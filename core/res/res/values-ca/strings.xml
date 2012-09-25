@@ -501,8 +501,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode d\'inactivitat"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir que el telèfon se suspengui"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en mode d\'inactivitat."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permet que l\'aplicació impedeixi que el telèfon entri en mode d\'inactivitat."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"activa o desactiva la tauleta"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"engegar o apagar el telèfon"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permet que l\'aplicació encengui i apagui la tauleta."</string>
@@ -541,8 +541,8 @@
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet que l\'aplicació pugui canviar la configuració de xarxa i interceptar i inspeccionar tot el trànsit de la xarxa, per exemple, canviar el servidor intermediari i el port de qualsevol APN. Les aplicacions malicioses poden controlar, redireccionar o modificar paquets de la xarxa sense el teu coneixement."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"canviar la connectivitat de xarxa"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet que l\'aplicació pugui canviar l\'estat de connectivitat de la xarxa."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat de connexió compartida"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet a l\'aplicació canviar l\'estat de la connectivitat de les xarxes compartides."</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat d\'ancoratge a xarxa"</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet que l\'aplicació canviï l\'estat de la connectivitat de la xarxa d\'ancoratge."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"canviar la configuració d\'ús de dades de referència"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Permet que l\'aplicació canviï la configuració d\'ús de les dades de fons."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"visualització de les connexions Wi-Fi"</string>
@@ -605,28 +605,26 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permet que l\'aplicació modifiqui la manera com es calcula l\'ús de la xarxa per part de les aplicacions. No indicat per a les aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
-    <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa els intents de desbloqueig de la pantalla"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Control d\'intents de desbloqueig de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Canvia la contrasenya de desbloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Canvia la contrasenya de desbloqueig de pantalla."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueja la pantalla"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueig de pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Esborra totes les dades"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Esborra les dades de la tauleta sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Esborra les dades del telèfon sense advertiment mitjançant un restabliment de les dades de fàbrica."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Defineix el servidor intermediari global del dispositiu"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Defineix el servidor intermediari global del dispositiu que cal utilitzar mentre la política estigui activada. Només el primer administrador del dispositiu pot definir el servidor intermediari global efectiu."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Defineix la caducitat de la contrasenya de bloqueig de pantalla"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Defineix caducitat de bloqueig de pantalla"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Controla la freqüència amb què cal canviar la contrasenya de bloqueig de pantalla."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactiva les càmeres"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedeix l\'ús de totes les càmeres del dispositiu."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Des. funcions en bloq. tecles"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedeix l\'ús d\'algunes funcions en bloqueig de tecles."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Xarxes Wi-fi obertes disponibles"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Inicia la sessió a la xarxa Wi-Fi"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Inicia la sessió a la xarxa"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No s\'ha pogut connectar a la Wi-Fi"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Per a:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Introdueix el PIN sol·licitat:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"El telèfon es desconnectarà temporalment de la Wi-Fi mentre estigui connectat a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Insereix un caràcter"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"S\'estan enviant missatges SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; està enviant molts missatges SMS. Vols permetre que aquesta aplicació continuï enviant missatges?"</string>
@@ -1230,7 +1226,7 @@
     <string name="submit" msgid="1602335572089911941">"Envia"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mode de cotxe activat"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca per sortir del mode de cotxe."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoratge a la xarxa o punt de connexió actiu"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoratge a la xarxa o zona Wi-Fi activat"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Toca per configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Comparteix"</string>
     <string name="find" msgid="4808270900322985960">"Cerca"</string>
     <string name="websearch" msgid="4337157977400211589">"Cerca al web"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Cerca el següent"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Cerca l\'anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Sol·licitud d\'ubicació de <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Sol·licitud d\'ubicació"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Sol·licitat per <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

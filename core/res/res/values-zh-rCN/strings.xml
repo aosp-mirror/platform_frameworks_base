@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"要求对存储的应用数据进行加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相机"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有设备摄像头。"</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"锁屏时禁用某些功能"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"锁屏时禁止使用某些功能。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"打开可用的 Wi-Fi 网络"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到 Wi-Fi 网络"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"登录网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到 Wi-Fi"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"键入所需的 PIN："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与 Wi-Fi 的连接。"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字符"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"正在发送短信"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;在发送大量短信。是否允许该应用继续发送短信？"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"查找"</string>
     <string name="websearch" msgid="4337157977400211589">"网页搜索"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"查找下一个"</string>
+    <string name="find_previous" msgid="2196723669388360506">"查找上一个"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"来自<xliff:g id="NAME">%s</xliff:g>的定位请求"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"定位请求"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"请求人：<xliff:g id="NAME">%1$s</xliff:g>（<xliff:g id="SERVICE">%2$s</xliff:g>）"</string>
