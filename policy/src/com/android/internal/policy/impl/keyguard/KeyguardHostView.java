@@ -243,11 +243,15 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         public void reportSuccessfulUnlockAttempt() {
             KeyguardUpdateMonitor.getInstance(mContext).clearFailedUnlockAttempts();
+            mLockPatternUtils.reportSuccessfulPasswordAttempt();
         }
 
         public void reportFailedUnlockAttempt() {
-            // TODO: handle biometric attempt differently.
-            KeyguardHostView.this.reportFailedUnlockAttempt();
+            if (mCurrentSecuritySelection == SecurityMode.Biometric) {
+                KeyguardUpdateMonitor.getInstance(mContext).reportFailedBiometricUnlockAttempt();
+            } else {
+                KeyguardHostView.this.reportFailedUnlockAttempt();
+            }
         }
 
         public int getFailedAttempts() {
