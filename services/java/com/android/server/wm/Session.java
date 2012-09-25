@@ -280,7 +280,8 @@ final class Session extends IWindowSession.Stub
             // !!! FIXME: put all this heavy stuff onto the mH looper, as well as
             // the actual drag event dispatch stuff in the dragstate
 
-            mService.mDragState.register(callingWin.mDisplayContent.getDisplay());
+            Display display = callingWin.mDisplayContent.getDisplay();
+            mService.mDragState.register(display);
             mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
                     mService.mDragState.mServerChannel)) {
@@ -310,6 +311,7 @@ final class Session extends IWindowSession.Stub
                         touchY - thumbCenterY);
                 surface.setAlpha(.7071f);
                 surface.setLayer(mService.mDragState.getDragLayerLw());
+                surface.setLayerStack(display.getLayerStack());
                 surface.show();
             } finally {
                 Surface.closeTransaction();
