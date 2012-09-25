@@ -1718,4 +1718,8 @@
   <!-- From PinyinIME(!!!) -->
   <java-symbol type="string" name="inputMethod" />
 
+  <!-- From Chromium-WebView -->
+  <java-symbol type="attr" name="actionModeWebSearchDrawable" />
+  <java-symbol type="string" name="websearch" />
+
 </resources>
