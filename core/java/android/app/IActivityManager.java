@@ -311,7 +311,7 @@ public interface IActivityManager extends IInterface {
 
     public int startActivities(IApplicationThread caller,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options) throws RemoteException;
+            Bundle options, int userId) throws RemoteException;
 
     public int getFrontActivityScreenCompatMode() throws RemoteException;
     public void setFrontActivityScreenCompatMode(int mode) throws RemoteException;
