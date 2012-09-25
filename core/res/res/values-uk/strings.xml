@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Вимагати шифрування даних збереженої програми."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Вимкнути камери"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запобігати використанню всіх камер пристрою."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Вимикати функції на клавіатурі"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Запобігає використанню деяких функцій на клавіатурі."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Відкриті Wi-Fi мережі доступні"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Вхід у мережу Wi-Fi"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Кому:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Введіть потрібний PIN-код:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-код:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Під час з’єднання з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g> телефон тимчасово від’єднається від мережі Wi-Fi"</string>
     <string name="select_character" msgid="3365550120617701745">"Вставл-ня символу"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Надсил. SMS повідомлень"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Програма &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; надсилає велику кількість SMS-повідомлень. Дозволити цій програмі й надалі надсилати повідомлення?"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Надіслати"</string>
     <string name="find" msgid="4808270900322985960">"Знайти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-пошук"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Знайти наступне"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Знайти попереднє"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Запит про місцезнаходження від користувача <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Запит про місцезнаходження"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Запит зроблено користувачем <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Kräv att sparade appdata krypteras."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inaktivera kameror"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Förhindra att enhetens kameror används."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Inaktivera vid knapplås"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Förhindra användning av vissa funktioner vid knapplås."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Logga in på Wi-Fi-nätverk"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Det gick inte att ansluta till Wi-Fi"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Till:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ange den obligatoriska PIN-koden:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Mobilen kommer tillfälligt att kopplas från Wi-Fi när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Infoga tecken"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Skickar SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; skickar ett stort antal SMS. Vill du tillåta att appen fortsätter att skicka meddelanden?"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Dela"</string>
     <string name="find" msgid="4808270900322985960">"Sök efter"</string>
     <string name="websearch" msgid="4337157977400211589">"Webbsökning"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Sök nästa"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Sök föregående"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Positionsförfrågan från <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Positionsförfrågan"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Begärt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
