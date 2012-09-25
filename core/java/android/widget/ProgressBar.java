@@ -354,7 +354,7 @@ public class ProgressBar extends View {
                     Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
             shapeDrawable.getPaint().setShader(bitmapShader);
 
-            return (clip) ? new ClipDrawable(shapeDrawable, Gravity.START,
+            return (clip) ? new ClipDrawable(shapeDrawable, Gravity.LEFT,
                     ClipDrawable.HORIZONTAL) : shapeDrawable;
         }
         
@@ -1040,6 +1040,11 @@ public class ProgressBar extends View {
                     }
                 }
             }
+            if (isLayoutRtl()) {
+                int tempLeft = left;
+                left = w - right;
+                right = w - tempLeft;
+            }
             mIndeterminateDrawable.setBounds(left, top, right, bottom);
         }
         
@@ -1057,7 +1062,12 @@ public class ProgressBar extends View {
             // Translate canvas so a indeterminate circular progress bar with padding
             // rotates properly in its animation
             canvas.save();
-            canvas.translate(mPaddingLeft, mPaddingTop);
+            if(isLayoutRtl()) {
+                canvas.translate(getWidth() - mPaddingRight, mPaddingTop);
+                canvas.scale(-1.0f, 1.0f);
+            } else {
+                canvas.translate(mPaddingLeft, mPaddingTop);
+            }
             long time = getDrawingTime();
             if (mHasAnimation) {
                 mAnimation.getTransformation(time, mTransformation);
