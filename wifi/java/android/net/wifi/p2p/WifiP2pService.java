@@ -346,6 +346,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         private GroupCreatedState mGroupCreatedState = new GroupCreatedState();
         private UserAuthorizingJoinState mUserAuthorizingJoinState = new UserAuthorizingJoinState();
+        private OngoingGroupRemovalState mOngoingGroupRemovalState = new OngoingGroupRemovalState();
 
         private WifiNative mWifiNative = new WifiNative(mInterface);
         private WifiMonitor mWifiMonitor = new WifiMonitor(this, mWifiNative);
@@ -389,6 +390,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         addState(mGroupNegotiationState, mGroupCreatingState);
                     addState(mGroupCreatedState, mP2pEnabledState);
                         addState(mUserAuthorizingJoinState, mGroupCreatedState);
+                        addState(mOngoingGroupRemovalState, mGroupCreatedState);
 
             if (p2pSupported) {
                 setInitialState(mP2pDisabledState);
@@ -545,6 +547,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                 case DhcpStateMachine.CMD_ON_QUIT:
+                case WifiMonitor.P2P_PROV_DISC_FAILURE_EVENT:
                     break;
                     /* unexpected group created, remove */
                 case WifiMonitor.P2P_GROUP_STARTED_EVENT:
@@ -1183,6 +1186,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         transitionTo(mGroupNegotiationState);
                     }
                     break;
+                case WifiMonitor.P2P_PROV_DISC_FAILURE_EVENT:
+                    loge("provision discovery failed");
+                    handleGroupCreationFailure();
+                    transitionTo(mInactiveState);
+                    break;
                 default:
                     return NOT_HANDLED;
             }
@@ -1228,6 +1236,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 P2pStateMachine.this, mGroup.getInterface());
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
                         WifiP2pDevice groupOwner = mGroup.getOwner();
+                        /* update group owner details with the ones found at discovery */
+                        groupOwner.update(mPeers.get(groupOwner.deviceAddress));
                         mPeers.updateStatus(groupOwner.deviceAddress, WifiP2pDevice.CONNECTED);
                         sendP2pPeersChangedBroadcast();
                     }
@@ -1303,7 +1313,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 deviceAddress.equals(mSavedProvDiscDevice.deviceAddress)) {
                             mSavedProvDiscDevice = null;
                         }
-                        mGroup.addClient(deviceAddress);
+                        mGroup.addClient(mPeers.get(deviceAddress));
                         mPeers.updateStatus(deviceAddress, WifiP2pDevice.CONNECTED);
                         if (DBG) logd(getName() + " ap sta connected");
                         sendP2pPeersChangedBroadcast();
@@ -1357,6 +1367,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.REMOVE_GROUP:
                     if (DBG) logd(getName() + " remove group");
                     if (mWifiNative.p2pGroupRemove(mGroup.getInterface())) {
+                        transitionTo(mOngoingGroupRemovalState);
                         replyToMessage(message, WifiP2pManager.REMOVE_GROUP_SUCCEEDED);
                     } else {
                         handleGroupRemoved();
@@ -1531,6 +1542,30 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public void exit() {
             //TODO: dismiss dialog if not already done
+        }
+    }
+
+    class OngoingGroupRemovalState extends State {
+        @Override
+        public void enter() {
+            if (DBG) logd(getName());
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) logd(getName() + message.toString());
+            switch (message.what) {
+                // Group removal ongoing. Multiple calls
+                // end up removing persisted network. Do nothing.
+                case WifiP2pManager.REMOVE_GROUP:
+                    replyToMessage(message, WifiP2pManager.REMOVE_GROUP_SUCCEEDED);
+                    break;
+                // Parent state will transition out of this state
+                // when removal is complete
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
         }
     }
 
@@ -1858,15 +1893,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             }
             if (DBG) logd("netId related with " + dev.deviceAddress + " = " + netId);
             if (netId >= 0) {
-
                 // Invoke the persistent group.
-                if (!mWifiNative.p2pReinvoke(netId, dev.deviceAddress)) {
-                    loge("p2pReinvoke() failed");
-                    return CONNECT_FAILURE;
+                if (mWifiNative.p2pReinvoke(netId, dev.deviceAddress)) {
+                    // Save network id. It'll be used when an invitation result event is received.
+                    mSavedPeerConfig.netId = netId;
+                    return CONNECT_SUCCESS;
+                } else {
+                    loge("p2pReinvoke() failed, update networks");
+                    updatePersistentNetworks();
+                    // continue with negotiation
                 }
-                // Save network id. It'll be used when an invitation result event is received.
-                mSavedPeerConfig.netId = netId;
-                return CONNECT_SUCCESS;
             }
         }
 
