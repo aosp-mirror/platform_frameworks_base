@@ -67,6 +67,21 @@ enum DebugLevel {
  */
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.show_overdraw"
 
+/**
+ * Used to enable/disable scissor optimization. The accepted values are
+ * "true" and "false". The default value is "false".
+ *
+ * When scissor optimization is enabled, OpenGLRenderer will attempt to
+ * minimize the use of scissor by selectively enabling and disabling the
+ * GL scissor test.
+ * When the optimization is disabled, OpenGLRenderer will keep the GL
+ * scissor test enabled and change the scissor rect as needed.
+ * Some GPUs (for instance the SGX 540) perform better when changing
+ * the scissor rect often than when enabling/disabling the scissor test
+ * often.
+ */
+#define PROPERTY_DISABLE_SCISSOR_OPTIMIZATION "ro.hwui.disable_scissor_opt"
+
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
 #define PROPERTY_LAYER_CACHE_SIZE "ro.hwui.layer_cache_size"
