@@ -166,8 +166,13 @@
     <integer name="notification_panel_layout_gravity">0x37</integer>
     <integer name="settings_panel_layout_gravity">0x37</integer>
 
-    <!-- Quick settings panels minimum fling open target width. -->
-    <dimen name="settings_panel_fling_gutter">90dp</dimen>
+    <!-- Fraction of the status bar that, when dragged, will produce the quick settings panel
+         instead of the notification panel. See also @dimen/settings_panel_dragzone_min.
+         If zero, the settings panel will not be directly draggable from the status bar. -->
+    <item type="dimen" name="settings_panel_dragzone_fraction">0%</item>
+
+    <!-- Quick settings dragzone, if used, should be at least this big (may be zero). -->
+    <dimen name="settings_panel_dragzone_min">100dp</dimen>
 
     <!-- Height of the carrier/wifi name label -->
     <dimen name="carrier_label_height">24dp</dimen>
