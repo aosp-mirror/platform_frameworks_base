@@ -453,6 +453,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char heapgrowthlimitOptsBuf[sizeof("-XX:HeapGrowthLimit=")-1 + PROPERTY_VALUE_MAX];
+    char heapminfreeOptsBuf[sizeof("-XX:HeapMinFree=")-1 + PROPERTY_VALUE_MAX];
+    char heapmaxfreeOptsBuf[sizeof("-XX:HeapMaxFree=")-1 + PROPERTY_VALUE_MAX];
+    char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
@@ -552,6 +555,27 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
     if (heapgrowthlimitOptsBuf[20] != '\0') {
         opt.optionString = heapgrowthlimitOptsBuf;
+        mOptions.add(opt);
+    }
+
+    strcpy(heapminfreeOptsBuf, "-XX:HeapMinFree=");
+    property_get("dalvik.vm.heapminfree", heapminfreeOptsBuf+16, "");
+    if (heapminfreeOptsBuf[16] != '\0') {
+        opt.optionString = heapminfreeOptsBuf;
+        mOptions.add(opt);
+    }
+
+    strcpy(heapmaxfreeOptsBuf, "-XX:HeapMaxFree=");
+    property_get("dalvik.vm.heapmaxfree", heapmaxfreeOptsBuf+16, "");
+    if (heapmaxfreeOptsBuf[16] != '\0') {
+        opt.optionString = heapmaxfreeOptsBuf;
+        mOptions.add(opt);
+    }
+
+    strcpy(heaptargetutilizationOptsBuf, "-XX:HeapTargetUtilization=");
+    property_get("dalvik.vm.heaptargetutilization", heaptargetutilizationOptsBuf+26, "");
+    if (heapmaxfreeOptsBuf[26] != '\0') {
+        opt.optionString = heaptargetutilizationOptsBuf;
         mOptions.add(opt);
     }
 
