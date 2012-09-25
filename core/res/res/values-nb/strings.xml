@@ -555,7 +555,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"endrer Bluetooth-innstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lar appen konfigurere den lokale Bluetooth-telefonen, samt oppdage og koble sammen med eksterne enheter."</string>
-    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"tilkobling til og frakobling fra WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koble til eller fra WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Lar appen avgjøre hvorvidt WiMAX er aktivert og finne informasjon om eventuelle tilkoblede WiMAX-nettverk."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Endre WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Lar appen koble nettbrettet til og fra WiMAX-nettverk."</string>
@@ -623,8 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
-    <string name="policylab_disableKeyguardWidgets" msgid="1794894613389073926">"Deaktivere moduler når tastelåsen er på"</string>
-    <string name="policydesc_disableKeyguardWidgets" msgid="7254624892984033592">"Forhindre bruk av noen eller alle modulene når tastelåsen er på."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Deaktiv. funksj. i tastelås"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Forhindre bruk av enkelte funksjoner når tastelåsen er på."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1260,6 +1260,8 @@
     <string name="share" msgid="1778686618230011964">"Del"</string>
     <string name="find" msgid="4808270900322985960">"Finn"</string>
     <string name="websearch" msgid="4337157977400211589">"Nettsøk"</string>
+    <string name="find_next" msgid="5742124618942193978">"Finn neste"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Finn forrige"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Posisjonsforespørsel fra <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Posisjonsforespørsel"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Forespurt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
