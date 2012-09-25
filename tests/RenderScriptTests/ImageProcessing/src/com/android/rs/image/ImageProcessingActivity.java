@@ -377,7 +377,7 @@ public class ImageProcessingActivity extends Activity
         long result = 0;
 
         //Log.v(TAG, "Warming");
-        long t = java.lang.System.currentTimeMillis() + 2000;
+        long t = java.lang.System.currentTimeMillis() + 250;
         do {
             mTest.runTest();
             mTest.finish();
@@ -391,7 +391,7 @@ public class ImageProcessingActivity extends Activity
             mTest.runTest();
             mTest.finish();
             ct++;
-        } while ((t+5000) > java.lang.System.currentTimeMillis());
+        } while ((t+1000) > java.lang.System.currentTimeMillis());
         t = java.lang.System.currentTimeMillis() - t;
         float ft = (float)t;
         ft /= ct;
