@@ -4348,13 +4348,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return Whether any parent scrolled.
      */
     public boolean requestRectangleOnScreen(Rect rectangle, boolean immediate) {
-        if (mAttachInfo == null) {
+        if (mParent == null) {
             return false;
         }
 
         View child = this;
 
-        RectF position = mAttachInfo.mTmpTransformRect;
+        RectF position = (mAttachInfo != null) ? mAttachInfo.mTmpTransformRect : new RectF();
         position.set(rectangle);
 
         ViewParent parent = mParent;
