@@ -1430,6 +1430,21 @@ public class Instrumentation {
      */
     public void execStartActivities(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options) {
+        execStartActivitiesAsUser(who, contextThread, token, target, intents, options,
+                UserHandle.myUserId());
+    }
+
+    /**
+     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * but accepts an array of activities to be started.  Note that active
+     * {@link ActivityMonitor} objects only match against the first activity in
+     * the array.
+     *
+     * {@hide}
+     */
+    public void execStartActivitiesAsUser(Context who, IBinder contextThread,
+            IBinder token, Activity target, Intent[] intents, Bundle options,
+            int userId) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1453,7 +1468,8 @@ public class Instrumentation {
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
-                .startActivities(whoThread, intents, resolvedTypes, token, options);
+                .startActivities(whoThread, intents, resolvedTypes, token, options,
+                        userId);
             checkStartActivityResult(result, intents[0]);
         } catch (RemoteException e) {
         }
