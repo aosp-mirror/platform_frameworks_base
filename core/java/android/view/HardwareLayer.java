@@ -204,4 +204,9 @@ abstract class HardwareLayer {
      * @param dirtyRect The dirty region of the layer that needs to be redrawn
      */
     abstract void redrawLater(DisplayList displayList, Rect dirtyRect);
+
+    /**
+     * Indicates that this layer has lost its underlying storage.
+     */
+    abstract void clearStorage();
 }
