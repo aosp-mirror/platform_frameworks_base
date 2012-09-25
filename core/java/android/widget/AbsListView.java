@@ -675,6 +675,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     static final Interpolator sLinearInterpolator = new LinearInterpolator();
 
     /**
+     * The saved state that we will be restoring from when we next sync.
+     * Kept here so that if we happen to be asked to save our state before
+     * the sync happens, we can return this existing data rather than losing
+     * it.
+     */
+    private SavedState mPendingSync;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -1612,6 +1620,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         SavedState ss = new SavedState(superState);
 
+        if (mPendingSync != null) {
+            // Just keep what we last restored.
+            ss.selectedId = mPendingSync.selectedId;
+            ss.firstId = mPendingSync.firstId;
+            ss.viewTop = mPendingSync.viewTop;
+            ss.position = mPendingSync.position;
+            ss.height = mPendingSync.height;
+            ss.filter = mPendingSync.filter;
+            ss.inActionMode = mPendingSync.inActionMode;
+            ss.checkedItemCount = mPendingSync.checkedItemCount;
+            ss.checkState = mPendingSync.checkState;
+            ss.checkIdState = mPendingSync.checkIdState;
+            return ss;
+        }
+
         boolean haveChildren = getChildCount() > 0 && mItemCount > 0;
         long selectedId = getSelectedItemId();
         ss.selectedId = selectedId;
@@ -1692,6 +1715,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (ss.selectedId >= 0) {
             mNeedSync = true;
+            mPendingSync = ss;
             mSyncRowId = ss.selectedId;
             mSyncPosition = ss.position;
             mSpecificTop = ss.viewTop;
@@ -1702,6 +1726,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             setNextSelectedPositionInt(INVALID_POSITION);
             mSelectorPosition = INVALID_POSITION;
             mNeedSync = true;
+            mPendingSync = ss;
             mSyncRowId = ss.firstId;
             mSyncPosition = ss.position;
             mSpecificTop = ss.viewTop;
@@ -1803,6 +1828,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mDataChanged = false;
         mPositionScrollAfterLayout = null;
         mNeedSync = false;
+        mPendingSync = null;
         mOldSelectedPosition = INVALID_POSITION;
         mOldSelectedRowId = INVALID_ROW_ID;
         setSelectedPositionInt(INVALID_POSITION);
@@ -5209,6 +5235,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mNeedSync) {
                 // Update this first, since setNextSelectedPositionInt inspects it
                 mNeedSync = false;
+                mPendingSync = null;
 
                 if (mTranscriptMode == TRANSCRIPT_MODE_ALWAYS_SCROLL) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
@@ -5324,6 +5351,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mNextSelectedPosition = INVALID_POSITION;
         mNextSelectedRowId = INVALID_ROW_ID;
         mNeedSync = false;
+        mPendingSync = null;
         mSelectorPosition = INVALID_POSITION;
         checkSelectionChanged();
     }

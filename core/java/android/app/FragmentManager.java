@@ -776,7 +776,7 @@ final class FragmentManagerImpl extends FragmentManager {
         //    + " mRemoving=" + f.mRemoving + " Callers=" + Debug.getCallers(5));
 
         // Fragments that are not currently added will sit in the onCreate() state.
-        if (!f.mAdded && newState > Fragment.CREATED) {
+        if ((!f.mAdded || f.mDetached) && newState > Fragment.CREATED) {
             newState = Fragment.CREATED;
         }
         if (f.mRemoving && newState > f.mState) {
