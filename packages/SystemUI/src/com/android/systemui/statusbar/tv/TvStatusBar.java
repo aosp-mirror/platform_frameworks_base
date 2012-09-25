@@ -30,7 +30,6 @@ import android.view.WindowManager;
  */
 
 public class TvStatusBar extends BaseStatusBar {
-    View mView;
 
     @Override
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
@@ -62,11 +61,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpand() {
+    public void animateExpandNotifications() {
     }
 
     @Override
-    public void animateCollapse(int flags) {
+    public void animateCollapseNotifications(int flags) {
     }
 
     @Override
@@ -139,28 +138,15 @@ public class TvStatusBar extends BaseStatusBar {
         return true;
     }
 
-    protected View makeStatusBarView() {
-        synchronized (this) {
-            if (mView == null) {
-                mView = new View(mContext);
-            }
-        }
-        return mView;
-    }
-
     public View getStatusBarView() {
         return null;
     }
 
-    protected int getStatusBarGravity() {
-        return 0;
+    @Override
+    public void animateExpandQuickSettings() {
     }
 
-    public int getStatusBarHeight() {
-        return 0;
+    @Override
+    public void animateCollapseQuickSettings() {
     }
-
-    public void animateCollapse() {
-    }
-
 }

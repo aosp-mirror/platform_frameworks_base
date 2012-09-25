@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -52,7 +51,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -77,7 +75,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.RotationToggle;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -298,7 +295,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (mExpandedVisible && !mAnimating) {
-                        animateCollapse();
+                        animateCollapseNotifications();
                     }
                 }
                 return mStatusBarWindow.onTouchEvent(event);
@@ -780,7 +777,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
-                animateCollapse();
+                animateCollapseNotifications();
             }
         }
 
@@ -1053,7 +1050,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                animateCollapse();
+                animateCollapseNotifications();
             }
         }
 
@@ -1113,10 +1110,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             super.handleMessage(m);
             switch (m.what) {
                 case MSG_OPEN_NOTIFICATION_PANEL:
-                    animateExpand();
+                    animateExpandNotifications();
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
-                    animateCollapse();
+                    animateCollapseNotifications();
                     break;
                 case MSG_SHOW_INTRUDER:
                     setIntruderAlertVisibility(true);
@@ -1169,11 +1166,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         visibilityChanged(true);
     }
 
-    public void animateCollapse() {
-        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+    public void animateCollapseNotifications() {
+        animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    public void animateCollapse(int flags) {
+    public void animateCollapseNotifications(int flags) {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
@@ -1198,7 +1195,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpand() {
+    public void animateExpandNotifications() {
         if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
@@ -1207,6 +1204,22 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationPanel.expand();
 
         if (false) postStartTracing();
+    }
+
+    @Override
+    public void animateExpandQuickSettings() {
+        if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            return;
+        }
+
+        mSettingsPanel.expand();
+
+        if (false) postStartTracing();
+    }
+
+    public void animateCollapseQuickSettings() {
+        mStatusBarView.collapseAllPanels(true);
     }
 
     void makeExpandedInvisible() {
@@ -1338,7 +1351,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
                 final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
                 if (lightsOut) {
-                    animateCollapse();
+                    animateCollapseNotifications();
                     if (mTicking) {
                         mTicker.halt();
                     }
@@ -1664,7 +1677,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     }
                 }
                 if (snapshot.isEmpty()) {
-                    animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+                    animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
                     return;
                 }
                 new Thread(new Runnable() {
@@ -1715,7 +1728,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+                                animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
                             }
                         }, totalDelay + 225);
                     }
@@ -1737,7 +1750,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             v.getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     new UserHandle(UserHandle.USER_CURRENT));
-            animateCollapse();
+            animateCollapseNotifications();
         }
     };
 
@@ -1753,7 +1766,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
-                animateCollapse(flags);
+                animateCollapseNotifications(flags);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 // no waiting!
@@ -1778,7 +1791,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void userSwitched(int newUserId) {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
-        animateCollapse();
+        animateCollapseNotifications();
         updateNotificationIcons();
     }
     

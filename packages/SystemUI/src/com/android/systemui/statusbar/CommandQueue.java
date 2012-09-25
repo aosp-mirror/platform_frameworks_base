@@ -33,38 +33,30 @@ import com.android.internal.statusbar.StatusBarNotification;
  * are coalesced, note that they are all idempotent.
  */
 public class CommandQueue extends IStatusBar.Stub {
-    private static final String TAG = "StatusBar.CommandQueue";
-
     private static final int INDEX_MASK = 0xffff;
     private static final int MSG_SHIFT  = 16;
     private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
 
-
-    private static final int MSG_ICON                   = 1 << MSG_SHIFT;
     private static final int OP_SET_ICON    = 1;
     private static final int OP_REMOVE_ICON = 2;
 
-    private static final int MSG_ADD_NOTIFICATION       = 2 << MSG_SHIFT;
-    private static final int MSG_UPDATE_NOTIFICATION    = 3 << MSG_SHIFT;
-    private static final int MSG_REMOVE_NOTIFICATION    = 4 << MSG_SHIFT;
-
-    private static final int MSG_DISABLE                = 5 << MSG_SHIFT;
-
-    private static final int MSG_SET_VISIBILITY         = 6 << MSG_SHIFT;
-    private static final int OP_EXPAND      = 1;
-    private static final int OP_COLLAPSE    = 2;
-
-    private static final int MSG_SET_SYSTEMUI_VISIBILITY          = 7 << MSG_SHIFT;
-
-    private static final int MSG_TOP_APP_WINDOW_CHANGED = 8 << MSG_SHIFT;
-    private static final int MSG_SHOW_IME_BUTTON        = 9 << MSG_SHIFT;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS = 10 << MSG_SHIFT;
-
-    private static final int MSG_TOGGLE_RECENT_APPS       = 11 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS      = 12 << MSG_SHIFT;
-    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS       = 13 << MSG_SHIFT;
-
-    private static final int MSG_SET_NAVIGATION_ICON_HINTS = 14 << MSG_SHIFT;
+    private static final int MSG_ICON                       = 1 << MSG_SHIFT;
+    private static final int MSG_ADD_NOTIFICATION           = 2 << MSG_SHIFT;
+    private static final int MSG_UPDATE_NOTIFICATION        = 3 << MSG_SHIFT;
+    private static final int MSG_REMOVE_NOTIFICATION        = 4 << MSG_SHIFT;
+    private static final int MSG_DISABLE                    = 5 << MSG_SHIFT;
+    private static final int MSG_EXPAND_NOTIFICATIONS       = 6 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_NOTIFICATIONS     = 7 << MSG_SHIFT;
+    private static final int MSG_EXPAND_QUICK_SETTINGS      = 8 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_QUICK_SETTINGS    = 9 << MSG_SHIFT;
+    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 10 << MSG_SHIFT;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 11 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON            = 12 << MSG_SHIFT;
+    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 13 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS         = 14 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS        = 15 << MSG_SHIFT;
+    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 16 << MSG_SHIFT;
+    private static final int MSG_SET_NAVIGATION_ICON_HINTS  = 17 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -94,8 +86,10 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateNotification(IBinder key, StatusBarNotification notification);
         public void removeNotification(IBinder key);
         public void disable(int state);
-        public void animateExpand();
-        public void animateCollapse(int flags);
+        public void animateExpandNotifications();
+        public void animateCollapseNotifications(int flags);
+        public void animateExpandQuickSettings();
+        public void animateCollapseQuickSettings();
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
@@ -160,21 +154,31 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void animateExpand() {
+    public void animateExpandNotifications() {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_VISIBILITY);
-            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_EXPAND, 0, null).sendToTarget();
+            mHandler.removeMessages(MSG_EXPAND_NOTIFICATIONS);
+            mHandler.sendEmptyMessage(MSG_EXPAND_NOTIFICATIONS);
         }
     }
 
-    public void animateCollapse() {
-        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+    public void animateCollapseNotifications() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_COLLAPSE_NOTIFICATIONS);
+            mHandler.sendEmptyMessage(MSG_COLLAPSE_NOTIFICATIONS);
+        }
     }
 
-    public void animateCollapse(int flags) {
+    public void animateExpandQuickSettings() {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_VISIBILITY);
-            mHandler.obtainMessage(MSG_SET_VISIBILITY, OP_COLLAPSE, flags, null).sendToTarget();
+            mHandler.removeMessages(MSG_EXPAND_QUICK_SETTINGS);
+            mHandler.sendEmptyMessage(MSG_EXPAND_QUICK_SETTINGS);
+        }
+    }
+
+    public void animateCollapseQuickSettings() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_COLLAPSE_QUICK_SETTINGS);
+            mHandler.sendEmptyMessage(MSG_COLLAPSE_QUICK_SETTINGS);
         }
     }
 
@@ -284,12 +288,17 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_DISABLE:
                     mCallbacks.disable(msg.arg1);
                     break;
-                case MSG_SET_VISIBILITY:
-                    if (msg.arg1 == OP_EXPAND) {
-                        mCallbacks.animateExpand();
-                    } else {
-                        mCallbacks.animateCollapse(msg.arg2);
-                    }
+                case MSG_EXPAND_NOTIFICATIONS:
+                    mCallbacks.animateExpandNotifications();
+                    break;
+                case MSG_COLLAPSE_NOTIFICATIONS:
+                    mCallbacks.animateCollapseNotifications(0);
+                    break;
+                case MSG_EXPAND_QUICK_SETTINGS:
+                    mCallbacks.animateExpandQuickSettings();
+                    break;
+                case MSG_COLLAPSE_QUICK_SETTINGS:
+                    mCallbacks.animateCollapseQuickSettings();
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
                     mCallbacks.setSystemUiVisibility(msg.arg1, msg.arg2);
