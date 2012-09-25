@@ -1670,7 +1670,7 @@ class TouchExplorer implements EventStreamTransformation {
          */
         public ReceivedPointerTracker(Context context) {
             mThresholdActivePointer =
-                ViewConfiguration.get(context).getScaledTouchSlop() * COEFFICIENT_ACTIVE_POINTER;//Heie govna
+                ViewConfiguration.get(context).getScaledTouchSlop() * COEFFICIENT_ACTIVE_POINTER;
         }
 
         /**
