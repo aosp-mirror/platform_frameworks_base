@@ -44,9 +44,9 @@
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mode d\'avió"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Gira pantalla automàticament"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"Silen."</string>
-    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTOM."</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificacions"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth sense fil"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ancorat"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configura els mètodes d\'entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclat físic"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Vols permetre que l\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g> accedeixi al dispositiu USB?"</string>
@@ -118,7 +118,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Vora"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap targeta SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Connexió Bluetooth mitjançant dispositiu portàtil"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoratge de Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -151,14 +151,14 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla està bloquejada en orientació horitzontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla està bloquejada en orientació vertical."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <string name="start_dreams" msgid="870400522982252717">"Comença els somnis"</string>
-    <!-- no translation found for ethernet_label (7967563676324087464) -->
-    <skip />
+    <string name="start_dreams" msgid="870400522982252717">"Comença l\'Estalvi de pantalla interactiu"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Mode d\'avió"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"S\'està carregant, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Carregada"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositius)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivat"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotació automàtica"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotació bloquejada"</string>
@@ -172,8 +172,9 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Jo"</string>
     <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wi-Fi"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hi ha cap xarxa"</string>
+    <string name="quick_settings_wifi_off_label" msgid="3343111275022978538">"Wi-Fi desactivada"</string>
     <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"Pantalla Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"No hi ha cap connexió de pantalla Wi-Fi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Sense connexió a pantalla Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
 </resources>
