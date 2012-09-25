@@ -75,8 +75,6 @@
     <dimen name="status_bar_recents_text_fading_edge_length">20dip</dimen>
     <!-- Size of fading edge for scrolling -->
     <dimen name="status_bar_recents_scroll_fading_edge_length">10dip</dimen>
-    <!-- Margin between recents container and glow on the right -->
-    <dimen name="status_bar_recents_right_glow_margin">100dip</dimen>
 
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
