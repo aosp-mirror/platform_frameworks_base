@@ -280,18 +280,33 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         return string;
     }
+    // Remove the period from the network name
+    public static String removeTrailingPeriod(String string) {
+        if (string == null) return null;
+        final int length = string.length();
+        if (string.endsWith(".")) {
+            string.substring(0, length - 1);
+        }
+        return string;
+    }
     // NetworkSignalChanged callback
     @Override
     public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String enabledDesc) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
         mWifiState.enabled = enabled;
-        mWifiState.iconId = enabled && (wifiSignalIconId > 0)
-                ? wifiSignalIconId
-                : R.drawable.ic_qs_wifi_no_network;
-        mWifiState.label = enabled && (enabledDesc != null)
-                ? removeDoubleQuotes(enabledDesc)
-                : r.getString(R.string.quick_settings_wifi_off_label);
+        boolean wifiConnected = enabled && (wifiSignalIconId > 0) && (enabledDesc != null);
+        boolean wifiNotConnected = enabled && (enabledDesc == null);
+        if (wifiConnected) {
+            mWifiState.iconId = wifiSignalIconId;
+            mWifiState.label = removeDoubleQuotes(enabledDesc);
+        } else if (wifiNotConnected) {
+            mWifiState.iconId = R.drawable.ic_qs_wifi_0;
+            mWifiState.label = r.getString(R.string.quick_settings_wifi_not_connected);
+        } else {
+            mWifiState.iconId = R.drawable.ic_qs_wifi_no_network;
+            mWifiState.label = r.getString(R.string.quick_settings_wifi_off_label);
+        }
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
 
@@ -319,7 +334,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     ? dataTypeIconId
                     : 0;
             mRSSIState.label = enabled
-                    ? enabledDesc
+                    ? removeTrailingPeriod(enabledDesc)
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
