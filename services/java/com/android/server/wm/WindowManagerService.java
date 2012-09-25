@@ -9777,7 +9777,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (moveInputMethodWindowsIfNeededLocked(
                         mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS &&
                         mode != UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
-                    getDefaultDisplayContentLocked().layoutNeeded = true;
+                    displayContent.layoutNeeded = true;
                 }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(displayContent, true /*initial*/, updateInputWindows);
@@ -9791,7 +9791,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if ((focusChanged & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
                 // The change in focus caused us to need to do a layout.  Okay.
-                getDefaultDisplayContentLocked().layoutNeeded = true;
+                displayContent.layoutNeeded = true;
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     performLayoutLockedInner(displayContent, true /*initial*/, updateInputWindows);
                 }
@@ -9814,22 +9814,29 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowState computeFocusedWindowLocked() {
-        WindowState result = null;
-        WindowState win;
-
         if (mAnimator.mUniverseBackground != null
                 && mAnimator.mUniverseBackground.mWin.canReceiveKeys()) {
             return mAnimator.mUniverseBackground.mWin;
         }
 
-        int nextAppIndex = mAppTokens.size()-1;
-        WindowToken nextApp = nextAppIndex >= 0
-            ? mAppTokens.get(nextAppIndex) : null;
+        final int displayCount = mDisplayContents.size();
+        for (int i = 0; i < displayCount; i++) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(i);
+            WindowState win = findFocusedWindowLocked(displayContent);
+            if (win != null) {
+                return win;
+            }
+        }
+        return null;
+    }
 
-        // TODO(multidisplay): IMEs are only supported on the default display.
-        WindowList windows = getDefaultWindowListLocked();
+    private WindowState findFocusedWindowLocked(DisplayContent displayContent) {
+        int nextAppIndex = mAppTokens.size()-1;
+        WindowToken nextApp = nextAppIndex >= 0 ? mAppTokens.get(nextAppIndex) : null;
+
+        final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
-            win = windows.get(i);
+            final WindowState win = windows.get(i);
 
             if (localLOGV || DEBUG_FOCUS) Slog.v(
                 TAG, "Looking for focus: " + i
@@ -9879,12 +9886,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.canReceiveKeys()) {
                 if (DEBUG_FOCUS) Slog.v(
                         TAG, "Found focus @ " + i + " = " + win);
-                result = win;
-                break;
+                return win;
             }
         }
-
-        return result;
+        return null;
     }
 
     private void startFreezingDisplayLocked(boolean inTransaction,
