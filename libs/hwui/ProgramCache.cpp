@@ -347,7 +347,6 @@ const char* gFS_Main_ApplyColorOp[4] = {
         // None
         "",
         // Matrix
-        // TODO: Fix premultiplied alpha computations for color matrix
         "    fragColor *= colorMatrix;\n"
         "    fragColor += colorMatrixVector;\n"
         "    fragColor.rgb *= fragColor.a;\n",
