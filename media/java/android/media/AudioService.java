@@ -388,9 +388,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private Looper mSoundPoolLooper = null;
     // volume applied to sound played with playSoundEffect()
     private static int sSoundEffectVolumeDb;
-    // getActiveStreamType() will return STREAM_NOTIFICATION during this period after a notification
+    // getActiveStreamType() will return:
+    // - STREAM_NOTIFICATION on tablets during this period after a notification stopped
+    // - STREAM_MUSIC on phones during this period after music or talkback/voice search prompt
     // stopped
-    private static final int NOTIFICATION_VOLUME_DELAY_MS = 5000;
+    private static final int DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS = 5000;
     // previous volume adjustment direction received by checkForRingerModeChange()
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
     // Keyguard manager proxy
@@ -2341,7 +2343,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
                     return STREAM_REMOTE_MUSIC;
-                } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC,
+                            DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
@@ -2370,9 +2373,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_NOTIFICATION,
-                    NOTIFICATION_VOLUME_DELAY_MS) ||
+                    DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS) ||
                     AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
-                            NOTIFICATION_VOLUME_DELAY_MS)) {
+                            DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
