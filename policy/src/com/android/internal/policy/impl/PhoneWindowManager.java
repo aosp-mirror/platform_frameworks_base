@@ -2916,7 +2916,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             try {
                                 IStatusBarService statusbar = getStatusBarService();
                                 if (statusbar != null) {
-                                    statusbar.collapse();
+                                    statusbar.collapseNotifications();
+                                    statusbar.collapseQuickSettings();
                                 }
                             } catch (RemoteException ex) {
                                 // re-acquire status bar service next time it is needed.

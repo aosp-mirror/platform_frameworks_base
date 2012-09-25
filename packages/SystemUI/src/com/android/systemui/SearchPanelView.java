@@ -72,7 +72,7 @@ public class SearchPanelView extends FrameLayout implements
 
     private void startAssistActivity() {
         // Close Recent Apps if needed
-        mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
+        mBar.animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
         // Launch Assist
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT);
@@ -220,7 +220,7 @@ public class SearchPanelView extends FrameLayout implements
     public void hide(boolean animate) {
         if (mBar != null) {
             // This will indirectly cause show(false, ...) to get called
-            mBar.animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+            mBar.animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
         } else {
             setVisibility(View.INVISIBLE);
         }
