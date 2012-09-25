@@ -165,7 +165,8 @@ public class StatusBarIconView extends AnimatedImageView {
 
         if (icon.iconPackage != null) {
             try {
-                r = context.getPackageManager().getResourcesForApplication(icon.iconPackage);
+                r = context.getPackageManager().getResourcesForApplicationAsUser(icon.iconPackage,
+                        icon.user.getIdentifier());
             } catch (PackageManager.NameNotFoundException ex) {
                 Slog.e(TAG, "Icon package not found: " + icon.iconPackage);
                 return null;

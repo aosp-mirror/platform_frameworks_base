@@ -1740,6 +1740,11 @@ public final class ActivityThread {
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags) {
+        return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
+    }
+
+    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
+            int flags, int userId) {
         synchronized (mPackages) {
             WeakReference<LoadedApk> ref;
             if ((flags&Context.CONTEXT_INCLUDE_CODE) != 0) {
@@ -1768,7 +1773,7 @@ public final class ActivityThread {
         ApplicationInfo ai = null;
         try {
             ai = getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES, UserHandle.myUserId());
+                    PackageManager.GET_SHARED_LIBRARY_FILES, userId);
         } catch (RemoteException e) {
             // Ignore
         }
