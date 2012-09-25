@@ -480,7 +480,7 @@ public class LocationManager {
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
      * @param minDistance minimum distance between location updates, in meters
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called for
      * each location update
      *
@@ -512,7 +512,7 @@ public class LocationManager {
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
      * @param minDistance minimum distance between location updates, in meters
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called for
      * each location update
      * @param looper a Looper object whose message queue will be used to
@@ -547,7 +547,7 @@ public class LocationManager {
      * @param minDistance minimum distance between location updates, in meters
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called for
      * each location update
      * @param looper a Looper object whose message queue will be used to
@@ -581,7 +581,7 @@ public class LocationManager {
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
      * @param minDistance minimum distance between location updates, in meters
-     * @param intent a {#link PendingIntent} to be sent for each location update
+     * @param intent a {@link PendingIntent} to be sent for each location update
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * on this device
@@ -689,7 +689,7 @@ public class LocationManager {
      * @param minDistance minimum distance between location updates, in meters
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
-     * @param intent a {#link PendingIntent} to be sent for each location update
+     * @param intent a {@link PendingIntent} to be sent for each location update
      *
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if intent is null
@@ -716,7 +716,7 @@ public class LocationManager {
      * for more detail on how to use this (deprecated) method.
      *
      * @param provider the name of the provider with which to register
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called when
      * the location update is available
      * @param looper a Looper object whose message queue will be used to
@@ -748,7 +748,7 @@ public class LocationManager {
      *
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called when
      * the location update is available
      * @param looper a Looper object whose message queue will be used to
@@ -778,7 +778,7 @@ public class LocationManager {
      * for more detail on how to use this (deprecated) method.
      *
      * @param provider the name of the provider with which to register
-     * @param intent a {#link PendingIntent} to be sent for the location update
+     * @param intent a {@link PendingIntent} to be sent for the location update
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
@@ -804,7 +804,7 @@ public class LocationManager {
      *
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
-     * @param intent a {#link PendingIntent} to be sent for the location update
+     * @param intent a {@link PendingIntent} to be sent for the location update
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
@@ -860,8 +860,10 @@ public class LocationManager {
      * {@link #KEY_PROVIDER_ENABLED} or {@link #KEY_STATUS_CHANGED} will not
      * be received.
      *
+     * <p> To unregister for Location updates, use: {@link #removeUpdates(LocationListener)}.
+     *
      * @param request quality of service required, null for default low power
-     * @param listener a {#link LocationListener} whose
+     * @param listener a {@link LocationListener} whose
      * {@link LocationListener#onLocationChanged} method will be called when
      * the location update is available
      * @param looper a Looper object whose message queue will be used to
@@ -881,11 +883,13 @@ public class LocationManager {
     /**
      * Register for fused location updates using a LocationRequest and a pending intent.
      *
+     * <p> To unregister for Location updates, use: {@link #removeUpdates(PendingIntent)}.
+     *
      * <p> See {@link #requestLocationUpdates(LocationRequest, LocationListener, Looper)}
      * for more detail.
      *
      * @param request quality of service required, null for default low power
-     * @param intent a {#link PendingIntent} to be sent for the location update
+     * @param intent a {@link PendingIntent} to be sent for the location update
      *
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
@@ -1603,7 +1607,7 @@ public class LocationManager {
     /**
      * Adds an NMEA listener.
      *
-     * @param listener a {#link GpsStatus.NmeaListener} object to register
+     * @param listener a {@link GpsStatus.NmeaListener} object to register
      *
      * @return true if the listener was successfully added
      *
@@ -1633,7 +1637,7 @@ public class LocationManager {
     /**
      * Removes an NMEA listener.
      *
-     * @param listener a {#link GpsStatus.NmeaListener} object to remove
+     * @param listener a {@link GpsStatus.NmeaListener} object to remove
      */
     public void removeNmeaListener(GpsStatus.NmeaListener listener) {
         try {
