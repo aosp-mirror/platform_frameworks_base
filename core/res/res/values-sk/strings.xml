@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Zakáz. funkcie v zámke kláves."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Zabrániť používaniu niektorých funkcií v zámke klávesov."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domovská stránka"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -765,7 +763,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Nabité."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Pripojte nabíjačku."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nie je vložená karta SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nie je vložená karta SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tablete nie je žiadna karta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefóne nie je žiadna karta SIM."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte kartu SIM."</string>
@@ -1262,10 +1260,8 @@
     <string name="share" msgid="1778686618230011964">"Zdieľať"</string>
     <string name="find" msgid="4808270900322985960">"Nájsť"</string>
     <string name="websearch" msgid="4337157977400211589">"Hľadať na webe"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Nájsť ďalšiu"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Nájsť predchádzajúcu"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Žiadosť o informácie o polohe od používateľa <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Žiadosť o informácie o polohe"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Žiadosť od používateľa <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

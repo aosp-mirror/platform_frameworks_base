@@ -312,7 +312,7 @@
     <string name="permlab_batteryStats" msgid="2789610673514103364">"funda izibalo zebhethri"</string>
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ivumela uhlelo lokusebenza ukufunda idatha yokusebenza yebhethri leleveli ephansi yamanje. Ingavumela uhlelo lokusebenza ukuthola ulwazi lemininingwane mayelana nokuthi iziphi izinhlelo zokusebenza ozisebenzisayo."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"guqula izibalo zebhetri"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ivumela uhlelo lokusebenza ukuthi luguqule imininingwane yebhethri eqoqiwe. Akwenzelwe ukuthi kusetshenziswe izinhlelo zokusebenza ezijwayelekile."</string>
+    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ivumela uhlelo lokusebenza ukuthi luguqule izibalo zebhethri eziqoqiwe. Akwenzelwe ukuthi kusetshenziswe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_backup" msgid="470013022865453920">"lawula ukusekela ngokulondoloza uhlelo bese ubuyisela esimweni"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Ivumela insiza ukuthi ilawule isipele sesistimu kanye nohlelo lokubuyiselwa kabusha. Ayenzelwe ukusetshenziswa izinsiza ezijwayelekile."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"qinisekisa isipele sonke noma buyisela futhi ukusebenza"</string>
@@ -320,7 +320,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"bonisa amawindi angavunyelwe"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Ivumela insiza ukuthi yakhe amawindi enzelwe ukuthi asetshenziswe inkundla yokusetshenziswa kwangaphakathi kwesistimu. Ayisethsnziswa izinsiza ezijwayelekile."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"dweba phezulu kwezinye izinhlelo zokusebenza"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ibumela uhlelo lokusebenza ukudweba phezu kwezinye izinhlelo zokusebenza noma izingxene zokusetshenziswa ukubonwa. Zingaphazamisa ukusebenzisa kwakho kokusetshenziswa kubonwa kunoma uluphi uhlelo lokusebenza, noma ukushintsha ocabanga ukuthi uyakubona kwezinye izinhlelo zokusebenza."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ivumela uhlelo lokusebenza ukudweba phezu kwezinye izinhlelo zokusebenza noma izingxene zokusetshenziswa ukubonwa. Zingaphazamisa ukusebenzisa kwakho kokusetshenziswa kubonwa kunoma uluphi uhlelo lokusebenza, noma ukushintsha ocabanga ukuthi uyakubona kwezinye izinhlelo zokusebenza."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"guqula isivinini sokugqwayiza jikelele"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ivumela uhlelo lokusebenza ukushintsha isivinini sokugqwayiza jikelele (ukugqwayiza okusheshayo noma okulengayo) nganoma isiphi isikhathi."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"lawula amathokheni ezinsiza"</string>
@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Idinga ukuthi idatha yohlelo lokusebenza olugciniwe ibethelwe"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Khubaza amakhamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Vimbela ukusetshenziswa kwamadivaysi wonke wamakhamera"</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Khubaza izici kokhiye abagadile"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Vikela ukusebenza kwezinye izici kokhiye abagadile."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ekhaya"</item>
     <item msgid="869923650527136615">"Iselula"</item>
@@ -1262,10 +1260,8 @@
     <string name="share" msgid="1778686618230011964">"Yabelana"</string>
     <string name="find" msgid="4808270900322985960">"Thola"</string>
     <string name="websearch" msgid="4337157977400211589">"USesho lweWebhu"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Thola okulandelayo"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Thola kwangaphambilini"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Isicelo sendawo esiphuma ku-<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Isicelo sendawo"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Icelwe ngu-:<xliff:g id="NAME">%1$s</xliff:g><xliff:g id="SERVICE">%2$s</xliff:g>"</string>

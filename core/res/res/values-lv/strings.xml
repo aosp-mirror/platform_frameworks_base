@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pieprasa, lai saglabātie lietotnes dati tiktu šifrēti."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Atspējot kameras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Neļauj izmantot nevienu ierīces kameru."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Bloķēšanas f-jas atspējošana"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Atspējot noteiktas funkcijas taustiņslēgā."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Mājas"</item>
     <item msgid="869923650527136615">"Mobilais"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Ir pieejami atvērti Wi-Fi tīkli."</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Pierakstieties Wi-Fi tīklā."</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Pierakstīšanās tīklā"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nevarēja izveidot savienojumu ar Wi-Fi."</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kam:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ierakstiet pieprasīto PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Tālrunis tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr būs izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sūta daudz īsziņu. Vai vēlaties, lai šī lietotne turpinātu sūtīt ziņojumus?"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Kopīgot"</string>
     <string name="find" msgid="4808270900322985960">"Atrast"</string>
     <string name="websearch" msgid="4337157977400211589">"Meklēt tīmeklī"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Atrast nākamo"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Atrast iepriekšējo"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Atrašanās vietas pieprasījums no: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Atrašanās vietas pieprasījums"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Pieprasīja: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
