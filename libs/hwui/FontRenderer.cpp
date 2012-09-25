@@ -374,9 +374,8 @@ void FontRenderer::issueDrawCommand() {
         int offset = 2;
 
         bool force = caches.unbindMeshBuffer();
-        caches.bindPositionVertexPointer(force, caches.currentProgram->position, buffer);
-        caches.bindTexCoordsVertexPointer(force, caches.currentProgram->texCoords,
-                buffer + offset);
+        caches.bindPositionVertexPointer(force, buffer);
+        caches.bindTexCoordsVertexPointer(force, buffer + offset);
     }
 
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);

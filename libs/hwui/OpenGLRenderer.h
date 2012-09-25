@@ -407,6 +407,11 @@ private:
             Rect& transformed, Rect& clip);
 
     /**
+     * Performs a quick reject but adjust the bounds to account for stroke width if necessary
+     */
+    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
+
+    /**
      * Creates a new layer stored in the specified snapshot.
      *
      * @param snapshot The snapshot associated with the new layer
@@ -513,11 +518,9 @@ private:
      * Renders the convex hull defined by the specified path as a strip of polygons.
      *
      * @param path The hull of the path to draw
-     * @param color The color of the rect
-     * @param mode The blending mode to draw the path
-     * @param isAA True if the drawing should be anti-aliased
+     * @param paint The paint to render with
      */
-    void drawConvexPath(const SkPath& path, int color, SkXfermode::Mode mode, bool isAA);
+    void drawConvexPath(const SkPath& path, SkPaint* paint);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
