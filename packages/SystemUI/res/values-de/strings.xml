@@ -171,10 +171,10 @@
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Uhrzeit"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ich"</string>
     <string name="quick_settings_wifi_label" msgid="4393429107095001520">"WLAN"</string>
-    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netzwerk"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="3343111275022978538">"WLAN aus"</string>
     <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"WLAN-Anzeige"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Keine Verbindung zur WLAN-Anzeige"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Keine WLAN-Anzeige"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helligkeit"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
 </resources>
