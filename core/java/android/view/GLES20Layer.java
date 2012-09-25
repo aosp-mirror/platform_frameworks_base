@@ -66,6 +66,11 @@ abstract class GLES20Layer extends HardwareLayer {
         mLayer = 0;
     }
 
+    @Override
+    void clearStorage() {
+        if (mLayer != 0) GLES20Canvas.nClearLayerTexture(mLayer);
+    }
+
     static class Finalizer {
         private int mLayerId;
 
