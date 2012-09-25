@@ -764,10 +764,6 @@ public final class Settings {
             return true;
         }
 
-        public boolean putString(ContentResolver cr, String name, String value) {
-            return putStringForUser(cr, name, value, UserHandle.myUserId());
-        }
-
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             if (isSelf) {
@@ -855,10 +851,6 @@ public final class Settings {
                 if (c != null) c.close();
             }
         }
-
-        public String getString(ContentResolver cr, String name) {
-            return getStringForUser(cr, name, UserHandle.myUserId());
-        }
     }
 
     /**
@@ -869,8 +861,17 @@ public final class Settings {
     public static final class System extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
-        // Populated lazily, guarded by class object:
-        private static NameValueCache sNameValueCache = null;
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://" + AUTHORITY + "/system");
+
+        private static final NameValueCache sNameValueCache = new NameValueCache(
+                SYS_PROP_SETTING_VERSION,
+                CONTENT_URI,
+                CALL_METHOD_GET_SYSTEM,
+                CALL_METHOD_PUT_SYSTEM);
 
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
@@ -937,28 +938,18 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.MODE_RINGER);
         }
 
-        private static void lazyInitCache() {
-            if (sNameValueCache == null) {
-                sNameValueCache = new NameValueCache(
-                        SYS_PROP_SETTING_VERSION + '_' + UserHandle.myUserId(),
-                        CONTENT_URI,
-                        CALL_METHOD_GET_SYSTEM,
-                        CALL_METHOD_PUT_SYSTEM);
-            }
-        }
-
         /**
          * Look up a name in the database.
          * @param resolver to access the database with
          * @param name to look up in the table
          * @return the corresponding value, or null if not present
          */
-        public synchronized static String getString(ContentResolver resolver, String name) {
+        public static String getString(ContentResolver resolver, String name) {
             return getStringForUser(resolver, name, UserHandle.myUserId());
         }
 
         /** @hide */
-        public synchronized static String getStringForUser(ContentResolver resolver, String name,
+        public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
@@ -970,7 +961,6 @@ public final class Settings {
                         + " to android.provider.Settings.Global, returning read-only value.");
                 return Global.getStringForUser(resolver, name, userHandle);
             }
-            lazyInitCache();
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
         }
 
@@ -998,7 +988,6 @@ public final class Settings {
                         + " to android.provider.Settings.Global, value is unchanged.");
                 return false;
             }
-            lazyInitCache();
             return sNameValueCache.putStringForUser(resolver, name, value, userHandle);
         }
 
@@ -1366,12 +1355,6 @@ public final class Settings {
                 int userHandle) {
             putIntForUser(cr, SHOW_GTALK_SERVICE_STATUS, flag ? 1 : 0, userHandle);
         }
-
-        /**
-         * The content:// style URL for this table
-         */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/system");
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN} instead
@@ -2549,8 +2532,18 @@ public final class Settings {
     public static final class Secure extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
 
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://" + AUTHORITY + "/secure");
+
         // Populated lazily, guarded by class object:
-        private static NameValueCache sNameValueCache = null;
+        private static final NameValueCache sNameValueCache = new NameValueCache(
+                SYS_PROP_SETTING_VERSION,
+                CONTENT_URI,
+                CALL_METHOD_GET_SECURE,
+                CALL_METHOD_PUT_SECURE);
 
         private static ILockSettings sLockSettings = null;
 
@@ -2654,28 +2647,18 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WTF_IS_FATAL);
         }
 
-        private static void lazyInitCache() {
-            if (sNameValueCache == null) {
-                sNameValueCache = new NameValueCache(
-                        SYS_PROP_SETTING_VERSION + '_' + UserHandle.myUserId(),
-                        CONTENT_URI,
-                        CALL_METHOD_GET_SECURE,
-                        CALL_METHOD_PUT_SECURE);
-            }
-        }
-
         /**
          * Look up a name in the database.
          * @param resolver to access the database with
          * @param name to look up in the table
          * @return the corresponding value, or null if not present
          */
-        public synchronized static String getString(ContentResolver resolver, String name) {
+        public static String getString(ContentResolver resolver, String name) {
             return getStringForUser(resolver, name, UserHandle.myUserId());
         }
 
         /** @hide */
-        public synchronized static String getStringForUser(ContentResolver resolver, String name,
+        public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
@@ -2683,21 +2666,23 @@ public final class Settings {
                 return Global.getStringForUser(resolver, name, userHandle);
             }
 
-            if (sLockSettings == null) {
-                sLockSettings = ILockSettings.Stub.asInterface(
-                        (IBinder) ServiceManager.getService("lock_settings"));
-                sIsSystemProcess = Process.myUid() == Process.SYSTEM_UID;
-            }
-            if (sLockSettings != null && !sIsSystemProcess
-                    && MOVED_TO_LOCK_SETTINGS.contains(name)) {
-                try {
-                    return sLockSettings.getString(name, "0", userHandle);
-                } catch (RemoteException re) {
-                    // Fall through
+            if (MOVED_TO_LOCK_SETTINGS.contains(name)) {
+                synchronized (Secure.class) {
+                    if (sLockSettings == null) {
+                        sLockSettings = ILockSettings.Stub.asInterface(
+                                (IBinder) ServiceManager.getService("lock_settings"));
+                        sIsSystemProcess = Process.myUid() == Process.SYSTEM_UID;
+                    }
+                }
+                if (sLockSettings != null && !sIsSystemProcess) {
+                    try {
+                        return sLockSettings.getString(name, "0", userHandle);
+                    } catch (RemoteException re) {
+                        // Fall through
+                    }
                 }
             }
 
-            lazyInitCache();
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
         }
 
@@ -2720,7 +2705,6 @@ public final class Settings {
                         + " to android.provider.Settings.Global");
                 return Global.putStringForUser(resolver, name, value, userHandle);
             }
-            lazyInitCache();
             return sNameValueCache.putStringForUser(resolver, name, value, userHandle);
         }
 
@@ -2999,12 +2983,6 @@ public final class Settings {
                 int userHandle) {
             return putStringForUser(cr, name, Float.toString(value), userHandle);
         }
-
-        /**
-         * The content:// style URL for this table
-         */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/secure");
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
@@ -5765,17 +5743,11 @@ public final class Settings {
 
 
         // Populated lazily, guarded by class object:
-        private static NameValueCache sNameValueCache = null;
-
-        private static void lazyInitCache() {
-            if (sNameValueCache == null) {
-                sNameValueCache = new NameValueCache(
-                        SYS_PROP_SETTING_VERSION,
-                        CONTENT_URI,
-                        CALL_METHOD_GET_GLOBAL,
-                        CALL_METHOD_PUT_GLOBAL);
-            }
-        }
+        private static NameValueCache sNameValueCache = new NameValueCache(
+                    SYS_PROP_SETTING_VERSION,
+                    CONTENT_URI,
+                    CALL_METHOD_GET_GLOBAL,
+                    CALL_METHOD_PUT_GLOBAL);
 
         /**
          * Look up a name in the database.
@@ -5783,14 +5755,13 @@ public final class Settings {
          * @param name to look up in the table
          * @return the corresponding value, or null if not present
          */
-        public synchronized static String getString(ContentResolver resolver, String name) {
+        public static String getString(ContentResolver resolver, String name) {
             return getStringForUser(resolver, name, UserHandle.myUserId());
         }
 
         /** @hide */
-        public synchronized static String getStringForUser(ContentResolver resolver, String name,
+        public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
-            lazyInitCache();
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
         }
 
@@ -5809,7 +5780,6 @@ public final class Settings {
         /** @hide */
         public static boolean putStringForUser(ContentResolver resolver,
                 String name, String value, int userHandle) {
-            lazyInitCache();
             if (LOCAL_LOGV) {
                 Log.v(TAG, "Global.putString(name=" + name + ", value=" + value
                         + " for " + userHandle);
