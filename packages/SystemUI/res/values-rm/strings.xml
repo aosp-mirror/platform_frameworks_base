@@ -282,6 +282,8 @@
     <skip />
     <!-- no translation found for quick_settings_bluetooth_multiple_devices_label (3912245565613684735) -->
     <skip />
+    <!-- no translation found for quick_settings_bluetooth_off_label (8159652146149219937) -->
+    <skip />
     <!-- no translation found for quick_settings_brightness_label (6968372297018755815) -->
     <skip />
     <!-- no translation found for quick_settings_rotation_unlocked_label (336054930362580584) -->
@@ -307,6 +309,8 @@
     <!-- no translation found for quick_settings_wifi_label (4393429107095001520) -->
     <skip />
     <!-- no translation found for quick_settings_wifi_no_network (2221993077220856376) -->
+    <skip />
+    <!-- no translation found for quick_settings_wifi_off_label (3343111275022978538) -->
     <skip />
     <!-- no translation found for quick_settings_wifi_display_label (6653501376641018614) -->
     <skip />
