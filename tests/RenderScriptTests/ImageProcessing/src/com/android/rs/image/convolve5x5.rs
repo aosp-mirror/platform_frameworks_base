@@ -37,35 +37,35 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     uint32_t y3 = min((int32_t)y+1, gHeight-1);
     uint32_t y4 = min((int32_t)y+2, gHeight-1);
 
-    float4 p0 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x0, y0))[0]) * gCoeffs[0]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y0))[0]) * gCoeffs[1]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y0))[0]) * gCoeffs[2]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x3, y0))[0]) * gCoeffs[3]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x4, y0))[0]) * gCoeffs[4];
+    float4 p0 = convert_float4(rsGetElementAt_uchar4(gIn, x0, y0)) * gCoeffs[0]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x1, y0)) * gCoeffs[1]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x2, y0)) * gCoeffs[2]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x3, y0)) * gCoeffs[3]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x4, y0)) * gCoeffs[4];
 
-    float4 p1 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x0, y1))[0]) * gCoeffs[5]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y1))[0]) * gCoeffs[6]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y1))[0]) * gCoeffs[7]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x3, y1))[0]) * gCoeffs[8]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x4, y1))[0]) * gCoeffs[9];
+    float4 p1 = convert_float4(rsGetElementAt_uchar4(gIn, x0, y1)) * gCoeffs[5]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x1, y1)) * gCoeffs[6]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x2, y1)) * gCoeffs[7]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x3, y1)) * gCoeffs[8]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x4, y1)) * gCoeffs[9];
 
-    float4 p2 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x0, y2))[0]) * gCoeffs[10]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y2))[0]) * gCoeffs[11]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y2))[0]) * gCoeffs[12]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x3, y2))[0]) * gCoeffs[13]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x4, y2))[0]) * gCoeffs[14];
+    float4 p2 = convert_float4(rsGetElementAt_uchar4(gIn, x0, y2)) * gCoeffs[10]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x1, y2)) * gCoeffs[11]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x2, y2)) * gCoeffs[12]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x3, y2)) * gCoeffs[13]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x4, y2)) * gCoeffs[14];
 
-    float4 p3 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x0, y3))[0]) * gCoeffs[15]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y3))[0]) * gCoeffs[16]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y3))[0]) * gCoeffs[17]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x3, y3))[0]) * gCoeffs[18]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x4, y3))[0]) * gCoeffs[19];
+    float4 p3 = convert_float4(rsGetElementAt_uchar4(gIn, x0, y3)) * gCoeffs[15]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x1, y3)) * gCoeffs[16]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x2, y3)) * gCoeffs[17]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x3, y3)) * gCoeffs[18]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x4, y3)) * gCoeffs[19];
 
-    float4 p4 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x0, y4))[0]) * gCoeffs[20]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y4))[0]) * gCoeffs[21]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y4))[0]) * gCoeffs[22]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x3, y4))[0]) * gCoeffs[23]
-              + convert_float4(((uchar4 *)rsGetElementAt(gIn, x4, y4))[0]) * gCoeffs[24];
+    float4 p4 = convert_float4(rsGetElementAt_uchar4(gIn, x0, y4)) * gCoeffs[20]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x1, y4)) * gCoeffs[21]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x2, y4)) * gCoeffs[22]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x3, y4)) * gCoeffs[23]
+              + convert_float4(rsGetElementAt_uchar4(gIn, x4, y4)) * gCoeffs[24];
 
     p0 = clamp(p0 + p1 + p2 + p3 + p4, 0.f, 255.f);
     *out = convert_uchar4(p0);
