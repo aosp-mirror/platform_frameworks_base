@@ -488,6 +488,24 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         showIfReady();
     }
 
+    public TaskDescription getBottomTask() {
+        if (mRecentsContainer != null) {
+            ViewGroup container = mRecentsContainer;
+            if (container instanceof RecentsScrollView) {
+                container = (ViewGroup) container.findViewById(
+                        R.id.recents_linear_layout);
+            }
+            if (container.getChildCount() > 0) {
+                View v = container.getChildAt(container.getChildCount() - 1);
+                if (v.getTag() instanceof ViewHolder) {
+                    ViewHolder h = (ViewHolder)v.getTag();
+                    return h.taskDescription;
+                }
+            }
+        }
+        return null;
+    }
+
     public void clearRecentTasksList() {
         // Clear memory used by screenshots
         if (mRecentTaskDescriptions != null) {

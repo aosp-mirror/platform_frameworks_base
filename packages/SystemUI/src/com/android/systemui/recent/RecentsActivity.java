@@ -120,7 +120,7 @@ public class RecentsActivity extends Activity {
         if (mRecentsPanel != null) {
             final SystemUIApplication app = (SystemUIApplication) getApplication();
             final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
-            TaskDescription firstTask = recentTasksLoader.getFirstTask();
+            TaskDescription firstTask = mRecentsPanel.getBottomTask();
             if (firstTask != null && mRecentsPanel.simulateClick(firstTask)) {
                 // recents panel will take care of calling show(false);
                 return;
