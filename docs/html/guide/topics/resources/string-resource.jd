@@ -13,8 +13,7 @@ your application with strings:</p>
   <dt><a href="#StringArray">String Array</a></dt>
     <dd>XML resource that provides an array of strings.</dd>
   <dt><a href="#Plurals">Quantity Strings (Plurals)</a></dt>
-    <dd>XML resource that carries different strings for different quantities
-    of the same word or phrase.</dd>
+    <dd>XML resource that carries different strings for pluralization.</dd>
 </dl>
 
 <p>All strings are capable of applying some styling markup and formatting arguments. For
@@ -231,10 +230,19 @@ so Android provides you with methods such as
 {@link android.content.res.Resources#getQuantityString(int,int) getQuantityString()} to select
 the appropriate resource for you.
 
-<p>Note that the selection is made based on grammatical necessity. A string for <code>zero</code>
-in English will be ignored even if the quantity is 0, because 0 isn't grammatically different
-from 2, or any other number except 1 ("zero books", "one book", "two books", and so on).
-Don't be misled either by the fact that, say, <code>two</code> sounds like it could only apply to
+<p>Although historically called "quantity strings" (and still called that in API), quantity
+strings should <i>only</i> be used for plurals. It would be a mistake to use quantity strings to
+implement something like Gmail's "Inbox" versus "Inbox (12)" when there are unread messages, for
+example. It might seem convenient to use quantity strings instead of an {@code if} statement,
+but it's important to note that some languages (such as Chinese) don't make these grammatical
+distinctions at all, so you'll always get the <code>other</code> string.
+
+<p>The selection of which string to use is made solely based on grammatical <i>necessity</i>.
+In English, a string for <code>zero</code> will be ignored even if the quantity is 0, because 0
+isn't grammatically different from 2, or any other number except 1 ("zero books", "one book",
+"two books", and so on).
+
+<p>Don't be misled either by the fact that, say, <code>two</code> sounds like it could only apply to
 the quantity 2: a language may require that 2, 12, 102 (and so on) are all treated like one
 another but differently to other quantities. Rely on your translator to know what distinctions
 their language actually insists upon.
@@ -313,7 +321,7 @@ values, with non-exhaustive examples in parentheses:
               <td>{@code one}</td><td>When the language requires special treatment of numbers like one (as with the number 1 in English and most other languages; in Russian, any number ending in 1 but not ending in 11 is in this class).</td>
             </tr>
             <tr>
-              <td>{@code two}</td><td>When the language requires special treatment of numbers like two (as in Welsh).</td>
+              <td>{@code two}</td><td>When the language requires special treatment of numbers like two (as with 2 in Welsh, or 102 in Slovenian).</td>
             </tr>
             <tr>
               <td>{@code few}</td><td>When the language requires special treatment of "small" numbers (as with 2, 3, and 4 in Czech; or numbers ending 2, 3, or 4 but not 12, 13, or 14 in Polish).</td>
@@ -322,7 +330,7 @@ values, with non-exhaustive examples in parentheses:
               <td>{@code many}</td><td>When the language requires special treatment of "large" numbers (as with numbers ending 11-99 in Maltese).</td>
             </tr>
             <tr>
-              <td>{@code other}</td><td>When the language does not require special treatment of the given quantity.</td>
+              <td>{@code other}</td><td>When the language does not require special treatment of the given quantity (as with all numbers in Chinese, or 42 in English).</td>
             </tr>
           </table>
         </dd>
