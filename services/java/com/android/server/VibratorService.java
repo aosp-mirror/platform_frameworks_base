@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Binder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -139,6 +140,7 @@ public class VibratorService extends IVibratorService.Stub
 
     public void systemReady() {
         mIm = (InputManager)mContext.getSystemService(Context.INPUT_SERVICE);
+
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES), true,
                 new ContentObserver(mH) {
@@ -146,7 +148,15 @@ public class VibratorService extends IVibratorService.Stub
                     public void onChange(boolean selfChange) {
                         updateInputDeviceVibrators();
                     }
-                });
+                }, UserHandle.USER_ALL);
+
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateInputDeviceVibrators();
+            }
+        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mH);
+
         updateInputDeviceVibrators();
     }
 
@@ -341,8 +351,9 @@ public class VibratorService extends IVibratorService.Stub
             synchronized (mInputDeviceVibrators) {
                 mVibrateInputDevicesSetting = false;
                 try {
-                    mVibrateInputDevicesSetting = Settings.System.getInt(mContext.getContentResolver(),
-                            Settings.System.VIBRATE_INPUT_DEVICES) > 0;
+                    mVibrateInputDevicesSetting = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.VIBRATE_INPUT_DEVICES, UserHandle.USER_CURRENT) > 0;
                 } catch (SettingNotFoundException snfe) {
                 }
 
