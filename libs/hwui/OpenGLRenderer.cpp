@@ -34,6 +34,7 @@
 #include "OpenGLRenderer.h"
 #include "DisplayListRenderer.h"
 #include "PathRenderer.h"
+#include "Properties.h"
 #include "Vector.h"
 
 namespace android {
@@ -117,6 +118,8 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
     mFirstSnapshot = new Snapshot;
+
+    mScissorOptimizationDisabled = false;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -124,16 +127,15 @@ OpenGLRenderer::~OpenGLRenderer() {
     // GL APIs. All GL state should be kept in Caches.h
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Debug
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::startMark(const char* name) const {
-    mCaches.startMark(0, name);
-}
-
-void OpenGLRenderer::endMark() const {
-    mCaches.endMark();
+void OpenGLRenderer::initProperties() {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DISABLE_SCISSOR_OPTIMIZATION, property, "false")) {
+        mScissorOptimizationDisabled = !strcasecmp(property, "true");
+        INIT_LOGD("  Scissor optimization %s",
+                mScissorOptimizationDisabled ? "disabled" : "enabled");
+    } else {
+        INIT_LOGD("  Scissor optimization enabled");
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,40 +267,6 @@ void OpenGLRenderer::finish() {
             mCaches.dumpMemoryUsage();
         }
 #endif
-    }
-}
-
-void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
-    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
-        if (clear) {
-            mCaches.disableScissor();
-            mCaches.stencil.clear();
-        }
-        if (enable) {
-            mCaches.stencil.enableDebugWrite();
-        } else {
-            mCaches.stencil.disable();
-        }
-    }
-}
-
-void OpenGLRenderer::renderOverdraw() {
-    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
-        const Rect* clip = mTilingSnapshot->clipRect;
-
-        mCaches.enableScissor();
-        mCaches.setScissor(clip->left, mTilingSnapshot->height - clip->bottom,
-                clip->right - clip->left, clip->bottom - clip->top);
-
-        mCaches.stencil.enableDebugTest(2);
-        drawColor(0x2f0000ff, SkXfermode::kSrcOver_Mode);
-        mCaches.stencil.enableDebugTest(3);
-        drawColor(0x2f00ff00, SkXfermode::kSrcOver_Mode);
-        mCaches.stencil.enableDebugTest(4);
-        drawColor(0x3fff0000, SkXfermode::kSrcOver_Mode);
-        mCaches.stencil.enableDebugTest(4, true);
-        drawColor(0x7fff0000, SkXfermode::kSrcOver_Mode);
-        mCaches.stencil.disable();
     }
 }
 
@@ -436,6 +404,52 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
 
     resume();
     return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Debug
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::startMark(const char* name) const {
+    mCaches.startMark(0, name);
+}
+
+void OpenGLRenderer::endMark() const {
+    mCaches.endMark();
+}
+
+void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
+    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
+        if (clear) {
+            mCaches.disableScissor();
+            mCaches.stencil.clear();
+        }
+        if (enable) {
+            mCaches.stencil.enableDebugWrite();
+        } else {
+            mCaches.stencil.disable();
+        }
+    }
+}
+
+void OpenGLRenderer::renderOverdraw() {
+    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
+        const Rect* clip = mTilingSnapshot->clipRect;
+
+        mCaches.enableScissor();
+        mCaches.setScissor(clip->left, mTilingSnapshot->height - clip->bottom,
+                clip->right - clip->left, clip->bottom - clip->top);
+
+        mCaches.stencil.enableDebugTest(2);
+        drawColor(0x2f0000ff, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(3);
+        drawColor(0x2f00ff00, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(4);
+        drawColor(0x3fff0000, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.enableDebugTest(4, true);
+        drawColor(0x7fff0000, SkXfermode::kSrcOver_Mode);
+        mCaches.stencil.disable();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1248,7 +1262,7 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
 
     bool rejected = !clipRect.intersects(r);
     if (!isDeferred() && !rejected) {
-        mCaches.setScissorEnabled(!clipRect.contains(r));
+        mCaches.setScissorEnabled(mScissorOptimizationDisabled || !clipRect.contains(r));
     }
 
     return rejected;
@@ -2711,7 +2725,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         debugLayerUpdate = mCaches.debugLayersUpdates;
     }
 
-    mCaches.setScissorEnabled(!clip.contains(transformed));
+    mCaches.setScissorEnabled(mScissorOptimizationDisabled || !clip.contains(transformed));
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
