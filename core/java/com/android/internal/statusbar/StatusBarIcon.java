@@ -18,18 +18,21 @@ package com.android.internal.statusbar;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 public class StatusBarIcon implements Parcelable {
     public String iconPackage;
+    public UserHandle user;
     public int iconId;
     public int iconLevel;
     public boolean visible = true;
     public int number;
     public CharSequence contentDescription;
 
-    public StatusBarIcon(String iconPackage, int iconId, int iconLevel, int number,
+    public StatusBarIcon(String iconPackage, UserHandle user, int iconId, int iconLevel, int number,
             CharSequence contentDescription) {
         this.iconPackage = iconPackage;
+        this.user = user;
         this.iconId = iconId;
         this.iconLevel = iconLevel;
         this.number = number;
@@ -38,15 +41,16 @@ public class StatusBarIcon implements Parcelable {
 
     @Override
     public String toString() {
-        return "StatusBarIcon(pkg=" + this.iconPackage + " id=0x" + Integer.toHexString(this.iconId)
+        return "StatusBarIcon(pkg=" + this.iconPackage + "user=" + user.getIdentifier()
+                + " id=0x" + Integer.toHexString(this.iconId)
                 + " level=" + this.iconLevel + " visible=" + visible
                 + " num=" + this.number + " )";
     }
 
     @Override
     public StatusBarIcon clone() {
-        StatusBarIcon that = new StatusBarIcon(this.iconPackage, this.iconId, this.iconLevel,
-                this.number, this.contentDescription);
+        StatusBarIcon that = new StatusBarIcon(this.iconPackage, this.user, this.iconId,
+                this.iconLevel, this.number, this.contentDescription);
         that.visible = this.visible;
         return that;
     }
@@ -60,6 +64,7 @@ public class StatusBarIcon implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         this.iconPackage = in.readString();
+        this.user = (UserHandle) in.readParcelable(null);
         this.iconId = in.readInt();
         this.iconLevel = in.readInt();
         this.visible = in.readInt() != 0;
@@ -69,6 +74,7 @@ public class StatusBarIcon implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(this.iconPackage);
+        out.writeParcelable(this.user, 0);
         out.writeInt(this.iconId);
         out.writeInt(this.iconLevel);
         out.writeInt(this.visible ? 1 : 0);

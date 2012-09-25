@@ -759,6 +759,21 @@ final class ApplicationPackageManager extends PackageManager {
             getApplicationInfo(appPackageName, 0));
     }
 
+    /** @hide */
+    @Override
+    public Resources getResourcesForApplicationAsUser(String appPackageName, int userId)
+            throws NameNotFoundException {
+        try {
+            ApplicationInfo ai = mPM.getApplicationInfo(appPackageName, 0, userId);
+            if (ai != null) {
+                return getResourcesForApplication(ai);
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+        throw new NameNotFoundException("Package " + appPackageName + " doesn't exist");
+    }
+
     int mCachedSafeMode = -1;
     @Override public boolean isSafeMode() {
         try {

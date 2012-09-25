@@ -860,6 +860,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
         final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                    notification.user,
                     notification.notification.icon,
                     notification.notification.iconLevel,
                     notification.notification.number,
@@ -1012,6 +1013,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
+                        notification.user,
                         notification.notification.icon, notification.notification.iconLevel,
                         notification.notification.number,
                         notification.notification.tickerText);
