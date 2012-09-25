@@ -733,7 +733,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         if (streamType == STREAM_REMOTE_MUSIC) {
             // don't play sounds for remote
-            flags &= ~AudioManager.FLAG_PLAY_SOUND;
+            flags &= ~(AudioManager.FLAG_PLAY_SOUND|AudioManager.FLAG_FIXED_VOLUME);
             //if (DEBUG_VOL) Log.i(TAG, "Need to adjust remote volume: calling adjustRemoteVolume()");
             adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, flags);
         } else {
@@ -771,6 +771,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         int index;
         int oldIndex;
 
+        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
         if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
                ((device & mFixedVolumeDevices) != 0)) {
             flags |= AudioManager.FLAG_FIXED_VOLUME;
@@ -855,6 +856,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         final int device = getDeviceForStream(streamType);
         int oldIndex;
 
+        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
         if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                 ((device & mFixedVolumeDevices) != 0)) {
             flags |= AudioManager.FLAG_FIXED_VOLUME;
