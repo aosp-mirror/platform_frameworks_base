@@ -1056,7 +1056,10 @@ class WindowStateAnimator {
             w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
         } else if (!w.isDefaultDisplay()) {
             // On a different display is easy, just use the entire display.
-            w.mSystemDecorRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+            w.mSystemDecorRect.intersect(-w.mFrame.left, -w.mFrame.top,
+                    displayInfo.logicalWidth - w.mFrame.left,
+                    displayInfo.logicalHeight - w.mFrame.top);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
             // Unless we have a universe background...  in which case all the
