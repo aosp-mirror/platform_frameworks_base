@@ -375,6 +375,7 @@ public abstract class WebSettings {
      * internal pattern. Default is true.
      *
      * @deprecated This method is now obsolete.
+     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void setUseWebViewBackgroundForOverscrollBackground(boolean view) {
