@@ -265,7 +265,7 @@
     <!-- Content description of the WIFI signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_three_bars">Wi-Fi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_signal_full">WiFi signal full.</string>
+    <string name="accessibility_wifi_signal_full">Wi-Fi signal full.</string>
 
     <!-- Content description of the WiMAX signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_wimax">No WiMAX.</string>
@@ -439,15 +439,17 @@
     <!-- QuickSettings: User [CHAR LIMIT=NONE] -->
     <string name="quick_settings_user_label">Me</string>
     <!-- QuickSettings: Wifi [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_label">Wifi</string>
+    <string name="quick_settings_wifi_label">Wi-Fi</string>
+    <!-- QuickSettings: Wifi (Not connected) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_wifi_not_connected">Not Connected</string>
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_no_network">No Network</string>
     <!-- QuickSettings: Wifi (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_off_label">Wifi Off</string>
+    <string name="quick_settings_wifi_off_label">Wi-Fi Off</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_display_label">Wifi Display</string>
+    <string name="quick_settings_wifi_display_label">Wi-Fi Display</string>
     <!-- QuickSettings: Wifi display [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_wifi_display_no_connection_label">No Wifi Display Connection</string>
+    <string name="quick_settings_wifi_display_no_connection_label">No Wi-Fi Display Connection</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->

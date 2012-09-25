@@ -654,6 +654,7 @@ class QuickSettings {
     }
 
     private void dismissBrightnessDialog(int timeout) {
+        removeAllBrightnessDialogCallbacks();
         if (mBrightnessDialog != null) {
             mHandler.postDelayed(mDismissBrightnessDialogRunnable, timeout);
         }
