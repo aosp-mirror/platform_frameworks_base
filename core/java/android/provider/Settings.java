@@ -3563,7 +3563,8 @@ public final class Settings {
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
         /**
-         * @deprecated Moved to Global namespace
+         * @deprecated Use {@link android.provider.Settings.Global#WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON}
+         * instead.
          * {@hide}
          */
         @Deprecated
@@ -3608,7 +3609,8 @@ public final class Settings {
          * the user turns off tethering.
          *
          * @hide
-         * @deprecated moved to Global
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_SAVED_STATE}
+         * instead.
          */
         @Deprecated
         public static final String WIFI_SAVED_STATE = Global.WIFI_SAVED_STATE;
@@ -3637,6 +3639,7 @@ public final class Settings {
         /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
@@ -3645,12 +3648,14 @@ public final class Settings {
         /**
          * The number of access points required for a network in order for the
          * watchdog to monitor it.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
 
         /**
          * The delay between background checks.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
@@ -3659,6 +3664,7 @@ public final class Settings {
         /**
          * Whether the Wi-Fi watchdog is enabled for background checking even
          * after it thinks the user has connected to a good access point.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
@@ -3666,6 +3672,7 @@ public final class Settings {
 
         /**
          * The timeout for a background ping
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
@@ -3676,6 +3683,7 @@ public final class Settings {
          * fail. Again, if these fail, they will *not* be used in packet loss
          * calculation. For example, one network always seemed to time out for
          * the first couple pings, so this is set to 3 by default.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT =
@@ -3686,6 +3694,7 @@ public final class Settings {
          * If this number is reached, the watchdog will no longer monitor the
          * initial connection state for the network. This is a safeguard for
          * networks containing multiple APs whose DNS does not respond to pings.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
@@ -3697,60 +3706,73 @@ public final class Settings {
 
         /**
          * A comma-separated list of SSIDs for which the Wi-Fi watchdog should be enabled.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_WATCH_LIST = "wifi_watchdog_watch_list";
 
         /**
          * The number of pings to test if an access point is a good connection.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
 
         /**
          * The delay between pings.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
 
         /**
          * The timeout per ping.
+         * @deprecated This setting is not used.
          */
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
 
         /**
          * ms delay before rechecking an 'online' wifi connection when it is thought to be unstable.
+         * @deprecated This setting is not used.
          * @hide
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_ARP_CHECK_INTERVAL_MS =
                 "wifi_watchdog_arp_interval_ms";
 
         /**
          * ms delay interval between rssi polling when the signal is known to be weak
+         * @deprecated This setting is not used.
          * @hide
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS =
                 "wifi_watchdog_rssi_fetch_interval_ms";
 
-
         /**
          * Number of ARP pings per check.
+         * @deprecated This setting is not used.
          * @hide
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_NUM_ARP_PINGS = "wifi_watchdog_num_arp_pings";
 
         /**
          * Minimum number of responses to the arp pings to consider the test 'successful'.
+         * @deprecated This setting is not used.
          * @hide
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_MIN_ARP_RESPONSES =
                 "wifi_watchdog_min_arp_responses";
 
         /**
          * Timeout on ARP pings
+         * @deprecated This setting is not used.
          * @hide
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_ARP_PING_TIMEOUT_MS =
                 "wifi_watchdog_arp_ping_timeout_ms";
 
@@ -3809,11 +3831,11 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
 
         /**
-         * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile
-         * data connectivity to be established after a disconnect from Wi-Fi.
+         * @deprecated Use
+         * {@link android.provider.Settings.Global#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS} instead
          */
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
-            "wifi_mobile_data_transition_wakelock_timeout_ms";
+                Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
 
         /**
          * Whether network service discovery is enabled.
@@ -4158,16 +4180,6 @@ public final class Settings {
         public static final String ERROR_LOGCAT_PREFIX =
                 "logcat_for_";
 
-
-        /**
-         * Screen timeout in milliseconds corresponding to the
-         * PowerManager's POKE_LOCK_SHORT_TIMEOUT flag (i.e. the fastest
-         * possible screen timeout behavior.)
-         * @hide
-         */
-        public static final String SHORT_KEYLIGHT_DELAY_MS =
-                "short_keylight_delay_ms";
-
         /**
          * The interval in minutes after which the amount of free storage left on the
          * device is logged to the event log
@@ -4220,7 +4232,8 @@ public final class Settings {
          * When idle, it is possible for the device to be switched from Wi-Fi to
          * the mobile data network.
          * @hide
-         * @deprecated Moved to Global
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_IDLE_MS}
+         * instead.
          */
         @Deprecated
         public static final String WIFI_IDLE_MS = Global.WIFI_IDLE_MS;
@@ -4230,7 +4243,8 @@ public final class Settings {
          * to connect. This is necessary to connect to an access point when
          * device is on the move and the screen is off.
          * @hide
-         * @deprecated Moved to Global
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_FRAMEWORK_SCAN_INTERVAL_MS}
+         * instead.
          */
         @Deprecated
         public static final String WIFI_FRAMEWORK_SCAN_INTERVAL_MS =
@@ -4239,14 +4253,16 @@ public final class Settings {
         /**
          * The interval in milliseconds to scan as used by the wifi supplicant
          * @hide
-         * @deprecated Moved to Global
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_SUPPLICANT_SCAN_INTERVAL_MS}
+         * instead.
          */
         @Deprecated
         public static final String WIFI_SUPPLICANT_SCAN_INTERVAL_MS =
                 Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_POLL_INTERVAL_MS}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4254,7 +4270,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_POLL_INTERVAL_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_LONG_POLL_INTERVAL_MS}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4262,7 +4279,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4270,7 +4288,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_TRIGGER_PACKET_COUNT}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4278,7 +4297,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_ERROR_POLL_COUNT}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4286,7 +4306,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_ERROR_POLL_COUNT;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4294,7 +4315,8 @@ public final class Settings {
                 Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4302,7 +4324,8 @@ public final class Settings {
                 Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS}
+         * instead.
          * @hide
          */
         @Deprecated
@@ -4310,7 +4333,8 @@ public final class Settings {
                 Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS;
 
         /**
-         * @deprecated Moved to Settings.Global
+         * @deprecated Use {@link android.provider.Settings.Global#GPRS_REGISTER_CHECK_PERIOD_MS}
+         * instead.
          * @hide
          */
         @Deprecated

@@ -150,8 +150,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
-            final boolean provisioned = 0 != Settings.Secure.getInt(
-                    mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0);
+            final boolean provisioned = 0 != Settings.Global.getInt(
+                    mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0);
             if (provisioned != mDeviceProvisioned) {
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
@@ -198,7 +198,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mProvisioningObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED), true,
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
 
         mBarService = IStatusBarService.Stub.asInterface(

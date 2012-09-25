@@ -286,8 +286,8 @@ public class KeyguardUpdateMonitor {
     public KeyguardUpdateMonitor(Context context) {
         mContext = context;
 
-        mDeviceProvisioned = Settings.Secure.getInt(
-                mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        mDeviceProvisioned = Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -321,8 +321,8 @@ public class KeyguardUpdateMonitor {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
-                mDeviceProvisioned = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+                mDeviceProvisioned = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
                 if (mDeviceProvisioned) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
                 }
@@ -331,13 +331,13 @@ public class KeyguardUpdateMonitor {
         };
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
                 false, mContentObserver);
 
         // prevent a race condition between where we check the flag and where we register the
         // observer by grabbing the value once again...
-        boolean provisioned = Settings.Secure.getInt(mContext.getContentResolver(),
-            Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        boolean provisioned = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         if (provisioned != mDeviceProvisioned) {
             mDeviceProvisioned = provisioned;
             if (mDeviceProvisioned) {

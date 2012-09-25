@@ -124,8 +124,8 @@ public class UsbDeviceManager {
         }
         @Override
         public void onChange(boolean selfChange) {
-            boolean enable = (Settings.Secure.getInt(mContentResolver,
-                    Settings.Secure.ADB_ENABLED, 0) > 0);
+            boolean enable = (Settings.Global.getInt(mContentResolver,
+                    Settings.Global.ADB_ENABLED, 0) > 0);
             mHandler.sendMessage(MSG_ENABLE_ADB, enable);
         }
     }
@@ -190,7 +190,7 @@ public class UsbDeviceManager {
         mUseUsbNotification = !massStorageSupported;
 
         // make sure the ADB_ENABLED setting value matches the current state
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED, mAdbEnabled ? 1 : 0);
+        Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, mAdbEnabled ? 1 : 0);
 
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
     }
@@ -351,7 +351,7 @@ public class UsbDeviceManager {
 
                 // register observer to listen for settings changes
                 mContentResolver.registerContentObserver(
-                        Settings.Secure.getUriFor(Settings.Secure.ADB_ENABLED),
+                        Settings.Global.getUriFor(Settings.Global.ADB_ENABLED),
                                 false, new AdbSettingsObserver());
 
                 // Watch for USB configuration changes

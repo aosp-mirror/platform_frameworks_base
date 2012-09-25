@@ -729,14 +729,14 @@ class BackupManagerService extends IBackupManager.Stub {
         final ContentResolver resolver = context.getContentResolver();
         boolean areEnabled = Settings.Secure.getInt(resolver,
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
-        mProvisioned = Settings.Secure.getInt(resolver,
-                Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        mProvisioned = Settings.Global.getInt(resolver,
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         mAutoRestore = Settings.Secure.getInt(resolver,
                 Settings.Secure.BACKUP_AUTO_RESTORE, 1) != 0;
 
         mProvisionedObserver = new ProvisionedObserver(mBackupHandler);
         resolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.DEVICE_PROVISIONED),
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
                 false, mProvisionedObserver);
 
         // If Encrypted file systems is enabled or disabled, this call will return the
@@ -4956,7 +4956,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     boolean deviceIsProvisioned() {
         final ContentResolver resolver = mContext.getContentResolver();
-        return (Settings.Secure.getInt(resolver, Settings.Secure.DEVICE_PROVISIONED, 0) != 0);
+        return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
     }
 
     // Run a *full* backup pass for the given package, writing the resulting data stream
