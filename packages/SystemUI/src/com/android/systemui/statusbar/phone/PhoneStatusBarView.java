@@ -21,6 +21,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -46,8 +47,9 @@ public class PhoneStatusBarView extends PanelBar {
 
     PhoneStatusBar mBar;
     int mScrimColor;
-    float mMinFlingGutter;
-    float mNotificationWidth;
+    float mSettingsPanelDragzoneFrac;
+    float mSettingsPanelDragzoneMin;
+
     boolean mFullWidthNotifications;
     PanelView mFadingPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
@@ -64,13 +66,14 @@ public class PhoneStatusBarView extends PanelBar {
     public void onAttachedToWindow() {
         Resources res = getContext().getResources();
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
-        mMinFlingGutter = res.getDimension(R.dimen.settings_panel_fling_gutter);
-        mFullWidthNotifications = false;
+        mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
         try {
-            mNotificationWidth = res.getDimension(R.dimen.notification_panel_width);
-        } catch (Resources.NotFoundException ex) {
-            mFullWidthNotifications = true;
+            mSettingsPanelDragzoneFrac = res.getFraction(R.dimen.settings_panel_dragzone_fraction, 1, 1);
+        } catch (NotFoundException ex) {
+            mSettingsPanelDragzoneFrac = 0f;
         }
+
+        mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
     }
 
     @Override
@@ -105,19 +108,30 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public PanelView selectPanelForTouchX(float x) {
-        // We split the status bar into thirds: the left 2/3 are for notifications, and the 
+        if (mFullWidthNotifications) {
+            if (DEBUG) {
+                Slog.v(TAG, "notif frac=" + mNotificationPanel.getExpandedFraction());
+            }
+            return (mNotificationPanel.getExpandedFraction() == 1.0f)
+                ? mSettingsPanel : mNotificationPanel;
+        }
+
+        // We split the status bar into thirds: the left 2/3 are for notifications, and the
         // right 1/3 for quick settings. If you pull the status bar down a second time you'll
         // toggle panels no matter where you pull it down.
+
         final float w = (float) getMeasuredWidth();
-        final float gutter = w - mNotificationWidth;
-        final boolean useGutter = !mFullWidthNotifications && gutter > mMinFlingGutter;
-        final float threshold = 1.0f - (gutter / w);
-        final float f = x / w;
-        if ((useGutter && f > threshold && mSettingsPanel.getExpandedFraction() != 1.0f) ||
-            mNotificationPanel.getExpandedFraction() == 1.0f) {
-            return mSettingsPanel;
+        float region = (w * mSettingsPanelDragzoneFrac);
+
+        if (DEBUG) {
+            Slog.v(TAG, String.format(
+                "w=%.1f frac=%.3f region=%.1f min=%.1f x=%.1f w-x=%.1f",
+                w, mSettingsPanelDragzoneFrac, region, mSettingsPanelDragzoneMin, x, (w-x)));
         }
-        return mNotificationPanel;
+
+        if (region < mSettingsPanelDragzoneMin) region = mSettingsPanelDragzoneMin;
+
+        return (w - x < region) ? mSettingsPanel : mNotificationPanel;
     }
 
     @Override
@@ -159,7 +173,7 @@ public class PhoneStatusBarView extends PanelBar {
             Slog.v(TAG, "panelExpansionChanged: f=" + frac);
         }
 
-        if (mFadingPanel == pv 
+        if (mFadingPanel == pv
                 && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
             // woo, special effects
             final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
