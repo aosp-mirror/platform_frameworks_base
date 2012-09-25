@@ -224,6 +224,7 @@ public class TextureView extends View {
     private void destroySurface() {
         if (mLayer != null) {
             mSurface.detachFromGLContext();
+            mLayer.clearStorage();
 
             boolean shouldRelease = true;
             if (mListener != null) {

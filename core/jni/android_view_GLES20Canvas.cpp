@@ -822,6 +822,11 @@ static void android_view_GLES20Canvas_updateRenderLayer(JNIEnv* env, jobject cla
     layer->updateDeferred(renderer, displayList, left, top, right, bottom);
 }
 
+static void android_view_GLES20Canvas_clearLayerTexture(JNIEnv* env, jobject clazz,
+        Layer* layer) {
+    layer->clearTexture();
+}
+
 static void android_view_GLES20Canvas_setTextureLayerTransform(JNIEnv* env, jobject clazz,
         Layer* layer, SkMatrix* matrix) {
 
@@ -1016,6 +1021,7 @@ static JNINativeMethod gMethods[] = {
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
             (void*) android_view_GLES20Canvas_updateTextureLayer },
     { "nUpdateRenderLayer",      "(IIIIIII)V", (void*) android_view_GLES20Canvas_updateRenderLayer },
+    { "nClearLayerTexture",      "(I)V",       (void*) android_view_GLES20Canvas_clearLayerTexture },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },

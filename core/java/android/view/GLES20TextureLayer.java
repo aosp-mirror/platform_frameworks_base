@@ -39,7 +39,7 @@ class GLES20TextureLayer extends GLES20Layer {
             mFinalizer = new Finalizer(mLayer);
         } else {
             mFinalizer = null;
-        }        
+        }
     }
 
     @Override
