@@ -204,14 +204,14 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             // We exclusively handle the back key by hiding this panel.
             case KeyEvent.KEYCODE_BACK: {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mBar.animateCollapse();
+                    mBar.animateCollapseNotifications();
                 }
                 return true;
             }
             // We react to the home key but let the system handle it.
             case KeyEvent.KEYCODE_HOME: {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mBar.animateCollapse();
+                    mBar.animateCollapseNotifications();
                 }
             } break;
         }

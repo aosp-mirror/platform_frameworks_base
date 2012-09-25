@@ -323,7 +323,7 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_HOME = 2;
 
     /**
-     * Action to open the recents.
+     * Action to open the recent apps.
      */
     public static final int GLOBAL_ACTION_RECENTS = 3;
 
@@ -331,6 +331,11 @@ public abstract class AccessibilityService extends Service {
      * Action to open the notifications.
      */
     public static final int GLOBAL_ACTION_NOTIFICATIONS = 4;
+
+    /**
+     * Action to open the quick settings.
+     */
+    public static final int GLOBAL_ACTION_QUICK_SETTINGS = 5;
 
     private static final String LOG_TAG = "AccessibilityService";
 
