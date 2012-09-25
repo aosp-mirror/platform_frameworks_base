@@ -348,10 +348,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * To take effect, this option must be set before the blocking method was called.
      *
      * @param socket a socket created by this factory.
-     * @param timeout the desired write timeout in milliseconds.
+     * @param writeTimeoutMilliseconds the desired write timeout in milliseconds.
      * @throws IllegalArgumentException if the socket was not created by this factory.
-     *
-     * @hide
      */
     public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
             throws SocketException {
