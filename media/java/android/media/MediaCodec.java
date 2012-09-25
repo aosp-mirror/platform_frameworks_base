@@ -498,6 +498,12 @@ final public class MediaCodec {
      */
     public native final void setVideoScalingMode(int mode);
 
+    /**
+     * Get the component name. If the codec was created by createDecoderByType
+     * or createEncoderByType, what component is chosen is not known beforehand.
+     */
+    public native final String getName();
+
     private native final ByteBuffer[] getBuffers(boolean input);
 
     private static native final void native_init();
