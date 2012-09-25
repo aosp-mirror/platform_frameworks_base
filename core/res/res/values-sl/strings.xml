@@ -310,7 +310,7 @@
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"vsiljeno zapiranje aplikacij v ozadju"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Programu omogoča, da nadzoruje, ali so dejavnosti zaključene takoj, ko so premaknjene v ozadje. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_batteryStats" msgid="2789610673514103364">"branje statističnih podatkov o akumulatorju"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Aplikaciji omogoča branje podatkov o trenutni nizki napolnjenosti akumulatorja. Aplikaciji lahko tudi dovoli dostop do podrobnosti o aplikacijah, ki jih uporabljate."</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Aplikaciji omogoča branje podatkov o trenutni nizki napolnjenosti akumulatorja. Aplikaciji lahko tudi dovoli dostop do podrobnosti o tem, katere aplikacije uporabljate."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"spreminjanje statističnih podatkov o akumulatorju"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Aplikaciji omogoča spreminjanje zbranih statističnih podatkov o akumulatorju. Ni primerno za uporabo z običajnimi aplikacijami."</string>
     <string name="permlab_backup" msgid="470013022865453920">"nadzor varnostnega kopiranja sistema in obnovitev"</string>
@@ -368,7 +368,7 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"neposredno nameščanje programov"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Programu omogoča namestitev novih ali posodobljenih paketov sistema Android. Zlonamerni programi lahko to uporabijo za dodajanje novih programov s poljubnimi zmogljivimi dovoljenji."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"brisanje vseh podatkov predpomnilnika programa"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Aplikaciji omogoča sproščanje pomnilnika v tabličnem računalniku, tako da izbrišite imenike predpomnilnika drugih aplikacij. To lahko povzroči počasnejši zagon drugih aplikacij, saj morajo znova prenesti svoje podatke."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Aplikaciji omogoča sproščanje pomnilnika v tabličnem računalniku, tako da izbriše imenike predpomnilnika drugih aplikacij. To lahko povzroči počasnejši zagon drugih aplikacij, saj morajo znova prenesti svoje podatke."</string>
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Aplikaciji omogoča sproščanje pomnilnika telefona, tako da izbriše datoteke v imenikih predpomnilnika drugih aplikacij. To lahko povzroči počasnejši zagon drugih aplikacij, saj morajo znova prenesti svoje podatke."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"premikanje sredstev programa"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Programu omogoča premikanje sredstev programa iz notranjih medijev v zunanje in obratno."</string>
@@ -431,9 +431,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"dovoljenje za namestitev ponudnika lokacije"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Ustvarjanje simuliranih virov lokacije za preverjanje ali namestitev novega ponudnika lokacije. S tem lahko aplikacija preglasi lokacijo in/ali stanje, ki ga vrnejo drugi viri lokacije, kot so GPS in ponudniki lokacij."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"natančna lokacija (na podlagi podatkov GPS in omrežja)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Aplikaciji omogoča, da določi vašo natančno lokacijo na podlagi sistema GPS ali omrežnih lokacijskih virov, kot so bazne postaje ali Wi-Fi. Te lokacijske storitve morajo biti vklopljene in na voljo v napravi, če želite, da jih aplikacija uporablja. Aplikacije lahko na podlagi tega določijo vašo lokacijo in še dodatno izpraznijo akumulator."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Aplikaciji omogoča, da določi vašo natančno lokacijo na podlagi sistema GPS ali omrežnih lokacijskih virov, kot so bazne postaje mobilne telefonije ali Wi-Fi. Te lokacijske storitve morajo biti vklopljene in na voljo v napravi, če želite, da jih aplikacija uporablja. Aplikacije lahko na podlagi tega določijo vašo lokacijo in še dodatno izpraznijo akumulator."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"približna lokacija (na podlagi omrežja)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Aplikaciji omogoča, da določi vašo približno lokacijo na podlagi lokacijskih storitev z omrežnimi lokacijskimi viri, kot so bazne postaje in Wi-Fi. Te lokacijske storitve morajo biti vklopljene in na voljo v napravi, če želite, da jih aplikacija uporablja. Aplikacije lahko na podlagi tega določijo vašo približno lokacijo."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Aplikaciji omogoča, da določi vašo približno lokacijo na podlagi lokacijskih storitev z omrežnimi lokacijskimi viri, kot so bazne postaje mobilne telefonije in Wi-Fi. Te lokacijske storitve morajo biti vklopljene in na voljo v napravi, če želite, da jih aplikacija uporablja. Aplikacije lahko na podlagi tega določijo vašo približno lokacijo."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"dostop do storitve SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Programu omogoča uporabo funkcij nizke ravni SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"branje grafičnega/slikovnega medpomnilnika"</string>
@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Odpiranje razpoložljivih brezžičnih omrežij"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Prijava v omrežje Wi-Fi"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Prijava v omrežje"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Z omrežjem Wi-Fi se ni mogoče povezati"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Za:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Vnesite zahtevano kodo PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefon bo začasno prekinil povezavo z Wi-Fi-jem, ko je povezan z napravo <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Vstavljanje znaka"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Pošiljanje sporočil SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pošilja veliko SMS-ov. Ali želite dovoliti, da jih še naprej pošilja?"</string>
@@ -1407,6 +1405,6 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat napačno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Želite povečati glasnost nad varno raven?"\n"Dolgotrajna izpostavljenost glasnim tonom lahko oslabi sluh."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Želite povečati glasnost nad varno raven?"\n"Dolgotrajna izpostavljenost glasnim tonom lahko poškoduje sluh."</string>
     <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
 </resources>

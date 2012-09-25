@@ -494,7 +494,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"የድረስባህሪያት ምልከታ"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"በገቢር ጀምር አገልግሎት ወደ ተሰቀሉት ባህሪያት አንብብ/ ፃፍ እንዲደርስ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"ፍርግሞች ምረጥ"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"የትኛው መተግበሪያ በየትኛው ምግብሮች መጠቀም እንደሚቻል ለስርዓቱ ለመንገር ለመተግበሪያው ይፈቅዳሉ፡፡መተግበሪያ በዚህ ፍቃድ ሌሎች መተግበሪያዎች ከግል ውሂብ ለመዳረስ እንዲቻል ያስችላል፡፡ ለመደበኛ መተግበሪያዎች አጠቃቀም አይሆንም፡፡"</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"የትኛው መተግበሪያ በየትኛው ፍርግሞች መጠቀም እንደሚቻል ለስርዓቱ ለመንገር ለመተግበሪያው ይፈቅዳሉ። መተግበሪያ በእዚህ ፍቃድ ሌሎች መተግበሪያዎች ከግል ውሂብ ለመዳረስ እንዲቻል ያስችላል። ለመደበኛ መተግበሪያዎች አጠቃቀም አይሆንም።"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"የስልክ ሁኔታን ቀይር"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"የመገልገያ መሳሪያውን የስልክ ባህሪያት ለመቆጣጠር ለመተግበሪያው ይፈቅዳል፡፡ ከዚህ ፍቃድ ጋር መተግበሪያ አውታረ መረቦችን ሊለውጥ ይችላል፤አንተን ምንም ሳያሳውቅ የስልኩን ሬድዮ አብራ እና አጥፋ እና የመሳሰሉትን ሊያበራ ይችላል፡፡"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"የስልክ ሁኔታና ማንነት አንብብ"</string>
