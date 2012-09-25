@@ -1530,8 +1530,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder resultTo = data.readStrongBinder();
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
+            int userId = data.readInt();
             int result = startActivities(app, intents, resolvedTypes, resultTo,
-                    options);
+                    options, userId);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -3708,7 +3709,7 @@ class ActivityManagerProxy implements IActivityManager
     
     public int startActivities(IApplicationThread caller,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options) throws RemoteException {
+            Bundle options, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3722,6 +3723,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+        data.writeInt(userId);
         mRemote.transact(START_ACTIVITIES_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();

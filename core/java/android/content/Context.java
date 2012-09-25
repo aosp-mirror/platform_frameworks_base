@@ -974,6 +974,36 @@ public abstract class Context {
     public abstract void startActivities(Intent[] intents, Bundle options);
 
     /**
+     * @hide
+     * Launch multiple new activities.  This is generally the same as calling
+     * {@link #startActivity(Intent)} for the first Intent in the array,
+     * that activity during its creation calling {@link #startActivity(Intent)}
+     * for the second entry, etc.  Note that unlike that approach, generally
+     * none of the activities except the last in the array will be created
+     * at this point, but rather will be created when the user first visits
+     * them (due to pressing back from the activity on top).
+     *
+     * <p>This method throws {@link ActivityNotFoundException}
+     * if there was no Activity found for <em>any</em> given Intent.  In this
+     * case the state of the activity stack is undefined (some Intents in the
+     * list may be on it, some not), so you probably want to avoid such situations.
+     *
+     * @param intents An array of Intents to be started.
+     * @param options Additional options for how the Activity should be started.
+     * @param userHandle The user for whom to launch the activities
+     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * Context.startActivity(Intent, Bundle)} for more details.
+     *
+     * @throws ActivityNotFoundException
+     *
+     * @see {@link #startActivities(Intent[])}
+     * @see PackageManager#resolveActivity
+     */
+    public void startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Same as {@link #startIntentSender(IntentSender, Intent, int, int, int, Bundle)}
      * with no options specified.
      *
