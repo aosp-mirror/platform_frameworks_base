@@ -406,17 +406,6 @@ notification style.</li>
 </ul>
 </li>
 
-<li>WebView
-<ul>
-<li>New {@link
-android.webkit.WebSettings#setUseWebViewBackgroundForOverscrollBackground(
-boolean) setUseWebViewBackgroundForOverscrollBackground()} method lets a {@link
-android.webkit.WebView} specify whether to use its own background for the
-overscroll background. </li>
-</ul>
-</li>
-</ul>
-
 <h3 id="extralargescreens">Extra Large Screens</h3>
 
 <p>The platform now supports extra large screen sizes, such as those that might
