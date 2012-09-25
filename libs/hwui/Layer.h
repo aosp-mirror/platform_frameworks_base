@@ -134,10 +134,6 @@ struct Layer {
         return fbo;
     }
 
-    inline GLuint* getTexturePointer() {
-        return &texture.id;
-    }
-
     inline GLuint getTexture() {
         return texture.id;
     }
@@ -181,15 +177,31 @@ struct Layer {
     ANDROID_API void setColorFilter(SkiaColorFilter* filter);
 
     inline void bindTexture() {
-        glBindTexture(renderTarget, texture.id);
+        if (texture.id) {
+            glBindTexture(renderTarget, texture.id);
+        }
     }
 
     inline void generateTexture() {
-        glGenTextures(1, &texture.id);
+        if (!texture.id) {
+            glGenTextures(1, &texture.id);
+        }
     }
 
     inline void deleteTexture() {
-        if (texture.id) glDeleteTextures(1, &texture.id);
+        if (texture.id) {
+            glDeleteTextures(1, &texture.id);
+            texture.id = 0;
+        }
+    }
+
+    /**
+     * When the caller frees the texture itself, the caller
+     * must call this method to tell this layer that it lost
+     * the texture.
+     */
+    void clearTexture() {
+        texture.id = 0;
     }
 
     inline void deleteFbo() {
