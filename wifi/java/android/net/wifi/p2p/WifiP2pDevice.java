@@ -260,6 +260,18 @@ public class WifiP2pDevice implements Parcelable {
         return (groupCapability & GROUP_CAPAB_GROUP_LIMIT) != 0;
     }
 
+    /** @hide */
+    public void update(WifiP2pDevice device) {
+        if (device == null || device.deviceAddress == null) return;
+        deviceName = device.deviceName;
+        primaryDeviceType = device.primaryDeviceType;
+        secondaryDeviceType = device.secondaryDeviceType;
+        wpsConfigMethodsSupported = device.wpsConfigMethodsSupported;
+        deviceCapability = device.deviceCapability;
+        groupCapability = device.groupCapability;
+        wfdInfo = device.wfdInfo;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
