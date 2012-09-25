@@ -13948,6 +13948,14 @@ package android.nfc.tech {
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
 
+  public final class NfcBarcode extends android.nfc.tech.BasicTagTechnology {
+    method public static android.nfc.tech.NfcBarcode get(android.nfc.Tag);
+    method public byte[] getBarcode();
+    method public int getType();
+    field public static final int TYPE_KOVIO = 1; // 0x1
+    field public static final int TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
   public final class NfcF extends android.nfc.tech.BasicTagTechnology {
     method public static android.nfc.tech.NfcF get(android.nfc.Tag);
     method public byte[] getManufacturer();
