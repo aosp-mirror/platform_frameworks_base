@@ -187,6 +187,6 @@
     <dimen name="quick_settings_cell_height">110dp</dimen>
 
     <!-- The padding between each tile within the QuickSettings layout -->
-    <dimen name="quick_settings_cell_gap">5dp</dimen>
+    <dimen name="quick_settings_cell_gap">4dp</dimen>
 
 </resources>

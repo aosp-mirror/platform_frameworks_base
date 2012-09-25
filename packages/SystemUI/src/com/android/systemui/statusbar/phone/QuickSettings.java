@@ -265,21 +265,17 @@ class QuickSettings {
         timeTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Jump into the alarm application
+                // TODO: Jump into the clock application
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(
                         "com.google.android.deskclock",
-                        "com.android.deskclock.AlarmClock"));
+                        "com.android.deskclock.DeskClock"));
                 startSettingsActivity(intent);
             }
         });
         mModel.addTimeTile(timeTile, new QuickSettingsModel.RefreshCallback() {
             @Override
-            public void refreshView(QuickSettingsTileView view, State alarmState) {
-                TextView tv = (TextView) view.findViewById(R.id.alarm_textview);
-                tv.setText(alarmState.label);
-                tv.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
-            }
+            public void refreshView(QuickSettingsTileView view, State alarmState) {}
         });
         parent.addView(timeTile);
         mDynamicSpannedTiles.add(timeTile);
@@ -487,6 +483,31 @@ class QuickSettings {
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
+        // Alarm tile
+        QuickSettingsTileView alarmTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        alarmTile.setContent(R.layout.quick_settings_tile_alarm, inflater);
+        alarmTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Jump into the alarm application
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(
+                        "com.google.android.deskclock",
+                        "com.android.deskclock.AlarmClock"));
+                startSettingsActivity(intent);
+            }
+        });
+        mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State alarmState) {
+                TextView tv = (TextView) view.findViewById(R.id.alarm_textview);
+                tv.setText(alarmState.label);
+                view.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
+            }
+        });
+        parent.addView(alarmTile);
+
         // Location
         QuickSettingsTileView locationTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
