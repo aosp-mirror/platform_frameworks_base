@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Richiede la crittografia dei dati applicazione memorizzati."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Disattiva fotocamere"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedisci l\'utilizzo di tutte le fotocamere del dispositivo."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Disattiva le funzioni con il blocco tastiera"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedisce l\'utilizzo di alcune funzioni con il blocco tastiera."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -1260,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Condividi"</string>
     <string name="find" msgid="4808270900322985960">"Trova"</string>
     <string name="websearch" msgid="4337157977400211589">"Ricerca Web"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Trova successivo"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Trova precedente"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Richiesta posizione da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Richiesta posizione"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Richiesto da <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

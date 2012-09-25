@@ -998,7 +998,7 @@
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren möglicherweise nicht."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
-    <string name="cancel" msgid="6442560571259935130">"Abbruch"</string>
+    <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Abbrechen"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Achtung"</string>
@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Verfügbare WLAN-Netzwerke öffnen"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Im WLAN-Netzwerk anmelden"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"An:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Geben Sie die erforderliche PIN ein:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Das Telefon wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> hergestellt wird."</string>
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sendet eine große Anzahl SMS. Möchten Sie zulassen, dass die App weiterhin Nachrichten sendet?"</string>
@@ -1261,7 +1259,7 @@
     <string name="find" msgid="4808270900322985960">"Suchen"</string>
     <string name="websearch" msgid="4337157977400211589">"Websuche"</string>
     <string name="find_next" msgid="5742124618942193978">"Weitersuchen"</string>
-    <string name="find_previous" msgid="2196723669388360506">"Rückwärts weitersuchen"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Aufwärts weitersuchen"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

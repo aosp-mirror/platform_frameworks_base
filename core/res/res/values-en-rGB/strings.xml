@@ -438,10 +438,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Allows the app to use SurfaceFlinger low-level features."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"read frame buffer"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Allows the app to read the content of the frame buffer."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configure Wifi displays"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Allows the app to configure and connect to Wifi displays."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control Wifi displays"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Allows the app to control low-level features of Wifi displays."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configure Wi-Fi displays"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Allows the app to configure and connect to Wi-Fi displays."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control Wi-Fi displays"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Allows the app to control low-level features of Wi-Fi displays."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"change your audio settings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Allows the app to modify global audio settings such as volume and which speaker is used for output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"record audio"</string>
@@ -545,9 +545,9 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Allows the app to change the state of tethered network connectivity."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"change background data usage setting"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Allows the app to change the background data usage setting."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"view WiFi connections"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"view Wi-Fi connections"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Allows the app to view information about Wi-FI networking, such as whether Wi-FI is enabled and name of connected Wi-FI devices."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"connect and disconnect from WiFi"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"connect and disconnect from Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Allows the app to connect to and disconnect from Wi-FI access points and to make changes to device configuration for Wi-FI networks."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"allow Wi-Fi Multicast reception"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Allows the app to receive packets sent to all devices on a Wi-FI network using multicast addresses, not just your tablet. It uses more power than the non-multicast mode."</string>
@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Open Wi-Fi networks available"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Sign in to Wi-Fi network"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Sign in to network"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Couldn\'t connect to Wi-Fi"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"To:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Type the required PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"The phone will temporarily disconnect from Wi-FI while it\'s connected to <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Insert character"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sending SMS messages"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; is sending a large number of SMS messages. Do you want to allow this app to continue sending messages?"</string>

@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Der er åbne Wi-Fi-netværk tilgængelige"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Log ind på Wi-Fi-netværket"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Log ind på netværk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kunne ikke oprette forbindelse til Wi-Fi"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Til:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Skriv den påkrævede pinkode:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pinkode:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefonens Wi-Fi-forbindelse vil midlertidigt blive afbrudt, når den er tilsluttet <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Indsæt tegn"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender sms-beskeder"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sender et stort antal sms-beskeder. Vil du tillade, at denne app fortsat sender beskeder?"</string>
