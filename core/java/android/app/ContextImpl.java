@@ -1707,7 +1707,8 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi =
-            mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(), flags);
+            mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(), flags,
+                    user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
