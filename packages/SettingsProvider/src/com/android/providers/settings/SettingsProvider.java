@@ -315,10 +315,10 @@ public class SettingsProvider extends ContentProvider {
         String property = null, table = uri.getPathSegments().get(0);
         final boolean isGlobal = table.equals(TABLE_GLOBAL);
         if (table.equals(TABLE_SYSTEM)) {
-            property = Settings.System.SYS_PROP_SETTING_VERSION + '_' + userHandle;
+            property = Settings.System.SYS_PROP_SETTING_VERSION;
             backedUpDataChanged = true;
         } else if (table.equals(TABLE_SECURE)) {
-            property = Settings.Secure.SYS_PROP_SETTING_VERSION + '_' + userHandle;
+            property = Settings.Secure.SYS_PROP_SETTING_VERSION;
             backedUpDataChanged = true;
         } else if (isGlobal) {
             property = Settings.Global.SYS_PROP_SETTING_VERSION;    // this one is global
@@ -447,11 +447,6 @@ public class SettingsProvider extends ContentProvider {
             sSystemCaches.delete(userHandle);
             sSecureCaches.delete(userHandle);
             sKnownMutationsInFlight.delete(userHandle);
-
-            String property = Settings.System.SYS_PROP_SETTING_VERSION + '_' + userHandle;
-            SystemProperties.set(property, "");
-            property = Settings.Secure.SYS_PROP_SETTING_VERSION + '_' + userHandle;
-            SystemProperties.set(property, "");
         }
     }
 

@@ -2448,7 +2448,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
@@ -2460,7 +2460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityAndWait");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
@@ -2474,7 +2474,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String resultWho, int requestCode, int startFlags, Configuration config,
             Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityWithConfig", null);
         int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
@@ -2613,7 +2613,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, Bundle options, int userId) {
 
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
 
         int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
@@ -2634,7 +2634,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
             Bundle options, int userId) {
 
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
         int ret = mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo,
                 options, userId);
@@ -3460,7 +3460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
-        userId = handleIncomingUserLocked(pid, uid,
+        userId = handleIncomingUser(pid, uid,
                 userId, false, true, "clearApplicationUserData", null);
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -3516,7 +3516,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, true, "killBackgroundProcesses", null);
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -3591,7 +3591,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, true, "forceStopPackage", null);
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -4596,7 +4596,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
             int origUserId = userId;
-            userId = handleIncomingUserLocked(Binder.getCallingPid(), callingUid, userId,
+            userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
                     type == ActivityManager.INTENT_SENDER_BROADCAST, true,
                     "getIntentSender", null);
             if (origUserId == UserHandle.USER_CURRENT) {
@@ -5756,26 +5756,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (userId != UserHandle.getCallingUserId()) {
-            // Check if the caller is holding permissions for cross-user requests.
-            if (checkComponentPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    Binder.getCallingPid(), callingUid, -1, true)
-                    != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: "
-                        + "Request to get recent tasks for user " + userId
-                        + " but is calling from user " + UserHandle.getUserId(callingUid)
-                        + "; this requires "
-                        + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            } else {
-                if (userId == UserHandle.USER_CURRENT) {
-                    userId = mCurrentUserId;
-                }
-            }
-        }
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                false, true, "getRecentTasks", null);
 
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
@@ -6679,7 +6661,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "getContentProvider", null);
         return getContentProviderImpl(caller, name, null, stable, userId);
     }
@@ -6688,7 +6670,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String name, int userId, IBinder token) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call getContentProviderExternal()");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "getContentProvider", null);
         return getContentProviderExternalUnchecked(name, token, userId);
     }
@@ -6953,7 +6935,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public String getProviderMimeType(Uri uri, int userId) {
         enforceNotIsolatedCaller("getProviderMimeType");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, true, "getProviderMimeType", null);
         final String name = uri.getAuthority();
         final long ident = Binder.clearCallingIdentity();
@@ -10926,14 +10908,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) {
-        synchronized(this) {
-            return handleIncomingUserLocked(callingPid, callingUid, userId, allowAll,
-                    requireFull, name, callerPackage);
-        }        
-    }
-
-    int handleIncomingUserLocked(int callingPid, int callingUid, int userId, boolean allowAll,
-            boolean requireFull, String name, String callerPackage) {
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (callingUserId != userId) {
             if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
@@ -10974,6 +10948,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (userId == UserHandle.USER_CURRENT
                     || userId == UserHandle.USER_CURRENT_OR_SELF) {
+                // Note that we may be accessing this outside of a lock...
+                // shouldn't be a big deal, if this is being called outside
+                // of a locked context there is intrinsically a race with
+                // the value the caller will receive and someone else changing it.
                 userId = mCurrentUserId;
             }
             if (!allowAll && userId < 0) {
@@ -11280,7 +11258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 callingPid = Binder.getCallingPid();
             }
 
-            userId = this.handleIncomingUserLocked(callingPid, callingUid, userId,
+            userId = this.handleIncomingUser(callingPid, callingUid, userId,
                     true, true, "registerReceiver", callerPackage);
 
             List allSticky = null;
@@ -11515,7 +11493,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
 
-        userId = handleIncomingUserLocked(callingPid, callingUid, userId,
+        userId = handleIncomingUser(callingPid, callingUid, userId,
                 true, false, "broadcast", callerPackage);
 
         // Make sure that the user who is receiving this broadcast is started.
@@ -11928,7 +11906,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        userId = handleIncomingUserLocked(Binder.getCallingPid(),
+        userId = handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, true, false, "removeStickyBroadcast", null);
 
         synchronized(this) {
@@ -12016,7 +11994,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String profileFile, int flags, Bundle arguments,
             IInstrumentationWatcher watcher, int userId) {
         enforceNotIsolatedCaller("startInstrumentation");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, true, "startInstrumentation", null);
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
@@ -13862,7 +13840,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ProcessRecord findProcessLocked(String process, int userId, String callName) {
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, true, callName, null);
         ProcessRecord proc = null;
         try {
