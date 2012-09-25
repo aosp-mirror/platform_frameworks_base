@@ -2628,7 +2628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options,
             int userId) {
         enforceNotIsolatedCaller("startActivities");
-        userId = handleIncomingUserLocked(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
         int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
                 options, userId);
