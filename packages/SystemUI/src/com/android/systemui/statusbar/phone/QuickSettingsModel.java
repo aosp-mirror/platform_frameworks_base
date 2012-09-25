@@ -137,8 +137,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private UserState mUserState = new UserState();
 
     private QuickSettingsTileView mTimeTile;
-    private RefreshCallback mTimeAlarmCallback;
-    private State mTimeAlarmState = new State();
+    private RefreshCallback mTimeCallback;
+    private State mTimeState = new State();
+
+    private QuickSettingsTileView mAlarmTile;
+    private RefreshCallback mAlarmCallback;
+    private State mAlarmState = new State();
 
     private QuickSettingsTileView mAirplaneModeTile;
     private RefreshCallback mAirplaneModeCallback;
@@ -212,17 +216,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     // Time
     void addTimeTile(QuickSettingsTileView view, RefreshCallback cb) {
         mTimeTile = view;
-        mTimeAlarmCallback = cb;
-        mTimeAlarmCallback.refreshView(view, mTimeAlarmState);
+        mTimeCallback = cb;
+        mTimeCallback.refreshView(view, mTimeState);
+    }
+
+    // Alarm
+    void addAlarmTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mAlarmTile = view;
+        mAlarmCallback = cb;
+        mAlarmCallback.refreshView(view, mAlarmState);
     }
     void onAlarmChanged(Intent intent) {
-        mTimeAlarmState.enabled = intent.getBooleanExtra("alarmSet", false);
-        mTimeAlarmCallback.refreshView(mTimeTile, mTimeAlarmState);
+        mAlarmState.enabled = intent.getBooleanExtra("alarmSet", false);
+        mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
     }
     void onNextAlarmChanged() {
-        mTimeAlarmState.label = Settings.System.getString(mContext.getContentResolver(),
+        mAlarmState.label = Settings.System.getString(mContext.getContentResolver(),
                 Settings.System.NEXT_ALARM_FORMATTED);
-        mTimeAlarmCallback.refreshView(mTimeTile, mTimeAlarmState);
+        mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
     }
 
     // Airplane Mode
@@ -330,7 +341,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.signalIconId = enabled && (mobileSignalIconId > 0)
                     ? mobileSignalIconId
                     : R.drawable.ic_qs_signal_no_signal;
-            mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0)
+            mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
                     ? dataTypeIconId
                     : 0;
             mRSSIState.label = enabled

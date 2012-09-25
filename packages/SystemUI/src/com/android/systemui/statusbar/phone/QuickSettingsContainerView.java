@@ -20,6 +20,7 @@ import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -73,20 +74,22 @@ class QuickSettingsContainerView extends FrameLayout {
         for (int i = 0; i < N; ++i) {
             // Update the child's width
             QuickSettingsTileView v = (QuickSettingsTileView) getChildAt(i);
-            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            int colSpan = v.getColumnSpan();
-            lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
+            if (v.getVisibility() != View.GONE) {
+                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                int colSpan = v.getColumnSpan();
+                lp.width = (int) ((colSpan * cellWidth) + (colSpan - 1) * mCellGap);
 
-            // Measure the child
-            int newWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
-            int newHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
-            v.measure(newWidthSpec, newHeightSpec);
+                // Measure the child
+                int newWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
+                int newHeightSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
+                v.measure(newWidthSpec, newHeightSpec);
 
-            // Save the cell height
-            if (cellHeight <= 0) {
-                cellHeight = v.getMeasuredHeight();
+                // Save the cell height
+                if (cellHeight <= 0) {
+                    cellHeight = v.getMeasuredHeight();
+                }
+                cursor += colSpan;
             }
-            cursor += colSpan;
         }
 
         // Set the measured dimensions.  We always fill the tray width, but wrap to the height of
