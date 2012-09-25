@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Reikalauti, kad saugomos programos duomenys būtų šifruoti."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Neleisti fotoaparatų"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Neleisti naudoti visų įrenginio fotoaparatų."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Funkcijų išjung. klaviat. aps."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Naudojant klaviatūros apsaugos funkciją, neleisti naudoti kai kurių funkcijų."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Pagrindinis"</item>
     <item msgid="869923650527136615">"Mobilusis"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Atidaryti galimus „Wi-Fi“ tinklus"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Prisijungti prie „Wi-Fi“ ryšio tinklo"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Prisijungti prie tinklo"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepavyko prisijungti prie „Wi-Fi“"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Skirta:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Įveskite reikiamą PIN kodą:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kodas:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefonas bus laikinai atjungtas nuo „Wi-Fi“, kol bus prijungtas prie „<xliff:g id="DEVICE_NAME">%1$s</xliff:g>“"</string>
     <string name="select_character" msgid="3365550120617701745">"Įterpti simbolį"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS pranešimų siuntimas"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Naudojant &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; siunčiama daug SMS pranešimų. Ar norite leisti šiai programai toliau siųsti pranešimus?"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Bendrinti"</string>
     <string name="find" msgid="4808270900322985960">"Ieškoti"</string>
     <string name="websearch" msgid="4337157977400211589">"Žiniat. paieška"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Rasti kitą"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Rasti ankstesnį"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Vietos užklausa iš <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Vietos užklausa"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Užklausą pateikė <xliff:g id="NAME">%1$s</xliff:g> („<xliff:g id="SERVICE">%2$s</xliff:g>“)"</string>
