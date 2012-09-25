@@ -48,8 +48,6 @@ struct Layer {
     Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
-    void freeResourcesLocked();
-
     /**
      * Sets this layer's region to a rectangle. Computes the appropriate
      * texture coordinates.

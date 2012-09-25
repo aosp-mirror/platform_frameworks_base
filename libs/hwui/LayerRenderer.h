@@ -60,6 +60,8 @@ public:
     ANDROID_API static void destroyLayerDeferred(Layer* layer);
     ANDROID_API static bool copyLayer(Layer* layer, SkBitmap* bitmap);
 
+    static void flushLayer(Layer* layer);
+
 protected:
     virtual bool hasLayer();
     virtual Region* getRegion();
@@ -68,8 +70,6 @@ protected:
 
 private:
     void generateMesh();
-
-    static void flushLayer(Layer* layer);
 
     Layer* mLayer;
 }; // class LayerRenderer
