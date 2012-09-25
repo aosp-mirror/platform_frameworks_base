@@ -26,6 +26,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBar;
@@ -179,7 +180,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 throw new SecurityException("invalid status bar icon slot: " + slot);
             }
 
-            StatusBarIcon icon = new StatusBarIcon(iconPackage, iconId, iconLevel, 0,
+            StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.OWNER, iconId,
+                    iconLevel, 0,
                     contentDescription);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.setIcon(index, icon);

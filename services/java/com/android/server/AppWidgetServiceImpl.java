@@ -657,13 +657,13 @@ class AppWidgetServiceImpl {
             }
             final ComponentName componentName = intent.getComponent();
             try {
-                final ServiceInfo si = mContext.getPackageManager().getServiceInfo(componentName,
-                        PackageManager.GET_PERMISSIONS);
+                final ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(componentName,
+                        PackageManager.GET_PERMISSIONS, mUserId);
                 if (!android.Manifest.permission.BIND_REMOTEVIEWS.equals(si.permission)) {
                     throw new SecurityException("Selected service does not require "
                             + android.Manifest.permission.BIND_REMOTEVIEWS + ": " + componentName);
                 }
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (RemoteException e) {
                 throw new IllegalArgumentException("Unknown component " + componentName);
             }
 
