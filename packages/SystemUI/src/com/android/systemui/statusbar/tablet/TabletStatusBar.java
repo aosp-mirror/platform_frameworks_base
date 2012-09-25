@@ -38,12 +38,10 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
@@ -742,7 +740,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                                         SharedPreferences.Editor editor = Prefs.edit(mContext);
                                         editor.putBoolean(Prefs.DO_NOT_DISTURB_PREF, false);
                                         editor.apply();
-                                        animateCollapse();
+                                        animateCollapseNotifications();
                                         visibilityChanged(false);
                                     }
                                 });
@@ -823,7 +821,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     break;
                 case MSG_HIDE_CHROME:
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
-                    animateCollapse();
+                    animateCollapseNotifications();
                     visibilityChanged(false);
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
@@ -909,7 +907,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.i(TAG, "DISABLE_EXPAND: yes");
-                animateCollapse();
+                animateCollapseNotifications();
                 visibilityChanged(false);
             }
         }
@@ -990,16 +988,16 @@ public class TabletStatusBar extends BaseStatusBar implements
         mFeedbackIconArea.setVisibility(View.VISIBLE);
     }
 
-    public void animateExpand() {
+    public void animateExpandNotifications() {
         mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PANEL);
         mHandler.sendEmptyMessage(MSG_OPEN_NOTIFICATION_PANEL);
     }
 
-    public void animateCollapse() {
-        animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+    public void animateCollapseNotifications() {
+        animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    public void animateCollapse(int flags) {
+    public void animateCollapseNotifications(int flags) {
         if ((flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
@@ -1021,6 +1019,16 @@ public class TabletStatusBar extends BaseStatusBar implements
             mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
         }
 
+    }
+
+    @Override
+    public void animateExpandQuickSettings() {
+        // TODO: Implement when TabletStatusBar begins to be used.
+    }
+
+    @Override
+    public void animateCollapseQuickSettings() {
+        // TODO: Implement when TabletStatusBar begins to be used.
     }
 
     @Override // CommandQueue
@@ -1291,7 +1299,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         mVT.computeCurrentVelocity(1000); // pixels per second
                         // require a little more oomph once we're already in peekaboo mode
                         if (mVT.getYVelocity() < -mNotificationFlingVelocity) {
-                            animateExpand();
+                            animateExpandNotifications();
                             visibilityChanged(true);
                             hilite(false);
                             mVT.recycle();
@@ -1309,7 +1317,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                          && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
                          // dragging off the bottom doesn't count
                          && (int)event.getY() < v.getBottom()) {
-                            animateExpand();
+                            animateExpandNotifications();
                             visibilityChanged(true);
                             v.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                             v.playSoundEffect(SoundEffectConstants.CLICK);
@@ -1485,7 +1493,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
-        animateCollapse();
+        animateCollapseNotifications();
         visibilityChanged(false);
     }
 
@@ -1501,7 +1509,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
-                animateCollapse(flags);
+                animateCollapseNotifications(flags);
             }
         }
     };

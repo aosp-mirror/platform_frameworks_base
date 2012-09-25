@@ -117,23 +117,45 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
-    public void expand() {
+    public void expandNotifications() {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpand();
+                mBar.animateExpandNotifications();
             } catch (RemoteException ex) {
             }
         }
     }
 
-    public void collapse() {
+    public void collapseNotifications() {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateCollapse();
+                mBar.animateCollapseNotifications();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void expandQuickSettings() {
+        enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.animateExpandQuickSettings();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void collapseQuickSettings() {
+        enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.animateCollapseQuickSettings();
             } catch (RemoteException ex) {
             }
         }
@@ -598,7 +620,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                collapse();
+                collapseNotifications();
+                collapseQuickSettings();
             }
             /*
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
