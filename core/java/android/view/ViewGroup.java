@@ -23,9 +23,11 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PathEffect;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -83,6 +85,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final String TAG = "ViewGroup";
 
     private static final boolean DBG = false;
+    /** @hide */
+    public static boolean DEBUG_DRAW = false;
 
     /**
      * Views which have been hidden or removed which need to be animated on
@@ -180,10 +184,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     })
     protected int mGroupFlags;
 
-    /*
-     * The layout mode: either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}
+    /**
+     * Either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
      */
-    private int mLayoutMode = CLIP_BOUNDS;
+    private int mLayoutMode = DEFAULT_LAYOUT_MODE;
 
     /**
      * NOTE: If you change the flags below make sure to reflect the changes
@@ -356,20 +360,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
      * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
      * {@link #getRight() right} and {@link #getBottom() bottom}.
-     *
-     * @hide
      */
-    public static final int CLIP_BOUNDS = 0;
+    public static final int LAYOUT_MODE_CLIP_BOUNDS = 0;
 
     /**
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
      * Optical bounds describe where a widget appears to be. They sit inside the clip
      * bounds which need to cover a larger area to allow other effects,
      * such as shadows and glows, to be drawn.
-     *
-     * @hide
      */
-    public static final int OPTICAL_BOUNDS = 1;
+    public static final int LAYOUT_MODE_OPTICAL_BOUNDS = 1;
+
+    /** @hide */
+    public static int DEFAULT_LAYOUT_MODE = LAYOUT_MODE_CLIP_BOUNDS;
 
     /**
      * We clip to padding when FLAG_CLIP_TO_PADDING and FLAG_PADDING_NOT_NULL
@@ -434,7 +437,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private boolean debugDraw() {
-        return mAttachInfo != null && mAttachInfo.mDebugLayout;
+        return DEBUG_DRAW || mAttachInfo != null && mAttachInfo.mDebugLayout;
     }
 
     private void initViewGroup() {
@@ -503,6 +506,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (animateLayoutChanges) {
                         setLayoutTransition(new LayoutTransition());
                     }
+                    break;
+                case R.styleable.ViewGroup_layoutMode:
+                    setLayoutMode(a.getInt(attr, DEFAULT_LAYOUT_MODE));
                     break;
             }
         }
@@ -2420,7 +2426,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < count; i++) {
             final View child = children[i];
             child.dispatchAttachedToWindow(info,
-                    visibility | (child.mViewFlags&VISIBILITY_MASK));
+                    visibility | (child.mViewFlags & VISIBILITY_MASK));
         }
     }
 
@@ -2682,20 +2688,89 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return b;
     }
 
-    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, int color) {
-        Paint paint = getDebugPaint();
-        paint.setColor(color);
+    /** Return true if this ViewGroup is laying out using optical bounds. */
+    boolean isLayoutModeOptical() {
+        return mLayoutMode == LAYOUT_MODE_OPTICAL_BOUNDS;
+    }
 
-        canvas.drawLines(getDebugLines(x1, y1, x2, y2), paint);
+    Insets computeOpticalInsets() {
+        if (isLayoutModeOptical()) {
+            int left = 0;
+            int top = 0;
+            int right = 0;
+            int bottom = 0;
+            for (int i = 0; i < mChildrenCount; i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() == VISIBLE) {
+                    Insets insets = child.getOpticalInsets();
+                    left =   Math.max(left,   insets.left);
+                    top =    Math.max(top,    insets.top);
+                    right =  Math.max(right,  insets.right);
+                    bottom = Math.max(bottom, insets.bottom);
+                }
+            }
+            return Insets.of(left, top, right, bottom);
+        } else {
+            return Insets.NONE;
+        }
+    }
+
+    private static void fillRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
+        if (x1 != x2 && y1 != y2) {
+            if (x1 > x2) {
+                int tmp = x1; x1 = x2; x2 = tmp;
+            }
+            if (y1 > y2) {
+                int tmp = y1; y1 = y2; y2 = tmp;
+            }
+            canvas.drawRect(x1, y1, x2, y2, paint);
+        }
+    }
+
+    private static int sign(int x) {
+        return (x >= 0) ? 1 : -1;
+    }
+
+    private static void drawCorner(Canvas c, Paint paint, int x1, int y1, int dx, int dy, int lw) {
+        fillRect(c, paint, x1, y1, x1 + dx, y1 + lw * sign(dy));
+        fillRect(c, paint, x1, y1, x1 + lw * sign(dx), y1 + dy);
+    }
+
+    private int dipsToPixels(int dips) {
+        float scale = getContext().getResources().getDisplayMetrics().density;
+        return (int) (dips * scale + 0.5f);
+    }
+
+    private void drawRectCorners(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint,
+                                 int lineLength, int lineWidth) {
+        drawCorner(canvas, paint, x1, y1, lineLength, lineLength, lineWidth);
+        drawCorner(canvas, paint, x1, y2, lineLength, -lineLength, lineWidth);
+        drawCorner(canvas, paint, x2, y1, -lineLength, lineLength, lineWidth);
+        drawCorner(canvas, paint, x2, y2, -lineLength, -lineLength, lineWidth);
+    }
+
+    private static void fillDifference(Canvas canvas,
+            int x2, int y2, int x3, int y3,
+            int dx1, int dy1, int dx2, int dy2, Paint paint) {
+        int x1 = x2 - dx1;
+        int y1 = y2 - dy1;
+
+        int x4 = x3 + dx2;
+        int y4 = y3 + dy2;
+
+        fillRect(canvas, paint, x1, y1, x4, y2);
+        fillRect(canvas, paint, x1, y2, x2, y3);
+        fillRect(canvas, paint, x3, y2, x4, y3);
+        fillRect(canvas, paint, x1, y3, x4, y4);
     }
 
     /**
      * @hide
      */
-    protected void onDebugDrawMargins(Canvas canvas) {
+    protected void onDebugDrawMargins(Canvas canvas, Paint paint) {
         for (int i = 0; i < getChildCount(); i++) {
             View c = getChildAt(i);
-            c.getLayoutParams().onDebugDraw(c, canvas);
+            c.getLayoutParams().onDebugDraw(c, canvas, paint);
         }
     }
 
@@ -2703,26 +2778,49 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     protected void onDebugDraw(Canvas canvas) {
+        Paint paint = getDebugPaint();
+
         // Draw optical bounds
-        if (getLayoutMode() == OPTICAL_BOUNDS) {
+        {
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            PathEffect pathEffect = paint.getPathEffect();
+            int len = dipsToPixels(4);
+            paint.setPathEffect(new DashPathEffect(new float[]{len, len}, 0));
+
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
                 Insets insets = c.getOpticalInsets();
-                drawRect(canvas,
-                        c.getLeft() + insets.left,
-                        c.getTop() + insets.top,
-                        c.getRight() - insets.right,
-                        c.getBottom() - insets.bottom, Color.RED);
+
+                drawRect(canvas, paint,
+                        c.getLeft()   + insets.left,
+                        c.getTop()    + insets.top,
+                        c.getRight()  - insets.right  - 1,
+                        c.getBottom() - insets.bottom - 1);
             }
+            paint.setPathEffect(pathEffect);
         }
 
         // Draw margins
-        onDebugDrawMargins(canvas);
+        {
+            paint.setColor(Color.argb(63, 255, 0, 255));
+            paint.setStyle(Paint.Style.FILL);
 
-        // Draw bounds
-        for (int i = 0; i < getChildCount(); i++) {
-            View c = getChildAt(i);
-            drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), Color.BLUE);
+            onDebugDrawMargins(canvas, paint);
+        }
+
+        // Draw clip bounds
+        {
+            paint.setColor(Color.rgb(63, 127, 255));
+            paint.setStyle(Paint.Style.FILL);
+
+            int lineLength = dipsToPixels(8);
+            int lineWidth = dipsToPixels(1);
+            for (int i = 0; i < getChildCount(); i++) {
+                View c = getChildAt(i);
+                drawRectCorners(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(),
+                        paint, lineLength, lineWidth);
+            }
         }
     }
 
@@ -4613,13 +4711,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Returns the basis of alignment during layout operations on this view group:
-     * either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}.
+     * either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
      *
      * @return the layout mode to use during layout operations
      *
      * @see #setLayoutMode(int)
-     *
-     * @hide
      */
     public int getLayoutMode() {
         return mLayoutMode;
@@ -4627,15 +4723,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Sets the basis of alignment during the layout of this view group.
-     * Valid values are either {@link #CLIP_BOUNDS} or {@link #OPTICAL_BOUNDS}.
+     * Valid values are either {@link #LAYOUT_MODE_CLIP_BOUNDS} or
+     * {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
      * <p>
-     * The default is {@link #CLIP_BOUNDS}.
+     * The default is {@link #LAYOUT_MODE_CLIP_BOUNDS}.
      *
      * @param layoutMode the layout mode to use during layout operations
      *
      * @see #getLayoutMode()
-     *
-     * @hide
      */
     public void setLayoutMode(int layoutMode) {
         if (mLayoutMode != layoutMode) {
@@ -5488,7 +5583,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * @hide
          */
-        public void onDebugDraw(View view, Canvas canvas) {
+        public void onDebugDraw(View view, Canvas canvas, Paint paint) {
         }
 
         /**
@@ -5833,12 +5928,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @hide
          */
         @Override
-        public void onDebugDraw(View view, Canvas canvas) {
-            drawRect(canvas,
-                    view.getLeft() - leftMargin,
-                    view.getTop() - topMargin,
-                    view.getRight() + rightMargin,
-                    view.getBottom() + bottomMargin, Color.MAGENTA);
+        public void onDebugDraw(View view, Canvas canvas, Paint paint) {
+            Insets oi = isLayoutModeOptical(view.mParent) ? view.getOpticalInsets() : Insets.NONE;
+
+            fillDifference(canvas,
+                    view.getLeft()   + oi.left,
+                    view.getTop()    + oi.top,
+                    view.getRight()  - oi.right,
+                    view.getBottom() - oi.bottom,
+                    leftMargin,
+                    topMargin,
+                    rightMargin,
+                    bottomMargin,
+                    paint);
         }
     }
 
@@ -6172,13 +6274,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return sDebugPaint;
     }
 
-    private static float[] getDebugLines(int x1, int y1, int x2, int y2) {
+    private void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
         if (sDebugLines== null) {
             sDebugLines = new float[16];
         }
-
-        x2--;
-        y2--;
 
         sDebugLines[0] = x1;
         sDebugLines[1] = y1;
@@ -6188,18 +6287,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         sDebugLines[4] = x2;
         sDebugLines[5] = y1;
         sDebugLines[6] = x2;
-        sDebugLines[7] = y2 + 1;
+        sDebugLines[7] = y2;
 
-        sDebugLines[8] = x2 + 1;
+        sDebugLines[8] = x2;
         sDebugLines[9] = y2;
         sDebugLines[10] = x1;
         sDebugLines[11] = y2;
 
-        sDebugLines[12]  = x1;
-        sDebugLines[13]  = y2;
+        sDebugLines[12] = x1;
+        sDebugLines[13] = y2;
         sDebugLines[14] = x1;
         sDebugLines[15] = y1;
 
-        return sDebugLines;
+        canvas.drawLines(sDebugLines, paint);
     }
 }

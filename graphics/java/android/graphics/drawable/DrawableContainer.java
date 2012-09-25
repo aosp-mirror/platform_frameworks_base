@@ -95,8 +95,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      * @hide
      */
     @Override
-    public Insets getLayoutInsets() {
-        return (mCurrDrawable == null) ? Insets.NONE : mCurrDrawable.getLayoutInsets();
+    public Insets getOpticalInsets() {
+        return (mCurrDrawable == null) ? Insets.NONE : mCurrDrawable.getOpticalInsets();
     }
 
     @Override

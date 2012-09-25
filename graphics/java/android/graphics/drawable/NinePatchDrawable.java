@@ -56,7 +56,7 @@ public class NinePatchDrawable extends Drawable {
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
-    private Insets mLayoutInsets = Insets.NONE;
+    private Insets mOpticalInsets = Insets.NONE;
     private Paint mPaint;
     private boolean mMutated;
 
@@ -96,8 +96,8 @@ public class NinePatchDrawable extends Drawable {
      * @hide
      */
     public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
-            Rect padding, Rect layoutInsets, String srcName) {
-        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding, layoutInsets), res);
+            Rect padding, Rect opticalInsets, String srcName) {
+        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding, opticalInsets), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
@@ -195,7 +195,7 @@ public class NinePatchDrawable extends Drawable {
         if (sdensity == tdensity) {
             mBitmapWidth = mNinePatch.getWidth();
             mBitmapHeight = mNinePatch.getHeight();
-            mLayoutInsets = mNinePatchState.mLayoutInsets;
+            mOpticalInsets = mNinePatchState.mOpticalInsets;
         } else {
             mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
                     sdensity, tdensity);
@@ -212,7 +212,7 @@ public class NinePatchDrawable extends Drawable {
                 dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
                 dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
             }
-            mLayoutInsets = scaleFromDensity(mNinePatchState.mLayoutInsets, sdensity, tdensity);
+            mOpticalInsets = scaleFromDensity(mNinePatchState.mOpticalInsets, sdensity, tdensity);
         }
     }
 
@@ -236,8 +236,8 @@ public class NinePatchDrawable extends Drawable {
      * @hide
      */
     @Override
-    public Insets getLayoutInsets() {
-        return mLayoutInsets;
+    public Insets getOpticalInsets() {
+        return mOpticalInsets;
     }
 
     @Override
@@ -299,7 +299,7 @@ public class NinePatchDrawable extends Drawable {
         options.inScreenDensity = r.getDisplayMetrics().noncompatDensityDpi;
 
         final Rect padding = new Rect();
-        final Rect layoutInsets = new Rect();
+        final Rect opticalInsets = new Rect();
         Bitmap bitmap = null;
 
         try {
@@ -323,7 +323,7 @@ public class NinePatchDrawable extends Drawable {
 
         setNinePatchState(new NinePatchState(
                 new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"),
-                padding, layoutInsets, dither), r);
+                padding, opticalInsets, dither), r);
         mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
@@ -397,7 +397,7 @@ public class NinePatchDrawable extends Drawable {
     private final static class NinePatchState extends ConstantState {
         final NinePatch mNinePatch;
         final Rect mPadding;
-        final Insets mLayoutInsets;
+        final Insets mOpticalInsets;
         final boolean mDither;
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
@@ -406,14 +406,14 @@ public class NinePatchDrawable extends Drawable {
             this(ninePatch, padding, new Rect(), DEFAULT_DITHER);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect padding, Rect layoutInsets) {
-            this(ninePatch, padding, layoutInsets, DEFAULT_DITHER);
+        NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets) {
+            this(ninePatch, padding, opticalInsets, DEFAULT_DITHER);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect rect, Rect layoutInsets, boolean dither) {
+        NinePatchState(NinePatch ninePatch, Rect rect, Rect opticalInsets, boolean dither) {
             mNinePatch = ninePatch;
             mPadding = rect;
-            mLayoutInsets = Insets.of(layoutInsets);
+            mOpticalInsets = Insets.of(opticalInsets);
             mDither = dither;
         }
 
@@ -423,7 +423,7 @@ public class NinePatchDrawable extends Drawable {
             mNinePatch = new NinePatch(state.mNinePatch);
             // Note we don't copy the padding because it is immutable.
             mPadding = state.mPadding;
-            mLayoutInsets = state.mLayoutInsets;
+            mOpticalInsets = state.mOpticalInsets;
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;

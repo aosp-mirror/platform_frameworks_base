@@ -715,7 +715,7 @@ public abstract class Drawable {
      *
      * @hide
      */
-    public Insets getLayoutInsets() {
+    public Insets getOpticalInsets() {
         return Insets.NONE;
     }
 
