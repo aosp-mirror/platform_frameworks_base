@@ -34,13 +34,10 @@ SkiaColorFilter::~SkiaColorFilter() {
 // Color matrix filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaColorMatrixFilter::SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector):
+SkiaColorMatrixFilter::SkiaColorMatrixFilter(SkColorFilter* skFilter, float* matrix, float* vector):
         SkiaColorFilter(skFilter, kColorMatrix, true), mMatrix(matrix), mVector(vector) {
-    // Skia uses the range [0..255] for the addition vector, but we need
-    // the [0..1] range to apply the vector in GLSL
-    for (int i = 0; i < 4; i++) {
-        mVector[i] /= 255.0f;
-    }
+    // TODO: We should be smarter about this
+    mBlend = true;
 }
 
 SkiaColorMatrixFilter::~SkiaColorMatrixFilter() {
@@ -62,7 +59,7 @@ void SkiaColorMatrixFilter::setupProgram(Program* program) {
 // Lighting color filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaLightingFilter::SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add):
+SkiaLightingFilter::SkiaLightingFilter(SkColorFilter* skFilter, int multiply, int add):
         SkiaColorFilter(skFilter, kLighting, true) {
     mMulR = ((multiply >> 16) & 0xFF) / 255.0f;
     mMulG = ((multiply >>  8) & 0xFF) / 255.0f;
@@ -71,6 +68,9 @@ SkiaLightingFilter::SkiaLightingFilter(SkColorFilter *skFilter, int multiply, in
     mAddR = ((add >> 16) & 0xFF) / 255.0f;
     mAddG = ((add >>  8) & 0xFF) / 255.0f;
     mAddB = ((add      ) & 0xFF) / 255.0f;
+
+    // A lighting filter always ignores alpha
+    mBlend = false;
 }
 
 void SkiaLightingFilter::describe(ProgramDescription& description, const Extensions& extensions) {
@@ -86,13 +86,16 @@ void SkiaLightingFilter::setupProgram(Program* program) {
 // Blend color filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaBlendFilter::SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode):
+SkiaBlendFilter::SkiaBlendFilter(SkColorFilter* skFilter, int color, SkXfermode::Mode mode):
         SkiaColorFilter(skFilter, kBlend, true), mMode(mode) {
     const int alpha = (color >> 24) & 0xFF;
     mA = alpha / 255.0f;
     mR = mA * ((color >> 16) & 0xFF) / 255.0f;
     mG = mA * ((color >>  8) & 0xFF) / 255.0f;
     mB = mA * ((color      ) & 0xFF) / 255.0f;
+
+    // TODO: We should do something smarter here
+    mBlend = true;
 }
 
 void SkiaBlendFilter::describe(ProgramDescription& description, const Extensions& extensions) {
