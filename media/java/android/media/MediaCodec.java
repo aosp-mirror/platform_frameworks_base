@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.view.Surface;
@@ -503,6 +505,16 @@ final public class MediaCodec {
      * or createEncoderByType, what component is chosen is not known beforehand.
      */
     public native final String getName();
+
+    /**
+     * Get the codec info. If the codec was created by createDecoderByType
+     * or createEncoderByType, what component is chosen is not known beforehand,
+     * and thus the caller does not have the MediaCodecInfo.
+     */
+    public MediaCodecInfo getCodecInfo() {
+        return MediaCodecList.getCodecInfoAt(
+                   MediaCodecList.findCodecByName(getName()));
+    }
 
     private native final ByteBuffer[] getBuffers(boolean input);
 
