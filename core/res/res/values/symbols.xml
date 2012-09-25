@@ -216,6 +216,7 @@
   <java-symbol type="id" name="sms_short_code_detail_layout" />
   <java-symbol type="id" name="sms_short_code_detail_message" />
   <java-symbol type="id" name="sms_short_code_remember_choice_checkbox" />
+  <java-symbol type="id" name="sms_short_code_remember_undo_instruction" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -754,6 +755,7 @@
   <java-symbol type="string" name="sms_short_code_confirm_message" />
   <java-symbol type="string" name="sms_short_code_details" />
   <java-symbol type="string" name="sms_premium_short_code_details" />
+  <java-symbol type="string" name="sms_short_code_remember_undo_instruction" />
   <java-symbol type="string" name="submit" />
   <java-symbol type="string" name="sync_binding_label" />
   <java-symbol type="string" name="sync_do_nothing" />

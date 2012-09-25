@@ -33,29 +33,54 @@
         android:paddingLeft="16dip"
         android:paddingRight="16dip"
         android:paddingTop="8dip"
-        android:paddingBottom="8dip"/>
+        android:paddingBottom="16dip" />
 
-    <LinearLayout android:id="@+id/sms_short_code_detail_layout"
-        android:layout_width="match_parent"
+    <TableLayout android:id="@+id/sms_short_code_detail_layout"
+        android:shrinkColumns="1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:minHeight="@dimen/alert_dialog_title_height"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="16dip">
-        <ImageView android:id="@+id/sms_short_code_coins_icon"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip">
+
+        <TableRow
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="8dip"
-            android:src="@null" />
-        <TextView android:id="@+id/sms_short_code_detail_message"
-                style="?android:attr/textAppearanceMedium"
+            android:layout_height="wrap_content" >
+
+            <ImageView android:id="@+id/sms_short_code_coins_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dip"
+                android:paddingRight="8dip"
+                android:src="@null" />
+            <TextView android:id="@+id/sms_short_code_detail_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-        </LinearLayout>
+        </TableRow>
 
-    <CheckBox android:id="@+id/sms_short_code_remember_choice_checkbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/sms_short_code_remember_choice" />
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <CheckBox android:id="@+id/sms_short_code_remember_choice_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="8dip" />
+            <TextView android:id="@+id/sms_short_code_remember_choice_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sms_short_code_remember_choice" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <Space android:layout_gravity="fill" />
+            <TextView android:id="@+id/sms_short_code_remember_undo_instruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+    </TableLayout>
+
 </LinearLayout>
