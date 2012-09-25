@@ -37,6 +37,8 @@ public class PanelView extends FrameLayout {
     private float mExpandMinDisplayFraction; // classic value: 0.5 (drag open halfway to expand)
     private float mFlingGestureMaxXVelocityPx; // classic value: 150px/s
 
+    private float mFlingGestureMinDistPx;
+
     private float mExpandAccelPx; // classic value: 2000px/s/s
     private float mCollapseAccelPx; // classic value: 2000px/s/s (will be negated to collapse "up")
 
@@ -78,6 +80,8 @@ public class PanelView extends FrameLayout {
     private float mVel, mAccel;
     private int mFullHeight = 0;
     private String mViewName;
+    protected float mInitialTouchY;
+    protected float mFinalTouchY;
 
     private void animationTick(long dtms) {
         if (!mTimeAnimator.isStarted()) {
@@ -88,7 +92,14 @@ public class PanelView extends FrameLayout {
             mTimeAnimator.start();
             
             mRubberbanding = STRETCH_PAST_CONTENTS && mExpandedHeight > getFullHeight();
-            mClosing = (mExpandedHeight > 0 && mVel < 0) || mRubberbanding;
+            if (mRubberbanding) {
+                mClosing = true;
+            } else if (mVel == 0) {
+                // if the panel is less than halfway open, close it 
+                mClosing = (mFinalTouchY / getFullHeight()) < 0.5f;
+            } else {
+                mClosing = mExpandedHeight > 0 && mVel < 0;
+            }
         } else if (dtms > 0) {
             final float dt = dtms * 0.001f;                  // ms -> s
             LOG("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
@@ -159,6 +170,8 @@ public class PanelView extends FrameLayout {
         mFlingExpandMinVelocityPx = res.getDimension(R.dimen.fling_expand_min_velocity);
         mFlingCollapseMinVelocityPx = res.getDimension(R.dimen.fling_collapse_min_velocity);
 
+        mFlingGestureMinDistPx = res.getDimension(R.dimen.fling_gesture_min_dist);
+
         mCollapseMinDisplayFraction = res.getFraction(R.dimen.collapse_min_display_fraction, 1, 1);
         mExpandMinDisplayFraction = res.getFraction(R.dimen.expand_min_display_fraction, 1, 1);
 
@@ -207,6 +220,7 @@ public class PanelView extends FrameLayout {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             mTracking = true;
+                            mInitialTouchY = y;
                             mVelocityTracker = VelocityTracker.obtain();
                             trackMovement(event);
                             mBar.onTrackingStarted(PanelView.this);
@@ -223,6 +237,7 @@ public class PanelView extends FrameLayout {
 
                         case MotionEvent.ACTION_UP:
                         case MotionEvent.ACTION_CANCEL:
+                            mFinalTouchY = y;
                             mTracking = false;
                             mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
@@ -243,11 +258,21 @@ public class PanelView extends FrameLayout {
                             if (vel > mFlingGestureMaxOutputVelocityPx) {
                                 vel = mFlingGestureMaxOutputVelocityPx;
                             }
+
+                            // if you've barely moved your finger, we treat the velocity as 0
+                            // preventing spurious flings due to touch screen jitter
+                            final float deltaY = (float)Math.abs(mFinalTouchY - mInitialTouchY);
+                            if (deltaY < mFlingGestureMinDistPx
+                                    || vel < mFlingGestureMinDistPx) {
+                                vel = 0;
+                            }
+
                             if (negative) {
                                 vel = -vel;
                             }
 
-                            LOG("gesture: vraw=(%f,%f) vnorm=(%f,%f) vlinear=%f",
+                            LOG("gesture: dy=%f vraw=(%f,%f) vnorm=(%f,%f) vlinear=%f",
+                                    deltaY,
                                     mVelocityTracker.getXVelocity(),
                                     mVelocityTracker.getYVelocity(),
                                     xVel, yVel,
