@@ -1245,6 +1245,12 @@ public final class CalendarContract {
          */
         public static final String CUSTOM_APP_URI = "customAppUri";
 
+        /**
+         * The UID for events added from the RFC 2445 iCalendar format.
+         * Column name.
+         * <P>Type: TEXT</P>
+         */
+        public static final String UID_2445 = "uid2445";
     }
 
     /**
@@ -1382,6 +1388,7 @@ public final class CalendarContract {
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_PACKAGE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CUSTOM_APP_URI);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, UID_2445);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, IS_ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
@@ -1587,6 +1594,7 @@ public final class CalendarContract {
      * <li>{@link #GUESTS_CAN_SEE_GUESTS}</li>
      * <li>{@link #CUSTOM_APP_PACKAGE}</li>
      * <li>{@link #CUSTOM_APP_URI}</li>
+     * <li>{@link #UID_2445}</li>
      * </ul>
      * The following Events columns are writable only by a sync adapter
      * <ul>
