@@ -1161,25 +1161,28 @@ public class Camera {
     public native final void setDisplayOrientation(int degrees);
 
     /**
-     * Enable or disable the default shutter sound when taking a picture.
+     * <p>Enable or disable the default shutter sound when taking a picture.</p>
      *
-     * By default, the camera plays the system-defined camera shutter sound when
-     * {@link #takePicture} is called. Using this method, the shutter sound can
-     * be disabled. It is strongly recommended that an alternative shutter sound
-     * is played in the {@link ShutterCallback} when the system shutter sound is
-     * disabled.
+     * <p>By default, the camera plays the system-defined camera shutter sound
+     * when {@link #takePicture} is called. Using this method, the shutter sound
+     * can be disabled. It is strongly recommended that an alternative shutter
+     * sound is played in the {@link ShutterCallback} when the system shutter
+     * sound is disabled.</p>
      *
-     * Note that devices may not always allow control of the camera shutter
-     * sound. If the shutter sound cannot be controlled, this method will return
-     * false.
+     * <p>Note that devices may not always allow disabling the camera shutter
+     * sound. If the shutter sound state cannot be set to the desired value,
+     * this method will return false. {@link CameraInfo#canDisableShutterSound}
+     * can be used to determine whether the device will allow the shutter sound
+     * to be disabled.</p>
      *
      * @param enabled whether the camera should play the system shutter sound
      *                when {@link #takePicture takePicture} is called.
-     * @return true if the shutter sound state was successfully changed. False
-     *         if the shutter sound cannot be controlled; in this case, the
-     *         application should not play its own shutter sound since the
-     *         system shutter sound will play when a picture is taken.
+     * @return {@code true} if the shutter sound state was successfully
+     *         changed. {@code false} if the shutter sound state could not be
+     *         changed. {@code true} is also returned if shutter sound playback
+     *         is already set to the requested state.
      * @see #takePicture
+     * @see CameraInfo#canDisableShutterSound
      * @see ShutterCallback
      */
     public native final boolean enableShutterSound(boolean enabled);
