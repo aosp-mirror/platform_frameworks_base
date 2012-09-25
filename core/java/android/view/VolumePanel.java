@@ -699,9 +699,12 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             if (sc.seekbarView.getMax() != max) {
                 sc.seekbarView.setMax(max);
             }
+
             sc.seekbarView.setProgress(index);
-            if (streamType != mAudioManager.getMasterStreamType()
-                    && streamType != AudioService.STREAM_REMOTE_MUSIC && isMuted(streamType)) {
+            if (((flags & AudioManager.FLAG_FIXED_VOLUME) != 0) ||
+                    (streamType != mAudioManager.getMasterStreamType() &&
+                     streamType != AudioService.STREAM_REMOTE_MUSIC &&
+                     isMuted(streamType))) {
                 sc.seekbarView.setEnabled(false);
             } else {
                 sc.seekbarView.setEnabled(true);
