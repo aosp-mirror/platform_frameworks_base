@@ -27268,7 +27268,6 @@ package android.webkit {
     method public void setSupportZoom(boolean);
     method public deprecated synchronized void setTextSize(android.webkit.WebSettings.TextSize);
     method public synchronized void setTextZoom(int);
-    method public deprecated void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method public synchronized void setUseWideViewPort(boolean);
     method public synchronized void setUserAgentString(java.lang.String);
     method public synchronized boolean supportMultipleWindows();
