@@ -35,13 +35,13 @@
         android:layout_width="@dimen/status_bar_icon_size"
         android:layout_height="match_parent"
         android:paddingLeft="6dip"
-		android:paddingBottom="2dip"
+        android:paddingBottom="2dip"
         android:src="@drawable/ic_sysbar_lights_out_dot_small"
         android:scaleType="center"
         android:visibility="gone"
         />
 
-    <LinearLayout android:id="@+id/icons"
+    <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="6dip"
@@ -50,7 +50,7 @@
         >
 
         <LinearLayout
-			android:id="@+id/notification_icon_area"
+            android:id="@+id/notification_icon_area"
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -71,42 +71,48 @@
                 android:orientation="horizontal"/>  
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/statusIcons"
+        <LinearLayout android:id="@+id/system_icon_area"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"/>    
+            android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/signal_battery_cluster"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:paddingLeft="2dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            >
-            <include layout="@layout/signal_cluster_view" 
-                android:id="@+id/signal_cluster"
+            <LinearLayout android:id="@+id/statusIcons"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-            <ImageView
-                android:id="@+id/battery"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"/>    
+    
+            <LinearLayout
+                android:id="@+id/signal_battery_cluster"
                 android:layout_width="wrap_content"
-                android:paddingLeft="4dip"
+                android:layout_height="match_parent"
+                android:paddingLeft="2dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                >
+                <include layout="@layout/signal_cluster_view" 
+                    android:id="@+id/signal_cluster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+                <ImageView
+                    android:id="@+id/battery"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:paddingLeft="4dip"
+                    />
+            </LinearLayout>
+    
+            <com.android.systemui.statusbar.policy.Clock
+                android:id="@+id/clock"
+                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="true"
+                android:paddingLeft="6dip"
+                android:gravity="center_vertical|left"
                 />
         </LinearLayout>
-
-        <com.android.systemui.statusbar.policy.Clock
-            android:id="@+id/clock"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingLeft="6dip"
-            android:gravity="center_vertical|left"
-            />
     </LinearLayout>
         
     <LinearLayout android:id="@+id/ticker"
