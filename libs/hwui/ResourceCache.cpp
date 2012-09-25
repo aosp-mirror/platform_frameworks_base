@@ -325,9 +325,9 @@ void ResourceCache::deleteResourceReferenceLocked(void* resource, ResourceRefere
             }
             break;
             case kLayer: {
-                Layer* layer = (Layer*) resource;
-                layer->freeResourcesLocked();
-                delete layer;
+                // No need to check for hasInstance, layers only exist
+                // when we have a Caches instance
+                Caches::getInstance().deleteLayerDeferred((Layer*) resource);
             }
             break;
         }

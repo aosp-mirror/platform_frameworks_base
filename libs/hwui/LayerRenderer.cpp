@@ -299,13 +299,6 @@ void LayerRenderer::destroyLayer(Layer* layer) {
         LAYER_RENDERER_LOGD("Recycling layer, %dx%d fbo = %d",
                 layer->getWidth(), layer->getHeight(), layer->getFbo());
 
-        GLuint fbo = layer->getFbo();
-        if (fbo) {
-            flushLayer(layer);
-            Caches::getInstance().fboCache.put(fbo);
-            layer->setFbo(0);
-        }
-
         if (!Caches::getInstance().layerCache.put(layer)) {
             LAYER_RENDERER_LOGD("  Destroyed!");
             Caches::getInstance().resourceCache.decrementRefcount(layer);
@@ -322,7 +315,6 @@ void LayerRenderer::destroyLayer(Layer* layer) {
 void LayerRenderer::destroyLayerDeferred(Layer* layer) {
     if (layer) {
         LAYER_RENDERER_LOGD("Deferring layer destruction, fbo = %d", layer->getFbo());
-
         Caches::getInstance().deleteLayerDeferred(layer);
     }
 }
