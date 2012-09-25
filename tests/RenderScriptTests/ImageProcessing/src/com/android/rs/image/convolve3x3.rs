@@ -30,15 +30,15 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     uint32_t y1 = min((int32_t)y+1, gHeight-1);
     uint32_t y2 = max((int32_t)y-1, 0);
 
-    float4 p00 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y1))[0]);
-    float4 p01 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x, y1))[0]);
-    float4 p02 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y1))[0]);
-    float4 p10 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y))[0]);
-    float4 p11 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x, y))[0]);
-    float4 p12 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y))[0]);
-    float4 p20 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x1, y2))[0]);
-    float4 p21 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x, y2))[0]);
-    float4 p22 = convert_float4(((uchar4 *)rsGetElementAt(gIn, x2, y2))[0]);
+    float4 p00 = convert_float4(rsGetElementAt_uchar4(gIn, x1, y1));
+    float4 p01 = convert_float4(rsGetElementAt_uchar4(gIn, x, y1));
+    float4 p02 = convert_float4(rsGetElementAt_uchar4(gIn, x2, y1));
+    float4 p10 = convert_float4(rsGetElementAt_uchar4(gIn, x1, y));
+    float4 p11 = convert_float4(rsGetElementAt_uchar4(gIn, x, y));
+    float4 p12 = convert_float4(rsGetElementAt_uchar4(gIn, x2, y));
+    float4 p20 = convert_float4(rsGetElementAt_uchar4(gIn, x1, y2));
+    float4 p21 = convert_float4(rsGetElementAt_uchar4(gIn, x, y2));
+    float4 p22 = convert_float4(rsGetElementAt_uchar4(gIn, x2, y2));
     p00 *= gCoeffs[0];
     p01 *= gCoeffs[1];
     p02 *= gCoeffs[2];
