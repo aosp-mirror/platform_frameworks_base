@@ -109,8 +109,6 @@ public class Environment {
 
                 // /storage/emulated/0
                 mExternalStorage = buildPath(emulatedBase, rawUserId);
-                // /storage/emulated/obb
-                mExternalStorageAndroidObb = buildPath(emulatedBase, "obb");
                 // /data/media/0
                 mMediaStorage = buildPath(mediaBase, rawUserId);
 
@@ -123,12 +121,11 @@ public class Environment {
 
                 // /storage/sdcard0
                 mExternalStorage = new File(rawExternalStorage);
-                // /storage/sdcard0/Android/obb
-                mExternalStorageAndroidObb = buildPath(mExternalStorage, DIRECTORY_ANDROID, "obb");
                 // /data/media
                 mMediaStorage = new File(rawMediaStorage);
             }
 
+            mExternalStorageAndroidObb = buildPath(mExternalStorage, DIRECTORY_ANDROID, "obb");
             mExternalStorageAndroidData = buildPath(mExternalStorage, DIRECTORY_ANDROID, "data");
             mExternalStorageAndroidMedia = buildPath(mExternalStorage, DIRECTORY_ANDROID, "media");
         }
