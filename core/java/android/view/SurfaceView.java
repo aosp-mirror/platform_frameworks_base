@@ -456,11 +456,12 @@ public class SurfaceView extends View {
                 }
 
                 if (mWindow == null) {
+                    Display display = getDisplay();
                     mWindow = new MyWindow(this);
                     mLayout.type = mWindowType;
                     mLayout.gravity = Gravity.START|Gravity.TOP;
                     mSession.addToDisplayWithoutInputChannel(mWindow, mWindow.mSeq, mLayout,
-                            mVisible ? VISIBLE : GONE, Display.DEFAULT_DISPLAY, mContentInsets);
+                            mVisible ? VISIBLE : GONE, display.getDisplayId(), mContentInsets);
                 }
                 
                 boolean realSizeChanged;
