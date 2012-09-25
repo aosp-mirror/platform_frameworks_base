@@ -21,13 +21,11 @@
 
     <item android:id="@android:id/secondaryProgress">
         <scale android:scaleWidth="100%"
-               android:scaleGravity="start"
                android:drawable="@android:drawable/progress_secondary_holo_light" />
     </item>
 
     <item android:id="@android:id/progress">
         <scale android:scaleWidth="100%"
-               android:scaleGravity="start"
                android:drawable="@android:drawable/progress_primary_holo_light" />
     </item>
 
