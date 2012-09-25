@@ -310,8 +310,8 @@
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"sundige taustarakendused sulguma"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Võimaldab rakendusel määrata, kas tegevused lõpetatakse kohe, kui need liiguvad taustale. Tavarakenduste puhul pole seda vaja."</string>
     <string name="permlab_batteryStats" msgid="2789610673514103364">"aku statistika lugemine"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Lubab rakendusel lugeda praeguse madala akutaseme kasutusandmeid. Võib lubada rakendusel hankida üksikasjalikku teavet selle kohta, mis rakendusi te kasutate."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"muuda aku statistikat"</string>
+    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Lubab rakendusel lugeda madala akutaseme kasutusandmeid. Võib lubada rakendusel hankida üksikasjalikku teavet selle kohta, mis rakendusi te kasutate."</string>
+    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"aku statistika muutmine"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Võimaldab rakendusel muuta aku kohta kogutud statistikat. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_backup" msgid="470013022865453920">"juhi süsteemi varundust ja taastet"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Võimaldab rakendusel juhtida süsteemi varundus- ja taastemehhanismi. Mitte kasutada tavarakenduste puhul."</string>
@@ -368,8 +368,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"Rakenduste otse installimine"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Võimaldab rakendusel installida uusi või värskendatud Android-pakette. Pahatahtlikud rakendused võivad selle abil lisada uusi meelevaldse tegevuse lubadega rakendusi."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"Kõigi rakenduse vahemäluandmete kustutamine"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Lubab rakendusel vabastada tahvelarvuti mäluruumi, kustutades failid teiste rakenduste vahemälu kataloogides. Selle tagajärjel võivad teised rakenduse käivituda aeglasemalt, sest need peavad oma andmed uuesti tooma."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Lubab rakendusel vabastada telefoni mäluruumi, kustutades failid teiste rakenduste vahemälu kataloogides. Selle tagajärjel võivad teised rakenduse käivituda aeglasemalt, sest need peavad oma andmed uuesti tooma."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Lubab rakendusel vabastada tahvelarvuti mäluruumi, kustutades faile teiste rakenduste vahemälu kataloogides. Selle tagajärjel võivad teised rakendused käivituda aeglasemalt, sest need peavad oma andmed uuesti tooma."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Lubab rakendusel vabastada telefoni mäluruumi, kustutades faile teiste rakenduste vahemälu kataloogides. Selle tagajärjel võivad teised rakendused käivituda aeglasemalt, sest need peavad oma andmed uuesti tooma."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"Rakenduse ressursside teisaldamine"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Võimaldab rakendusel teisalda rakenduseressursid sisemiselt kandjalt välisele ja vastupidi."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"tundlike logiandmete lugemine"</string>
@@ -431,9 +431,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"luba asukohapakkuja installimiseks"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Looge võltsasukoha allikaid, et katsetada või installida uut asukohapakkujat. See lubab rakendusel tühistada teiste asukohaallikate, näiteks GPS-i või asukohapakkujate tagastatud asukoha ja/või oleku."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"täpne asukoht (GPS- ja võrgupõhine)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lubab rakendusel hankida teie täpse asukoha globaalse positsioneerimissüsteemi (GPS) või võrgu asukoha allikate (nt mobiilimastide ja WiFi) järgi. Need asukohateenused peavad olema sisse lülitatud ja teie seadme jaoks saadaval, et rakendus saaks neid kasutada. Rakendused võivad kasutada seda teie asukoha tuvastamiseks ja tarbida akut."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lubab rakendusel hankida teie täpse asukoha globaalse positsioneerimissüsteemi (GPS) või võrgu asukohaallikate (nt mobiilimastide ja WiFi) järgi. Need asukohateenused peavad olema sisse lülitatud ja teie seadme jaoks saadaval, et rakendus saaks neid kasutada. Rakendused võivad kasutada seda teie asukoha tuvastamiseks ja tarbida akut."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ligikaudne asukoht (võrgupõhine)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lubab rakendusel hankida juurdepääs ligikaudsele asukohale. Asukoht tuletatakse asukohateenuste järgi, kasutades võrgu asukoha allikaid, nagu mobiilimastid ja WiFi. Need asukohateenused peavad olema sisse lülitatud ja teie seadme jaoks saadaval, et rakendus saaks neid kasutada. Rakendused võivad kasutada seda teie ligikaudse asukoha tuvastamiseks."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lubab rakendusel hankida juurdepääsu ligikaudsele asukohale. Asukoht tuletatakse asukohateenuste järgi, kasutades võrgu asukohaallikaid, nt mobiilimastid ja WiFi. Need asukohateenused peavad olema sisse lülitatud ja teie seadme jaoks saadaval, et rakendus saaks neid kasutada. Rakendused võivad kasutada seda teie ligikaudse asukoha tuvastamiseks."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"juurdepääs SurfaceFlingerile"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Võimaldab rakendusel kasutada SurfaceFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"loe kaadripuhvrit"</string>
@@ -623,10 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Nõua salvestatud rakenduse andmete krüpteerimist."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Keela kaamerad"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Vältige seadme kõigi kaamerate kasutamist."</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (266329104542638802) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3467082272186534614) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Klahviluku funkts. keelamine"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Takistage klahviluku mõne funktsiooni kasutamist."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Kodu"</item>
     <item msgid="869923650527136615">"Mobiil"</item>
@@ -1074,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Avatud WiFi-võrgud on saadaval"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Logige sisse WiFi-võrku"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Logige võrku"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
@@ -1093,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Saaja:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Sisestage nõutav PIN-kood:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kood:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefoni ühendus WiFi-ga katkestatakse ajutiselt, kui see on ühendatud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Sisesta tähemärk"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-sõnumite saatmine"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; saadab suurel hulgal SMS-sõnumeid. Kas tahate lubada sellel rakendusel ka edaspidi sõnumeid saata?"</string>
@@ -1262,10 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Jaga"</string>
     <string name="find" msgid="4808270900322985960">"Otsi"</string>
     <string name="websearch" msgid="4337157977400211589">"Veebiotsing"</string>
-    <!-- no translation found for find_next (5742124618942193978) -->
-    <skip />
-    <!-- no translation found for find_previous (2196723669388360506) -->
-    <skip />
+    <string name="find_next" msgid="5742124618942193978">"Leia järgmine"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Leia eelmine"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Asukohapäring kasutajalt <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Asukohapäring"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Taotleja: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
