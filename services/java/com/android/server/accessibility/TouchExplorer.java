@@ -25,7 +25,6 @@ import android.gesture.GestureStore;
 import android.gesture.GestureStroke;
 import android.gesture.Prediction;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -687,15 +686,10 @@ class TouchExplorer implements EventStreamTransformation {
                 }
             } break;
             case MotionEvent.ACTION_POINTER_UP: {
-                final int activePointerCount = mReceivedPointerTracker.getActivePointerCount();
-                switch (activePointerCount) {
-                    case 1: {
-                        // Send an event to the end of the drag gesture.
-                        sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
-                    } break;
-                    default: {
-                        mCurrentState = STATE_TOUCH_EXPLORING;
-                    }
+                final int pointerId = event.getPointerId(event.getActionIndex());
+                if (mReceivedPointerTracker.isActiveOrWasLastActiveUpPointer(pointerId)) {
+                    sendUpForInjectedDownPointers(event, policyFlags);
+                    mCurrentState = STATE_TOUCH_EXPLORING;
                 }
              } break;
             case MotionEvent.ACTION_UP: {
