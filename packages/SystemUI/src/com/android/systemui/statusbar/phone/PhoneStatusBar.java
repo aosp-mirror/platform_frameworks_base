@@ -153,11 +153,18 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mPixelFormat;
     Object mQueueLock = new Object();
 
-    // icons
-    LinearLayout mIcons;
-    IconMerger mNotificationIcons;
-    View mMoreIcon;
+    // viewgroup containing the normal contents of the statusbar
+    LinearLayout mStatusBarContents;
+    
+    // right-hand icons
+    LinearLayout mSystemIconArea;
+    
+    // left-hand icons 
     LinearLayout mStatusIcons;
+    // the icons themselves
+    IconMerger mNotificationIcons;
+    // [+>
+    View mMoreIcon;
 
     // expanded notifications
     PanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -226,8 +233,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
 
-    private AnimatorSet mLightsOutAnimation;
-    private AnimatorSet mLightsOnAnimation;
+    private Animator mLightsOutAnimation;
+    private Animator mLightsOnAnimation;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -245,9 +252,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void onAnimationEnd(Animator animation) {
             // double-check to avoid races
-            if (mIcons.getAlpha() == 0) {
+            if (mStatusBarContents.getAlpha() == 0) {
                 Slog.d(TAG, "makeIconsInvisible");
-                mIcons.setVisibility(View.INVISIBLE);
+                mStatusBarContents.setVisibility(View.INVISIBLE);
             }
         }
     };
@@ -307,8 +314,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationPanelIsFullScreenWidth =
             (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
         mNotificationPanel.setSystemUiVisibility(
-                  View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
-                | (mNotificationPanelIsFullScreenWidth ? 0 : View.STATUS_BAR_DISABLE_SYSTEM_INFO));
+                  View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER | View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS);
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
@@ -343,10 +349,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
+
+        mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
-        mIcons = (LinearLayout)mStatusBarView.findViewById(R.id.icons);
+        mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
@@ -431,6 +439,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsPanel.setService(this);
         mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
                 mLocationController);
+        mSettingsPanel.setSystemUiVisibility(
+                View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
 
         if (!ActivityManager.isHighEndGfx()) {
             mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
@@ -1016,22 +1026,18 @@ public class PhoneStatusBar extends BaseStatusBar {
         Slog.d(TAG, flagdbg.toString());
 
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-            mIcons.animate().cancel();
+            mSystemIconArea.animate().cancel();
             if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-                if (mTicking) {
-                    mTicker.halt();
-                }
-                mIcons.animate()
+                mSystemIconArea.animate()
                     .alpha(0f)
                     .translationY(mNaturalBarHeight*0.5f)
-                    //.setStartDelay(100)
                     .setDuration(175)
                     .setInterpolator(new DecelerateInterpolator(1.5f))
                     .setListener(mMakeIconsInvisible)
                     .start();
             } else {
-                mIcons.setVisibility(View.VISIBLE);
-                mIcons.animate()
+                mSystemIconArea.setVisibility(View.VISIBLE);
+                mSystemIconArea.animate()
                     .alpha(1f)
                     .translationY(0)
                     .setStartDelay(0)
@@ -1068,13 +1074,24 @@ public class PhoneStatusBar extends BaseStatusBar {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 if (mTicking) {
                     mTicker.halt();
-                } else {
-                    setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
                 }
+
+                mNotificationIcons.animate()
+                    .alpha(0f)
+                    .translationY(mNaturalBarHeight*0.5f)
+                    .setDuration(175)
+                    .setInterpolator(new DecelerateInterpolator(1.5f))
+                    .setListener(mMakeIconsInvisible)
+                    .start();
             } else {
-                if (!mExpandedVisible) {
-                    setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
-                }
+                mNotificationIcons.setVisibility(View.VISIBLE);
+                mNotificationIcons.animate()
+                    .alpha(1f)
+                    .translationY(0)
+                    .setStartDelay(0)
+                    .setInterpolator(new DecelerateInterpolator(1.5f))
+                    .setDuration(175)
+                    .start();
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
@@ -1340,30 +1357,11 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void setStatusBarLowProfile(boolean lightsOut) {
         if (mLightsOutAnimation == null) {
-            final View notifications = mStatusBarView.findViewById(R.id.notification_icon_area);
-            final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
-            final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
-            final View battery = mStatusBarView.findViewById(R.id.battery);
-            final View clock = mStatusBarView.findViewById(R.id.clock);
-
-            mLightsOutAnimation = new AnimatorSet();
-            mLightsOutAnimation.playTogether(
-                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
-                    ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
-                );
+            mLightsOutAnimation = ObjectAnimator.ofFloat(mStatusBarContents, View.ALPHA, 0);
             mLightsOutAnimation.setDuration(750);
 
             mLightsOnAnimation = new AnimatorSet();
-            mLightsOnAnimation.playTogether(
-                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
-                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
-                );
+            mLightsOnAnimation = ObjectAnimator.ofFloat(mStatusBarContents, View.ALPHA, 1);
             mLightsOnAnimation.setDuration(250);
         }
 
@@ -1453,25 +1451,25 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void tickerStarting() {
             mTicking = true;
-            mIcons.setVisibility(View.GONE);
+            mStatusBarContents.setVisibility(View.GONE);
             mTickerView.setVisibility(View.VISIBLE);
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
+            mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
         }
 
         @Override
         public void tickerDone() {
-            mIcons.setVisibility(View.VISIBLE);
+            mStatusBarContents.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
+            mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
                         mTickingDoneListener));
         }
 
         public void tickerHalting() {
-            mIcons.setVisibility(View.VISIBLE);
+            mStatusBarContents.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
-            mIcons.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
+            mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out,
                         mTickingDoneListener));
         }
@@ -1647,40 +1645,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDisplay.getMetrics(mDisplayMetrics);
         mGestureRec.tag("display", 
                 String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
-    }
-
-    void performDisableActions(int net) {
-        int old = mDisabled;
-        int diff = net ^ old;
-        mDisabled = net;
-
-        // act accordingly
-        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
-            if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.d(TAG, "DISABLE_EXPAND: yes");
-                animateCollapse();
-            }
-        }
-        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((net & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
-                if (mTicking) {
-                    mNotificationIcons.setVisibility(View.INVISIBLE);
-                    mTicker.halt();
-                } else {
-                    setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
-                }
-            } else {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
-                if (!mExpandedVisible) {
-                    setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
-                }
-            }
-        } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-            if (mTicking && (net & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                mTicker.halt();
-            }
-        }
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
