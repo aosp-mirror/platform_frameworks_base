@@ -97,13 +97,13 @@ public class StatusBarManager {
     }
     
     /**
-     * Expand the status bar.
+     * Expand the notifications.
      */
-    public void expand() {
+    public void expandNotifications() {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.expand();
+                svc.expandNotifications();
             }
         } catch (RemoteException ex) {
             // system process is dead anyway.
@@ -112,13 +112,43 @@ public class StatusBarManager {
     }
     
     /**
-     * Collapse the status bar.
+     * Collapse the notifications.
      */
-    public void collapse() {
+    public void collapseNotifications() {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.collapse();
+                svc.collapseNotifications();
+            }
+        } catch (RemoteException ex) {
+            // system process is dead anyway.
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Expand the quick settings.
+     */
+    public void expandQuickSettings() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.expandQuickSettings();
+            }
+        } catch (RemoteException ex) {
+            // system process is dead anyway.
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Collapse the quick settings.
+     */
+    public void collapseQuickSettings() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.collapseQuickSettings();
             }
         } catch (RemoteException ex) {
             // system process is dead anyway.

@@ -24,8 +24,10 @@ import com.android.internal.statusbar.StatusBarNotification;
 /** @hide */
 interface IStatusBarService
 {
-    void expand();
-    void collapse();
+    void expandNotifications();
+    void collapseNotifications();
+    void expandQuickSettings();
+    void collapseQuickSettings();
     void disable(int what, IBinder token, String pkg);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);

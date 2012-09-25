@@ -1738,7 +1738,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         }
 
-        public boolean performGlobalAction(int action) throws RemoteException {
+        public boolean performGlobalAction(int action) {
             synchronized (mLock) {
                 final int resolvedUserId = mSecurityPolicy
                         .resolveCallingUserIdEnforcingPermissionsLocked(
@@ -1760,7 +1760,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         openRecents();
                     } return true;
                     case AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS: {
-                        expandStatusBar();
+                        expandNotifications();
+                    } return true;
+                    case AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS: {
+                        expandQuickSettings();
                     } return true;
                 }
                 return false;
@@ -1932,12 +1935,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Binder.restoreCallingIdentity(token);
         }
 
-        private void expandStatusBar() {
+        private void expandNotifications() {
             final long token = Binder.clearCallingIdentity();
 
             StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
                     android.app.Service.STATUS_BAR_SERVICE);
-            statusBarManager.expand();
+            statusBarManager.expandNotifications();
+
+            Binder.restoreCallingIdentity(token);
+        }
+
+        private void expandQuickSettings() {
+            final long token = Binder.clearCallingIdentity();
+
+            StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
+                    android.app.Service.STATUS_BAR_SERVICE);
+            statusBarManager.expandQuickSettings();
 
             Binder.restoreCallingIdentity(token);
         }

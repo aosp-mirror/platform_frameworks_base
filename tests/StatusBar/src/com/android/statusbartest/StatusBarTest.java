@@ -16,29 +16,15 @@
 
 package com.android.statusbartest;
 
-import android.app.ListActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.widget.ArrayAdapter;
 import android.view.View;
-import android.widget.ListView;
 import android.content.Intent;
 import android.app.PendingIntent;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.StatusBarManager;
-import android.content.Context;
-import android.util.AttributeSet;
-import android.os.Vibrator;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.net.Uri;
 import android.os.SystemClock;
-import android.widget.RemoteViews;
-import android.widget.Toast;
-import android.os.PowerManager;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -300,14 +286,14 @@ public class StatusBarTest extends TestActivity
         },
         new Test("Expand") {
             public void run() {
-                mStatusBarManager.expand();
+                mStatusBarManager.expandNotifications();
             }
         },
         new Test("Expand in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.expand();
+                            mStatusBarManager.expandNotifications();
                         }
                     }, 3000);
             }
@@ -316,7 +302,7 @@ public class StatusBarTest extends TestActivity
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.collapse();
+                            mStatusBarManager.collapseNotifications();
                         }
                     }, 3000);
             }
