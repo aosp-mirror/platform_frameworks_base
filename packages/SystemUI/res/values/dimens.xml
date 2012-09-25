@@ -107,6 +107,9 @@
     <!-- Cap on overall resulting fling speed (s^-1) -->
     <dimen name="fling_gesture_max_output_velocity">3000dp</dimen>
 
+    <!-- Minimum distance a fling must travel (anti-jitter) -->
+    <dimen name="fling_gesture_min_dist">10dp</dimen>
+
     <!-- Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
          collapse request -->
     <item type="dimen" name="collapse_min_display_fraction">10%</item>

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 public class PanelBar extends FrameLayout {
@@ -101,6 +102,7 @@ public class PanelBar extends FrameLayout {
         PanelView fullyOpenedPanel = null;
         LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
         for (PanelView pv : mPanels) {
+            final boolean visible = pv.getVisibility() == View.VISIBLE;
             // adjust any other panels that may be partially visible
             if (pv.getExpandedHeight() > 0f) {
                 if (mState == STATE_CLOSED) {
@@ -115,6 +117,11 @@ public class PanelBar extends FrameLayout {
                 } else {
                     pv.setExpandedFraction(1f-frac);
                 }
+            }
+            if (pv.getExpandedHeight() > 0f) {
+                if (!visible) pv.setVisibility(View.VISIBLE);
+            } else {
+                if (visible) pv.setVisibility(View.GONE);
             }
         }
         if (fullyOpenedPanel != null && !mTracking) {
@@ -138,6 +145,7 @@ public class PanelBar extends FrameLayout {
             } else {
                 pv.setExpandedFraction(0); // just in case
             }
+            pv.setVisibility(View.GONE);
         }
         if (!waiting) {
             // it's possible that nothing animated, so we replicate the termination 
