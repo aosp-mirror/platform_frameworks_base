@@ -2474,8 +2474,16 @@ public class AudioManager {
      *         or null if there is no value for that key.
      */
     public String getProperty(String key) {
-        // implementation to be written
-        return null;
+        if (PROPERTY_OUTPUT_SAMPLE_RATE.equals(key)) {
+            int outputSampleRate = AudioSystem.getPrimaryOutputSamplingRate();
+            return outputSampleRate > 0 ? Integer.toString(outputSampleRate) : null;
+        } else if (PROPERTY_OUTPUT_FRAMES_PER_BUFFER.equals(key)) {
+            int outputFramesPerBuffer = AudioSystem.getPrimaryOutputFrameCount();
+            return outputFramesPerBuffer > 0 ? Integer.toString(outputFramesPerBuffer) : null;
+        } else {
+            // null or unknown key
+            return null;
+        }
     }
 
 }
