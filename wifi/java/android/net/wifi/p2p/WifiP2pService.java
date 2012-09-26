@@ -2039,8 +2039,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     }
 
     private String getPersistedDeviceName() {
-        String deviceName = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.WIFI_P2P_DEVICE_NAME);
+        String deviceName = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.WIFI_P2P_DEVICE_NAME);
         if (deviceName == null) {
             /* We use the 4 digits of the ANDROID_ID to have a friendly
              * default that has low likelihood of collision with a peer */
@@ -2062,8 +2062,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mThisDevice.deviceName = devName;
         mWifiNative.setP2pSsidPostfix("-" + mThisDevice.deviceName);
 
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.WIFI_P2P_DEVICE_NAME, devName);
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.WIFI_P2P_DEVICE_NAME, devName);
         sendThisDeviceChangedBroadcast();
         return true;
     }
