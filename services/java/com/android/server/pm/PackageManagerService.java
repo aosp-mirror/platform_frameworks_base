@@ -5907,8 +5907,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return the current "allow unknown sources" setting
      */
     private int getUnknownSourcesSettings() {
-        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
+        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.INSTALL_NON_MARKET_APPS,
                 -1);
     }
 
