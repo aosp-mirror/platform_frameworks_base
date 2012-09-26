@@ -31,6 +31,7 @@ public class Environment {
     private static final String TAG = "Environment";
 
     private static final String ENV_EXTERNAL_STORAGE = "EXTERNAL_STORAGE";
+    private static final String ENV_EMULATED_STORAGE_SOURCE = "EMULATED_STORAGE_SOURCE";
     private static final String ENV_EMULATED_STORAGE_TARGET = "EMULATED_STORAGE_TARGET";
     private static final String ENV_MEDIA_STORAGE = "MEDIA_STORAGE";
 
@@ -132,6 +133,10 @@ public class Environment {
 
         public File getExternalStorageDirectory() {
             return mExternalStorage;
+        }
+
+        public File getExternalStorageObbDirectory() {
+            return mExternalStorageAndroidObb;
         }
 
         public File getExternalStoragePublicDirectory(String type) {
@@ -300,6 +305,23 @@ public class Environment {
     /** {@hide} */
     public static File getLegacyExternalStorageDirectory() {
         return new File(System.getenv(ENV_EXTERNAL_STORAGE));
+    }
+
+    /** {@hide} */
+    public static File getLegacyExternalStorageObbDirectory() {
+        return buildPath(getLegacyExternalStorageDirectory(), DIRECTORY_ANDROID, "obb");
+    }
+
+    /** {@hide} */
+    public static File getEmulatedStorageSource(int userId) {
+        // /mnt/shell/emulated/0
+        return new File(System.getenv(ENV_EMULATED_STORAGE_SOURCE), String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getEmulatedStorageObbSource() {
+        // /mnt/shell/emulated/obb
+        return new File(System.getenv(ENV_EMULATED_STORAGE_SOURCE), "obb");
     }
 
     /**
