@@ -227,21 +227,29 @@ void Caches::clearGarbage() {
     textureCache.clearGarbage();
     pathCache.clearGarbage();
 
-    Mutex::Autolock _l(mGarbageLock);
+    Vector<DisplayList*> displayLists;
+    Vector<Layer*> layers;
 
-    size_t count = mLayerGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        Layer* layer = mLayerGarbage.itemAt(i);
-        delete layer;
+    { // scope for the lock
+        Mutex::Autolock _l(mGarbageLock);
+        displayLists = mDisplayListGarbage;
+        layers = mLayerGarbage;
+        mDisplayListGarbage.clear();
+        mLayerGarbage.clear();
     }
-    mLayerGarbage.clear();
 
-    count = mDisplayListGarbage.size();
+    size_t count = displayLists.size();
     for (size_t i = 0; i < count; i++) {
-        DisplayList* displayList = mDisplayListGarbage.itemAt(i);
+        DisplayList* displayList = displayLists.itemAt(i);
         delete displayList;
     }
-    mDisplayListGarbage.clear();
+
+    count = layers.size();
+    for (size_t i = 0; i < count; i++) {
+        Layer* layer = layers.itemAt(i);
+        delete layer;
+    }
+    layers.clear();
 }
 
 void Caches::deleteLayerDeferred(Layer* layer) {
