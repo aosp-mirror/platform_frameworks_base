@@ -3410,14 +3410,14 @@ public final class ViewRootImpl implements ViewParent,
         final int source = event.getSource();
         final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
         final boolean isTouchPad = (source & InputDevice.SOURCE_CLASS_POSITION) != 0;
-        if (isTouchPad) {
-            //Convert TouchPad motion into a TrackBall event
-            mSimulatedTrackball.updateTrackballDirection(this, event);
-        }
+
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
             if (isJoystick) {
                 updateJoystickDirection(event, false);
+            } else if (isTouchPad) {
+              //Convert TouchPad motion into a TrackBall event
+              mSimulatedTrackball.updateTrackballDirection(this, event);
             }
             finishInputEvent(q, false);
             return;
@@ -3427,6 +3427,9 @@ public final class ViewRootImpl implements ViewParent,
         if (mView.dispatchGenericMotionEvent(event)) {
             if (isJoystick) {
                 updateJoystickDirection(event, false);
+            } else if (isTouchPad) {
+              //Convert TouchPad motion into a TrackBall event
+              mSimulatedTrackball.updateTrackballDirection(this, event);
             }
             finishInputEvent(q, true);
             return;
@@ -3436,6 +3439,10 @@ public final class ViewRootImpl implements ViewParent,
             // Translate the joystick event into DPAD keys and try to deliver
             // those.
             updateJoystickDirection(event, true);
+            finishInputEvent(q, true);
+        } else if (isTouchPad) {
+            //Convert TouchPad motion into a TrackBall event
+            mSimulatedTrackball.updateTrackballDirection(this, event);
             finishInputEvent(q, true);
         } else {
             finishInputEvent(q, false);
