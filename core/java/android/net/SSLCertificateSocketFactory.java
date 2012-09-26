@@ -90,7 +90,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private byte[] mNpnProtocols = null;
 
     private final int mHandshakeTimeoutMillis;
-    private final int mWriteTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
     private final boolean mSecure;
 
@@ -101,19 +100,10 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     private SSLCertificateSocketFactory(
-            int handshakeTimeoutMillis,
-            int writeTimeoutMillis,
-            SSLSessionCache cache,
-            boolean secure) {
+            int handshakeTimeoutMillis, SSLSessionCache cache, boolean secure) {
         mHandshakeTimeoutMillis = handshakeTimeoutMillis;
-        mWriteTimeoutMillis = writeTimeoutMillis;
         mSessionCache = cache == null ? null : cache.mSessionCache;
         mSecure = secure;
-    }
-
-    private SSLCertificateSocketFactory(
-            int handshakeTimeoutMillis, SSLSessionCache cache, boolean secure) {
-        this(handshakeTimeoutMillis, 0, cache, secure);
     }
 
     /**
@@ -169,24 +159,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             int handshakeTimeoutMillis, SSLSessionCache cache) {
         return new org.apache.http.conn.ssl.SSLSocketFactory(
                 new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true));
-    }
-
-    /**
-     * Returns a socket factory (also named SSLSocketFactory, but in a different
-     * namespace) for use with the Apache HTTP stack.
-     *
-     * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
-     *         for none.  The socket timeout is reset to 0 after the handshake.
-     * @param writeTimeoutMillis the desired write timeout in milliseconds or 0 for none.
-     * @param cache The {@link SSLSessionCache} to use, or null for no cache.
-     * @return a new SocketFactory with the specified parameters
-     */
-    public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(
-            int handshakeTimeoutMillis,
-            int writeTimeoutMillis,
-            SSLSessionCache cache) {
-        return new org.apache.http.conn.ssl.SSLSocketFactory(new SSLCertificateSocketFactory(
-                handshakeTimeoutMillis, writeTimeoutMillis, cache, true));
     }
 
     /**
@@ -376,8 +348,10 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * To take effect, this option must be set before the blocking method was called.
      *
      * @param socket a socket created by this factory.
-     * @param writeTimeoutMilliseconds the desired write timeout in milliseconds.
+     * @param timeout the desired write timeout in milliseconds.
      * @throws IllegalArgumentException if the socket was not created by this factory.
+     *
+     * @hide
      */
     public void setSoWriteTimeout(Socket socket, int writeTimeoutMilliseconds)
             throws SocketException {
@@ -404,7 +378,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);
         }
@@ -424,7 +397,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket();
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         return s;
     }
 
@@ -442,7 +414,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 addr, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         return s;
     }
 
@@ -458,7 +429,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(addr, port);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         return s;
     }
 
@@ -475,7 +445,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 host, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);
         }
@@ -493,7 +462,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
-        s.setSoWriteTimeout(mWriteTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);
         }
