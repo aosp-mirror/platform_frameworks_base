@@ -19,7 +19,6 @@
 #include <utils/Log.h>
 
 #include "Layer.h"
-#include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "Caches.h"
 
@@ -47,12 +46,15 @@ Layer::~Layer() {
     if (mesh) delete mesh;
     if (meshIndices) delete meshIndices;
     if (colorFilter) Caches::getInstance().resourceCache.decrementRefcount(colorFilter);
-    if (fbo) {
-        LayerRenderer::flushLayer(this);
-        Caches::getInstance().fboCache.put(fbo);
-        fbo = 0;
-    }
+    if (fbo) Caches::getInstance().fboCache.put(fbo);
     deleteTexture();
+}
+
+void Layer::freeResourcesLocked() {
+    if (colorFilter) {
+        Caches::getInstance().resourceCache.decrementRefcountLocked(colorFilter);
+        colorFilter = NULL;
+    }
 }
 
 void Layer::setPaint(SkPaint* paint) {
@@ -68,6 +70,8 @@ void Layer::setColorFilter(SkiaColorFilter* filter) {
         Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
     }
 }
+
+
 
 }; // namespace uirenderer
 }; // namespace android
