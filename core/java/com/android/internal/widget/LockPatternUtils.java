@@ -256,9 +256,13 @@ public class LockPatternUtils {
      * @return Whether the pattern matches the stored one.
      */
     public boolean checkPattern(List<LockPatternView.Cell> pattern) {
-        int userId = getCurrentOrCallingUserId();
+        final int userId = getCurrentOrCallingUserId();
         try {
-            return getLockSettings().checkPattern(patternToHash(pattern), userId);
+            final boolean matched = getLockSettings().checkPattern(patternToHash(pattern), userId);
+            if (matched && (userId == UserHandle.USER_OWNER)) {
+                KeyStore.getInstance().password(patternToString(pattern));
+            }
+            return matched;
         } catch (RemoteException re) {
             return true;
         }
@@ -271,9 +275,14 @@ public class LockPatternUtils {
      * @return Whether the password matches the stored one.
      */
     public boolean checkPassword(String password) {
-        int userId = getCurrentOrCallingUserId();
+        final int userId = getCurrentOrCallingUserId();
         try {
-            return getLockSettings().checkPassword(passwordToHash(password), userId);
+            final boolean matched = getLockSettings().checkPassword(passwordToHash(password),
+                    userId);
+            if (matched && (userId == UserHandle.USER_OWNER)) {
+                KeyStore.getInstance().password(password);
+            }
+            return matched;
         } catch (RemoteException re) {
             return true;
         }
