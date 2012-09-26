@@ -793,8 +793,13 @@ public class TextToSpeech {
     }
 
     /**
-     * Speaks the string using the specified queuing strategy and speech
-     * parameters.
+     * Speaks the string using the specified queuing strategy and speech parameters.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
      * @param text The string of text to be spoken.
      * @param queueMode The queuing strategy to use, {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
@@ -809,7 +814,7 @@ public class TextToSpeech {
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
      *            engine named "com.svox.pico" if it is being used.
      *
-     * @return {@link #ERROR} or {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
      */
     public int speak(final String text, final int queueMode, final HashMap<String, String> params) {
         return runAction(new Action<Integer>() {
@@ -830,6 +835,12 @@ public class TextToSpeech {
      * Plays the earcon using the specified queueing mode and parameters.
      * The earcon must already have been added with {@link #addEarcon(String, String)} or
      * {@link #addEarcon(String, String, int)}.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
      * @param earcon The earcon that should be played
      * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
@@ -842,7 +853,7 @@ public class TextToSpeech {
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
      *            engine named "com.svox.pico" if it is being used.
      *
-     * @return {@link #ERROR} or {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
      */
     public int playEarcon(final String earcon, final int queueMode,
             final HashMap<String, String> params) {
@@ -862,6 +873,12 @@ public class TextToSpeech {
     /**
      * Plays silence for the specified amount of time using the specified
      * queue mode.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
      * @param durationInMs The duration of the silence.
      * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
@@ -873,7 +890,7 @@ public class TextToSpeech {
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
      *            engine named "com.svox.pico" if it is being used.
      *
-     * @return {@link #ERROR} or {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playSilence operation.
      */
     public int playSilence(final long durationInMs, final int queueMode,
             final HashMap<String, String> params) {
@@ -1089,6 +1106,12 @@ public class TextToSpeech {
 
     /**
      * Synthesizes the given text to a file using the specified parameters.
+     * This method is asynchronous, i.e. the method just adds the request to the queue of TTS
+     * requests and then returns. The synthesis might not have finished (or even started!) at the
+     * time when this method returns. In order to reliably detect errors during synthesis,
+     * we recommend setting an utterance progress listener (see
+     * {@link #setOnUtteranceProgressListener}) and using the
+     * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
      * @param text The text that should be synthesized
      * @param params Parameters for the request. Can be null.
@@ -1101,7 +1124,7 @@ public class TextToSpeech {
      * @param filename Absolute file filename to write the generated audio data to.It should be
      *            something like "/sdcard/myappsounds/mysound.wav".
      *
-     * @return {@link #ERROR} or {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
      */
     public int synthesizeToFile(final String text, final HashMap<String, String> params,
             final String filename) {
