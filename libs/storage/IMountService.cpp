@@ -433,12 +433,13 @@ public:
         reply.readExceptionCode();
     }
 
-    void mountObb(const String16& filename, const String16& key,
+    void mountObb(const String16& rawPath, const String16& canonicalPath, const String16& key,
             const sp<IObbActionListener>& token, int32_t nonce)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeString16(filename);
+        data.writeString16(rawPath);
+        data.writeString16(canonicalPath);
         data.writeString16(key);
         data.writeStrongBinder(token->asBinder());
         data.writeInt32(nonce);
