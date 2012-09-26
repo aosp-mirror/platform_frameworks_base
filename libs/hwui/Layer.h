@@ -48,7 +48,7 @@ struct Layer {
     Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
-    void freeResourcesLocked();
+    void removeFbo();
 
     /**
      * Sets this layer's region to a rectangle. Computes the appropriate
