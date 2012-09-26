@@ -5313,6 +5313,19 @@
         <attr name="description" />
     </declare-styleable>
 
+    <!-- Use <code>dream</code> as the root tag of the XML resource that
+         describes an
+         {@link android.service.dreams.Dream}, which is
+         referenced from its
+         {@link android.service.dreams.Dream#DREAM_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="Dream">
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this dream. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Accounts package class attributes -->
     <!-- =============================== -->

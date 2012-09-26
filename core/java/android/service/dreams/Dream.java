@@ -59,10 +59,10 @@ import com.android.internal.policy.PolicyManager;
  *         <category android:name="android.intent.category.DREAM" />
  *     </intent-filter>
  *
- *     <!-- Point to configuration activity for this dream (optional) -->
+ *     <!-- Point to additional information for this dream (optional) -->
  *     <meta-data
- *         android:name="android.service.dreams.config_activity"
- *         android:value="com.example.mypackage/com.example.mypackage.MyDreamSettingsActivity" />
+ *         android:name="android.service.dream"
+ *         android:resource="@xml/my_dream" />
  * </service>
  * }
  * </pre>
@@ -81,12 +81,12 @@ public class Dream extends Service implements Window.Callback {
             "android.intent.category.DREAM";
 
     /**
-     * Service meta-data key for declaring an optional configuration activity.
-     *
-     * @see Dream
-     * */
-    public static final String METADATA_NAME_CONFIG_ACTIVITY =
-            "android.service.dreams.config_activity";
+     * Name under which a Dream publishes information about itself.
+     * This meta-data must reference an XML resource containing
+     * a <code>&lt;{@link android.R.styleable#Dream dream}&gt;</code>
+     * tag.
+     */
+    public static final String DREAM_META_DATA = "android.service.dream";
 
     /**
      * Broadcast Action: Sent after the system starts dreaming.
@@ -359,13 +359,6 @@ public class Dream extends Service implements Window.Callback {
      */
     public View findViewById(int id) {
         return getWindow().findViewById(id);
-    }
-
-    /** FIXME remove once platform dreams are updated */
-    @Deprecated
-    protected void lightsOut() {
-        setLowProfile(true);
-        setFullscreen(true);
     }
 
     /**
