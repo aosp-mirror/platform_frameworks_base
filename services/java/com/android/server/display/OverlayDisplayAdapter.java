@@ -19,10 +19,14 @@ package com.android.server.display;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -88,19 +92,28 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             @Override
             public void run() {
                 getContext().getContentResolver().registerContentObserver(
-                        Settings.System.getUriFor(Settings.Secure.OVERLAY_DISPLAY_DEVICES),
-                        true, new SettingsObserver(getHandler()));
+                        Settings.Global.getUriFor(Settings.Global.OVERLAY_DISPLAY_DEVICES),
+                        true, new ContentObserver(getHandler()) {
+                            @Override
+                            public void onChange(boolean selfChange) {
+                                updateOverlayDisplayDevices();
+                            }
+                        });
 
-                synchronized (getSyncRoot()) {
-                    updateOverlayDisplayDevicesLocked();
-                }
+                updateOverlayDisplayDevices();
             }
         });
     }
 
+    private void updateOverlayDisplayDevices() {
+        synchronized (getSyncRoot()) {
+            updateOverlayDisplayDevicesLocked();
+        }
+    }
+
     private void updateOverlayDisplayDevicesLocked() {
-        String value = Settings.System.getString(getContext().getContentResolver(),
-                Settings.Secure.OVERLAY_DISPLAY_DEVICES);
+        String value = Settings.Global.getString(getContext().getContentResolver(),
+                Settings.Global.OVERLAY_DISPLAY_DEVICES);
         if (value == null) {
             value = "";
         }
@@ -168,19 +181,6 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             case 4:
             default:
                 return Gravity.BOTTOM | Gravity.LEFT;
-        }
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        public SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            synchronized (getSyncRoot()) {
-                updateOverlayDisplayDevicesLocked();
-            }
         }
     }
 

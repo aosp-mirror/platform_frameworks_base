@@ -48,6 +48,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.Dream;
@@ -357,34 +358,44 @@ public final class PowerManagerService extends IPowerManager.Stub
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            mContext.registerReceiver(new BatteryReceiver(), filter);
+            mContext.registerReceiver(new BatteryReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
             filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-            mContext.registerReceiver(new BootCompletedReceiver(), filter);
+            mContext.registerReceiver(new BootCompletedReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DOCK_EVENT);
-            mContext.registerReceiver(new DockReceiver(), filter);
+            mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
             filter.addAction(Dream.ACTION_DREAMING_STOPPED);
-            mContext.registerReceiver(new DreamReceiver(), filter);
+            mContext.registerReceiver(new DreamReceiver(), filter, null, mHandler);
+
+            filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_USER_SWITCHED);
+            mContext.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
 
             // Register for settings changes.
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SCREENSAVER_ENABLED), false, mSettingsObserver);
+                    Settings.Secure.SCREENSAVER_ENABLED),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP), false, mSettingsObserver);
+                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_OFF_TIMEOUT), false, mSettingsObserver);
+                    Settings.System.SCREEN_OFF_TIMEOUT),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN), false, mSettingsObserver);
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS), false, mSettingsObserver);
+                    Settings.System.SCREEN_BRIGHTNESS),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS_MODE), false, mSettingsObserver);
+                    Settings.System.SCREEN_BRIGHTNESS_MODE),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
 
             // Go.
             readConfigurationLocked();
@@ -406,34 +417,38 @@ public final class PowerManagerService extends IPowerManager.Stub
     private void updateSettingsLocked() {
         final ContentResolver resolver = mContext.getContentResolver();
 
-        mDreamsEnabledSetting = (Settings.Secure.getInt(resolver,
-                Settings.Secure.SCREENSAVER_ENABLED, 0) != 0);
-        mDreamsActivateOnSleepSetting = (Settings.Secure.getInt(resolver,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0) != 0);
-        mScreenOffTimeoutSetting = Settings.System.getInt(resolver,
-                Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT);
+        mDreamsEnabledSetting = (Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SCREENSAVER_ENABLED, 0,
+                UserHandle.USER_CURRENT) != 0);
+        mDreamsActivateOnSleepSetting = (Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0,
+                UserHandle.USER_CURRENT) != 0);
+        mScreenOffTimeoutSetting = Settings.System.getIntForUser(resolver,
+                Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,
+                UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-                BatteryManager.BATTERY_PLUGGED_AC);
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
-        mScreenBrightnessSetting = Settings.System.getInt(resolver,
-                Settings.System.SCREEN_BRIGHTNESS, mScreenBrightnessSettingDefault);
+        mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
+                Settings.System.SCREEN_BRIGHTNESS, mScreenBrightnessSettingDefault,
+                UserHandle.USER_CURRENT);
         if (oldScreenBrightnessSetting != mScreenBrightnessSetting) {
             mTemporaryScreenBrightnessSettingOverride = -1;
         }
 
         final float oldScreenAutoBrightnessAdjustmentSetting =
                 mScreenAutoBrightnessAdjustmentSetting;
-        mScreenAutoBrightnessAdjustmentSetting = Settings.System.getFloat(resolver,
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f);
+        mScreenAutoBrightnessAdjustmentSetting = Settings.System.getFloatForUser(resolver,
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f,
+                UserHandle.USER_CURRENT);
         if (oldScreenAutoBrightnessAdjustmentSetting != mScreenAutoBrightnessAdjustmentSetting) {
             mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
         }
 
-        mScreenBrightnessModeSetting = Settings.System.getInt(resolver,
+        mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
 
         mDirty |= DIRTY_SETTINGS;
     }
@@ -1958,6 +1973,15 @@ public final class PowerManagerService extends IPowerManager.Stub
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
                 handleDreamEndedLocked();
+            }
+        }
+    }
+
+    private final class UserSwitchedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                handleSettingsChangedLocked();
             }
         }
     }

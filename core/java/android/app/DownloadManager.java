@@ -1098,8 +1098,8 @@ public class DownloadManager {
      */
     public static Long getMaxBytesOverMobile(Context context) {
         try {
-            return Settings.Secure.getLong(context.getContentResolver(),
-                    Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
+            return Settings.Global.getLong(context.getContentResolver(),
+                    Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
         } catch (SettingNotFoundException exc) {
             return null;
         }
@@ -1116,8 +1116,8 @@ public class DownloadManager {
      */
     public static Long getRecommendedMaxBytesOverMobile(Context context) {
         try {
-            return Settings.Secure.getLong(context.getContentResolver(),
-                    Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
+            return Settings.Global.getLong(context.getContentResolver(),
+                    Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
         } catch (SettingNotFoundException exc) {
             return null;
         }

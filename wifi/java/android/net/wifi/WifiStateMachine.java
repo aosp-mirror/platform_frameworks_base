@@ -1060,8 +1060,8 @@ public class WifiStateMachine extends StateMachine {
      */
     public void setCountryCode(String countryCode, boolean persist) {
         if (persist) {
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_COUNTRY_CODE,
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.WIFI_COUNTRY_CODE,
                     countryCode);
         }
         sendMessage(obtainMessage(CMD_SET_COUNTRY_CODE, countryCode));
@@ -1318,8 +1318,8 @@ public class WifiStateMachine extends StateMachine {
      * Set the country code from the system setting value, if any.
      */
     private void setCountryCode() {
-        String countryCode = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.WIFI_COUNTRY_CODE);
+        String countryCode = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.WIFI_COUNTRY_CODE);
         if (countryCode != null && !countryCode.isEmpty()) {
             setCountryCode(countryCode, false);
         } else {
@@ -1609,8 +1609,8 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private int getMaxDhcpRetries() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                                      Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT,
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                                      Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                                       DEFAULT_MAX_DHCP_RETRIES);
     }
 

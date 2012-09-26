@@ -701,7 +701,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetConfigs[preference].isDefault()) {
             if (mNetworkPreference != preference) {
                 final ContentResolver cr = mContext.getContentResolver();
-                Settings.Secure.putInt(cr, Settings.Secure.NETWORK_PREFERENCE, preference);
+                Settings.Global.putInt(cr, Settings.Global.NETWORK_PREFERENCE, preference);
                 synchronized(this) {
                     mNetworkPreference = preference;
                 }
@@ -724,8 +724,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int getPersistedNetworkPreference() {
         final ContentResolver cr = mContext.getContentResolver();
 
-        final int networkPrefSetting = Settings.Secure
-                .getInt(cr, Settings.Secure.NETWORK_PREFERENCE, -1);
+        final int networkPrefSetting = Settings.Global
+                .getInt(cr, Settings.Global.NETWORK_PREFERENCE, -1);
         if (networkPrefSetting != -1) {
             return networkPrefSetting;
         }
@@ -2108,14 +2108,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final int timeout;
 
         if (ConnectivityManager.isNetworkTypeMobile(type)) {
-            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
-                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_MOBILE,
+            timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                                              0);
             // Canonicalize mobile network type
             type = ConnectivityManager.TYPE_MOBILE;
         } else if (ConnectivityManager.TYPE_WIFI == type) {
-            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
-                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_WIFI,
+            timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                                              0);
         } else {
             // do not track any other networks
@@ -2930,8 +2930,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public boolean isTetheringSupported() {
         enforceTetherAccessPermission();
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
-        boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
+        boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.TETHER_SUPPORTED, defaultVal) != 0);
         return tetherEnabledInSettings && mTetheringConfigValid;
     }
 

@@ -2268,8 +2268,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // low-level factory test mode.
         final ContentResolver resolver = mContext.getContentResolver();
         if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL &&
-                Settings.Secure.getInt(resolver,
-                        Settings.Secure.DEVICE_PROVISIONED, 0) != 0) {
+                Settings.Global.getInt(resolver,
+                        Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             mCheckedForSetup = true;
             
             // See if we should be showing the platform update setup UI.
@@ -8314,8 +8314,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
         if (r != null && r.pid != Process.myPid() &&
-                Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.WTF_IS_FATAL, 0) != 0) {
+                Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.WTF_IS_FATAL, 0) != 0) {
             crashApplication(r, crashInfo);
             return true;
         } else {
