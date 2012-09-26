@@ -174,32 +174,32 @@ static void nativeSetScreenState(JNIEnv *env, jclass clazz, jboolean on) {
     sp<ISurfaceComposer> s(ComposerService::getComposerService());
     if (on) {
         {
-            ALOGD_IF_SLOW(50, "Excessive delay in autosuspend_disable() while turning screen on");
+            ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_disable() while turning screen on");
             autosuspend_disable();
         }
 
         if (gPowerModule) {
-            ALOGD_IF_SLOW(10, "Excessive delay in setInteractive(true) while turning screen on");
+            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
             gPowerModule->setInteractive(gPowerModule, true);
         }
 
         {
-            ALOGD_IF_SLOW(20, "Excessive delay in unblank() while turning screen on");
+            ALOGD_IF_SLOW(100, "Excessive delay in unblank() while turning screen on");
             s->unblank();
         }
     } else {
         {
-            ALOGD_IF_SLOW(20, "Excessive delay in blank() while turning screen off");
+            ALOGD_IF_SLOW(100, "Excessive delay in blank() while turning screen off");
             s->blank();
         }
 
         if (gPowerModule) {
-            ALOGD_IF_SLOW(10, "Excessive delay in setInteractive(false) while turning screen off");
+            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(false) while turning screen off");
             gPowerModule->setInteractive(gPowerModule, false);
         }
 
         {
-            ALOGD_IF_SLOW(50, "Excessive delay in autosuspend_enable() while turning screen off");
+            ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
             autosuspend_enable();
         }
     }
