@@ -242,6 +242,18 @@ android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint st
     return (jint) AudioSystem::getDevicesForStream(static_cast <audio_stream_type_t>(stream));
 }
 
+static jint
+android_media_AudioSystem_getPrimaryOutputSamplingRate(JNIEnv *env, jobject clazz)
+{
+    return (jint) AudioSystem::getPrimaryOutputSamplingRate();
+}
+
+static jint
+android_media_AudioSystem_getPrimaryOutputFrameCount(JNIEnv *env, jobject clazz)
+{
+    return (jint) AudioSystem::getPrimaryOutputFrameCount();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -263,6 +275,8 @@ static JNINativeMethod gMethods[] = {
     {"setMasterMute",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMute},
     {"getMasterMute",       "()Z",      (void *)android_media_AudioSystem_getMasterMute},
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
+    {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
+    {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
