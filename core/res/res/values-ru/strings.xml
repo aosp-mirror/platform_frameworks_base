@@ -1258,8 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Отправить"</string>
     <string name="find" msgid="4808270900322985960">"Найти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-поиск"</string>
-    <string name="find_next" msgid="5742124618942193978">"Найти след."</string>
-    <string name="find_previous" msgid="2196723669388360506">"Найти пред."</string>
+    <string name="find_next" msgid="5742124618942193978">"Cлед."</string>
+    <string name="find_previous" msgid="2196723669388360506">"Пред."</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Пользователь <xliff:g id="NAME">%s</xliff:g> запрашивает ваше местоположение"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Запрос местоположения"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Запрашивает <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>

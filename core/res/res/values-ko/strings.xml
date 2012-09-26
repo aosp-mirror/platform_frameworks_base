@@ -608,7 +608,7 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"화면 잠금해제 비밀번호를 변경합니다."</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"화면 잠금해제 비밀번호 변경"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"화면 잠금해제 비밀번호를 변경합니다."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"화면 잠금"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"화면을 잠그는 방법과 시기를 제어합니다."</string>
