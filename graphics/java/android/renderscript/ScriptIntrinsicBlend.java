@@ -36,17 +36,18 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @return ScriptIntrinsicBlend
      */
     public static ScriptIntrinsicBlend create(RenderScript rs, Element e) {
-        int id = rs.nScriptIntrinsicCreate(6, e.getID(rs));
+        // 7 comes from RS_SCRIPT_INTRINSIC_ID_BLEND in rsDefines.h
+        int id = rs.nScriptIntrinsicCreate(7, e.getID(rs));
         return new ScriptIntrinsicBlend(id, rs);
 
     }
 
     private void blend(int id, Allocation ain, Allocation aout) {
-        if (ain.getElement() != Element.U8_4(mRS)) {
-            throw new RSIllegalArgumentException("Input not of expected format.");
+        if (!ain.getElement().isCompatible(Element.U8_4(mRS))) {
+            throw new RSIllegalArgumentException("Input is not of expected format.");
         }
-        if (aout.getElement() != Element.U8_4(mRS)) {
-            throw new RSIllegalArgumentException("Output not of expected format.");
+        if (!aout.getElement().isCompatible(Element.U8_4(mRS))) {
+            throw new RSIllegalArgumentException("Output is not of expected format.");
         }
         forEach(id, ain, aout, null);
     }
