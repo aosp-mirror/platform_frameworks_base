@@ -55,9 +55,11 @@ public class ImageProcessingActivity extends Activity
     private final String RESULT_FILE = "image_processing_result.csv";
 
     Bitmap mBitmapIn;
+    Bitmap mBitmapIn2;
     Bitmap mBitmapOut;
     String mTestNames[];
 
+    private Spinner mSpinner;
     private SeekBar mBar1;
     private SeekBar mBar2;
     private SeekBar mBar3;
@@ -81,6 +83,10 @@ public class ImageProcessingActivity extends Activity
 
     private TestBase mTest;
 
+    public void updateDisplay() {
+            mTest.updateBitmap(mBitmapOut);
+            mDisplayView.invalidate();
+    }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
@@ -98,8 +104,7 @@ public class ImageProcessingActivity extends Activity
             }
 
             mTest.runTest();
-            mTest.updateBitmap(mBitmapOut);
-            mDisplayView.invalidate();
+            updateDisplay();
         }
     }
 
@@ -110,6 +115,9 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupBars() {
+        mSpinner.setVisibility(View.VISIBLE);
+        mTest.onSpinner1Setup(mSpinner);
+
         mBar1.setVisibility(View.VISIBLE);
         mText1.setVisibility(View.VISIBLE);
         mTest.onBar1Setup(mBar1, mText1);
@@ -221,19 +229,21 @@ public class ImageProcessingActivity extends Activity
         case 27:
             mTest = new Mandelbrot();
             break;
+        case 28:
+            mTest = new Blend();
+            break;
         }
 
-        mTest.createBaseTest(this, mBitmapIn);
+        mTest.createBaseTest(this, mBitmapIn, mBitmapIn2);
         setupBars();
 
         mTest.runTest();
-        mTest.updateBitmap(mBitmapOut);
-        mDisplayView.invalidate();
+        updateDisplay();
         mBenchmarkResult.setText("Result: not run");
     }
 
     void setupTests() {
-        mTestNames = new String[28];
+        mTestNames = new String[29];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -262,6 +272,7 @@ public class ImageProcessingActivity extends Activity
         mTestNames[25] = "Convolve 5x5";
         mTestNames[26] = "Intrinsics Convolve 5x5";
         mTestNames[27] = "Mandelbrot";
+        mTestNames[28] = "Intrinsics Blend";
 
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
@@ -284,12 +295,15 @@ public class ImageProcessingActivity extends Activity
         setContentView(R.layout.main);
 
         mBitmapIn = loadBitmap(R.drawable.img1600x1067);
+        mBitmapIn2 = loadBitmap(R.drawable.img1600x1067b);
         mBitmapOut = loadBitmap(R.drawable.img1600x1067);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
 
         mDisplayView = (ImageView) findViewById(R.id.display);
         mDisplayView.setImageBitmap(mBitmapOut);
+
+        mSpinner = (Spinner) findViewById(R.id.spinner1);
 
         mBar1 = (SeekBar) findViewById(R.id.slider1);
         mBar2 = (SeekBar) findViewById(R.id.slider2);
