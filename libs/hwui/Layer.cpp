@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "Layer.h"
+#include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "Caches.h"
 
@@ -46,14 +47,15 @@ Layer::~Layer() {
     if (mesh) delete mesh;
     if (meshIndices) delete meshIndices;
     if (colorFilter) Caches::getInstance().resourceCache.decrementRefcount(colorFilter);
-    if (fbo) Caches::getInstance().fboCache.put(fbo);
+    removeFbo();
     deleteTexture();
 }
 
-void Layer::freeResourcesLocked() {
-    if (colorFilter) {
-        Caches::getInstance().resourceCache.decrementRefcountLocked(colorFilter);
-        colorFilter = NULL;
+void Layer::removeFbo() {
+    if (fbo) {
+        LayerRenderer::flushLayer(this);
+        Caches::getInstance().fboCache.put(fbo);
+        fbo = 0;
     }
 }
 
