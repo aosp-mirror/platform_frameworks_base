@@ -64,6 +64,8 @@ class BroadcastFilter extends IntentFilter {
         StringBuilder sb = new StringBuilder();
         sb.append("BroadcastFilter{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" u");
+        sb.append(owningUserId);
         sb.append(' ');
         sb.append(receiverList);
         sb.append('}');

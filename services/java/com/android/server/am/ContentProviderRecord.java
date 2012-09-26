@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -199,6 +200,8 @@ class ContentProviderRecord {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ContentProviderRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" u");
+        sb.append(UserHandle.getUserId(uid));
         sb.append(' ');
         sb.append(name.flattenToShortString());
         sb.append('}');

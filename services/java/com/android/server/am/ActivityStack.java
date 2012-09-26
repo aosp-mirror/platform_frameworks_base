@@ -638,7 +638,7 @@ final class ActivityStack {
         if (idx < 0) {
             app.activities.add(r);
         }
-        mService.updateLruProcessLocked(app, true, true);
+        mService.updateLruProcessLocked(app, true);
 
         try {
             if (app.thread == null) {
@@ -656,7 +656,7 @@ final class ActivityStack {
                     + " andResume=" + andResume);
             if (andResume) {
                 EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY,
-                        System.identityHashCode(r),
+                        r.userId, System.identityHashCode(r),
                         r.task.taskId, r.shortComponentName);
             }
             if (r.isHomeActivity) {
@@ -951,7 +951,7 @@ final class ActivityStack {
             if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending pause: " + prev);
             try {
                 EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
-                        System.identityHashCode(prev),
+                        prev.userId, System.identityHashCode(prev),
                         prev.shortComponentName);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
                         userLeaving, prev.configChangeFlags);
@@ -1040,7 +1040,7 @@ final class ActivityStack {
                     completePauseLocked();
                 } else {
                     EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
-                            System.identityHashCode(r), r.shortComponentName, 
+                            r.userId, System.identityHashCode(r), r.shortComponentName, 
                             mPausingActivity != null
                                 ? mPausingActivity.shortComponentName : "(none)");
                 }
@@ -1505,7 +1505,7 @@ final class ActivityStack {
             if (next.app != null && next.app.thread != null) {
                 // No reason to do full oom adj update here; we'll let that
                 // happen whenever it needs to later.
-                mService.updateLruProcessLocked(next.app, false, true);
+                mService.updateLruProcessLocked(next.app, false);
             }
             startPausingLocked(userLeaving, false);
             return true;
@@ -1641,7 +1641,7 @@ final class ActivityStack {
             if (mMainStack) {
                 mService.addRecentTaskLocked(next.task);
             }
-            mService.updateLruProcessLocked(next.app, true, true);
+            mService.updateLruProcessLocked(next.app, true);
             updateLRUListLocked(next);
 
             // Have the window manager re-evaluate the orientation of
@@ -1699,7 +1699,7 @@ final class ActivityStack {
                 }
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY,
-                        System.identityHashCode(next),
+                        next.userId, System.identityHashCode(next),
                         next.task.taskId, next.shortComponentName);
                 
                 next.sleeping = false;
@@ -2967,7 +2967,7 @@ final class ActivityStack {
                 intent, r.getUriPermissionsLocked());
 
         if (newTask) {
-            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.task.taskId);
+            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.userId, r.task.taskId);
         }
         logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         startActivityLocked(r, newTask, doResume, keepCurTransition, options);
@@ -3700,7 +3700,7 @@ final class ActivityStack {
 
         r.makeFinishing();
         EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                System.identityHashCode(r),
+                r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
         if (index < (mHistory.size()-1)) {
             ActivityRecord next = mHistory.get(index+1);
@@ -3996,7 +3996,7 @@ final class ActivityStack {
             TAG, "Removing activity from " + reason + ": token=" + r
               + ", app=" + (r.app != null ? r.app.processName : "(null)"));
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
-                System.identityHashCode(r),
+                r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
 
         boolean removedFromHistory = false;
@@ -4228,7 +4228,7 @@ final class ActivityStack {
         }
 
         finishTaskMoveLocked(task);
-        EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, task);
+        EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, task);
     }
 
     private final void finishTaskMoveLocked(int task) {
@@ -4448,7 +4448,7 @@ final class ActivityStack {
     private final void logStartActivity(int tag, ActivityRecord r,
             TaskRecord task) {
         EventLog.writeEvent(tag,
-                System.identityHashCode(r), task.taskId,
+                r.userId, System.identityHashCode(r), task.taskId,
                 r.shortComponentName, r.intent.getAction(),
                 r.intent.getType(), r.intent.getDataString(),
                 r.intent.getFlags());
@@ -4590,7 +4590,7 @@ final class ActivityStack {
                 + " with results=" + results + " newIntents=" + newIntents
                 + " andResume=" + andResume);
         EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
-                : EventLogTags.AM_RELAUNCH_ACTIVITY, System.identityHashCode(r),
+                : EventLogTags.AM_RELAUNCH_ACTIVITY, r.userId, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName);
         
         r.startFreezingScreenLocked(r.app, 0);

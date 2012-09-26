@@ -746,8 +746,8 @@ final class ActivityRecord {
                 final long totalTime = stack.mInitialStartTime != 0
                         ? (curTime - stack.mInitialStartTime) : thisTime;
                 if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
-                    EventLog.writeEvent(EventLogTags.ACTIVITY_LAUNCH_TIME,
-                            System.identityHashCode(this), shortComponentName,
+                    EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
+                            userId, System.identityHashCode(this), shortComponentName,
                             thisTime, totalTime);
                     StringBuilder sb = service.mStringBuilder;
                     sb.setLength(0);
@@ -923,6 +923,8 @@ final class ActivityRecord {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" u");
+        sb.append(userId);
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());
         sb.append('}');

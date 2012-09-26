@@ -44,7 +44,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
@@ -391,7 +390,7 @@ public class ActiveServices {
                     if (r.isForeground) {
                         r.isForeground = false;
                         if (r.app != null) {
-                            mAm.updateLruProcessLocked(r.app, false, true);
+                            mAm.updateLruProcessLocked(r.app, false);
                             updateServiceForegroundLocked(r.app, true);
                         }
                     }
@@ -760,7 +759,8 @@ public class ActiveServices {
                     int N = mPendingServices.size();
                     for (int i=0; i<N; i++) {
                         ServiceRecord pr = mPendingServices.get(i);
-                        if (pr.name.equals(name)) {
+                        if (pr.serviceInfo.applicationInfo.uid == sInfo.applicationInfo.uid
+                                && pr.name.equals(name)) {
                             mPendingServices.remove(i);
                             i--;
                             N--;
@@ -942,7 +942,7 @@ public class ActiveServices {
         Slog.w(TAG, "Scheduling restart of crashed service "
                 + r.shortName + " in " + r.restartDelay + "ms");
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
-                r.shortName, r.restartDelay);
+                r.userId, r.shortName, r.restartDelay);
 
         return canceled;
     }
@@ -1083,14 +1083,14 @@ public class ActiveServices {
 
         app.services.add(r);
         bumpServiceExecutingLocked(r, "create");
-        mAm.updateLruProcessLocked(app, true, true);
+        mAm.updateLruProcessLocked(app, true);
 
         boolean created = false;
         try {
             mAm.mStringBuilder.setLength(0);
             r.intent.getIntent().toShortString(mAm.mStringBuilder, true, false, true, false);
             EventLog.writeEvent(EventLogTags.AM_CREATE_SERVICE,
-                    System.identityHashCode(r), r.shortName,
+                    r.userId, System.identityHashCode(r), r.shortName,
                     mAm.mStringBuilder.toString(), r.app.pid);
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
@@ -1240,7 +1240,7 @@ public class ActiveServices {
 
         if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down " + r + " " + r.intent);
         EventLog.writeEvent(EventLogTags.AM_DESTROY_SERVICE,
-                System.identityHashCode(r), r.shortName,
+                r.userId, System.identityHashCode(r), r.shortName,
                 (r.app != null) ? r.app.pid : -1);
 
         mServiceMap.removeServiceByName(r.name, r.userId);
@@ -1664,7 +1664,7 @@ public class ActiveServices {
                     Slog.w(TAG, "Service crashed " + sr.crashCount
                             + " times, stopping: " + sr);
                     EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
-                            sr.crashCount, sr.shortName, app.pid);
+                            sr.userId, sr.crashCount, sr.shortName, app.pid);
                     bringDownServiceLocked(sr, true);
                 } else if (!allowRestart) {
                     bringDownServiceLocked(sr, true);

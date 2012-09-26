@@ -194,6 +194,6 @@ class BroadcastRecord extends Binder {
     public String toString() {
         return "BroadcastRecord{"
             + Integer.toHexString(System.identityHashCode(this))
-            + " " + intent.getAction() + "}";
+            + " u" + userId + " " + intent.getAction() + "}";
     }
 }
