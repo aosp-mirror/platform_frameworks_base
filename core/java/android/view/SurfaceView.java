@@ -46,13 +46,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * 
  * <p>The surface is Z ordered so that it is behind the window holding its
  * SurfaceView; the SurfaceView punches a hole in its window to allow its
- * surface to be displayed.  The view hierarchy will take care of correctly
+ * surface to be displayed. The view hierarchy will take care of correctly
  * compositing with the Surface any siblings of the SurfaceView that would
- * normally appear on top of it.  This can be used to place overlays such as
+ * normally appear on top of it. This can be used to place overlays such as
  * buttons on top of the Surface, though note however that it can have an
  * impact on performance since a full alpha-blended composite will be performed
  * each time the Surface changes.
  * 
+ * <p> The transparent region that makes the surface visible is based on the
+ * layout positions in the view hierarchy. If the post-layout transform
+ * properties are used to draw a sibling view on top of the SurfaceView, the
+ * view may not be properly composited with the surface.
+ *
  * <p>Access to the underlying surface is provided via the SurfaceHolder interface,
  * which can be retrieved by calling {@link #getHolder}.
  * 
@@ -62,14 +67,14 @@ import java.util.concurrent.locks.ReentrantLock;
  * Surface is created and destroyed as the window is shown and hidden.
  * 
  * <p>One of the purposes of this class is to provide a surface in which a
- * secondary thread can render into the screen.  If you are going to use it
+ * secondary thread can render into the screen. If you are going to use it
  * this way, you need to be aware of some threading semantics:
  * 
  * <ul>
  * <li> All SurfaceView and
  * {@link SurfaceHolder.Callback SurfaceHolder.Callback} methods will be called
  * from the thread running the SurfaceView's window (typically the main thread
- * of the application).  They thus need to correctly synchronize with any
+ * of the application). They thus need to correctly synchronize with any
  * state that is also touched by the drawing thread.
  * <li> You must ensure that the drawing thread only touches the underlying
  * Surface while it is valid -- between
