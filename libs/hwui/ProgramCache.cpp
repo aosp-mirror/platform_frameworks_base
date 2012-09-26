@@ -48,6 +48,7 @@ const char* gVS_Header_Attributes_AAVertexShapeParameters =
 const char* gVS_Header_Uniforms_TextureTransform =
         "uniform mat4 mainTextureTransform;\n";
 const char* gVS_Header_Uniforms =
+        "uniform mat4 projection;\n" \
         "uniform mat4 transform;\n";
 const char* gVS_Header_Uniforms_IsPoint =
         "uniform mediump float pointSize;\n";
@@ -104,28 +105,28 @@ const char* gVS_Main_OutTransformedTexCoords =
 const char* gVS_Main_OutGradient[6] = {
         // Linear
         "    linear = vec2((screenSpace * position).x, 0.5);\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
         "    linear = (screenSpace * position).x;\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
 
         // Circular
         "    circular = (screenSpace * position).xy;\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
         "    circular = (screenSpace * position).xy;\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
 
         // Sweep
         "    sweep = (screenSpace * position).xy;\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
         "    sweep = (screenSpace * position).xy;\n"
-        "    ditherTexCoords = (gl_Position * ditherSize).xy;\n",
+        "    ditherTexCoords = (transform * position).xy * ditherSize;\n",
 };
 const char* gVS_Main_OutBitmapTexCoords =
         "    outBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
 const char* gVS_Main_OutPointBitmapTexCoords =
         "    outPointBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
 const char* gVS_Main_Position =
-        "    gl_Position = transform * position;\n";
+        "    gl_Position = projection * transform * position;\n";
 const char* gVS_Main_PointSize =
         "    gl_PointSize = pointSize;\n";
 const char* gVS_Main_AALine =
