@@ -2450,6 +2450,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
+            // Cull any packages that run as system-domain uids but do not define their
+            // own backup agents
+            for (int i = 0; i < packagesToBackup.size(); ) {
+                PackageInfo pkg = packagesToBackup.get(i);
+                if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                        && (pkg.applicationInfo.backupAgentName == null)) {
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "... ignoring non-agent system package " + pkg.packageName);
+                    }
+                    packagesToBackup.remove(i);
+                } else {
+                    i++;
+                }
+            }
+
             FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
             OutputStream out = null;
 
@@ -3664,29 +3679,37 @@ class BackupManagerService extends IBackupManager.Stub {
                                 // Fall through to IGNORE if the app explicitly disallows backup
                                 final int flags = pkgInfo.applicationInfo.flags;
                                 if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
-                                    // Verify signatures against any installed version; if they
-                                    // don't match, then we fall though and ignore the data.  The
-                                    // signatureMatch() method explicitly ignores the signature
-                                    // check for packages installed on the system partition, because
-                                    // such packages are signed with the platform cert instead of
-                                    // the app developer's cert, so they're different on every
-                                    // device.
-                                    if (signaturesMatch(sigs, pkgInfo)) {
-                                        if (pkgInfo.versionCode >= version) {
-                                            Slog.i(TAG, "Sig + version match; taking data");
-                                            policy = RestorePolicy.ACCEPT;
+                                    // Restore system-uid-space packages only if they have
+                                    // defined a custom backup agent
+                                    if ((pkgInfo.applicationInfo.uid >= Process.FIRST_APPLICATION_UID)
+                                            || (pkgInfo.applicationInfo.backupAgentName != null)) {
+                                        // Verify signatures against any installed version; if they
+                                        // don't match, then we fall though and ignore the data.  The
+                                        // signatureMatch() method explicitly ignores the signature
+                                        // check for packages installed on the system partition, because
+                                        // such packages are signed with the platform cert instead of
+                                        // the app developer's cert, so they're different on every
+                                        // device.
+                                        if (signaturesMatch(sigs, pkgInfo)) {
+                                            if (pkgInfo.versionCode >= version) {
+                                                Slog.i(TAG, "Sig + version match; taking data");
+                                                policy = RestorePolicy.ACCEPT;
+                                            } else {
+                                                // The data is from a newer version of the app than
+                                                // is presently installed.  That means we can only
+                                                // use it if the matching apk is also supplied.
+                                                Slog.d(TAG, "Data version " + version
+                                                        + " is newer than installed version "
+                                                        + pkgInfo.versionCode + " - requiring apk");
+                                                policy = RestorePolicy.ACCEPT_IF_APK;
+                                            }
                                         } else {
-                                            // The data is from a newer version of the app than
-                                            // is presently installed.  That means we can only
-                                            // use it if the matching apk is also supplied.
-                                            Slog.d(TAG, "Data version " + version
-                                                    + " is newer than installed version "
-                                                    + pkgInfo.versionCode + " - requiring apk");
-                                            policy = RestorePolicy.ACCEPT_IF_APK;
+                                            Slog.w(TAG, "Restore manifest signatures do not match "
+                                                    + "installed application for " + info.packageName);
                                         }
                                     } else {
-                                        Slog.w(TAG, "Restore manifest signatures do not match "
-                                                + "installed application for " + info.packageName);
+                                        Slog.w(TAG, "Package " + info.packageName
+                                                + " is system level with no agent");
                                     }
                                 } else {
                                     if (DEBUG) Slog.i(TAG, "Restore manifest from "
