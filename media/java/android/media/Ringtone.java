@@ -225,8 +225,9 @@ public class Ringtone {
                 mLocalPlayer.start();
             }
         } else if (mAllowRemote) {
+            final Uri canonicalUri = mUri.getCanonicalUri();
             try {
-                mRemotePlayer.play(mRemoteToken, mUri, mStreamType);
+                mRemotePlayer.play(mRemoteToken, canonicalUri, mStreamType);
             } catch (RemoteException e) {
                 Log.w(TAG, "Problem playing ringtone: " + e);
             }

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.net.Uri;
+import android.os.UserHandle;
 
 /**
  * @hide
@@ -28,6 +29,6 @@ interface IRingtonePlayer {
     boolean isPlaying(IBinder token);
 
     /** Used for Notification sound playback. */
-    void playAsync(in Uri uri, boolean looping, int streamType);
+    void playAsync(in Uri uri, in UserHandle user, boolean looping, int streamType);
     void stopAsync();
 }
