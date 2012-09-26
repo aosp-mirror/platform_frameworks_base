@@ -155,7 +155,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de error"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Hacer informe de errores"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de errores"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo electrónico. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está desactivado. Activar"</string>
@@ -1227,7 +1227,7 @@
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche."</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca para salir del modo coche."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red/Zona Wi-Fi activo"</string>
-    <string name="tethered_notification_message" msgid="6857031760103062982">"Toca para configurar."</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"Toca para configurar"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Saltar"</string>
@@ -1270,7 +1270,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Eliminar elementos"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Deshacer las eliminaciones"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"No hacer nada por ahora"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Seleccionar una cuenta"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Selecciona una cuenta"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Añadir una cuenta"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Añadir cuenta"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Aumentar"</string>
@@ -1372,11 +1372,11 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Has olvidado el patrón?"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patrón incorrecto"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"El patrón es incorrecto."</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contraseña incorrecta"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN incorrecto"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Inténtalo de nuevo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"Dibuja tu patrón."</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"Dibuja tu patrón de desbloqueo."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Introduce el PIN de la tarjeta SIM."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Introduce el PIN."</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Escribe tu contraseña."</string>
