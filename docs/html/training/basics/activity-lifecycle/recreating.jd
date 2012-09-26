@@ -54,20 +54,25 @@ load alternative resources (such as the layout).</p>
 <p>By default, the system uses the {@link android.os.Bundle} instance state to save information
 about each {@link android.view.View} object in your activity layout (such as the text value entered
 into an {@link android.widget.EditText} object). So, if your activity instance is destroyed and
-recreated, the state of the layout is automatically restored to its previous state. However, your
+recreated, the state of the layout is restored to its previous state with no
+code required by you. However, your
 activity might have more state information that you'd like to restore, such as member variables that
 track the user's progress in the activity.</p>
 
-<p>In order for you to add additional data to the saved instance state for your activity, there's an
-additional callback method in the activity lifecycle that's not shown in the illustration from
-previous lessons. The method is {@link android.app.Activity#onSaveInstanceState
-onSaveInstanceState()} and the system calls it when the user is leaving your activity. When the
-system calls this method, it passes the {@link android.os.Bundle} object that will be saved in the
-event that your activity is destroyed unexpectedly so you can add additional information to it. Then
-if the system must recreate the activity instance after it was destroyed, it passes the same {@link
-android.os.Bundle} object to your activity's {@link android.app.Activity#onRestoreInstanceState
-onRestoreInstanceState()} method and also to your {@link android.app.Activity#onCreate onCreate()}
-method.</p>
+<p class="note"><strong>Note:</strong> In order for the Android system to restore the state of
+the views in your activity, <strong>each view must have a unique ID</strong>, supplied by the
+<a href="{@docRoot}reference/android/view/View.html#attr_android:id">{@code
+android:id}</a> attribute.</p>
+
+<p>To save additional data about the activity state, you must override
+the {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()} callback method.
+The system calls this method when the user is leaving your activity
+and passes it the {@link android.os.Bundle} object that will be saved in the
+event that your activity is destroyed unexpectedly. If
+the system must recreate the activity instance later, it passes the same {@link
+android.os.Bundle} object to both the {@link android.app.Activity#onRestoreInstanceState
+onRestoreInstanceState()} and {@link android.app.Activity#onCreate onCreate()}
+methods.</p>
 
 <img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
 <p class="img-caption"><strong>Figure 2.</strong> As the system begins to stop your activity, it
