@@ -146,7 +146,7 @@ public class ScaleGestureDetector {
     private int[] mTouchHistoryDirection;
     private long[] mTouchHistoryLastAcceptedTime;
 
-    private static final long TOUCH_STABILIZE_TIME = 64; // ms
+    private static final long TOUCH_STABILIZE_TIME = 128; // ms
 
     /**
      * Consistency verifier for debugging purposes.
@@ -192,7 +192,8 @@ public class ScaleGestureDetector {
 
                 if (hasLastAccepted) {
                     final int directionSig = (int) Math.signum(avg - mTouchHistoryLastAccepted[id]);
-                    if (directionSig != mTouchHistoryDirection[id]) {
+                    if (directionSig != mTouchHistoryDirection[id] ||
+                            (directionSig == 0 && mTouchHistoryDirection[id] == 0)) {
                         mTouchHistoryDirection[id] = directionSig;
                         final long time = h < historySize ? ev.getHistoricalEventTime(h)
                                 : ev.getEventTime();
