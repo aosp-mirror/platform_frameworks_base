@@ -12745,14 +12745,12 @@ package android.net {
     method public static javax.net.ssl.SSLSocketFactory getDefault(int, android.net.SSLSessionCache);
     method public java.lang.String[] getDefaultCipherSuites();
     method public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
-    method public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, int, android.net.SSLSessionCache);
     method public static javax.net.ssl.SSLSocketFactory getInsecure(int, android.net.SSLSessionCache);
     method public byte[] getNpnSelectedProtocol(java.net.Socket);
     method public java.lang.String[] getSupportedCipherSuites();
     method public void setHostname(java.net.Socket, java.lang.String);
     method public void setKeyManagers(javax.net.ssl.KeyManager[]);
     method public void setNpnProtocols(byte[][]);
-    method public void setSoWriteTimeout(java.net.Socket, int) throws java.net.SocketException;
     method public void setTrustManagers(javax.net.ssl.TrustManager[]);
     method public void setUseSessionTickets(java.net.Socket, boolean);
   }
