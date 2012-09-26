@@ -117,7 +117,7 @@ to modify App Widget settings at create-time.</p>
 application's
 <code>AndroidManifest.xml</code> file. For example:</p>
 
-<pre>
+<pre style="clear:right">
 &lt;receiver android:name="ExampleAppWidgetProvider" >
     &lt;intent-filter>
         &lt;action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -815,8 +815,7 @@ href="{@docRoot}resources/samples/StackWidget/index.html">StackView Widget
 sample</a>:</p>
 
 <p>
-<img src="{@docRoot}resources/samples/images/StackWidget.png" alt="StackView
-Widget" />
+<img src="{@docRoot}resources/images/StackWidget.png" alt="" />
 </p>
 
 <p>This sample consists of a stack of 10 views, which  display the values
