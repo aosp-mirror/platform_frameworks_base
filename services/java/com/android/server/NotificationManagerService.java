@@ -626,8 +626,8 @@ public class NotificationManagerService extends INotificationManager.Stub
         // After that, including subsequent boots, init with notifications turned on.
         // This works on the first boot because the setup wizard will toggle this
         // flag at least once and we'll go back to 0 after that.
-        if (0 == Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.DEVICE_PROVISIONED, 0)) {
+        if (0 == Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0)) {
             mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
         }
 

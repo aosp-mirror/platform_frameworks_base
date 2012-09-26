@@ -773,8 +773,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     boolean isDeviceProvisioned() {
-        return Settings.Secure.getInt(
-                mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
+        return Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     private void handleLongPressOnHome() {

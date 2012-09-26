@@ -241,6 +241,14 @@ public class InputManagerService extends IInputManager.Stub
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
 
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updatePointerSpeedFromSettings();
+                updateShowTouchesFromSettings();
+            }
+        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
+
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
     }
@@ -1073,14 +1081,14 @@ public class InputManagerService extends IInputManager.Stub
                     public void onChange(boolean selfChange) {
                         updatePointerSpeedFromSettings();
                     }
-                });
+                }, UserHandle.USER_ALL);
     }
 
     private int getPointerSpeedSetting() {
         int speed = InputManager.DEFAULT_POINTER_SPEED;
         try {
-            speed = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.POINTER_SPEED);
+            speed = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.POINTER_SPEED, UserHandle.USER_CURRENT);
         } catch (SettingNotFoundException snfe) {
         }
         return speed;
@@ -1099,14 +1107,14 @@ public class InputManagerService extends IInputManager.Stub
                     public void onChange(boolean selfChange) {
                         updateShowTouchesFromSettings();
                     }
-                });
+                }, UserHandle.USER_ALL);
     }
 
     private int getShowTouchesSetting(int defaultValue) {
         int result = defaultValue;
         try {
-            result = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SHOW_TOUCHES);
+            result = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SHOW_TOUCHES, UserHandle.USER_CURRENT);
         } catch (SettingNotFoundException snfe) {
         }
         return result;

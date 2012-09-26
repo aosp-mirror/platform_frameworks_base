@@ -159,8 +159,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *  Returns true if the Bluetooth saved state is "on"
      */
     private final boolean isBluetoothPersistedStateOn() {
-        return Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.BLUETOOTH_ON, 0) ==1;
+        return Settings.Global.getInt(mContentResolver,
+                Settings.Global.BLUETOOTH_ON, 0) ==1;
     }
 
     /**
@@ -168,8 +168,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *
      */
     private void persistBluetoothSetting(boolean setOn) {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                               Settings.Secure.BLUETOOTH_ON,
+        Settings.Global.putInt(mContext.getContentResolver(),
+                               Settings.Global.BLUETOOTH_ON,
                                setOn ? 1 : 0);
     }
 
