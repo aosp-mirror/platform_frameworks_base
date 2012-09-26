@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import com.android.frameworks.coretests.R;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -28,6 +26,10 @@ import android.test.AndroidTestCase;
 import android.test.ComparisonFailure;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
+
+import static com.android.server.MountService.buildObbPath;
+
+import com.android.frameworks.servicestests.R;
 
 import java.io.File;
 import java.io.InputStream;
@@ -281,5 +283,35 @@ public class MountServiceTests extends AndroidTestCase {
 
         unmountObb(sm, file1, OnObbStateChangeListener.UNMOUNTED);
         unmountObb(sm, file2, OnObbStateChangeListener.UNMOUNTED);
+    }
+
+    public void testBuildObbPath() {
+        final int userId = 10;
+
+        // Paths outside external storage should remain untouched
+        assertEquals("/storage/random/foo",
+                buildObbPath("/storage/random/foo", userId, true));
+        assertEquals("/storage/random/foo",
+                buildObbPath("/storage/random/foo", userId, false));
+
+        // Paths on user-specific emulated storage
+        assertEquals("/mnt/shell/emulated/10/foo",
+                buildObbPath("/storage/emulated_legacy/foo", userId, true));
+        assertEquals("/storage/emulated/10/foo",
+                buildObbPath("/storage/emulated_legacy/foo", userId, false));
+        assertEquals("/mnt/shell/emulated/10/foo",
+                buildObbPath("/storage/emulated/10/foo", userId, true));
+        assertEquals("/storage/emulated/10/foo",
+                buildObbPath("/storage/emulated/10/foo", userId, false));
+
+        // Paths on shared OBB emulated storage
+        assertEquals("/mnt/shell/emulated/obb/foo",
+                buildObbPath("/storage/emulated_legacy/Android/obb/foo", userId, true));
+        assertEquals("/storage/emulated/0/Android/obb/foo",
+                buildObbPath("/storage/emulated_legacy/Android/obb/foo", userId, false));
+        assertEquals("/mnt/shell/emulated/obb/foo",
+                buildObbPath("/storage/emulated/10/Android/obb/foo", userId, true));
+        assertEquals("/storage/emulated/0/Android/obb/foo",
+                buildObbPath("/storage/emulated/10/Android/obb/foo", userId, false));
     }
 }

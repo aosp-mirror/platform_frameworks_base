@@ -28,6 +28,10 @@ import android.os.ServiceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -443,25 +447,23 @@ public class StorageManager
      * That is, shared UID applications can attempt to mount any other
      * application's OBB that shares its UID.
      * 
-     * @param filename the path to the OBB file
+     * @param rawPath the path to the OBB file
      * @param key secret used to encrypt the OBB; may be <code>null</code> if no
      *            encryption was used on the OBB.
      * @param listener will receive the success or failure of the operation
      * @return whether the mount call was successfully queued or not
      */
-    public boolean mountObb(String filename, String key, OnObbStateChangeListener listener) {
-        if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
-        }
-
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
+    public boolean mountObb(String rawPath, String key, OnObbStateChangeListener listener) {
+        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Preconditions.checkNotNull(listener, "listener cannot be null");
 
         try {
+            final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.mountObb(filename, key, mObbActionListener, nonce);
+            mMountService.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce);
             return true;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to mount OBB", e);
         }
@@ -483,24 +485,19 @@ public class StorageManager
      * application's OBB that shares its UID.
      * <p>
      * 
-     * @param filename path to the OBB file
+     * @param rawPath path to the OBB file
      * @param force whether to kill any programs using this in order to unmount
      *            it
      * @param listener will receive the success or failure of the operation
      * @return whether the unmount call was successfully queued or not
      */
-    public boolean unmountObb(String filename, boolean force, OnObbStateChangeListener listener) {
-        if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
-        }
-
-        if (listener == null) {
-            throw new IllegalArgumentException("listener cannot be null");
-        }
+    public boolean unmountObb(String rawPath, boolean force, OnObbStateChangeListener listener) {
+        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Preconditions.checkNotNull(listener, "listener cannot be null");
 
         try {
             final int nonce = mObbActionListener.addListener(listener);
-            mMountService.unmountObb(filename, force, mObbActionListener, nonce);
+            mMountService.unmountObb(rawPath, force, mObbActionListener, nonce);
             return true;
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to mount OBB", e);
@@ -512,16 +509,14 @@ public class StorageManager
     /**
      * Check whether an Opaque Binary Blob (OBB) is mounted or not.
      * 
-     * @param filename path to OBB image
+     * @param rawPath path to OBB image
      * @return true if OBB is mounted; false if not mounted or on error
      */
-    public boolean isObbMounted(String filename) {
-        if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
-        }
+    public boolean isObbMounted(String rawPath) {
+        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.isObbMounted(filename);
+            return mMountService.isObbMounted(rawPath);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to check if OBB is mounted", e);
         }
@@ -534,17 +529,15 @@ public class StorageManager
      * give you the path to where you can obtain access to the internals of the
      * OBB.
      * 
-     * @param filename path to OBB image
+     * @param rawPath path to OBB image
      * @return absolute path to mounted OBB image data or <code>null</code> if
      *         not mounted or exception encountered trying to read status
      */
-    public String getMountedObbPath(String filename) {
-        if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
-        }
+    public String getMountedObbPath(String rawPath) {
+        Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         try {
-            return mMountService.getMountedObbPath(filename);
+            return mMountService.getMountedObbPath(rawPath);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to find mounted path for OBB", e);
         }
