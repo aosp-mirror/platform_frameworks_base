@@ -281,6 +281,28 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.widgetFeatures);
     }
 
+    @Override
+    public AppWidgetProviderInfo clone() {
+        AppWidgetProviderInfo that = new AppWidgetProviderInfo();
+        that.provider = this.provider == null ? null : this.provider.clone();
+        that.minWidth = this.minWidth;
+        that.minHeight = this.minHeight;
+        that.minResizeWidth = this.minResizeHeight;
+        that.minResizeHeight = this.minResizeHeight;
+        that.updatePeriodMillis = this.updatePeriodMillis;
+        that.initialLayout = that.initialLayout;
+        that.initialKeyguardLayout = this.initialKeyguardLayout;
+        that.configure = this.configure == null ? null : this.configure.clone();
+        that.label = this.label == null ? null : this.label.substring(0);
+        that.icon = this.icon;
+        that.previewImage = this.previewImage;
+        that.autoAdvanceViewId = this.autoAdvanceViewId;
+        that.resizeMode = this.resizeMode;
+        that.widgetCategory  = this.widgetCategory;
+        that.widgetFeatures = this.widgetFeatures;
+        return that;
+    }
+
     public int describeContents() {
         return 0;
     }
