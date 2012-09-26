@@ -81,6 +81,7 @@ Program::Program(const ProgramDescription& description, const char* vertex, cons
 
     if (mInitialized) {
         transform = addUniform("transform");
+        projection = addUniform("projection");
     }
 }
 
@@ -152,18 +153,20 @@ GLuint Program::buildShader(const char* source, GLenum type) {
 
 void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
         const mat4& transformMatrix, bool offset) {
-    mat4 t(projectionMatrix);
+    mat4 p(projectionMatrix);
     if (offset) {
         // offset screenspace xy by an amount that compensates for typical precision
         // issues in GPU hardware that tends to paint hor/vert lines in pixels shifted
         // up and to the left.
         // This offset value is based on an assumption that some hardware may use as
         // little as 12.4 precision, so we offset by slightly more than 1/16.
-        t.translate(.375, .375, 0);
+        p.translate(.375, .375, 0);
     }
-    t.multiply(transformMatrix);
+
+    mat4 t(transformMatrix);
     t.multiply(modelViewMatrix);
 
+    glUniformMatrix4fv(projection, 1, GL_FALSE, &p.data[0]);
     glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
 }
 
