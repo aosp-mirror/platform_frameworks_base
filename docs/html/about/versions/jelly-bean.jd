@@ -303,12 +303,12 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>Smart app updates is a new feature of Google Play that introduces a better way of delivering <strong>app updates</strong> to devices. When developers publish an update, Google Play now delivers only the <strong>bits that have changed</strong> to devices, rather than the entire APK. This makes the updates much lighter-weight in most cases, so they are faster to download, save the device’s battery, and conserve bandwidth usage on users’ mobile data plan. On average, a smart app update is about <strong>1/3 the size</strong> of a full APK update.</p>
 
-<h3 id="gps">Google Play services (coming soon)</h3>
+<h3 id="gps">Google Play services</h3>
 
 <p>Google Play services helps developers to <strong>integrate Google services</strong> such as authentication and Google+ into their apps delivered through Google Play.</p> 
 
-<p>Google Play services will be automatically provisioned to end user devices by Google Play, so all you need is a <strong>thin client library</strong> in your apps.</p>
+<p>Google Play services is automatically provisioned to end user devices by Google Play, so all you need is a <strong>thin client library</strong> in your apps.</p>
 
 <p>Because your app only contains the small client library, you can take advantage of these services without a big increase in download size and storage footprint. Also, Google Play will <strong>deliver regular updates</strong> to the services, without developers needing to publish app updates to take advantage of them.</p>
 
-<p>For more information about the APIs included in Google Play Services, see the <a href="http://developers.google.com/android/google-play-services/index.html">Google Play Services</a> developer page.</p>
+<p>For more information about the APIs included in Google Play Services, see the <a href="http://developers.google.com/android/google-play-services/index.html">Google Play services</a> developer page.</p>
