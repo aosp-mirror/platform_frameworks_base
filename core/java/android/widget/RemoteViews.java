@@ -2166,6 +2166,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setUri(int viewId, String methodName, Uri value) {
+        // Resolve any filesystem path before sending remotely
+        value = value.getCanonicalUri();
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.URI, value));
     }
 

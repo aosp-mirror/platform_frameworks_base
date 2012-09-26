@@ -124,6 +124,9 @@ public class NotificationManager
         int[] idOut = new int[1];
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
+        if (notification.sound != null) {
+            notification.sound = notification.sound.getCanonicalUri();
+        }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
             service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut,
@@ -143,6 +146,9 @@ public class NotificationManager
         int[] idOut = new int[1];
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
+        if (notification.sound != null) {
+            notification.sound = notification.sound.getCanonicalUri();
+        }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
             service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut,
