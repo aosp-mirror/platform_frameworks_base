@@ -2108,14 +2108,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final int timeout;
 
         if (ConnectivityManager.isNetworkTypeMobile(type)) {
-            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
-                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_MOBILE,
+            timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                                              0);
             // Canonicalize mobile network type
             type = ConnectivityManager.TYPE_MOBILE;
         } else if (ConnectivityManager.TYPE_WIFI == type) {
-            timeout = Settings.Secure.getInt(mContext.getContentResolver(),
-                                             Settings.Secure.DATA_ACTIVITY_TIMEOUT_WIFI,
+            timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                                              0);
         } else {
             // do not track any other networks
