@@ -1029,7 +1029,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 mLocation.setTime(timestamp);
                 // It would be nice to push the elapsed real-time timestamp
                 // further down the stack, but this is still useful
-                mLocation.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
+                mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
             }
             if ((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
                 mLocation.setAltitude(altitude);
