@@ -890,6 +890,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, userId, true, true, "enqueueNotification", pkg);
+        final UserHandle user = new UserHandle(userId);
 
         // Limit the number of notifications that any given package except the android
         // package can enqueue.  Prevents DOS attacks and deals with leaks.
@@ -991,7 +992,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
 
             if (notification.icon != 0) {
-                final UserHandle user = new UserHandle(userId);
                 final StatusBarNotification n = new StatusBarNotification(
                         pkg, id, tag, r.uid, r.initialPid, score, notification, user);
                 if (old != null && old.statusBarKey != null) {
@@ -1063,7 +1063,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         try {
                             final IRingtonePlayer player = mAudioService.getRingtonePlayer();
                             if (player != null) {
-                                player.playAsync(uri, looping, audioStreamType);
+                                player.playAsync(uri, user, looping, audioStreamType);
                             }
                         } catch (RemoteException e) {
                         } finally {
