@@ -381,4 +381,9 @@ public class AudioSystem
     public static native int setMasterMute(boolean mute);
     public static native boolean getMasterMute();
     public static native int getDevicesForStream(int stream);
+
+    // helpers for android.media.AudioManager.getProperty(), see description there for meaning
+    public static native int getPrimaryOutputSamplingRate();
+    public static native int getPrimaryOutputFrameCount();
+
 }
