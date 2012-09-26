@@ -703,10 +703,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private String pickBest(List<String> providers) {
-        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-            return LocationManager.NETWORK_PROVIDER;
-        } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
             return LocationManager.GPS_PROVIDER;
+        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            return LocationManager.NETWORK_PROVIDER;
         } else {
             return providers.get(0);
         }
