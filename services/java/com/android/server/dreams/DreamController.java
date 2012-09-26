@@ -25,13 +25,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.service.dreams.Dream;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-
-import com.android.internal.util.DumpUtils;
 
 import java.io.PrintWriter;
 import java.util.NoSuchElementException;
@@ -39,179 +38,206 @@ import java.util.NoSuchElementException;
 /**
  * Internal controller for starting and stopping the current dream and managing related state.
  *
- * Assumes all operations (except {@link #dump}) are called from a single thread.
+ * Assumes all operations are called from the dream handler thread.
  */
 final class DreamController {
-    private static final boolean DEBUG = true;
-    private static final String TAG = DreamController.class.getSimpleName();
-
-    public interface Listener {
-        void onDreamStopped(boolean wasTest);
-    }
+    private static final String TAG = "DreamController";
 
     private final Context mContext;
-    private final IWindowManager mIWindowManager;
-    private final DeathRecipient mDeathRecipient;
-    private final ServiceConnection mServiceConnection;
+    private final Handler mHandler;
     private final Listener mListener;
+    private final IWindowManager mIWindowManager;
 
-    private Handler mHandler;
+    private final Intent mDreamingStartedIntent = new Intent(Dream.ACTION_DREAMING_STARTED)
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    private final Intent mDreamingStoppedIntent = new Intent(Dream.ACTION_DREAMING_STOPPED)
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-    private ComponentName mCurrentDreamComponent;
-    private IDreamService mCurrentDream;
-    private Binder mCurrentDreamToken;
-    private boolean mCurrentDreamIsTest;
+    private DreamRecord mCurrentDream;
 
-    public DreamController(Context context, DeathRecipient deathRecipient,
-            ServiceConnection serviceConnection, Listener listener) {
+    public DreamController(Context context, Handler handler, Listener listener) {
         mContext = context;
-        mDeathRecipient = deathRecipient;
-        mServiceConnection = serviceConnection;
+        mHandler = handler;
         mListener = listener;
         mIWindowManager = WindowManagerGlobal.getWindowManagerService();
     }
 
-    public void setHandler(Handler handler) {
-        mHandler = handler;
+    public void dump(PrintWriter pw) {
+        pw.println("Dreamland:");
+        if (mCurrentDream != null) {
+            pw.println("  mCurrentDream:");
+            pw.println("    mToken=" + mCurrentDream.mToken);
+            pw.println("    mName=" + mCurrentDream.mName);
+            pw.println("    mIsTest=" + mCurrentDream.mIsTest);
+            pw.println("    mUserId=" + mCurrentDream.mUserId);
+            pw.println("    mBound=" + mCurrentDream.mBound);
+            pw.println("    mService=" + mCurrentDream.mService);
+            pw.println("    mSentStartBroadcast=" + mCurrentDream.mSentStartBroadcast);
+        } else {
+            pw.println("  mCurrentDream: null");
+        }
     }
 
-    public void dump(PrintWriter pw) {
-        if (mHandler== null || pw == null) {
+    public void startDream(Binder token, ComponentName name, boolean isTest, int userId) {
+        stopDream();
+
+        Slog.i(TAG, "Starting dream: name=" + name + ", isTest=" + isTest + ", userId=" + userId);
+
+        mCurrentDream = new DreamRecord(token, name, isTest, userId);
+
+        try {
+            mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Unable to add window token for dream.", ex);
+            stopDream();
             return;
         }
-        DumpUtils.dumpAsync(mHandler, new DumpUtils.Dump() {
-            @Override
-            public void dump(PrintWriter pw) {
-                pw.print("  component="); pw.println(mCurrentDreamComponent);
-                pw.print("  token="); pw.println(mCurrentDreamToken);
-                pw.print("  dream="); pw.println(mCurrentDream);
-            }
-        }, pw, 200);
-    }
 
-    public void start(ComponentName dream, boolean isTest) {
-        if (DEBUG) Slog.v(TAG, String.format("start(%s,%s)", dream, isTest));
-
-        if (mCurrentDreamComponent != null ) {
-            if (dream.equals(mCurrentDreamComponent) && isTest == mCurrentDreamIsTest) {
-                if (DEBUG) Slog.v(TAG, "Dream is already started: " + dream);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Dream.CATEGORY_DREAM);
+        intent.setComponent(name);
+        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        try {
+            if (!mContext.bindService(intent, mCurrentDream,
+                    Context.BIND_AUTO_CREATE, userId)) {
+                Slog.e(TAG, "Unable to bind dream service: " + intent);
+                stopDream();
                 return;
             }
-            // stop the current dream before starting a new one
-            stop();
-        }
-
-        mCurrentDreamComponent = dream;
-        mCurrentDreamIsTest = isTest;
-        mCurrentDreamToken = new Binder();
-
-        try {
-            if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurrentDreamToken
-                    + " for window type: " + WindowManager.LayoutParams.TYPE_DREAM);
-            mIWindowManager.addWindowToken(mCurrentDreamToken,
-                    WindowManager.LayoutParams.TYPE_DREAM);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Unable to add window token.");
-            stop();
+        } catch (SecurityException ex) {
+            Slog.e(TAG, "Unable to bind dream service: " + intent, ex);
+            stopDream();
             return;
         }
 
-        Intent intent = new Intent(Intent.ACTION_MAIN)
-                .setComponent(mCurrentDreamComponent)
-                .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                .putExtra("android.dreams.TEST", mCurrentDreamIsTest);
-
-        if (!mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE)) {
-            Slog.w(TAG, "Unable to bind service");
-            stop();
-            return;
-        }
-        if (DEBUG) Slog.v(TAG, "Bound service");
+        mCurrentDream.mBound = true;
     }
 
-    public void attach(ComponentName name, IBinder dream) {
-        if (DEBUG) Slog.v(TAG, String.format("attach(%s,%s)", name, dream));
-        mCurrentDream = IDreamService.Stub.asInterface(dream);
-
-        boolean linked = linkDeathRecipient(dream);
-        if (!linked) {
-            stop();
+    public void stopDream() {
+        if (mCurrentDream == null) {
             return;
         }
 
-        try {
-            if (DEBUG) Slog.v(TAG, "Attaching with token:" + mCurrentDreamToken);
-            mCurrentDream.attach(mCurrentDreamToken);
-        } catch (Throwable ex) {
-            Slog.w(TAG, "Unable to send window token to dream:" + ex);
-            stop();
-        }
-    }
-
-    public void stop() {
-        if (DEBUG) Slog.v(TAG, "stop()");
-
-        if (mCurrentDream != null) {
-            unlinkDeathRecipient(mCurrentDream.asBinder());
-
-            if (DEBUG) Slog.v(TAG, "Unbinding: " +  mCurrentDreamComponent + " service: " + mCurrentDream);
-            mContext.unbindService(mServiceConnection);
-        }
-        if (mCurrentDreamToken != null) {
-            removeWindowToken(mCurrentDreamToken);
-        }
-
-        final boolean wasTest = mCurrentDreamIsTest;
+        final DreamRecord oldDream = mCurrentDream;
         mCurrentDream = null;
-        mCurrentDreamToken = null;
-        mCurrentDreamComponent = null;
-        mCurrentDreamIsTest = false;
+        Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
+                + ", isTest=" + oldDream.mIsTest + ", userId=" + oldDream.mUserId);
 
-        if (mListener != null && mHandler != null) {
-            mHandler.post(new Runnable(){
+        if (oldDream.mSentStartBroadcast) {
+            mContext.sendBroadcast(mDreamingStoppedIntent);
+        }
+
+        if (oldDream.mService != null) {
+            // TODO: It would be nice to tell the dream that it's being stopped so that
+            // it can shut down nicely before we yank its window token out from under it.
+            try {
+                oldDream.mService.asBinder().unlinkToDeath(oldDream, 0);
+            } catch (NoSuchElementException ex) {
+                // don't care
+            }
+            oldDream.mService = null;
+        }
+
+        if (oldDream.mBound) {
+            mContext.unbindService(oldDream);
+        }
+
+        try {
+            mIWindowManager.removeWindowToken(oldDream.mToken);
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Error removing window token for dream.", ex);
+        }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onDreamStopped(oldDream.mToken);
+            }
+        });
+    }
+
+    private void attach(IDreamService service) {
+        try {
+            service.asBinder().linkToDeath(mCurrentDream, 0);
+            service.attach(mCurrentDream.mToken);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "The dream service died unexpectedly.", ex);
+            stopDream();
+            return;
+        }
+
+        mCurrentDream.mService = service;
+
+        if (!mCurrentDream.mIsTest) {
+            mContext.sendBroadcast(mDreamingStartedIntent);
+            mCurrentDream.mSentStartBroadcast = true;
+        }
+    }
+
+    /**
+     * Callback interface to be implemented by the {@link DreamManagerService}.
+     */
+    public interface Listener {
+        void onDreamStopped(Binder token);
+    }
+
+    private final class DreamRecord implements DeathRecipient, ServiceConnection {
+        public final Binder mToken;
+        public final ComponentName mName;
+        public final boolean mIsTest;
+        public final int mUserId;
+
+        public boolean mBound;
+        public IDreamService mService;
+        public boolean mSentStartBroadcast;
+
+        public DreamRecord(Binder token, ComponentName name,
+                boolean isTest, int userId) {
+            mToken = token;
+            mName = name;
+            mIsTest = isTest;
+            mUserId  = userId;
+        }
+
+        // May be called on any thread.
+        @Override
+        public void binderDied() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onDreamStopped(wasTest);
-                }});
+                    mService = null;
+                    if (mCurrentDream == DreamRecord.this) {
+                        stopDream();
+                    }
+                }
+            });
+        }
+
+        // May be called on any thread.
+        @Override
+        public void onServiceConnected(ComponentName name, final IBinder service) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCurrentDream == DreamRecord.this && mService == null) {
+                        attach(IDreamService.Stub.asInterface(service));
+                    }
+                }
+            });
+        }
+
+        // May be called on any thread.
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mService = null;
+                    if (mCurrentDream == DreamRecord.this) {
+                        stopDream();
+                    }
+                }
+            });
         }
     }
-
-    public void stopSelf(IBinder token) {
-        if (DEBUG) Slog.v(TAG, String.format("stopSelf(%s)", token));
-        if (token == null || token != mCurrentDreamToken) {
-            Slog.w(TAG, "Stop requested for non-current dream token: " + token);
-        } else {
-            stop();
-        }
-    }
-
-    private void removeWindowToken(IBinder token) {
-        if (DEBUG) Slog.v(TAG, "Removing window token: " + token);
-        try {
-            mIWindowManager.removeWindowToken(token);
-        } catch (Throwable e) {
-            Slog.w(TAG, "Error removing window token", e);
-        }
-    }
-
-    private boolean linkDeathRecipient(IBinder dream) {
-        if (DEBUG) Slog.v(TAG, "Linking death recipient");
-        try {
-            dream.linkToDeath(mDeathRecipient, 0);
-            return true;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Unable to link death recipient",  e);
-            return false;
-        }
-    }
-
-    private void unlinkDeathRecipient(IBinder dream) {
-        if (DEBUG) Slog.v(TAG, "Unlinking death recipient");
-        try {
-            dream.unlinkToDeath(mDeathRecipient, 0);
-        } catch (NoSuchElementException e) {
-            // we tried
-        }
-    }
-
 }

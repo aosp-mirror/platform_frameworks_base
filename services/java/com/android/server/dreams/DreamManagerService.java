@@ -16,100 +16,97 @@
 
 package com.android.server.dreams;
 
-import static android.provider.Settings.Secure.SCREENSAVER_COMPONENTS;
-import static android.provider.Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT;
+import com.android.internal.util.DumpUtils;
 
-import android.app.ActivityManagerNative;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.Dream;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import libcore.util.Objects;
+
 /**
  * Service api for managing dreams.
  *
  * @hide
  */
-public final class DreamManagerService
-        extends IDreamManager.Stub
-        implements ServiceConnection {
+public final class DreamManagerService extends IDreamManager.Stub {
     private static final boolean DEBUG = true;
-    private static final String TAG = DreamManagerService.class.getSimpleName();
-
-    private static final Intent mDreamingStartedIntent = new Intent(Dream.ACTION_DREAMING_STARTED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-    private static final Intent mDreamingStoppedIntent = new Intent(Dream.ACTION_DREAMING_STOPPED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    private static final String TAG = "DreamManagerService";
 
     private final Object mLock = new Object();
-    private final DreamController mController;
-    private final DreamControllerHandler mHandler;
+
     private final Context mContext;
+    private final DreamHandler mHandler;
+    private final DreamController mController;
+    private final PowerManager mPowerManager;
 
-    private final CurrentUserManager mCurrentUserManager = new CurrentUserManager();
+    private Binder mCurrentDreamToken;
+    private ComponentName mCurrentDreamName;
+    private int mCurrentDreamUserId;
+    private boolean mCurrentDreamIsTest;
 
-    private final DeathRecipient mAwakenOnBinderDeath = new DeathRecipient() {
-        @Override
-        public void binderDied() {
-            if (DEBUG) Slog.v(TAG, "binderDied()");
-            awaken();
-        }
-    };
-
-    private final DreamController.Listener mControllerListener = new DreamController.Listener() {
-        @Override
-        public void onDreamStopped(boolean wasTest) {
-            synchronized(mLock) {
-                setDreamingLocked(false, wasTest);
-            }
-        }};
-
-    private boolean mIsDreaming;
-
-    public DreamManagerService(Context context) {
-        if (DEBUG) Slog.v(TAG, "DreamManagerService startup");
+    public DreamManagerService(Context context, Handler mainHandler) {
         mContext = context;
-        mController = new DreamController(context, mAwakenOnBinderDeath, this, mControllerListener);
-        mHandler = new DreamControllerHandler(mController);
-        mController.setHandler(mHandler);
+        mHandler = new DreamHandler(mainHandler.getLooper());
+        mController = new DreamController(context, mHandler, mControllerListener);
+
+        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
     }
 
     public void systemReady() {
-        mCurrentUserManager.init(mContext);
-
-        if (DEBUG) Slog.v(TAG, "Ready to dream!");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                synchronized (mLock) {
+                    stopDreamLocked();
+                }
+            }
+        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
     }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
-        pw.println("Dreamland:");
-        mController.dump(pw);
-        mCurrentUserManager.dump(pw);
+        pw.println("DREAM MANAGER (dumpsys dreams)");
+        pw.println();
+
+        pw.println("mCurrentDreamToken=" + mCurrentDreamToken);
+        pw.println("mCurrentDreamName=" + mCurrentDreamName);
+        pw.println("mCurrentDreamUserId=" + mCurrentDreamUserId);
+        pw.println("mCurrentDreamIsTest=" + mCurrentDreamIsTest);
+        pw.println();
+
+        DumpUtils.dumpAsync(mHandler, new DumpUtils.Dump() {
+            @Override
+            public void dump(PrintWriter pw) {
+                mController.dump(pw);
+            }
+        }, pw, 200);
     }
 
-    // begin IDreamManager api
-    @Override
+    @Override // Binder call
     public ComponentName[] getDreamComponents() {
         checkPermission(android.Manifest.permission.READ_DREAM_STATE);
-        int userId = UserHandle.getCallingUserId();
 
+        final int userId = UserHandle.getCallingUserId();
         final long ident = Binder.clearCallingIdentity();
         try {
             return getDreamComponentsForUser(userId);
@@ -118,15 +115,15 @@ public final class DreamManagerService
         }
     }
 
-    @Override
+    @Override // Binder call
     public void setDreamComponents(ComponentName[] componentNames) {
         checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
-        int userId = UserHandle.getCallingUserId();
 
+        final int userId = UserHandle.getCallingUserId();
         final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    SCREENSAVER_COMPONENTS,
+                    Settings.Secure.SCREENSAVER_COMPONENTS,
                     componentsToString(componentNames),
                     userId);
         } finally {
@@ -134,140 +131,211 @@ public final class DreamManagerService
         }
     }
 
-    @Override
+    @Override // Binder call
     public ComponentName getDefaultDreamComponent() {
         checkPermission(android.Manifest.permission.READ_DREAM_STATE);
-        int userId = UserHandle.getCallingUserId();
 
+        final int userId = UserHandle.getCallingUserId();
         final long ident = Binder.clearCallingIdentity();
         try {
             String name = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                    SCREENSAVER_DEFAULT_COMPONENT,
+                    Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
                     userId);
             return name == null ? null : ComponentName.unflattenFromString(name);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
     }
 
-    @Override
+    @Override // Binder call
     public boolean isDreaming() {
         checkPermission(android.Manifest.permission.READ_DREAM_STATE);
 
-        return mIsDreaming;
+        synchronized (mLock) {
+            return mCurrentDreamToken != null && !mCurrentDreamIsTest;
+        }
     }
 
-    @Override
+    @Override // Binder call
     public void dream() {
         checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (DEBUG) Slog.v(TAG, "Dream now");
-            ComponentName[] dreams = getDreamComponentsForUser(mCurrentUserManager.getCurrentUserId());
-            ComponentName firstDream = dreams != null && dreams.length > 0 ? dreams[0] : null;
-            if (firstDream != null) {
-                mHandler.requestStart(firstDream, false /*isTest*/);
-                synchronized (mLock) {
-                    setDreamingLocked(true, false /*isTest*/);
-                }
-            }
+            // Ask the power manager to nap.  It will eventually call back into
+            // startDream() if/when it is appropriate to start dreaming.
+            // Because napping could cause the screen to turn off immediately if the dream
+            // cannot be started, we keep one eye open and gently poke user activity.
+            long time = SystemClock.uptimeMillis();
+            mPowerManager.userActivity(time, true /*noChangeLights*/);
+            mPowerManager.nap(time);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @Override
+    @Override // Binder call
     public void testDream(ComponentName dream) {
         checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
 
+        if (dream == null) {
+            throw new IllegalArgumentException("dream must not be null");
+        }
+
+        final int callingUserId = UserHandle.getCallingUserId();
+        final int currentUserId = ActivityManager.getCurrentUser();
+        if (callingUserId != currentUserId) {
+            // This check is inherently prone to races but at least it's something.
+            Slog.w(TAG, "Aborted attempt to start a test dream while a different "
+                    + " user is active: callingUserId=" + callingUserId
+                    + ", currentUserId=" + currentUserId);
+            return;
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (DEBUG) Slog.v(TAG, "Test dream name=" + dream);
-            if (dream != null) {
-                mHandler.requestStart(dream, true /*isTest*/);
-                synchronized (mLock) {
-                    setDreamingLocked(true, true /*isTest*/);
-                }
+            synchronized (mLock) {
+                startDreamLocked(dream, true /*isTest*/, callingUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
     }
 
-    @Override
+    @Override // Binder call
     public void awaken() {
         checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (DEBUG) Slog.v(TAG, "Wake up");
-            mHandler.requestStop();
+            // Treat an explicit request to awaken as user activity so that the
+            // device doesn't immediately go to sleep if the timeout expired,
+            // for example when being undocked.
+            long time = SystemClock.uptimeMillis();
+            mPowerManager.userActivity(time, false /*noChangeLights*/);
+            stopDream();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    @Override
-    public void awakenSelf(IBinder token) {
-        // requires no permission, called by Dream from an arbitrary process
+    @Override // Binder call
+    public void finishSelf(IBinder token) {
+        // Requires no permission, called by Dream from an arbitrary process.
+        if (token == null) {
+            throw new IllegalArgumentException("token must not be null");
+        }
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (DEBUG) Slog.v(TAG, "Wake up from dream: " + token);
-            if (token != null) {
-                mHandler.requestStopSelf(token);
+            if (DEBUG) {
+                Slog.d(TAG, "Dream finished: " + token);
+            }
+
+            // Note that a dream finishing and self-terminating is not
+            // itself considered user activity.  If the dream is ending because
+            // the user interacted with the device then user activity will already
+            // have been poked so the device will stay awake a bit longer.
+            // If the dream is ending on its own for other reasons and no wake
+            // locks are held and the user activity timeout has expired then the
+            // device may simply go to sleep.
+            synchronized (mLock) {
+                if (mCurrentDreamToken == token) {
+                    stopDreamLocked();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
-    // end IDreamManager api
 
-    // begin ServiceConnection
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder dream) {
-        if (DEBUG) Slog.v(TAG, "Service connected: " + name + " binder=" +
-                dream + " thread=" + Thread.currentThread().getId());
-        mHandler.requestAttach(name, dream);
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        if (DEBUG) Slog.v(TAG, "Service disconnected: " + name);
-        // Only happens in exceptional circumstances, awaken just to be safe
-        awaken();
-    }
-    // end ServiceConnection
-
-    private void checkPermission(String permission) {
-        if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(permission)) {
-            throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
-                    + ", must have permission " + permission);
-        }
-    }
-
-    private void setDreamingLocked(boolean isDreaming, boolean isTest) {
-        boolean wasDreaming = mIsDreaming;
-        if (!isTest) {
-            if (!wasDreaming && isDreaming) {
-                if (DEBUG) Slog.v(TAG, "Firing ACTION_DREAMING_STARTED");
-                mContext.sendBroadcast(mDreamingStartedIntent);
-            } else if (wasDreaming && !isDreaming) {
-                if (DEBUG) Slog.v(TAG, "Firing ACTION_DREAMING_STOPPED");
-                mContext.sendBroadcast(mDreamingStoppedIntent);
+    /**
+     * Called by the power manager to start a dream.
+     */
+    public void startDream() {
+        int userId = ActivityManager.getCurrentUser();
+        ComponentName dream = chooseDreamForUser(userId);
+        if (dream != null) {
+            synchronized (mLock) {
+                startDreamLocked(dream, false /*isTest*/, userId);
             }
         }
-        mIsDreaming = isDreaming;
+    }
+
+    /**
+     * Called by the power manager to stop a dream.
+     */
+    public void stopDream() {
+        synchronized (mLock) {
+            stopDreamLocked();
+        }
+    }
+
+    private ComponentName chooseDreamForUser(int userId) {
+        ComponentName[] dreams = getDreamComponentsForUser(userId);
+        return dreams != null && dreams.length != 0 ? dreams[0] : null;
     }
 
     private ComponentName[] getDreamComponentsForUser(int userId) {
         String names = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                SCREENSAVER_COMPONENTS,
+                Settings.Secure.SCREENSAVER_COMPONENTS,
                 userId);
         return names == null ? null : componentsFromString(names);
+    }
+
+    private void startDreamLocked(final ComponentName name,
+            final boolean isTest, final int userId) {
+        if (Objects.equal(mCurrentDreamName, name)
+                && mCurrentDreamIsTest == isTest
+                && mCurrentDreamUserId == userId) {
+            return;
+        }
+
+        stopDreamLocked();
+
+        Slog.i(TAG, "Entering dreamland.");
+
+        final Binder newToken = new Binder();
+        mCurrentDreamToken = newToken;
+        mCurrentDreamName = name;
+        mCurrentDreamIsTest = isTest;
+        mCurrentDreamUserId = userId;
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mController.startDream(newToken, name, isTest, userId);
+            }
+        });
+    }
+
+    private void stopDreamLocked() {
+        if (mCurrentDreamToken != null) {
+            Slog.i(TAG, "Leaving dreamland.");
+
+            cleanupDreamLocked();
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mController.stopDream();
+                }
+            });
+        }
+    }
+
+    private void cleanupDreamLocked() {
+        mCurrentDreamToken = null;
+        mCurrentDreamName = null;
+        mCurrentDreamIsTest = false;
+        mCurrentDreamUserId = 0;
+    }
+
+    private void checkPermission(String permission) {
+        if (mContext.checkCallingOrSelfPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
+                    + ", must have permission " + permission);
+        }
     }
 
     private static String componentsToString(ComponentName[] componentNames) {
@@ -292,93 +360,24 @@ public final class DreamManagerService
         return componentNames;
     }
 
-    /**
-     * Keeps track of the current user, since dream() uses the current user's configuration.
-     */
-    private static class CurrentUserManager {
-        private final Object mLock = new Object();
-        private int mCurrentUserId;
-
-        public void init(Context context) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
-            context.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                        synchronized(mLock) {
-                            mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                            if (DEBUG) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
-                        }
-                    }
-                }}, filter);
-            try {
-                synchronized (mLock) {
-                    mCurrentUserId = ActivityManagerNative.getDefault().getCurrentUser().id;
+    private final DreamController.Listener mControllerListener = new DreamController.Listener() {
+        @Override
+        public void onDreamStopped(Binder token) {
+            synchronized (mLock) {
+                if (mCurrentDreamToken == token) {
+                    cleanupDreamLocked();
                 }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
             }
         }
-
-        public void dump(PrintWriter pw) {
-            pw.print("  user="); pw.println(getCurrentUserId());
-        }
-
-        public int getCurrentUserId() {
-            synchronized(mLock) {
-                return mCurrentUserId;
-            }
-        }
-    }
+    };
 
     /**
      * Handler for asynchronous operations performed by the dream manager.
-     *
      * Ensures operations to {@link DreamController} are single-threaded.
      */
-    private static final class DreamControllerHandler extends Handler {
-        private final DreamController mController;
-        private final Runnable mStopRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mController.stop();
-            }};
-
-        public DreamControllerHandler(DreamController controller) {
-            super(true /*async*/);
-            mController = controller;
+    private final class DreamHandler extends Handler {
+        public DreamHandler(Looper looper) {
+            super(looper, null, true /*async*/);
         }
-
-        public void requestStart(final ComponentName name, final boolean isTest) {
-            post(new Runnable(){
-                @Override
-                public void run() {
-                    mController.start(name, isTest);
-                }});
-        }
-
-        public void requestAttach(final ComponentName name, final IBinder dream) {
-            post(new Runnable(){
-                @Override
-                public void run() {
-                    mController.attach(name, dream);
-                }});
-        }
-
-        public void requestStopSelf(final IBinder token) {
-            post(new Runnable(){
-                @Override
-                public void run() {
-                    mController.stopSelf(token);
-                }});
-        }
-
-        public void requestStop() {
-            post(mStopRunnable);
-        }
-
     }
-
 }
