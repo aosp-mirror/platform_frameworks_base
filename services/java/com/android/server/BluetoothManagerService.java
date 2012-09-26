@@ -218,8 +218,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public IBluetooth registerAdapter(IBluetoothManagerCallback callback){
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                                "Need BLUETOOTH permission");
         Message msg = mHandler.obtainMessage(MESSAGE_REGISTER_ADAPTER);
         msg.obj = callback;
         mHandler.sendMessage(msg);
