@@ -17,7 +17,10 @@
 package android.view;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.FloatMath;
+
+import java.util.Arrays;
 
 /**
  * Detects scaling transformation gestures using the supplied {@link MotionEvent}s.
@@ -139,6 +142,12 @@ public class ScaleGestureDetector {
     private int mSpanSlop;
     private int mMinSpan;
 
+    private float[] mTouchHistoryLastAccepted;
+    private int[] mTouchHistoryDirection;
+    private long[] mTouchHistoryLastAcceptedTime;
+
+    private static final long TOUCH_STABILIZE_TIME = 64; // ms
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -152,6 +161,119 @@ public class ScaleGestureDetector {
         mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
         mMinSpan = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_minScalingSpan);
+    }
+
+    /**
+     * The touchMajor/touchMinor elements of a MotionEvent can flutter/jitter on
+     * some hardware/driver combos. Smooth it out to get kinder, gentler behavior.
+     * @param ev MotionEvent to add to the ongoing history
+     */
+    private void addTouchHistory(MotionEvent ev) {
+        final long currentTime = SystemClock.uptimeMillis();
+        final int count = ev.getPointerCount();
+        for (int i = 0; i < count; i++) {
+            final int id = ev.getPointerId(i);
+            ensureTouchHistorySize(id);
+
+            final boolean hasLastAccepted = !Float.isNaN(mTouchHistoryLastAccepted[id]);
+            boolean accept = true;
+            final int historySize = ev.getHistorySize();
+            for (int h = 0; h < historySize + 1; h++) {
+                final float major;
+                final float minor;
+                if (h < historySize) {
+                    major = ev.getHistoricalTouchMajor(i, h);
+                    minor = ev.getHistoricalTouchMinor(i, h);
+                } else {
+                    major = ev.getTouchMajor(i);
+                    minor = ev.getTouchMinor(i);
+                }
+                final float avg = (major + minor) / 2;
+
+                if (hasLastAccepted) {
+                    final int directionSig = (int) Math.signum(avg - mTouchHistoryLastAccepted[id]);
+                    if (directionSig != mTouchHistoryDirection[id]) {
+                        mTouchHistoryDirection[id] = directionSig;
+                        final long time = h < historySize ? ev.getHistoricalEventTime(h)
+                                : ev.getEventTime();
+                        mTouchHistoryLastAcceptedTime[id] = time;
+                        accept = false;
+                    }
+                    if (currentTime - mTouchHistoryLastAcceptedTime[id] < TOUCH_STABILIZE_TIME) {
+                        accept = false;
+                    }
+                }
+            }
+
+            if (accept) {
+                float newAccepted = (ev.getTouchMajor(i) + ev.getTouchMinor(i)) / 2;
+                if (hasLastAccepted) {
+                    newAccepted = (mTouchHistoryLastAccepted[id] + newAccepted) / 2;
+                }
+                mTouchHistoryLastAccepted[id] = newAccepted;
+                mTouchHistoryDirection[id] = 0;
+                mTouchHistoryLastAcceptedTime[id] = ev.getEventTime();
+            }
+        }
+    }
+
+    /**
+     * Clear out the touch history for a given pointer id.
+     * @param id pointer id to clear
+     * @see #addTouchHistory(MotionEvent)
+     */
+    private void removeTouchHistoryForId(int id) {
+        mTouchHistoryLastAccepted[id] = Float.NaN;
+        mTouchHistoryDirection[id] = 0;
+        mTouchHistoryLastAcceptedTime[id] = 0;
+    }
+
+    /**
+     * Get the adjusted combined touchMajor/touchMinor value for a given pointer id
+     * @param id the pointer id of the data to obtain
+     * @return the adjusted major/minor value for the point at id
+     * @see #addTouchHistory(MotionEvent)
+     */
+    private float getAdjustedTouchHistory(int id) {
+        return mTouchHistoryLastAccepted[id];
+    }
+
+    /**
+     * Clear all touch history tracking. Useful in ACTION_CANCEL or ACTION_UP.
+     * @see #addTouchHistory(MotionEvent)
+     */
+    private void clearTouchHistory() {
+        Arrays.fill(mTouchHistoryLastAccepted, Float.NaN);
+        Arrays.fill(mTouchHistoryDirection, 0);
+        Arrays.fill(mTouchHistoryLastAcceptedTime, 0);
+    }
+
+    private void ensureTouchHistorySize(int id) {
+        final int requiredSize = id + 1;
+        if (mTouchHistoryLastAccepted == null || mTouchHistoryLastAccepted.length < requiredSize) {
+            final float[] newLastAccepted = new float[requiredSize];
+            final int[] newDirection = new int[requiredSize];
+            final long[] newLastAcceptedTime = new long[requiredSize];
+
+            int oldLength = 0;
+            if (mTouchHistoryLastAccepted != null) {
+                System.arraycopy(mTouchHistoryLastAccepted, 0, newLastAccepted, 0,
+                        mTouchHistoryLastAccepted.length);
+                System.arraycopy(mTouchHistoryDirection, 0, newDirection, 0,
+                        mTouchHistoryDirection.length);
+                System.arraycopy(mTouchHistoryLastAcceptedTime, 0, newLastAcceptedTime, 0,
+                        mTouchHistoryLastAcceptedTime.length);
+                oldLength = mTouchHistoryLastAccepted.length;
+            }
+
+            Arrays.fill(newLastAccepted, oldLength, newLastAccepted.length, Float.NaN);
+            Arrays.fill(newDirection, oldLength, newDirection.length, 0);
+            Arrays.fill(newLastAcceptedTime, oldLength, newLastAcceptedTime.length, 0);
+
+            mTouchHistoryLastAccepted = newLastAccepted;
+            mTouchHistoryDirection = newDirection;
+            mTouchHistoryLastAcceptedTime = newLastAcceptedTime;
+        }
     }
 
     /**
@@ -186,6 +308,7 @@ public class ScaleGestureDetector {
             }
 
             if (streamComplete) {
+                clearTouchHistory();
                 return true;
             }
         }
@@ -208,13 +331,19 @@ public class ScaleGestureDetector {
         final float focusX = sumX / div;
         final float focusY = sumY / div;
 
+        if (pointerUp) {
+            removeTouchHistoryForId(event.getPointerId(event.getActionIndex()));
+        } else {
+            addTouchHistory(event);
+        }
+
         // Determine average deviation from focal point
         float devSumX = 0, devSumY = 0;
         for (int i = 0; i < count; i++) {
             if (skipIndex == i) continue;
 
             // Average touch major and touch minor and convert the resulting diameter into a radius.
-            final float touchSize = (event.getTouchMajor(i) + event.getTouchMinor(i)) / 4;
+            final float touchSize = getAdjustedTouchHistory(event.getPointerId(i));
             devSumX += Math.abs(event.getX(i) - focusX) + touchSize;
             devSumY += Math.abs(event.getY(i) - focusY) + touchSize;
         }
