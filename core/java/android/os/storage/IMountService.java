@@ -489,13 +489,14 @@ public interface IMountService extends IInterface {
              * IObbActionListener to inform it of the terminal state of the
              * call.
              */
-            public void mountObb(String filename, String key, IObbActionListener token, int nonce)
-                    throws RemoteException {
+            public void mountObb(String rawPath, String canonicalPath, String key,
+                    IObbActionListener token, int nonce) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeString(filename);
+                    _data.writeString(rawPath);
+                    _data.writeString(canonicalPath);
                     _data.writeString(key);
                     _data.writeStrongBinder((token != null ? token.asBinder() : null));
                     _data.writeInt(nonce);
@@ -514,13 +515,14 @@ public interface IMountService extends IInterface {
              * IObbActionListener to inform it of the terminal state of the
              * call.
              */
-            public void unmountObb(String filename, boolean force, IObbActionListener token,
-                    int nonce) throws RemoteException {
+            public void unmountObb(
+                    String rawPath, boolean force, IObbActionListener token, int nonce)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeString(filename);
+                    _data.writeString(rawPath);
                     _data.writeInt((force ? 1 : 0));
                     _data.writeStrongBinder((token != null ? token.asBinder() : null));
                     _data.writeInt(nonce);
@@ -536,13 +538,13 @@ public interface IMountService extends IInterface {
              * Checks whether the specified Opaque Binary Blob (OBB) is mounted
              * somewhere.
              */
-            public boolean isObbMounted(String filename) throws RemoteException {
+            public boolean isObbMounted(String rawPath) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 boolean _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeString(filename);
+                    _data.writeString(rawPath);
                     mRemote.transact(Stub.TRANSACTION_isObbMounted, _data, _reply, 0);
                     _reply.readException();
                     _result = 0 != _reply.readInt();
@@ -556,13 +558,13 @@ public interface IMountService extends IInterface {
             /**
              * Gets the path to the mounted Opaque Binary Blob (OBB).
              */
-            public String getMountedObbPath(String filename) throws RemoteException {
+            public String getMountedObbPath(String rawPath) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 String _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeString(filename);
+                    _data.writeString(rawPath);
                     mRemote.transact(Stub.TRANSACTION_getMountedObbPath, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readString();
@@ -1042,15 +1044,14 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_mountObb: {
                     data.enforceInterface(DESCRIPTOR);
-                    String filename;
-                    filename = data.readString();
-                    String key;
-                    key = data.readString();
+                    final String rawPath = data.readString();
+                    final String canonicalPath = data.readString();
+                    final String key = data.readString();
                     IObbActionListener observer;
                     observer = IObbActionListener.Stub.asInterface(data.readStrongBinder());
                     int nonce;
                     nonce = data.readInt();
-                    mountObb(filename, key, observer, nonce);
+                    mountObb(rawPath, canonicalPath, key, observer, nonce);
                     reply.writeNoException();
                     return true;
                 }
@@ -1194,7 +1195,7 @@ public interface IMountService extends IInterface {
     /**
      * Gets the path to the mounted Opaque Binary Blob (OBB).
      */
-    public String getMountedObbPath(String filename) throws RemoteException;
+    public String getMountedObbPath(String rawPath) throws RemoteException;
 
     /**
      * Gets an Array of currently known secure container IDs
@@ -1220,7 +1221,7 @@ public interface IMountService extends IInterface {
      * Checks whether the specified Opaque Binary Blob (OBB) is mounted
      * somewhere.
      */
-    public boolean isObbMounted(String filename) throws RemoteException;
+    public boolean isObbMounted(String rawPath) throws RemoteException;
 
     /*
      * Returns true if the specified container is mounted
@@ -1243,8 +1244,8 @@ public interface IMountService extends IInterface {
      * MountService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
-    public void mountObb(String filename, String key, IObbActionListener token, int nonce)
-            throws RemoteException;
+    public void mountObb(String rawPath, String canonicalPath, String key,
+            IObbActionListener token, int nonce) throws RemoteException;
 
     /*
      * Mount a secure container with the specified key and owner UID. Returns an
@@ -1287,7 +1288,7 @@ public interface IMountService extends IInterface {
      * MountService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
-    public void unmountObb(String filename, boolean force, IObbActionListener token, int nonce)
+    public void unmountObb(String rawPath, boolean force, IObbActionListener token, int nonce)
             throws RemoteException;
 
     /*

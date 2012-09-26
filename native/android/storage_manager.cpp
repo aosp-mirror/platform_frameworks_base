@@ -125,11 +125,20 @@ public:
         }
     }
 
-    void mountObb(const char* filename, const char* key, AStorageManager_obbCallbackFunc func, void* data) {
+    void mountObb(const char* rawPath, const char* key, AStorageManager_obbCallbackFunc func,
+            void* data) {
+        // Resolve path before sending to MountService
+        char canonicalPath[PATH_MAX];
+        if (realpath(rawPath, canonicalPath) == NULL) {
+            ALOGE("mountObb failed to resolve path %s: %s", rawPath, strerror(errno));
+            return;
+        }
+
         ObbCallback* cb = registerObbCallback(func, data);
-        String16 filename16(filename);
+        String16 rawPath16(rawPath);
+        String16 canonicalPath16(canonicalPath);
         String16 key16(key);
-        mMountService->mountObb(filename16, key16, mObbActionListener, cb->nonce);
+        mMountService->mountObb(rawPath16, canonicalPath16, key16, mObbActionListener, cb->nonce);
     }
 
     void unmountObb(const char* filename, const bool force, AStorageManager_obbCallbackFunc func, void* data) {
