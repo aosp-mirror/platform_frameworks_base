@@ -54,6 +54,10 @@
                 android:id="@+id/filterselection"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/slider1Text"
                 android:layout_width="match_parent"
