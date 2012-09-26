@@ -317,9 +317,9 @@ public class StorageNotification extends StorageEventListener {
             }
 
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
-            final boolean adbOn = 1 == Settings.Secure.getInt(
+            final boolean adbOn = 1 == Settings.Global.getInt(
                 mContext.getContentResolver(),
-                Settings.Secure.ADB_ENABLED,
+                Settings.Global.ADB_ENABLED,
                 0);
 
             if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {

@@ -535,8 +535,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
-            boolean dataEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
-                                                         Settings.Secure.MOBILE_DATA, 1) == 1;
+            boolean dataEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                                                         Settings.Global.MOBILE_DATA, 1) == 1;
             boolean networkAvailable = info.isAvailable() && dataEnabled;
             String defaultApn = getSelectedApn();
             if (defaultApn == null) {
@@ -952,8 +952,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             mStarted = true;
             mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
-             if (Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.ASSISTED_GPS_ENABLED, 1) != 0) {
+             if (Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0) {
                 if (hasCapability(GPS_CAPABILITY_MSB)) {
                     mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 }

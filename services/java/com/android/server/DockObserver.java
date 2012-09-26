@@ -147,8 +147,8 @@ final class DockObserver extends UEventObserver {
 
             final ContentResolver cr = mContext.getContentResolver();
 
-            if (Settings.Secure.getInt(cr,
-                    Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
+            if (Settings.Global.getInt(cr,
+                    Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
                 Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
                 return;
             }
@@ -168,29 +168,29 @@ final class DockObserver extends UEventObserver {
 
             // User feedback to confirm dock connection. Particularly
             // useful for flaky contact pins...
-            if (Settings.System.getInt(cr,
-                    Settings.System.DOCK_SOUNDS_ENABLED, 1) == 1) {
+            if (Settings.Global.getInt(cr,
+                    Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1) {
                 String whichSound = null;
                 if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                     if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
                         (mPreviousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
                         (mPreviousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
-                        whichSound = Settings.System.DESK_UNDOCK_SOUND;
+                        whichSound = Settings.Global.DESK_UNDOCK_SOUND;
                     } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
-                        whichSound = Settings.System.CAR_UNDOCK_SOUND;
+                        whichSound = Settings.Global.CAR_UNDOCK_SOUND;
                     }
                 } else {
                     if ((mDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
                         (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
                         (mDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
-                        whichSound = Settings.System.DESK_DOCK_SOUND;
+                        whichSound = Settings.Global.DESK_DOCK_SOUND;
                     } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
-                        whichSound = Settings.System.CAR_DOCK_SOUND;
+                        whichSound = Settings.Global.CAR_DOCK_SOUND;
                     }
                 }
 
                 if (whichSound != null) {
-                    final String soundPath = Settings.System.getString(cr, whichSound);
+                    final String soundPath = Settings.Global.getString(cr, whichSound);
                     if (soundPath != null) {
                         final Uri soundUri = Uri.parse("file://" + soundPath);
                         if (soundUri != null) {

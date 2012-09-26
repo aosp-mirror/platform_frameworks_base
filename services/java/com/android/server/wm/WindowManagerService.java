@@ -7946,8 +7946,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DISPLAY_DENSITY_FORCED, "");
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.DISPLAY_DENSITY_FORCED, "");
         }
     }
 

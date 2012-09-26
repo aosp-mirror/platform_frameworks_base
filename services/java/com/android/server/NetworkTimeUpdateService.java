@@ -215,8 +215,8 @@ public class NetworkTimeUpdateService {
      * Checks if the user prefers to automatically set the time.
      */
     private boolean isAutomaticTimeRequested() {
-        return Settings.System.getInt(mContext.getContentResolver(), Settings.System.AUTO_TIME, 0)
-                != 0;
+        return Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 0;
     }
 
     /** Receiver for Nitz time events */
@@ -289,7 +289,7 @@ public class NetworkTimeUpdateService {
 
         void observe(Context context) {
             ContentResolver resolver = context.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(Settings.System.AUTO_TIME),
+            resolver.registerContentObserver(Settings.Global.getUriFor(Settings.Global.AUTO_TIME),
                     false, this);
         }
 
