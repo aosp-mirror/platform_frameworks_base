@@ -374,6 +374,11 @@ public:
      */
     int transform;
 
+    /**
+     * Name of the projection uniform.
+     */
+    int projection;
+
 protected:
     /**
      * Adds an attribute with the specified name.
