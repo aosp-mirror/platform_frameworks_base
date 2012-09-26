@@ -5859,6 +5859,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * layout attribute and/or the inherited value from the parent
      *
      * @return true if the layout is right-to-left.
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
@@ -11591,9 +11593,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
      * that the parent directionality can and will be resolved before its children.
      *
+     * @return true if resolution has been done, false otherwise.
+     *
      * @hide
      */
-    public void resolveLayoutDirection() {
+    public boolean resolveLayoutDirection() {
         // Clear any previous layout direction resolution
         mPrivateFlags2 &= ~PFLAG2_LAYOUT_DIRECTION_RESOLVED_MASK;
 
@@ -11604,15 +11608,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case LAYOUT_DIRECTION_INHERIT:
                     // We cannot resolve yet. LTR is by default and let the resolution happen again
                     // later to get the correct resolved value
-                    if (!canResolveLayoutDirection()) return;
+                    if (!canResolveLayoutDirection()) return false;
 
-                    ViewGroup viewGroup = ((ViewGroup) mParent);
+                    View parent = ((View) mParent);
+                    // Parent has not yet resolved, LTR is still the default
+                    if (!parent.isLayoutDirectionResolved()) return false;
 
-                    // We cannot resolve yet on the parent too. LTR is by default and let the
-                    // resolution happen again later
-                    if (!viewGroup.canResolveLayoutDirection()) return;
-
-                    if (viewGroup.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                    if (parent.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
                     break;
@@ -11632,6 +11634,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set to resolved
         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
+        return true;
     }
 
     /**
@@ -11642,10 +11645,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean canResolveLayoutDirection() {
-        switch ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_MASK) >>
-                PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) {
+        switch (getRawLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
-                return (mParent != null) && (mParent instanceof ViewGroup);
+                return (mParent != null) && (mParent instanceof ViewGroup) &&
+                       ((ViewGroup) mParent).canResolveLayoutDirection();
             default:
                 return true;
         }
@@ -16622,9 +16625,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Resolve the text direction.
      *
+     * @return true if resolution has been done, false otherwise.
+     *
      * @hide
      */
-    public void resolveTextDirection() {
+    public boolean resolveTextDirection() {
         // Reset any previous text direction resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_DIRECTION_RESOLVED | PFLAG2_TEXT_DIRECTION_RESOLVED_MASK);
 
@@ -16633,29 +16638,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final int textDirection = getRawTextDirection();
             switch(textDirection) {
                 case TEXT_DIRECTION_INHERIT:
-                    if (canResolveTextDirection()) {
-                        ViewGroup viewGroup = ((ViewGroup) mParent);
-
-                        // Set current resolved direction to the same value as the parent's one
-                        final int parentResolvedDirection = viewGroup.getTextDirection();
-                        switch (parentResolvedDirection) {
-                            case TEXT_DIRECTION_FIRST_STRONG:
-                            case TEXT_DIRECTION_ANY_RTL:
-                            case TEXT_DIRECTION_LTR:
-                            case TEXT_DIRECTION_RTL:
-                            case TEXT_DIRECTION_LOCALE:
-                                mPrivateFlags2 |=
-                                        (parentResolvedDirection << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
-                                break;
-                            default:
-                                // Default resolved direction is "first strong" heuristic
-                                mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
-                        }
-                    } else {
+                    if (!canResolveTextDirection()) {
                         // We cannot do the resolution if there is no parent, so use the default one
                         mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
                         // Resolution will need to happen again later
-                        return;
+                        return false;
+                    }
+
+                    View parent = ((View) mParent);
+                    // Parent has not yet resolved, so we still return the default
+                    if (!parent.isTextDirectionResolved()) {
+                        mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
+                        // Resolution will need to happen again later
+                        return false;
+                    }
+
+                    // Set current resolved direction to the same value as the parent's one
+                    final int parentResolvedDirection = parent.getTextDirection();
+                    switch (parentResolvedDirection) {
+                        case TEXT_DIRECTION_FIRST_STRONG:
+                        case TEXT_DIRECTION_ANY_RTL:
+                        case TEXT_DIRECTION_LTR:
+                        case TEXT_DIRECTION_RTL:
+                        case TEXT_DIRECTION_LOCALE:
+                            mPrivateFlags2 |=
+                                    (parentResolvedDirection << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
+                            break;
+                        default:
+                            // Default resolved direction is "first strong" heuristic
+                            mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
                     }
                     break;
                 case TEXT_DIRECTION_FIRST_STRONG:
@@ -16677,6 +16688,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set to resolved
         mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED;
+        return true;
     }
 
     /**
@@ -16687,7 +16699,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean canResolveTextDirection() {
         switch (getRawTextDirection()) {
             case TEXT_DIRECTION_INHERIT:
-                return (mParent != null) && (mParent instanceof ViewGroup);
+                return (mParent != null) && (mParent instanceof View) &&
+                       ((View) mParent).canResolveTextDirection();
             default:
                 return true;
         }
@@ -16817,9 +16830,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Resolve the text alignment.
      *
+     * @return true if resolution has been done, false otherwise.
+     *
      * @hide
      */
-    public void resolveTextAlignment() {
+    public boolean resolveTextAlignment() {
         // Reset any previous text alignment resolution
         mPrivateFlags2 &= ~(PFLAG2_TEXT_ALIGNMENT_RESOLVED | PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK);
 
@@ -16829,32 +16844,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             switch (textAlignment) {
                 case TEXT_ALIGNMENT_INHERIT:
                     // Check if we can resolve the text alignment
-                    if (canResolveTextAlignment() && mParent instanceof View) {
-                        View view = (View) mParent;
-
-                        final int parentResolvedTextAlignment = view.getTextAlignment();
-                        switch (parentResolvedTextAlignment) {
-                            case TEXT_ALIGNMENT_GRAVITY:
-                            case TEXT_ALIGNMENT_TEXT_START:
-                            case TEXT_ALIGNMENT_TEXT_END:
-                            case TEXT_ALIGNMENT_CENTER:
-                            case TEXT_ALIGNMENT_VIEW_START:
-                            case TEXT_ALIGNMENT_VIEW_END:
-                                // Resolved text alignment is the same as the parent resolved
-                                // text alignment
-                                mPrivateFlags2 |=
-                                        (parentResolvedTextAlignment << PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT);
-                                break;
-                            default:
-                                // Use default resolved text alignment
-                                mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
-                        }
-                    }
-                    else {
+                    if (!canResolveTextAlignment()) {
                         // We cannot do the resolution if there is no parent so use the default
                         mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
                         // Resolution will need to happen again later
-                        return;
+                        return false;
+                    }
+                    View parent = (View) mParent;
+
+                    // Parent has not yet resolved, so we still return the default
+                    if (!parent.isTextAlignmentResolved()) {
+                        mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+                        // Resolution will need to happen again later
+                        return false;
+                    }
+
+                    final int parentResolvedTextAlignment = parent.getTextAlignment();
+                    switch (parentResolvedTextAlignment) {
+                        case TEXT_ALIGNMENT_GRAVITY:
+                        case TEXT_ALIGNMENT_TEXT_START:
+                        case TEXT_ALIGNMENT_TEXT_END:
+                        case TEXT_ALIGNMENT_CENTER:
+                        case TEXT_ALIGNMENT_VIEW_START:
+                        case TEXT_ALIGNMENT_VIEW_END:
+                            // Resolved text alignment is the same as the parent resolved
+                            // text alignment
+                            mPrivateFlags2 |=
+                                    (parentResolvedTextAlignment << PFLAG2_TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT);
+                            break;
+                        default:
+                            // Use default resolved text alignment
+                            mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
                     }
                     break;
                 case TEXT_ALIGNMENT_GRAVITY:
@@ -16877,6 +16897,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Set the resolved
         mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED;
+        return true;
     }
 
     /**
@@ -16887,7 +16908,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean canResolveTextAlignment() {
         switch (getRawTextAlignment()) {
             case TEXT_DIRECTION_INHERIT:
-                return (mParent != null);
+                return (mParent != null) && (mParent instanceof View) &&
+                       ((View) mParent).canResolveTextAlignment();
             default:
                 return true;
         }
