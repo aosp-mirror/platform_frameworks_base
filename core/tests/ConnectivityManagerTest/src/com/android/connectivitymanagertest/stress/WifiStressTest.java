@@ -219,15 +219,16 @@ public class WifiStressTest
     // Stress Wifi reconnection to secure net after sleep
     @LargeTest
     public void testWifiReconnectionAfterSleep() {
-        int value = Settings.System.getInt(mRunner.getContext().getContentResolver(),
-                Settings.System.WIFI_SLEEP_POLICY, -1);
-        if (value < 0) {
-            Settings.System.putInt(mRunner.getContext().getContentResolver(),
-                    Settings.System.WIFI_SLEEP_POLICY, Settings.System.WIFI_SLEEP_POLICY_DEFAULT);
+        int value = Settings.Global.getInt(mRunner.getContext().getContentResolver(),
+                Settings.Global.WIFI_SLEEP_POLICY, -1);
+        log("wifi sleep policy is: " + value);
+        if (value != Settings.Global.WIFI_SLEEP_POLICY_DEFAULT) {
+            Settings.Global.putInt(mRunner.getContext().getContentResolver(),
+                    Settings.Global.WIFI_SLEEP_POLICY, Settings.Global.WIFI_SLEEP_POLICY_DEFAULT);
             log("set wifi sleep policy to default value");
         }
-        Settings.Secure.putLong(mRunner.getContext().getContentResolver(),
-                Settings.Secure.WIFI_IDLE_MS, WIFI_IDLE_MS);
+        Settings.Global.putLong(mRunner.getContext().getContentResolver(),
+                Settings.Global.WIFI_IDLE_MS, WIFI_IDLE_MS);
 
         // Connect to a Wi-Fi network
         WifiConfiguration config = new WifiConfiguration();
