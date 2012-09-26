@@ -43,4 +43,11 @@
     <!-- Size of clock font in LockScreen on Unsecure unlock screen. -->
     <dimen name="keyguard_lockscreen_clock_font_size">70sp</dimen>
 
+    <!-- Shift emergency button from the left edge by this amount.  Used by landscape layout on
+         phones -->
+    <dimen name="kg_emergency_button_shift">30dp</dimen>
+
+    <!-- Space reserved at the bottom of secure views (pin/pattern/password/SIM pin/SIM puk) -->
+    <dimen name="kg_secure_padding_height">0dp</dimen>
+
 </resources>

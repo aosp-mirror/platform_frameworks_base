@@ -957,6 +957,7 @@
   <java-symbol type="drawable" name="ic_lockscreen_silent" />
   <java-symbol type="drawable" name="ic_lockscreen_unlock" />
   <java-symbol type="drawable" name="ic_action_assist_generic" />
+  <java-symbol type="drawable" name="ic_lockscreen_alarm" />
   <java-symbol type="drawable" name="notification_bg" />
   <java-symbol type="drawable" name="notification_bg_low" />
   <java-symbol type="drawable" name="notification_template_icon_bg" />
@@ -1079,6 +1080,7 @@
   <java-symbol type="xml" name="password_kbd_qwerty_shifted" />
   <java-symbol type="xml" name="password_kbd_symbols" />
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
+  <java-symbol type="xml" name="kg_password_kbd_numeric" />
   <java-symbol type="xml" name="power_profile" />
   <java-symbol type="xml" name="time_zones_by_country" />
   <java-symbol type="xml" name="sms_short_codes" />
@@ -1362,7 +1364,6 @@
   <java-symbol type="string" name="lockscreen_too_many_failed_pin_attempts_dialog_message" />
   <java-symbol type="string" name="lockscreen_unlock_label" />
   <java-symbol type="string" name="status_bar_device_locked" />
-  <java-symbol type="string" name="keyguard_wday_day_month" />
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />

@@ -31,7 +31,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.LinearLayout;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -40,7 +40,7 @@ import com.android.internal.R;
 import java.io.IOException;
 import java.util.List;
 
-public class KeyguardPatternView extends GridLayout implements KeyguardSecurityView {
+public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView {
 
     private static final String TAG = "SecurityPatternView";
     private static final boolean DEBUG = false;
