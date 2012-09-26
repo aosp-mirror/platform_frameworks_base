@@ -1946,7 +1946,7 @@ static status_t writeTextLayoutClasses(
                 const bool pub = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
 
                 fprintf(fp,
-                        "int styleable.%s_%s %d\n",
+                        "int styleable %s_%s %d\n",
                         nclassName.string(),
                         String8(name).string(), (int)pos);
             }
