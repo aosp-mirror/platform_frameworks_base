@@ -14,72 +14,72 @@ option java_package com.android.server.am
 # google3/googledata/wireless/android/provisioning/gservices.config !!
 #
 # An activity is being finished:
-30001 am_finish_activity (Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
+30001 am_finish_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
 # A task is being brought to the front of the screen:
-30002 am_task_to_front (Task|1|5)
+30002 am_task_to_front (User|1|5),(Task|1|5)
 # An existing activity is being given a new intent:
-30003 am_new_intent (Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+30003 am_new_intent (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
 # A new task is being created:
-30004 am_create_task (Task ID|1|5)
+30004 am_create_task (User|1|5),(Task ID|1|5)
 # A new activity is being created in an existing task:
-30005 am_create_activity (Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+30005 am_create_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
 # An activity has been resumed into the foreground but was not already running:
-30006 am_restart_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
+30006 am_restart_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # An activity has been resumed and is now in the foreground:
-30007 am_resume_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
+30007 am_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # Application Not Responding
-30008 am_anr (pid|1|5),(Package Name|3),(Flags|1|5),(reason|3)
+30008 am_anr (User|1|5),(pid|1|5),(Package Name|3),(Flags|1|5),(reason|3)
 # Activity launch time
-30009 activity_launch_time (Token|1|5),(Component Name|3),(time|2|3)
+30009 am_activity_launch_time (User|1|5),(Token|1|5),(Component Name|3),(time|2|3)
 # Application process bound to work
-30010 am_proc_bound (PID|1|5),(Process Name|3)
+30010 am_proc_bound (User|1|5),(PID|1|5),(Process Name|3)
 # Application process died
-30011 am_proc_died (PID|1|5),(Process Name|3)
+30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3)
 # The Activity Manager failed to pause the given activity.
-30012 am_failed_to_pause (Token|1|5),(Wanting to pause|3),(Currently pausing|3)
+30012 am_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
 # Attempting to pause the current activity
-30013 am_pause_activity (Token|1|5),(Component Name|3)
+30013 am_pause_activity (User|1|5),(Token|1|5),(Component Name|3)
 # Application process has been started
-30014 am_proc_start (PID|1|5),(UID|1|5),(Process Name|3),(Type|3),(Component|3)
+30014 am_proc_start (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3),(Type|3),(Component|3)
 # An application process has been marked as bad
-30015 am_proc_bad (UID|1|5),(Process Name|3)
+30015 am_proc_bad (User|1|5),(UID|1|5),(Process Name|3)
 # An application process that was bad is now marked as good
-30016 am_proc_good (UID|1|5),(Process Name|3)
+30016 am_proc_good (User|1|5),(UID|1|5),(Process Name|3)
 # Reporting to applications that memory is low
 30017 am_low_memory (Num Processes|1|1)
 # An activity is being destroyed:
-30018 am_destroy_activity (Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
+30018 am_destroy_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
 # An activity has been relaunched, resumed, and is now in the foreground:
-30019 am_relaunch_resume_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
+30019 am_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # An activity has been relaunched:
-30020 am_relaunch_activity (Token|1|5),(Task ID|1|5),(Component Name|3)
+30020 am_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # The activity's onPause has been called.
-30021 am_on_paused_called (Component Name|3)
+30021 am_on_paused_called (User|1|5),(Component Name|3)
 # The activity's onResume has been called.
-30022 am_on_resume_called (Component Name|3)
+30022 am_on_resume_called (User|1|5),(Component Name|3)
 # Kill a process to reclaim memory.
-30023 am_kill (PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
+30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
-30024 am_broadcast_discard_filter (Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
-30025 am_broadcast_discard_app (Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)
+30024 am_broadcast_discard_filter (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
+30025 am_broadcast_discard_app (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)
 # A service is being created
-30030 am_create_service (Service Record|1|5),(Name|3),(Intent|3),(PID|1|5)
+30030 am_create_service (User|1|5),(Service Record|1|5),(Name|3),(Intent|3),(PID|1|5)
 # A service is being destroyed
-30031 am_destroy_service (Service Record|1|5),(Name|3),(PID|1|5)
+30031 am_destroy_service (User|1|5),(Service Record|1|5),(Name|3),(PID|1|5)
 # A process has crashed too many times, it is being cleared
-30032 am_process_crashed_too_much (Name|3),(PID|1|5)
+30032 am_process_crashed_too_much (User|1|5),(Name|3),(PID|1|5)
 # An unknown process is trying to attach to the activity manager
 30033 am_drop_process (PID|1|5)
 # A service has crashed too many times, it is being stopped
-30034 am_service_crashed_too_much (Crash Count|1|1),(Component Name|3),(PID|1|5)
+30034 am_service_crashed_too_much (User|1|5),(Crash Count|1|1),(Component Name|3),(PID|1|5)
 # A service is going to be restarted after its process went away
-30035 am_schedule_service_restart (Component Name|3),(Time|2|3)
+30035 am_schedule_service_restart (User|1|5),(Component Name|3),(Time|2|3)
 # A client was waiting for a content provider, but its process was lost
-30036 am_provider_lost_process (Package Name|3),(UID|1|5),(Name|3)
+30036 am_provider_lost_process (User|1|5),(Package Name|3),(UID|1|5),(Name|3)
 # The activity manager gave up on a new process taking too long to start
-30037 am_process_start_timeout (PID|1|5),(UID|1|5),(Process Name|3)
+30037 am_process_start_timeout (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3)
 
 # Unhandled exception
-30039 am_crash (PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5)
+30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5)
 # Log.wtf() called
-30040 am_wtf (PID|1|5),(Process Name|3),(Flags|1|5),(Tag|3),(Message|3)
+30040 am_wtf (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Tag|3),(Message|3)
