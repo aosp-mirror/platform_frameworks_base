@@ -1055,11 +1055,12 @@ class WindowStateAnimator {
             // just keep the crop rect the same as the source surface.
             w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
         } else if (!w.isDefaultDisplay()) {
-            // On a different display is easy, just use the entire display.
+            // On a different display there is no system decor.  Crop the window
+            // by the screen boundaries.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
-            w.mSystemDecorRect.intersect(-w.mFrame.left, -w.mFrame.top,
-                    displayInfo.logicalWidth - w.mFrame.left,
-                    displayInfo.logicalHeight - w.mFrame.top);
+            w.mSystemDecorRect.intersect(-w.mCompatFrame.left, -w.mCompatFrame.top,
+                    displayInfo.logicalWidth - w.mCompatFrame.left,
+                    displayInfo.logicalHeight - w.mCompatFrame.top);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
             // Unless we have a universe background...  in which case all the
