@@ -436,9 +436,10 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             if (mBaseResolveList != null) {
                 mCurrentResolveList = mBaseResolveList;
             } else {
-                mCurrentResolveList = mPm.queryIntentActivities(
+                mCurrentResolveList = mPm.queryIntentActivitiesAsUser(
                         mIntent, PackageManager.MATCH_DEFAULT_ONLY
-                        | (mAlwaysUseOption ? PackageManager.GET_RESOLVED_FILTER : 0));
+                        | (mAlwaysUseOption ? PackageManager.GET_RESOLVED_FILTER : 0),
+                        UserHandle.getUserId(mLaunchedFromUid));
                 // Filter out any activities that the launched uid does not
                 // have permission for.  We don't do this when we have an explicit
                 // list of resolved activities, because that only happens when
