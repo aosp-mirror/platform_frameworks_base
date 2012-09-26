@@ -62,6 +62,8 @@ class ConnectionRecord {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ConnectionRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" u");
+        sb.append(binding.client.userId);
         sb.append(' ');
         if ((flags&Context.BIND_AUTO_CREATE) != 0) {
             sb.append("CR ");
@@ -70,7 +72,7 @@ class ConnectionRecord {
             sb.append("DBG ");
         }
         if ((flags&Context.BIND_NOT_FOREGROUND) != 0) {
-            sb.append("NOTFG ");
+            sb.append("!FG ");
         }
         if ((flags&Context.BIND_ABOVE_CLIENT) != 0) {
             sb.append("ABCLT ");
@@ -88,7 +90,10 @@ class ConnectionRecord {
             sb.append("ACT ");
         }
         if ((flags&Context.BIND_NOT_VISIBLE) != 0) {
-            sb.append("NOTVIS ");
+            sb.append("!VIS ");
+        }
+        if ((flags&Context.BIND_VISIBLE) != 0) {
+            sb.append("VIS ");
         }
         if (serviceDead) {
             sb.append("DEAD ");
