@@ -232,7 +232,7 @@ void Caches::clearGarbage() {
     size_t count = mLayerGarbage.size();
     for (size_t i = 0; i < count; i++) {
         Layer* layer = mLayerGarbage.itemAt(i);
-        LayerRenderer::destroyLayer(layer);
+        delete layer;
     }
     mLayerGarbage.clear();
 
