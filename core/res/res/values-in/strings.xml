@@ -623,7 +623,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Mengharuskan data apl yang disimpan untuk dienkripsi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Nonaktifkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Mencegah penggunaan semua kamera perangkat."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Menonaktifkan ftur di pengaman"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Nonaktifkan fitur di pengaman"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Mencegah penggunaan beberapa fitur dalam pengaman."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>

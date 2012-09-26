@@ -276,7 +276,7 @@
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"cambiar la configuración de visualización del sistema"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permite que la aplicación cambie la configuración actual como, por ejemplo, la configuración regional o el tamaño de fuente general."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar el modo de auto"</string>
-    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que la aplicación habilite el modo coche."</string>
+    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que la aplicación habilite el modo automóvil."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"cerrar otras aplicaciones"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Este permiso autoriza a la aplicación a interrumpir procesos en segundo plano de otras aplicaciones y puede hacer, por lo tanto, que esas aplicaciones dejen de ejecutarse."</string>
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"forzar la detención de otras aplicaciones"</string>
@@ -1195,7 +1195,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Buscar"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Siguiente"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Hecho"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Listo"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Ant."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Ejecutar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Marcar el número"\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
