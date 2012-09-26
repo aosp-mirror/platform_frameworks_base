@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks2;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.opengl.EGL14;
 import android.opengl.GLUtils;
 import android.opengl.ManagedEGLContext;
 import android.os.Handler;
@@ -608,12 +609,6 @@ public abstract class HardwareRenderer {
 
     @SuppressWarnings({"deprecation"})
     static abstract class GlRenderer extends HardwareRenderer {
-        // These values are not exposed in our EGL APIs
-        static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-        static final int EGL_OPENGL_ES2_BIT = 4;
-        static final int EGL_SURFACE_TYPE = 0x3033;
-        static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;        
-
         static final int SURFACE_STATE_ERROR = 0;
         static final int SURFACE_STATE_SUCCESS = 1;
         static final int SURFACE_STATE_UPDATED = 2;
@@ -953,18 +948,7 @@ public abstract class HardwareRenderer {
                 return null;
             }
 
-            /*
-             * Before we can issue GL commands, we need to make sure
-             * the context is current and bound to a surface.
-             */
-            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
-                        + GLUtils.getEGLErrorString(sEgl.eglGetError()));
-            }
-            
             initCaches();
-
-            enableDirtyRegions();
 
             return mEglContext.getGL();
         }
@@ -990,7 +974,7 @@ public abstract class HardwareRenderer {
         abstract void initCaches();
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-            int[] attribs = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
+            int[] attribs = { EGL14.EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
 
             EGLContext context = egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT,
                     mGlVersion != 0 ? attribs : null);
@@ -1066,6 +1050,14 @@ public abstract class HardwareRenderer {
                 throw new RuntimeException("createWindowSurface failed "
                         + GLUtils.getEGLErrorString(error));
             }
+
+            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
+                throw new IllegalStateException("eglMakeCurrent failed " +
+                        GLUtils.getEGLErrorString(sEgl.eglGetError()));
+            }
+
+            enableDirtyRegions();
+
             return true;
         }
 
@@ -1430,7 +1422,7 @@ public abstract class HardwareRenderer {
         @Override
         int[] getConfig(boolean dirtyRegions) {
             return new int[] {
-                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
                     EGL_RED_SIZE, 8,
                     EGL_GREEN_SIZE, 8,
                     EGL_BLUE_SIZE, 8,
@@ -1439,7 +1431,7 @@ public abstract class HardwareRenderer {
                     // TODO: Find a better way to choose the stencil size
                     EGL_STENCIL_SIZE, mShowOverdraw ? GLES20Canvas.getStencilSize() : 0,
                     EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
-                            (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
+                            (dirtyRegions ? EGL14.EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
                     EGL_NONE
             };
         }
