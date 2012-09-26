@@ -38,6 +38,8 @@ struct Texture {
 
         firstFilter = true;
         firstWrap = true;
+
+        id = 0;
     }
 
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
