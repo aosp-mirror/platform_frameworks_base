@@ -209,7 +209,7 @@ public class BroadcastQueue {
         r.receiver = app.thread.asBinder();
         r.curApp = app;
         app.curReceiver = r;
-        mService.updateLruProcessLocked(app, true, true);
+        mService.updateLruProcessLocked(app, true);
 
         // Tell the application to launch this receiver.
         r.intent.setComponent(r.curComponent);
@@ -930,22 +930,22 @@ public class BroadcastQueue {
             if (curReceiver instanceof BroadcastFilter) {
                 BroadcastFilter bf = (BroadcastFilter) curReceiver;
                 EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_FILTER,
-                        System.identityHashCode(r),
+                        bf.owningUserId, System.identityHashCode(r),
                         r.intent.getAction(),
                         r.nextReceiver - 1,
                         System.identityHashCode(bf));
             } else {
+                ResolveInfo ri = (ResolveInfo)curReceiver;
                 EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
-                        System.identityHashCode(r),
-                        r.intent.getAction(),
-                        r.nextReceiver - 1,
-                        ((ResolveInfo)curReceiver).toString());
+                        UserHandle.getUserId(ri.activityInfo.applicationInfo.uid),
+                        System.identityHashCode(r), r.intent.getAction(),
+                        r.nextReceiver - 1, ri.toString());
             }
         } else {
             Slog.w(TAG, "Discarding broadcast before first receiver is invoked: "
                     + r);
             EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
-                    System.identityHashCode(r),
+                    -1, System.identityHashCode(r),
                     r.intent.getAction(),
                     r.nextReceiver,
                     "NONE");

@@ -425,6 +425,7 @@ class ServiceRecord extends Binder {
         StringBuilder sb = new StringBuilder(128);
         sb.append("ServiceRecord{")
             .append(Integer.toHexString(System.identityHashCode(this)))
+            .append(" u").append(userId)
             .append(' ').append(shortName).append('}');
         return stringName = sb.toString();
     }

@@ -1509,9 +1509,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case DUMP_HEAP_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String process = data.readString();
+            int userId = data.readInt();
             boolean managed = data.readInt() != 0;
             String path = data.readString();
-            int userId = data.readInt();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
             boolean res = dumpHeap(process, userId, managed, path, fd);

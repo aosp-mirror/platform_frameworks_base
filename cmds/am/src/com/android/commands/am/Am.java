@@ -804,8 +804,9 @@ public class Am {
         ParcelFileDescriptor fd = null;
 
         try {
-            fd = ParcelFileDescriptor.open(
-                    new File(heapFile),
+            File file = new File(heapFile);
+            file.delete();
+            fd = ParcelFileDescriptor.open(file,
                     ParcelFileDescriptor.MODE_CREATE |
                     ParcelFileDescriptor.MODE_TRUNCATE |
                     ParcelFileDescriptor.MODE_READ_WRITE);
