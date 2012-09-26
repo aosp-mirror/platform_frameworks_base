@@ -23,7 +23,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.widget.Toast;
 
-public class SingleUserService extends Service {
+public class ServiceUserTarget extends Service {
     Binder mBinder = new Binder();
 
     @Override
