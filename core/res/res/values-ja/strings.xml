@@ -748,7 +748,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"MENU、0キーでロック解除"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急通報番号"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"通信サービスはありません。"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"通信サービスはありません"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"画面ロック中"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"MENUキーでロック解除"</string>
@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Wi-Fiオープンネットワークが利用できます"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fiネットワークにログイン"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"ネットワークにログイン"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiに接続できませんでした"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"To:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"必要なPINを入力してください:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"携帯端末が<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に接続されている間は一時的にWi-Fi接続が解除されます。"</string>
     <string name="select_character" msgid="3365550120617701745">"文字を挿入"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMSメッセージの送信中"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;が大量のSMSメッセージを送信しています。このアプリにこのままメッセージの送信を許可しますか？"</string>
