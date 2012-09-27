@@ -18917,7 +18917,7 @@ package android.provider {
     field public static final deprecated java.lang.String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS = "wifi_watchdog_background_check_timeout_ms";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT = "wifi_watchdog_initial_ignored_ping_count";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
-    field public static final java.lang.String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
+    field public static final deprecated java.lang.String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";

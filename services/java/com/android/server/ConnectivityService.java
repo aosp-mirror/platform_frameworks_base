@@ -1509,8 +1509,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         //       which is where we store the value and maybe make this
         //       asynchronous.
         enforceAccessPermission();
-        boolean retVal = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.MOBILE_DATA, 1) == 1;
+        boolean retVal = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.MOBILE_DATA, 1) == 1;
         if (VDBG) log("getMobileDataEnabled returning " + retVal);
         return retVal;
     }

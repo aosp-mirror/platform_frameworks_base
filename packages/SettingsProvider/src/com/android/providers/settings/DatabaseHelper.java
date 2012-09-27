@@ -472,7 +472,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String value =
                         mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
                 db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
-                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
+                        Settings.Global.ASSISTED_GPS_ENABLED + "','" + value + "');");
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -1190,7 +1190,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
                         + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+                loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
                         R.bool.def_package_verifier_enable);
                 db.setTransactionSuccessful();
             } finally {
@@ -1300,9 +1300,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
-                            Settings.Secure.PACKAGE_VERIFIER_ENABLE,
-                            Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
-                            Settings.Secure.PACKAGE_VERIFIER_DEFAULT_RESPONSE
+                            Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                            Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
+                            Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE
                     };
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 
@@ -1319,9 +1319,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
-                            Settings.Secure.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
-                            Settings.Secure.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
-                            Settings.Secure.GPRS_REGISTER_CHECK_PERIOD_MS
+                            Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
+                            Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
+                            Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS
                     };
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 

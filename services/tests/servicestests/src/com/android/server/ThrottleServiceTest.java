@@ -242,9 +242,9 @@ public class ThrottleServiceTest extends AndroidTestCase {
      */
     public void setThrottlePolicy(long thresholdBytes, int valueKbitps, int resetDay) {
         final ContentResolver resolver = getContext().getContentResolver();
-        Settings.Secure.putLong(resolver, Settings.Secure.THROTTLE_THRESHOLD_BYTES, thresholdBytes);
-        Settings.Secure.putInt(resolver, Settings.Secure.THROTTLE_VALUE_KBITSPS, valueKbitps);
-        Settings.Secure.putInt(resolver, Settings.Secure.THROTTLE_RESET_DAY, resetDay);
+        Settings.Global.putLong(resolver, Settings.Global.THROTTLE_THRESHOLD_BYTES, thresholdBytes);
+        Settings.Global.putInt(resolver, Settings.Global.THROTTLE_VALUE_KBITSPS, valueKbitps);
+        Settings.Global.putInt(resolver, Settings.Global.THROTTLE_RESET_DAY, resetDay);
     }
 
     /**
@@ -252,9 +252,9 @@ public class ThrottleServiceTest extends AndroidTestCase {
      */
     public void clearThrottlePolicy() {
         final ContentResolver resolver = getContext().getContentResolver();
-        Settings.Secure.putString(resolver, Settings.Secure.THROTTLE_THRESHOLD_BYTES, null);
-        Settings.Secure.putString(resolver, Settings.Secure.THROTTLE_VALUE_KBITSPS, null);
-        Settings.Secure.putString(resolver, Settings.Secure.THROTTLE_RESET_DAY, null);
+        Settings.Global.putString(resolver, Settings.Global.THROTTLE_THRESHOLD_BYTES, null);
+        Settings.Global.putString(resolver, Settings.Global.THROTTLE_VALUE_KBITSPS, null);
+        Settings.Global.putString(resolver, Settings.Global.THROTTLE_RESET_DAY, null);
     }
 
     /**

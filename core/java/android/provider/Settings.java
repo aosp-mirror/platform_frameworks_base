@@ -3054,6 +3054,7 @@ public final class Settings {
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
          */
+        @Deprecated
         public static final String DATA_ROAMING = Global.DATA_ROAMING;
 
         /**
@@ -3215,27 +3216,6 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#DISPLAY_SIZE_FORCED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DISPLAY_SIZE_FORCED = Global.DISPLAY_SIZE_FORCED;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DISPLAY_DENSITY_FORCED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DISPLAY_DENSITY_FORCED = Global.DISPLAY_DENSITY_FORCED;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#ASSISTED_GPS_ENABLED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String ASSISTED_GPS_ENABLED = Global.ASSISTED_GPS_ENABLED;
-
-        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
@@ -3251,44 +3231,6 @@ public final class Settings {
         public static final String NETWORK_PREFERENCE = Global.NETWORK_PREFERENCE;
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#TETHER_SUPPORTED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String TETHER_SUPPORTED = Global.TETHER_SUPPORTED;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#TETHER_DUN_REQUIRED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String TETHER_DUN_REQUIRED = Global.TETHER_DUN_REQUIRED;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#TETHER_DUN_REQUIRED} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String TETHER_DUN_APN = Global.TETHER_DUN_APN;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DATA_ACTIVITY_TIMEOUT_MOBILE}
-         * instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DATA_ACTIVITY_TIMEOUT_MOBILE =
-            Global.DATA_ACTIVITY_TIMEOUT_MOBILE;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DATA_ACTIVITY_TIMEOUT_MOBILE}
-         * instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DATA_ACTIVITY_TIMEOUT_WIFI = Global.DATA_ACTIVITY_TIMEOUT_WIFI;
-
-        /**
          * No longer supported.
          */
         public static final String PARENTAL_CONTROL_ENABLED = "parental_control_enabled";
@@ -3302,13 +3244,6 @@ public final class Settings {
          * No longer supported.
          */
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#SAMPLING_PROFILER_MS} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String SAMPLING_PROFILER_MS = Global.SAMPLING_PROFILER_MS;
 
         /**
          * Settings classname to launch when Settings is clicked from All
@@ -3562,14 +3497,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON}
-         * instead.
-         * {@hide}
-         */
-        @Deprecated
-        public static final String WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON =
-                Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY}
@@ -3578,15 +3505,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                 Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#WIFI_COUNTRY_CODE}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_COUNTRY_CODE = Global.WIFI_COUNTRY_CODE;
-
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NUM_OPEN_NETWORKS_KEPT}
@@ -3602,39 +3520,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String WIFI_ON = Global.WIFI_ON;
-
-        /**
-         * Used to save the Wifi_ON state prior to tethering.
-         * This state will be checked to restore Wifi after
-         * the user turns off tethering.
-         *
-         * @hide
-         * @deprecated Use {@link android.provider.Settings.Global#WIFI_SAVED_STATE}
-         * instead.
-         */
-        @Deprecated
-        public static final String WIFI_SAVED_STATE = Global.WIFI_SAVED_STATE;
-
-        /**
-         * AP SSID
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_SSID = "wifi_ap_ssid";
-
-        /**
-         * AP security
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_SECURITY = "wifi_ap_security";
-
-        /**
-         * AP passphrase
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_PASSWD = "wifi_ap_passwd";
 
         /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
@@ -3700,8 +3585,9 @@ public final class Settings {
         public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
 
         /**
-         * Whether the Wi-Fi watchdog is enabled.
+         * @deprecated Use {@link android.provider.Settings.Global#WIFI_WATCHDOG_ON} instead
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
 
         /**
@@ -3733,87 +3619,11 @@ public final class Settings {
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
 
         /**
-         * ms delay before rechecking an 'online' wifi connection when it is thought to be unstable.
-         * @deprecated This setting is not used.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_WATCHDOG_ARP_CHECK_INTERVAL_MS =
-                "wifi_watchdog_arp_interval_ms";
-
-        /**
-         * ms delay interval between rssi polling when the signal is known to be weak
-         * @deprecated This setting is not used.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS =
-                "wifi_watchdog_rssi_fetch_interval_ms";
-
-        /**
-         * Number of ARP pings per check.
-         * @deprecated This setting is not used.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_WATCHDOG_NUM_ARP_PINGS = "wifi_watchdog_num_arp_pings";
-
-        /**
-         * Minimum number of responses to the arp pings to consider the test 'successful'.
-         * @deprecated This setting is not used.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_WATCHDOG_MIN_ARP_RESPONSES =
-                "wifi_watchdog_min_arp_responses";
-
-        /**
-         * Timeout on ARP pings
-         * @deprecated This setting is not used.
-         * @hide
-         */
-        @Deprecated
-        public static final String WIFI_WATCHDOG_ARP_PING_TIMEOUT_MS =
-                "wifi_watchdog_arp_ping_timeout_ms";
-
-        /**
-         * Setting to turn off poor network avoidance on Wi-Fi. Feature is enabled by default and
-         * the setting needs to be set to 0 to disable it.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
-                "wifi_watchdog_poor_network_test_enabled";
-
-        /**
-         * Setting to turn on suspend optimizations at screen off on Wi-Fi. Enabled by default and
-         * needs to be set to 0 to disable it.
-         * @hide
-         */
-        public static final String WIFI_SUSPEND_OPTIMIZATIONS_ENABLED =
-                "wifi_suspend_optimizations_enabled";
-
-        /**
          * @deprecated Use
          * {@link android.provider.Settings.Global#WIFI_MAX_DHCP_RETRY_COUNT} instead
          */
         @Deprecated
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = Global.WIFI_MAX_DHCP_RETRY_COUNT;
-
-        /**
-         * The operational wifi frequency band
-         * Set to one of {@link WifiManager#WIFI_FREQUENCY_BAND_AUTO},
-         * {@link WifiManager#WIFI_FREQUENCY_BAND_5GHZ} or
-         * {@link WifiManager#WIFI_FREQUENCY_BAND_2GHZ}
-         *
-         * @hide
-         */
-        public static final String WIFI_FREQUENCY_BAND = "wifi_frequency_band";
-
-        /**
-         * The Wi-Fi peer-to-peer device name
-         * @hide
-         */
-        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
         /**
          * Setting to turn off captive portal detection. Feature is enabled by default and
@@ -3834,6 +3644,7 @@ public final class Settings {
          * @deprecated Use
          * {@link android.provider.Settings.Global#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS} instead
          */
+        @Deprecated
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
                 Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
 
@@ -3858,27 +3669,6 @@ public final class Settings {
                 = "allowed_geolocation_origins";
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#MOBILE_DATA} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String MOBILE_DATA = Global.MOBILE_DATA;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#CDMA_ROAMING_MODE} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String CDMA_ROAMING_MODE = Global.CDMA_ROAMING_MODE;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#CDMA_ROAMING_MODE} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String CDMA_SUBSCRIPTION_MODE = Global.CDMA_SUBSCRIPTION_MODE;
-
-        /**
          * The preferred network mode   7 = Global
          *                              6 = EvDo only
          *                              5 = CDMA w/o EvDo
@@ -3901,14 +3691,6 @@ public final class Settings {
          */
         public static final String PREFERRED_TTY_MODE =
                 "preferred_tty_mode";
-
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#CDMA_CELL_BROADCAST_SMS} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String CDMA_CELL_BROADCAST_SMS = Global.CDMA_CELL_BROADCAST_SMS;
 
         /**
          * The cdma subscription 0 = Subscription from RUIM, when available
@@ -4128,13 +3910,6 @@ public final class Settings {
         public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#WTF_IS_FATAL} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String WTF_IS_FATAL = Global.WTF_IS_FATAL;
-
-        /**
          * Maximum age of entries kept by {@link com.android.internal.os.IDropBoxManagerService}.
          * @hide
          */
@@ -4239,141 +4014,12 @@ public final class Settings {
         public static final String WIFI_IDLE_MS = Global.WIFI_IDLE_MS;
 
         /**
-         * The interval in milliseconds to issue wake up scans when wifi needs
-         * to connect. This is necessary to connect to an access point when
-         * device is on the move and the screen is off.
-         * @hide
-         * @deprecated Use {@link android.provider.Settings.Global#WIFI_FRAMEWORK_SCAN_INTERVAL_MS}
-         * instead.
-         */
-        @Deprecated
-        public static final String WIFI_FRAMEWORK_SCAN_INTERVAL_MS =
-                Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS;
-
-        /**
-         * The interval in milliseconds to scan as used by the wifi supplicant
-         * @hide
-         * @deprecated Use {@link android.provider.Settings.Global#WIFI_SUPPLICANT_SCAN_INTERVAL_MS}
-         * instead.
-         */
-        @Deprecated
-        public static final String WIFI_SUPPLICANT_SCAN_INTERVAL_MS =
-                Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_POLL_INTERVAL_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_POLL_INTERVAL_MS =
-                Global.PDP_WATCHDOG_POLL_INTERVAL_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_LONG_POLL_INTERVAL_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_LONG_POLL_INTERVAL_MS =
-                Global.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS =
-                Global.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_TRIGGER_PACKET_COUNT}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_TRIGGER_PACKET_COUNT =
-                Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_ERROR_POLL_COUNT}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_ERROR_POLL_COUNT =
-                Global.PDP_WATCHDOG_ERROR_POLL_COUNT;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT =
-                Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS =
-                Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS =
-                Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#GPRS_REGISTER_CHECK_PERIOD_MS}
-         * instead.
-         * @hide
-         */
-        @Deprecated
-        public static final String GPRS_REGISTER_CHECK_PERIOD_MS =
-                Global.GPRS_REGISTER_CHECK_PERIOD_MS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#NITZ_UPDATE_SPACING} instead
-         * @hide
-         */
-        public static final String NITZ_UPDATE_SPACING = Global.NITZ_UPDATE_SPACING;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#NITZ_UPDATE_SPACING} instead
-         * @hide
-         */
-        public static final String NITZ_UPDATE_DIFF = Global.NITZ_UPDATE_DIFF;
-
-        /**
          * The maximum reconnect delay for short network outages or when the network is suspended
          * due to phone use.
          * @hide
          */
         public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
                 "sync_max_retry_delay_in_seconds";
-
-        /**
-         * @deprecated Use {@link Settings.Global#SMS_OUTGOING_CHECK_INTERVAL_MS} instead.
-         * @hide
-         */
-        public static final String SMS_OUTGOING_CHECK_INTERVAL_MS =
-                Global.SMS_OUTGOING_CHECK_INTERVAL_MS;
-
-        /**
-         * @deprecated Use {@link Settings.Global#SMS_OUTGOING_CHECK_MAX_COUNT} instead.
-         * @hide
-         */
-        public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
-                Global.SMS_OUTGOING_CHECK_MAX_COUNT;
 
         /**
          * The global search provider chosen by the user (if multiple global
@@ -4610,72 +4256,6 @@ public final class Settings {
         public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_POLLING_SEC} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_POLLING_SEC = Global.THROTTLE_POLLING_SEC;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_THRESHOLD_BYTES} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_THRESHOLD_BYTES = Global.THROTTLE_THRESHOLD_BYTES;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_VALUE_KBITSPS} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_VALUE_KBITSPS = Global.THROTTLE_VALUE_KBITSPS;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_VALUE_KBITSPS} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_RESET_DAY = Global.THROTTLE_RESET_DAY;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_NOTIFICATION_TYPE} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_NOTIFICATION_TYPE = Global.THROTTLE_NOTIFICATION_TYPE;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_HELP_URI} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_HELP_URI = Global.THROTTLE_HELP_URI;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#THROTTLE_MAX_NTP_CACHE_AGE_SEC} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String THROTTLE_MAX_NTP_CACHE_AGE_SEC =
-                Global.THROTTLE_MAX_NTP_CACHE_AGE_SEC;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DOWNLOAD_MAX_BYTES_OVER_MOBILE} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DOWNLOAD_MAX_BYTES_OVER_MOBILE =
-                Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE =
-                Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE;
-
-        /**
          * ms during which to consume extra events related to Inet connection condition
          * after a transtion to fully-connected
          * @hide
@@ -4690,30 +4270,6 @@ public final class Settings {
          */
         public static final String INET_CONDITION_DEBOUNCE_DOWN_DELAY =
                 "inet_condition_debounce_down_delay";
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#SETUP_PREPAID_DATA_SERVICE_URL} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String SETUP_PREPAID_DATA_SERVICE_URL =
-                Global.SETUP_PREPAID_DATA_SERVICE_URL;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#SETUP_PREPAID_DETECTION_TARGET_URL} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String SETUP_PREPAID_DETECTION_TARGET_URL =
-                Global.SETUP_PREPAID_DETECTION_TARGET_URL;
-
-        /**
-         * @deprecated Use {@link android.provider.Settings.Global#SETUP_PREPAID_DETECTION_REDIR_HOST} instead
-         * @hide
-         */
-        @Deprecated
-        public static final String SETUP_PREPAID_DETECTION_REDIR_HOST =
-                Global.SETUP_PREPAID_DETECTION_REDIR_HOST;
 
         /**
          * Whether screensavers are enabled.
@@ -4749,118 +4305,6 @@ public final class Settings {
          * @hide
          */
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
-
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_ENABLED = Global.NETSTATS_ENABLED;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_POLL_INTERVAL = Global.NETSTATS_POLL_INTERVAL;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_TIME_CACHE_MAX_AGE = Global.NETSTATS_TIME_CACHE_MAX_AGE;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_GLOBAL_ALERT_BYTES = Global.NETSTATS_GLOBAL_ALERT_BYTES;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_SAMPLE_ENABLED = Global.NETSTATS_SAMPLE_ENABLED;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_REPORT_XT_OVER_DEV = Global.NETSTATS_REPORT_XT_OVER_DEV;
-
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_DEV_BUCKET_DURATION = Global.NETSTATS_DEV_BUCKET_DURATION;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_DEV_PERSIST_BYTES = Global.NETSTATS_DEV_PERSIST_BYTES;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_DEV_ROTATE_AGE = Global.NETSTATS_DEV_ROTATE_AGE;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_DEV_DELETE_AGE = Global.NETSTATS_DEV_DELETE_AGE;
-
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_BUCKET_DURATION = Global.NETSTATS_UID_BUCKET_DURATION;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_PERSIST_BYTES = Global.NETSTATS_UID_PERSIST_BYTES;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_ROTATE_AGE = Global.NETSTATS_UID_ROTATE_AGE;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_DELETE_AGE = Global.NETSTATS_UID_DELETE_AGE;
-
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_TAG_BUCKET_DURATION = Global.NETSTATS_UID_TAG_BUCKET_DURATION;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_TAG_PERSIST_BYTES = Global.NETSTATS_UID_TAG_PERSIST_BYTES;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_TAG_ROTATE_AGE = Global.NETSTATS_UID_TAG_ROTATE_AGE;
-        /** @deprecated The NETSTATS_* symbols live in Settings.Global.* now
-         * {@hide} */
-        @Deprecated
-        public static final String NETSTATS_UID_TAG_DELETE_AGE = Global.NETSTATS_UID_TAG_DELETE_AGE;
-
-        /** Preferred NTP server. {@hide}
-         * @deprecated moved to Settings.Global */
-        public static final String NTP_SERVER = Global.NTP_SERVER;
-
-        /** Timeout in milliseconds to wait for NTP server. {@hide}
-         * @deprecated moved to Settings.Global */
-        public static final String NTP_TIMEOUT = Global.NTP_TIMEOUT;
-
-        /** Autofill server address (Used in WebView/browser).
-         * @deprecated moved to Settings.Global
-         * {@hide} */
-        public static final String WEB_AUTOFILL_QUERY_URL = Global.WEB_AUTOFILL_QUERY_URL;
-
-        /**
-         * Whether the package manager should send package verification broadcasts for verifiers to
-         * review apps prior to installation.
-         * @deprecated moved to Settings.Global
-         * 1 = request apps to be verified prior to installation, if a verifier exists.
-         * 0 = do not verify apps before installation
-         * {@hide}
-         */
-        @Deprecated
-        public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
-
-        /** Timeout for package verification.
-         * @deprecated moved to Settings.Global
-         * {@hide} */
-        @Deprecated
-        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
-
-        /** Default response code for package verification.
-         * @deprecated moved to Settings.Global
-         * {@hide} */
-        @Deprecated
-        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
 
         /** {@hide} */
         public static final String
