@@ -65,6 +65,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
 
@@ -5871,6 +5872,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this);
         if (mRemoteAdapter.isDataReady()) {
             setAdapter(mRemoteAdapter);
+        }
+    }
+
+    /**
+     * Sets up the onClickHandler to be used by the RemoteViewsAdapter when inflating RemoteViews
+     * 
+     * @param handler The OnClickHandler to use when inflating RemoteViews.
+     * 
+     * @hide
+     */
+    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
+        // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
+        // service handling the specified intent.
+        if (mRemoteAdapter != null) {
+            mRemoteAdapter.setRemoteViewsOnClickHandler(handler);
         }
     }
 
