@@ -74,7 +74,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
-import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -2749,7 +2748,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": " + win.mAttrs);
+            if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
+                    + " " + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
 
             win.mEnforceSizeCompat = (win.mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
 
@@ -4036,7 +4036,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
-                if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp);
+                if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp
+                        + " moveFocusNow=" + moveFocusNow);
                 if (changed) {
                     mInputMonitor.setFocusedAppLw(newFocus);
                 }
@@ -8296,7 +8297,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
                 Slog.v(TAG, "1ST PASS " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
-                        + " mLayoutAttached=" + win.mLayoutAttached);
+                        + " mLayoutAttached=" + win.mLayoutAttached
+                        + " screen changed=" + win.isConfigDiff(ActivityInfo.CONFIG_SCREEN_SIZE));
                 final AppWindowToken atoken = win.mAppToken;
                 if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
@@ -8318,6 +8320,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
+                    || win.isConfigDiff(ActivityInfo.CONFIG_SCREEN_SIZE)
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
@@ -8753,10 +8756,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     !w.mLastContentInsets.equals(w.mContentInsets);
             w.mVisibleInsetsChanged |=
                     !w.mLastVisibleInsets.equals(w.mVisibleInsets);
-            boolean configChanged =
-                w.mConfiguration != mCurConfiguration
-                && (w.mConfiguration == null
-                        || mCurConfiguration.diff(w.mConfiguration) != 0);
+            boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
                 Slog.v(TAG, "Win " + w + " config changed: "
                         + mCurConfiguration);
@@ -9254,10 +9254,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                             "Reporting new frame to " + win + ": " + win.mCompatFrame);
                     int diff = 0;
-                    boolean configChanged =
-                        win.mConfiguration != mCurConfiguration
-                        && (win.mConfiguration == null
-                                || (diff=mCurConfiguration.diff(win.mConfiguration)) != 0);
+                    boolean configChanged = win.isConfigChanged();
                     if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
                             && configChanged) {
                         Slog.i(TAG, "Sending new config to window " + win + ": "
