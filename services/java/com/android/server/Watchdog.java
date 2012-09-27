@@ -33,7 +33,6 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -118,9 +117,7 @@ public class Watchdog extends Thread {
                 case MONITOR: {
                     // See if we should force a reboot.
                     int rebootInterval = mReqRebootInterval >= 0
-                            ? mReqRebootInterval : Settings.Secure.getInt(
-                            mResolver, Settings.Secure.REBOOT_INTERVAL,
-                            REBOOT_DEFAULT_INTERVAL);
+                            ? mReqRebootInterval : REBOOT_DEFAULT_INTERVAL;
                     if (mRebootInterval != rebootInterval) {
                         mRebootInterval = rebootInterval;
                         // We have been running long enough that a reboot can
@@ -226,9 +223,7 @@ public class Watchdog extends Thread {
 
     void checkReboot(boolean fromAlarm) {
         int rebootInterval = mReqRebootInterval >= 0 ? mReqRebootInterval
-                : Settings.Secure.getInt(
-                mResolver, Settings.Secure.REBOOT_INTERVAL,
-                REBOOT_DEFAULT_INTERVAL);
+                : REBOOT_DEFAULT_INTERVAL;
         mRebootInterval = rebootInterval;
         if (rebootInterval <= 0) {
             // No reboot interval requested.
@@ -238,17 +233,11 @@ public class Watchdog extends Thread {
         }
 
         long rebootStartTime = mReqRebootStartTime >= 0 ? mReqRebootStartTime
-                : Settings.Secure.getLong(
-                mResolver, Settings.Secure.REBOOT_START_TIME,
-                REBOOT_DEFAULT_START_TIME);
+                : REBOOT_DEFAULT_START_TIME;
         long rebootWindowMillis = (mReqRebootWindow >= 0 ? mReqRebootWindow
-                : Settings.Secure.getLong(
-                mResolver, Settings.Secure.REBOOT_WINDOW,
-                REBOOT_DEFAULT_WINDOW)) * 1000;
+                : REBOOT_DEFAULT_WINDOW) * 1000;
         long recheckInterval = (mReqRecheckInterval >= 0 ? mReqRecheckInterval
-                : Settings.Secure.getLong(
-                mResolver, Settings.Secure.MEMCHECK_RECHECK_INTERVAL,
-                MEMCHECK_DEFAULT_RECHECK_INTERVAL)) * 1000;
+                : MEMCHECK_DEFAULT_RECHECK_INTERVAL) * 1000;
 
         retrieveBrutalityAmount();
 
@@ -325,13 +314,9 @@ public class Watchdog extends Thread {
      */
     void retrieveBrutalityAmount() {
         mMinScreenOff = (mReqMinScreenOff >= 0 ? mReqMinScreenOff
-                : Settings.Secure.getInt(
-                mResolver, Settings.Secure.MEMCHECK_MIN_SCREEN_OFF,
-                MEMCHECK_DEFAULT_MIN_SCREEN_OFF)) * 1000;
+                : MEMCHECK_DEFAULT_MIN_SCREEN_OFF) * 1000;
         mMinAlarm = (mReqMinNextAlarm >= 0 ? mReqMinNextAlarm
-                : Settings.Secure.getInt(
-                mResolver, Settings.Secure.MEMCHECK_MIN_ALARM,
-                MEMCHECK_DEFAULT_MIN_ALARM)) * 1000;
+                : MEMCHECK_DEFAULT_MIN_ALARM) * 1000;
     }
 
     /**
