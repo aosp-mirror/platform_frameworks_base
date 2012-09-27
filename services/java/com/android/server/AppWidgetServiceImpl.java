@@ -534,6 +534,7 @@ class AppWidgetServiceImpl {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
+                options = cloneIfLocalBinder(options);
                 ensureStateLoadedLocked();
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
                 if (id == null) {
@@ -817,7 +818,7 @@ class AppWidgetServiceImpl {
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null && id.provider != null && !id.provider.zombie) {
-                return id.provider.info;
+                return cloneIfLocalBinder(id.provider.info);
             }
             return null;
         }
@@ -828,7 +829,7 @@ class AppWidgetServiceImpl {
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
-                return id.views;
+                return cloneIfLocalBinder(id.views);
             }
             return null;
         }
@@ -842,7 +843,7 @@ class AppWidgetServiceImpl {
             for (int i = 0; i < N; i++) {
                 Provider p = mInstalledProviders.get(i);
                 if (!p.zombie) {
-                    result.add(p.info);
+                    result.add(cloneIfLocalBinder(p.info));
                 }
             }
             return result;
@@ -881,6 +882,7 @@ class AppWidgetServiceImpl {
 
     public void updateAppWidgetOptions(int appWidgetId, Bundle options) {
         synchronized (mAppWidgetIds) {
+            options = cloneIfLocalBinder(options);
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
 
@@ -907,7 +909,7 @@ class AppWidgetServiceImpl {
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null && id.options != null) {
-                return id.options;
+                return cloneIfLocalBinder(id.options);
             } else {
                 return Bundle.EMPTY;
             }
@@ -1062,6 +1064,34 @@ class AppWidgetServiceImpl {
         }
     }
 
+    private boolean isLocalBinder() {
+        return Process.myPid() == Binder.getCallingPid();
+    }
+
+    private RemoteViews cloneIfLocalBinder(RemoteViews rv) {
+        if (isLocalBinder() && rv != null) {
+            return rv.clone();
+        }
+        return rv;
+    }
+
+    private AppWidgetProviderInfo cloneIfLocalBinder(AppWidgetProviderInfo info) {
+        if (isLocalBinder() && info != null) {
+            return info.clone();
+        }
+        return info;
+    }
+
+    private Bundle cloneIfLocalBinder(Bundle bundle) {
+        // Note: this is only a shallow copy. For now this will be fine, but it could be problematic
+        // if we start adding objects to the options. Further, it would only be an issue if keyguard
+        // used such options.
+        if (isLocalBinder() && bundle != null) {
+            return (Bundle) bundle.clone();
+        }
+        return bundle;
+    }
+
     public int[] startListening(IAppWidgetHost callbacks, String packageName, int hostId,
             List<RemoteViews> updatedViews) {
         int callingUid = enforceCallingUid(packageName);
@@ -1078,7 +1108,7 @@ class AppWidgetServiceImpl {
             for (int i = 0; i < N; i++) {
                 AppWidgetId id = instances.get(i);
                 updatedIds[i] = id.appWidgetId;
-                updatedViews.add(id.views);
+                updatedViews.add(cloneIfLocalBinder(id.views));
             }
             return updatedIds;
         }
