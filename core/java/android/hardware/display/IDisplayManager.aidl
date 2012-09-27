@@ -28,13 +28,14 @@ interface IDisplayManager {
 
     void registerCallback(in IDisplayManagerCallback callback);
 
-    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    // No permissions required.
     void scanWifiDisplays();
 
-    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    // Requires CONFIGURE_WIFI_DISPLAY permission to connect to an unknown device.
+    // No permissions required to connect to a known device.
     void connectWifiDisplay(String address);
 
-    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    // No permissions required.
     void disconnectWifiDisplay();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
@@ -43,6 +44,6 @@ interface IDisplayManager {
     // Requires CONFIGURE_WIFI_DISPLAY permission.
     void forgetWifiDisplay(String address);
 
-    // Requires CONFIGURE_WIFI_DISPLAY permission.
+    // No permissions required.
     WifiDisplayStatus getWifiDisplayStatus();
 }
