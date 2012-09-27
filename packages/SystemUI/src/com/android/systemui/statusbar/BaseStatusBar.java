@@ -184,7 +184,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             if (isActivity && handled) {
                 // close the shade if it was open
-                animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                 visibilityChanged(false);
             }
             return handled;
@@ -361,7 +361,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.notification_inspect_item) {
                             startApplicationDetailsActivity(packageNameF);
-                            animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                         } else {
                             return false;
                         }
@@ -793,7 +793,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             // close the shade if it was open
-            animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             visibilityChanged(false);
 
             // If this click was on the intruder alert, hide that instead

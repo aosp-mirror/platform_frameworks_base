@@ -104,7 +104,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             = "com.android.internal.policy.statusbar.START";
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
-    private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
+    private static final int MSG_CLOSE_PANELS = 1001;
+    private static final int MSG_OPEN_SETTINGS_PANEL = 1002;
     // 1020-1030 reserved for BaseStatusBar
 
     // will likely move to a resource or other tunable param at some point
@@ -296,7 +297,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (mExpandedVisible && !mAnimating) {
-                        animateCollapseNotifications();
+                        animateCollapsePanels();
                     }
                 }
                 return mStatusBarWindow.onTouchEvent(event);
@@ -778,7 +779,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
-                animateCollapseNotifications();
+                animateCollapsePanels();
             }
         }
 
@@ -1051,7 +1052,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                animateCollapseNotifications();
+                animateCollapsePanels();
             }
         }
 
@@ -1111,10 +1112,13 @@ public class PhoneStatusBar extends BaseStatusBar {
             super.handleMessage(m);
             switch (m.what) {
                 case MSG_OPEN_NOTIFICATION_PANEL:
-                    animateExpandNotifications();
+                    animateExpandNotificationsPanel();
                     break;
-                case MSG_CLOSE_NOTIFICATION_PANEL:
-                    animateCollapseNotifications();
+                case MSG_OPEN_SETTINGS_PANEL:
+                    animateExpandSettingsPanel();
+                    break;
+                case MSG_CLOSE_PANELS:
+                    animateCollapsePanels();
                     break;
                 case MSG_SHOW_INTRUDER:
                     setIntruderAlertVisibility(true);
@@ -1167,11 +1171,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         visibilityChanged(true);
     }
 
-    public void animateCollapseNotifications() {
-        animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+    public void animateCollapsePanels() {
+        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    public void animateCollapseNotifications(int flags) {
+    public void animateCollapsePanels(int flags) {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse():"
                     + " mExpandedVisible=" + mExpandedVisible
@@ -1196,7 +1200,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandNotifications() {
+    public void animateExpandNotificationsPanel() {
         if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
@@ -1208,7 +1212,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandQuickSettings() {
+    public void animateExpandSettingsPanel() {
         if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return;
@@ -1352,7 +1356,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
                 final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
                 if (lightsOut) {
-                    animateCollapseNotifications();
+                    animateCollapsePanels();
                     if (mTicking) {
                         mTicker.halt();
                     }
@@ -1678,7 +1682,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     }
                 }
                 if (snapshot.isEmpty()) {
-                    animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                     return;
                 }
                 new Thread(new Runnable() {
@@ -1729,7 +1733,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+                                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                             }
                         }, totalDelay + 225);
                     }
@@ -1751,7 +1755,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             v.getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     new UserHandle(UserHandle.USER_CURRENT));
-            animateCollapseNotifications();
+            animateCollapsePanels();
         }
     };
 
@@ -1767,7 +1771,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
-                animateCollapseNotifications(flags);
+                animateCollapsePanels(flags);
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 // no waiting!
@@ -1792,7 +1796,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void userSwitched(int newUserId) {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
-        animateCollapseNotifications();
+        animateCollapsePanels();
         updateNotificationIcons();
     }
     
