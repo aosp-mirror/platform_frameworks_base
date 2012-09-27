@@ -51,6 +51,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.DisplayManagerService;
+import com.android.server.dreams.DreamManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
