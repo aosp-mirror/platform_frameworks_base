@@ -347,8 +347,6 @@ public class UT_math_agree extends UnitTest {
         long[] rand_sl2_1 = randvec_long(2);
         long[] rand_sl3_1 = randvec_long(3);
         long[] rand_sl4_1 = randvec_long(4);
-        // FIXME:  generate signed char vectors once bug 6865598 is fixed
-        /*
         byte rand_sc1_0 = (byte)rand.nextInt(0x1 << 8);
         byte[] rand_sc2_0 = randvec_char(2);
         byte[] rand_sc3_0 = randvec_char(3);
@@ -357,7 +355,6 @@ public class UT_math_agree extends UnitTest {
         byte[] rand_sc2_1 = randvec_char(2);
         byte[] rand_sc3_1 = randvec_char(3);
         byte[] rand_sc4_1 = randvec_char(4);
-        */
         // TODO:  generate unsigned long vectors
 
         // Set random vectors in renderscript code
@@ -417,8 +414,6 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_uc2_0(pack_s2(rand_uc2_0));
         s.set_rand_uc3_0(pack_s3(rand_uc3_0));
         s.set_rand_uc4_0(pack_s4(rand_uc4_0));
-        // FIXME:  set char input vectors once bug 6865598 is fixed
-        /*
         s.set_rand_sc1_0(rand_sc1_0);
         s.set_rand_sc2_0(pack_b2(rand_sc2_0));
         s.set_rand_sc3_0(pack_b3(rand_sc3_0));
@@ -427,7 +422,6 @@ public class UT_math_agree extends UnitTest {
         s.set_rand_sc2_1(pack_b2(rand_sc2_1));
         s.set_rand_sc3_1(pack_b3(rand_sc3_1));
         s.set_rand_sc4_1(pack_b4(rand_sc4_1));
-        */
         // TODO:  set unsigned long vectors
 
         // Set results for min
@@ -459,13 +453,10 @@ public class UT_math_agree extends UnitTest {
         s.set_min_rand_sl2_sl2(pack_l2(min(rand_sl2_0, rand_sl2_1)));
         s.set_min_rand_sl3_sl3(pack_l3(min(rand_sl3_0, rand_sl3_1)));
         s.set_min_rand_sl4_sl4(pack_l4(min(rand_sl4_0, rand_sl4_1)));
-        // FIXME:  set char min reference vectors once bug 6865598 is fixed
-        /*
         s.set_min_rand_sc1_sc1(min(rand_sc1_0, rand_sc1_1));
         s.set_min_rand_sc2_sc2(pack_b2(min(rand_sc2_0, rand_sc2_1)));
         s.set_min_rand_sc3_sc3(pack_b3(min(rand_sc3_0, rand_sc3_1)));
         s.set_min_rand_sc4_sc4(pack_b4(min(rand_sc4_0, rand_sc4_1)));
-        */
         // TODO:  set results for unsigned long min
 
         // Set results for max
@@ -497,13 +488,10 @@ public class UT_math_agree extends UnitTest {
         s.set_max_rand_sl2_sl2(pack_l2(max(rand_sl2_0, rand_sl2_1)));
         s.set_max_rand_sl3_sl3(pack_l3(max(rand_sl3_0, rand_sl3_1)));
         s.set_max_rand_sl4_sl4(pack_l4(max(rand_sl4_0, rand_sl4_1)));
-        // FIXME:  set signed char max reference vectors once bug 6865598 is fixed
-        /*
         s.set_max_rand_sc1_sc1(max(rand_sc1_0, rand_sc1_1));
         s.set_max_rand_sc2_sc2(pack_b2(max(rand_sc2_0, rand_sc2_1)));
         s.set_max_rand_sc3_sc3(pack_b3(max(rand_sc3_0, rand_sc3_1)));
         s.set_max_rand_sc4_sc4(pack_b4(max(rand_sc4_0, rand_sc4_1)));
-        */
 
         // TODO:  set results for unsigned long max
 
