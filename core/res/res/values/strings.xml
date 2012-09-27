@@ -744,6 +744,13 @@
         the entire window content and examine all its text except passwords.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_temporary_enable_accessibility">temporary enable accessibility</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_temporary_enable_accessibility">Allows an application to temporarily
+         enable accessibility on the device. Malicious apps may enable accessibility without
+         user consent.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_retrieve_window_info">retrieve window info</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_retrieve_window_info">Allows an application to retrieve
@@ -3903,5 +3910,14 @@
     </string>
 
     <string name="kg_temp_back_string"> &lt; </string> <!-- TODO: remove this -->
+
+    <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
+    <string name="continue_to_enable_accessibility">Continue touching the screen to enable accessibility.</string>
+    <!-- Text spoken when the user enabled accessibility. [CHAR LIMIT=none] -->
+    <string name="accessibility_enabled">Accessibility enabled.</string>
+    <!-- Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none] -->
+    <string name="enable_accessibility_canceled">Enable accessibility canceled.</string>
+    <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
+    <string name="user_switched">Switched to user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
 
 </resources>

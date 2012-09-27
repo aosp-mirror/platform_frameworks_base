@@ -290,6 +290,7 @@
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
+  <java-symbol type="dimen" name="accessibility_touch_slop" />
   <java-symbol type="dimen" name="config_prefDialogWidth" />
   <java-symbol type="dimen" name="config_viewConfigurationTouchSlop" />
   <java-symbol type="dimen" name="default_app_widget_padding_bottom" />
@@ -357,6 +358,7 @@
   <java-symbol type="string" name="abbrev_month_day_year" />
   <java-symbol type="string" name="abbrev_month_year" />
   <java-symbol type="string" name="accept" />
+  <java-symbol type="string" name="accessibility_enabled" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
   <java-symbol type="string" name="activitychooserview_choose_application" />
   <java-symbol type="string" name="alternate_eri_file" />
@@ -437,6 +439,7 @@
   <java-symbol type="string" name="contentServiceSync" />
   <java-symbol type="string" name="contentServiceSyncNotificationTitle" />
   <java-symbol type="string" name="contentServiceTooManyDeletesNotificationDesc" />
+  <java-symbol type="string" name="continue_to_enable_accessibility" />
   <java-symbol type="string" name="date1_date2" />
   <java-symbol type="string" name="date1_time1_date2_time2" />
   <java-symbol type="string" name="date_and_time" />
@@ -470,6 +473,7 @@
   <java-symbol type="string" name="emailTypeWork" />
   <java-symbol type="string" name="emergency_call_dialog_number_for_display" />
   <java-symbol type="string" name="emergency_calls_only" />
+  <java-symbol type="string" name="enable_accessibility_canceled" />
   <java-symbol type="string" name="eventTypeAnniversary" />
   <java-symbol type="string" name="eventTypeBirthday" />
   <java-symbol type="string" name="eventTypeCustom" />
@@ -778,6 +782,7 @@
   <java-symbol type="string" name="twelve_hour_time_format" />
   <java-symbol type="string" name="twenty_four_hour_time_format" />
   <java-symbol type="string" name="upload_file" />
+  <java-symbol type="string" name="user_switched" />
   <java-symbol type="string" name="volume_alarm" />
   <java-symbol type="string" name="volume_icon_description_bluetooth" />
   <java-symbol type="string" name="volume_icon_description_incall" />
