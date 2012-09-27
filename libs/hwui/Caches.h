@@ -173,14 +173,13 @@ public:
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gMeshStride and a size of 2.
      */
-    void bindPositionVertexPointer(bool force, GLuint slot, GLvoid* vertices,
-            GLsizei stride = gMeshStride);
+    void bindPositionVertexPointer(bool force, GLvoid* vertices, GLsizei stride = gMeshStride);
 
     /**
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gMeshStride and a size of 2.
      */
-    void bindTexCoordsVertexPointer(bool force, GLuint slot, GLvoid* vertices);
+    void bindTexCoordsVertexPointer(bool force, GLvoid* vertices);
 
     /**
      * Resets the vertex pointers.
@@ -295,6 +294,7 @@ private:
     GLuint mCurrentBuffer;
     GLuint mCurrentIndicesBuffer;
     void* mCurrentPositionPointer;
+    GLuint mCurrentPositionStride;
     void* mCurrentTexCoordsPointer;
 
     bool mTexCoordsArrayEnabled;
