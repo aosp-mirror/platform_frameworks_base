@@ -115,8 +115,8 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
             Location lastKnownLocation = mLocationManager.getLastKnownLocation(provider);
             if (lastKnownLocation != null) {
                 if (bestLocation == null ||
-                        bestLocation.getElapsedRealtimeNano() <
-                        lastKnownLocation.getElapsedRealtimeNano()) {
+                        bestLocation.getElapsedRealtimeNanos() <
+                        lastKnownLocation.getElapsedRealtimeNanos()) {
                     bestLocation = lastKnownLocation;
                 }
             }
