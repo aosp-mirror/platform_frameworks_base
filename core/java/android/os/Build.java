@@ -413,7 +413,7 @@ public class Build {
         public static final int JELLY_BEAN = 16;
 
         /**
-         * Moar jelly beans!
+         * Android 4.2: Moar jelly beans!
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -422,6 +422,12 @@ public class Build {
          * {@code false}. See
          * <a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
          * the android:exported section</a> in the provider documentation for more details.</li>
+         * <li>{@link android.view.View#getLayoutDirection() View.getLayoutDirection()}
+         * can return different values than {@link android.view.View#LAYOUT_DIRECTION_LTR}
+         * based on the locale etc.
+         * <li> {@link android.webkit.WebView#addJavascriptInterface(Object, String)
+         * WebView.addJavascriptInterface} requires explicit annotations on methods
+         * for them to be accessible from Javascript.
          * </ul>
          */
         public static final int JELLY_BEAN_MR1 = 17;
