@@ -445,7 +445,7 @@ public class TableLayout extends LinearLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         // enforce vertical layout
-        layoutVertical();
+        layoutVertical(l, t, r, b);
     }
 
     /**

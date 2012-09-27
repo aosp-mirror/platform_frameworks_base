@@ -120,7 +120,7 @@ public class TableRow extends LinearLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         // enforce horizontal layout
-        layoutHorizontal();
+        layoutHorizontal(l, t, r, b);
     }
 
     /**

@@ -1431,9 +1431,9 @@ public class LinearLayout extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (mOrientation == VERTICAL) {
-            layoutVertical();
+            layoutVertical(l, t, r, b);
         } else {
-            layoutHorizontal();
+            layoutHorizontal(l, t, r, b);
         }
     }
 
@@ -1444,15 +1444,19 @@ public class LinearLayout extends ViewGroup {
      * @see #getOrientation()
      * @see #setOrientation(int)
      * @see #onLayout(boolean, int, int, int, int)
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
      */
-    void layoutVertical() {
+    void layoutVertical(int left, int top, int right, int bottom) {
         final int paddingLeft = mPaddingLeft;
 
         int childTop;
         int childLeft;
         
         // Where right end of child should go
-        final int width = mRight - mLeft;
+        final int width = right - left;
         int childRight = width - mPaddingRight;
         
         // Space available for child
@@ -1466,12 +1470,12 @@ public class LinearLayout extends ViewGroup {
         switch (majorGravity) {
            case Gravity.BOTTOM:
                // mTotalLength contains the padding already
-               childTop = mPaddingTop + mBottom - mTop - mTotalLength;
+               childTop = mPaddingTop + bottom - top - mTotalLength;
                break;
 
                // mTotalLength contains the padding already
            case Gravity.CENTER_VERTICAL:
-               childTop = mPaddingTop + (mBottom - mTop - mTotalLength) / 2;
+               childTop = mPaddingTop + (bottom - top - mTotalLength) / 2;
                break;
 
            case Gravity.TOP:
@@ -1534,8 +1538,12 @@ public class LinearLayout extends ViewGroup {
      * @see #getOrientation()
      * @see #setOrientation(int)
      * @see #onLayout(boolean, int, int, int, int)
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
      */
-    void layoutHorizontal() {
+    void layoutHorizontal(int left, int top, int right, int bottom) {
         final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
 
@@ -1543,7 +1551,7 @@ public class LinearLayout extends ViewGroup {
         int childLeft;
         
         // Where bottom of child should go
-        final int height = mBottom - mTop;
+        final int height = bottom - top;
         int childBottom = height - mPaddingBottom; 
         
         // Space available for child
@@ -1563,12 +1571,12 @@ public class LinearLayout extends ViewGroup {
         switch (Gravity.getAbsoluteGravity(majorGravity, layoutDirection)) {
             case Gravity.RIGHT:
                 // mTotalLength contains the padding already
-                childLeft = mPaddingLeft + mRight - mLeft - mTotalLength;
+                childLeft = mPaddingLeft + right - left - mTotalLength;
                 break;
 
             case Gravity.CENTER_HORIZONTAL:
                 // mTotalLength contains the padding already
-                childLeft = mPaddingLeft + (mRight - mLeft - mTotalLength) / 2;
+                childLeft = mPaddingLeft + (right - left - mTotalLength) / 2;
                 break;
 
             case Gravity.LEFT:
