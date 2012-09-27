@@ -3902,6 +3902,5 @@
        "Raise volume above safe level?\nListening at high volume for long periods may damage your hearing."
     </string>
 
-    <string name="kg_temp_back_string"> &lt; </string> <!-- TODO: remove this -->
 
 </resources>
