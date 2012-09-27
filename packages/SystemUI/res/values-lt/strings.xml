@@ -104,7 +104,7 @@
     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Viena „Wi-Fi“ juosta."</string>
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dvi „Wi-Fi“ signalo juostos."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Trys „Wi-Fi“ signalo juostos."</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"„Wi-Fi“ signalas stiprus."</string>
+    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Stiprus „Wi-Fi“ signalas."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Nėra „WiMAX“ signalo."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Viena „WiMAX“ signalo juosta."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Dvi „WiMAX“ signalo juostos."</string>
@@ -168,11 +168,12 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Nustatymai"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Laikas"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Aš"</string>
-    <string name="quick_settings_wifi_label" msgid="4393429107095001520">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Neprisijungta"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tinklo nėra"</string>
-    <string name="quick_settings_wifi_off_label" msgid="3343111275022978538">"„Wi-Fi“ išjungta"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6653501376641018614">"„Wi-Fi“ pateiktis"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="6255615315258869136">"Nėra „Wi-Fi“ pateikties ryšio"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"„Wi-Fi“ pateiktis"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Nėra „Wi-Fi“ pateikties ryšio"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Skaistis"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
 </resources>
