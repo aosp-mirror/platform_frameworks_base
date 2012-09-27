@@ -71,7 +71,7 @@ public class Location implements Parcelable {
 
     private String mProvider;
     private long mTime = 0;
-    private long mElapsedRealtimeNano = 0;
+    private long mElapsedRealtimeNanos = 0;
     private double mLatitude = 0.0;
     private double mLongitude = 0.0;
     private boolean mHasAltitude = false;
@@ -120,7 +120,7 @@ public class Location implements Parcelable {
     public void set(Location l) {
         mProvider = l.mProvider;
         mTime = l.mTime;
-        mElapsedRealtimeNano = l.mElapsedRealtimeNano;
+        mElapsedRealtimeNanos = l.mElapsedRealtimeNanos;
         mLatitude = l.mLatitude;
         mLongitude = l.mLongitude;
         mHasAltitude = l.mHasAltitude;
@@ -140,7 +140,7 @@ public class Location implements Parcelable {
     public void reset() {
         mProvider = null;
         mTime = 0;
-        mElapsedRealtimeNano = 0;
+        mElapsedRealtimeNanos = 0;
         mLatitude = 0;
         mLongitude = 0;
         mHasAltitude = false;
@@ -485,7 +485,7 @@ public class Location implements Parcelable {
      *
      * <p>Note that the UTC time on a device is not monotonic: it
      * can jump forwards or backwards unpredictably. So always use
-     * {@link #getElapsedRealtimeNano} when calculating time deltas.
+     * {@link #getElapsedRealtimeNanos} when calculating time deltas.
      *
      * <p>On the other hand, {@link #getTime} is useful for presenting
      * a human readable time to the user, or for carefully comparing
@@ -515,7 +515,7 @@ public class Location implements Parcelable {
      * Return the time of this fix, in elapsed real-time since system boot.
      *
      * <p>This value can be reliably compared to
-     * {@link android.os.SystemClock#elapsedRealtimeNano},
+     * {@link android.os.SystemClock#elapsedRealtimeNanos},
      * to calculate the age of a fix and to compare Location fixes. This
      * is reliable because elapsed real-time is guaranteed monotonic for
      * each system boot and continues to increment even when the system
@@ -526,8 +526,8 @@ public class Location implements Parcelable {
      *
      * @return elapsed real-time of fix, in nanoseconds since system boot.
      */
-    public long getElapsedRealtimeNano() {
-        return mElapsedRealtimeNano;
+    public long getElapsedRealtimeNanos() {
+        return mElapsedRealtimeNanos;
     }
 
     /**
@@ -535,8 +535,8 @@ public class Location implements Parcelable {
      *
      * @param time elapsed real-time of fix, in nanoseconds since system boot.
      */
-    public void setElapsedRealtimeNano(long time) {
-        mElapsedRealtimeNano = time;
+    public void setElapsedRealtimeNanos(long time) {
+        mElapsedRealtimeNanos = time;
     }
 
     /**
@@ -772,7 +772,7 @@ public class Location implements Parcelable {
         if (mProvider == null) return false;
         if (!mHasAccuracy) return false;
         if (mTime == 0) return false;
-        if (mElapsedRealtimeNano == 0) return false;
+        if (mElapsedRealtimeNanos == 0) return false;
         return true;
     }
 
@@ -792,7 +792,7 @@ public class Location implements Parcelable {
             mAccuracy = 100.0f;
         }
         if (mTime == 0) mTime = System.currentTimeMillis();
-        if (mElapsedRealtimeNano == 0) mElapsedRealtimeNano = SystemClock.elapsedRealtimeNano();
+        if (mElapsedRealtimeNanos == 0) mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
     }
 
     /**
@@ -832,11 +832,11 @@ public class Location implements Parcelable {
         if (mTime == 0) {
             s.append(" t=?!?");
         }
-        if (mElapsedRealtimeNano == 0) {
+        if (mElapsedRealtimeNanos == 0) {
             s.append(" et=?!?");
         } else {
             s.append(" et=");
-            TimeUtils.formatDuration(mElapsedRealtimeNano / 1000000L, s);
+            TimeUtils.formatDuration(mElapsedRealtimeNanos / 1000000L, s);
         }
         if (mHasAltitude) s.append(" alt=").append(mAltitude);
         if (mHasSpeed) s.append(" vel=").append(mSpeed);
@@ -860,7 +860,7 @@ public class Location implements Parcelable {
             String provider = in.readString();
             Location l = new Location(provider);
             l.mTime = in.readLong();
-            l.mElapsedRealtimeNano = in.readLong();
+            l.mElapsedRealtimeNanos = in.readLong();
             l.mLatitude = in.readDouble();
             l.mLongitude = in.readDouble();
             l.mHasAltitude = in.readInt() != 0;
@@ -890,7 +890,7 @@ public class Location implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mProvider);
         parcel.writeLong(mTime);
-        parcel.writeLong(mElapsedRealtimeNano);
+        parcel.writeLong(mElapsedRealtimeNanos);
         parcel.writeDouble(mLatitude);
         parcel.writeDouble(mLongitude);
         parcel.writeInt(mHasAltitude ? 1 : 0);
