@@ -147,7 +147,7 @@ public final class TwilightService {
         }
 
         // if new location is older than the current one, the device hasn't moved.
-        if (to.getElapsedRealtimeNano() < from.getElapsedRealtimeNano()) {
+        if (to.getElapsedRealtimeNanos() < from.getElapsedRealtimeNanos()) {
             return false;
         }
 
@@ -428,8 +428,8 @@ public final class TwilightService {
                         mLocationManager.getLastKnownLocation(providers.next());
                 // pick the most recent location
                 if (location == null || (lastKnownLocation != null &&
-                        location.getElapsedRealtimeNano() <
-                        lastKnownLocation.getElapsedRealtimeNano())) {
+                        location.getElapsedRealtimeNanos() <
+                        lastKnownLocation.getElapsedRealtimeNanos())) {
                     location = lastKnownLocation;
                 }
             }
@@ -447,7 +447,7 @@ public final class TwilightService {
                 location.setLatitude(0);
                 location.setAccuracy(417000.0f);
                 location.setTime(System.currentTimeMillis());
-                location.setElapsedRealtimeNano(SystemClock.elapsedRealtimeNano());
+                location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
 
                 if (DEBUG) {
                     Slog.d(TAG, "Estimated location from timezone: " + location);

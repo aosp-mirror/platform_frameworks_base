@@ -17,17 +17,14 @@
 package com.android.server;
 
 import android.app.PendingIntent;
-import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
@@ -41,7 +38,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
-import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,7 +51,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.provider.Settings.NameValueTable;
 import android.util.Log;
 import android.util.Slog;
 
@@ -80,8 +75,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
 /**
@@ -1343,7 +1336,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         // Check whether sufficient time has passed
         long minTime = record.mRequest.getFastestInterval();
-        long delta = (loc.getElapsedRealtimeNano() - lastLoc.getElapsedRealtimeNano()) / 1000000L;
+        long delta = (loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos()) / 1000000L;
         if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
             return false;
         }

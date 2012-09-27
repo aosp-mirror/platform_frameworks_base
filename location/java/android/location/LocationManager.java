@@ -1186,7 +1186,7 @@ public class LocationManager {
      * Get the last known location.
      *
      * <p>This location could be very old so use
-     * {@link Location#getElapsedRealtimeNano} to calculate its age. It can
+     * {@link Location#getElapsedRealtimeNanos} to calculate its age. It can
      * also return null if no previous location is available.
      *
      * <p>Always returns immediately.
