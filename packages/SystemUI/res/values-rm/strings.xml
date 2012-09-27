@@ -178,7 +178,7 @@
     <skip />
     <!-- no translation found for accessibility_wifi_three_bars (928322805193265041) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (1275764416228473932) -->
+    <!-- no translation found for accessibility_wifi_signal_full (4826278754383492058) -->
     <skip />
     <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
     <skip />
@@ -306,15 +306,17 @@
     <skip />
     <!-- no translation found for quick_settings_user_label (5238995632130897840) -->
     <skip />
-    <!-- no translation found for quick_settings_wifi_label (4393429107095001520) -->
+    <!-- no translation found for quick_settings_wifi_label (9135344704899546041) -->
+    <skip />
+    <!-- no translation found for quick_settings_wifi_not_connected (7171904845345573431) -->
     <skip />
     <!-- no translation found for quick_settings_wifi_no_network (2221993077220856376) -->
     <skip />
-    <!-- no translation found for quick_settings_wifi_off_label (3343111275022978538) -->
+    <!-- no translation found for quick_settings_wifi_off_label (7558778100843885864) -->
     <skip />
-    <!-- no translation found for quick_settings_wifi_display_label (6653501376641018614) -->
+    <!-- no translation found for quick_settings_wifi_display_label (6893592964463624333) -->
     <skip />
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (6255615315258869136) -->
+    <!-- no translation found for quick_settings_wifi_display_no_connection_label (7834964244709912066) -->
     <skip />
     <!-- no translation found for quick_settings_brightness_dialog_title (8599674057673605368) -->
     <skip />
