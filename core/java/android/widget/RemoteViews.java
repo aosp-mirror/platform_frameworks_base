@@ -237,12 +237,11 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     public void mergeRemoteViews(RemoteViews newRv) {
+        if (newRv == null) return;
         // We first copy the new RemoteViews, as the process of merging modifies the way the actions
         // reference the bitmap cache. We don't want to modify the object as it may need to
         // be merged and applied multiple times.
-        Parcel p = Parcel.obtain();
-        newRv.writeToParcel(p, 0);
-        RemoteViews copy = new RemoteViews(p);
+        RemoteViews copy = newRv.clone();
 
         HashMap<String, Action> map = new HashMap<String, Action>();
         if (mActions == null) {
@@ -261,7 +260,7 @@ public class RemoteViews implements Parcelable, Filter {
         for (int i = 0; i < count; i++) {
             Action a = newActions.get(i);
             String key = newActions.get(i).getUniqueKey();
-            int mergeBehavior = map.get(key).mergeBehavior();
+            int mergeBehavior = newActions.get(i).mergeBehavior();
             if (map.containsKey(key) && mergeBehavior == Action.MERGE_REPLACE) {
                 mActions.remove(map.get(key));
                 map.remove(key);
@@ -1581,23 +1580,12 @@ public class RemoteViews implements Parcelable, Filter {
         recalculateMemoryUsage();
     }
 
-    @Override
-    public RemoteViews clone() {
-        RemoteViews that;
-        if (!hasLandscapeAndPortraitLayouts()) {
-            that = new RemoteViews(mPackage, mLayoutId);
 
-            if (mActions != null) {
-                that.mActions = (ArrayList<Action>)mActions.clone();
-            }
-        } else {
-            RemoteViews land = mLandscape.clone();
-            RemoteViews port = mPortrait.clone();
-            that = new RemoteViews(land, port);
-        }
-        // update the memory usage stats of the cloned RemoteViews
-        that.recalculateMemoryUsage();
-        return that;
+    public RemoteViews clone() {
+        Parcel p = Parcel.obtain();
+        writeToParcel(p, 0);
+        p.setDataPosition(0);
+        return new RemoteViews(p);
     }
 
     public String getPackage() {
