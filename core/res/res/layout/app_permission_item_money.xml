@@ -55,9 +55,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@id/perm_name"
-            android:scaleType="fitCenter" />
+            android:layout_alignBottom="@+id/perm_money_label"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_coins_s" />
         <TextView
+            android:id="@+id/perm_money_label"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textSize="16sp"
             android:textColor="@color/perms_costs_money"
@@ -65,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/perm_money_icon"
             android:layout_below="@id/perm_name"
+            android:layout_marginStart="8dp"
             android:text="@string/perm_costs_money" />
     </RelativeLayout>
 
