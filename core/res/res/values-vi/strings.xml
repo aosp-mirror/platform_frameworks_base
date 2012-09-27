@@ -1259,7 +1259,7 @@
     <string name="find" msgid="4808270900322985960">"Tìm"</string>
     <string name="websearch" msgid="4337157977400211589">"Tìm kiếm trên web"</string>
     <string name="find_next" msgid="5742124618942193978">"Tìm kết quả phù hợp tiếp theo"</string>
-    <string name="find_previous" msgid="2196723669388360506">"Tìm kết quả phù hợp trước đó"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Tìm kết quả phù hợp trước"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Yêu cầu vị trí từ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Yêu cầu vị trí"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Được yêu cầu bởi <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
