@@ -68,6 +68,7 @@ void Caches::init() {
     mCurrentBuffer = meshBuffer;
     mCurrentIndicesBuffer = 0;
     mCurrentPositionPointer = this;
+    mCurrentPositionStride = 0;
     mCurrentTexCoordsPointer = this;
 
     mTexCoordsArrayEnabled = false;
@@ -340,15 +341,18 @@ bool Caches::unbindIndicesBuffer() {
 // Meshes and textures
 ///////////////////////////////////////////////////////////////////////////////
 
-void Caches::bindPositionVertexPointer(bool force, GLuint slot, GLvoid* vertices, GLsizei stride) {
-    if (force || vertices != mCurrentPositionPointer) {
+void Caches::bindPositionVertexPointer(bool force, GLvoid* vertices, GLsizei stride) {
+    if (force || vertices != mCurrentPositionPointer || stride != mCurrentPositionStride) {
+        GLuint slot = currentProgram->position;
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentPositionPointer = vertices;
+        mCurrentPositionStride = stride;
     }
 }
 
-void Caches::bindTexCoordsVertexPointer(bool force, GLuint slot, GLvoid* vertices) {
+void Caches::bindTexCoordsVertexPointer(bool force, GLvoid* vertices) {
     if (force || vertices != mCurrentTexCoordsPointer) {
+        GLuint slot = currentProgram->texCoords;
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, gMeshStride, vertices);
         mCurrentTexCoordsPointer = vertices;
     }

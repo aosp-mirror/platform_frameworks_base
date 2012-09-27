@@ -35,15 +35,13 @@ public:
         mCleanupMethod(0)
     {}
 
-    ~VertexBuffer()
-    {
+    ~VertexBuffer() {
         if (mCleanupMethod)
             mCleanupMethod(mBuffer);
     }
 
     template <class TYPE>
-    TYPE* alloc(int size)
-    {
+    TYPE* alloc(int size) {
         mSize = size;
         mBuffer = (void*)new TYPE[size];
         mCleanupMethod = &(cleanup<TYPE>);
@@ -56,8 +54,7 @@ public:
 
 private:
     template <class TYPE>
-    static void cleanup(void* buffer)
-    {
+    static void cleanup(void* buffer) {
         delete[] (TYPE*)buffer;
     }
 
@@ -68,17 +65,15 @@ private:
 
 class PathRenderer {
 public:
-    static void computeInverseScales(
-        const mat4 *transform, float &inverseScaleX, float& inverseScaleY);
+    static SkRect computePathBounds(const SkPath& path, const SkPaint* paint);
 
-    static void convexPathFillVertices(
-        const SkPath &path, const mat4 *transform,
-        VertexBuffer &vertexBuffer, bool isAA);
+    static void convexPathVertices(const SkPath& path, const SkPaint* paint,
+            const mat4 *transform, VertexBuffer& vertexBuffer);
 
 private:
-    static void convexPathVertices(
+    static void convexPathPerimeterVertices(
         const SkPath &path,
-        float thresholdx, float thresholdy,
+        float sqrInvScaleX, float sqrInvScaleY,
         Vector<Vertex> &outputVertices);
 
 /*
@@ -86,23 +81,23 @@ private:
   control c
  */
     static void recursiveQuadraticBezierVertices(
-        float ax, float ay,
-        float bx, float by,
-        float cx, float cy,
-        float thresholdx, float thresholdy,
-        Vector<Vertex> &outputVertices);
+            float ax, float ay,
+            float bx, float by,
+            float cx, float cy,
+            float sqrInvScaleX, float sqrInvScaleY,
+            Vector<Vertex> &outputVertices);
 
 /*
   endpoints p1, p2
   control c1, c2
  */
     static void recursiveCubicBezierVertices(
-        float p1x, float p1y,
-        float c1x, float c1y,
-        float p2x, float p2y,
-        float c2x, float c2y,
-        float thresholdx, float thresholdy,
-        Vector<Vertex> &outputVertices);
+            float p1x, float p1y,
+            float c1x, float c1y,
+            float p2x, float p2y,
+            float c2x, float c2y,
+            float sqrInvScaleX, float sqrInvScaleY,
+            Vector<Vertex> &outputVertices);
 };
 
 }; // namespace uirenderer
