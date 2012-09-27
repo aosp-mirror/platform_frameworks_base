@@ -35,6 +35,7 @@
             android:id="@+id/clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-15.5dip"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:layout_gravity="end">
 
@@ -46,6 +47,7 @@
                 android:textSize="@dimen/kg_status_clock_font_size"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#ffffffff"
+                android:drawablePadding="2dip"
                 />
 
         </com.android.internal.policy.impl.keyguard.ClockView>
@@ -64,19 +66,21 @@
             />
 
         <TextView
-            android:id="@+id/owner_info"
+            android:id="@+id/alarm_status"
             android:layout_gravity="end"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="28dp"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/kg_status_line_font_size"
+            android:drawablePadding="4dip"
             />
 
         <TextView
-            android:id="@+id/alarm_status"
+            android:id="@+id/owner_info"
             android:layout_gravity="end"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:singleLine="true"
             android:ellipsize="marquee"
@@ -87,6 +91,7 @@
         <TextView
             android:id="@+id/status1"
             android:layout_gravity="end"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:singleLine="true"
             android:ellipsize="marquee"

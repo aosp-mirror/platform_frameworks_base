@@ -31,6 +31,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="0.45"
+        android:layout_marginTop="35dip"
+        android:layout_marginLeft="33dip"
+        android:layout_marginRight="33dip"
         android:visibility="gone">
             <!-- TODO: Remove this when supported as a widget -->
             <include layout="@layout/keyguard_status_view"/>
@@ -50,6 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
+            android:gravity="@integer/kg_selector_gravity"
 
             prvandroid:targetDrawables="@*android:array/lockscreen_targets_with_camera"
             prvandroid:targetDescriptions="@*android:array/lockscreen_target_descriptions_with_camera"
@@ -64,34 +68,13 @@
             prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
             prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"/>
 
-        <LinearLayout
+        <include layout="@layout/keyguard_emergency_carrier_area"
             android:id="@+id/keyguard_selector_fade_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_alignParentBottom="true">
-
-            <com.android.internal.policy.impl.keyguard.CarrierText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="@*android:dimen/keyguard_lockscreen_status_line_font_size"
-                android:textColor="?android:attr/textColorSecondary"
-                />
-
-            <com.android.internal.policy.impl.keyguard.EmergencyButton
-                android:id="@+id/emergency_call_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
-                android:text="@string/kg_emergency_call_label"
-                style="?android:attr/buttonBarButtonStyle"
-                android:drawablePadding="8dip" />
-
-        </LinearLayout>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 
