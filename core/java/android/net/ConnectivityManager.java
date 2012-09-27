@@ -330,6 +330,14 @@ public class ConnectivityManager {
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
+    /**
+     * Default value for {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY} in
+     * milliseconds.
+     *
+     * @hide
+     */
+    public static final int CONNECTIVITY_CHANGE_DELAY_DEFAULT = 3000;
+
     private final IConnectivityManager mService;
 
     public static boolean isNetworkTypeValid(int networkType) {

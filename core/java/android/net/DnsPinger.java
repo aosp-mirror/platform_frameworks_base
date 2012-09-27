@@ -295,8 +295,8 @@ public final class DnsPinger extends Handler {
     }
 
     private InetAddress getDefaultDns() {
-        String dns = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.DEFAULT_DNS_SERVER);
+        String dns = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.DEFAULT_DNS_SERVER);
         if (dns == null || dns.length() == 0) {
             dns = mContext.getResources().getString(
                     com.android.internal.R.string.config_default_dns_server);

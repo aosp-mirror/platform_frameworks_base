@@ -186,10 +186,8 @@ public class SettingsProvider extends ContentProvider {
         sSecureGlobalKeys.add(Settings.Global.WIFI_SAVED_STATE);
         sSecureGlobalKeys.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
         sSecureGlobalKeys.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
-        sSecureGlobalKeys.add(Settings.Global.WIFI_WATCHDOG_NUM_ARP_PINGS);
         sSecureGlobalKeys.add(Settings.Global.WIFI_WATCHDOG_ON);
         sSecureGlobalKeys.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
-        sSecureGlobalKeys.add(Settings.Global.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS);
         sSecureGlobalKeys.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
         sSecureGlobalKeys.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
         sSecureGlobalKeys.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
@@ -198,27 +196,59 @@ public class SettingsProvider extends ContentProvider {
         sSecureGlobalKeys.add(Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
         sSecureGlobalKeys.add(Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS);
         sSecureGlobalKeys.add(Settings.Global.WTF_IS_FATAL);
+        sSecureGlobalKeys.add(Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD);
+        sSecureGlobalKeys.add(Settings.Global.BATTERY_DISCHARGE_THRESHOLD);
+        sSecureGlobalKeys.add(Settings.Global.SEND_ACTION_APP_ERROR);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_AGE_SECONDS);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_MAX_FILES);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_QUOTA_KB);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_QUOTA_PERCENT);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_RESERVE_PERCENT);
+        sSecureGlobalKeys.add(Settings.Global.DROPBOX_TAG_PREFIX);
+        sSecureGlobalKeys.add(Settings.Global.ERROR_LOGCAT_PREFIX);
+        sSecureGlobalKeys.add(Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL);
+        sSecureGlobalKeys.add(Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD);
+        sSecureGlobalKeys.add(Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE);
+        sSecureGlobalKeys.add(Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES);
+        sSecureGlobalKeys.add(Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES);
+        sSecureGlobalKeys.add(Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS);
+        sSecureGlobalKeys.add(Settings.Global.CONNECTIVITY_CHANGE_DELAY);
+        sSecureGlobalKeys.add(Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED);
+        sSecureGlobalKeys.add(Settings.Global.CAPTIVE_PORTAL_SERVER);
+        sSecureGlobalKeys.add(Settings.Global.NSD_ON);
+        sSecureGlobalKeys.add(Settings.Global.SET_INSTALL_LOCATION);
+        sSecureGlobalKeys.add(Settings.Global.DEFAULT_INSTALL_LOCATION);
+        sSecureGlobalKeys.add(Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY);
+        sSecureGlobalKeys.add(Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY);
+        sSecureGlobalKeys.add(Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT);
+        sSecureGlobalKeys.add(Settings.Global.HTTP_PROXY);
+        sSecureGlobalKeys.add(Settings.Global.GLOBAL_HTTP_PROXY_HOST);
+        sSecureGlobalKeys.add(Settings.Global.GLOBAL_HTTP_PROXY_PORT);
+        sSecureGlobalKeys.add(Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+        sSecureGlobalKeys.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
+        sSecureGlobalKeys.add(Settings.Global.DEFAULT_DNS_SERVER);
 
         // Keys from the 'system' table now moved to 'global'
         // These must match Settings.System.MOVED_TO_GLOBAL
         sSystemGlobalKeys = new HashSet<String>();
 
-        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_ON);
-        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_RADIOS);
-        sSystemGlobalKeys.add(Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
-        sSystemGlobalKeys.add(Settings.System.AUTO_TIME);
-        sSystemGlobalKeys.add(Settings.System.AUTO_TIME_ZONE);
-        sSystemGlobalKeys.add(Settings.System.CAR_DOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.CAR_UNDOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.DESK_DOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.DESK_UNDOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.DOCK_SOUNDS_ENABLED);
-        sSystemGlobalKeys.add(Settings.System.LOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.UNLOCK_SOUND);
-        sSystemGlobalKeys.add(Settings.System.LOW_BATTERY_SOUND);
-        sSystemGlobalKeys.add(Settings.System.POWER_SOUNDS_ENABLED);
-        sSystemGlobalKeys.add(Settings.System.STAY_ON_WHILE_PLUGGED_IN);
-        sSystemGlobalKeys.add(Settings.System.WIFI_SLEEP_POLICY);
+        sSystemGlobalKeys.add(Settings.Global.AIRPLANE_MODE_ON);
+        sSystemGlobalKeys.add(Settings.Global.AIRPLANE_MODE_RADIOS);
+        sSystemGlobalKeys.add(Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        sSystemGlobalKeys.add(Settings.Global.AUTO_TIME);
+        sSystemGlobalKeys.add(Settings.Global.AUTO_TIME_ZONE);
+        sSystemGlobalKeys.add(Settings.Global.CAR_DOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.CAR_UNDOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.DESK_DOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.DESK_UNDOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.DOCK_SOUNDS_ENABLED);
+        sSystemGlobalKeys.add(Settings.Global.LOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.UNLOCK_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.LOW_BATTERY_SOUND);
+        sSystemGlobalKeys.add(Settings.Global.POWER_SOUNDS_ENABLED);
+        sSystemGlobalKeys.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
+        sSystemGlobalKeys.add(Settings.Global.WIFI_SLEEP_POLICY);
+        sSystemGlobalKeys.add(Settings.Global.MODE_RINGER);
     }
 
     private boolean settingMovedToGlobal(final String name) {
