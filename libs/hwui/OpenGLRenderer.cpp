@@ -1248,6 +1248,15 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     return !clip.intersects(transformed);
 }
 
+bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint) {
+    if (paint->getStyle() != SkPaint::kFill_Style) {
+        float outset = paint->getStrokeWidth() * 0.5f;
+        return quickReject(left - outset, top - outset, right + outset, bottom + outset);
+    } else {
+        return quickReject(left, top, right, bottom);
+    }
+}
+
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
     if (mSnapshot->isIgnored()) {
         return true;
@@ -1490,7 +1499,7 @@ void OpenGLRenderer::setupDrawTextGammaUniforms() {
 
 void OpenGLRenderer::setupDrawSimpleMesh() {
     bool force = mCaches.bindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position, 0);
+    mCaches.bindPositionVertexPointer(force, 0);
     mCaches.unbindIndicesBuffer();
 }
 
@@ -1523,9 +1532,9 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
         force = mCaches.unbindMeshBuffer();
     }
 
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position, vertices);
+    mCaches.bindPositionVertexPointer(force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
-        mCaches.bindTexCoordsVertexPointer(force, mCaches.currentProgram->texCoords, texCoords);
+        mCaches.bindTexCoordsVertexPointer(force, texCoords);
     }
 
     mCaches.unbindIndicesBuffer();
@@ -1533,16 +1542,15 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
 
 void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords) {
     bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position, vertices);
+    mCaches.bindPositionVertexPointer(force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
-        mCaches.bindTexCoordsVertexPointer(force, mCaches.currentProgram->texCoords, texCoords);
+        mCaches.bindTexCoordsVertexPointer(force, texCoords);
     }
 }
 
 void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
     bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
-            vertices, gVertexStride);
+    mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
     mCaches.unbindIndicesBuffer();
 }
 
@@ -1560,8 +1568,7 @@ void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
 void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
         GLvoid* lengthCoords, float boundaryWidthProportion, int& widthSlot, int& lengthSlot) {
     bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
-            vertices, gAAVertexStride);
+    mCaches.bindPositionVertexPointer(force, vertices, gAAVertexStride);
     mCaches.resetTexCoordsVertexPointer();
     mCaches.unbindIndicesBuffer();
 
@@ -1919,15 +1926,23 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
 }
 
 /**
- * This function uses a similar approach to that of AA lines in the drawLines() function.
- * We expand the rectangle by a half pixel in screen space on all sides. However, instead of using
- * a fragment shader to compute the translucency of the color from its position, we simply use a
- * varying parameter to define how far a given pixel is into the region.
+ * Renders a convex path via tessellation. For AA paths, this function uses a similar approach to
+ * that of AA lines in the drawLines() function.  We expand the convex path by a half pixel in
+ * screen space in all directions. However, instead of using a fragment shader to compute the
+ * translucency of the color from its position, we simply use a varying parameter to define how far
+ * a given pixel is from the edge. For non-AA paths, the expansion and alpha varying are not used.
+ *
+ * Doesn't yet support joins, caps, or path effects.
  */
-void OpenGLRenderer::drawConvexPath(const SkPath& path, int color, SkXfermode::Mode mode, bool isAA) {
+void OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
+    int color = paint->getColor();
+    SkPaint::Style style = paint->getStyle();
+    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
+    bool isAA = paint->isAntiAlias();
+
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
-    PathRenderer::convexPathFillVertices(path, mSnapshot->transform, vertexBuffer, isAA);
+    PathRenderer::convexPathVertices(path, paint, mSnapshot->transform, vertexBuffer);
 
     setupDraw();
     setupDrawNoTexture();
@@ -1938,15 +1953,14 @@ void OpenGLRenderer::drawConvexPath(const SkPath& path, int color, SkXfermode::M
     setupDrawShader();
     setupDrawBlending(isAA, mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity(true);
+    setupDrawModelViewIdentity();
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderIdentityUniforms();
 
     void* vertices = vertexBuffer.getBuffer();
     bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
-                                      vertices, isAA ? gAlphaVertexStride : gVertexStride);
+    mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
     mCaches.resetTexCoordsVertexPointer();
     mCaches.unbindIndicesBuffer();
 
@@ -1960,7 +1974,7 @@ void OpenGLRenderer::drawConvexPath(const SkPath& path, int color, SkXfermode::M
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
     }
 
-    SkRect bounds = path.getBounds();
+    SkRect bounds = PathRenderer::computePathBounds(path, paint);
     dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getSize());
@@ -2050,7 +2064,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     setupDrawShader();
     setupDrawBlending(isAA, mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity(true);
+    setupDrawModelViewIdentity();
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderIdentityUniforms();
@@ -2330,11 +2344,11 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    if (p->getStyle() != SkPaint::kFill_Style) {
+    if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
                 right - left, bottom - top, rx, ry, p);
@@ -2343,37 +2357,47 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 
     SkPath path;
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        float outset = p->getStrokeWidth() / 2;
+        rect.outset(outset, outset);
+        rx += outset;
+        ry += outset;
+    }
     path.addRoundRect(rect, rx, ry);
-    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+    drawConvexPath(path, p);
 
     return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickReject(x - radius, y - radius, x + radius, y + radius)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(x - radius, y - radius,
+            x + radius, y + radius, p)) {
         return DrawGlInfo::kStatusDone;
     }
-
-    if (p->getStyle() != SkPaint::kFill_Style) {
+    if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, p);
         return drawShape(x - radius, y - radius, texture, p);
     }
 
     SkPath path;
-    path.addCircle(x, y, radius);
-    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        path.addCircle(x, y, radius + p->getStrokeWidth() / 2);
+    } else {
+        path.addCircle(x, y, radius);
+    }
+    drawConvexPath(path, p);
 
     return DrawGlInfo::kStatusDrew;
 }
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    if (p->getStyle() != SkPaint::kFill_Style) {
+    if (p->getPathEffect() != 0) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, p);
         return drawShape(left, top, texture, p);
@@ -2381,8 +2405,11 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
     SkPath path;
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        rect.outset(p->getStrokeWidth() / 2, p->getStrokeWidth() / 2);
+    }
     path.addOval(rect);
-    drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), p->isAntiAlias());
+    drawConvexPath(path, p);
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -2402,10 +2429,11 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 }
 
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
-    if (mSnapshot->isIgnored() || quickReject(left, top, right, bottom)) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
         return DrawGlInfo::kStatusDone;
     }
 
+    // only fill style is supported by drawConvexPath, since others have to handle joins
     if (p->getStyle() != SkPaint::kFill_Style) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, p);
@@ -2415,7 +2443,7 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
     if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
         SkPath path;
         path.addRect(left, top, right, bottom);
-        drawConvexPath(path, p->getColor(), getXfermode(p->getXfermode()), true);
+        drawConvexPath(path, p);
     } else {
         drawColorRect(left, top, right, bottom, p->getColor(), getXfermode(p->getXfermode()));
     }
