@@ -338,16 +338,13 @@ TEST_UL4_UL4(func)
 
 #define TEST_VEC_VEC_ALL(func)  \
 TEST_FN_FN_ALL(func)            \
+TEST_SC_SC_ALL(func)            \
 TEST_UC_UC_ALL(func)            \
 TEST_SS_SS_ALL(func)            \
 TEST_US_US_ALL(func)            \
 TEST_SI_SI_ALL(func)            \
 TEST_UI_UI_ALL(func)
 
-// FIXME:  Add char tests back in once bug 6865598 is fixed
-#if 0
-TEST_SC_SC_ALL(func)
-#endif
 // TODO:  add long types to ALL macro
 #if 0
 TEST_SL_SL_ALL(func)            \
