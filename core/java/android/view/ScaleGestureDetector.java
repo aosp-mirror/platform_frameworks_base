@@ -314,7 +314,7 @@ public class ScaleGestureDetector {
             }
         }
 
-        final boolean configChanged =
+        final boolean configChanged = action == MotionEvent.ACTION_DOWN ||
                 action == MotionEvent.ACTION_POINTER_UP ||
                 action == MotionEvent.ACTION_POINTER_DOWN;
         final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
@@ -344,7 +344,7 @@ public class ScaleGestureDetector {
             if (skipIndex == i) continue;
 
             // Average touch major and touch minor and convert the resulting diameter into a radius.
-            final float touchSize = getAdjustedTouchHistory(event.getPointerId(i));
+            final float touchSize = getAdjustedTouchHistory(event.getPointerId(i)) / 2;
             devSumX += Math.abs(event.getX(i) - focusX) + touchSize;
             devSumY += Math.abs(event.getY(i) - focusY) + touchSize;
         }
