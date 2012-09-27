@@ -352,11 +352,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void scanWifiDisplays() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -371,19 +366,16 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void connectWifiDisplay(String address) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
         }
 
+        final boolean trusted = canCallerConfigureWifiDisplay();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
                 if (mWifiDisplayAdapter != null) {
-                    mWifiDisplayAdapter.requestConnectLocked(address);
+                    mWifiDisplayAdapter.requestConnectLocked(address, trusted);
                 }
             }
         } finally {
@@ -393,11 +385,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void disconnectWifiDisplay() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -412,12 +399,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void renameWifiDisplay(String address, String alias) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
+        }
+        if (!canCallerConfigureWifiDisplay()) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
+                    + "rename a wifi display.");
         }
 
         final long token = Binder.clearCallingIdentity();
@@ -434,12 +421,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public void forgetWifiDisplay(String address) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
         if (address == null) {
             throw new IllegalArgumentException("address must not be null");
+        }
+        if (!canCallerConfigureWifiDisplay()) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission to "
+                    + "forget a wifi display.");
         }
 
         final long token = Binder.clearCallingIdentity();
@@ -456,11 +443,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     @Override // Binder call
     public WifiDisplayStatus getWifiDisplayStatus() {
-        if (mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY permission");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSyncRoot) {
@@ -473,6 +455,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    private boolean canCallerConfigureWifiDisplay() {
+        return mContext.checkCallingPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private void registerDefaultDisplayAdapter() {
