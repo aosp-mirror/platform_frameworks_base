@@ -1072,8 +1072,7 @@
     <item quantity="other" msgid="7915895323644292768">"Kullanılabilir kablosuz ağları aç"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Kablosuz ağda oturum açın"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Ağda oturum açın"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kablosuz bağlantısı kurulamadı"</string>
@@ -1091,8 +1090,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Alıcı:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Gerekli PIN\'i yazın:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaza bağlıyken Kablosuz ağ bağlantısı geçici olarak kesilecektir"</string>
     <string name="select_character" msgid="3365550120617701745">"Karakter ekle"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS mesajları gönderiliyor"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; çok sayıda SMS mesajı gönderiyor. Bu uygulamanın mesaj göndermeye devam etmesine izin veriyor musunuz?"</string>
