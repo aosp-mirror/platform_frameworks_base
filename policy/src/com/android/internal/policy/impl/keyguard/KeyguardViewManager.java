@@ -46,7 +46,7 @@ import com.android.internal.R;
 public class KeyguardViewManager {
     private final static boolean DEBUG = false;
     private static String TAG = "KeyguardViewManager";
-    public static boolean USE_UPPER_CASE = false;
+    public static boolean USE_UPPER_CASE = true;
 
     private final Context mContext;
     private final ViewManager mViewManager;

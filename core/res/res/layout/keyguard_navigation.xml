@@ -17,39 +17,19 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="left">
+    android:id="@+id/keyguard_click_area"
+    android:gravity="center">
 
-    <LinearLayout
-        android:id="@+id/keyguard_click_area"
-        android:layout_width="match_parent"
+    <!-- message area for security screen -->
+    <TextView
+        android:id="@+id/keyguard_message_area"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="?android:attr/buttonBarButtonStyle"
-        android:padding="10dip"
-        android:clickable="true">
-
-        <ImageView
-               android:src="?android:attr/homeAsUpIndicator"
-               android:layout_gravity="center_vertical|start"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"/>
-
-        <!-- message area for security screen -->
-        <TextView
-            android:id="@+id/keyguard_message_area"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="end"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:layout_marginEnd="6dip"
-            android:layout_marginStart="6dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-    </LinearLayout>
+        android:layout_gravity="start"
+        android:ellipsize="marquee"
+        android:layout_marginEnd="4dip"
+        android:layout_marginStart="4dip"
+        android:textSize="22dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 </LinearLayout>
