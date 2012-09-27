@@ -21,6 +21,7 @@ import java.util.HashMap;
 
 import android.app.ActivityThread;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -57,6 +58,9 @@ public class AppWidgetHost {
 
     class Callbacks extends IAppWidgetHost.Stub {
         public void updateAppWidget(int appWidgetId, RemoteViews views) {
+            if (isLocalBinder() && views != null) {
+                views = views.clone();
+            }
             Message msg = mHandler.obtainMessage(HANDLE_UPDATE);
             msg.arg1 = appWidgetId;
             msg.obj = views;
@@ -64,6 +68,9 @@ public class AppWidgetHost {
         }
 
         public void providerChanged(int appWidgetId, AppWidgetProviderInfo info) {
+            if (isLocalBinder() && info != null) {
+                info = info.clone();
+            }
             Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED);
             msg.arg1 = appWidgetId;
             msg.obj = info;
@@ -223,6 +230,10 @@ public class AppWidgetHost {
             return;
         }
         throw new SecurityException("Disallowed call for uid " + uid);
+    }
+
+    private boolean isLocalBinder() {
+        return Process.myPid() == Binder.getCallingPid();
     }
 
     /**
