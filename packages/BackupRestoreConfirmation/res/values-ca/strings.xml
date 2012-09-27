@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"Fes una còpia de seguretat completa"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"Còpia de seguretat completa"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restaura completament"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"S\'ha sol·licitat una còpia de seguretat completa de totes les dades a un equip de sobretaula connectat. Vols permetre que això passi?"\n" "\n"Si no has sol·licitat la còpia de seguretat tu mateix, no permetis que continuï l\'operació."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Còpia de seguretat de dades"</string>
