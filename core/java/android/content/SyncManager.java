@@ -20,7 +20,6 @@ import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerService;
-import android.accounts.OnAccountsUpdateListener;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -81,7 +80,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * @hide
  */
-public class SyncManager implements OnAccountsUpdateListener {
+public class SyncManager {
     private static final String TAG = "SyncManager";
 
     /** Delay a sync due to local changes this long. In milliseconds */
