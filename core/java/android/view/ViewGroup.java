@@ -2784,9 +2784,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         {
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.STROKE);
-            PathEffect pathEffect = paint.getPathEffect();
-            int len = dipsToPixels(4);
-            paint.setPathEffect(new DashPathEffect(new float[]{len, len}, 0));
 
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
@@ -2798,7 +2795,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         c.getRight()  - insets.right  - 1,
                         c.getBottom() - insets.bottom - 1);
             }
-            paint.setPathEffect(pathEffect);
         }
 
         // Draw margins
