@@ -1618,6 +1618,7 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mHolder.getSurface());
+                        mFullRedrawNeeded = true;
                     }
                 }
             }
