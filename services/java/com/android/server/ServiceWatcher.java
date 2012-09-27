@@ -170,7 +170,7 @@ public class ServiceWatcher implements ServiceConnection {
         }
         if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ")");
         mContext.bindService(intent, this, Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_ALLOW_OOM_MANAGEMENT);
+                | Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_NOT_VISIBLE);
     }
 
     private boolean isSignatureMatch(Signature[] signatures) {
