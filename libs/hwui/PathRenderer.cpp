@@ -57,22 +57,32 @@ void computeInverseScales(const mat4 *transform, float &inverseScaleX, float& in
         float m11 = transform->data[Matrix4::kScaleY];
         float scaleX = sqrt(m00 * m00 + m01 * m01);
         float scaleY = sqrt(m10 * m10 + m11 * m11);
-        inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 0;
-        inverseScaleY = (scaleY != 0) ? (1.0f / scaleY) : 0;
+        inverseScaleX = (scaleX != 0) ? (1.0f / scaleX) : 1.0f;
+        inverseScaleY = (scaleY != 0) ? (1.0f / scaleY) : 1.0f;
     } else {
         inverseScaleX = 1.0f;
         inverseScaleY = 1.0f;
     }
 }
 
-inline void copyVertex(Vertex* destPtr, const Vertex* srcPtr)
-{
+inline void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
     Vertex::set(destPtr, srcPtr->position[0], srcPtr->position[1]);
 }
 
-inline void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr)
-{
+inline void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
     AlphaVertex::set(destPtr, srcPtr->position[0], srcPtr->position[1], srcPtr->alpha);
+}
+
+/**
+ * Produces a pseudo-normal for a vertex, given the normals of the two incoming lines. If the offset
+ * from each vertex in a perimeter is calculated, the resultant lines connecting the offset vertices
+ * will be offset by 1.0
+ *
+ * Note that we can't add and normalize the two vectors, that would result in a rectangle having an
+ * offset of (sqrt(2)/2, sqrt(2)/2) at each corner, instead of (1, 1)
+ */
+inline vec2 totalOffsetFromNormals(const vec2& normalA, const vec2& normalB) {
+    return (normalA + normalB) / (1 + fabs(normalA.dot(normalB)));
 }
 
 void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer& vertexBuffer) {
@@ -108,9 +118,7 @@ void getStrokeVerticesFromPerimeter(const Vector<Vertex>& perimeter, float halfS
                 current->position[0] - next->position[0]);
         nextNormal.normalize();
 
-        // offset each point by its normal, out and in, by appropriate stroke offset
-        vec2 totalOffset = (lastNormal + nextNormal);
-        totalOffset.normalize();
+        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
         if (halfStrokeWidth == 0.0f) {
             // hairline - compensate for scale
             totalOffset.x *= 0.5f * inverseScaleX;
@@ -155,12 +163,11 @@ void getFillVerticesFromPerimeterAA(const Vector<Vertex>& perimeter, VertexBuffe
                 current->position[0] - next->position[0]);
         nextNormal.normalize();
 
-        // AA point offset from original point is that point's normal, such that
-        // each side is offset by .5 pixels
-        vec2 totalOffset = (lastNormal + nextNormal);
-        totalOffset.normalize();
-        totalOffset.x *= inverseScaleX * 0.5f;
-        totalOffset.y *= inverseScaleY * 0.5f;
+        // AA point offset from original point is that point's normal, such that each side is offset
+        // by .5 pixels
+        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
+        totalOffset.x *= 0.5f * inverseScaleX;
+        totalOffset.y *= 0.5f * inverseScaleY;
 
         AlphaVertex::set(&buffer[currentIndex++],
                 current->position[0] + totalOffset.x,
@@ -204,6 +211,15 @@ void getStrokeVerticesFromPerimeterAA(const Vector<Vertex>& perimeter, float hal
         VertexBuffer& vertexBuffer, float inverseScaleX, float inverseScaleY) {
     AlphaVertex* buffer = vertexBuffer.alloc<AlphaVertex>(6 * perimeter.size() + 8);
 
+    // avoid lines smaller than hairline since they break triangle based sampling. instead reducing
+    // alpha value (TODO: support different X/Y scale)
+    float maxAlpha = 1.0f;
+    if (halfStrokeWidth != 0 && inverseScaleX == inverseScaleY &&
+            halfStrokeWidth * inverseScaleX < 1.0f) {
+        maxAlpha *= (2 * halfStrokeWidth) / inverseScaleX;
+        halfStrokeWidth = 0.0f;
+    }
+
     int offset = 2 * perimeter.size() + 3;
     int currentAAOuterIndex = 0;
     int currentStrokeIndex = offset;
@@ -220,13 +236,12 @@ void getStrokeVerticesFromPerimeterAA(const Vector<Vertex>& perimeter, float hal
                 current->position[0] - next->position[0]);
         nextNormal.normalize();
 
-        vec2 pointNormal = (lastNormal + nextNormal);
-        pointNormal.normalize();
-        vec2 AAOffset = pointNormal * 0.5f;
-        AAOffset.x *= inverseScaleX;
-        AAOffset.y *= inverseScaleY;
+        vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
+        vec2 AAOffset = totalOffset;
+        AAOffset.x *= 0.5f * inverseScaleX;
+        AAOffset.y *= 0.5f * inverseScaleY;
 
-        vec2 innerOffset = pointNormal;
+        vec2 innerOffset = totalOffset;
         if (halfStrokeWidth == 0.0f) {
             // hairline! - compensate for scale
             innerOffset.x *= 0.5f * inverseScaleX;
@@ -244,27 +259,26 @@ void getStrokeVerticesFromPerimeterAA(const Vector<Vertex>& perimeter, float hal
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
                 current->position[0] + innerOffset.x,
                 current->position[1] + innerOffset.y,
-                1.0f);
+                maxAlpha);
 
         AlphaVertex::set(&buffer[currentStrokeIndex++],
                 current->position[0] + innerOffset.x,
                 current->position[1] + innerOffset.y,
-                1.0f);
+                maxAlpha);
         AlphaVertex::set(&buffer[currentStrokeIndex++],
                 current->position[0] - innerOffset.x,
                 current->position[1] - innerOffset.y,
-                1.0f);
+                maxAlpha);
 
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
                 current->position[0] - innerOffset.x,
                 current->position[1] - innerOffset.y,
-                1.0f);
+                maxAlpha);
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
                 current->position[0] - outerOffset.x,
                 current->position[1] - outerOffset.y,
                 0.0f);
 
-        // TODO: current = next, copy last normal instead of recalculate
         last = current;
         current = next;
         lastNormal = nextNormal;
@@ -295,8 +309,19 @@ void PathRenderer::convexPathVertices(const SkPath &path, const SkPaint* paint,
     computeInverseScales(transform, inverseScaleX, inverseScaleY);
 
     Vector<Vertex> tempVertices;
-    convexPathPerimeterVertices(path, inverseScaleX * inverseScaleX, inverseScaleY * inverseScaleY,
-            tempVertices);
+    float threshInvScaleX = inverseScaleX;
+    float threshInvScaleY = inverseScaleY;
+    if (style == SkPaint::kStroke_Style) {
+        // alter the bezier recursion threshold values we calculate in order to compensate for
+        // expansion done after the path vertices are found
+        SkRect bounds = path.getBounds();
+        if (!bounds.isEmpty()) {
+            threshInvScaleX *= bounds.width() / (bounds.width() + paint->getStrokeWidth());
+            threshInvScaleY *= bounds.height() / (bounds.height() + paint->getStrokeWidth());
+        }
+    }
+    convexPathPerimeterVertices(path, threshInvScaleX * threshInvScaleX,
+            threshInvScaleY * threshInvScaleY, tempVertices);
 
 #if VERTEX_DEBUG
     for (unsigned int i = 0; i < tempVertices.size(); i++) {
