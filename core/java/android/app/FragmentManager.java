@@ -22,6 +22,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
@@ -771,9 +772,9 @@ final class FragmentManagerImpl extends FragmentManager {
 
     void moveToState(Fragment f, int newState, int transit, int transitionStyle,
             boolean keepActive) {
-        //if (DEBUG) Log.v(TAG, "moveToState: " + f
-        //    + " oldState=" + f.mState + " newState=" + newState
-        //    + " mRemoving=" + f.mRemoving + " Callers=" + Debug.getCallers(5));
+        if (DEBUG && false) Log.v(TAG, "moveToState: " + f
+            + " oldState=" + f.mState + " newState=" + newState
+            + " mRemoving=" + f.mRemoving + " Callers=" + Debug.getCallers(5));
 
         // Fragments that are not currently added will sit in the onCreate() state.
         if ((!f.mAdded || f.mDetached) && newState > Fragment.CREATED) {
@@ -1112,6 +1113,9 @@ final class FragmentManagerImpl extends FragmentManager {
         if (DEBUG) Log.v(TAG, "add: " + fragment);
         makeActive(fragment);
         if (!fragment.mDetached) {
+            if (mAdded.contains(fragment)) {
+                throw new IllegalStateException("Fragment already added: " + fragment);
+            }
             mAdded.add(fragment);
             fragment.mAdded = true;
             fragment.mRemoving = false;
@@ -1128,6 +1132,14 @@ final class FragmentManagerImpl extends FragmentManager {
         if (DEBUG) Log.v(TAG, "remove: " + fragment + " nesting=" + fragment.mBackStackNesting);
         final boolean inactive = !fragment.isInBackStack();
         if (!fragment.mDetached || inactive) {
+            if (false) {
+                // Would be nice to catch a bad remove here, but we need
+                // time to test this to make sure we aren't crashes cases
+                // where it is not a problem.
+                if (!mAdded.contains(fragment)) {
+                    throw new IllegalStateException("Fragment not added: " + fragment);
+                }
+            }
             if (mAdded != null) {
                 mAdded.remove(fragment);
             }
@@ -1200,6 +1212,7 @@ final class FragmentManagerImpl extends FragmentManager {
             if (fragment.mAdded) {
                 // We are not already in back stack, so need to remove the fragment.
                 if (mAdded != null) {
+                    if (DEBUG) Log.v(TAG, "remove from detach: " + fragment);
                     mAdded.remove(fragment);
                 }
                 if (fragment.mHasMenu && fragment.mMenuVisible) {
@@ -1219,6 +1232,10 @@ final class FragmentManagerImpl extends FragmentManager {
                 if (mAdded == null) {
                     mAdded = new ArrayList<Fragment>();
                 }
+                if (mAdded.contains(fragment)) {
+                    throw new IllegalStateException("Fragment already added: " + fragment);
+                }
+                if (DEBUG) Log.v(TAG, "add from attach: " + fragment);
                 mAdded.add(fragment);
                 fragment.mAdded = true;
                 if (fragment.mHasMenu && fragment.mMenuVisible) {
@@ -1717,19 +1734,18 @@ final class FragmentManagerImpl extends FragmentManager {
             FragmentState fs = fms.mActive[i];
             if (fs != null) {
                 Fragment f = fs.instantiate(mActivity, mParent);
-                if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": " + f);
+                if (DEBUG) Log.v(TAG, "restoreAllState: active #" + i + ": " + f);
                 mActive.add(f);
                 // Now that the fragment is instantiated (or came from being
                 // retained above), clear mInstance in case we end up re-restoring
                 // from this FragmentState again.
                 fs.mInstance = null;
             } else {
-                if (DEBUG) Log.v(TAG, "restoreAllState: adding #" + i + ": (null)");
                 mActive.add(null);
                 if (mAvailIndices == null) {
                     mAvailIndices = new ArrayList<Integer>();
                 }
-                if (DEBUG) Log.v(TAG, "restoreAllState: adding avail #" + i);
+                if (DEBUG) Log.v(TAG, "restoreAllState: avail #" + i);
                 mAvailIndices.add(i);
             }
         }
@@ -1760,7 +1776,10 @@ final class FragmentManagerImpl extends FragmentManager {
                             "No instantiated fragment for index #" + fms.mAdded[i]));
                 }
                 f.mAdded = true;
-                if (DEBUG) Log.v(TAG, "restoreAllState: making added #" + i + ": " + f);
+                if (DEBUG) Log.v(TAG, "restoreAllState: added #" + i + ": " + f);
+                if (mAdded.contains(f)) {
+                    throw new IllegalStateException("Already added!");
+                }
                 mAdded.add(f);
             }
         } else {
@@ -1772,8 +1791,13 @@ final class FragmentManagerImpl extends FragmentManager {
             mBackStack = new ArrayList<BackStackRecord>(fms.mBackStack.length);
             for (int i=0; i<fms.mBackStack.length; i++) {
                 BackStackRecord bse = fms.mBackStack[i].instantiate(this);
-                if (DEBUG) Log.v(TAG, "restoreAllState: adding bse #" + i
+                if (DEBUG) {
+                    Log.v(TAG, "restoreAllState: back stack #" + i
                         + " (index " + bse.mIndex + "): " + bse);
+                    LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
+                    PrintWriter pw = new PrintWriter(logw);
+                    bse.dump("  ", pw, false);
+                }
                 mBackStack.add(bse);
                 if (bse.mIndex >= 0) {
                     setBackStackIndex(bse.mIndex, bse);
