@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.dreams;
 
 import android.content.ComponentName;
 import android.content.Context;
