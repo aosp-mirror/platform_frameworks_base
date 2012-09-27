@@ -608,8 +608,8 @@ public class WifiStateMachine extends StateMachine {
         mPrimaryDeviceType = mContext.getResources().getString(
                 R.string.config_wifi_p2p_device_type);
 
-        mUserWantsSuspendOpt.set(Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
+        mUserWantsSuspendOpt.set(Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
 
         mContext.registerReceiver(
             new BroadcastReceiver() {
@@ -659,13 +659,13 @@ public class WifiStateMachine extends StateMachine {
                 },
                 new IntentFilter(ACTION_DELAYED_DRIVER_STOP));
 
-        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED), false,
+        mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED), false,
                 new ContentObserver(getHandler()) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        mUserWantsSuspendOpt.set(Settings.Secure.getInt(mContext.getContentResolver(),
-                                Settings.Secure.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
+                        mUserWantsSuspendOpt.set(Settings.Global.getInt(mContext.getContentResolver(),
+                                Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED, 1) == 1);
                     }
                 });
 
@@ -1074,8 +1074,8 @@ public class WifiStateMachine extends StateMachine {
      */
     public void setFrequencyBand(int band, boolean persist) {
         if (persist) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_FREQUENCY_BAND,
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.WIFI_FREQUENCY_BAND,
                     band);
         }
         sendMessage(obtainMessage(CMD_SET_FREQUENCY_BAND, band, 0));
@@ -1331,8 +1331,8 @@ public class WifiStateMachine extends StateMachine {
      * Set the frequency band from the system setting value, if any.
      */
     private void setFrequencyBand() {
-        int band = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.WIFI_FREQUENCY_BAND, WifiManager.WIFI_FREQUENCY_BAND_AUTO);
+        int band = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_FREQUENCY_BAND, WifiManager.WIFI_FREQUENCY_BAND_AUTO);
         setFrequencyBand(band, false);
     }
 
