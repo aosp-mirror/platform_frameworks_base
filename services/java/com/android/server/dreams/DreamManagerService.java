@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.dreams;
 
 import static android.provider.Settings.Secure.SCREENSAVER_COMPONENTS;
 import static android.provider.Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT;
@@ -28,17 +28,14 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.Dream;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
