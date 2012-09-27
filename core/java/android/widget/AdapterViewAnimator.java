@@ -31,6 +31,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.RemoteViews.OnClickHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -989,6 +990,21 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this);
         if (mRemoteViewsAdapter.isDataReady()) {
             setAdapter(mRemoteViewsAdapter);
+        }
+    }
+
+    /**
+     * Sets up the onClickHandler to be used by the RemoteViewsAdapter when inflating RemoteViews
+     * 
+     * @param handler The OnClickHandler to use when inflating RemoteViews.
+     * 
+     * @hide
+     */
+    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
+        // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
+        // service handling the specified intent.
+        if (mRemoteViewsAdapter != null) {
+            mRemoteViewsAdapter.setRemoteViewsOnClickHandler(handler);
         }
     }
 
