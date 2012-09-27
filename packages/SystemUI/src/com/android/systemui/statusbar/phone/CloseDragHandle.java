@@ -36,7 +36,9 @@ public class CloseDragHandle extends LinearLayout {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            setPressed(true);
+        } else {
             mService.interceptTouchEvent(event);
         }
         return true;

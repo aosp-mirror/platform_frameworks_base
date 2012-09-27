@@ -24,27 +24,21 @@
     <!-- TODO: Put into ScrollView -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-      <com.android.systemui.statusbar.phone.QuickSettingsContainerView
-          android:id="@+id/quick_settings_container"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:animateLayoutChanges="true"
-          android:columnCount="@integer/quick_settings_num_columns"
-          />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/close_handle_underlap"
+        >
+        <com.android.systemui.statusbar.phone.QuickSettingsContainerView
+            android:id="@+id/quick_settings_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:columnCount="@integer/quick_settings_num_columns"
+            />
     </ScrollView>
-    <LinearLayout android:id="@+id/handle"
+
+    <View
+        android:id="@+id/handle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/close_handle_height"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        >
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/close_handle_height"
-            android:layout_gravity="bottom"
-            android:scaleType="fitXY"
-            android:src="@drawable/status_bar_close"
-            />
-    </LinearLayout>
+        />
 </com.android.systemui.statusbar.phone.SettingsPanelView >

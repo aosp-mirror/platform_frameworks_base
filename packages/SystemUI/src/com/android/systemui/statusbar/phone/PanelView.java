@@ -220,6 +220,7 @@ public class PanelView extends FrameLayout {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
                             mTracking = true;
+                            mHandleView.setPressed(true);
                             mInitialTouchY = y;
                             mVelocityTracker = VelocityTracker.obtain();
                             trackMovement(event);
@@ -239,6 +240,7 @@ public class PanelView extends FrameLayout {
                         case MotionEvent.ACTION_CANCEL:
                             mFinalTouchY = y;
                             mTracking = false;
+                            mHandleView.setPressed(false);
                             mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
                             mVelocityTracker.computeCurrentVelocity(1000);
