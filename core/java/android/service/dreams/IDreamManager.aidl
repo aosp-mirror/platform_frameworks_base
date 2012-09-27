@@ -30,5 +30,5 @@ interface IDreamManager {
     ComponentName getDefaultDreamComponent();
     void testDream(in ComponentName componentName);
     boolean isDreaming();
-    void awakenSelf(in IBinder token);
+    void finishSelf(in IBinder token);
 }

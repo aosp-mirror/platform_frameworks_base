@@ -16,9 +16,6 @@
 
 package com.android.server;
 
-import static android.provider.Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK;
-import static android.provider.Settings.Secure.SCREENSAVER_ENABLED;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,16 +24,12 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.util.Log;
 import android.util.Slog;
 
@@ -48,13 +41,9 @@ import java.io.FileReader;
  */
 final class DockObserver extends UEventObserver {
     private static final String TAG = DockObserver.class.getSimpleName();
-    private static final boolean LOG = false;
 
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
-
-    private static final int DEFAULT_SCREENSAVER_ENABLED = 1;
-    private static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
 
     private static final int MSG_DOCK_STATE_CHANGED = 0;
 
@@ -66,11 +55,16 @@ final class DockObserver extends UEventObserver {
     private boolean mSystemReady;
 
     private final Context mContext;
+    private final PowerManager mPowerManager;
+    private final PowerManager.WakeLock mWakeLock;
 
     public DockObserver(Context context) {
         mContext = context;
-        init();  // set initial status
 
+        mPowerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        init();  // set initial status
         startObserving(DOCK_UEVENT_MATCH);
     }
 
@@ -87,17 +81,9 @@ final class DockObserver extends UEventObserver {
                     mPreviousDockState = mDockState;
                     mDockState = newState;
                     if (mSystemReady) {
-                        // Don't force screen on when undocking from the desk dock.
-                        // The change in power state will do this anyway.
-                        // FIXME - we should be configurable.
-                        if ((mPreviousDockState != Intent.EXTRA_DOCK_STATE_DESK
-                                && mPreviousDockState != Intent.EXTRA_DOCK_STATE_LE_DESK
-                                && mPreviousDockState != Intent.EXTRA_DOCK_STATE_HE_DESK) ||
-                                mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                            PowerManager pm =
-                                    (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-                            pm.wakeUp(SystemClock.uptimeMillis());
-                        }
+                        // Wake up immediately when docked or undocked.
+                        mPowerManager.wakeUp(SystemClock.uptimeMillis());
+
                         updateLocked();
                     }
                 }
@@ -138,6 +124,7 @@ final class DockObserver extends UEventObserver {
     }
 
     private void updateLocked() {
+        mWakeLock.acquire();
         mHandler.sendEmptyMessage(MSG_DOCK_STATE_CHANGED);
     }
 
@@ -145,8 +132,8 @@ final class DockObserver extends UEventObserver {
         synchronized (mLock) {
             Slog.i(TAG, "Dock state changed: " + mDockState);
 
+            // Skip the dock intent if not yet provisioned.
             final ContentResolver cr = mContext.getContentResolver();
-
             if (Settings.Global.getInt(cr,
                     Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
                 Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
@@ -158,16 +145,8 @@ final class DockObserver extends UEventObserver {
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
 
-            // Check if this is Bluetooth Dock
-            // TODO(BT): Get Dock address.
-            // String address = null;
-            // if (address != null) {
-            //    intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
-            //            BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
-            // }
-
-            // User feedback to confirm dock connection. Particularly
-            // useful for flaky contact pins...
+            // Play a sound to provide feedback to confirm dock connection.
+            // Particularly useful for flaky contact pins...
             if (Settings.Global.getInt(cr,
                     Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1) {
                 String whichSound = null;
@@ -204,42 +183,14 @@ final class DockObserver extends UEventObserver {
                 }
             }
 
-            IDreamManager mgr = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
-            if (mgr != null) {
-                // dreams feature enabled
-                boolean undocked = mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED;
-                if (undocked) {
-                    try {
-                        if (mgr.isDreaming()) {
-                            mgr.awaken();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Unable to awaken!", e);
-                    }
-                } else {
-                    if (isScreenSaverEnabled(mContext) && isScreenSaverActivatedOnDock(mContext)) {
-                        try {
-                            mgr.dream();
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "Unable to dream!", e);
-                        }
-                    }
-                }
-            } else {
-                // dreams feature not enabled, send legacy intent
-                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-            }
+            // Send the dock event intent.
+            // There are many components in the system watching for this so as to
+            // adjust audio routing, screen orientation, etc.
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+
+            // Release the wake lock that was acquired when the message was posted.
+            mWakeLock.release();
         }
-    }
-
-    private static boolean isScreenSaverEnabled(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED) != 0;
-    }
-
-    private static boolean isScreenSaverActivatedOnDock(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                SCREENSAVER_ACTIVATE_ON_DOCK, DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK) != 0;
     }
 
     private final Handler mHandler = new Handler(true /*async*/) {
