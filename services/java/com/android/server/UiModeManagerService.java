@@ -25,7 +25,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -497,7 +496,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
         sendConfigurationLocked();
 
         // If we did not start a dock app, then start dreaming if supported.
-        if (!dockAppStarted && isScreenSaverEnabled() && isScreenSaverActivatedOnDock()) {
+        if (category != null && !dockAppStarted
+                && isScreenSaverEnabled() && isScreenSaverActivatedOnDock()) {
             Slog.i(TAG, "Activating dream while docked.");
             try {
                 IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(

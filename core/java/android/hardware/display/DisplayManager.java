@@ -46,9 +46,7 @@ public final class DisplayManager {
      * The status is provided as a {@link WifiDisplayStatus} object in the
      * {@link #EXTRA_WIFI_DISPLAY_STATUS} extra.
      * </p><p>
-     * This broadcast is only sent to registered receivers with the
-     * {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} permission and can
-     * only be sent by the system.
+     * This broadcast is only sent to registered receivers and can only be sent by the system.
      * </p>
      * @hide
      */
@@ -163,6 +161,9 @@ public final class DisplayManager {
      * <p>
      * Automatically remembers the display after a successful connection, if not
      * already remembered.
+     * </p><p>
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} to connect
+     * to unknown displays.  No permissions are required to connect to already known displays.
      * </p>
      *
      * @param deviceAddress The MAC address of the device to which we should connect.
@@ -187,6 +188,8 @@ public final class DisplayManager {
      * The display must already be remembered for this call to succeed.  In other words,
      * we must already have successfully connected to the display at least once and then
      * not forgotten it.
+     * </p><p>
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
      * </p>
      *
      * @param deviceAddress The MAC address of the device to rename.
@@ -202,6 +205,8 @@ public final class DisplayManager {
      * Forgets a previously remembered Wifi display.
      * <p>
      * Automatically disconnects from the display if currently connected to it.
+     * </p><p>
+     * Requires {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY}.
      * </p>
      *
      * @param deviceAddress The MAC address of the device to forget.
