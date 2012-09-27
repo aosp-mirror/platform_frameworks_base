@@ -137,7 +137,7 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_SystemClock_currentThreadTimeMicro },
     { "currentTimeMicro",             "()J",
             (void*) android_os_SystemClock_currentTimeMicro },
-    { "elapsedRealtimeNano",      "()J",
+    { "elapsedRealtimeNanos",      "()J",
             (void*) android_os_SystemClock_elapsedRealtimeNano },
 };
 int register_android_os_SystemClock(JNIEnv* env)
