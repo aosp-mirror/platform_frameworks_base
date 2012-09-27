@@ -203,6 +203,12 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
     };
 
+    private BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            onAccountsUpdated(null);
+        }
+    };
+
     private final PowerManager mPowerManager;
 
     // Use this as a random offset to seed all periodic syncs
@@ -456,8 +462,11 @@ public class SyncManager implements OnAccountsUpdateListener {
         });
 
         if (!factoryTest) {
-            AccountManager.get(mContext).addOnAccountsUpdatedListener(SyncManager.this,
-                mSyncHandler, false /* updateImmediately */);
+            // Register for account list updates for all users
+            mContext.registerReceiverAsUser(mAccountsUpdatedReceiver,
+                    UserHandle.ALL,
+                    new IntentFilter(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION),
+                    null, null);
             // do this synchronously to ensure we have the accounts before this call returns
             onAccountsUpdated(null);
         }
