@@ -2479,6 +2479,13 @@ public final class WebViewCore {
         setupViewport(true);
     }
 
+    static float getFixedDisplayDensity(Context context) {
+        // We make bad assumptions about multiplying and dividing density by 100,
+        // force them to be true with this hack
+        float density = context.getResources().getDisplayMetrics().density;
+        return ((int) (density * 100)) / 100.0f;
+    }
+
     private void setupViewport(boolean updateViewState) {
         if (mWebViewClassic == null || mSettings == null) {
             // We've been destroyed or are being destroyed, return early
@@ -2523,14 +2530,13 @@ public final class WebViewCore {
         // adjust the default scale to match the densityDpi
         float adjust = 1.0f;
         if (mViewportDensityDpi == -1) {
-            adjust = mContext.getResources().getDisplayMetrics().density;
+            adjust = getFixedDisplayDensity(mContext);
         } else if (mViewportDensityDpi > 0) {
             adjust = (float) mContext.getResources().getDisplayMetrics().densityDpi
                     / mViewportDensityDpi;
+            adjust = ((int) (adjust * 100)) / 100.0f;
         }
-        // We make bad assumptions about multiplying and dividing by 100, force
-        // them to be true with this hack
-        adjust = ((int) (adjust * 100)) / 100.0f;
+
         // Remove any update density messages in flight.
         // If the density is indeed different from WebView's default scale,
         // a new message will be queued.
