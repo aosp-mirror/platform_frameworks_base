@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IUiModeManager;
 import android.app.Notification;
@@ -39,6 +40,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.Dream;
+import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -55,6 +58,9 @@ class UiModeManagerService extends IUiModeManager.Stub {
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
     private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
+
+    private static final int DEFAULT_SCREENSAVER_ENABLED = 1;
+    private static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
 
     private final Context mContext;
     private final TwilightService mTwilightService;
@@ -110,72 +116,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 return;
             }
 
-            final int  enableFlags = intent.getIntExtra("enableFlags", 0);
-            final int  disableFlags = intent.getIntExtra("disableFlags", 0);
-
+            final int enableFlags = intent.getIntExtra("enableFlags", 0);
+            final int disableFlags = intent.getIntExtra("disableFlags", 0);
             synchronized (mLock) {
-                // Launch a dock activity
-                String category = null;
-                if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                    // Only launch car home when car mode is enabled and the caller
-                    // has asked us to switch to it.
-                    if (ENABLE_LAUNCH_CAR_DOCK_APP
-                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
-                        category = Intent.CATEGORY_CAR_DOCK;
-                    }
-                } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(intent.getAction())) {
-                    // Only launch car home when desk mode is enabled and the caller
-                    // has asked us to switch to it.  Currently re-using the car
-                    // mode flag since we don't have a formal API for "desk mode".
-                    if (ENABLE_LAUNCH_DESK_DOCK_APP
-                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
-                        category = Intent.CATEGORY_DESK_DOCK;
-                    }
-                } else {
-                    // Launch the standard home app if requested.
-                    if ((disableFlags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
-                        category = Intent.CATEGORY_HOME;
-                    }
-                }
-
-                if (LOG) {
-                    Slog.v(TAG, String.format(
-                        "Handling broadcast result for action %s: enable=0x%08x disable=0x%08x category=%s",
-                        intent.getAction(), enableFlags, disableFlags, category));
-                }
-
-                if (category != null) {
-                    // This is the new activity that will serve as home while
-                    // we are in care mode.
-                    Intent homeIntent = buildHomeIntent(category);
-
-                    // Now we are going to be careful about switching the
-                    // configuration and starting the activity -- we need to
-                    // do this in a specific order under control of the
-                    // activity manager, to do it cleanly.  So compute the
-                    // new config, but don't set it yet, and let the
-                    // activity manager take care of both the start and config
-                    // change.
-                    Configuration newConfig = null;
-                    if (mHoldingConfiguration) {
-                        mHoldingConfiguration = false;
-                        updateConfigurationLocked(false);
-                        newConfig = mConfiguration;
-                    }
-                    try {
-                        ActivityManagerNative.getDefault().startActivityWithConfig(
-                                null, homeIntent, null, null, null, 0, 0,
-                                newConfig, null, UserHandle.USER_CURRENT);
-                        mHoldingConfiguration = false;
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, e.getCause());
-                    }
-                }
-
-                if (mHoldingConfiguration) {
-                    mHoldingConfiguration = false;
-                    updateConfigurationLocked(true);
-                }
+                updateAfterBroadcastLocked(intent.getAction(), enableFlags, disableFlags);
             }
         }
     };
@@ -335,9 +279,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
     }
 
-    final void updateConfigurationLocked(boolean sendIt) {
-        int uiMode = mTelevision ? Configuration.UI_MODE_TYPE_TELEVISION
-                : mDefaultUiModeType;
+    final void updateConfigurationLocked() {
+        int uiMode = mTelevision ? Configuration.UI_MODE_TYPE_TELEVISION : mDefaultUiModeType;
         if (mCarModeEnabled) {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
         } else if (isDeskDockState(mDockState)) {
@@ -365,17 +308,19 @@ class UiModeManagerService extends IUiModeManager.Stub {
         }
 
         mCurUiMode = uiMode;
-
-        if (!mHoldingConfiguration && uiMode != mSetUiMode) {
-            mSetUiMode = uiMode;
+        if (!mHoldingConfiguration) {
             mConfiguration.uiMode = uiMode;
+        }
+    }
 
-            if (sendIt) {
-                try {
-                    ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failure communicating with activity manager", e);
-                }
+    final void sendConfigurationLocked() {
+        if (mSetUiMode != mConfiguration.uiMode) {
+            mSetUiMode = mConfiguration.uiMode;
+
+            try {
+                ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failure communicating with activity manager", e);
             }
         }
     }
@@ -434,42 +379,37 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 intent.putExtra("disableFlags", disableFlags);
                 mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
                         mResultReceiver, null, Activity.RESULT_OK, null, null);
+
                 // Attempting to make this transition a little more clean, we are going
                 // to hold off on doing a configuration change until we have finished
                 // the broadcast and started the home activity.
                 mHoldingConfiguration = true;
+                updateConfigurationLocked();
             } else {
-                Intent homeIntent = null;
+                String category = null;
                 if (mCarModeEnabled) {
                     if (ENABLE_LAUNCH_CAR_DOCK_APP
-                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
-                        homeIntent = buildHomeIntent(Intent.CATEGORY_CAR_DOCK);
+                            && (enableFlags & UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        category = Intent.CATEGORY_CAR_DOCK;
                     }
                 } else if (isDeskDockState(mDockState)) {
                     if (ENABLE_LAUNCH_DESK_DOCK_APP
-                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
-                        homeIntent = buildHomeIntent(Intent.CATEGORY_DESK_DOCK);
+                            && (enableFlags & UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                        category = Intent.CATEGORY_DESK_DOCK;
                     }
                 } else {
-                    if ((disableFlags&UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
-                        homeIntent = buildHomeIntent(Intent.CATEGORY_HOME);
+                    if ((disableFlags & UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
+                        category = Intent.CATEGORY_HOME;
                     }
                 }
 
                 if (LOG) {
                     Slog.v(TAG, "updateLocked: null action, mDockState="
-                            + mDockState +", firing homeIntent: " + homeIntent);
+                            + mDockState +", category=" + category);
                 }
 
-                if (homeIntent != null) {
-                    try {
-                        mContext.startActivityAsUser(homeIntent, UserHandle.CURRENT);
-                    } catch (ActivityNotFoundException e) {
-                    }
-                }
+                sendConfigurationAndStartDreamOrDockAppLocked(category);
             }
-
-            updateConfigurationLocked(true);
 
             // keep screen on when charging and in car mode
             boolean keepScreenOn = mCharging &&
@@ -485,6 +425,100 @@ class UiModeManagerService extends IUiModeManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void updateAfterBroadcastLocked(String action, int enableFlags, int disableFlags) {
+        // Launch a dock activity
+        String category = null;
+        if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(action)) {
+            // Only launch car home when car mode is enabled and the caller
+            // has asked us to switch to it.
+            if (ENABLE_LAUNCH_CAR_DOCK_APP
+                    && (enableFlags & UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                category = Intent.CATEGORY_CAR_DOCK;
+            }
+        } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(action)) {
+            // Only launch car home when desk mode is enabled and the caller
+            // has asked us to switch to it.  Currently re-using the car
+            // mode flag since we don't have a formal API for "desk mode".
+            if (ENABLE_LAUNCH_DESK_DOCK_APP
+                    && (enableFlags & UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                category = Intent.CATEGORY_DESK_DOCK;
+            }
+        } else {
+            // Launch the standard home app if requested.
+            if ((disableFlags & UiModeManager.DISABLE_CAR_MODE_GO_HOME) != 0) {
+                category = Intent.CATEGORY_HOME;
+            }
+        }
+
+        if (LOG) {
+            Slog.v(TAG, String.format(
+                "Handling broadcast result for action %s: enable=0x%08x, disable=0x%08x, "
+                    + "category=%s",
+                action, enableFlags, disableFlags, category));
+        }
+
+        sendConfigurationAndStartDreamOrDockAppLocked(category);
+    }
+
+    private void sendConfigurationAndStartDreamOrDockAppLocked(String category) {
+        // Update the configuration but don't send it yet.
+        mHoldingConfiguration = false;
+        updateConfigurationLocked();
+
+        // Start the dock app, if there is one.
+        boolean dockAppStarted = false;
+        if (category != null) {
+            // Now we are going to be careful about switching the
+            // configuration and starting the activity -- we need to
+            // do this in a specific order under control of the
+            // activity manager, to do it cleanly.  So compute the
+            // new config, but don't set it yet, and let the
+            // activity manager take care of both the start and config
+            // change.
+            Intent homeIntent = buildHomeIntent(category);
+            try {
+                int result = ActivityManagerNative.getDefault().startActivityWithConfig(
+                        null, homeIntent, null, null, null, 0, 0,
+                        mConfiguration, null, UserHandle.USER_CURRENT);
+                if (result >= ActivityManager.START_SUCCESS) {
+                    dockAppStarted = true;
+                } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {
+                    Slog.e(TAG, "Could not start dock app: " + homeIntent
+                            + ", startActivityWithConfig result " + result);
+                }
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Could not start dock app: " + homeIntent, ex);
+            }
+        }
+
+        // Send the new configuration.
+        sendConfigurationLocked();
+
+        // If we did not start a dock app, then start dreaming if supported.
+        if (!dockAppStarted && isScreenSaverEnabled() && isScreenSaverActivatedOnDock()) {
+            Slog.i(TAG, "Activating dream while docked.");
+            try {
+                IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(
+                        ServiceManager.getService(Dream.DREAM_SERVICE));
+                dreamManagerService.dream();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Could not start dream when docked.", ex);
+            }
+        }
+    }
+
+    private boolean isScreenSaverEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED,
+                UserHandle.USER_CURRENT) != 0;
+    }
+
+    private boolean isScreenSaverActivatedOnDock() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK, UserHandle.USER_CURRENT) != 0;
     }
 
     private void adjustStatusBarCarModeLocked() {

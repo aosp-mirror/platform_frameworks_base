@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.dreams.Dream;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
@@ -45,7 +46,7 @@ public class Somnambulator extends Activity {
             setResult(RESULT_OK, resultIntent);
         } else {
             IDreamManager somnambulist = IDreamManager.Stub.asInterface(
-                    ServiceManager.checkService("dreams"));
+                    ServiceManager.checkService(Dream.DREAM_SERVICE));
             if (somnambulist != null) {
                 try {
                     Slog.v("Somnambulator", "Dreaming by user request.");
