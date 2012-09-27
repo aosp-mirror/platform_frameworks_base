@@ -294,7 +294,7 @@ private:
     GLuint mCurrentBuffer;
     GLuint mCurrentIndicesBuffer;
     void* mCurrentPositionPointer;
-    GLuint mCurrentPositionStride;
+    GLsizei mCurrentPositionStride;
     void* mCurrentTexCoordsPointer;
 
     bool mTexCoordsArrayEnabled;
