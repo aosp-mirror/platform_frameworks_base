@@ -27,6 +27,7 @@ import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Slog;
 import android.view.Surface;
 
 import java.io.PrintWriter;
@@ -121,7 +122,17 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         });
     }
 
-    public void requestConnectLocked(final String address) {
+    public void requestConnectLocked(final String address, final boolean trusted) {
+        if (!trusted) {
+            synchronized (getSyncRoot()) {
+                if (!isRememberedDisplayLocked(address)) {
+                    Slog.w(TAG, "Ignoring request by an untrusted client to connect to "
+                            + "an unknown wifi display: " + address);
+                    return;
+                }
+            }
+        }
+
         getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -130,6 +141,15 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 }
             }
         });
+    }
+
+    private boolean isRememberedDisplayLocked(String address) {
+        for (WifiDisplay display : mRememberedDisplays) {
+            if (display.getDeviceAddress().equals(address)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void requestDisconnectLocked() {
@@ -241,10 +261,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                         getWifiDisplayStatusLocked());
             }
 
-            // Send protected broadcast about wifi display status to receivers that
-            // have the required permission.
-            getContext().sendBroadcast(intent,
-                    android.Manifest.permission.CONFIGURE_WIFI_DISPLAY);
+            // Send protected broadcast about wifi display status to registered receivers.
+            getContext().sendBroadcast(intent);
         }
     };
 
