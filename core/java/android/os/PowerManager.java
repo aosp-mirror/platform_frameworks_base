@@ -426,7 +426,7 @@ public final class PowerManager {
      * </p>
      *
      * @param when The time of the user activity, in the {@link SystemClock#uptimeMillis()}
-     * time base.  This timestamp is used to correctly order the user activity with
+     * time base.  This timestamp is used to correctly order the user activity request with
      * other power management functions.  It should be set
      * to the timestamp of the input event that caused the user activity.
      * @param noChangeLights If true, does not cause the keyboard backlight to turn on
@@ -457,7 +457,7 @@ public final class PowerManager {
      *
      * @param time The time when the request to go to sleep was issued, in the
      * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the user activity with other power management functions.  It should be set
+     * order the go to sleep request with other power management functions.  It should be set
      * to the timestamp of the input event that caused the request to go to sleep.
      *
      * @see #userActivity
@@ -481,7 +481,7 @@ public final class PowerManager {
      *
      * @param time The time when the request to wake up was issued, in the
      * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the user activity with other power management functions.  It should be set
+     * order the wake up request with other power management functions.  It should be set
      * to the timestamp of the input event that caused the request to wake up.
      *
      * @see #userActivity
@@ -490,6 +490,34 @@ public final class PowerManager {
     public void wakeUp(long time) {
         try {
             mService.wakeUp(time);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Forces the device to start napping.
+     * <p>
+     * If the device is currently awake, starts dreaming, otherwise does nothing.
+     * When the dream ends or if the dream cannot be started, the device will
+     * either wake up or go to sleep depending on whether there has been recent
+     * user activity.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to nap was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the nap request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to nap.
+     *
+     * @see #wakeUp
+     * @see #goToSleep
+     *
+     * @hide
+     */
+    public void nap(long time) {
+        try {
+            mService.nap(time);
         } catch (RemoteException e) {
         }
     }

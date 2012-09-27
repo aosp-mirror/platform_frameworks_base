@@ -24,6 +24,7 @@ import com.android.server.TwilightService;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayManagerService;
+import com.android.server.dreams.DreamManagerService;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -46,13 +47,11 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.Dream;
-import android.service.dreams.IDreamManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -100,14 +99,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DIRTY_STAY_ON = 1 << 7;
     // Dirty bit: battery state changed
     private static final int DIRTY_BATTERY_STATE = 1 << 8;
-    // Dirty bit: dream ended
-    private static final int DIRTY_DREAM_ENDED = 1 << 9;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
     private static final int WAKEFULNESS_ASLEEP = 0;
     // Wakefulness: The device is fully awake.  It can be put to sleep by a call to goToSleep().
-    // When the user activity timeout expires, the device may start napping.
+    // When the user activity timeout expires, the device may start napping or go to sleep.
     private static final int WAKEFULNESS_AWAKE = 1;
     // Wakefulness: The device is napping.  It is deciding whether to dream or go to sleep
     // but hasn't gotten around to it yet.  It can be awoken by a call to wakeUp(), which
@@ -149,7 +146,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private Notifier mNotifier;
     private DisplayPowerController mDisplayPowerController;
     private SettingsObserver mSettingsObserver;
-    private IDreamManager mDreamManager;
+    private DreamManagerService mDreamManager;
     private LightsService.Light mAttentionLight;
 
     private final Object mLock = new Object();
@@ -335,9 +332,10 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void systemReady(TwilightService twilight) {
+    public void systemReady(TwilightService twilight, DreamManagerService dreamManager) {
         synchronized (mLock) {
             mSystemReady = true;
+            mDreamManager = dreamManager;
 
             PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
@@ -365,10 +363,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             mContext.registerReceiver(new BootCompletedReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_DOCK_EVENT);
-            mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
-
-            filter = new IntentFilter();
+            filter.addAction(Dream.ACTION_DREAMING_STARTED);
             filter.addAction(Dream.ACTION_DREAMING_STOPPED);
             mContext.registerReceiver(new DreamReceiver(), filter, null, mHandler);
 
@@ -887,6 +882,47 @@ public final class PowerManagerService extends IPowerManager.Stub
         return true;
     }
 
+    @Override // Binder call
+    public void nap(long eventTime) {
+        if (eventTime > SystemClock.uptimeMillis()) {
+            throw new IllegalArgumentException("event time must not be in the future");
+        }
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            napInternal(eventTime);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void napInternal(long eventTime) {
+        synchronized (mLock) {
+            if (napNoUpdateLocked(eventTime)) {
+                updatePowerStateLocked();
+            }
+        }
+    }
+
+    private boolean napNoUpdateLocked(long eventTime) {
+        if (DEBUG_SPEW) {
+            Slog.d(TAG, "napNoUpdateLocked: eventTime=" + eventTime);
+        }
+
+        if (eventTime < mLastWakeTime || mWakefulness != WAKEFULNESS_AWAKE
+                || !mBootCompleted || !mSystemReady) {
+            return false;
+        }
+
+        Slog.i(TAG, "Nap time...");
+
+        mDirty |= DIRTY_WAKEFULNESS;
+        mWakefulness = WAKEFULNESS_NAPPING;
+        return true;
+    }
+
     /**
      * Updates the global power state based on dirty bits recorded in mDirty.
      *
@@ -1143,11 +1179,15 @@ public final class PowerManagerService extends IPowerManager.Stub
                 | DIRTY_WAKEFULNESS | DIRTY_STAY_ON)) != 0) {
             if (mWakefulness == WAKEFULNESS_AWAKE && isItBedTimeYetLocked()) {
                 if (DEBUG_SPEW) {
-                    Slog.d(TAG, "updateWakefulnessLocked: Nap time...");
+                    Slog.d(TAG, "updateWakefulnessLocked: Bed time...");
                 }
-                mWakefulness = WAKEFULNESS_NAPPING;
-                mDirty |= DIRTY_WAKEFULNESS;
-                changed = true;
+                final long time = SystemClock.uptimeMillis();
+                if (mDreamsActivateOnSleepSetting) {
+                    changed = napNoUpdateLocked(time);
+                } else {
+                    changed = goToSleepNoUpdateLocked(time,
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+                }
             }
         }
         return changed;
@@ -1172,8 +1212,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                 | DIRTY_SETTINGS
                 | DIRTY_IS_POWERED
                 | DIRTY_STAY_ON
-                | DIRTY_BATTERY_STATE
-                | DIRTY_DREAM_ENDED)) != 0) {
+                | DIRTY_BATTERY_STATE)) != 0) {
             scheduleSandmanLocked();
         }
     }
@@ -1210,32 +1249,15 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
 
-        // Get the dream manager, if needed.
-        if (startDreaming && mDreamManager == null) {
-            mDreamManager = IDreamManager.Stub.asInterface(
-                    ServiceManager.checkService("dreams"));
-            if (mDreamManager == null) {
-                Slog.w(TAG, "Unable to find IDreamManager.");
-            }
-        }
-
         // Start dreaming if needed.
         // We only control the dream on the handler thread, so we don't need to worry about
         // concurrent attempts to start or stop the dream.
         boolean isDreaming = false;
         if (mDreamManager != null) {
-            try {
-                isDreaming = mDreamManager.isDreaming();
-                if (startDreaming && !isDreaming) {
-                    Slog.i(TAG, "Entering dreamland.");
-                    mDreamManager.dream();
-                    isDreaming = mDreamManager.isDreaming();
-                    if (!isDreaming) {
-                        Slog.i(TAG, "Could not enter dreamland.  Sleep will be dreamless.");
-                    }
-                }
-            } catch (RemoteException ex) {
+            if (startDreaming) {
+                mDreamManager.startDream();
             }
+            isDreaming = mDreamManager.isDreaming();
         }
 
         // Update dream state.
@@ -1255,18 +1277,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             if (!continueDreaming) {
                 handleDreamFinishedLocked();
             }
-
-            // In addition to listening for the intent, poll the sandman periodically to detect
-            // when the dream has ended (as a watchdog only, ensuring our state is always correct).
-            if (mWakefulness == WAKEFULNESS_DREAMING
-                    || mWakefulness == WAKEFULNESS_NAPPING) {
-                if (!mSandmanScheduled) {
-                    mSandmanScheduled = true;
-                    Message msg = mHandler.obtainMessage(MSG_SANDMAN);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageDelayed(msg, 5000);
-                }
-            }
         }
 
         // Stop dreaming if needed.
@@ -1274,26 +1284,22 @@ public final class PowerManagerService extends IPowerManager.Stub
         // If so, then the power manager will have posted another message to the handler
         // to take care of it later.
         if (mDreamManager != null) {
-            try {
-                if (!continueDreaming && isDreaming) {
-                    Slog.i(TAG, "Leaving dreamland.");
-                    mDreamManager.awaken();
-                }
-            } catch (RemoteException ex) {
+            if (!continueDreaming) {
+                mDreamManager.stopDream();
             }
         }
     }
 
     /**
      * Returns true if the device is allowed to dream in its current state,
-     * assuming there has been no recent user activity and no wake locks are held.
+     * assuming that there was either an explicit request to nap or the user activity
+     * timeout expired and no wake locks are held.
      */
     private boolean canDreamLocked() {
         return mIsPowered
                 && mDreamsSupportedConfig
                 && mDreamsEnabledSetting
-                && mDreamsActivateOnSleepSetting
-                && !mBatteryService.isBatteryLow();
+                && mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF;
     }
 
     /**
@@ -1312,7 +1318,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
     }
-
 
     /**
      * Updates the display power state asynchronously.
@@ -1491,15 +1496,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         mDirty |= DIRTY_BOOT_COMPLETED;
         userActivityNoUpdateLocked(
                 now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
-        updatePowerStateLocked();
-    }
-
-    private void handleDockStateChangedLocked(int dockState) {
-        // TODO
-    }
-
-    private void handleDreamEndedLocked() {
-        mDirty |= DIRTY_DREAM_ENDED;
         updatePowerStateLocked();
     }
 
@@ -1957,22 +1953,11 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private final class DockReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
-                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
-                handleDockStateChangedLocked(dockState);
-            }
-        }
-    }
-
     private final class DreamReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
-                handleDreamEndedLocked();
+                scheduleSandmanLocked();
             }
         }
     }

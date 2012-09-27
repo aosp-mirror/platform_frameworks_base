@@ -38,6 +38,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.server.search.SearchManagerService;
+import android.service.dreams.Dream;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -739,8 +740,8 @@ class ServerThread extends Thread {
                 try {
                     Slog.i(TAG, "Dreams Service");
                     // Dreams (interactive idle-time views, a/k/a screen savers)
-                    dreamy = new DreamManagerService(context);
-                    ServiceManager.addService("dreams", dreamy);
+                    dreamy = new DreamManagerService(context, wmHandler);
+                    ServiceManager.addService(Dream.DREAM_SERVICE, dreamy);
                 } catch (Throwable e) {
                     reportWtf("starting DreamManagerService", e);
                 }
@@ -811,7 +812,7 @@ class ServerThread extends Thread {
         context.getResources().updateConfiguration(config, metrics);
 
         try {
-            power.systemReady(twilight);
+            power.systemReady(twilight, dreamy);
         } catch (Throwable e) {
             reportWtf("making Power Manager Service ready", e);
         }

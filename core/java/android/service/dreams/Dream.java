@@ -72,6 +72,12 @@ public class Dream extends Service implements Window.Callback {
     private final String TAG = Dream.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
 
     /**
+     * The name of the dream manager service.
+     * @hide
+     */
+    public static final String DREAM_SERVICE = "dreams";
+
+    /**
      * Used with {@link Intent#ACTION_MAIN} to declare the necessary intent-filter for a dream.
      *
      * @see Dream
@@ -499,7 +505,7 @@ public class Dream extends Service implements Window.Callback {
     // end public api
 
     private void loadSandman() {
-        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService("dreams"));
+        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
     }
 
     private final void attach(IBinder windowToken) {
@@ -584,7 +590,7 @@ public class Dream extends Service implements Window.Callback {
             mFinished = true;
 
             if (mSandman != null) {
-                mSandman.awakenSelf(mWindowToken);
+                mSandman.finishSelf(mWindowToken);
             } else {
                 Slog.w(TAG, "No dream manager found");
             }

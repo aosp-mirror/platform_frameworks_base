@@ -34,6 +34,7 @@ interface IPowerManager
     void userActivity(long time, int event, int flags);
     void wakeUp(long time);
     void goToSleep(long time, int reason);
+    void nap(long time);
 
     boolean isScreenOn();
     void reboot(String reason);
