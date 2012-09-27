@@ -343,13 +343,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
         // Watchdog is always enabled. Poor network detection can be seperately turned on/off
         // TODO: Remove this setting & clean up state machine since we always have
         // watchdog in an enabled state
-        putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        putSettingsGlobalBoolean(contentResolver, Settings.Global.WIFI_WATCHDOG_ON, true);
 
         // disable poor network avoidance
         if (sWifiOnly) {
             logd("Disabling poor network avoidance for wi-fi only device");
-            putSettingsBoolean(contentResolver,
-                    Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
+            putSettingsGlobalBoolean(contentResolver,
+                    Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
         }
 
         WifiWatchdogStateMachine wwsm = new WifiWatchdogStateMachine(context);
@@ -402,7 +402,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         };
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_ON),
+                Settings.Global.getUriFor(Settings.Global.WIFI_WATCHDOG_ON),
                 false, contentObserver);
     }
 
@@ -418,7 +418,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         };
 
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED),
+                Settings.Global.getUriFor(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED),
                 false, contentObserver);
     }
 
@@ -432,7 +432,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     private boolean isWatchdogEnabled() {
-        boolean ret = getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        boolean ret = getSettingsGlobalBoolean(
+                mContentResolver, Settings.Global.WIFI_WATCHDOG_ON, true);
         if (DBG) logd("Watchdog enabled " + ret);
         return ret;
     }
@@ -440,8 +441,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private void updateSettings() {
         if (DBG) logd("Updating secure settings");
 
-        mPoorNetworkDetectionEnabled = getSettingsBoolean(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, true);
+        mPoorNetworkDetectionEnabled = getSettingsGlobalBoolean(mContentResolver,
+                Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, true);
     }
 
     /**
@@ -927,21 +928,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     /**
-     * Convenience function for retrieving a single secure settings value
-     * as a string with a default value.
-     *
-     * @param cr The ContentResolver to access.
-     * @param name The name of the setting to retrieve.
-     * @param def Value to return if the setting is not defined.
-     *
-     * @return The setting's current value, or 'def' if it is not defined
-     */
-    private static String getSettingsStr(ContentResolver cr, String name, String def) {
-        String v = Settings.Secure.getString(cr, name);
-        return v != null ? v : def;
-    }
-
-    /**
      * Convenience function for retrieving a single secure settings value as a
      * boolean. Note that internally setting values are always stored as
      * strings; this function converts the string to a boolean for you. The
@@ -954,8 +940,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * @return The setting's current value, or 'def' if it is not defined or not
      *         a valid boolean.
      */
-    private static boolean getSettingsBoolean(ContentResolver cr, String name, boolean def) {
-        return Settings.Secure.getInt(cr, name, def ? 1 : 0) == 1;
+    private static boolean getSettingsGlobalBoolean(ContentResolver cr, String name, boolean def) {
+        return Settings.Global.getInt(cr, name, def ? 1 : 0) == 1;
     }
 
     /**
@@ -970,8 +956,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * @param value The new value for the setting.
      * @return true if the value was set, false on database errors
      */
-    private static boolean putSettingsBoolean(ContentResolver cr, String name, boolean value) {
-        return Settings.Secure.putInt(cr, name, value ? 1 : 0);
+    private static boolean putSettingsGlobalBoolean(ContentResolver cr, String name, boolean value) {
+        return Settings.Global.putInt(cr, name, value ? 1 : 0);
     }
 
     private static void logd(String s) {
