@@ -11516,8 +11516,9 @@ public final class ActivityManagerService extends ActivityManagerNative
          * Prevent non-system code (defined here to be non-persistent
          * processes) from sending protected broadcasts.
          */
-        if (callingUid == Process.SYSTEM_UID || callingUid == Process.PHONE_UID
-            || callingUid == Process.SHELL_UID || callingUid == Process.BLUETOOTH_UID ||
+        int callingAppId = UserHandle.getAppId(callingUid);
+        if (callingAppId == Process.SYSTEM_UID || callingAppId == Process.PHONE_UID
+            || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID ||
             callingUid == 0) {
             // Always okay.
         } else if (callerApp == null || !callerApp.persistent) {
