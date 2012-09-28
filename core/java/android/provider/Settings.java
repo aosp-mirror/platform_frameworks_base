@@ -3141,6 +3141,12 @@ public final class Settings {
         public static final String DEVICE_PROVISIONED = Global.DEVICE_PROVISIONED;
 
         /**
+         * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String USER_SETUP_COMPLETE = "user_setup_complete";
+
+        /**
          * List of input methods that are currently enabled.  This is a string
          * containing the IDs of all enabled input methods, each ID separated
          * by ':'.
