@@ -1361,6 +1361,14 @@ public class NumberPicker extends LinearLayout {
             // Allow text entry rather than strictly numeric entry.
             mInputText.setRawInputType(InputType.TYPE_CLASS_TEXT
                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            // Make sure the min, max, respect the size of the displayed
+            // values. This will take care of the current value as well.
+            if (getMinValue() >= displayedValues.length) {
+                setMinValue(0);
+            }
+            if (getMaxValue() >= displayedValues.length) {
+                setMaxValue(displayedValues.length - 1);
+            }
         } else {
             mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         }
