@@ -5614,7 +5614,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             int flags, String installerPackageName, Uri verificationURI,
             ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
         VerificationParams verificationParams = new VerificationParams(verificationURI, null, null,
-                manifestDigest);
+                VerificationParams.NO_UID, manifestDigest);
         installPackageWithVerificationAndEncryption(packageURI, observer, flags,
                 installerPackageName, verificationParams, encryptionParams);
     }
@@ -6437,6 +6437,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (verificationParams.getReferrer() != null) {
                             verification.putExtra(Intent.EXTRA_REFERRER,
                                   verificationParams.getReferrer());
+                        }
+                        if (verificationParams.getOriginatingUid() >= 0) {
+                            verification.putExtra(Intent.EXTRA_ORIGINATING_UID,
+                                  verificationParams.getOriginatingUid());
                         }
                         if (verificationParams.getInstallerUid() >= 0) {
                             verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_UID,

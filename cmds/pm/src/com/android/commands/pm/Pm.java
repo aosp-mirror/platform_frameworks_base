@@ -924,7 +924,7 @@ public final class Pm {
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
-                    originatingURI, referrerURI, null);
+                    originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
             mPm.installPackageWithVerificationAndEncryption(apkURI, obs, installFlags,
                     installerPackageName, verificationParams, encryptionParams);
