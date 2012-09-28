@@ -3300,7 +3300,7 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
-         * List of the accessibility services to which the user has graned
+         * List of the accessibility services to which the user has granted
          * permission to put the device into touch exploration mode.
          *
          * @hide
@@ -3319,7 +3319,7 @@ public final class Settings {
          * <p>
          *   Note: The JavaScript based screen-reader is served by the
          *   Google infrastructure and enable users with disabilities to
-         *   efficiantly navigate in and explore web content.
+         *   efficiently navigate in and explore web content.
          * </p>
          * <p>
          *   This property represents a boolean value.
@@ -3331,7 +3331,7 @@ public final class Settings {
 
         /**
          * The URL for the injected JavaScript based screen-reader used
-         * for providing accessiblity of content in WebView.
+         * for providing accessibility of content in WebView.
          * <p>
          *   Note: The JavaScript based screen-reader is served by the
          *   Google infrastructure and enable users with disabilities to
@@ -4108,6 +4108,15 @@ public final class Settings {
          * The content:// style URL for global secure settings items.  Not public.
          */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/global");
+
+        /**
+         * Setting whether the global gesture for enabling accessibility is enabled.
+         * If this gesture is enabled the user will be able to perfrom it to enable
+         * the accessibility state without visiting the settings app.
+         * @hide
+         */
+        public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
+                "enable_accessibility_global_gesture_enabled";
 
         /**
          * Whether Airplane Mode is on.
