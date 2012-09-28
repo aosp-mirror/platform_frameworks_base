@@ -1178,10 +1178,14 @@ public class ViewDebug {
 
     private static void writeValue(BufferedWriter out, Object value) throws IOException {
         if (value != null) {
-            String output = value.toString().replace("\n", "\\n");
-            out.write(String.valueOf(output.length()));
-            out.write(",");
-            out.write(output);
+            String output = "[EXCEPTION]";
+            try {
+                output = value.toString().replace("\n", "\\n");
+            } finally {
+                out.write(String.valueOf(output.length()));
+                out.write(",");
+                out.write(output);
+            }
         } else {
             out.write("4,null");
         }
