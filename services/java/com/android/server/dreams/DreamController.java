@@ -53,6 +53,8 @@ final class DreamController {
     private final Intent mDreamingStoppedIntent = new Intent(Dream.ACTION_DREAMING_STOPPED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
+    private final Intent mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+
     private DreamRecord mCurrentDream;
 
     public DreamController(Context context, Handler handler, Listener listener) {
@@ -80,6 +82,9 @@ final class DreamController {
 
     public void startDream(Binder token, ComponentName name, boolean isTest, int userId) {
         stopDream();
+
+        // Close the notification shade
+        mContext.sendBroadcast(mCloseNotificationShadeIntent);
 
         Slog.i(TAG, "Starting dream: name=" + name + ", isTest=" + isTest + ", userId=" + userId);
 
