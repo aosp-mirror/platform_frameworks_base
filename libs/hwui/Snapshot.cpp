@@ -178,6 +178,10 @@ void Snapshot::setClip(float left, float top, float right, float bottom) {
     flags |= Snapshot::kFlagClipSet;
 }
 
+bool Snapshot::hasPerspectiveTransform() const {
+    return transform->isPerspective();
+}
+
 const Rect& Snapshot::getLocalClip() {
     mat4 inverse;
     inverse.loadInverse(*transform);
