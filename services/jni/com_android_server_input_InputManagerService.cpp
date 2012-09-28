@@ -187,7 +187,7 @@ public:
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
-    virtual void notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
+    virtual void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
             uint32_t policyFlags);
     virtual void notifyConfigurationChanged(nsecs_t when);
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
@@ -527,17 +527,17 @@ String8 NativeInputManager::getDeviceAlias(const InputDeviceIdentifier& identifi
     return result;
 }
 
-void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
-        int32_t switchValue, uint32_t policyFlags) {
+void NativeInputManager::notifySwitch(nsecs_t when,
+        uint32_t switchValues, uint32_t switchMask, uint32_t policyFlags) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifySwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
-            when, switchCode, switchValue, policyFlags);
+    ALOGD("notifySwitch - when=%lld, switchValues=0x%08x, switchMask=0x%08x, policyFlags=0x%x",
+            when, switchValues, switchMask, policyFlags);
 #endif
 
     JNIEnv* env = jniEnv();
 
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,
-            when, switchCode, switchValue);
+            when, switchValues, switchMask);
     checkAndClearExceptionFromCallback(env, "notifySwitch");
 }
 
