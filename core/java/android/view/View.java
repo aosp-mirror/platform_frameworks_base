@@ -2150,7 +2150,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Group of bits indicating that RTL properties resolution is done.
      */
     static final int ALL_RTL_PROPERTIES_RESOLVED = PFLAG2_LAYOUT_DIRECTION_RESOLVED |
-            PFLAG2_TEXT_DIRECTION_RESOLVED | PFLAG2_TEXT_ALIGNMENT_RESOLVED;
+            PFLAG2_TEXT_DIRECTION_RESOLVED |
+            PFLAG2_TEXT_ALIGNMENT_RESOLVED |
+            PFLAG2_PADDING_RESOLVED |
+            PFLAG2_DRAWABLE_RESOLVED;
 
     // There are a couple of flags left in mPrivateFlags2
 
@@ -3299,6 +3302,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int overScrollMode = mOverScrollMode;
         boolean initializeScrollbars = false;
 
+        boolean leftPaddingDefined = false;
+        boolean rightPaddingDefined = false;
+        boolean startPaddingDefined = false;
+        boolean endPaddingDefined = false;
+
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
         final int N = a.getIndexCount();
@@ -3312,10 +3320,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     padding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = padding;
                     mUserPaddingRightInitial = padding;
+                    leftPaddingDefined = true;
+                    rightPaddingDefined = true;
                     break;
                  case com.android.internal.R.styleable.View_paddingLeft:
                     leftPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingLeftInitial = leftPadding;
+                    leftPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingTop:
                     topPadding = a.getDimensionPixelSize(attr, -1);
@@ -3323,15 +3334,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case com.android.internal.R.styleable.View_paddingRight:
                     rightPadding = a.getDimensionPixelSize(attr, -1);
                     mUserPaddingRightInitial = rightPadding;
+                    rightPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingBottom:
                     bottomPadding = a.getDimensionPixelSize(attr, -1);
                     break;
                 case com.android.internal.R.styleable.View_paddingStart:
                     startPadding = a.getDimensionPixelSize(attr, UNDEFINED_PADDING);
+                    startPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_paddingEnd:
                     endPadding = a.getDimensionPixelSize(attr, UNDEFINED_PADDING);
+                    endPaddingDefined = true;
                     break;
                 case com.android.internal.R.styleable.View_scrollX:
                     x = a.getDimensionPixelOffset(attr, 0);
@@ -3629,10 +3643,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mUserPaddingRightInitial = padding;
         }
 
+        // RTL compatibility mode: pre Jelly Bean MR1 case OR no RTL support case.
+        // left / right padding are used if defined (meaning here nothing to do). If they are not
+        // defined and start / end padding are defined (e.g. in Frameworks resources), then we use
+        // start / end and resolve them as left / right (layout direction is not taken into account).
+        if (isRtlCompatibilityMode()) {
+            if (!leftPaddingDefined && startPaddingDefined) {
+                leftPadding = startPadding;
+            }
+            if (!rightPaddingDefined && endPaddingDefined) {
+                rightPadding = endPadding;
+            }
+        }
+
         // If the user specified the padding (either with android:padding or
         // android:paddingLeft/Top/Right/Bottom), use this padding, otherwise
         // use the default padding or the padding from the background drawable
-        // (stored at this point in mPadding*)
+        // (stored at this point in mPadding*). Padding resolution will happen later if
+        // RTL is supported.
         mUserPaddingLeftInitial = leftPadding >= 0 ? leftPadding : mPaddingLeft;
         mUserPaddingRightInitial = rightPadding >= 0 ? rightPadding : mPaddingRight;
         internalSetPadding(
@@ -11569,6 +11597,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return true if we are in RTL compatibility mode (either before Jelly Bean MR1 or
+     * RTL not supported)
+     */
+    private boolean isRtlCompatibilityMode() {
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+        return targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport();
+    }
+
+    /**
      * @return true if RTL properties need resolution.
      */
     private boolean needRtlPropertiesResolution() {
@@ -11693,26 +11730,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void resolvePadding() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport()) {
-            // Pre Jelly Bean MR1 case (compatibility mode) OR no RTL support case:
-            // left / right padding are used if defined. If they are not defined and start / end
-            // padding are defined (e.g. in Frameworks resources), then we use start / end and
-            // resolve them as left / right (layout direction is not taken into account).
-            if (mUserPaddingLeftInitial == UNDEFINED_PADDING &&
-                    mUserPaddingStart != UNDEFINED_PADDING) {
-                mUserPaddingLeft = mUserPaddingStart;
-            }
-            if (mUserPaddingRightInitial == UNDEFINED_PADDING &&
-                    mUserPaddingEnd != UNDEFINED_PADDING) {
-                mUserPaddingRight = mUserPaddingEnd;
-            }
-
-            mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
-
-            internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight,
-                    mUserPaddingBottom);
-        } else {
+        if (!isRtlCompatibilityMode()) {
             // Post Jelly Bean MR1 case: we need to take the resolved layout direction into account.
             // If start / end padding are defined, they will be resolved (hence overriding) to
             // left / right or right / left depending on the resolved layout direction.
