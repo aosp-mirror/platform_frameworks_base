@@ -18816,6 +18816,7 @@ package android.provider {
     field public static final java.lang.String DATA_ROAMING = "data_roaming";
     field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
     field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
+    field public static final java.lang.String HTTP_PROXY = "http_proxy";
     field public static final java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String MODE_RINGER = "mode_ringer";
     field public static final java.lang.String NETWORK_PREFERENCE = "network_preference";
@@ -18879,7 +18880,7 @@ package android.provider {
     field public static final deprecated java.lang.String DEVICE_PROVISIONED = "device_provisioned";
     field public static final java.lang.String ENABLED_ACCESSIBILITY_SERVICES = "enabled_accessibility_services";
     field public static final java.lang.String ENABLED_INPUT_METHODS = "enabled_input_methods";
-    field public static final java.lang.String HTTP_PROXY = "http_proxy";
+    field public static final deprecated java.lang.String HTTP_PROXY = "http_proxy";
     field public static final java.lang.String INPUT_METHOD_SELECTOR_VISIBILITY = "input_method_selector_visibility";
     field public static final deprecated java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
@@ -19038,12 +19039,12 @@ package android.provider {
     field public static final deprecated int WIFI_SLEEP_POLICY_DEFAULT = 0; // 0x0
     field public static final deprecated int WIFI_SLEEP_POLICY_NEVER = 2; // 0x2
     field public static final deprecated int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1; // 0x1
-    field public static final java.lang.String WIFI_STATIC_DNS1 = "wifi_static_dns1";
-    field public static final java.lang.String WIFI_STATIC_DNS2 = "wifi_static_dns2";
-    field public static final java.lang.String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
-    field public static final java.lang.String WIFI_STATIC_IP = "wifi_static_ip";
-    field public static final java.lang.String WIFI_STATIC_NETMASK = "wifi_static_netmask";
-    field public static final java.lang.String WIFI_USE_STATIC_IP = "wifi_use_static_ip";
+    field public static final deprecated java.lang.String WIFI_STATIC_DNS1 = "wifi_static_dns1";
+    field public static final deprecated java.lang.String WIFI_STATIC_DNS2 = "wifi_static_dns2";
+    field public static final deprecated java.lang.String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
+    field public static final deprecated java.lang.String WIFI_STATIC_IP = "wifi_static_ip";
+    field public static final deprecated java.lang.String WIFI_STATIC_NETMASK = "wifi_static_netmask";
+    field public static final deprecated java.lang.String WIFI_USE_STATIC_IP = "wifi_use_static_ip";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE = "wifi_watchdog_acceptable_packet_loss_percentage";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS = "wifi_watchdog_background_check_delay_ms";
