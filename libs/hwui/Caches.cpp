@@ -86,6 +86,8 @@ void Caches::init() {
     lastDstMode = GL_ZERO;
     currentProgram = NULL;
 
+    mFunctorsCount = 0;
+
     mInitialized = true;
 }
 
@@ -451,6 +453,22 @@ void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool o
 void Caches::endTiling() {
     if (extensions.hasTiledRendering() && !debugOverdraw) {
         glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
+    }
+}
+
+bool Caches::hasRegisteredFunctors() {
+    return mFunctorsCount > 0;
+}
+
+void Caches::registerFunctors(uint32_t functorCount) {
+    mFunctorsCount += functorCount;
+}
+
+void Caches::unregisterFunctors(uint32_t functorCount) {
+    if (functorCount > mFunctorsCount) {
+        mFunctorsCount = 0;
+    } else {
+        mFunctorsCount -= functorCount;
     }
 }
 
