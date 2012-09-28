@@ -20,6 +20,7 @@ package android.view.accessibility;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.content.ComponentName;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -53,4 +54,7 @@ interface IAccessibilityManager {
         in AccessibilityServiceInfo info);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
+
+    void temporaryEnableAccessibilityStateUntilKeyguardRemoved(in ComponentName service,
+            boolean touchExplorationEnabled);
 }

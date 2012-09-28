@@ -16,12 +16,15 @@
 
 package com.android.internal.policy.impl;
 
+import com.android.internal.app.AlertController;
+import com.android.internal.app.AlertController.AlertParams;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,11 +35,11 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -46,17 +49,21 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.IWindowManager;
+import android.util.TypedValue;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy.WindowManagerFuncs;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -78,7 +85,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private final AudioManager mAudioManager;
 
     private ArrayList<Action> mItems;
-    private AlertDialog mDialog;
+    private GlobalActionsDialog mDialog;
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
@@ -150,7 +157,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * Create the global actions dialog.
      * @return A new dialog.
      */
-    private AlertDialog createDialog() {
+    private GlobalActionsDialog createDialog() {
         // Simple toggle style if there's no vibrator, otherwise use a tri-state
         if (!mHasVibrator) {
             mSilentModeAction = new SilentModeToggleAction();
@@ -319,12 +326,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mAdapter = new MyAdapter();
 
-        final AlertDialog.Builder ab = new AlertDialog.Builder(mContext);
+        AlertParams params = new AlertParams(mContext);
+        params.mAdapter = mAdapter;
+        params.mOnClickListener = this;
+        params.mForceInverseBackground = true;
 
-        ab.setAdapter(mAdapter, this)
-                .setInverseBackgroundForced(true);
+        GlobalActionsDialog dialog = new GlobalActionsDialog(mContext, params);
+        dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
 
-        final AlertDialog dialog = ab.create();
         dialog.getListView().setItemsCanFocus(true);
         dialog.getListView().setLongClickable(true);
         dialog.getListView().setOnItemLongClickListener(
@@ -870,6 +879,123 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         if (!mHasTelephony) {
             mAirplaneState = on ? ToggleAction.State.On : ToggleAction.State.Off;
+        }
+    }
+
+    private static final class GlobalActionsDialog extends Dialog implements DialogInterface {
+        private final Context mContext;
+        private final int mWindowTouchSlop;
+        private final AlertController mAlert;
+
+        private EnableAccessibilityController mEnableAccessibilityController;
+
+        private boolean mIntercepted;
+        private boolean mCancelOnUp;
+
+        public GlobalActionsDialog(Context context, AlertParams params) {
+            super(context, getDialogTheme(context));
+            mContext = context;
+            mAlert = new AlertController(mContext, this, getWindow());
+            mWindowTouchSlop = ViewConfiguration.get(context).getScaledWindowTouchSlop();
+            params.apply(mAlert);
+        }
+
+        private static int getDialogTheme(Context context) {
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
+                    outValue, true);
+            return outValue.resourceId;
+        }
+
+        @Override
+        protected void onStart() {
+            // If global accessibility gesture can be performed, we will take care
+            // of dismissing the dialog on touch outside. This is because the dialog
+            // is dismissed on the first down while the global gesture is a long press
+            // with two fingers anywhere on the screen.
+            if (EnableAccessibilityController.canEnableAccessibilityViaGesture(mContext)) {
+                mEnableAccessibilityController = new EnableAccessibilityController(mContext);
+                super.setCanceledOnTouchOutside(false);
+            } else {
+                mEnableAccessibilityController = null;
+                super.setCanceledOnTouchOutside(true);
+            }
+            super.onStart();
+        }
+
+        @Override
+        protected void onStop() {
+            if (mEnableAccessibilityController != null) {
+                mEnableAccessibilityController.onDestroy();
+            }
+            super.onStop();
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            if (mEnableAccessibilityController != null) {
+                final int action = event.getActionMasked();
+                if (action == MotionEvent.ACTION_DOWN) {
+                    View decor = getWindow().getDecorView();
+                    final int eventX = (int) event.getX();
+                    final int eventY = (int) event.getY();
+                    if (eventX < -mWindowTouchSlop
+                            || eventY < -mWindowTouchSlop
+                            || eventX >= decor.getWidth() + mWindowTouchSlop
+                            || eventY >= decor.getHeight() + mWindowTouchSlop) {
+                        mCancelOnUp = true;
+                    }
+                }
+                try {
+                    if (!mIntercepted) {
+                        mIntercepted = mEnableAccessibilityController.onInterceptTouchEvent(event);
+                        if (mIntercepted) {
+                            final long now = SystemClock.uptimeMillis();
+                            event = MotionEvent.obtain(now, now,
+                                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+                            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                            mCancelOnUp = true;
+                        }
+                    } else {
+                        return mEnableAccessibilityController.onTouchEvent(event);
+                    }
+                } finally {
+                    if (action == MotionEvent.ACTION_UP) {
+                        if (mCancelOnUp) {
+                            cancel();
+                        }
+                        mCancelOnUp = false;
+                        mIntercepted = false;
+                    }
+                }
+            }
+            return super.dispatchTouchEvent(event);
+        }
+
+        public ListView getListView() {
+            return mAlert.getListView();
+        }
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mAlert.installContent();
+        }
+
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (mAlert.onKeyDown(keyCode, event)) {
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
+        }
+
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            if (mAlert.onKeyUp(keyCode, event)) {
+                return true;
+            }
+            return super.onKeyUp(keyCode, event);
         }
     }
 }

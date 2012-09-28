@@ -40,6 +40,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.IAudioService;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -747,7 +749,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case LONG_PRESS_POWER_GLOBAL_ACTIONS:
                 mPowerKeyHandled = true;
-                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
+                    performAuditoryFeedbackForAccessibilityIfNeed();
+                }
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
                 showGlobalActionsDialog();
                 break;
@@ -4248,6 +4252,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateOrientationListenerLp();
             }
         }
+    }
+
+    private void performAuditoryFeedbackForAccessibilityIfNeed() {
+        if (!isGlobalAccessibilityGestureEnabled()) {
+            return;
+        }
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(
+                Context.AUDIO_SERVICE);
+        if (audioManager.isSilentMode()) {
+            return;
+        }
+        Ringtone ringTone = RingtoneManager.getRingtone(mContext,
+                Settings.System.DEFAULT_NOTIFICATION_URI);
+        ringTone.setStreamType(AudioManager.STREAM_MUSIC);
+        ringTone.play();
+    }
+    private boolean isGlobalAccessibilityGestureEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED, 0) == 1;
     }
 
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {

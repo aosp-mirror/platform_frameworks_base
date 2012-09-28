@@ -285,4 +285,7 @@
     <!-- Space reserved at the bottom of secure views (pin/pattern/password/SIM pin/SIM puk) -->
     <dimen name="kg_secure_padding_height">46dp</dimen>
 
+    <!-- Touch slop for the global toggle accessibility gesture -->
+    <dimen name="accessibility_touch_slop">80dip</dimen>
+
 </resources>
