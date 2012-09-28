@@ -89,12 +89,12 @@ public class CaptivePortalTracker extends StateMachine {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiver(mReceiver, filter);
 
-        mServer = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.CAPTIVE_PORTAL_SERVER);
+        mServer = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.CAPTIVE_PORTAL_SERVER);
         if (mServer == null) mServer = DEFAULT_SERVER;
 
-        mIsCaptivePortalCheckEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
+        mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
 
         addState(mDefaultState);
             addState(mNoActiveNetworkState, mDefaultState);

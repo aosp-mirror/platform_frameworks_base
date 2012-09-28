@@ -163,8 +163,8 @@ public class DeviceStorageMonitorService extends Binder {
             mFreeMem = Long.parseLong(debugFreeMem);
         }
         // Read the log interval from secure settings
-        long freeMemLogInterval = Settings.Secure.getLong(mContentResolver,
-                Settings.Secure.SYS_FREE_STORAGE_LOG_INTERVAL,
+        long freeMemLogInterval = Settings.Global.getLong(mContentResolver,
+                Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
                 DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES)*60*1000;
         //log the amount of free memory in event log
         long currTime = SystemClock.elapsedRealtime();
@@ -190,8 +190,8 @@ public class DeviceStorageMonitorService extends Binder {
                                 mFreeMem, mFreeSystem, mFreeCache);
         }
         // Read the reporting threshold from secure settings
-        long threshold = Settings.Secure.getLong(mContentResolver,
-                Settings.Secure.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+        long threshold = Settings.Global.getLong(mContentResolver,
+                Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
                 DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD);
         // If mFree changed significantly log the new value
         long delta = mFreeMem - mLastReportedFreeMem;
@@ -309,15 +309,15 @@ public class DeviceStorageMonitorService extends Binder {
      * any way
      */
     private long getMemThreshold() {
-        long value = Settings.Secure.getInt(
+        long value = Settings.Global.getInt(
                               mContentResolver,
-                              Settings.Secure.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                              Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                               DEFAULT_THRESHOLD_PERCENTAGE);
         if(localLOGV) Slog.v(TAG, "Threshold Percentage="+value);
         value = (value*mTotalMemory)/100;
-        long maxValue = Settings.Secure.getInt(
+        long maxValue = Settings.Global.getInt(
                 mContentResolver,
-                Settings.Secure.SYS_STORAGE_THRESHOLD_MAX_BYTES,
+                Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
                 DEFAULT_THRESHOLD_MAX_BYTES);
         //evaluate threshold value
         return value < maxValue ? value : maxValue;
@@ -329,9 +329,9 @@ public class DeviceStorageMonitorService extends Binder {
      * any way
      */
     private int getMemFullThreshold() {
-        int value = Settings.Secure.getInt(
+        int value = Settings.Global.getInt(
                               mContentResolver,
-                              Settings.Secure.SYS_STORAGE_FULL_THRESHOLD_BYTES,
+                              Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                               DEFAULT_FULL_THRESHOLD_BYTES);
         if(localLOGV) Slog.v(TAG, "Full Threshold Bytes="+value);
         return value;

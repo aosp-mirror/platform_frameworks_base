@@ -158,8 +158,8 @@ public class ApplicationErrorReport implements Parcelable {
     public static ComponentName getErrorReportReceiver(Context context,
             String packageName, int appFlags) {
         // check if error reporting is enabled in secure settings
-        int enabled = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.SEND_ACTION_APP_ERROR, 0);
+        int enabled = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SEND_ACTION_APP_ERROR, 0);
         if (enabled == 0) {
             return null;
         }

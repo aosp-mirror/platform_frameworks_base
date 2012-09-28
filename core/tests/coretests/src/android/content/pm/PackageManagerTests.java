@@ -1668,16 +1668,16 @@ public class PackageManagerTests extends AndroidTestCase {
     private int getDefaultInstallLoc() {
         int origDefaultLoc = PackageInfo.INSTALL_LOCATION_AUTO;
         try {
-            origDefaultLoc = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.Secure.DEFAULT_INSTALL_LOCATION);
+            origDefaultLoc = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEFAULT_INSTALL_LOCATION);
         } catch (SettingNotFoundException e1) {
         }
         return origDefaultLoc;
     }
 
     private void setInstallLoc(int loc) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.Secure.DEFAULT_INSTALL_LOCATION, loc);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.DEFAULT_INSTALL_LOCATION, loc);
     }
 
     /*
@@ -2555,16 +2555,16 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     private boolean getUserSettingSetInstallLocation() {
         try {
-            return Settings.System.getInt(mContext.getContentResolver(), Settings.Secure.SET_INSTALL_LOCATION) != 0;
-
+            return Settings.Global.getInt(
+                    mContext.getContentResolver(), Settings.Global.SET_INSTALL_LOCATION) != 0;
         } catch (SettingNotFoundException e1) {
         }
         return false;
     }
 
     private void setUserSettingSetInstallLocation(boolean value) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.Secure.SET_INSTALL_LOCATION, value ? 1 : 0);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.SET_INSTALL_LOCATION, value ? 1 : 0);
     }
 
     private void setUserX(boolean enable, int userSetting, int iloc) throws Exception {

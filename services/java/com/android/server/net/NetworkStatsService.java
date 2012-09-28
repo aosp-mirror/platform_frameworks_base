@@ -104,7 +104,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
+import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
@@ -696,7 +696,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Update {@link NetworkStatsRecorder} and {@link #mGlobalAlertBytes} to
      * reflect current {@link #mPersistThreshold} value. Always defers to
-     * {@link Secure} values when defined.
+     * {@link Global} values when defined.
      */
     private void updatePersistThresholds() {
         mDevRecorder.setPersistThreshold(mSettings.getDevPersistBytes(mPersistThreshold));
@@ -1263,7 +1263,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /**
      * Default external settings that read from
-     * {@link android.provider.Settings.Secure}.
+     * {@link android.provider.Settings.Global}.
      */
     private static class DefaultNetworkStatsSettings implements NetworkStatsSettings {
         private final ContentResolver mResolver;
