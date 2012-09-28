@@ -76,10 +76,9 @@
         </ScrollView>
     </LinearLayout>
 
-    <View android:id="@+id/handle"
+    <View
+        android:id="@+id/handle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/close_handle_height"
-        android:layout_gravity="bottom"
         />
-
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
