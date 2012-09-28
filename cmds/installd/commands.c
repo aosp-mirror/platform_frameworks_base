@@ -447,6 +447,16 @@ int get_size(const char *pkgname, int persona, const char *apkpath,
         }
     }
 
+        /* add in size of any libraries */
+    if (!create_pkg_path_in_dir(path, &android_app_lib_dir, pkgname, PKG_DIR_POSTFIX)) {
+        d = opendir(path);
+        if (d != NULL) {
+            dfd = dirfd(d);
+            codesize += calculate_dir_size(dfd);
+            closedir(d);
+        }
+    }
+
         /* compute asec size if it is given
          */
     if (asecpath != NULL && asecpath[0] != '!') {
@@ -474,21 +484,33 @@ int get_size(const char *pkgname, int persona, const char *apkpath,
 
         if (de->d_type == DT_DIR) {
             int subfd;
+            int64_t statsize = 0;
+            int64_t dirsize = 0;
                 /* always skip "." and ".." */
             if (name[0] == '.') {
                 if (name[1] == 0) continue;
                 if ((name[1] == '.') && (name[2] == 0)) continue;
             }
+            if (fstatat(dfd, name, &s, AT_SYMLINK_NOFOLLOW) == 0) {
+                statsize = stat_size(&s);
+            }
             subfd = openat(dfd, name, O_RDONLY | O_DIRECTORY);
             if (subfd >= 0) {
-                int64_t size = calculate_dir_size(subfd);
-                if (!strcmp(name,"lib")) {
-                    codesize += size;
-                } else if(!strcmp(name,"cache")) {
-                    cachesize += size;
-                } else {
-                    datasize += size;
-                }
+                dirsize = calculate_dir_size(subfd);
+            }
+            if(!strcmp(name,"lib")) {
+                codesize += dirsize + statsize;
+            } else if(!strcmp(name,"cache")) {
+                cachesize += dirsize + statsize;
+            } else {
+                datasize += dirsize + statsize;
+            }
+        } else if (de->d_type == DT_LNK && !strcmp(name,"lib")) {
+            // This is the symbolic link to the application's library
+            // code.  We'll count this as code instead of data, since
+            // it is not something that the app creates.
+            if (fstatat(dfd, name, &s, AT_SYMLINK_NOFOLLOW) == 0) {
+                codesize += stat_size(&s);
             }
         } else {
             if (fstatat(dfd, name, &s, AT_SYMLINK_NOFOLLOW) == 0) {
