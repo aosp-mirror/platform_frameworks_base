@@ -284,25 +284,39 @@ public class StatusBarTest extends TestActivity
                     }, 3000);
             }
         },
-        new Test("Expand") {
+        new Test("Expand notifications") {
             public void run() {
-                mStatusBarManager.expandNotifications();
+                mStatusBarManager.expandNotificationsPanel();
             }
         },
-        new Test("Expand in 3 sec.") {
+        new Test(" ... in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.expandNotifications();
+                            mStatusBarManager.expandNotificationsPanel();
                         }
                     }, 3000);
             }
         },
-        new Test("Collapse in 3 sec.") {
+        new Test("Expand settings") {
+            public void run() {
+                mStatusBarManager.expandSettingsPanel();
+            }
+        },
+        new Test(" ... in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.collapseNotifications();
+                            mStatusBarManager.expandSettingsPanel();
+                        }
+                    }, 3000);
+            }
+        },
+        new Test("Collapse panels in 3 sec.") {
+            public void run() {
+                mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            mStatusBarManager.collapsePanels();
                         }
                     }, 3000);
             }
