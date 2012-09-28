@@ -75,7 +75,7 @@
        <li><a href="<?cs var:toroot ?>distribute/promote/device-art.html">
         <span class="en">Device Art Generator</a></li>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/promote/brand.html">
-        <span class="en">Brand Assets and Guidelines</a></li>
+        <span class="en">Brand Guidelines</a></li>
      </ul>
    </li>
 
