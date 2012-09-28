@@ -78,6 +78,7 @@ public final class LocationBlacklist extends ContentObserver {
      * (package name matches blacklist, and does not match whitelist)
      */
     public boolean isBlacklisted(String packageName) {
+        /*
         synchronized (mLock) {
             for (String black : mBlacklist) {
                 if (packageName.startsWith(black)) {
@@ -91,6 +92,7 @@ public final class LocationBlacklist extends ContentObserver {
                 }
             }
         }
+        */
         return false;
     }
 
