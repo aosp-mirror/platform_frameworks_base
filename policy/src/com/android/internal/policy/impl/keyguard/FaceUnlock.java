@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -128,6 +129,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     public void hide() {
         if (DEBUG) Log.d(TAG, "hide()");
+        // Removes any wakelock messages to make sure they don't cause the screen to turn back on.
+        mHandler.removeMessages(MSG_POKE_WAKELOCK);
         // Remove messages to prevent a delayed show message from undo-ing the hide
         removeDisplayMessages();
         mHandler.sendEmptyMessage(MSG_HIDE_FACE_UNLOCK_VIEW);
@@ -384,10 +387,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Pokes the wakelock to keep the screen alive and active for a specific amount of time.
+     * If the screen is on, pokes the wakelock to keep the screen alive and active for a specific
+     * amount of time.
      */
     void handlePokeWakelock(int millis) {
+      PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+      if (powerManager.isScreenOn()) {
         mKeyguardScreenCallback.userActivity(millis);
+      }
     }
 
     /**
