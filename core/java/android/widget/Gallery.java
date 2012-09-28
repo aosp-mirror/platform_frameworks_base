@@ -182,6 +182,12 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
      */
     private boolean mIsRtl = true;
     
+    /**
+     * Offset between the center of the selected child view and the center of the Gallery.
+     * Used to reset position correctly during layout.
+     */
+    private int mSelectedCenterOffset;
+
     public Gallery(Context context) {
         this(context, null);
     }
@@ -395,6 +401,14 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         
         setSelectionToCenterChild();
 
+        final View selChild = mSelectedChild;
+        if (selChild != null) {
+            final int childLeft = selChild.getLeft();
+            final int childCenter = selChild.getWidth() / 2;
+            final int galleryCenter = getWidth() / 2;
+            mSelectedCenterOffset = childLeft + childCenter - galleryCenter;
+        }
+
         onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
 
         invalidate();
@@ -537,6 +551,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             // We haven't been callbacking during the fling, so do it now
             super.selectionChanged();
         }
+        mSelectedCenterOffset = 0;
         invalidate();
     }
     
@@ -650,7 +665,8 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         View sel = makeAndAddView(mSelectedPosition, 0, 0, true);
         
         // Put the selected child in the center
-        int selectedOffset = childrenLeft + (childrenWidth / 2) - (sel.getWidth() / 2);
+        int selectedOffset = childrenLeft + (childrenWidth / 2) - (sel.getWidth() / 2) +
+                mSelectedCenterOffset;
         sel.offsetLeftAndRight(selectedOffset);
 
         fillToGalleryRight();
