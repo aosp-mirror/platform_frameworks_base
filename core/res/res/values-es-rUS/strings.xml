@@ -199,7 +199,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Acceso directo a micrófono para grabar audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Acceso directo a cámara para imagen o captura de vídeo"</string>
+    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Acceso directo a cámara para imagen o captura de video"</string>
     <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Información de tus aplicaciones"</string>
     <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Capacidad para influir en el comportamiento de otras aplicaciones en el dispositivo"</string>
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Fondo de pantalla"</string>
@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permite que la aplicación recupere el estado interno del sistema. Las aplicaciones maliciosas pueden recuperar una amplia variedad de información privada y segura que normalmente no necesitarían."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"recuperar contenido de la pantalla"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que la aplicación recupere el contenido de la ventana activa. Las aplicaciones maliciosas pueden recuperar el contenido completo de la ventana y examinar todo el texto, excepto las contraseñas."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recuperar información de ventanas"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que una aplicación recupere la información del administrador de ventanas relacionada con estas. Las aplicaciones maliciosas pueden recuperar información destinada al uso interno del sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
@@ -623,8 +627,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se encripten los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactivar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evita el uso de todas las cámaras del dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Desact. fun. con bloq. teclas."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Evita el uso de algunas funciones con el bloqueo de teclas."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Desactiv. funciones en bloqueo"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Evita el uso de algunas funciones con el bloqueo del teclado."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -885,19 +889,19 @@
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"¿Activar exploración táctil?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con la tableta."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> desea activar la exploración táctil. Cuando esta función esté activada, podrás escuchar o ver descripciones del contenido seleccionado o usar gestos para interactuar con el dispositivo."</string>
-    <string name="oneMonthDurationPast" msgid="7396384508953779925">"hace 1 mes"</string>
+    <string name="oneMonthDurationPast" msgid="7396384508953779925">"Hace 1 mes."</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Anterior a 1 mes atrás"</string>
   <plurals name="num_seconds_ago">
     <item quantity="one" msgid="4869870056547896011">"hace 1 segundo"</item>
     <item quantity="other" msgid="3903706804349556379">"hace <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"hace 1 minuto"</item>
+    <item quantity="one" msgid="3306787433088810191">"Hace 1 minuto."</item>
     <item quantity="other" msgid="2176942008915455116">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"hace 1 hora"</item>
-    <item quantity="other" msgid="2467273239587587569">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora."</item>
+    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas."</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Últimos <xliff:g id="COUNT">%d</xliff:g> días"</item>
@@ -906,7 +910,7 @@
     <string name="older" msgid="5211975022815554840">"Antiguos"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ayer"</item>
-    <item quantity="other" msgid="2479586466153314633">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
+    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días."</item>
   </plurals>
   <plurals name="in_num_seconds">
     <item quantity="one" msgid="2729745560954905102">"en 1 segundo"</item>
@@ -930,15 +934,15 @@
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"hace 1 min"</item>
-    <item quantity="other" msgid="851164968597150710">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+    <item quantity="other" msgid="851164968597150710">"Hace <xliff:g id="COUNT">%d</xliff:g> minutos."</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"hace 1 hora"</item>
+    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora."</item>
     <item quantity="other" msgid="6889970745748538901">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
     <item quantity="one" msgid="8463161711492680309">"ayer"</item>
-    <item quantity="other" msgid="3453342639616481191">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
+    <item quantity="other" msgid="3453342639616481191">"Hace <xliff:g id="COUNT">%d</xliff:g> días."</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
     <item quantity="one" msgid="5842225370795066299">"en 1 segundo"</item>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tableta mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"¿Aumentar el volumen sobre el nivel seguro?"\n"Si escuchas con el volumen alto durante períodos prolongados, puedes dañar tu audición."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>

@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Umožňuje aplikácii načítať interný stav systému. Škodlivé aplikácie môžu načítať široký rozsah súkromných a zabezpečených informácií, ktoré by obvykle nemali nikdy potrebovať."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"načítanie obsahu obrazovky"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Umožňuje aplikácii načítať obsah aktívneho okna. Škodlivé aplikácie môžu získať celý obsah okna a preskúmať celý jeho text okrem hesiel."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"načítanie informácií o oknách"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Umožňuje aplikácii načítať informácie o oknách zo správcu okien. Škodlivé aplikácie môžu načítať informácie, ktoré sú určené pre interné využitie systému."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrovanie udalostí"</string>
@@ -1097,8 +1101,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Povoliť"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmietnuť"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať správu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"To môže spôsobiť, že budú na váš mobilný účet účtované poplatky."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"To spôsobí, že budú na váš mobilný účet účtované poplatky."</string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"To môže spôsobiť, že sa na váš mobilný účet budú účtovať poplatky."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"To spôsobí, že sa na váš mobilný účet budú účtovať poplatky."</string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Odoslať"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Zrušiť"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapamätať si voľbu"</string>
@@ -1117,7 +1121,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOVINKA: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Poskytuje aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nevyžadujú sa žiadne oprávnenia."</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"môžu vám byť účtované poplatky"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"môžu sa vám účtovať poplatky"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Veľkokapacitné úložisko USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Zariadenie USB pripojené"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Zariadenie ste pripojili k počítaču pomocou portu USB. Ak chcete kopírovať súbory z počítača do ukladacieho priestoru USB v zariadení so systémom Android alebo naopak, dotknite sa tlačidla nižšie."</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Chcete zvýšiť hlasitosť nad bezpečnú úroveň?"\n"Dlhodobé počúvanie pri vysokej hlasitosti môže viesť k poškodeniu vášho sluchu."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>

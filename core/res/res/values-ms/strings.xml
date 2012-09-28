@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Membenarkan apl untuk mendapatkan semula keadaan dalaman sistem. Apl hasad boleh mendapatkan pelbagai maklumat peribadi dan selamat yang biasanya tidak ia perlukan."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"dapatkan semula kandungan skrin"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Membenarkan apl untuk mendapatkan kandungan tetingkap aktif. Apl hasad boleh mengambil keseluruhan kandungan tetingkap dan memeriksa semua teks kecuali kata laluan."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"dapatkan maklumat tetingkap"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Membolehkan aplikasi mendapatkan maklumat tentang tetingkap dari pengurus tetingkap. Apl hasad boleh mendapatkan maklumat yang bertujuan untuk penggunaan sistem dalaman."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"tapis acara"</string>
@@ -623,7 +627,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Memerlukan data apl yang disimpan itu disulitkan."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Lumpuhkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Menghalang penggunaan semua kamera peranti."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lumpuhkan ciri dalam pelindung kekunci"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lumpuh ciri pelindung kekunci"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Cegah penggunaan beberapa ciri dalam pelindung kekunci."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Laman Utama"</item>
@@ -1072,8 +1076,7 @@
     <item quantity="other" msgid="7915895323644292768">"Rangkaian Wi-Fi terbuka tersedia"</item>
   </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Log masuk ke rangkaian Wi-Fi"</string>
-    <!-- no translation found for network_available_sign_in (8495155593358054676) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Log masuk ke rangkaian"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak boleh menyambung kepada Wi-Fi"</string>
@@ -1091,8 +1094,7 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kepada:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Taipkan PIN yang diperlukan:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <!-- no translation found for wifi_p2p_frequency_conflict_message (7363907213787469151) -->
-    <skip />
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefon akan dinyahsambung buat sementara dari Wi-Fi semasa disambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang menghantar banyak mesej SMS. Adakah anda mahu membenarkan apl ini terus menghantar mesej?"</string>
@@ -1408,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tingkatkan kelantangan di atas tahap selamat?"\n"Mendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>

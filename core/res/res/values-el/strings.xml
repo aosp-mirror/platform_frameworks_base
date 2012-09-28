@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Επιτρέπει στην  εφαρμογή την ανάκτηση της εσωτερικής κατάστασης του συστήματος. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακτήσουν μεγάλη ποικιλία ιδιωτικών πληροφοριών και πληροφοριών ασφάλειας οι οποίες δεν θα έπρεπε να τους είναι απαραίτητες υπό φυσιολογικές συνθήκες."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ανάκτηση περιεχομένου οθόνης"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Επιτρέπει στην εφαρμογή την ανάκτηση του περιεχομένου του ενεργού παραθύρου. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακτήσουν ολόκληρο το περιεχόμενο του παραθύρου και να εξετάσουν ολόκληρο το κείμενό του εκτός από τους κωδικούς πρόσβασης."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"ανάκτηση πληροφοριών παραθύρων"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Επιτρέπει σε μια εφαρμογή να ανακτήσει πληροφορίες σχετικά με τα παράθυρα από το διαχειριστή παραθύρων. Οι κακόβουλες εφαρμογές ενδέχεται να ανακτήσουν πληροφορίες που προορίζονται για την εσωτερική χρήση του συστήματος."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"φιλτράρισμα συμβάντων"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου."\n\n" Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου."\n\n" Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Αύξηση έντασης ήχου πάνω από το επίπεδο ασφαλείας;"\n"Αν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
