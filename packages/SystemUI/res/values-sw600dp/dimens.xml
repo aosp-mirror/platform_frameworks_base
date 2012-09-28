@@ -44,4 +44,7 @@
     <!-- On tablet-sized devices, we allocate the rightmost third(ish) of the draggable status bar
          to quick settings. -->
     <item type="dimen" name="settings_panel_dragzone_fraction">35%</item>
+
+    <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
+    <item type="dimen" name="notification_panel_min_height_frac">40%</item>
 </resources>

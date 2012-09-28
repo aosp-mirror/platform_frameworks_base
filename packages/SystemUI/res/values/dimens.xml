@@ -189,4 +189,7 @@
     <!-- The padding between each tile within the QuickSettings layout -->
     <dimen name="quick_settings_cell_gap">4dp</dimen>
 
+    <!-- Minimum fraction of the screen that should be taken up by the notification panel.
+         Not used at this screen size. -->
+    <item type="dimen" name="notification_panel_min_height_frac">0%</item>
 </resources>
