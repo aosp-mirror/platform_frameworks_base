@@ -184,8 +184,8 @@ class KeyguardStatusViewManager {
                 Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
         String text = Settings.Secure.getStringForUser(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO,
                 UserHandle.USER_CURRENT);
-        text = text != null ? text.trim() : null; // Remove trailing newlines
         if (ownerInfoEnabled && !TextUtils.isEmpty(text)) {
+            text = text.trim(); // Remove trailing newlines
             maybeSetUpperCaseText(mOwnerInfoView, text);
             mOwnerInfoView.setVisibility(View.VISIBLE);
         } else {
