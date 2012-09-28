@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
@@ -40,6 +41,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -160,6 +162,8 @@ class QuickSettings {
     }
 
     private void queryForUserInformation() {
+        System.out.println("queryForUserInformation");
+
         Uri userContactUri = Uri.withAppendedPath(
             ContactsContract.Profile.CONTENT_URI,
             ContactsContract.Contacts.Data.CONTENT_DIRECTORY);
@@ -184,9 +188,11 @@ class QuickSettings {
                     @Override
                     public void onLoadComplete(Loader<Cursor> loader,
                             Cursor cursor) {
+                        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
                         if (cursor != null && cursor.moveToFirst()) {
                             String name = cursor.getString(0); // DISPLAY_NAME
-                            mModel.setUserTileInfo(name, null);
+                            BitmapDrawable d = new BitmapDrawable(userManager.getUserIcon(userManager.getUserHandle()));
+                            mModel.setUserTileInfo(name, d);
                             /*
                             byte[] photoData = cursor.getBlob(0);
                             Bitmap b =
@@ -248,10 +254,11 @@ class QuickSettings {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
                 UserState us = (UserState) state;
+                ImageView iv = (ImageView) view.findViewById(R.id.user_imageview);
                 TextView tv = (TextView) view.findViewById(R.id.user_textview);
                 tv.setText(state.label);
                 if (us.avatar != null) {
-                    tv.setCompoundDrawables(null, us.avatar, null, null);
+                    iv.setImageDrawable(us.avatar);
                 }
             }
         });
@@ -288,6 +295,13 @@ class QuickSettings {
             @Override
             public void onClick(View v) {
                 startSettingsActivity(android.provider.Settings.ACTION_SETTINGS);
+            }
+        });
+        mModel.addSettingsTile(settingsTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                TextView tv = (TextView) view.findViewById(R.id.settings_tileview);
+                tv.setText(state.label);
             }
         });
         parent.addView(settingsTile);
@@ -418,6 +432,7 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.airplane_mode_textview);
                 tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                tv.setText(state.label);
             }
         });
         parent.addView(airplaneTile);
@@ -476,6 +491,7 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
                 tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                tv.setText(state.label);
                 dismissBrightnessDialog(mBrightnessDialogShortTimeout);
             }
         });
@@ -613,6 +629,9 @@ class QuickSettings {
 
     void updateResources() {
         Resources r = mContext.getResources();
+
+        // Update the model
+        mModel.updateResources();
 
         // Update the User, Time, and Settings tiles spans, and reset everything else
         int span = r.getInteger(R.integer.quick_settings_user_time_settings_tile_span);
