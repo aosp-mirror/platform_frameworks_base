@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -143,6 +144,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mIconSize = -1;
     int mIconHPadding = -1;
     Display mDisplay;
+    Point mCurrentDisplaySize = new Point();
 
     IDreamManager mDreamManager;
 
@@ -169,10 +171,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     PanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     ScrollView mScrollView;
     View mExpandedContents;
-    final Rect mNotificationPanelBackgroundPadding = new Rect();
     int mNotificationPanelGravity;
     int mNotificationPanelMarginBottomPx, mNotificationPanelMarginPx;
-    int mNotificationPanelMinHeight;
+    float mNotificationPanelMinHeightFrac;
     boolean mNotificationPanelIsFullScreenWidth;
     TextView mNotificationPanelDebugText;
 
@@ -1644,12 +1645,17 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void updateExpandedViewPos(int thingy) {
-        // TODO
         if (DEBUG) Slog.v(TAG, "updateExpandedViewPos");
+
+        // on larger devices, the notification panel is propped open a bit
+        mNotificationPanel.setMinimumHeight(
+                (int)(mNotificationPanelMinHeightFrac * mCurrentDisplaySize.y));
+
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
         lp.gravity = mNotificationPanelGravity;
         lp.leftMargin = mNotificationPanelMarginPx;
         mNotificationPanel.setLayoutParams(lp);
+
         lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
         lp.gravity = mSettingsPanelGravity;
         lp.rightMargin = mNotificationPanelMarginPx;
@@ -1781,6 +1787,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (DEBUG) {
                     Slog.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());
                 }
+                mDisplay.getSize(mCurrentDisplaySize);
+
                 updateResources();
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -1889,27 +1897,16 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mSettingsPanelGravity <= 0) {
             mSettingsPanelGravity = Gravity.RIGHT | Gravity.TOP;
         }
-        getNinePatchPadding(res.getDrawable(R.drawable.notification_panel_bg), mNotificationPanelBackgroundPadding);
-        final int notificationPanelDecorationHeight =
-              res.getDimensionPixelSize(R.dimen.notification_panel_padding_top)
-            + res.getDimensionPixelSize(R.dimen.notification_panel_header_height)
-            + mNotificationPanelBackgroundPadding.top
-            + mNotificationPanelBackgroundPadding.bottom;
-        mNotificationPanelMinHeight = 
-              notificationPanelDecorationHeight 
-            + res.getDimensionPixelSize(R.dimen.close_handle_underlap);
 
         mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
         mNotificationHeaderHeight = res.getDimensionPixelSize(R.dimen.notification_panel_header_height);
 
-        if (false) Slog.v(TAG, "updateResources");
-    }
-
-    private static void getNinePatchPadding(Drawable d, Rect outPadding) {
-        if (d instanceof NinePatchDrawable) {
-            NinePatchDrawable ninePatch = (NinePatchDrawable) d;
-            ninePatch.getPadding(outPadding);
+        mNotificationPanelMinHeightFrac = res.getFraction(R.dimen.notification_panel_min_height_frac, 1, 1);
+        if (mNotificationPanelMinHeightFrac < 0f || mNotificationPanelMinHeightFrac > 1f) {
+            mNotificationPanelMinHeightFrac = 0f;
         }
+
+        if (false) Slog.v(TAG, "updateResources");
     }
 
     //
