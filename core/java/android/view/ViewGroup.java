@@ -3476,6 +3476,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             ai.mKeepScreenOn = lastKeepOn;
         }
 
+        if (child.isLayoutDirectionInherited()) {
+            child.resetResolvedLayoutDirection();
+            child.resolveRtlPropertiesIfNeeded();
+        }
+
         onViewAdded(child);
 
         if ((child.mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE) {
@@ -5347,48 +5352,54 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public void resolveLayoutDirection() {
-        super.resolveLayoutDirection();
-
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.isLayoutDirectionInherited()) {
-                child.resolveLayoutDirection();
+    public boolean resolveLayoutDirection() {
+        final boolean result = super.resolveLayoutDirection();
+        if (result) {
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.isLayoutDirectionInherited()) {
+                    child.resolveLayoutDirection();
+                }
             }
         }
+        return result;
     }
 
     /**
      * @hide
      */
     @Override
-    public void resolveTextDirection() {
-        super.resolveTextDirection();
-
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.isTextDirectionInherited()) {
-                child.resolveTextDirection();
+    public boolean resolveTextDirection() {
+        final boolean result = super.resolveTextDirection();
+        if (result) {
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.isTextDirectionInherited()) {
+                    child.resolveTextDirection();
+                }
             }
         }
+        return result;
     }
 
     /**
      * @hide
      */
     @Override
-    public void resolveTextAlignment() {
-        super.resolveTextAlignment();
-
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.isTextAlignmentInherited()) {
-                child.resolveTextAlignment();
+    public boolean resolveTextAlignment() {
+        final boolean result = super.resolveTextAlignment();
+        if (result) {
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.isTextAlignmentInherited()) {
+                    child.resolveTextAlignment();
+                }
             }
         }
+        return result;
     }
 
     /**
