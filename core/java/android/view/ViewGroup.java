@@ -5995,7 +5995,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        protected boolean isLayoutRtl() {
+        /**
+         * @hide
+         */
+        public boolean isLayoutRtl() {
             return (layoutDirection == View.LAYOUT_DIRECTION_RTL);
         }
 
