@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
@@ -68,6 +69,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private LayoutInflater mLayoutInflater;
     private RemoteViewsAdapterServiceConnection mServiceConnection;
     private WeakReference<RemoteAdapterConnectionCallback> mCallback;
+    private OnClickHandler mRemoteViewsOnClickHandler;
     private FixedSizeRemoteViewsCache mCache;
     private int mVisibleWindowLowerBound;
     private int mVisibleWindowUpperBound;
@@ -277,11 +279,11 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
          * @param view the RemoteViews that was loaded. If null, the RemoteViews was not loaded
          *             successfully.
          */
-        public void onRemoteViewsLoaded(RemoteViews view) {
+        public void onRemoteViewsLoaded(RemoteViews view, OnClickHandler handler) {
             try {
                 // Remove all the children of this layout first
                 removeAllViews();
-                addView(view.apply(getContext(), this));
+                addView(view.apply(getContext(), this, handler));
             } catch (Exception e) {
                 Log.e(TAG, "Failed to apply RemoteViews.");
             }
@@ -330,7 +332,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 // Notify all the references for that position of the newly loaded RemoteViews
                 final LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(pos);
                 for (final RemoteViewsFrameLayout ref : refs) {
-                    ref.onRemoteViewsLoaded(view);
+                    ref.onRemoteViewsLoaded(view, mRemoteViewsOnClickHandler);
                 }
                 refs.clear();
 
@@ -421,7 +423,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
 
         private RemoteViewsFrameLayout createLoadingView(int position, View convertView,
-                ViewGroup parent, Object lock, LayoutInflater layoutInflater) {
+                ViewGroup parent, Object lock, LayoutInflater layoutInflater, OnClickHandler
+                handler) {
             // Create and return a new FrameLayout, and setup the references for this position
             final Context context = parent.getContext();
             RemoteViewsFrameLayout layout = new RemoteViewsFrameLayout(context);
@@ -433,7 +436,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 if (mUserLoadingView != null) {
                     // Try to inflate user-specified loading view
                     try {
-                        View loadingView = mUserLoadingView.apply(parent.getContext(), parent);
+                        View loadingView = mUserLoadingView.apply(parent.getContext(), parent,
+                                handler);
                         loadingView.setTagInternal(com.android.internal.R.id.rowTypeId,
                                 new Integer(0));
                         layout.addView(loadingView);
@@ -448,7 +452,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     // Use the size of the first row as a guide for the size of the loading view
                     if (mFirstViewHeight < 0) {
                         try {
-                            View firstView = mFirstView.apply(parent.getContext(), parent);
+                            View firstView = mFirstView.apply(parent.getContext(), parent, handler);
                             firstView.measure(
                                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
                                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
@@ -815,6 +819,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         return mDataReady;
     }
 
+    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
+        mRemoteViewsOnClickHandler = handler;
+    }
+
     public void saveRemoteViewsCache() {
         final Pair<Intent.FilterComparison, Integer> key = new Pair<Intent.FilterComparison,
                 Integer> (new Intent.FilterComparison(mIntent), mAppWidgetId);
@@ -1102,7 +1110,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     // Reuse the convert view where possible
                     if (layout != null) {
                         if (convertViewTypeId == typeId) {
-                            rv.reapply(context, convertViewChild);
+                            rv.reapply(context, convertViewChild, mRemoteViewsOnClickHandler);
                             return layout;
                         }
                         layout.removeAllViews();
@@ -1111,7 +1119,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     }
 
                     // Otherwise, create a new view to be returned
-                    View newView = rv.apply(context, parent);
+                    View newView = rv.apply(context, parent, mRemoteViewsOnClickHandler);
                     newView.setTagInternal(com.android.internal.R.id.rowTypeId,
                             new Integer(typeId));
                     layout.addView(newView);
@@ -1127,7 +1135,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     final RemoteViewsMetaData metaData = mCache.getMetaData();
                     synchronized (metaData) {
                         loadingView = metaData.createLoadingView(position, convertView, parent,
-                                mCache, mLayoutInflater);
+                                mCache, mLayoutInflater, mRemoteViewsOnClickHandler);
                     }
                     return loadingView;
                 } finally {
@@ -1140,7 +1148,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 final RemoteViewsMetaData metaData = mCache.getMetaData();
                 synchronized (metaData) {
                     loadingView = metaData.createLoadingView(position, convertView, parent,
-                            mCache, mLayoutInflater);
+                            mCache, mLayoutInflater, mRemoteViewsOnClickHandler);
                 }
 
                 mRequestedViews.add(position, loadingView);
