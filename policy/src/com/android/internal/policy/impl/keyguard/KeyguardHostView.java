@@ -123,7 +123,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        mViewMediatorCallback.keyguardDoneDrawing();
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.keyguardDoneDrawing();
+        }
     }
 
     private int getWidgetPosition(int id) {
@@ -230,7 +232,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {
 
         public void userActivity(long timeout) {
-            mViewMediatorCallback.pokeWakelock(timeout);
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.pokeWakelock(timeout);
+            }
         }
 
         public void dismiss(boolean authenticated) {
@@ -450,7 +454,9 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mLaunchRunnable.run();
                 mLaunchRunnable = null;
             }
-            mViewMediatorCallback.keyguardDone(true);
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.keyguardDone(true);
+            }
         }
     }
 
@@ -541,7 +547,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         oldView.onPause();
         newView.onResume();
 
-        mViewMediatorCallback.setNeedsInput(newView.needsInput());
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.setNeedsInput(newView.needsInput());
+        }
 
         // Find and show this child.
         final int childCount = mSecurityViewContainer.getChildCount();
@@ -624,9 +632,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (keyCode == KeyEvent.KEYCODE_MENU && isSecure()) {
             if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
             showSecurityScreen(SecurityMode.None);
-            mViewMediatorCallback.pokeWakelock();
         } else {
             if (DEBUG) Log.d(TAG, "poking wake lock immediately");
+        }
+        if (mViewMediatorCallback != null) {
             mViewMediatorCallback.pokeWakelock();
         }
     }
@@ -635,11 +644,15 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void verifyUnlock() {
         SecurityMode securityMode = mSecurityModel.getSecurityMode();
         if (securityMode == KeyguardSecurityModel.SecurityMode.None) {
-            mViewMediatorCallback.keyguardDone(true);
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.keyguardDone(true);
+            }
         } else if (securityMode != KeyguardSecurityModel.SecurityMode.Pattern
                 && securityMode != KeyguardSecurityModel.SecurityMode.Password) {
             // can only verify unlock when in pattern/password mode
-            mViewMediatorCallback.keyguardDone(false);
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.keyguardDone(false);
+            }
         } else {
             // otherwise, go to the unlock screen, see if they can verify it
             mIsVerifyUnlockOnly = true;
