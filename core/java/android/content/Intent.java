@@ -1305,6 +1305,14 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.REFERRER";
 
     /**
+     * Used as an int extra field with {@link #ACTION_INSTALL_PACKAGE} and
+     * {@link} #ACTION_VIEW} to indicate the uid of the package that initiated the install
+     * @hide
+     */
+    public static final String EXTRA_ORIGINATING_UID
+            = "android.intent.extra.ORIGINATING_UID";
+
+    /**
      * Used as a boolean extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
      * package.  Tells the installer UI to skip the confirmation with the user
      * if the .apk is replacing an existing one.

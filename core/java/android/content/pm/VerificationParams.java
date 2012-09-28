@@ -27,6 +27,9 @@ import android.os.Parcelable;
  * @hide
  */
 public class VerificationParams implements Parcelable {
+    /** A constant used to indicate that a uid value is not present. */
+    public static final int NO_UID = -1;
+
     /** What we print out first when toString() is called. */
     private static final String TO_STRING_PREFIX = "VerificationParams{";
 
@@ -38,6 +41,9 @@ public class VerificationParams implements Parcelable {
 
     /** HTTP referrer URI associated with the originatingURI. */
     private final Uri mReferrer;
+
+    /** UID of the application that the install request originated from. */
+    private final int mOriginatingUid;
 
     /** UID of application requesting the install */
     private int mInstallerUid;
@@ -57,16 +63,19 @@ public class VerificationParams implements Parcelable {
      *            from. May be {@code null}.
      * @param referrer HTTP referrer URI associated with the originatingURI.
      *            May be {@code null}.
+     * @param originatingUid UID of the application that the install request originated
+     *            from, or NO_UID if not present
      * @param manifestDigest an object that holds the digest of the package
      *            which can be used to verify ownership. May be {@code null}.
      */
     public VerificationParams(Uri verificationURI, Uri originatingURI, Uri referrer,
-            ManifestDigest manifestDigest) {
+            int originatingUid, ManifestDigest manifestDigest) {
         mVerificationURI = verificationURI;
         mOriginatingURI = originatingURI;
         mReferrer = referrer;
+        mOriginatingUid = originatingUid;
         mManifestDigest = manifestDigest;
-        mInstallerUid = -1;
+        mInstallerUid = NO_UID;
     }
 
     public Uri getVerificationURI() {
@@ -81,11 +90,16 @@ public class VerificationParams implements Parcelable {
         return mReferrer;
     }
 
+    /** return NO_UID if not available */
+    public int getOriginatingUid() {
+        return mOriginatingUid;
+    }
+
     public ManifestDigest getManifestDigest() {
         return mManifestDigest;
     }
 
-    /** @return -1 when not set */
+    /** @return NO_UID when not set */
     public int getInstallerUid() {
         return mInstallerUid;
     }
@@ -111,31 +125,39 @@ public class VerificationParams implements Parcelable {
 
         final VerificationParams other = (VerificationParams) o;
 
-        if (mVerificationURI == null && other.mVerificationURI != null) {
-            return false;
-        }
-        if (!mVerificationURI.equals(other.mVerificationURI)) {
-            return false;
-        }
-
-        if (mOriginatingURI == null && other.mOriginatingURI != null) {
-            return false;
-        }
-        if (!mOriginatingURI.equals(other.mOriginatingURI)) {
+        if (mVerificationURI == null) {
+            if (other.mVerificationURI != null) {
+                return false;
+            }
+        } else if (!mVerificationURI.equals(other.mVerificationURI)) {
             return false;
         }
 
-        if (mReferrer == null && other.mReferrer != null) {
-            return false;
-        }
-        if (!mReferrer.equals(other.mReferrer)) {
+        if (mOriginatingURI == null) {
+            if (other.mOriginatingURI != null) {
+                return false;
+            }
+        } else if (!mOriginatingURI.equals(other.mOriginatingURI)) {
             return false;
         }
 
-        if (mManifestDigest == null && other.mManifestDigest != null) {
+        if (mReferrer == null) {
+            if (other.mReferrer != null) {
+                return false;
+            }
+        } else if (!mReferrer.equals(other.mReferrer)) {
             return false;
         }
-        if (mManifestDigest != null && !mManifestDigest.equals(other.mManifestDigest)) {
+
+        if (mOriginatingUid != other.mOriginatingUid) {
+            return false;
+        }
+
+        if (mManifestDigest == null) {
+            if (other.mManifestDigest != null) {
+                return false;
+            }
+        } else if (!mManifestDigest.equals(other.mManifestDigest)) {
             return false;
         }
 
@@ -150,11 +172,12 @@ public class VerificationParams implements Parcelable {
     public int hashCode() {
         int hash = 3;
 
-        hash += 5 * (mVerificationURI==null?1:mVerificationURI.hashCode());
-        hash += 7 * (mOriginatingURI==null?1:mOriginatingURI.hashCode());
-        hash += 11 * (mReferrer==null?1:mReferrer.hashCode());
-        hash += 13 * (mManifestDigest==null?1:mManifestDigest.hashCode());
-        hash += 17 * mInstallerUid;
+        hash += 5 * (mVerificationURI == null ? 1 : mVerificationURI.hashCode());
+        hash += 7 * (mOriginatingURI == null ? 1 : mOriginatingURI.hashCode());
+        hash += 11 * (mReferrer == null ? 1 : mReferrer.hashCode());
+        hash += 13 * mOriginatingUid;
+        hash += 17 * (mManifestDigest == null ? 1 : mManifestDigest.hashCode());
+        hash += 19 * mInstallerUid;
 
         return hash;
     }
@@ -169,6 +192,8 @@ public class VerificationParams implements Parcelable {
         sb.append(mOriginatingURI.toString());
         sb.append(",mReferrer=");
         sb.append(mReferrer.toString());
+        sb.append(",mOriginatingUid=");
+        sb.append(mOriginatingUid);
         sb.append(",mManifestDigest=");
         sb.append(mManifestDigest.toString());
         sb.append(",mInstallerUid=");
@@ -183,6 +208,7 @@ public class VerificationParams implements Parcelable {
         dest.writeParcelable(mVerificationURI, 0);
         dest.writeParcelable(mOriginatingURI, 0);
         dest.writeParcelable(mReferrer, 0);
+        dest.writeInt(mOriginatingUid);
         dest.writeParcelable(mManifestDigest, 0);
         dest.writeInt(mInstallerUid);
     }
@@ -192,6 +218,7 @@ public class VerificationParams implements Parcelable {
         mVerificationURI = source.readParcelable(Uri.class.getClassLoader());
         mOriginatingURI = source.readParcelable(Uri.class.getClassLoader());
         mReferrer = source.readParcelable(Uri.class.getClassLoader());
+        mOriginatingUid = source.readInt();
         mManifestDigest = source.readParcelable(ManifestDigest.class.getClassLoader());
         mInstallerUid = source.readInt();
     }
