@@ -123,6 +123,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final Boolean TRY_REINVOCATION = true;;
     private static final Boolean NO_REINVOCATION = false;
 
+    private static final Boolean RELOAD = true;
+    private static final Boolean NO_RELOAD = false;
+
     private static final int CONNECT_FAILURE = -1;
     private static final int CONNECT_SUCCESS = 0;
     private static final int NEEDS_PROVISION_REQ = 1;
@@ -135,7 +138,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int DISCOVER_TIMEOUT_S = 120;
 
     /* Idle time after a peer is gone when the group is torn down */
-    private static final int GROUP_IDLE_TIME_S = 20;
+    private static final int GROUP_IDLE_TIME_S = 10;
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_SERVICE;
 
@@ -1222,7 +1225,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         /*
                          * update cache information and set network id to mGroup.
                          */
-                        updatePersistentNetworks();
+                        updatePersistentNetworks(NO_RELOAD);
                         String devAddr = mGroup.getOwner().deviceAddress;
                         mGroup.setNetworkId(mGroups.getNetworkId(devAddr,
                                 mGroup.getNetworkName()));
@@ -1269,11 +1272,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             if (DBG) logd("Remove unknown client from the list");
                             removeClientFromList(netId, mSavedPeerConfig.deviceAddress, true);
                         }
-                    }
 
-                    // invocation is failed or deferred. Try another way to connect.
-                    mSavedPeerConfig.netId = WifiP2pGroup.PERSISTENT_NET_ID;
-                    if (connect(mSavedPeerConfig, NO_REINVOCATION) == CONNECT_FAILURE) {
+                        // invocation is failed or deferred. Try another way to connect.
+                        mSavedPeerConfig.netId = WifiP2pGroup.PERSISTENT_NET_ID;
+                        if (connect(mSavedPeerConfig, NO_REINVOCATION) == CONNECT_FAILURE) {
+                            handleGroupCreationFailure();
+                            transitionTo(mInactiveState);
+                        }
+                    } else {
                         handleGroupCreationFailure();
                         transitionTo(mInactiveState);
                     }
@@ -1759,13 +1765,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * Synchronize the persistent group list between
      * wpa_supplicant and mGroups.
      */
-    private void updatePersistentNetworks() {
+    private void updatePersistentNetworks(boolean reload) {
         String listStr = mWifiNative.listNetworks();
         if (listStr == null) return;
 
         boolean isSaveRequired = false;
         String[] lines = listStr.split("\n");
         if (lines == null) return;
+
+        if (reload) mGroups.clear();
 
         // Skip the first line, which is a header
         for (int i = 1; i < lines.length; i++) {
@@ -1821,9 +1829,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             isSaveRequired = true;
         }
 
-        if (isSaveRequired) {
-            sendP2pPersistentGroupsChangedBroadcast();
+        if (reload || isSaveRequired) {
             mWifiNative.saveConfig();
+            sendP2pPersistentGroupsChangedBroadcast();
         }
     }
 
@@ -1900,7 +1908,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     return CONNECT_SUCCESS;
                 } else {
                     loge("p2pReinvoke() failed, update networks");
-                    updatePersistentNetworks();
+                    updatePersistentNetworks(RELOAD);
                     // continue with negotiation
                 }
             }
@@ -2112,7 +2120,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mServiceTransactionId = 0;
         mServiceDiscReqId = null;
 
-        updatePersistentNetworks();
+        updatePersistentNetworks(RELOAD);
     }
 
     private void updateThisDevice(int status) {
