@@ -25679,7 +25679,6 @@ package android.view {
     method public int getLayoutDirection();
     method public int getMarginEnd();
     method public int getMarginStart();
-    method protected boolean isLayoutRtl();
     method public boolean isMarginRelative();
     method public void setLayoutDirection(int);
     method public void setMarginEnd(int);
