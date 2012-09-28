@@ -4625,13 +4625,6 @@ public final class Settings {
         public static final String SMS_SHORT_CODE_RULE = "sms_short_code_rule";
 
        /**
-        * Prefix for SMS short code regex patterns (country code is appended).
-        * @see com.android.internal.telephony.SmsUsageMonitor
-        * @hide
-        */
-       public static final String SMS_SHORT_CODES_PREFIX = "sms_short_codes_";
-
-       /**
         * Used to disable Tethering on a device - defaults to true
         * @hide
         */

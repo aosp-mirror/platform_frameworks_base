@@ -2152,6 +2152,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.UPDATE_SMS_SHORT_CODES" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR"
             android:priority="100" >
