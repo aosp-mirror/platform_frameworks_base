@@ -117,45 +117,34 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
-    public void expandNotifications() {
+    public void expandNotificationsPanel() {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpandNotifications();
+                mBar.animateExpandNotificationsPanel();
             } catch (RemoteException ex) {
             }
         }
     }
 
-    public void collapseNotifications() {
+    public void collapsePanels() {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateCollapseNotifications();
+                mBar.animateCollapsePanels();
             } catch (RemoteException ex) {
             }
         }
     }
 
-    public void expandQuickSettings() {
+    public void expandSettingsPanel() {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpandQuickSettings();
-            } catch (RemoteException ex) {
-            }
-        }
-    }
-
-    public void collapseQuickSettings() {
-        enforceExpandStatusBar();
-
-        if (mBar != null) {
-            try {
-                mBar.animateCollapseQuickSettings();
+                mBar.animateExpandSettingsPanel();
             } catch (RemoteException ex) {
             }
         }
@@ -620,8 +609,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                collapseNotifications();
-                collapseQuickSettings();
+                collapsePanels();
             }
             /*
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
