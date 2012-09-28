@@ -86,7 +86,7 @@ private:
     }
 
     virtual void notifySwitch(nsecs_t when,
-            int32_t switchCode, int32_t switchValue, uint32_t policyFlags) {
+            uint32_t switchValues, uint32_t switchMask, uint32_t policyFlags) {
     }
 
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) {

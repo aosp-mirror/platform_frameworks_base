@@ -962,7 +962,11 @@ public:
     virtual int32_t getSwitchState(uint32_t sourceMask, int32_t switchCode);
 
 private:
-    void processSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue);
+    uint32_t mUpdatedSwitchValues;
+    uint32_t mUpdatedSwitchMask;
+
+    void processSwitch(int32_t switchCode, int32_t switchValue);
+    void sync(nsecs_t when);
 };
 
 

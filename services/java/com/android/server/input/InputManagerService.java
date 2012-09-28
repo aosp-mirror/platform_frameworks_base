@@ -1238,11 +1238,15 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private void notifySwitch(long whenNanos, int switchCode, int switchValue) {
-        switch (switchCode) {
-            case SW_LID:
-                mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, switchValue == 0);
-                break;
+    private void notifySwitch(long whenNanos, int switchValues, int switchMask) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifySwitch: values=" + Integer.toHexString(switchValues)
+                    + ", mask=" + Integer.toHexString(switchMask));
+        }
+
+        if ((switchMask & (1 << SW_LID)) != 0) {
+            final boolean lidOpen = ((switchValues & (1 << SW_LID)) == 0);
+            mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
         }
     }
 

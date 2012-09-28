@@ -116,13 +116,13 @@ struct NotifyMotionArgs : public NotifyArgs {
 struct NotifySwitchArgs : public NotifyArgs {
     nsecs_t eventTime;
     uint32_t policyFlags;
-    int32_t switchCode;
-    int32_t switchValue;
+    uint32_t switchValues;
+    uint32_t switchMask;
 
     inline NotifySwitchArgs() { }
 
     NotifySwitchArgs(nsecs_t eventTime, uint32_t policyFlags,
-            int32_t switchCode, int32_t switchValue);
+            uint32_t switchValues, uint32_t switchMask);
 
     NotifySwitchArgs(const NotifySwitchArgs& other);
 
