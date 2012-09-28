@@ -547,8 +547,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         oldView.onPause();
         newView.onResume();
 
+        final boolean needsInput = newView.needsInput();
         if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.setNeedsInput(newView.needsInput());
+            mViewMediatorCallback.setNeedsInput(needsInput);
         }
 
         // Find and show this child.
