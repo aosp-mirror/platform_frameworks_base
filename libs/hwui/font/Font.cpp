@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include <cutils/compiler.h>
 
 #include <SkUtils.h>
