@@ -686,22 +686,23 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
                     i, HBFixedToFloat(mShaperItem.advances[i]));
         }
 #endif
-        // Get Advances and their total
-        jfloat currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[0]]);
-        jfloat totalFontRunAdvance = currentAdvance;
-        outAdvances->replaceAt(currentAdvance, startScriptRun);
-        for (size_t i = 1; i < countScriptRun; i++) {
-            size_t clusterPrevious = mShaperItem.log_clusters[i - 1];
+        jfloat totalFontRunAdvance = 0;
+        size_t clusterStart = 0;
+        for (size_t i = 0; i < countScriptRun; i++) {
             size_t cluster = mShaperItem.log_clusters[i];
-            if (cluster != clusterPrevious) {
-                currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[i]]);
-                outAdvances->replaceAt(currentAdvance, startScriptRun + i);
+            size_t clusterNext = i == countScriptRun - 1 ? mShaperItem.num_glyphs :
+                mShaperItem.log_clusters[i + 1];
+            if (cluster != clusterNext) {
+                jfloat advance = 0;
+                // The advance for the cluster is the sum of the advances of all glyphs within
+                // the cluster.
+                for (size_t j = cluster; j < clusterNext; j++) {
+                    advance += HBFixedToFloat(mShaperItem.advances[j]);
+                }
+                totalFontRunAdvance += advance;
+                outAdvances->replaceAt(advance, startScriptRun + clusterStart);
+                clusterStart = i + 1;
             }
-        }
-        // TODO: can be removed and go back in the previous loop when Harfbuzz log clusters are fixed
-        for (size_t i = 1; i < mShaperItem.num_glyphs; i++) {
-            currentAdvance = HBFixedToFloat(mShaperItem.advances[i]);
-            totalFontRunAdvance += currentAdvance;
         }
 
 #if DEBUG_ADVANCES
