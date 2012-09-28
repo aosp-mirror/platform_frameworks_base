@@ -20,6 +20,8 @@ import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +39,10 @@ public class SettingsPanelView extends PanelView {
     private QuickSettings mQS;
     private QuickSettingsContainerView mQSContainer;
 
+    Drawable mHandleBar;
+    float mHandleBarHeight;
+    View mHandleView;
+
     public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -47,6 +53,11 @@ public class SettingsPanelView extends PanelView {
 
         mQSContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
         mQS = new QuickSettings(getContext(), mQSContainer);
+
+        Resources resources = getContext().getResources();
+        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
+        mHandleView = findViewById(R.id.handle);
     }
 
     @Override
@@ -94,5 +105,26 @@ public class SettingsPanelView extends PanelView {
         if (mQS != null) {
             mQS.setService(phoneStatusBar);
         }
+    }
+
+    // We draw the handle ourselves so that it's always glued to the bottom of the window.
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            final int pl = getPaddingLeft();
+            final int pr = getPaddingRight();
+            mHandleBar.setBounds(pl, 0, getWidth() - pr, (int) mHandleBarHeight);
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        final int off = (int) (getHeight() - mHandleBarHeight - getPaddingBottom());
+        canvas.translate(0, off);
+        mHandleBar.setState(mHandleView.getDrawableState());
+        mHandleBar.draw(canvas);
+        canvas.translate(0, -off);
     }
 }
