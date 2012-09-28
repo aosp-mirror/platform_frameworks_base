@@ -2609,10 +2609,11 @@ final class Settings {
                 pw.print("    installerPackageName="); pw.println(ps.installerPackageName);
             }
             pw.print("    signatures="); pw.println(ps.signatures);
-            pw.print("    permissionsFixed="); pw.println(ps.permissionsFixed);
-            pw.print("    haveGids="); pw.println(ps.haveGids);
+            pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
+                    pw.print(" haveGids="); pw.print(ps.haveGids);
+                    pw.print(" installStatus="); pw.println(ps.installStatus);
             pw.print("    pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
-            pw.print("    installStatus="); pw.println(ps.installStatus);
+                    pw.println();
             for (UserInfo user : users) {
                 pw.print("    User "); pw.print(user.id); pw.print(": ");
                 pw.print(" installed=");

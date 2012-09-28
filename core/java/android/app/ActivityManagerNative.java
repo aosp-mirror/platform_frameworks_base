@@ -1783,6 +1783,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case REQUEST_BUG_REPORT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            requestBugReport();
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4061,6 +4067,16 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(observer != null ? observer.asBinder() : null);
         mRemote.transact(UNREGISTER_USER_SWITCH_OBSERVER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void requestBugReport() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(REQUEST_BUG_REPORT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

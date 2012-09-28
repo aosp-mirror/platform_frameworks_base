@@ -32,12 +32,17 @@ public class UserStartedState {
             = new ArrayList<IStopUserCallback>();
 
     public int mState = STATE_BOOTING;
+    public boolean switching;
+    public boolean initializing;
 
     public UserStartedState(UserHandle handle, boolean initial) {
         mHandle = handle;
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mState="); pw.println(mState);
+        pw.print(prefix); pw.print("mState="); pw.print(mState);
+        if (switching) pw.print(" SWITCHING");
+        if (initializing) pw.print(" INITIALIZING");
+        pw.println();
     }
 }

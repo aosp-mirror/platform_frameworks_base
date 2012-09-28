@@ -172,10 +172,16 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_IMMERSIVE = 0x0400;
     /**
+     * @hide Bit in {@link #flags}: If set, this component will only be seen
+     * by the primary user.  Only works with broadcast receivers.  Set from the
+     * {@link android.R.attr#primaryUserOnly} attribute.
+     */
+    public static final int FLAG_PRIMARY_USER_ONLY = 0x20000000;
+    /**
      * Bit in {@link #flags}: If set, a single instance of the receiver will
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.  Note that this flag is
-     * only relevent for ActivityInfo structures that are describiner receiver
+     * only relevant for ActivityInfo structures that are describing receiver
      * components; it is not applied to activities.
      */
     public static final int FLAG_SINGLE_USER = 0x40000000;
