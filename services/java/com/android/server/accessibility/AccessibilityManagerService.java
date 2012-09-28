@@ -827,7 +827,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void tryAddServiceLocked(Service service, int userId) {
         try {
             UserState userState = getUserStateLocked(userId);
-            if (userState.mServices.contains(service) || !service.isConfigured()) {
+            if (userState.mServices.contains(service)) {
                 return;
             }
             service.linkToOwnDeath();
@@ -876,7 +876,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private boolean canDispathEventLocked(Service service, AccessibilityEvent event,
             int handledFeedbackTypes) {
 
-        if (!service.isConfigured()) {
+        if (!service.canReceiveEvents()) {
             return false;
         }
 
@@ -1192,7 +1192,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void tryEnableTouchExplorationLocked(final Service service) {
         UserState userState = getUserStateLocked(service.mUserId);
-        if (!userState.mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode) {
+        if (!userState.mIsTouchExplorationEnabled && service.mRequestTouchExplorationMode
+                && service.canReceiveEvents()) {
             final boolean canToggleTouchExploration =
                     userState.mTouchExplorationGrantedServices.contains(service.mComponentName);
             if (!service.mIsAutomation && !canToggleTouchExploration) {
@@ -1205,6 +1206,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void tryDisableTouchExplorationLocked(Service service) {
+        if (!service.canReceiveEvents()) {
+            return;
+        }
         UserState userState = getUserStateLocked(service.mUserId);
         if (userState.mIsTouchExplorationEnabled) {
             final int serviceCount = userState.mServices.size();
@@ -1464,7 +1468,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // If this service is up and running we may have to enable touch
             // exploration, otherwise this will happen when the service connects.
             synchronized (mLock) {
-                if (isConfigured()) {
+                if (canReceiveEvents()) {
                     if (mRequestTouchExplorationMode) {
                         tryEnableTouchExplorationLocked(this);
                     } else {
@@ -1505,13 +1509,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return false;
         }
 
-        /**
-         * Returns if the service is configured i.e. at least event types of interest
-         * and feedback type must be set.
-         *
-         * @return True if the service is configured, false otherwise.
-         */
-        public boolean isConfigured() {
+        public boolean canReceiveEvents() {
             return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
         }
 
