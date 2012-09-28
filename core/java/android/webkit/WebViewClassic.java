@@ -1664,7 +1664,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mTouchSlopSquare = slop * slop;
         slop = configuration.getScaledDoubleTapSlop();
         mDoubleTapSlopSquare = slop * slop;
-        final float density = mContext.getResources().getDisplayMetrics().density;
+        final float density = WebViewCore.getFixedDisplayDensity(mContext);
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
         mNavSlop = (int) (16 * density);
@@ -1809,7 +1809,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /* package */ void adjustDefaultZoomDensity(int zoomDensity) {
-        final float density = mContext.getResources().getDisplayMetrics().density
+        final float density = WebViewCore.getFixedDisplayDensity(mContext)
                 * 100 / zoomDensity;
         updateDefaultZoomDensity(density);
     }
