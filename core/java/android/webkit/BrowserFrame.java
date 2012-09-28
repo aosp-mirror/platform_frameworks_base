@@ -1025,7 +1025,7 @@ class BrowserFrame extends Handler {
     }
 
     private float density() {
-        return mContext.getResources().getDisplayMetrics().density;
+        return WebViewCore.getFixedDisplayDensity(mContext);
     }
 
     /**
