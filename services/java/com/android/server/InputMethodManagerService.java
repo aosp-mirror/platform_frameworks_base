@@ -745,6 +745,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // set the current ime to the proper one.
                     resetDefaultImeLocked(mContext);
                 }
+            } else {
+                // If the locale is changed, needs to reset the default ime
+                resetDefaultImeLocked(mContext);
             }
             updateFromSettingsLocked();
             mLastSystemLocale = newLocale;
