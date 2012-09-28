@@ -993,7 +993,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
                 if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
-                    if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
+
+                    // If we don't have a menu or we're waiting for a full content refresh,
+                    // forget it. This is a lingering event that no longer matters.
+                    if (st.menu != null && !st.refreshMenuContent &&
+                            cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
                         mActionBar.showOverflowMenu();
                     }
