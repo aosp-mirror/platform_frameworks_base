@@ -740,7 +740,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                                         SharedPreferences.Editor editor = Prefs.edit(mContext);
                                         editor.putBoolean(Prefs.DO_NOT_DISTURB_PREF, false);
                                         editor.apply();
-                                        animateCollapseNotifications();
+                                        animateCollapsePanels();
                                         visibilityChanged(false);
                                     }
                                 });
@@ -821,7 +821,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     break;
                 case MSG_HIDE_CHROME:
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
-                    animateCollapseNotifications();
+                    animateCollapsePanels();
                     visibilityChanged(false);
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
@@ -907,7 +907,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.i(TAG, "DISABLE_EXPAND: yes");
-                animateCollapseNotifications();
+                animateCollapsePanels();
                 visibilityChanged(false);
             }
         }
@@ -988,16 +988,16 @@ public class TabletStatusBar extends BaseStatusBar implements
         mFeedbackIconArea.setVisibility(View.VISIBLE);
     }
 
-    public void animateExpandNotifications() {
+    public void animateExpandNotificationsPanel() {
         mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PANEL);
         mHandler.sendEmptyMessage(MSG_OPEN_NOTIFICATION_PANEL);
     }
 
-    public void animateCollapseNotifications() {
-        animateCollapseNotifications(CommandQueue.FLAG_EXCLUDE_NONE);
+    public void animateCollapsePanels() {
+        animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
-    public void animateCollapseNotifications(int flags) {
+    public void animateCollapsePanels(int flags) {
         if ((flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
@@ -1022,12 +1022,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    public void animateExpandQuickSettings() {
-        // TODO: Implement when TabletStatusBar begins to be used.
-    }
-
-    @Override
-    public void animateCollapseQuickSettings() {
+    public void animateExpandSettingsPanel() {
         // TODO: Implement when TabletStatusBar begins to be used.
     }
 
@@ -1299,7 +1294,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         mVT.computeCurrentVelocity(1000); // pixels per second
                         // require a little more oomph once we're already in peekaboo mode
                         if (mVT.getYVelocity() < -mNotificationFlingVelocity) {
-                            animateExpandNotifications();
+                            animateExpandNotificationsPanel();
                             visibilityChanged(true);
                             hilite(false);
                             mVT.recycle();
@@ -1317,7 +1312,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                          && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
                          // dragging off the bottom doesn't count
                          && (int)event.getY() < v.getBottom()) {
-                            animateExpandNotifications();
+                            animateExpandNotificationsPanel();
                             visibilityChanged(true);
                             v.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                             v.playSoundEffect(SoundEffectConstants.CLICK);
@@ -1493,7 +1488,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
-        animateCollapseNotifications();
+        animateCollapsePanels();
         visibilityChanged(false);
     }
 
@@ -1509,7 +1504,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
                     }
                 }
-                animateCollapseNotifications(flags);
+                animateCollapsePanels(flags);
             }
         }
     };

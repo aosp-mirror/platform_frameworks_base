@@ -70,7 +70,7 @@ public class StatusBarWindowView extends FrameLayout
         switch (event.getKeyCode()) {
         case KeyEvent.KEYCODE_BACK:
             if (!down) {
-                mService.animateCollapseNotifications();
+                mService.animateCollapsePanels();
             }
             return true;
         }

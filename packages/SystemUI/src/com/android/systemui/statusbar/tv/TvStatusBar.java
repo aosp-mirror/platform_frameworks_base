@@ -61,11 +61,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandNotifications() {
+    public void animateExpandNotificationsPanel() {
     }
 
     @Override
-    public void animateCollapseNotifications(int flags) {
+    public void animateCollapsePanels(int flags) {
     }
 
     @Override
@@ -143,10 +143,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandQuickSettings() {
-    }
-
-    @Override
-    public void animateCollapseQuickSettings() {
+    public void animateExpandSettingsPanel() {
     }
 }
