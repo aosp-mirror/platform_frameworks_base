@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Pinapayagan ang app na mabawi ang panloob na katayuan ng system. Maaaring bawiin ng nakakahamak na apps ang iba\'t ibang pribado at secure na impormasyon na hindi kailanman normal na kinakailangan ng mga ito."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"kunin ang nilalaman ng screen"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Pinapayagan ang app na bawiin ang nilalaman ng aktibong window. Maaaring bawiin ng nakakahamak na apps ang kabuuang nilalaman ng window at suriin ang lahat ng teksto nito maliban sa mga password."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"kunin ang impormasyon ng window"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Pinapayagan ang application na kumuha ng impormasyon tungkol sa mga window mula sa tagapamahala ng window. Maaaring kumuha ang mga nakakahamak na app ng impormasyong nilayon para sa panloob na paggamit ng system."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"i-filter ang mga kaganapan"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
