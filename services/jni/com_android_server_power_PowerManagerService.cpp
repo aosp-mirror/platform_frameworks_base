@@ -183,14 +183,16 @@ static void nativeSetScreenState(JNIEnv *env, jclass clazz, jboolean on) {
             gPowerModule->setInteractive(gPowerModule, true);
         }
 
+        const sp<IBinder>& display = s->getBuiltInDisplay(0);   // TODO: support multiple displays
         {
             ALOGD_IF_SLOW(100, "Excessive delay in unblank() while turning screen on");
-            s->unblank();
+            s->unblank(display);
         }
     } else {
+        const sp<IBinder>& display = s->getBuiltInDisplay(0);   // TODO: support multiple displays
         {
             ALOGD_IF_SLOW(100, "Excessive delay in blank() while turning screen off");
-            s->blank();
+            s->blank(display);
         }
 
         if (gPowerModule) {
