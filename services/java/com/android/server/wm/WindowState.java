@@ -574,6 +574,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAttrs;
     }
 
+    @Override
     public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
         int index = -1;
         WindowState ws = this;
@@ -612,6 +613,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mLayer;
     }
 
+    @Override
     public IApplicationToken getAppToken() {
         return mAppToken != null ? mAppToken.appToken : null;
     }
@@ -801,12 +803,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mWinAnimator.mAnimation != null;
     }
 
+    @Override
     public boolean isGoneForLayoutLw() {
         final AppWindowToken atoken = mAppToken;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
                 || (atoken == null && mRootToken.hidden)
-                || (atoken != null && atoken.hiddenRequested)
+                || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
                 || mAttachedHidden
                 || mExiting || mDestroying;
     }
@@ -847,6 +850,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isFullscreen(int screenWidth, int screenHeight) {
         return mFrame.left <= 0 && mFrame.top <= 0 &&
                 mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
+    }
+
+    boolean isConfigChanged() {
+        return mConfiguration != mService.mCurConfiguration
+                && (mConfiguration == null
+                        || (mConfiguration.diff(mService.mCurConfiguration) != 0));
+    }
+
+    boolean isConfigDiff(int mask) {
+        return mConfiguration != mService.mCurConfiguration
+                && mConfiguration != null
+                && (mConfiguration.diff(mService.mCurConfiguration) & mask) != 0;
     }
 
     void removeLocked() {
