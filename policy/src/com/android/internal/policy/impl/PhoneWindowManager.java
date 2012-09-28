@@ -361,7 +361,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mScreenOnEarly = false;
     boolean mScreenOnFully = false;
     boolean mOrientationSensorEnabled = false;
-    int mLastSensorRotation = -1;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
     
@@ -3729,16 +3728,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             int sensorRotation = mOrientationListener.getProposedRotation(); // may be -1
             if (sensorRotation < 0) {
-                // Sensor is disabled, device probably just turned off.
-                if (mLastSensorRotation >= 0) {
-                    sensorRotation = mLastSensorRotation;
-                } else {
-                    // Sensor has never been enabled. Last resort is to use lastRotation.
-                    sensorRotation = lastRotation;
-                }
-            } else {
-                // Valid sensor data, save it away.
-                mLastSensorRotation = sensorRotation;
+                sensorRotation = lastRotation;
             }
 
             final int preferredRotation;
