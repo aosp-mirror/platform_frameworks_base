@@ -25,7 +25,7 @@ import android.app.MediaRouteActionProvider;
 import android.app.MediaRouteButton;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
+import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteCategory;
 import android.media.MediaRouter.RouteGroup;
@@ -70,6 +70,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     };
 
     MediaRouter mRouter;
+    DisplayManager mDisplayService;
     private int mRouteTypes;
 
     private LayoutInflater mInflater;
@@ -97,6 +98,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mRouter = (MediaRouter) activity.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mDisplayService = (DisplayManager) activity.getSystemService(Context.DISPLAY_SERVICE);
     }
 
     @Override
@@ -119,6 +121,15 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
 
     public void setRouteTypes(int types) {
         mRouteTypes = types;
+        if ((mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_VIDEO) != 0 && mDisplayService == null) {
+            final Context activity = getActivity();
+            if (activity != null) {
+                mDisplayService = (DisplayManager) activity.getSystemService(
+                        Context.DISPLAY_SERVICE);
+            }
+        } else {
+            mDisplayService = null;
+        }
     }
 
     void updateVolume() {
@@ -194,6 +205,9 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (mDisplayService != null) {
+            mDisplayService.scanWifiDisplays();
+        }
     }
 
     private static class ViewHolder {
@@ -253,7 +267,9 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
                 final RouteCategory cat = mRouter.getCategoryAt(i);
                 routes = cat.getRoutes(mCatRouteList);
 
-                mItems.add(cat);
+                if (!cat.isSystem()) {
+                    mItems.add(cat);
+                }
 
                 if (cat == mCategoryEditingGroups) {
                     addGroupEditingCategoryRoutes(routes);
@@ -370,6 +386,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
         public boolean isEnabled(int position) {
             switch (getItemViewType(position)) {
                 case VIEW_ROUTE:
+                    return ((RouteInfo) mItems.get(position)).isEnabled();
                 case VIEW_GROUPING_ROUTE:
                 case VIEW_GROUPING_DONE:
                     return true;
@@ -434,6 +451,7 @@ public class MediaRouteChooserDialogFragment extends DialogFragment {
             }
 
             convertView.setActivated(position == mSelectedItemPosition);
+            convertView.setEnabled(isEnabled(position));
 
             return convertView;
         }

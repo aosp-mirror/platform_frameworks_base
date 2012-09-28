@@ -826,6 +826,10 @@
   <java-symbol type="string" name="default_audio_route_name_hdmi" />
   <java-symbol type="string" name="default_audio_route_category_name" />
   <java-symbol type="string" name="safe_media_volume_warning" />
+  <java-symbol type="string" name="media_route_status_scanning" />
+  <java-symbol type="string" name="media_route_status_connecting" />
+  <java-symbol type="string" name="media_route_status_available" />
+  <java-symbol type="string" name="media_route_status_not_available" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
