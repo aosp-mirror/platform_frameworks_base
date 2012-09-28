@@ -193,6 +193,11 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
 
     syncState();
 
+    // Functors break the tiling extension in pretty spectacular ways
+    // This ensures we don't use tiling when a functor is going to be
+    // invoked during the frame
+    mSuppressTiling = mCaches.hasRegisteredFunctors();
+
     mTilingSnapshot = mSnapshot;
     startTiling(mTilingSnapshot, true);
 
@@ -221,17 +226,19 @@ void OpenGLRenderer::syncState() {
 }
 
 void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
-    Rect* clip = mTilingSnapshot->clipRect;
-    if (s->flags & Snapshot::kFlagIsFboLayer) {
-        clip = s->clipRect;
-    }
+    if (!mSuppressTiling) {
+        Rect* clip = mTilingSnapshot->clipRect;
+        if (s->flags & Snapshot::kFlagIsFboLayer) {
+            clip = s->clipRect;
+        }
 
-    mCaches.startTiling(clip->left, s->height - clip->bottom,
-            clip->right - clip->left, clip->bottom - clip->top, opaque);
+        mCaches.startTiling(clip->left, s->height - clip->bottom,
+                clip->right - clip->left, clip->bottom - clip->top, opaque);
+    }
 }
 
 void OpenGLRenderer::endTiling() {
-    mCaches.endTiling();
+    if (!mSuppressTiling) mCaches.endTiling();
 }
 
 void OpenGLRenderer::finish() {

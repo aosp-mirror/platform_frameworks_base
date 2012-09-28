@@ -814,6 +814,9 @@ private:
     // Properties.h
     bool mScissorOptimizationDisabled;
 
+    // No-ops start/endTiling when set
+    bool mSuppressTiling;
+
     friend class DisplayListRenderer;
 
 }; // class OpenGLRenderer

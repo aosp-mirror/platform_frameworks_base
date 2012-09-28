@@ -227,6 +227,10 @@ public:
     void dumpMemoryUsage();
     void dumpMemoryUsage(String8& log);
 
+    bool hasRegisteredFunctors();
+    void registerFunctors(uint32_t functorCount);
+    void unregisterFunctors(uint32_t functorCount);
+
     bool blend;
     GLenum lastSrcMode;
     GLenum lastDstMode;
@@ -316,6 +320,8 @@ private:
 
     DebugLevel mDebugLevel;
     bool mInitialized;
+
+    uint32_t mFunctorsCount;
 }; // class Caches
 
 }; // namespace uirenderer
