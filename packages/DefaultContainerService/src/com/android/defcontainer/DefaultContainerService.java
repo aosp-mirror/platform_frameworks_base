@@ -672,9 +672,9 @@ public class DefaultContainerService extends IntentService {
             }
 
             // Pick user preference
-            int installPreference = Settings.System.getInt(getApplicationContext()
+            int installPreference = Settings.Global.getInt(getApplicationContext()
                     .getContentResolver(),
-                    Settings.Secure.DEFAULT_INSTALL_LOCATION,
+                    Settings.Global.DEFAULT_INSTALL_LOCATION,
                     PackageHelper.APP_INSTALL_AUTO);
             if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
                 prefer = PREFER_INTERNAL;

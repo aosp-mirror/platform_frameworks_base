@@ -32,16 +32,19 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.Build.VERSION_CODES;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
@@ -917,6 +920,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Global.DEVICE_PROVISIONED);
             MOVED_TO_GLOBAL.add(Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_GLOBAL.add(Global.USB_MASS_STORAGE_ENABLED);
+            MOVED_TO_GLOBAL.add(Global.HTTP_PROXY);
 
             // these are moving directly from system to global
             MOVED_TO_GLOBAL.add(Settings.Global.AIRPLANE_MODE_ON);
@@ -1487,47 +1491,64 @@ public final class Settings {
         @Deprecated
         public static final String MODE_RINGER = Global.MODE_RINGER;
 
-        //TODO: deprecate static IP constants
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
          * Set to 1 for true and 0 for false.
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_USE_STATIC_IP = "wifi_use_static_ip";
 
         /**
          * The static IP address.
          * <p>
          * Example: "192.168.1.51"
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_STATIC_IP = "wifi_static_ip";
 
         /**
          * If using static IP, the gateway's IP address.
          * <p>
          * Example: "192.168.1.1"
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
 
         /**
          * If using static IP, the net mask.
          * <p>
          * Example: "255.255.255.0"
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_STATIC_NETMASK = "wifi_static_netmask";
 
         /**
          * If using static IP, the primary DNS's IP address.
          * <p>
          * Example: "192.168.1.1"
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_STATIC_DNS1 = "wifi_static_dns1";
 
         /**
          * If using static IP, the secondary DNS's IP address.
          * <p>
          * Example: "192.168.1.2"
+         *
+         * @deprecated Use {@link WifiManager} instead
          */
+        @Deprecated
         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
 
 
@@ -2326,10 +2347,10 @@ public final class Settings {
         public static final String DEVICE_PROVISIONED = Global.DEVICE_PROVISIONED;
 
         /**
-         * @deprecated Use {@link android.provider.Settings.Secure#HTTP_PROXY} instead
+         * @deprecated Use {@link android.provider.Settings.Global#HTTP_PROXY} instead
          */
         @Deprecated
-        public static final String HTTP_PROXY = Secure.HTTP_PROXY;
+        public static final String HTTP_PROXY = Global.HTTP_PROXY;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#INSTALL_NON_MARKET_APPS} instead
@@ -2633,10 +2654,8 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_NUM_ARP_PINGS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
@@ -2645,6 +2664,37 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WTF_IS_FATAL);
+            MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD);
+            MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_DISCHARGE_THRESHOLD);
+            MOVED_TO_GLOBAL.add(Settings.Global.SEND_ACTION_APP_ERROR);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_AGE_SECONDS);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_MAX_FILES);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_QUOTA_KB);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_QUOTA_PERCENT);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_RESERVE_PERCENT);
+            MOVED_TO_GLOBAL.add(Settings.Global.DROPBOX_TAG_PREFIX);
+            MOVED_TO_GLOBAL.add(Settings.Global.ERROR_LOGCAT_PREFIX);
+            MOVED_TO_GLOBAL.add(Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL);
+            MOVED_TO_GLOBAL.add(Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD);
+            MOVED_TO_GLOBAL.add(Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES);
+            MOVED_TO_GLOBAL.add(Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES);
+            MOVED_TO_GLOBAL.add(Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS);
+            MOVED_TO_GLOBAL.add(Settings.Global.CONNECTIVITY_CHANGE_DELAY);
+            MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED);
+            MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_SERVER);
+            MOVED_TO_GLOBAL.add(Settings.Global.NSD_ON);
+            MOVED_TO_GLOBAL.add(Settings.Global.SET_INSTALL_LOCATION);
+            MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_INSTALL_LOCATION);
+            MOVED_TO_GLOBAL.add(Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY);
+            MOVED_TO_GLOBAL.add(Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY);
+            MOVED_TO_GLOBAL.add(Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT);
+            MOVED_TO_GLOBAL.add(Settings.Global.HTTP_PROXY);
+            MOVED_TO_GLOBAL.add(Settings.Global.GLOBAL_HTTP_PROXY_HOST);
+            MOVED_TO_GLOBAL.add(Settings.Global.GLOBAL_HTTP_PROXY_PORT);
+            MOVED_TO_GLOBAL.add(Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+            MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
+            MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
         }
 
         /**
@@ -3106,45 +3156,13 @@ public final class Settings {
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
-         * Host name and port for global http proxy.  Uses ':' seperator for between host and port
-         * TODO - deprecate in favor of global_http_proxy_host, etc
+         * Host name and port for global http proxy. Uses ':' seperator for
+         * between host and port.
+         *
+         * @deprecated Use {@link Global#HTTP_PROXY}
          */
-        public static final String HTTP_PROXY = "http_proxy";
-
-        /**
-         * Host name for global http proxy.  Set via ConnectivityManager.
-         * @hide
-         */
-        public static final String GLOBAL_HTTP_PROXY_HOST = "global_http_proxy_host";
-
-        /**
-         * Integer host port for global http proxy.  Set via ConnectivityManager.
-         * @hide
-         */
-        public static final String GLOBAL_HTTP_PROXY_PORT = "global_http_proxy_port";
-
-        /**
-         * Exclusion list for global proxy. This string contains a list of comma-separated
-         * domains where the global proxy does not apply. Domains should be listed in a comma-
-         * separated list. Example of acceptable formats: ".domain1.com,my.domain2.com"
-         * Use ConnectivityManager to set/get.
-         * @hide
-         */
-        public static final String GLOBAL_HTTP_PROXY_EXCLUSION_LIST =
-                "global_http_proxy_exclusion_list";
-
-        /**
-         * Enables the UI setting to allow the user to specify the global HTTP proxy
-         * and associated exclusion list.
-         * @hide
-         */
-        public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
-
-        /**
-         * Setting for default DNS in case nobody suggests one
-         * @hide
-         */
-        public static final String DEFAULT_DNS_SERVER = "default_dns_server";
+        @Deprecated
+        public static final String HTTP_PROXY = Global.HTTP_PROXY;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#INSTALL_NON_MARKET_APPS} instead
@@ -3626,21 +3644,6 @@ public final class Settings {
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = Global.WIFI_MAX_DHCP_RETRY_COUNT;
 
         /**
-         * Setting to turn off captive portal detection. Feature is enabled by default and
-         * the setting needs to be set to 0 to disable it.
-         * @hide
-         */
-        public static final String CAPTIVE_PORTAL_DETECTION_ENABLED =
-                "captive_portal_detection_enabled";
-
-        /**
-         * The server used for captive portal detection upon a new conection. A 204 response
-         * code from the server is used for validation.
-         * @hide
-         */
-        public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
-
-        /**
          * @deprecated Use
          * {@link android.provider.Settings.Global#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS} instead
          */
@@ -3649,14 +3652,13 @@ public final class Settings {
                 Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
 
         /**
-         * Whether network service discovery is enabled.
-         * @hide
-         */
-        public static final String NSD_ON = "nsd_on";
-
-        /**
-         * Whether background data usage is allowed by the user. See
-         * ConnectivityManager for more info.
+         * Whether background data usage is allowed.
+         *
+         * @deprecated As of {@link VERSION_CODES#ICE_CREAM_SANDWICH},
+         *             availability of background data depends on several
+         *             combined factors. When background data is unavailable,
+         *             {@link ConnectivityManager#getActiveNetworkInfo()} will
+         *             now appear disconnected.
          */
         @Deprecated
         public static final String BACKGROUND_DATA = "background_data";
@@ -3717,18 +3719,6 @@ public final class Settings {
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
         /**
-         * The number of milliseconds to delay before sending out Connectivyt Change broadcasts
-         * @hide
-         */
-        public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
-
-        /**
-         * Default value for CONNECTIVITY_CHANGE_DELAY in milliseconds.
-         * @hide
-         */
-        public static final int CONNECTIVITY_CHANGE_DELAY_DEFAULT = 3000;
-
-        /**
          * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
@@ -3764,118 +3754,6 @@ public final class Settings {
         public static final String LAST_SETUP_SHOWN = "last_setup_shown";
 
         /**
-         * Threshold values for the duration and level of a discharge cycle, under
-         * which we log discharge cycle info.
-         * @hide
-         */
-        public static final String BATTERY_DISCHARGE_DURATION_THRESHOLD =
-                "battery_discharge_duration_threshold";
-        /** @hide */
-        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
-
-        /**
-         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
-         * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
-         * will never display the "Report" button.
-         * Type: int ( 0 = disallow, 1 = allow )
-         * @hide
-         */
-        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
-
-        /**
-         * Maximum age of entries kept by {@link com.android.internal.os.IDropBoxManagerService}.
-         * @hide
-         */
-        public static final String DROPBOX_AGE_SECONDS =
-                "dropbox_age_seconds";
-        /**
-         * Maximum number of entry files which {@link com.android.internal.os.IDropBoxManagerService} will keep around.
-         * @hide
-         */
-        public static final String DROPBOX_MAX_FILES =
-                "dropbox_max_files";
-        /**
-         * Maximum amount of disk space used by {@link com.android.internal.os.IDropBoxManagerService} no matter what.
-         * @hide
-         */
-        public static final String DROPBOX_QUOTA_KB =
-                "dropbox_quota_kb";
-        /**
-         * Percent of free disk (excluding reserve) which {@link com.android.internal.os.IDropBoxManagerService} will use.
-         * @hide
-         */
-        public static final String DROPBOX_QUOTA_PERCENT =
-                "dropbox_quota_percent";
-        /**
-         * Percent of total disk which {@link com.android.internal.os.IDropBoxManagerService} will never dip into.
-         * @hide
-         */
-        public static final String DROPBOX_RESERVE_PERCENT =
-                "dropbox_reserve_percent";
-        /**
-         * Prefix for per-tag dropbox disable/enable settings.
-         * @hide
-         */
-        public static final String DROPBOX_TAG_PREFIX =
-                "dropbox:";
-        /**
-         * Lines of logcat to include with system crash/ANR/etc. reports,
-         * as a prefix of the dropbox tag of the report type.
-         * For example, "logcat_for_system_server_anr" controls the lines
-         * of logcat captured with system server ANR reports.  0 to disable.
-         * @hide
-         */
-        public static final String ERROR_LOGCAT_PREFIX =
-                "logcat_for_";
-
-        /**
-         * The interval in minutes after which the amount of free storage left on the
-         * device is logged to the event log
-         * @hide
-         */
-        public static final String SYS_FREE_STORAGE_LOG_INTERVAL =
-                "sys_free_storage_log_interval";
-
-        /**
-         * Threshold for the amount of change in disk free space required to report the amount of
-         * free space. Used to prevent spamming the logs when the disk free space isn't changing
-         * frequently.
-         * @hide
-         */
-        public static final String DISK_FREE_CHANGE_REPORTING_THRESHOLD =
-                "disk_free_change_reporting_threshold";
-
-
-        /**
-         * Minimum percentage of free storage on the device that is used to determine if
-         * the device is running low on storage.  The default is 10.
-         * <p>Say this value is set to 10, the device is considered running low on storage
-         * if 90% or more of the device storage is filled up.
-         * @hide
-         */
-        public static final String SYS_STORAGE_THRESHOLD_PERCENTAGE =
-                "sys_storage_threshold_percentage";
-
-        /**
-         * Maximum byte size of the low storage threshold.  This is to ensure
-         * that {@link #SYS_STORAGE_THRESHOLD_PERCENTAGE} does not result in
-         * an overly large threshold for large storage devices.  Currently this
-         * must be less than 2GB.  This default is 500MB.
-         * @hide
-         */
-        public static final String SYS_STORAGE_THRESHOLD_MAX_BYTES =
-                "sys_storage_threshold_max_bytes";
-
-        /**
-         * Minimum bytes of free storage on the device before the data
-         * partition is considered full. By default, 1 MB is reserved
-         * to avoid system-wide SQLite disk full exceptions.
-         * @hide
-         */
-        public static final String SYS_STORAGE_FULL_THRESHOLD_BYTES =
-                "sys_storage_full_threshold_bytes";
-
-        /**
          * The interval in milliseconds after which Wi-Fi is considered idle.
          * When idle, it is possible for the device to be switched from Wi-Fi to
          * the mobile data network.
@@ -3885,14 +3763,6 @@ public final class Settings {
          */
         @Deprecated
         public static final String WIFI_IDLE_MS = Global.WIFI_IDLE_MS;
-
-        /**
-         * The maximum reconnect delay for short network outages or when the network is suspended
-         * due to phone use.
-         * @hide
-         */
-        public static final String SYNC_MAX_RETRY_DELAY_IN_SECONDS =
-                "sync_max_retry_delay_in_seconds";
 
         /**
          * The global search provider chosen by the user (if multiple global
@@ -4114,37 +3984,6 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
-         * Let user pick default install location.
-         * @hide
-         */
-        public static final String SET_INSTALL_LOCATION = "set_install_location";
-
-        /**
-         * Default install location value.
-         * 0 = auto, let system decide
-         * 1 = internal
-         * 2 = sdcard
-         * @hide
-         */
-        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
-
-        /**
-         * ms during which to consume extra events related to Inet connection condition
-         * after a transtion to fully-connected
-         * @hide
-         */
-        public static final String INET_CONDITION_DEBOUNCE_UP_DELAY =
-                "inet_condition_debounce_up_delay";
-
-        /**
-         * ms during which to consume extra events related to Inet connection condtion
-         * after a transtion to partly-connected
-         * @hide
-         */
-        public static final String INET_CONDITION_DEBOUNCE_DOWN_DELAY =
-                "inet_condition_debounce_down_delay";
-
-        /**
          * Whether screensavers are enabled.
          * @hide
          */
@@ -4178,10 +4017,6 @@ public final class Settings {
          * @hide
          */
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
-
-        /** {@hide} */
-        public static final String
-                READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT = "read_external_storage_enforced_default";
 
         /**
          * This are the settings to be backed up.
@@ -4959,19 +4794,6 @@ public final class Settings {
        public static final String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
 
        /**
-        * ms delay interval between rssi polling when the signal is known to be weak
-        * @hide
-        */
-       public static final String WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS =
-               "wifi_watchdog_rssi_fetch_interval_ms";
-
-       /**
-        * Number of ARP pings per check.
-        * @hide
-        */
-       public static final String WIFI_WATCHDOG_NUM_ARP_PINGS = "wifi_watchdog_num_arp_pings";
-
-       /**
         * Setting to turn off poor network avoidance on Wi-Fi. Feature is enabled by default and
         * the setting needs to be set to 0 to disable it.
         * @hide
@@ -5073,6 +4895,262 @@ public final class Settings {
         * @hide
         */
        public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
+
+        /**
+         * Threshold values for the duration and level of a discharge cycle,
+         * under which we log discharge cycle info.
+         *
+         * @hide
+         */
+        public static final String
+                BATTERY_DISCHARGE_DURATION_THRESHOLD = "battery_discharge_duration_threshold";
+
+        /** @hide */
+        public static final String BATTERY_DISCHARGE_THRESHOLD = "battery_discharge_threshold";
+
+        /**
+         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR
+         * intents on application crashes and ANRs. If this is disabled, the
+         * crash/ANR dialog will never display the "Report" button.
+         * <p>
+         * Type: int (0 = disallow, 1 = allow)
+         *
+         * @hide
+         */
+        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
+
+        /**
+         * Maximum age of entries kept by {@link DropBoxManager}.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_AGE_SECONDS = "dropbox_age_seconds";
+
+        /**
+         * Maximum number of entry files which {@link DropBoxManager} will keep
+         * around.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_MAX_FILES = "dropbox_max_files";
+
+        /**
+         * Maximum amount of disk space used by {@link DropBoxManager} no matter
+         * what.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_QUOTA_KB = "dropbox_quota_kb";
+
+        /**
+         * Percent of free disk (excluding reserve) which {@link DropBoxManager}
+         * will use.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_QUOTA_PERCENT = "dropbox_quota_percent";
+
+        /**
+         * Percent of total disk which {@link DropBoxManager} will never dip
+         * into.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_RESERVE_PERCENT = "dropbox_reserve_percent";
+
+        /**
+         * Prefix for per-tag dropbox disable/enable settings.
+         *
+         * @hide
+         */
+        public static final String DROPBOX_TAG_PREFIX = "dropbox:";
+
+        /**
+         * Lines of logcat to include with system crash/ANR/etc. reports, as a
+         * prefix of the dropbox tag of the report type. For example,
+         * "logcat_for_system_server_anr" controls the lines of logcat captured
+         * with system server ANR reports. 0 to disable.
+         *
+         * @hide
+         */
+        public static final String ERROR_LOGCAT_PREFIX = "logcat_for_";
+
+        /**
+         * The interval in minutes after which the amount of free storage left
+         * on the device is logged to the event log
+         *
+         * @hide
+         */
+        public static final String SYS_FREE_STORAGE_LOG_INTERVAL = "sys_free_storage_log_interval";
+
+        /**
+         * Threshold for the amount of change in disk free space required to
+         * report the amount of free space. Used to prevent spamming the logs
+         * when the disk free space isn't changing frequently.
+         *
+         * @hide
+         */
+        public static final String
+                DISK_FREE_CHANGE_REPORTING_THRESHOLD = "disk_free_change_reporting_threshold";
+
+        /**
+         * Minimum percentage of free storage on the device that is used to
+         * determine if the device is running low on storage. The default is 10.
+         * <p>
+         * Say this value is set to 10, the device is considered running low on
+         * storage if 90% or more of the device storage is filled up.
+         *
+         * @hide
+         */
+        public static final String
+                SYS_STORAGE_THRESHOLD_PERCENTAGE = "sys_storage_threshold_percentage";
+
+        /**
+         * Maximum byte size of the low storage threshold. This is to ensure
+         * that {@link #SYS_STORAGE_THRESHOLD_PERCENTAGE} does not result in an
+         * overly large threshold for large storage devices. Currently this must
+         * be less than 2GB. This default is 500MB.
+         *
+         * @hide
+         */
+        public static final String
+                SYS_STORAGE_THRESHOLD_MAX_BYTES = "sys_storage_threshold_max_bytes";
+
+        /**
+         * Minimum bytes of free storage on the device before the data partition
+         * is considered full. By default, 1 MB is reserved to avoid system-wide
+         * SQLite disk full exceptions.
+         *
+         * @hide
+         */
+        public static final String
+                SYS_STORAGE_FULL_THRESHOLD_BYTES = "sys_storage_full_threshold_bytes";
+
+        /**
+         * The maximum reconnect delay for short network outages or when the
+         * network is suspended due to phone use.
+         *
+         * @hide
+         */
+        public static final String
+                SYNC_MAX_RETRY_DELAY_IN_SECONDS = "sync_max_retry_delay_in_seconds";
+
+        /**
+         * The number of milliseconds to delay before sending out
+         * {@link ConnectivityManager#CONNECTIVITY_ACTION} broadcasts.
+         *
+         * @hide
+         */
+        public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
+
+        /**
+         * Setting to turn off captive portal detection. Feature is enabled by
+         * default and the setting needs to be set to 0 to disable it.
+         *
+         * @hide
+         */
+        public static final String
+                CAPTIVE_PORTAL_DETECTION_ENABLED = "captive_portal_detection_enabled";
+
+        /**
+         * The server used for captive portal detection upon a new conection. A
+         * 204 response code from the server is used for validation.
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
+
+        /**
+         * Whether network service discovery is enabled.
+         *
+         * @hide
+         */
+        public static final String NSD_ON = "nsd_on";
+
+        /**
+         * Let user pick default install location.
+         *
+         * @hide
+         */
+        public static final String SET_INSTALL_LOCATION = "set_install_location";
+
+        /**
+         * Default install location value.
+         * 0 = auto, let system decide
+         * 1 = internal
+         * 2 = sdcard
+         * @hide
+         */
+        public static final String DEFAULT_INSTALL_LOCATION = "default_install_location";
+
+        /**
+         * ms during which to consume extra events related to Inet connection
+         * condition after a transtion to fully-connected
+         *
+         * @hide
+         */
+        public static final String
+                INET_CONDITION_DEBOUNCE_UP_DELAY = "inet_condition_debounce_up_delay";
+
+        /**
+         * ms during which to consume extra events related to Inet connection
+         * condtion after a transtion to partly-connected
+         *
+         * @hide
+         */
+        public static final String
+                INET_CONDITION_DEBOUNCE_DOWN_DELAY = "inet_condition_debounce_down_delay";
+
+        /** {@hide} */
+        public static final String
+                READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT = "read_external_storage_enforced_default";
+
+        /**
+         * Host name and port for global http proxy. Uses ':' seperator for
+         * between host and port.
+         */
+        public static final String HTTP_PROXY = "http_proxy";
+
+        /**
+         * Host name for global http proxy. Set via ConnectivityManager.
+         *
+         * @hide
+         */
+        public static final String GLOBAL_HTTP_PROXY_HOST = "global_http_proxy_host";
+
+        /**
+         * Integer host port for global http proxy. Set via ConnectivityManager.
+         *
+         * @hide
+         */
+        public static final String GLOBAL_HTTP_PROXY_PORT = "global_http_proxy_port";
+
+        /**
+         * Exclusion list for global proxy. This string contains a list of
+         * comma-separated domains where the global proxy does not apply.
+         * Domains should be listed in a comma- separated list. Example of
+         * acceptable formats: ".domain1.com,my.domain2.com" Use
+         * ConnectivityManager to set/get.
+         *
+         * @hide
+         */
+        public static final String
+                GLOBAL_HTTP_PROXY_EXCLUSION_LIST = "global_http_proxy_exclusion_list";
+
+        /**
+         * Enables the UI setting to allow the user to specify the global HTTP
+         * proxy and associated exclusion list.
+         *
+         * @hide
+         */
+        public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
+
+        /**
+         * Setting for default DNS in case nobody suggests one
+         *
+         * @hide
+         */
+        public static final String DEFAULT_DNS_SERVER = "default_dns_server";
 
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = new NameValueCache(
