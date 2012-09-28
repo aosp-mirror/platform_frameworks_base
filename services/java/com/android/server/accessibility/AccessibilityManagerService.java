@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -108,8 +109,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final String LOG_TAG = "AccessibilityManagerService";
 
+    // TODO: This is arbitrary. When there is time implement this by watching
+    //       when that accessibility services are bound.
+    private static final int WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS = 5000;
+
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
+
+    private static final String TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED =
+            "temporaryEnableAccessibilityStateUntilKeyguardRemoved";
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -156,6 +164,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final SparseArray<IBinder> mGlobalWindowTokens = new SparseArray<IBinder>();
 
     private final SparseArray<UserState> mUserStates = new SparseArray<UserState>();
+
+    private final TempUserStateChangeMemento mTempStateChangeForCurrentUserMemento =
+            new TempUserStateChangeMemento();
 
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
@@ -268,12 +279,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         // package changes
         monitor.register(mContext, null,  UserHandle.ALL, true);
 
-        // user change
-        IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        // user change and unlock
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
 
-        mContext.registerReceiver(new BroadcastReceiver() {
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -281,9 +293,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                    restoreStateFromMementoIfNeeded();
                 }
             }
-        }, userFilter);
+        }, UserHandle.ALL, intentFilter, null, null);
     }
 
     public int addClient(IAccessibilityManagerClient client, int userId) {
@@ -510,6 +524,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    public void temporaryEnableAccessibilityStateUntilKeyguardRemoved(
+            ComponentName service, boolean touchExplorationEnabled) {
+        mSecurityPolicy.enforceCallingPermission(
+                Manifest.permission.TEMPORARY_ENABLE_ACCESSIBILITY,
+                TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED);
+        try {
+            if (!mWindowManagerService.isKeyguardLocked()) {
+                return;
+            }
+        } catch (RemoteException re) {
+            return;
+        }
+        synchronized (mLock) {
+            UserState userState = getCurrentUserStateLocked();
+            // Stash the old state so we can restore it when the keyguard is gone.
+            mTempStateChangeForCurrentUserMemento.initialize(mCurrentUserId, getCurrentUserStateLocked());
+            // Set the temporary state.
+            userState.mIsAccessibilityEnabled = true;
+            userState.mIsTouchExplorationEnabled= touchExplorationEnabled;
+            userState.mIsDisplayMagnificationEnabled = false;
+            userState.mEnabledServices.clear();
+            userState.mEnabledServices.add(service);
+            userState.mTouchExplorationGrantedServices.clear();
+            userState.mTouchExplorationGrantedServices.add(service);
+            // Update the internal state.
+            performServiceManagementLocked(userState);
+            updateInputFilterLocked(userState);
+            scheduleSendStateToClientsLocked(userState);
+        }
+    }
+
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             // Automation service is not bound, so pretend it died to perform clean up.
@@ -600,9 +645,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void switchUser(int userId) {
         synchronized (mLock) {
-            if (userId == mCurrentUserId) {
-                return;
-            }
+            // The user switched so we do not need to restore the current user
+            // state since we will fully rebuild it when he becomes current again.
+            mTempStateChangeForCurrentUserMemento.clear();
 
             // Disconnect from services for the old user.
             UserState oldUserState = getUserStateLocked(mCurrentUserId);
@@ -620,12 +665,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Recreate the internal state for the new user.
             mMainHandler.obtainMessage(MainHandler.MSG_SEND_RECREATE_INTERNAL_STATE,
                     mCurrentUserId, 0).sendToTarget();
+
+            // Schedule announcement of the current user if needed.
+            mMainHandler.sendEmptyMessageDelayed(MainHandler.MSG_ANNOUNCE_NEW_USER_IF_NEEDED,
+                    WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
         }
     }
 
     private void removeUser(int userId) {
         synchronized (mLock) {
             mUserStates.remove(userId);
+        }
+    }
+
+    private void restoreStateFromMementoIfNeeded() {
+        synchronized (mLock) {
+            if (mTempStateChangeForCurrentUserMemento.mUserId != UserHandle.USER_NULL) {
+                UserState userState = getCurrentUserStateLocked();
+                // Restore the state from the memento.
+                mTempStateChangeForCurrentUserMemento.applyTo(userState);
+                mTempStateChangeForCurrentUserMemento.clear();
+                // Update the internal state.
+                performServiceManagementLocked(userState);
+                updateInputFilterLocked(userState);
+                scheduleSendStateToClientsLocked(userState);
+            }
         }
     }
 
@@ -1076,6 +1140,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         handleDisplayMagnificationEnabledSettingChangedLocked(userState);
         handleAccessibilityEnabledSettingChangedLocked(userState);
 
+        performServiceManagementLocked(userState);
         updateInputFilterLocked(userState);
         scheduleSendStateToClientsLocked(userState);
     }
@@ -1084,6 +1149,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         userState.mIsAccessibilityEnabled = Settings.Secure.getIntForUser(
                mContext.getContentResolver(),
                Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId) == 1;
+    }
+
+    private void performServiceManagementLocked(UserState userState) {
         if (userState.mIsAccessibilityEnabled ) {
             manageServicesLocked(userState);
         } else {
@@ -1186,6 +1254,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER = 3;
         public static final int MSG_SEND_RECREATE_INTERNAL_STATE = 4;
         public static final int MSG_UPDATE_ACTIVE_WINDOW = 5;
+        public static final int MSG_ANNOUNCE_NEW_USER_IF_NEEDED = 6;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -1226,6 +1295,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     final int eventType = msg.arg2;
                     mSecurityPolicy.updateActiveWindow(windowId, eventType);
                 } break;
+                case MSG_ANNOUNCE_NEW_USER_IF_NEEDED: {
+                    announceNewUserIfNeeded();
+                } break;
+            }
+        }
+
+        private void announceNewUserIfNeeded() {
+            synchronized (mLock) {
+                UserState userState = getCurrentUserStateLocked();
+                if (userState.mIsAccessibilityEnabled) {
+                    UserManager userManager = (UserManager) mContext.getSystemService(
+                            Context.USER_SERVICE);
+                    String message = mContext.getString(R.string.user_switched,
+                            userManager.getUserInfo(mCurrentUserId).name);
+                    AccessibilityEvent event = AccessibilityEvent.obtain(
+                            AccessibilityEvent.TYPE_ANNOUNCEMENT);
+                    event.getText().add(message);
+                    sendAccessibilityEvent(event, mCurrentUserId);
+                }
             }
         }
 
@@ -2229,6 +2317,46 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private class TempUserStateChangeMemento {
+        public int mUserId = UserHandle.USER_NULL;
+        public boolean mIsAccessibilityEnabled;
+        public boolean mIsTouchExplorationEnabled;
+        public boolean mIsDisplayMagnificationEnabled;
+        public final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
+        public final Set<ComponentName> mTouchExplorationGrantedServices =
+                new HashSet<ComponentName>();
+
+        public void initialize(int userId, UserState userState) {
+            mUserId = userId;
+            mIsAccessibilityEnabled = userState.mIsAccessibilityEnabled;
+            mIsTouchExplorationEnabled = userState.mIsTouchExplorationEnabled;
+            mIsDisplayMagnificationEnabled = userState.mIsDisplayMagnificationEnabled;
+            mEnabledServices.clear();
+            mEnabledServices.addAll(userState.mEnabledServices);
+            mTouchExplorationGrantedServices.clear();
+            mTouchExplorationGrantedServices.addAll(userState.mTouchExplorationGrantedServices);
+        }
+
+        public void applyTo(UserState userState) {
+            userState.mIsAccessibilityEnabled = mIsAccessibilityEnabled;
+            userState.mIsTouchExplorationEnabled = mIsTouchExplorationEnabled;
+            userState.mIsDisplayMagnificationEnabled = mIsDisplayMagnificationEnabled;
+            userState.mEnabledServices.clear();
+            userState.mEnabledServices.addAll(mEnabledServices);
+            userState.mTouchExplorationGrantedServices.clear();
+            userState.mTouchExplorationGrantedServices.addAll(mTouchExplorationGrantedServices);
+        }
+
+        public void clear() {
+            mUserId = UserHandle.USER_NULL;
+            mIsAccessibilityEnabled = false;
+            mIsTouchExplorationEnabled = false;
+            mIsDisplayMagnificationEnabled = false;
+            mEnabledServices.clear();
+            mTouchExplorationGrantedServices.clear();
+        }
+    }
+
     private final class AccessibilityContentObserver extends ContentObserver {
 
         private final Uri mAccessibilityEnabledUri = Settings.Secure.getUriFor(
@@ -2272,6 +2400,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (mUiAutomationService == null) {
                         UserState userState = getCurrentUserStateLocked();
                         handleAccessibilityEnabledSettingChangedLocked(userState);
+                        performServiceManagementLocked(userState);
                         updateInputFilterLocked(userState);
                         scheduleSendStateToClientsLocked(userState);
                     }
