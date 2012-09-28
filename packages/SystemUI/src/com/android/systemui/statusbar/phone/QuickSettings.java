@@ -707,7 +707,18 @@ class QuickSettings {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
-                    SystemProperties.set("ctl.start", "bugreport");
+                    // Add a little delay before executing, to give the
+                    // dialog a chance to go away before it takes a
+                    // screenshot.
+                    mHandler.postDelayed(new Runnable() {
+                        @Override public void run() {
+                            try {
+                                ActivityManagerNative.getDefault()
+                                        .requestBugReport();
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }, 500);
                 }
             }
         });

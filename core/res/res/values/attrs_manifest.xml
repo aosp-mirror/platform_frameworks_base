@@ -1391,6 +1391,9 @@
         <attr name="uiOptions" />
         <attr name="parentActivityName" />
         <attr name="singleUser" />
+        <!-- @hide This broacast receiver will only receive broadcasts for the
+             primary user.  Can only be used with receivers. -->
+        <attr name="primaryUserOnly" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

@@ -2140,7 +2140,8 @@
                 android:process=":ui">
         </activity>
 
-        <receiver android:name="com.android.server.BootReceiver" >
+        <receiver android:name="com.android.server.BootReceiver"
+                android:primaryUserOnly="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

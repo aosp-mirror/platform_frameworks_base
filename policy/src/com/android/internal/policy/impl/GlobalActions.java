@@ -241,7 +241,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         if (Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.BUGREPORT_IN_POWER_MENU, 0) != 0) {
             mItems.add(
-                new SinglePressAction(0, R.string.global_action_bug_report) {
+                new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
+                        R.string.global_action_bug_report) {
 
                     public void onPress() {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -257,7 +258,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                                         // screenshot.
                                         mHandler.postDelayed(new Runnable() {
                                             @Override public void run() {
-                                                SystemProperties.set("ctl.start", "bugreport");
+                                                try {
+                                                    ActivityManagerNative.getDefault()
+                                                            .requestBugReport();
+                                                } catch (RemoteException e) {
+                                                }
                                             }
                                         }, 500);
                                     }
