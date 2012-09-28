@@ -3768,8 +3768,8 @@
     <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
 
-    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name_hdmi">HDMI audio</string>
+    <!-- Name of the default media route when HDMI is connected. [CHAR LIMIT=50] -->
+    <string name="default_media_route_name_hdmi">HDMI</string>
 
     <!-- Name of the default audio route category. [CHAR LIMIT=50] -->
     <string name="default_audio_route_category_name">System</string>
