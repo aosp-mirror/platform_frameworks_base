@@ -171,8 +171,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final SettingsObserver mSettingsObserver;
     final IWindowManager mIWindowManager;
     final HandlerCaller mCaller;
-    private final InputMethodFileManager mFileManager;
-    private final InputMethodAndSubtypeListManager mImListManager;
+    private InputMethodFileManager mFileManager;
+    private InputMethodAndSubtypeListManager mImListManager;
     private final HardKeyboardListener mHardKeyboardListener;
     private final WindowManagerService mWindowManagerService;
 
@@ -625,11 +625,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mShowOngoingImeSwitcherForPhones = false;
 
-        synchronized (mMethodMap) {
-            mFileManager = new InputMethodFileManager(mMethodMap);
-        }
-        mImListManager = new InputMethodAndSubtypeListManager(context, this);
-
         final IntentFilter broadcastFilter = new IntentFilter();
         broadcastFilter.addAction(Intent.ACTION_SCREEN_ON);
         broadcastFilter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -643,7 +638,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     new IUserSwitchObserver.Stub() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
-                            switchUser(newUserId);
+                            synchronized(mMethodMap) {
+                                switchUserLocked(newUserId);
+                            }
                             if (reply != null) {
                                 try {
                                     reply.sendResult(null);
@@ -665,6 +662,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
                 mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
+        mFileManager = new InputMethodFileManager(mMethodMap, userId);
+        mImListManager = new InputMethodAndSubtypeListManager(context, this);
 
         // Just checking if defaultImiId is empty or not
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -736,6 +735,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
             }
+            // InputMethodAndSubtypeListManager should be reset when the locale is changed.
+            mImListManager = new InputMethodAndSubtypeListManager(mContext, this);
             buildInputMethodListLocked(mMethodList, mMethodMap);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
@@ -761,8 +762,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         resetAllInternalStateLocked(true);
     }
 
-    private void switchUser(int newUserId) {
+    private void switchUserLocked(int newUserId) {
         mSettings.setCurrentUserId(newUserId);
+        // InputMethodFileManager should be reset when the user is changed
+        mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
         resetAllInternalStateLocked(false);
     }
 
@@ -3816,6 +3819,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    // TODO: Cache the state for each user and reset when the cached user is removed.
     private static class InputMethodFileManager {
         private static final String SYSTEM_PATH = "system";
         private static final String INPUT_METHOD_PATH = "inputmethod";
@@ -3834,12 +3838,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private final HashMap<String, InputMethodInfo> mMethodMap;
         private final HashMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
                 new HashMap<String, List<InputMethodSubtype>>();
-        public InputMethodFileManager(HashMap<String, InputMethodInfo> methodMap) {
+        public InputMethodFileManager(HashMap<String, InputMethodInfo> methodMap, int userId) {
             if (methodMap == null) {
                 throw new NullPointerException("methodMap is null");
             }
             mMethodMap = methodMap;
-            final File systemDir = new File(Environment.getDataDirectory(), SYSTEM_PATH);
+            final File systemDir = userId == UserHandle.USER_OWNER
+                    ? new File(Environment.getDataDirectory(), SYSTEM_PATH)
+                    : Environment.getUserSystemDirectory(userId);
             final File inputMethodDir = new File(systemDir, INPUT_METHOD_PATH);
             if (!inputMethodDir.mkdirs()) {
                 Slog.w(TAG, "Couldn't create dir.: " + inputMethodDir.getAbsolutePath());
