@@ -221,21 +221,28 @@ public class MediaRouteButton extends View {
     void updateRouteCount() {
         final int N = mRouter.getRouteCount();
         int count = 0;
+        boolean hasVideoRoutes = false;
         for (int i = 0; i < N; i++) {
             final RouteInfo route = mRouter.getRouteAt(i);
-            if ((route.getSupportedTypes() & mRouteTypes) != 0) {
+            final int routeTypes = route.getSupportedTypes();
+            if ((routeTypes & mRouteTypes) != 0) {
                 if (route instanceof RouteGroup) {
                     count += ((RouteGroup) route).getRouteCount();
                 } else {
                     count++;
+                }
+                if ((routeTypes & MediaRouter.ROUTE_TYPE_LIVE_VIDEO) != 0) {
+                    hasVideoRoutes = true;
                 }
             }
         }
 
         setEnabled(count != 0);
 
-        // Only allow toggling if we have more than just user routes
-        mToggleMode = count == 2 && (mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_AUDIO) != 0;
+        // Only allow toggling if we have more than just user routes.
+        // Don't toggle if we support video routes, we may have to let the dialog scan.
+        mToggleMode = count == 2 && (mRouteTypes & MediaRouter.ROUTE_TYPE_LIVE_AUDIO) != 0 &&
+                !hasVideoRoutes;
     }
 
     @Override

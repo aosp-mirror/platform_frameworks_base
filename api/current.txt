@@ -11750,6 +11750,7 @@ package android.media {
     method public void removeUserRoute(android.media.MediaRouter.UserRouteInfo);
     method public void selectRoute(int, android.media.MediaRouter.RouteInfo);
     field public static final int ROUTE_TYPE_LIVE_AUDIO = 1; // 0x1
+    field public static final int ROUTE_TYPE_LIVE_VIDEO = 2; // 0x2
     field public static final int ROUTE_TYPE_USER = 8388608; // 0x800000
   }
 
@@ -11798,6 +11799,7 @@ package android.media {
     method public int getVolume();
     method public int getVolumeHandling();
     method public int getVolumeMax();
+    method public boolean isEnabled();
     method public void requestSetVolume(int);
     method public void requestUpdateVolume(int);
     method public void setTag(java.lang.Object);
