@@ -378,8 +378,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         // read our default dns server ip
-        String dns = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.DEFAULT_DNS_SERVER);
+        String dns = Settings.Global.getString(context.getContentResolver(),
+                Settings.Global.DEFAULT_DNS_SERVER);
         if (dns == null || dns.length() == 0) {
             dns = context.getResources().getString(
                     com.android.internal.R.string.config_default_dns_server);
@@ -715,9 +715,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         /** Check system properties for the default value then use secure settings value, if any. */
         int defaultDelay = SystemProperties.getInt(
-                "conn." + Settings.Secure.CONNECTIVITY_CHANGE_DELAY,
-                Settings.Secure.CONNECTIVITY_CHANGE_DELAY_DEFAULT);
-        return Settings.Secure.getInt(cr, Settings.Secure.CONNECTIVITY_CHANGE_DELAY,
+                "conn." + Settings.Global.CONNECTIVITY_CHANGE_DELAY,
+                ConnectivityManager.CONNECTIVITY_CHANGE_DELAY_DEFAULT);
+        return Settings.Global.getInt(cr, Settings.Global.CONNECTIVITY_CHANGE_DELAY,
                 defaultDelay);
     }
 
@@ -2997,11 +2997,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (VDBG) log("handleInetConditionChange: starting a change hold");
             // setup a new hold to debounce this
             if (mDefaultInetCondition > 50) {
-                delay = Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.INET_CONDITION_DEBOUNCE_UP_DELAY, 500);
+                delay = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY, 500);
             } else {
-                delay = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.INET_CONDITION_DEBOUNCE_DOWN_DELAY, 3000);
+                delay = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY, 3000);
             }
             mInetConditionChangeInFlight = true;
             mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_INET_CONDITION_HOLD_END,
@@ -3070,9 +3070,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mGlobalProxy = null;
             }
             ContentResolver res = mContext.getContentResolver();
-            Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST, host);
-            Settings.Secure.putInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, port);
-            Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+            Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, host);
+            Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
+            Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                     exclList);
         }
 
@@ -3084,10 +3084,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void loadGlobalProxy() {
         ContentResolver res = mContext.getContentResolver();
-        String host = Settings.Secure.getString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST);
-        int port = Settings.Secure.getInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, 0);
-        String exclList = Settings.Secure.getString(res,
-                Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
+        String host = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST);
+        int port = Settings.Global.getInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, 0);
+        String exclList = Settings.Global.getString(res,
+                Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
         if (!TextUtils.isEmpty(host)) {
             ProxyProperties proxyProperties = new ProxyProperties(host, port, exclList);
             synchronized (mGlobalProxyLock) {
@@ -3118,8 +3118,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleDeprecatedGlobalHttpProxy() {
-        String proxy = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.HTTP_PROXY);
+        String proxy = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.HTTP_PROXY);
         if (!TextUtils.isEmpty(proxy)) {
             String data[] = proxy.split(":");
             String proxyHost =  data[0];
@@ -3162,8 +3162,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         void observe(Context context) {
             ContentResolver resolver = context.getContentResolver();
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.HTTP_PROXY), false, this);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.HTTP_PROXY), false, this);
         }
 
         @Override

@@ -8466,8 +8466,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sb.append(crashInfo.stackTrace);
                 }
 
-                String setting = Settings.Secure.ERROR_LOGCAT_PREFIX + dropboxTag;
-                int lines = Settings.Secure.getInt(mContext.getContentResolver(), setting, 0);
+                String setting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                int lines = Settings.Global.getInt(mContext.getContentResolver(), setting, 0);
                 if (lines > 0) {
                     sb.append("\n");
 

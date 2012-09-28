@@ -2124,9 +2124,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         exclusionList = exclusionList.trim();
         ContentResolver res = mContext.getContentResolver();
-        Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_HOST, data[0]);
-        Settings.Secure.putInt(res, Settings.Secure.GLOBAL_HTTP_PROXY_PORT, proxyPort);
-        Settings.Secure.putString(res, Settings.Secure.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+        Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_HOST, data[0]);
+        Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, proxyPort);
+        Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                 exclusionList);
     }
 

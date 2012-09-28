@@ -10015,16 +10015,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if (loc == PackageHelper.APP_INSTALL_AUTO || loc == PackageHelper.APP_INSTALL_INTERNAL
                 || loc == PackageHelper.APP_INSTALL_EXTERNAL) {
-            android.provider.Settings.System.putInt(mContext.getContentResolver(),
-                    android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION, loc);
+            android.provider.Settings.Global.putInt(mContext.getContentResolver(),
+                    android.provider.Settings.Global.DEFAULT_INSTALL_LOCATION, loc);
             return true;
         }
         return false;
    }
 
     public int getInstallLocation() {
-        return android.provider.Settings.System.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION,
+        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.DEFAULT_INSTALL_LOCATION,
                 PackageHelper.APP_INSTALL_AUTO);
     }
 
@@ -10116,8 +10116,9 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private boolean isPermissionEnforcedDefault(String permission) {
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            return Secure.getInt(mContext.getContentResolver(),
-                    Secure.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT, 0) != 0;
+            return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                    android.provider.Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT, 0)
+                    != 0;
         } else {
             return true;
         }
