@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permite aplicaţiei să preia starea internă a sistemului. Aplicaţiile rău intenţionate pot să preia o gamă variată de informaţii private şi securizate, de care în mod normal nu ar avea nevoie niciodată."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"preia conţinutul de pe ecran"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite aplicaţiei să preia conţinutul ferestrei active. Aplicaţiile rău intenţionate pot să preia întregul conţinut al ferestrei şi să examineze integral textul acesteia, cu excepţia parolelor."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"preluare informaţii despre ferestre"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite unei aplicaţii să preia informaţii despre ferestrele din managerul de ferestre. Aplicaţiile rău intenţionate pot prelua informaţii care sunt destinate utilizării sistemului intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrare evenimente"</string>
@@ -623,8 +627,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicaţiei stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Protecţia dezact. funcţiile"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Previne utilizarea unora dintre funcţii la activarea protecţiei tastaturii."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Dezactiv. funcții după blocare"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Previne utilizarea unora dintre funcții când tastatura este blocată."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1258,8 +1262,8 @@
     <string name="share" msgid="1778686618230011964">"Distribuiţi"</string>
     <string name="find" msgid="4808270900322985960">"Găsiţi"</string>
     <string name="websearch" msgid="4337157977400211589">"Căutare pe web"</string>
-    <string name="find_next" msgid="5742124618942193978">"Găsiţi următoarea"</string>
-    <string name="find_previous" msgid="2196723669388360506">"Găsiţi anterioara"</string>
+    <string name="find_next" msgid="5742124618942193978">"Următorul rezultat"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Rezultatul anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitare de locaţie de la <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitare de locaţie"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitat de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ridicaţi volumul mai sus de nivelul sigur?"\n"Ascultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
