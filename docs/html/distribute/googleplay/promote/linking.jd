@@ -5,7 +5,7 @@ page.title=Linking to Your Products
 <div class="sidebox">
 <a href="badges.html">
   <img alt="Get it on Google Play"
-       src="http://www.android.com/images/brand/get_it_on_play_logo_small.png" />
+       src="{@docRoot}en_app_rgb_wo_45.png" />
 </a>
 <p>For a link that includes the Google Play brand icon, check out the <a href="badges.html">Badges</a> page. </p>
 </div>
