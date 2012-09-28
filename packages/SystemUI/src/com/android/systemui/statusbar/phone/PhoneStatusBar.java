@@ -1073,7 +1073,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 if (mTicking) {
-                    mTicker.halt();
+                    haltTicker();
                 }
 
                 mNotificationIcons.animate()
@@ -1095,7 +1095,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                mTicker.halt();
+                haltTicker();
             }
         }
     }
@@ -1359,7 +1359,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (lightsOut) {
                     animateCollapsePanels();
                     if (mTicking) {
-                        mTicker.halt();
+                        haltTicker();
                     }
                 }
 
@@ -1489,8 +1489,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mStatusBarContents.setVisibility(View.VISIBLE);
             mTickerView.setVisibility(View.GONE);
             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out,
-                        mTickingDoneListener));
+            // we do not animate the ticker away at this point, just get rid of it (b/6992707)
         }
     }
 
