@@ -607,7 +607,9 @@ include $(BUILD_DROIDDOC)
 # $(gen), i.e. framework.aidl, is also needed while building against the current stub.
 $(full_target): $(framework_built) $(gen)
 
-droidcore: doc-comment-check-docs
+# Run this for checkbuild
+.PHONY: checkbuild
+checkbuild: doc-comment-check-docs
 
 # ====  static html in the pdk ==================================
 include $(CLEAR_VARS)
