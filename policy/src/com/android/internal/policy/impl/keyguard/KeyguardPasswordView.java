@@ -122,7 +122,15 @@ public class KeyguardPasswordView extends LinearLayout
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
 
-        mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false);
+        mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
+                new int[] {
+                    R.xml.kg_password_kbd_numeric,
+                    com.android.internal.R.xml.password_kbd_qwerty,
+                    com.android.internal.R.xml.password_kbd_qwerty_shifted,
+                    com.android.internal.R.xml.password_kbd_symbols,
+                    com.android.internal.R.xml.password_kbd_symbols_shift
+                    }
+        );
         mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
 
         boolean imeOrDeleteButtonVisible = false;

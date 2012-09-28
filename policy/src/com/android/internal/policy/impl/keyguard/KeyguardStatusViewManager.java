@@ -102,7 +102,8 @@ class KeyguardStatusViewManager {
     public KeyguardStatusViewManager(View view) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
-        mDateFormatString = getContext().getResources().getText(R.string.keyguard_wday_day_month);
+        mDateFormatString = getContext().getResources().getText(
+                com.android.internal.R.string.abbrev_wday_month_day_no_year);
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 
@@ -113,7 +114,7 @@ class KeyguardStatusViewManager {
         mClockView = (ClockView) view.findViewById(R.id.clock_view);
 
         // Use custom font in mDateView
-        mDateView.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
+        mDateView.setTypeface(Typeface.SANS_SERIF);
 
         // Required to get Marquee to work.
         final View marqueeViews[] = { mDateView, mStatus1View, mOwnerInfoView, mAlarmStatusView };
@@ -183,6 +184,7 @@ class KeyguardStatusViewManager {
                 Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
         String text = Settings.Secure.getStringForUser(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO,
                 UserHandle.USER_CURRENT);
+        text = text.trim(); // Remove trailing newlines
         if (ownerInfoEnabled && !TextUtils.isEmpty(text)) {
             maybeSetUpperCaseText(mOwnerInfoView, text);
             mOwnerInfoView.setVisibility(View.VISIBLE);
@@ -228,8 +230,7 @@ class KeyguardStatusViewManager {
     }
 
     private void maybeSetUpperCaseText(TextView textView, CharSequence text) {
-        if (KeyguardViewManager.USE_UPPER_CASE
-                && (textView == mDateView)) { // currently only required for date view
+        if (KeyguardViewManager.USE_UPPER_CASE) { // currently only required for date view
             textView.setText(text != null ? text.toString().toUpperCase() : null);
         } else {
             textView.setText(text);
