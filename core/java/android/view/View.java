@@ -2787,14 +2787,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    protected int mPaddingLeft = UNDEFINED_PADDING;
+    protected int mPaddingLeft = 0;
     /**
      * The right padding in pixels, that is the distance in pixels between the
      * right edge of this view and the right edge of its content.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    protected int mPaddingRight = UNDEFINED_PADDING;
+    protected int mPaddingRight = 0;
     /**
      * The top padding in pixels, that is the distance in pixels between the
      * top edge of this view and the top edge of its content.
@@ -3664,9 +3664,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mUserPaddingLeftInitial = leftPadding >= 0 ? leftPadding : mPaddingLeft;
         mUserPaddingRightInitial = rightPadding >= 0 ? rightPadding : mPaddingRight;
         internalSetPadding(
-                mUserPaddingLeftInitial != UNDEFINED_PADDING ? mUserPaddingLeftInitial : 0,
+                mUserPaddingLeftInitial,
                 topPadding >= 0 ? topPadding : mPaddingTop,
-                mUserPaddingRightInitial != UNDEFINED_PADDING ? mUserPaddingRightInitial : 0,
+                mUserPaddingRightInitial,
                 bottomPadding >= 0 ? bottomPadding : mPaddingBottom);
 
         if (viewFlagMasks != 0) {
