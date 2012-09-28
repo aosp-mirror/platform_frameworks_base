@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Antaa sovelluksen noutaa järjestelmän sisäisen tilan. Haitalliset sovellukset voivat noutaa paljon yksityisiä ja suojattuja tietoja, joita niiden ei pitäisi tarvita normaalisti."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"nouda näytön sisältö"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Antaa sovelluksen noutaa aktiivisen ikkunan sisällön. Haitalliset sovellukset voivat noutaa koko ikkunan sisällön ja tarkastella sen kaikkea tekstiä lukuun ottamatta salasanoja."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"nouda ikkunoiden tietoja"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Antaa sovelluksen noutaa ikkunoiden tietoja ikkunanhallinnasta. Haitalliset sovellukset voivat noutaa tietoja, jotka on tarkoitettu järjestelmän sisäiseen käyttöön."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"suodata tapahtumat"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Nostetaanko äänenvoimakkuus turvallista tasoa voimakkaammaksi?"\n"Jos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>

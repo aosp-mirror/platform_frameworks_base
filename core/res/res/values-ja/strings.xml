@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"システムの内部状態の取得をアプリに許可します。この許可を悪意のあるアプリに利用されると、通常必要ないはずの各種の非公開/機密情報が取得される恐れがあります。"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"画面のコンテンツの取得"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"作業中のウィンドウの内容を取得することをアプリに許可します。この許可を悪意のあるアプリに利用されると、ウィンドウの内容全体が取得されてパスワード以外のテキストがすべてチェックされる恐れがあります。"</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"ウィンドウ情報の取得"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"ウィンドウマネージャからウィンドウに関する情報を取得することをアプリに許可します。悪意のあるアプリが内部システムの利用を目的に情報を取得する恐れがあります。"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"イベントのフィルタリング"</string>
@@ -555,7 +559,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetoothの設定へのアクセス"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ローカルのBluetoothタブレットを設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
-    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXからの接続と切断"</string>
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXへの接続と切断"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"安全レベルを超えるまで音量を上げますか？"\n"大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>

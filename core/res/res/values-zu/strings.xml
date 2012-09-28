@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Ivumela insiza ukuthi ithole kabusha ingaphakathi lesistimu. izinsiza ezinobungozi zingathola kabusha inqwaba yolwazi oluyimfihlo noluvikelekile ezingajwayele ukuthi ziludinge."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"letha okuqukethwe kwesikrini"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ivumela insiza ukuthi ithole okuqukethe kwi-Window. Izinsiza ezinobungozi zingathola kabush iwindi eliphelele bese ibheka konke okuqukethwe ngaphandle kwaaaphasiwedi."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"buyisa ulwazi lewindi"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Ivumela uhlelo lokusebenza ukubuyisa ulwazi mayelana namawindi avela kumphathi wewindi. Izinhlelo zokusebenza zingabuyisa ulwazi olubhekiswe ukusetshenziselwa kohlelo lwangaphakathi."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"hlunga imicimbi"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g> kweminye imizamo engaphumelelanga, uzocelwa ukuvula ithebhulethi yakho usebenzisa ukungena ngemvume kwi-Google."\n\n" Sicela uzame futhi kwengu-<xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google"\n\n" Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Khulisa ivolomu ngaphezu kweleveli yokuphepha?"\n"Ukulalela ngevolomu ephezulu izikhathi ezide kungalimaza ukuzwa kwakho."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
