@@ -40,6 +40,7 @@ import com.android.internal.R;
  * Displays the time
  */
 public class ClockView extends RelativeLayout {
+    private static final String ANDROID_CLOCK_FONT_FILE = "/system/fonts/AndroidClock.ttf";
     private final static String M12 = "h:mm";
     private final static String M24 = "kk:mm";
 
@@ -153,7 +154,7 @@ public class ClockView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mTimeView = (TextView) findViewById(R.id.clock_text);
-        mTimeView.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
+        mTimeView.setTypeface(Typeface.createFromFile(ANDROID_CLOCK_FONT_FILE));
         mAmPm = new AmPm(this, null);
         mCalendar = Calendar.getInstance();
         setDateFormat();
