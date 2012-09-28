@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.systemui"
         coreApp="true">
 
@@ -91,7 +92,7 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
-        <receiver android:name=".BootReceiver" >
+        <receiver android:name=".BootReceiver" androidprv:primaryUserOnly="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

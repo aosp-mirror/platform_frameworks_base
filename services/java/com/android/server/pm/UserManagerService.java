@@ -16,9 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.os.ParcelFileDescriptor.MODE_CREATE;
-import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
-
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -35,7 +32,6 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IUserManager;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -74,6 +70,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
+    private static final String ATTR_PARTIAL = "partial";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
 
@@ -132,24 +129,40 @@ public class UserManagerService extends IUserManager.Stub {
     private UserManagerService(Context context, PackageManagerService pm,
             Object installLock, Object packagesLock,
             File dataDir, File baseUserPath) {
-        synchronized (UserManagerService.class) {
-            mContext = context;
-            mPm = pm;
-            mInstallLock = installLock;
-            mPackagesLock = packagesLock;
-            mUsersDir = new File(dataDir, USER_INFO_DIR);
-            mUsersDir.mkdirs();
-            // Make zeroth user directory, for services to migrate their files to that location
-            File userZeroDir = new File(mUsersDir, "0");
-            userZeroDir.mkdirs();
-            mBaseUserPath = baseUserPath;
-            FileUtils.setPermissions(mUsersDir.toString(),
-                    FileUtils.S_IRWXU|FileUtils.S_IRWXG
-                    |FileUtils.S_IROTH|FileUtils.S_IXOTH,
-                    -1, -1);
-            mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
-            readUserList();
-            sInstance = this;
+        mContext = context;
+        mPm = pm;
+        mInstallLock = installLock;
+        mPackagesLock = packagesLock;
+        synchronized (mInstallLock) {
+            synchronized (mPackagesLock) {
+                mUsersDir = new File(dataDir, USER_INFO_DIR);
+                mUsersDir.mkdirs();
+                // Make zeroth user directory, for services to migrate their files to that location
+                File userZeroDir = new File(mUsersDir, "0");
+                userZeroDir.mkdirs();
+                mBaseUserPath = baseUserPath;
+                FileUtils.setPermissions(mUsersDir.toString(),
+                        FileUtils.S_IRWXU|FileUtils.S_IRWXG
+                        |FileUtils.S_IROTH|FileUtils.S_IXOTH,
+                        -1, -1);
+                mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
+                readUserListLocked();
+                // Prune out any partially created users.
+                ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
+                for (int i = 0; i < mUsers.size(); i++) {
+                    UserInfo ui = mUsers.valueAt(i);
+                    if (ui.partial && i != 0) {
+                        partials.add(ui);
+                    }
+                }
+                for (int i = 0; i < partials.size(); i++) {
+                    UserInfo ui = partials.get(i);
+                    Slog.w(LOG_TAG, "Removing partially created user #" + i
+                            + " (name=" + ui.name + ")");
+                    removeUserStateLocked(ui.id);
+                }
+                sInstance = this;
+            }
         }
     }
 
@@ -159,8 +172,12 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             for (int i = 0; i < mUsers.size(); i++) {
-                if (!excludeDying || !mRemovingUserIds.contains(mUsers.keyAt(i))) {
-                    users.add(mUsers.valueAt(i));
+                UserInfo ui = mUsers.valueAt(i);
+                if (ui.partial) {
+                    continue;
+                }
+                if (!excludeDying || !mRemovingUserIds.contains(ui.id)) {
+                    users.add(ui);
                 }
             }
             return users;
@@ -179,7 +196,12 @@ public class UserManagerService extends IUserManager.Stub {
      * Should be locked on mUsers before calling this.
      */
     private UserInfo getUserInfoLocked(int userId) {
-        return mUsers.get(userId);
+        UserInfo ui = mUsers.get(userId);
+        if (ui != null && ui.partial) {
+            Slog.w(LOG_TAG, "getUserInfo: unknown user #" + userId);
+            return null;
+        }
+        return ui;
     }
 
     public boolean exists(int userId) {
@@ -191,14 +213,22 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserName(int userId, String name) {
         checkManageUsersPermission("rename users");
+        boolean changed = false;
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
+            if (info == null || info.partial) {
+                Slog.w(LOG_TAG, "setUserName: unknown user #" + userId);
+                return;
+            }
             if (name != null && !name.equals(info.name)) {
                 info.name = name;
                 writeUserLocked(info);
+                changed = true;
             }
         }
-        sendUserInfoChangedBroadcast(userId);
+        if (changed) {
+            sendUserInfoChangedBroadcast(userId);
+        }
     }
 
     @Override
@@ -206,7 +236,10 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("update users");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
-            if (info == null) return;
+            if (info == null || info.partial) {
+                Slog.w(LOG_TAG, "setUserIcon: unknown user #" + userId);
+                return;
+            }
             writeBitmapLocked(info, bitmap);
             writeUserLocked(info);
         }
@@ -225,7 +258,13 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("read users");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
-            if (info == null || info.iconPath == null) return null;
+            if (info == null || info.partial) {
+                Slog.w(LOG_TAG, "getUserIcon: unknown user #" + userId);
+                return null;
+            }
+            if (info.iconPath == null) {
+                return null;
+            }
             return BitmapFactory.decodeFile(info.iconPath);
         }
     }
@@ -239,7 +278,7 @@ public class UserManagerService extends IUserManager.Stub {
                 // Erase any guest user that currently exists
                 for (int i = 0; i < mUsers.size(); i++) {
                     UserInfo user = mUsers.valueAt(i);
-                    if (user.isGuest()) {
+                    if (!user.partial && user.isGuest()) {
                         if (!enable) {
                             removeUser(user.id);
                         }
@@ -271,7 +310,10 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("makeInitialized");
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
-            if (info != null && (info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
+            if (info == null || info.partial) {
+                Slog.w(LOG_TAG, "makeInitialized: unknown user #" + userId);
+            }
+            if ((info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                 info.flags |= UserInfo.FLAG_INITIALIZED;
                 writeUserLocked(info);
             }
@@ -453,6 +495,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
+            if (userInfo.partial) {
+                serializer.attribute(null, ATTR_PARTIAL, "true");
+            }
 
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
@@ -516,6 +561,7 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
+        boolean partial = false;
 
         FileInputStream fis = null;
         try {
@@ -546,6 +592,10 @@ public class UserManagerService extends IUserManager.Stub {
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
                 creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
                 lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+                String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
+                if ("true".equals(valueString)) {
+                    partial = true;
+                }
 
                 while ((type = parser.next()) != XmlPullParser.START_TAG
                         && type != XmlPullParser.END_DOCUMENT) {
@@ -562,6 +612,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.serialNumber = serialNumber;
             userInfo.creationTime = creationTime;
             userInfo.lastLoggedInTime = lastLoggedInTime;
+            userInfo.partial = partial;
             return userInfo;
 
         } catch (IOException ioe) {
@@ -613,11 +664,14 @@ public class UserManagerService extends IUserManager.Stub {
                     userInfo.serialNumber = mNextSerialNumber++;
                     long now = System.currentTimeMillis();
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
+                    userInfo.partial = true;
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
                     writeUserLocked(userInfo);
-                    updateUserIdsLocked();
                     mPm.createNewUserLILPw(userId, userPath);
+                    userInfo.partial = false;
+                    writeUserLocked(userInfo);
+                    updateUserIdsLocked();
                 }
             }
             if (userInfo != null) {
@@ -670,19 +724,7 @@ public class UserManagerService extends IUserManager.Stub {
     void finishRemoveUser(int userHandle) {
         synchronized (mInstallLock) {
             synchronized (mPackagesLock) {
-                // Cleanup package manager settings
-                mPm.cleanUpUserLILPw(userHandle);
-
-                // Remove this user from the list
-                mUsers.remove(userHandle);
-                mRemovingUserIds.remove(userHandle);
-                // Remove user file
-                AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
-                userFile.delete();
-                // Update the user list
-                writeUserListLocked();
-                updateUserIdsLocked();
-                removeDirectoryRecursive(Environment.getUserSystemDirectory(userHandle));
+                removeUserStateLocked(userHandle);
             }
         }
 
@@ -696,6 +738,22 @@ public class UserManagerService extends IUserManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void removeUserStateLocked(int userHandle) {
+        // Cleanup package manager settings
+        mPm.cleanUpUserLILPw(userHandle);
+
+        // Remove this user from the list
+        mUsers.remove(userHandle);
+        mRemovingUserIds.remove(userHandle);
+        // Remove user file
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
+        userFile.delete();
+        // Update the user list
+        writeUserListLocked();
+        updateUserIdsLocked();
+        removeDirectoryRecursive(Environment.getUserSystemDirectory(userHandle));
     }
 
     private void removeDirectoryRecursive(File parent) {
@@ -732,9 +790,17 @@ public class UserManagerService extends IUserManager.Stub {
      * Caches the list of user ids in an array, adjusting the array size when necessary.
      */
     private void updateUserIdsLocked() {
-        int[] newUsers = new int[mUsers.size()];
+        int num = 0;
         for (int i = 0; i < mUsers.size(); i++) {
-            newUsers[i] = mUsers.keyAt(i);
+            if (!mUsers.valueAt(i).partial) {
+                num++;
+            }
+        }
+        int[] newUsers = new int[num];
+        for (int i = 0; i < mUsers.size(); i++) {
+            if (!mUsers.valueAt(i).partial) {
+                newUsers[i] = mUsers.keyAt(i);
+            }
         }
         mUserIds = newUsers;
     }
@@ -747,7 +813,11 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             UserInfo user = mUsers.get(userId);
             long now = System.currentTimeMillis();
-            if (user != null && now > EPOCH_PLUS_30_YEARS) {
+            if (user == null || user.partial) {
+                Slog.w(LOG_TAG, "userForeground: unknown user #" + userId);
+                return;
+            }
+            if (now > EPOCH_PLUS_30_YEARS) {
                 user.lastLoggedInTime = now;
                 writeUserLocked(user);
             }
@@ -793,7 +863,9 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo user = mUsers.valueAt(i);
                 if (user == null) continue;
                 pw.print("  "); pw.print(user);
-                pw.println(mRemovingUserIds.contains(mUsers.keyAt(i)) ? " <removing> " : "");
+                if (mRemovingUserIds.contains(mUsers.keyAt(i))) pw.print(" <removing> ");
+                if (user.partial) pw.print(" <partial>");
+                pw.println();
                 pw.print("    Created: ");
                 if (user.creationTime == 0) {
                     pw.println("<unknown>");

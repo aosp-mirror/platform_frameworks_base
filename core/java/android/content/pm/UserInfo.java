@@ -71,6 +71,9 @@ public class UserInfo implements Parcelable {
     public long creationTime;
     public long lastLoggedInTime;
 
+    /** User is only partially created. */
+    public boolean partial;
+
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
     }
@@ -105,6 +108,7 @@ public class UserInfo implements Parcelable {
         serialNumber = orig.serialNumber;
         creationTime = orig.creationTime;
         lastLoggedInTime = orig.lastLoggedInTime;
+        partial = orig.partial;
     }
 
     public UserHandle getUserHandle() {
@@ -128,6 +132,7 @@ public class UserInfo implements Parcelable {
         dest.writeInt(serialNumber);
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
+        dest.writeInt(partial ? 1 : 0);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -148,5 +153,6 @@ public class UserInfo implements Parcelable {
         serialNumber = source.readInt();
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
+        partial = source.readInt() != 0;
     }
 }

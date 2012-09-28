@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageUserState;
 import android.content.pm.UserInfo;
 import android.util.SparseArray;
@@ -64,7 +65,8 @@ class PackageSettingBase extends GrantedPermissions {
     boolean permissionsFixed;
     boolean haveGids;
 
-    private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
+    private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState(false);
+    private static final PackageUserState DEFAULT_SYSTEM_USER_STATE = new PackageUserState(true);
 
     // Whether this package is currently stopped, thus can not be
     // started until explicitly launched by the user.
@@ -174,7 +176,7 @@ class PackageSettingBase extends GrantedPermissions {
     private PackageUserState modifyUserState(int userId) {
         PackageUserState state = userState.get(userId);
         if (state == null) {
-            state = new PackageUserState();
+            state = new PackageUserState((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0);
             userState.put(userId, state);
         }
         return state;
@@ -182,7 +184,11 @@ class PackageSettingBase extends GrantedPermissions {
 
     public PackageUserState readUserState(int userId) {
         PackageUserState state = userState.get(userId);
-        return state != null ? state : DEFAULT_USER_STATE;
+        if (state != null) {
+            return state;
+        }
+        return ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0)
+                ? DEFAULT_SYSTEM_USER_STATE : DEFAULT_USER_STATE;
     }
 
     void setEnabled(int state, int userId) {
