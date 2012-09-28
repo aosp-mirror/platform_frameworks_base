@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -165,8 +166,12 @@ public class StatusBarIconView extends AnimatedImageView {
 
         if (icon.iconPackage != null) {
             try {
-                r = context.getPackageManager().getResourcesForApplicationAsUser(icon.iconPackage,
-                        icon.user.getIdentifier());
+                int userId = icon.user.getIdentifier();
+                if (userId == UserHandle.USER_ALL) {
+                    userId = UserHandle.USER_OWNER;
+                }
+                r = context.getPackageManager()
+                        .getResourcesForApplicationAsUser(icon.iconPackage, userId);
             } catch (PackageManager.NameNotFoundException ex) {
                 Slog.e(TAG, "Icon package not found: " + icon.iconPackage);
                 return null;
