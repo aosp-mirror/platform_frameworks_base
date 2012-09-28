@@ -104,14 +104,14 @@ void NotifyMotionArgs::notify(const sp<InputListenerInterface>& listener) const 
 // --- NotifySwitchArgs ---
 
 NotifySwitchArgs::NotifySwitchArgs(nsecs_t eventTime, uint32_t policyFlags,
-        int32_t switchCode, int32_t switchValue) :
+        uint32_t switchValues, uint32_t switchMask) :
         eventTime(eventTime), policyFlags(policyFlags),
-        switchCode(switchCode), switchValue(switchValue) {
+        switchValues(switchValues), switchMask(switchMask) {
 }
 
 NotifySwitchArgs::NotifySwitchArgs(const NotifySwitchArgs& other) :
         eventTime(other.eventTime), policyFlags(other.policyFlags),
-        switchCode(other.switchCode), switchValue(other.switchValue) {
+        switchValues(other.switchValues), switchMask(other.switchMask) {
 }
 
 void NotifySwitchArgs::notify(const sp<InputListenerInterface>& listener) const {

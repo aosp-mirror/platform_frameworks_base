@@ -1493,12 +1493,16 @@ TEST_F(SwitchInputMapperTest, Process) {
     addMapperAndConfigure(mapper);
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SW, SW_LID, 1);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SW, SW_JACK_PHYSICAL_INSERT, 1);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SW, SW_HEADPHONE_INSERT, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0);
 
     NotifySwitchArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifySwitchWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
-    ASSERT_EQ(SW_LID, args.switchCode);
-    ASSERT_EQ(1, args.switchValue);
+    ASSERT_EQ((1 << SW_LID) | (1 << SW_JACK_PHYSICAL_INSERT), args.switchValues);
+    ASSERT_EQ((1 << SW_LID) | (1 << SW_JACK_PHYSICAL_INSERT) | (1 << SW_HEADPHONE_INSERT),
+            args.switchMask);
     ASSERT_EQ(uint32_t(0), args.policyFlags);
 }
 

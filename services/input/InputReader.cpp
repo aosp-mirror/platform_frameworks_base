@@ -1800,7 +1800,7 @@ void InputMapper::dumpRawAbsoluteAxisInfo(String8& dump,
 // --- SwitchInputMapper ---
 
 SwitchInputMapper::SwitchInputMapper(InputDevice* device) :
-        InputMapper(device) {
+        InputMapper(device), mUpdatedSwitchValues(0), mUpdatedSwitchMask(0) {
 }
 
 SwitchInputMapper::~SwitchInputMapper() {
@@ -1813,14 +1813,33 @@ uint32_t SwitchInputMapper::getSources() {
 void SwitchInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_SW:
-        processSwitch(rawEvent->when, rawEvent->code, rawEvent->value);
+        processSwitch(rawEvent->code, rawEvent->value);
         break;
+
+    case EV_SYN:
+        if (rawEvent->code == SYN_REPORT) {
+            sync(rawEvent->when);
+        }
     }
 }
 
-void SwitchInputMapper::processSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue) {
-    NotifySwitchArgs args(when, 0, switchCode, switchValue);
-    getListener()->notifySwitch(&args);
+void SwitchInputMapper::processSwitch(int32_t switchCode, int32_t switchValue) {
+    if (switchCode >= 0 && switchCode < 32) {
+        if (switchValue) {
+            mUpdatedSwitchValues |= 1 << switchCode;
+        }
+        mUpdatedSwitchMask |= 1 << switchCode;
+    }
+}
+
+void SwitchInputMapper::sync(nsecs_t when) {
+    if (mUpdatedSwitchMask) {
+        NotifySwitchArgs args(when, 0, mUpdatedSwitchValues, mUpdatedSwitchMask);
+        getListener()->notifySwitch(&args);
+
+        mUpdatedSwitchValues = 0;
+        mUpdatedSwitchMask = 0;
+    }
 }
 
 int32_t SwitchInputMapper::getSwitchState(uint32_t sourceMask, int32_t switchCode) {
