@@ -20,15 +20,33 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.dreams.Dream;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
 public class Somnambulator extends Activity {
+    public static final String TAG = "Somnambulator";
+
+    public static final int DEFAULT_SCREENSAVER_ENABLED = 1;
+    public static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
 
     public Somnambulator() {
     }
-    
+
+    private boolean isScreenSaverEnabled() {
+        return Settings.Secure.getIntForUser(getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED,
+                UserHandle.USER_CURRENT) != 0;
+    }
+
+    private boolean isScreenSaverActivatedOnDock() {
+        return Settings.Secure.getIntForUser(getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK, UserHandle.USER_CURRENT) != 0;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -45,14 +63,20 @@ public class Somnambulator extends Activity {
             resultIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.start_dreams));
             setResult(RESULT_OK, resultIntent);
         } else {
-            IDreamManager somnambulist = IDreamManager.Stub.asInterface(
-                    ServiceManager.checkService(Dream.DREAM_SERVICE));
-            if (somnambulist != null) {
-                try {
-                    Slog.v("Somnambulator", "Dreaming by user request.");
-                    somnambulist.dream();
-                } catch (RemoteException e) {
-                    // fine, stay asleep then
+            boolean docked = launchIntent.hasCategory(Intent.CATEGORY_DESK_DOCK);
+
+            if (docked && !(isScreenSaverEnabled() && isScreenSaverActivatedOnDock())) {
+                Slog.i(TAG, "Dreams currently disabled for docks.");
+            } else {
+                IDreamManager somnambulist = IDreamManager.Stub.asInterface(
+                        ServiceManager.checkService(Dream.DREAM_SERVICE));
+                if (somnambulist != null) {
+                    try {
+                        Slog.v(TAG, "Dreaming on " + (docked ? "dock insertion" : "user request"));
+                        somnambulist.dream();
+                    } catch (RemoteException e) {
+                        // fine, stay asleep then
+                    }
                 }
             }
         }
