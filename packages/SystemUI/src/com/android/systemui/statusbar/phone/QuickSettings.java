@@ -246,9 +246,10 @@ class QuickSettings {
             @Override
             public void onClick(View v) {
                 mBar.collapseAllPanels(true);
-                ContactsContract.QuickContact.showQuickContact(mContext, v,
-                        ContactsContract.Profile.CONTENT_URI,
+                Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(mContext,
+                        v, ContactsContract.Profile.CONTENT_URI,
                         ContactsContract.QuickContact.MODE_LARGE, null);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
             }
         });
         mModel.addUserTile(userTile, new QuickSettingsModel.RefreshCallback() {
