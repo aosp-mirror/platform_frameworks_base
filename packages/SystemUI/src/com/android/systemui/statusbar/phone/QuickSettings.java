@@ -235,7 +235,7 @@ class QuickSettings {
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        getService().animateCollapseNotifications();
+        getService().animateCollapsePanels();
     }
 
     private void addUserTiles(ViewGroup parent, LayoutInflater inflater) {

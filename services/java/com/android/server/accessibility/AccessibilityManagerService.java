@@ -2028,7 +2028,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
                     android.app.Service.STATUS_BAR_SERVICE);
-            statusBarManager.expandNotifications();
+            statusBarManager.expandNotificationsPanel();
 
             Binder.restoreCallingIdentity(token);
         }
@@ -2038,7 +2038,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             StatusBarManager statusBarManager = (StatusBarManager) mContext.getSystemService(
                     android.app.Service.STATUS_BAR_SERVICE);
-            statusBarManager.expandQuickSettings();
+            statusBarManager.expandSettingsPanel();
 
             Binder.restoreCallingIdentity(token);
         }

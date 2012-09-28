@@ -24,16 +24,15 @@ import com.android.internal.statusbar.StatusBarNotification;
 /** @hide */
 interface IStatusBarService
 {
-    void expandNotifications();
-    void collapseNotifications();
-    void expandQuickSettings();
-    void collapseQuickSettings();
+    void expandNotificationsPanel();
+    void collapsePanels();
     void disable(int what, IBinder token, String pkg);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
     void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
+    void expandSettingsPanel();
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
