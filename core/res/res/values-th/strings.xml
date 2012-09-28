@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"อนุญาตให้แอปพลิเคชันเรียกดูสถานะภายในของระบบ แอปพลิเคชันที่เป็นอันตรายอาจเรียกดูข้อมูลส่วนบุคคลและข้อมูลที่ต้องรักษาความปลอดภัยหลากหลายประเภทที่ปกติแล้วไม่จำเป็นต้องใช้แต่อย่างใด"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ดึงเนื้อหาหน้าจอ"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"อนุญาตให้แอปพลิเคชันดึงเนื้อหาของหน้าต่างที่ใช้งานอยู่ แอปพลิเคชันที่เป็นอันตรายอาจดึงเนื้อหาจากหน้าต่างทั้งหมดและตรวจสอบข้อความทั้งหมดยกเว้นรหัสผ่าน"</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"เรียกข้อมูลหน้าต่าง"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"อนุญาตให้แอปพลิเคชันดึงข้อมูลเกี่ยวกับหน้าต่างจากเครื่องมือจัดการหน้าต่าง แอปพลิเคชันที่เป็นอันตรายอาจดึงข้อมูลที่มีไว้เพื่อการใช้ของระบบภายใน"</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"กรองกิจกรรม"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล"\n\n" โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล"\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"เพิ่มระดับเสียงจนเกินระดับที่ปลอดภัยหรือไม่"\n"การฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
