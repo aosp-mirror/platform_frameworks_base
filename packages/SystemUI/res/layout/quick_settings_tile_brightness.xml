@@ -22,5 +22,4 @@
     android:layout_gravity="center"
     android:gravity="center"
     android:drawableTop="@drawable/ic_qs_brightness_auto_off"
-    android:text="@string/quick_settings_brightness_label"
     />

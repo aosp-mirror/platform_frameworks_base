@@ -188,6 +188,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
 
+    private QuickSettingsTileView mSettingsTile;
+    private RefreshCallback mSettingsCallback;
+    private State mSettingsState = new State();
+
     public QuickSettingsModel(Context context) {
         mContext = context;
         mHandler = new Handler();
@@ -199,6 +203,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
+    }
+
+    void updateResources() {
+        refreshSettingsTile();
+        refreshBatteryTile();
+        refreshBluetoothTile();
+        refreshBrightnessTile();
+        refreshRotationLockTile();
+    }
+
+    // Settings
+    void addSettingsTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mSettingsTile = view;
+        mSettingsCallback = cb;
+        refreshSettingsTile();
+    }
+    void refreshSettingsTile() {
+        Resources r = mContext.getResources();
+        mSettingsState.label = r.getString(R.string.quick_settings_settings_label);
+        mSettingsCallback.refreshView(mSettingsTile, mSettingsState);
     }
 
     // User
@@ -250,7 +274,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
         });
         mAirplaneModeCallback = cb;
-        mAirplaneModeCallback.refreshView(mAirplaneModeTile, mAirplaneModeState);
+        int airplaneMode = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0);
+        onAirplaneModeChanged(airplaneMode != 0);
     }
     private void setAirplaneModeState(boolean enabled) {
         // TODO: Sets the view to be "awaiting" if not already awaiting
@@ -273,6 +299,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mAirplaneModeState.iconId = (enabled ?
                 R.drawable.ic_qs_airplane_on :
                 R.drawable.ic_qs_airplane_off);
+        mAirplaneModeState.label = r.getString(R.string.quick_settings_airplane_mode_label);
         mAirplaneModeCallback.refreshView(mAirplaneModeTile, mAirplaneModeState);
     }
 
@@ -307,7 +334,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         Resources r = mContext.getResources();
         mWifiState.enabled = enabled;
         boolean wifiConnected = enabled && (wifiSignalIconId > 0) && (enabledDesc != null);
-        boolean wifiNotConnected = enabled && (enabledDesc == null);
+        boolean wifiNotConnected = (wifiSignalIconId > 0) && (enabledDesc == null);
         if (wifiConnected) {
             mWifiState.iconId = wifiSignalIconId;
             mWifiState.label = removeDoubleQuotes(enabledDesc);
@@ -377,6 +404,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         mBluetoothCallback.refreshView(mBluetoothTile, mBluetoothState);
     }
+    void refreshBluetoothTile() {
+        if (mBluetoothTile != null) {
+            onBluetoothStateChange(mBluetoothState.enabled);
+        }
+    }
 
     // Battery
     void addBatteryTile(QuickSettingsTileView view, RefreshCallback cb) {
@@ -389,6 +421,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     public void onBatteryLevelChanged(int level, boolean pluggedIn) {
         mBatteryState.batteryLevel = level;
         mBatteryState.pluggedIn = pluggedIn;
+        mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
+    }
+    void refreshBatteryTile() {
         mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
     }
 
@@ -544,6 +579,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
         }
     }
+    void refreshRotationLockTile() {
+        if (mRotationLockTile != null) {
+            onRotationLockChanged();
+        }
+    }
 
     // Brightness
     void addBrightnessTile(QuickSettingsTileView view, RefreshCallback cb) {
@@ -553,6 +593,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     @Override
     public void onBrightnessLevelChanged() {
+        Resources r = mContext.getResources();
         int mode = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
@@ -561,7 +602,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBrightnessState.iconId = mBrightnessState.autoBrightness
                 ? R.drawable.ic_qs_brightness_auto_on
                 : R.drawable.ic_qs_brightness_auto_off;
+        mBrightnessState.label = r.getString(R.string.quick_settings_brightness_label);
         mBrightnessCallback.refreshView(mBrightnessTile, mBrightnessState);
+    }
+    void refreshBrightnessTile() {
+        onBrightnessLevelChanged();
     }
 
 }
