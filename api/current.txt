@@ -4476,6 +4476,7 @@ package android.appwidget {
   public class AppWidgetProviderInfo implements android.os.Parcelable {
     ctor public AppWidgetProviderInfo();
     ctor public AppWidgetProviderInfo(android.os.Parcel);
+    method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
