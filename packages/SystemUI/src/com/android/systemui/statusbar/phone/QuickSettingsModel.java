@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -90,6 +91,16 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             if (action.equals(Intent.ACTION_ALARM_CHANGED)) {
                 onAlarmChanged(intent);
                 onNextAlarmChanged();
+            }
+        }
+    };
+
+    /** Broadcast receiver to act on user switches to update visuals of per-user state */
+    private BroadcastReceiver mUserSwitchedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                onUserSwitched(intent);
             }
         }
     };
@@ -203,6 +214,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
+
+        IntentFilter userSwitchedFilter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+        context.registerReceiver(mUserSwitchedReceiver, userSwitchedFilter);
     }
 
     void updateResources() {
@@ -607,6 +621,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void refreshBrightnessTile() {
         onBrightnessLevelChanged();
+    }
+
+    // User switch: need to update visuals of all tiles known to have per-user state
+    void onUserSwitched(Intent intent) {
+        onRotationLockChanged();
+        onBrightnessLevelChanged();
+        onNextAlarmChanged();
+        onBugreportChanged();
     }
 
 }
