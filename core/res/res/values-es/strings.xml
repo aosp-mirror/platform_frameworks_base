@@ -797,7 +797,7 @@
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Para desbloquear el teléfono, inicia sesión con tu cuenta de Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nombre de usuario (correo electrónico)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Contraseña"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Acceder"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Iniciar sesión"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nombre de usuario o contraseña no válido"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Si has olvidado tu nombre de usuario o tu contraseña,"\n"accede a la página "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Comprobando..."</string>

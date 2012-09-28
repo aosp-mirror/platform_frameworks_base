@@ -372,7 +372,7 @@
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Umožňuje aplikaci uvolnit úložiště v telefonu tím, že smaže soubory ve složkách mezipaměti jiných aplikací. To může způsobit, že se jiné aplikace budou spouštět pomaleji, protože budou potřebovat znovu načíst data."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"přesun zdrojů aplikace"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Umožňuje aplikaci přesunout zdroje aplikace z interního média do externího a naopak."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"číst citlivá data v protokolech"</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"čtení citlivých dat v protokolech"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto oprávnění aplikaci umožní získat obecné informace o činnostech s tabletem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto oprávnění aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"použít jakýkoliv dekodér pro přehrávání médií"</string>
@@ -418,10 +418,10 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikaci získat přístup k sociálním aktualizacím od vašich přátel a synchronizaci těchto aktualizací. Při sdílení informací buďte opatrní – toto oprávnění umožňuje aplikaci číst komunikaci mezi vámi a vašimi přáteli v sociálních sítích bez ohledu na její důvěrnost. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapisovat do vašeho sociálního streamu"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Umožňuje aplikaci zobrazit sociální aktualizace od vašich přátel. Při sdílení informací buďte opatrní – aplikace s tímto oprávněním může vytvářet zprávy, které zdánlivě pochází od vašich přátel. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"číst události kalendáře a důvěrné informace"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"čtení událostí kalendáře a důvěrné informace"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Umožňuje aplikaci číst všechny události kalendáře uložené v telefonu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"přidávat a upravovat události kalendáře a odesílat e-maily bez vědomí vlastníka"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"přidávání a upravování událostí kalendářů a odesílání e-mailů bez vědomí vlastníka"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Umožňuje aplikaci přidat, odebrat nebo změnit události, které můžete v tabletu upravovat, a to včetně událostí přátel a spolupracovníků. Toto oprávnění umožňuje aplikaci odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Umožňuje aplikaci přidat, odebrat nebo změnit události, které můžete v telefonu upravovat, a to včetně událostí přátel a spolupracovníků. Toto oprávnění umožňuje aplikaci odesílat zprávy, které budou zdánlivě přicházet od vlastníků kalendářů, nebo upravovat události bez vědomí vlastníků."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulace zdrojů polohy pro účely testování"</string>
@@ -563,7 +563,7 @@
     <string name="permlab_bluetooth" msgid="6127769336339276828">"párování se zařízeními Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Umožňuje aplikaci zobrazit konfiguraci tabletu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Umožňuje aplikaci zobrazit konfiguraci telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"ovládat technologii NFC"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"ovládání technologie NFC"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vypnutí zámku obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Telefon například vypne zámek klávesnice při příchozím hovoru a po skončení hovoru jej zase zapne."</string>

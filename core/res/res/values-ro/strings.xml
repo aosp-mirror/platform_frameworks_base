@@ -623,8 +623,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicaţiei stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Protecţia dezact. funcţiile"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Previne utilizarea unora dintre funcţii la activarea protecţiei tastaturii."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Dezactiv. funcții după blocare"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Previne utilizarea unora dintre funcții când tastatura este blocată."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1258,8 +1258,8 @@
     <string name="share" msgid="1778686618230011964">"Distribuiţi"</string>
     <string name="find" msgid="4808270900322985960">"Găsiţi"</string>
     <string name="websearch" msgid="4337157977400211589">"Căutare pe web"</string>
-    <string name="find_next" msgid="5742124618942193978">"Găsiţi următoarea"</string>
-    <string name="find_previous" msgid="2196723669388360506">"Găsiţi anterioara"</string>
+    <string name="find_next" msgid="5742124618942193978">"Următorul rezultat"</string>
+    <string name="find_previous" msgid="2196723669388360506">"Rezultatul anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitare de locaţie de la <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitare de locaţie"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitat de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
