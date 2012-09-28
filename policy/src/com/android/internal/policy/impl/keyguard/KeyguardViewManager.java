@@ -164,8 +164,9 @@ public class KeyguardViewManager {
     }
 
     private void inflateKeyguardView() {
-        if (mKeyguardView != null) {
-            mKeyguardHost.removeView(mKeyguardView);
+        View v = mKeyguardHost.findViewById(R.id.keyguard_host_view);
+        if (v != null) {
+            mKeyguardHost.removeView(v);
         }
         // TODO: Remove once b/7094175 is fixed
         Slog.d(TAG, "inflateKeyguardView: b/7094175 mContext.config="
