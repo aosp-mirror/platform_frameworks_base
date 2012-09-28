@@ -1300,6 +1300,11 @@ class TouchExplorer implements EventStreamTransformation {
 
         @Override
         public void run() {
+            // Announce the end of gesture recognition.
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
+            // Clearing puts is in touch exploration state with a finger already
+            // down, so announce the transition to exploration state.
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
             clear();
         }
     }
