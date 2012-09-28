@@ -157,6 +157,7 @@ void DisplayList::clearResources() {
     mAnimationMatrix = NULL;
 
     Caches& caches = Caches::getInstance();
+    caches.unregisterFunctors(mFunctorCount);
     caches.resourceCache.lock();
 
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
@@ -218,6 +219,7 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     init();
 
     if (writer.size() == 0) {
+        mFunctorCount = 0;
         return;
     }
 
@@ -232,7 +234,10 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     writer.flatten(buffer);
     mReader.setMemory(buffer, mSize);
 
+    mFunctorCount = recorder.getFunctorCount();
+
     Caches& caches = Caches::getInstance();
+    caches.registerFunctors(mFunctorCount);
     caches.resourceCache.lock();
 
     const Vector<SkBitmap*>& bitmapResources = recorder.getBitmapResources();
@@ -1340,7 +1345,8 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
 
 DisplayListRenderer::DisplayListRenderer():
         mCaches(Caches::getInstance()), mWriter(MIN_WRITER_SIZE),
-        mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false), mHasDrawOps(false) {
+        mTranslateX(0.0f), mTranslateY(0.0f), mHasTranslate(false),
+        mHasDrawOps(false), mFunctorCount(0) {
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
@@ -1397,6 +1403,7 @@ void DisplayListRenderer::reset() {
     mLayers.clear();
 
     mHasDrawOps = false;
+    mFunctorCount = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1453,6 +1460,7 @@ status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) 
     // Ignore dirty during recording, it matters only when we replay
     addOp(DisplayList::DrawGLFunction);
     addInt((int) functor);
+    mFunctorCount++;
     return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
