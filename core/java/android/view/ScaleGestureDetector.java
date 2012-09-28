@@ -19,6 +19,7 @@ package android.view;
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.FloatMath;
+import android.util.Log;
 
 import java.util.Arrays;
 
@@ -223,10 +224,14 @@ public class ScaleGestureDetector {
      * @param id pointer id to clear
      * @see #addTouchHistory(MotionEvent)
      */
-    private void removeTouchHistoryForId(int id) {
+    private boolean removeTouchHistoryForId(int id) {
+        if (id >= mTouchHistoryLastAccepted.length) {
+            return false;
+        }
         mTouchHistoryLastAccepted[id] = Float.NaN;
         mTouchHistoryDirection[id] = 0;
         mTouchHistoryLastAcceptedTime[id] = 0;
+        return true;
     }
 
     /**
@@ -236,6 +241,11 @@ public class ScaleGestureDetector {
      * @see #addTouchHistory(MotionEvent)
      */
     private float getAdjustedTouchHistory(int id) {
+        if (id >= mTouchHistoryLastAccepted.length) {
+            Log.e(TAG, "Error retrieving adjusted touch history for id=" + id +
+                    " - incomplete event stream?");
+            return 0;
+        }
         return mTouchHistoryLastAccepted[id];
     }
 
@@ -244,6 +254,10 @@ public class ScaleGestureDetector {
      * @see #addTouchHistory(MotionEvent)
      */
     private void clearTouchHistory() {
+        if (mTouchHistoryLastAccepted == null) {
+            // All three arrays will be null if this is the case; nothing to do.
+            return;
+        }
         Arrays.fill(mTouchHistoryLastAccepted, Float.NaN);
         Arrays.fill(mTouchHistoryDirection, 0);
         Arrays.fill(mTouchHistoryLastAcceptedTime, 0);
@@ -333,7 +347,11 @@ public class ScaleGestureDetector {
         final float focusY = sumY / div;
 
         if (pointerUp) {
-            removeTouchHistoryForId(event.getPointerId(event.getActionIndex()));
+            final int id = event.getPointerId(event.getActionIndex());
+            if (!removeTouchHistoryForId(id)) {
+                Log.e(TAG, "Got ACTION_POINTER_UP for previously unknown id=" + id +
+                        " - incomplete event stream?");
+            }
         } else {
             addTouchHistory(event);
         }
