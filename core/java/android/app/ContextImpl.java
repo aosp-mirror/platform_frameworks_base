@@ -1029,7 +1029,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, false, false,
-                UserHandle.myUserId());
+                getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1042,7 +1042,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, receiverPermission, false, false,
-                UserHandle.myUserId());
+                getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1056,7 +1056,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, receiverPermission, true, false,
-                UserHandle.myUserId());
+                getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1089,7 +1089,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
-                true, false, UserHandle.myUserId());
+                true, false, getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1160,7 +1160,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, false, true,
-                UserHandle.myUserId());
+                getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1193,7 +1193,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
-                true, true, UserHandle.myUserId());
+                true, true, getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1208,7 +1208,7 @@ class ContextImpl extends Context {
         try {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().unbroadcastIntent(
-                    mMainThread.getApplicationThread(), intent, UserHandle.myUserId());
+                    mMainThread.getApplicationThread(), intent, getUserId());
         } catch (RemoteException e) {
         }
     }
@@ -1281,7 +1281,7 @@ class ContextImpl extends Context {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
-        return registerReceiverInternal(receiver, UserHandle.myUserId(),
+        return registerReceiverInternal(receiver, getUserId(),
                 filter, broadcastPermission, scheduler, getOuterContext());
     }
 
@@ -1337,12 +1337,12 @@ class ContextImpl extends Context {
 
     @Override
     public ComponentName startService(Intent service) {
-        return startServiceAsUser(service, Process.myUserHandle());
+        return startServiceAsUser(service, mUser);
     }
 
     @Override
     public boolean stopService(Intent service) {
-        return stopServiceAsUser(service, Process.myUserHandle());
+        return stopServiceAsUser(service, mUser);
     }
 
     @Override
@@ -1446,7 +1446,7 @@ class ContextImpl extends Context {
                 arguments.setAllowFds(false);
             }
             return ActivityManagerNative.getDefault().startInstrumentation(
-                    className, profileFile, 0, arguments, null, UserHandle.myUserId());
+                    className, profileFile, 0, arguments, null, getUserId());
         } catch (RemoteException e) {
             // System has crashed, nothing we can do.
         }
@@ -1790,6 +1790,11 @@ class ContextImpl extends Context {
                     FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH);
         }
         return file;
+    }
+
+    /** {@hide} */
+    public int getUserId() {
+        return mUser.getIdentifier();
     }
 
     static ContextImpl createSystemContext(ActivityThread mainThread) {
