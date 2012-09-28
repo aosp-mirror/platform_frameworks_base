@@ -912,21 +912,38 @@ public final class ActivityManagerService extends ActivityManagerNative
             switch (msg.what) {
             case SHOW_ERROR_MSG: {
                 HashMap data = (HashMap) msg.obj;
+                boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
                 synchronized (ActivityManagerService.this) {
                     ProcessRecord proc = (ProcessRecord)data.get("app");
+                    AppErrorResult res = (AppErrorResult) data.get("result");
                     if (proc != null && proc.crashDialog != null) {
                         Slog.e(TAG, "App already has crash dialog: " + proc);
+                        if (res != null) {
+                            res.set(0);
+                        }
                         return;
                     }
-                    AppErrorResult res = (AppErrorResult) data.get("result");
+                    if (!showBackground && UserHandle.getAppId(proc.uid)
+                            >= Process.FIRST_APPLICATION_UID && proc.userId != mCurrentUserId
+                            && proc.pid != MY_PID) {
+                        Slog.w(TAG, "Skipping crash dialog of " + proc + ": background");
+                        if (res != null) {
+                            res.set(0);
+                        }
+                        return;
+                    }
                     if (mShowDialogs && !mSleeping && !mShuttingDown) {
-                        Dialog d = new AppErrorDialog(mContext, res, proc);
+                        Dialog d = new AppErrorDialog(mContext,
+                                ActivityManagerService.this, res, proc);
                         d.show();
                         proc.crashDialog = d;
                     } else {
                         // The device is asleep, so just pretend that the user
                         // saw a crash dialog and hit "force quit".
-                        res.set(0);
+                        if (res != null) {
+                            res.set(0);
+                        }
                     }
                 }
                 
@@ -977,7 +994,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
                     if (mShowDialogs && !mSleeping && !mShuttingDown) {
-                        Dialog d = new StrictModeViolationDialog(mContext, res, proc);
+                        Dialog d = new StrictModeViolationDialog(mContext,
+                                ActivityManagerService.this, res, proc);
                         d.show();
                         proc.crashDialog = d;
                     } else {
@@ -3685,7 +3703,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void closeSystemDialogsLocked(String reason) {
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
         if (reason != null) {
             intent.putExtra("reason", reason);
         }
@@ -3757,7 +3776,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                    | Intent.FLAG_RECEIVER_FOREGROUND);
         }
         intent.putExtra(Intent.EXTRA_UID, uid);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(uid));
@@ -3770,7 +3790,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void forceStopUserLocked(int userId) {
         forceStopPackageLocked(null, -1, false, false, true, false, userId);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
@@ -7365,7 +7386,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             return mController != null;
         }
     }
-    
+
+    public void requestBugReport() {
+        // No permission check because this can't do anything harmful --
+        // it will just eventually cause the user to be presented with
+        // a UI to select where the bug report goes.
+        SystemProperties.set("ctl.start", "bugreport");
+    }
+
     public void registerProcessObserver(IProcessObserver observer) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerProcessObserver()");
@@ -7700,9 +7728,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
-                    
+
                     ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
-                    
+
                     final ArrayList<ComponentName> doneReceivers = new ArrayList<ComponentName>();
                     for (int i=0; i<ris.size(); i++) {
                         ActivityInfo ai = ris.get(i).activityInfo;
@@ -7876,7 +7904,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             long ident = Binder.clearCallingIdentity();
             try {
                 Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null,
@@ -8083,8 +8112,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void startAppProblemLocked(ProcessRecord app) {
-        app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
-                mContext, app.info.packageName, app.info.flags);
+        if (app.userId == mCurrentUserId) {
+            app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
+                    mContext, app.info.packageName, app.info.flags);
+        } else {
+            // If this app is not running under the current user, then we
+            // can't give it a report button because that would require
+            // launching the report UI under a different user.
+            app.errorReportReceiver = null;
+        }
         skipCurrentReceiverLocked(app);
     }
 
@@ -8592,7 +8628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (appErrorIntent != null) {
             try {
-                mContext.startActivity(appErrorIntent);
+                mContext.startActivityAsUser(appErrorIntent, new UserHandle(r.userId));
             } catch (ActivityNotFoundException e) {
                 Slog.w(TAG, "bug report receiver dissappeared", e);
             }
@@ -11429,6 +11465,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int user : users) {
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
                         .queryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user);
+                if (user != 0 && newReceivers != null) {
+                    // If this is not the primary user, we need to check for
+                    // any receivers that should be filtered out.
+                    for (int i=0; i<newReceivers.size(); i++) {
+                        ResolveInfo ri = newReceivers.get(i);
+                        if ((ri.activityInfo.flags&ActivityInfo.FLAG_PRIMARY_USER_ONLY) != 0) {
+                            newReceivers.remove(i);
+                            i--;
+                        }
+                    }
+                }
                 if (newReceivers != null && newReceivers.size() == 0) {
                     newReceivers = null;
                 }
@@ -12273,12 +12320,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                        | Intent.FLAG_RECEIVER_REPLACE_PENDING
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
-                    broadcastIntentLocked(null, null,
-                            new Intent(Intent.ACTION_LOCALE_CHANGED),
+                    intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                    broadcastIntentLocked(null, null, intent,
                             null, null, 0, null, null,
                             null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
@@ -14087,7 +14136,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
                         oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
                 Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null,
@@ -14096,17 +14146,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                     if (userId != 0) {
                         intent = new Intent(Intent.ACTION_USER_INITIALIZE);
+                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
                                 new IIntentReceiver.Stub() {
                                     public void performReceive(Intent intent, int resultCode,
                                             String data, Bundle extras, boolean ordered,
                                             boolean sticky, int sendingUser) {
-                                        synchronized (ActivityManagerService.this) {
-                                            getUserManagerLocked().makeInitialized(userInfo.id);
-                                        }
+                                        userInitialized(uss);
                                     }
                                 }, 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
                                 userId);
+                        uss.initializing = true;
                     } else {
                         getUserManagerLocked().makeInitialized(userInfo.id);
                     }
@@ -14133,7 +14183,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent;
             if (oldUserId >= 0) {
                 intent = new Intent(Intent.ACTION_USER_BACKGROUND);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, oldUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null,
@@ -14141,13 +14192,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (newUserId >= 0) {
                 intent = new Intent(Intent.ACTION_USER_FOREGROUND);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null,
                         false, false, MY_PID, Process.SYSTEM_UID, newUserId);
                 intent = new Intent(Intent.ACTION_USER_SWITCHED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
@@ -14178,6 +14231,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             };
             synchronized (this) {
+                uss.switching = true;
                 mCurUserSwitchCallback = callback;
             }
             for (int i=0; i<N; i++) {
@@ -14209,6 +14263,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oldUserId, newUserId, uss));
     }
 
+    void userInitialized(UserStartedState uss) {
+        synchronized (ActivityManagerService.this) {
+            getUserManagerLocked().makeInitialized(uss.mHandle.getIdentifier());
+            uss.initializing = false;
+            completeSwitchAndInitalizeLocked(uss);
+        }
+    }
+
     void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
         final int N = mUserSwitchObservers.beginBroadcast();
         for (int i=0; i<N; i++) {
@@ -14219,6 +14281,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mUserSwitchObservers.finishBroadcast();
         synchronized (this) {
+            uss.switching = false;
+            completeSwitchAndInitalizeLocked(uss);
+        }
+    }
+
+    void completeSwitchAndInitalizeLocked(UserStartedState uss) {
+        if (!uss.switching && !uss.initializing) {
             mWindowManager.stopFreezingScreen();
         }
     }

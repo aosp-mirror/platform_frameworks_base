@@ -2193,7 +2193,7 @@ public class PackageParser {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_singleUser,
                     false)) {
-                a.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
+                a.info.flags |= ActivityInfo.FLAG_SINGLE_USER;
                 if (a.info.exported) {
                     Slog.w(TAG, "Activity exported request ignored due to singleUser: "
                             + a.className + " at " + mArchiveSourcePath + " "
@@ -2201,6 +2201,11 @@ public class PackageParser {
                     a.info.exported = false;
                 }
                 setExported = true;
+            }
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_primaryUserOnly,
+                    false)) {
+                a.info.flags |= ActivityInfo.FLAG_PRIMARY_USER_ONLY;
             }
         }
 
