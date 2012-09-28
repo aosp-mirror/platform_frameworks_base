@@ -503,6 +503,7 @@ private:
     size_t mSize;
 
     bool mIsRenderable;
+    uint32_t mFunctorCount;
 
     String8 mName;
 
@@ -659,6 +660,10 @@ public:
 
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
+    }
+
+    uint32_t getFunctorCount() const {
+        return mFunctorCount;
     }
 
 private:
@@ -886,6 +891,8 @@ private:
     float mTranslateY;
     bool mHasTranslate;
     bool mHasDrawOps;
+
+    uint32_t mFunctorCount;
 
     friend class DisplayList;
 
