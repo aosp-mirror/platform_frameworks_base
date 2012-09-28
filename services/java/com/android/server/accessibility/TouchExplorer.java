@@ -102,6 +102,10 @@ class TouchExplorer implements EventStreamTransformation {
     // The timeout after which we are no longer trying to detect a gesture.
     private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
 
+    // The timeout to send interaction end events in case we did not
+    // receive the expected hover exit event due to a misbehaving app.
+    private static final int SEND_INTERACTION_END_EVENTS_TIMEOUT = 200;
+
     // Temporary array for storing pointer IDs.
     private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
 
@@ -134,6 +138,9 @@ class TouchExplorer implements EventStreamTransformation {
 
     // Command for delayed sending of a hover exit event.
     private final SendHoverDelayed mSendHoverExitDelayed;
+
+    // Command for delayed sending of interaction ending events.
+    private final SendInteractionEndEventsDelayed mSendInteractionEndEventsDelayed;
 
     // Command for delayed sending of a long press.
     private final PerformLongPressDelayed mPerformLongPressDelayed;
@@ -233,6 +240,7 @@ class TouchExplorer implements EventStreamTransformation {
         mGestureLibrary.load();
         mSendHoverEnterDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_ENTER, true);
         mSendHoverExitDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_EXIT, false);
+        mSendInteractionEndEventsDelayed = new SendInteractionEndEventsDelayed();
         mDoubleTapDetector = new DoubleTapDetector();
         final float density = context.getResources().getDisplayMetrics().density;
         mScaledMinPointerDistanceToUseMiddleLocation =
@@ -278,6 +286,7 @@ class TouchExplorer implements EventStreamTransformation {
         mSendHoverExitDelayed.remove();
         mPerformLongPressDelayed.remove();
         mExitGestureDetectionModeDelayed.remove();
+        mSendInteractionEndEventsDelayed.remove();
         // Reset the pointer trackers.
         mReceivedPointerTracker.clear();
         mInjectedPointerTracker.clear();
@@ -334,6 +343,7 @@ class TouchExplorer implements EventStreamTransformation {
         // last hover exit event.
         if (mTouchExplorationGestureEnded
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+            mSendInteractionEndEventsDelayed.remove();
             mTouchExplorationGestureEnded = false;
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
@@ -342,6 +352,7 @@ class TouchExplorer implements EventStreamTransformation {
         // last hover exit and the touch exploration gesture end events.
         if (mTouchInteractionEnded
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+            mSendInteractionEndEventsDelayed.remove();
             mTouchInteractionEnded = false;
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
@@ -414,6 +425,10 @@ class TouchExplorer implements EventStreamTransformation {
                         if (mSendHoverEnterDelayed.isPending()) {
                             mSendHoverEnterDelayed.remove();
                             mSendHoverExitDelayed.remove();
+                        }
+
+                        if (mSendInteractionEndEventsDelayed.isPending()) {
+                            mSendInteractionEndEventsDelayed.forceSendAndRemove();
                         }
 
                         mPerformLongPressDelayed.remove();
@@ -873,6 +888,9 @@ class TouchExplorer implements EventStreamTransformation {
             final int pointerIdBits = event.getPointerIdBits();
             mTouchExplorationGestureEnded = true;
             mTouchInteractionEnded = true;
+            if (!mSendInteractionEndEventsDelayed.isPending()) {
+                mSendInteractionEndEventsDelayed.post();
+            }
             sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits, policyFlags);
         }
     }
@@ -1484,14 +1502,54 @@ class TouchExplorer implements EventStreamTransformation {
                 } else {
                     mTouchExplorationGestureEnded = true;
                     mTouchInteractionEnded = true;
+                    if (!mSendInteractionEndEventsDelayed.isPending()) {
+                        mSendInteractionEndEventsDelayed.post();
+                    }
                 }
             } else {
                 if (!mGestureStarted) {
                     mTouchInteractionEnded = true;
+                    if (!mSendInteractionEndEventsDelayed.isPending()) {
+                        mSendInteractionEndEventsDelayed.post();
+                    }
                 }
             }
             sendMotionEvent(mPrototype, mHoverAction, mPointerIdBits, mPolicyFlags);
             clear();
+        }
+    }
+
+    private class SendInteractionEndEventsDelayed implements Runnable {
+
+        public void remove() {
+            mHandler.removeCallbacks(this);
+        }
+
+        public void post() {
+            mHandler.postDelayed(this, SEND_INTERACTION_END_EVENTS_TIMEOUT);
+        }
+
+        public boolean isPending() {
+            return mHandler.hasCallbacks(this);
+        }
+
+        public void forceSendAndRemove() {
+            if (isPending()) {
+                run();
+                remove();
+            }
+        }
+
+        @Override
+        public void run() {
+            if (mTouchExplorationGestureEnded) {
+                mTouchExplorationGestureEnded = false;
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            }
+            if (mTouchInteractionEnded) {
+                mTouchInteractionEnded = false;
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+            }
         }
     }
 
