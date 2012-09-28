@@ -115,6 +115,7 @@ public:
     bool isPureTranslate() const;
     bool isSimple() const;
     bool isIdentity() const;
+    bool isPerspective() const;
 
     bool changesBounds() const;
 

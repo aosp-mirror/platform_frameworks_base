@@ -73,6 +73,11 @@ bool Matrix4::isIdentity() const {
     return mIsIdentity;
 }
 
+bool Matrix4::isPerspective() const {
+    return data[kPerspective0] != 0.0f || data[kPerspective1] != 0.0f ||
+            data[kPerspective2] != 1.0f;
+}
+
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
     // TODO: Do something smarter here

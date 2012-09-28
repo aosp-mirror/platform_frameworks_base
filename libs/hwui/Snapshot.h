@@ -121,6 +121,11 @@ public:
     bool isIgnored() const;
 
     /**
+     * Indicates whether the current transform has perspective components.
+     */
+    bool hasPerspectiveTransform() const;
+
+    /**
      * Dirty flags.
      */
     int flags;
