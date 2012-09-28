@@ -158,7 +158,8 @@ class QuickSettings {
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
         locationController.addStateChangedCallback(mModel);
-        RotationPolicy.registerRotationPolicyListener(mContext, mRotationPolicyListener);
+        RotationPolicy.registerRotationPolicyListener(mContext, mRotationPolicyListener,
+                UserHandle.USER_ALL);
     }
 
     private void queryForUserInformation() {

@@ -32,6 +32,7 @@ import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
@@ -261,12 +262,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                    ));
         }
 
-        // XXX: this is currently broken and will always return 0, but should start working at some point
-        try {
-            mCurrentUserId = ActivityManagerNative.getDefault().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Log.v(TAG, "Couldn't get current user ID; guessing it's 0", e);
-        }
+        mCurrentUserId = ActivityManager.getCurrentUser();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
