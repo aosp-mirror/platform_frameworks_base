@@ -1573,7 +1573,8 @@ status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint*
 }
 
 status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
-    const bool reject = quickReject(left, top, left + bitmap->width(), top + bitmap->height());
+    const bool reject = quickRejectNoScissor(left, top,
+            left + bitmap->width(), top + bitmap->height());
     uint32_t* location = addOp(DisplayList::DrawBitmap, reject);
     addBitmap(bitmap);
     addPoint(left, top);
@@ -1587,7 +1588,7 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkP
     const mat4 transform(*matrix);
     transform.mapRect(r);
 
-    const bool reject = quickReject(r.left, r.top, r.right, r.bottom);
+    const bool reject = quickRejectNoScissor(r.left, r.top, r.right, r.bottom);
     uint32_t* location = addOp(DisplayList::DrawBitmapMatrix, reject);
     addBitmap(bitmap);
     addMatrix(matrix);
@@ -1599,7 +1600,7 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkP
 status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
         float dstRight, float dstBottom, SkPaint* paint) {
-    const bool reject = quickReject(dstLeft, dstTop, dstRight, dstBottom);
+    const bool reject = quickRejectNoScissor(dstLeft, dstTop, dstRight, dstBottom);
     uint32_t* location = addOp(DisplayList::DrawBitmapRect, reject);
     addBitmap(bitmap);
     addBounds(srcLeft, srcTop, srcRight, srcBottom);
@@ -1611,7 +1612,8 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
 
 status_t DisplayListRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
         SkPaint* paint) {
-    const bool reject = quickReject(left, top, left + bitmap->width(), top + bitmap->height());
+    const bool reject = quickRejectNoScissor(left, top,
+            left + bitmap->width(), top + bitmap->height());
     uint32_t* location = addOp(DisplayList::DrawBitmapData, reject);
     addBitmapData(bitmap);
     addPoint(left, top);
@@ -1644,7 +1646,7 @@ status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs,
     SkXfermode::Mode mode;
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
 
-    const bool reject = quickReject(left, top, right, bottom);
+    const bool reject = quickRejectNoScissor(left, top, right, bottom);
     uint32_t* location = addOp(DisplayList::DrawPatch, reject);
     addBitmap(bitmap);
     addInts(xDivs, width);
@@ -1667,7 +1669,7 @@ status_t DisplayListRenderer::drawColor(int color, SkXfermode::Mode mode) {
 status_t DisplayListRenderer::drawRect(float left, float top, float right, float bottom,
         SkPaint* paint) {
     const bool reject = paint->getStyle() == SkPaint::kFill_Style &&
-            quickReject(left, top, right, bottom);
+            quickRejectNoScissor(left, top, right, bottom);
     uint32_t* location = addOp(DisplayList::DrawRect, reject);
     addBounds(left, top, right, bottom);
     addPaint(paint);
@@ -1678,7 +1680,7 @@ status_t DisplayListRenderer::drawRect(float left, float top, float right, float
 status_t DisplayListRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, SkPaint* paint) {
     const bool reject = paint->getStyle() == SkPaint::kFill_Style &&
-            quickReject(left, top, right, bottom);
+            quickRejectNoScissor(left, top, right, bottom);
     uint32_t* location = addOp(DisplayList::DrawRoundRect, reject);
     addBounds(left, top, right, bottom);
     addPoint(rx, ry);
@@ -1721,7 +1723,7 @@ status_t DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
     left -= offset;
     top -= offset;
 
-    const bool reject = quickReject(left, top, left + width, top + height);
+    const bool reject = quickRejectNoScissor(left, top, left + width, top + height);
     uint32_t* location = addOp(DisplayList::DrawPath, reject);
     addPath(path);
     addPaint(paint);
@@ -1791,7 +1793,7 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     if (CC_LIKELY(paint->getTextAlign() == SkPaint::kLeft_Align)) {
         SkPaint::FontMetrics metrics;
         paint->getFontMetrics(&metrics, 0.0f);
-        reject = quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom);
+        reject = quickRejectNoScissor(x, y + metrics.fTop, x + length, y + metrics.fBottom);
     }
 
     uint32_t* location = addOp(DisplayList::DrawText, reject);

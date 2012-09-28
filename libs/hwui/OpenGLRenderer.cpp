@@ -2647,20 +2647,21 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     setupDrawShaderUniforms(pureTranslate);
     setupDrawTextGammaUniforms();
 
-    const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
+    const Rect* clip = pureTranslate ? mSnapshot->clipRect :
+            (mSnapshot->hasPerspectiveTransform() ? NULL : &mSnapshot->getLocalClip());
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     const bool hasActiveLayer = hasLayer();
 
     bool status;
-    if (paint->getTextAlign() != SkPaint::kLeft_Align) {
+    if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
         status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
-            positions, hasActiveLayer ? &bounds : NULL);
+                positions, hasActiveLayer ? &bounds : NULL);
     } else {
         status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
-            positions, hasActiveLayer ? &bounds : NULL);
+                positions, hasActiveLayer ? &bounds : NULL);
     }
 
     if (status && hasActiveLayer) {
