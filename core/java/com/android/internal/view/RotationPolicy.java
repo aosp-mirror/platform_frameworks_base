@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -55,16 +56,17 @@ public final class RotationPolicy {
      */
     public static boolean isRotationLockToggleVisible(Context context) {
         return isRotationLockToggleSupported(context) &&
-                Settings.System.getInt(context.getContentResolver(),
-                        Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0) == 0;
+                Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0,
+                        UserHandle.USER_CURRENT) == 0;
     }
 
     /**
      * Returns true if rotation lock is enabled.
      */
     public static boolean isRotationLocked(Context context) {
-        return Settings.System.getInt(context.getContentResolver(),
-                Settings.System.ACCELEROMETER_ROTATION, 0) == 0;
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) == 0;
     }
 
     /**
@@ -73,8 +75,9 @@ public final class RotationPolicy {
      * Should be used by the rotation lock toggle.
      */
     public static void setRotationLock(Context context, final boolean enabled) {
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0);
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0,
+                UserHandle.USER_CURRENT);
 
         AsyncTask.execute(new Runnable() {
             @Override
@@ -100,8 +103,9 @@ public final class RotationPolicy {
      * Should be used by Display settings and Accessibility settings.
      */
     public static void setRotationLockForAccessibility(Context context, final boolean enabled) {
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, enabled ? 1 : 0);
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, enabled ? 1 : 0,
+                        UserHandle.USER_CURRENT);
 
         AsyncTask.execute(new Runnable() {
             @Override
@@ -121,16 +125,25 @@ public final class RotationPolicy {
     }
 
     /**
-     * Registers a listener for rotation policy changes.
+     * Registers a listener for rotation policy changes affecting the caller's user
      */
     public static void registerRotationPolicyListener(Context context,
             RotationPolicyListener listener) {
+        registerRotationPolicyListener(context, listener, UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Registers a listener for rotation policy changes affecting a specific user,
+     * or USER_ALL for all users.
+     */
+    public static void registerRotationPolicyListener(Context context,
+            RotationPolicyListener listener, int userHandle) {
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 Settings.System.ACCELEROMETER_ROTATION),
-                false, listener.mObserver);
+                false, listener.mObserver, userHandle);
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY),
-                false, listener.mObserver);
+                false, listener.mObserver, userHandle);
     }
 
     /**
