@@ -14059,6 +14059,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
 
+                mWindowManager.lockNow();
                 mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
                         R.anim.screen_user_enter);
 
