@@ -45,19 +45,40 @@ public class Grain extends TestBase {
         mScript.set_gNoiseStrength(s);
     }
 
+    private int findHighBit(int v) {
+        int bit = 0;
+        while (v > 1) {
+            bit++;
+            v >>= 1;
+        }
+        return bit;
+    }
+
+
     public void createTest(android.content.res.Resources res) {
         int width = mInPixelsAllocation.getType().getX();
         int height = mInPixelsAllocation.getType().getY();
 
+        int noiseW = findHighBit(width);
+        int noiseH = findHighBit(height);
+        if (noiseW > 9) {
+            noiseW = 9;
+        }
+        if (noiseH > 9) {
+            noiseH = 9;
+        }
+        noiseW = 1 << noiseW;
+        noiseH = 1 << noiseH;
+
         Type.Builder tb = new Type.Builder(mRS, Element.U8(mRS));
-        tb.setX(width);
-        tb.setY(height);
+        tb.setX(noiseW);
+        tb.setY(noiseH);
         mNoise = Allocation.createTyped(mRS, tb.create());
         mNoise2 = Allocation.createTyped(mRS, tb.create());
 
         mScript = new ScriptC_grain(mRS, res, R.raw.grain);
-        mScript.set_gWidth(width);
-        mScript.set_gHeight(height);
+        mScript.set_gWMask(noiseW - 1);
+        mScript.set_gHMask(noiseH - 1);
         mScript.set_gNoiseStrength(0.5f);
         mScript.set_gBlendSource(mNoise);
         mScript.set_gNoise(mNoise2);

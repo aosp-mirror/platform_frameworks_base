@@ -42,6 +42,7 @@ public class RsYuv
     private Allocation mAllocationOut;
     private Allocation mAllocationIn;
     private ScriptC_yuv mScript;
+    private ScriptIntrinsicYuvToRGB mYuv;
 
     RsYuv(RenderScript rs, Resources res, int width, int height) {
         mHeight = height;
@@ -49,6 +50,8 @@ public class RsYuv
         mRS = rs;
         mScript = new ScriptC_yuv(mRS, res, R.raw.yuv);
         mScript.invoke_setSize(mWidth, mHeight);
+
+        mYuv = ScriptIntrinsicYuvToRGB.create(rs, Element.RGBA_8888(mRS));
 
         Type.Builder tb = new Type.Builder(mRS, Element.RGBA_8888(mRS));
         tb.setX(mWidth);
@@ -58,34 +61,16 @@ public class RsYuv
         mAllocationIn = Allocation.createSized(rs, Element.U8(mRS), (mHeight * mWidth) +
                                                ((mHeight / 2) * (mWidth / 2) * 2));
 
-        mScript.bind_gYuvIn(mAllocationIn);
+        mYuv.setInput(mAllocationIn);
     }
 
     private long mTiming[] = new long[50];
     private int mTimingSlot = 0;
 
-    void execute(byte[] yuv) {
+    void execute(byte[] yuv, Bitmap b) {
         mAllocationIn.copyFrom(yuv);
-        mRS.finish();
-
-        long t1 = java.lang.System.currentTimeMillis();
-        mScript.forEach_root(mAllocationOut);
-        mRS.finish();
-        long t2 = java.lang.System.currentTimeMillis();
-
-        mTiming[mTimingSlot++] = t2 - t1;
-        if (mTimingSlot >= mTiming.length) {
-            float total = 0;
-            for (int i=0; i<mTiming.length; i++) {
-                total += (float)mTiming[i];
-            }
-            total /= mTiming.length;
-            Log.e("yuv", "core time = " + total);
-            mTimingSlot = 0;
-        }
-    }
-
-    void copyOut(Bitmap b) {
+        mYuv.forEach(mAllocationOut);
+        mScript.forEach_root(mAllocationOut, mAllocationOut);
         mAllocationOut.copyTo(b);
     }
 
