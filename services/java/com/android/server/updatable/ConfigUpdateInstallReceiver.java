@@ -126,7 +126,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(istream);
         } catch (CertificateException e) {
-            throw new IllegalStateException("Got malformed certificate from settings, ignoring", e);
+            throw new IllegalStateException("Got malformed certificate from settings, ignoring");
         }
     }
 
@@ -167,7 +167,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             String strVersion = IoUtils.readFileAsString(updateVersion.getCanonicalPath()).trim();
             return Integer.parseInt(strVersion);
         } catch (IOException e) {
-            Slog.i(TAG, "Couldn't find current metadata, assuming first update", e);
+            Slog.i(TAG, "Couldn't find current metadata, assuming first update");
             return 0;
         }
     }
@@ -181,7 +181,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         try {
             return IoUtils.readFileAsString(updateContent.getCanonicalPath()).trim();
         } catch (IOException e) {
-            Slog.i(TAG, "Failed to read current content, assuming first update!", e);
+            Slog.i(TAG, "Failed to read current content, assuming first update!");
             return null;
         }
     }
