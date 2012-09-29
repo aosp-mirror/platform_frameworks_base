@@ -1206,9 +1206,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void tryDisableTouchExplorationLocked(Service service) {
-        if (!service.canReceiveEvents()) {
-            return;
-        }
         UserState userState = getUserStateLocked(service.mUserId);
         if (userState.mIsTouchExplorationEnabled) {
             final int serviceCount = userState.mServices.size();
