@@ -1,10 +1,10 @@
 package com.android.systemui;
 
-import android.service.dreams.Dream;
+import android.service.dreams.DreamService;
 
 import com.android.systemui.BeanBag.Board;
 
-public class BeanBagDream extends Dream {
+public class BeanBagDream extends DreamService {
 
     private Board mBoard;
 

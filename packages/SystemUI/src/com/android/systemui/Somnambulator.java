@@ -22,7 +22,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.Dream;
+import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
@@ -69,7 +69,7 @@ public class Somnambulator extends Activity {
                 Slog.i(TAG, "Dreams currently disabled for docks.");
             } else {
                 IDreamManager somnambulist = IDreamManager.Stub.asInterface(
-                        ServiceManager.checkService(Dream.DREAM_SERVICE));
+                        ServiceManager.checkService(DreamService.DREAM_SERVICE));
                 if (somnambulist != null) {
                     try {
                         Slog.v(TAG, "Dreaming on " + (docked ? "dock insertion" : "user request"));
