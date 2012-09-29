@@ -46,6 +46,9 @@ public class CheckedTextView extends TextView implements Checkable {
     private int mCheckMarkWidth;
     private boolean mNeedRequestlayout;
 
+    private int initialPaddingLeft = -1;
+    private int initialPaddingRight = -1;
+
     private static final int[] CHECKED_STATE_SET = {
         R.attr.state_checked
     };
@@ -176,10 +179,22 @@ public class CheckedTextView extends TextView implements Checkable {
     protected void internalSetPadding(int left, int top, int right, int bottom) {
         super.internalSetPadding(left, top, right, bottom);
         setBasePadding(isLayoutRtl());
+        initialPaddingLeft = mPaddingLeft;
+        initialPaddingRight = mPaddingRight;
     }
 
     @Override
     public void onPaddingChanged(int layoutDirection) {
+        updatePadding();
+    }
+
+    @Override
+    public void onRtlPropertiesChanged() {
+        super.onRtlPropertiesChanged();
+        updatePadding();
+    }
+
+    private void updatePadding() {
         int newPadding = (mCheckMarkDrawable != null) ?
                 mCheckMarkWidth + mBasePadding : mBasePadding;
         mNeedRequestlayout |= (mPaddingRight != newPadding);
@@ -193,7 +208,7 @@ public class CheckedTextView extends TextView implements Checkable {
             mNeedRequestlayout = false;
         }
     }
-    
+
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         super.setPadding(left, top, right, bottom);
