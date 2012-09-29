@@ -44,7 +44,6 @@ interface IPowerManager
     void setPokeLock(int pokey, IBinder lock, String tag);
     void setStayOnSetting(int val);
     void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
-    void preventScreenOn(boolean prevent);
 
     // temporarily overrides the screen brightness settings to allow the user to
     // see the effect of a settings change without applying it immediately
