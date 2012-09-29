@@ -127,6 +127,8 @@ public class Am {
             runSetDebugApp();
         } else if (op.equals("clear-debug-app")) {
             runClearDebugApp();
+        } else if (op.equals("bug-report")) {
+            runBugReport();
         } else if (op.equals("monitor")) {
             runMonitor();
         } else if (op.equals("screen-compat")) {
@@ -844,6 +846,11 @@ public class Am {
         mAm.setDebugApp(null, false, true);
     }
 
+    private void runBugReport() throws Exception {
+        mAm.requestBugReport();
+        System.out.println("Your lovely bug report is being created; please be patient.");
+    }
+
     private void runSwitchUser() throws Exception {
         String user = nextArgRequired();
         mAm.switchUser(Integer.parseInt(user));
@@ -1507,6 +1514,9 @@ public class Am {
                 "    --persistent: retain this value\n" +
                 "\n" +
                 "am clear-debug-app: clear the previously set-debug-app.\n" +
+                "\n" +
+                "am bug-report: request bug report generation; will launch UI\n" +
+                "    when done to select where it should be delivered." +
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +
