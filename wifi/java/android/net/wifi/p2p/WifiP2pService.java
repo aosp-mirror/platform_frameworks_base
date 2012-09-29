@@ -1231,10 +1231,17 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 mGroup.getNetworkName()));
                     }
 
-                    mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                     if (mGroup.isGroupOwner()) {
+                        /* Setting an idle time out on GO causes issues with certain scenarios
+                         * on clients where it can be off-channel for longer and with the power
+                         * save modes used.
+                         *
+                         * TODO: Verify multi-channel scenarios and supplicant behavior are
+                         * better before adding a time out in future
+                         */
                         startDhcpServer(mGroup.getInterface());
                     } else {
+                        mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
                         mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(mContext,
                                 P2pStateMachine.this, mGroup.getInterface());
                         mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
