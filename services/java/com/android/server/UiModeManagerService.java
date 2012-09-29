@@ -39,7 +39,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.Dream;
+import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.Slog;
 
@@ -501,7 +501,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
             Slog.i(TAG, "Activating dream while docked.");
             try {
                 IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(
-                        ServiceManager.getService(Dream.DREAM_SERVICE));
+                        ServiceManager.getService(DreamService.DREAM_SERVICE));
                 dreamManagerService.dream();
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Could not start dream when docked.", ex);
