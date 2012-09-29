@@ -26,19 +26,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.android.internal.policy.impl.keyguard.KeyguardWidgetPager
-        android:id="@+id/app_widget_container"
+    <include layout="@layout/keyguard_widget_region"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="0.45"
         android:layout_marginTop="35dip"
         android:layout_marginLeft="33dip"
-        android:layout_marginRight="33dip"
-        android:visibility="gone">
-            <!-- TODO: Remove this when supported as a widget -->
-            <include layout="@layout/keyguard_status_view"/>
-            <include layout="@layout/keyguard_transport_control_view"/>
-    </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
+        android:layout_marginRight="33dip"/>
 
     <RelativeLayout
         android:layout_width="wrap_content"
