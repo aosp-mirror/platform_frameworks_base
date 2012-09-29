@@ -3107,15 +3107,18 @@
     <!-- The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="sms_short_code_confirm_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> would like to send a message to &lt;b><xliff:g id="dest_address">%2$s</xliff:g>&lt;/b>.</string>
     <!-- Message details for the SMS short code confirmation dialog (possible premium short code). [CHAR LIMIT=NONE] -->
-    <string name="sms_short_code_details">This may cause charges on your mobile account.</string>
+    <string name="sms_short_code_details">This <font fgcolor="#ffffb060">may cause charges</font> on your mobile account.</string>
     <!-- Message details for the SMS short code confirmation dialog (premium short code). [CHAR LIMIT=NONE] -->
-    <string name="sms_premium_short_code_details">This will cause charges on your mobile account.</string>
+    <string name="sms_premium_short_code_details"><font fgcolor="#ffffb060">This will cause charges on your mobile account.</font></string>
     <!-- Text of the approval button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
     <string name="sms_short_code_confirm_allow">Send</string>
     <!-- Text of the cancel button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
     <string name="sms_short_code_confirm_deny">Cancel</string>
     <!-- Text of the checkbox for the SMS short code confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
     <string name="sms_short_code_remember_choice">Remember my choice</string>
+    <!-- Text shown when remember checkbox is checked to inform the user how they may undo the setting. [CHAR LIMIT=40] -->
+    <string name="sms_short_code_remember_undo_instruction">You can change this later in Settings\u00A0>\u00A0Apps"</string>
+
     <!-- Text of the approval button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30] -->
     <string name="sms_short_code_confirm_always_allow">Always Allow</string>
     <!-- Text of the cancel button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30] -->
