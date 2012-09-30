@@ -1508,6 +1508,9 @@ public abstract class HardwareRenderer {
         @Override
         void destroyLayers(View view) {
             if (view != null && isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) {
+                if (mCanvas != null) {
+                    mCanvas.clearLayerUpdates();
+                }
                 destroyHardwareLayer(view);
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
             }
@@ -1556,6 +1559,9 @@ public abstract class HardwareRenderer {
                 safelyRun(new Runnable() {
                     @Override
                     public void run() {
+                        if (mCanvas != null) {
+                            mCanvas.clearLayerUpdates();
+                        }
                         destroyResources(view);
                         GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
                     }
