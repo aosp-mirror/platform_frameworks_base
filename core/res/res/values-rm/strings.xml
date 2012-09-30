@@ -428,6 +428,10 @@
     <skip />
     <!-- no translation found for permdesc_retrieve_window_content (3193269069469700265) -->
     <skip />
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <!-- no translation found for permlab_retrieve_window_info (8532295199112519378) -->
     <skip />
     <!-- no translation found for permdesc_retrieve_window_info (4998836370424186849) -->
@@ -2266,6 +2270,12 @@
     <skip />
     <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
-    <!-- no translation found for kg_temp_back_string (5812983904056640466) -->
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
     <skip />
 </resources>

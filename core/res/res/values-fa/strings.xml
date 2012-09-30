@@ -287,6 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"به برنامه اجازه می‎دهد تا وضعیت داخلی سیستم را بازیابی کند. برنامه‎های مخرب می‎توانند انواع مختلفی از اطلاعات خصوصی و امن را که معمولا به آن‌ها نیاز ندارند، بازیابی کنند."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"بازیابی محتوای صفحه"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"به برنامه اجازه می‎دهد تا محتوای پنجره فعال را بازیابی کند. برنامه‎های مخرب می‎توانند کل محتوای پنجره را بازیابی کنند و همه متن آنرا به غیر از گذرواژه‎ها امتحان کنند."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"بازیابی اطلاعات پنجره"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"به یک برنامه کاربردی اجازه می‌دهد که اطلاعات مربوط به پنجره‌ها را از مدیریت پنجره بازیابی کند. برنامه‌های کاربردی مخرب ممکن است اطلاعاتی که برای استفاده سیستم داخلی درنظر گرفته شده‌اند را بازیابی کنند."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"فیلتر کردن رویدادها"</string>
@@ -1406,5 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"صدا به بالاتر از سطح ایمن افزایش یابد؟"\n"گوش دادن به صدای بلند برای زمان‌های طولانی می‌تواند به شنوایی شما آسیب برساند."</string>
-    <string name="kg_temp_back_string" msgid="5812983904056640466">"&lt;"</string>
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <skip />
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <skip />
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
+    <skip />
 </resources>
