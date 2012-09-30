@@ -1577,9 +1577,16 @@ class MountService extends IMountService.Stub
 
     private void warnOnNotMounted() {
         final StorageVolume primary = getPrimaryPhysicalVolume();
-        if (primary != null
-                && Environment.MEDIA_MOUNTED.equals(getVolumeState(primary.getPath()))) {
-            Slog.w(TAG, "getSecureContainerList() called when storage not mounted");
+        if (primary != null) {
+            boolean mounted = false;
+            try {
+                mounted = Environment.MEDIA_MOUNTED.equals(getVolumeState(primary.getPath()));
+            } catch (IllegalStateException e) {
+            }
+
+            if (!mounted) {
+                Slog.w(TAG, "getSecureContainerList() called when storage not mounted");
+            }
         }
     }
 
