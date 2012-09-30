@@ -172,7 +172,77 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Multiple Screens</a> for more information.
      */
     public int screenLayout;
-    
+
+    /** @hide */
+    static public int resetScreenLayout(int curLayout) {
+        return (curLayout&~(SCREENLAYOUT_LONG_MASK | SCREENLAYOUT_SIZE_MASK
+                        | SCREENLAYOUT_COMPAT_NEEDED))
+                | (SCREENLAYOUT_LONG_YES | SCREENLAYOUT_SIZE_XLARGE);
+    }
+
+    /** @hide */
+    static public int reduceScreenLayout(int curLayout, int longSizeDp, int shortSizeDp) {
+        int screenLayoutSize;
+        boolean screenLayoutLong;
+        boolean screenLayoutCompatNeeded;
+
+        // These semi-magic numbers define our compatibility modes for
+        // applications with different screens.  These are guarantees to
+        // app developers about the space they can expect for a particular
+        // configuration.  DO NOT CHANGE!
+        if (longSizeDp < 470) {
+            // This is shorter than an HVGA normal density screen (which
+            // is 480 pixels on its long side).
+            screenLayoutSize = SCREENLAYOUT_SIZE_SMALL;
+            screenLayoutLong = false;
+            screenLayoutCompatNeeded = false;
+        } else {
+            // What size is this screen screen?
+            if (longSizeDp >= 960 && shortSizeDp >= 720) {
+                // 1.5xVGA or larger screens at medium density are the point
+                // at which we consider it to be an extra large screen.
+                screenLayoutSize = SCREENLAYOUT_SIZE_XLARGE;
+            } else if (longSizeDp >= 640 && shortSizeDp >= 480) {
+                // VGA or larger screens at medium density are the point
+                // at which we consider it to be a large screen.
+                screenLayoutSize = SCREENLAYOUT_SIZE_LARGE;
+            } else {
+                screenLayoutSize = SCREENLAYOUT_SIZE_NORMAL;
+            }
+
+            // If this screen is wider than normal HVGA, or taller
+            // than FWVGA, then for old apps we want to run in size
+            // compatibility mode.
+            if (shortSizeDp > 321 || longSizeDp > 570) {
+                screenLayoutCompatNeeded = true;
+            } else {
+                screenLayoutCompatNeeded = false;
+            }
+
+            // Is this a long screen?
+            if (((longSizeDp*3)/5) >= (shortSizeDp-1)) {
+                // Anything wider than WVGA (5:3) is considering to be long.
+                screenLayoutLong = true;
+            } else {
+                screenLayoutLong = false;
+            }
+        }
+
+        // Now reduce the last screenLayout to not be better than what we
+        // have found.
+        if (!screenLayoutLong) {
+            curLayout = (curLayout&~SCREENLAYOUT_LONG_MASK) | SCREENLAYOUT_LONG_NO;
+        }
+        if (screenLayoutCompatNeeded) {
+            curLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
+        }
+        int curSize = curLayout&SCREENLAYOUT_SIZE_MASK;
+        if (screenLayoutSize < curSize) {
+            curLayout = (curLayout&~SCREENLAYOUT_SIZE_MASK) | screenLayoutSize;
+        }
+        return curLayout;
+    }
+
     /**
      * Check if the Configuration's current {@link #screenLayout} is at
      * least the given size.
