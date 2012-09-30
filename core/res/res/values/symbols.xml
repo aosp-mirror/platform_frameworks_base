@@ -1075,6 +1075,7 @@
   <java-symbol type="layout" name="notification_template_inbox" />
   <java-symbol type="layout" name="keyguard_multi_user_avatar" />
   <java-symbol type="layout" name="keyguard_multi_user_selector_widget" />
+  <java-symbol type="layout" name="keyguard_widget_region" />
   <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
@@ -1283,6 +1284,10 @@
   <java-symbol type="id" name="keyguard_users_grid" />
   <java-symbol type="id" name="clock_text" />
   <java-symbol type="id" name="clock_view" />
+  <java-symbol type="id" name="kg_widget_region" />
+  <java-symbol type="id" name="left_strip" />
+  <java-symbol type="id" name="right_strip" />
+
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
