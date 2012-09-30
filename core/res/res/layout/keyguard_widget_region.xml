@@ -54,7 +54,7 @@
         <Space
             android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="1.6"/>
         <com.android.internal.policy.impl.keyguard.KeyguardGlowStripView
             android:id="@+id/right_strip"
             android:layout_width="0dip"
