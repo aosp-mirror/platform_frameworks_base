@@ -17,9 +17,11 @@
 package com.android.server;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -171,6 +173,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final ArrayList<LocationProviderProxy> mProxyProviders =
             new ArrayList<LocationProviderProxy>();
 
+    // current active user on the device - other users are denied location data
+    private int mCurrentUserId = UserHandle.USER_OWNER;
+
     public LocationManagerService(Context context) {
         super();
         mContext = context;
@@ -223,6 +228,20 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         });
         mPackageMonitor.register(mContext, Looper.myLooper(), true);
+
+        // listen for user change
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, null);
 
         updateProvidersLocked();
     }
@@ -298,6 +317,19 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mGeocodeProvider = GeocoderProxy.createAndBind(mContext, providerPackageNames);
         if (mGeocodeProvider == null) {
             Slog.e(TAG,  "no geocoder provider found");
+        }
+    }
+
+    /**
+     * Called when the device's active user changes.
+     * @param userId the new active user's UserId
+     */
+    private void switchUser(int userId) {
+        //Log.d("LocationManagerService", "switchUser(" + mCurrentUserId + " -> " + userId + ")"); // TODO: remove this
+        synchronized (mLock) {
+            // TODO: inform previous user's Receivers that they will no longer receive updates
+            mCurrentUserId = userId;
+            // TODO: inform new user's Receivers that they are back on the update train
         }
     }
 
