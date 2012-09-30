@@ -332,4 +332,11 @@ public abstract class DisplayList {
      * @see View#offsetTopAndBottom(int)
      */
     public abstract void offsetTopBottom(int offset);
+
+    /**
+     * Reset native resources. This is called when cleaning up the state of DisplayLists
+     * during destruction of hardware resources, to ensure that we do not hold onto
+     * obsolete resources after related resources are gone.
+     */
+    public abstract void reset();
 }
