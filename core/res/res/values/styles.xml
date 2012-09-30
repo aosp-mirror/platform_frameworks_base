@@ -464,7 +464,11 @@ please see styles_device_defaults.xml.
         <item name="android:textEditSuggestionItemLayout">?android:attr/textEditSuggestionItemLayout</item>
         <item name="android:textCursorDrawable">?android:attr/textCursorDrawable</item>
     </style>
-    
+
+    <style name="Widget.CheckedTextView">
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
     <style name="Widget.TextView.ListSeparator">
         <item name="android:background">@android:drawable/dark_header_dither</item>
         <item name="android:layout_width">match_parent</item>
@@ -1589,6 +1593,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.TextView" parent="Widget.TextView">
     </style>
 
+    <style name="Widget.Holo.CheckedTextView" parent="Widget.CheckedTextView">
+    </style>
+
     <style name="Widget.Holo.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
         <item name="android:background">@android:drawable/list_section_divider_holo_dark</item>
         <item name="android:textAllCaps">true</item>
@@ -2015,6 +2022,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">
+    </style>
+
+    <style name="Widget.Holo.Light.CheckedTextView" parent="Widget.CheckedTextView">
     </style>
 
     <style name="Widget.Holo.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">

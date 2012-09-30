@@ -55,7 +55,7 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     public CheckedTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.checkedTextViewStyle);
     }
 
     public CheckedTextView(Context context, AttributeSet attrs, int defStyle) {

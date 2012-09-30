@@ -104,6 +104,7 @@ easier.
         <item name="absListViewStyle">@android:style/Widget.DeviceDefault.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.DeviceDefault.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.DeviceDefault.CompoundButton.CheckBox</item>
+        <item name="checkedTextViewStyle">@android:style/Widget.DeviceDefault.CheckedTextView</item>
         <item name="dropDownListViewStyle">@android:style/Widget.DeviceDefault.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.DeviceDefault.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.DeviceDefault.ExpandableListView</item>
@@ -261,6 +262,7 @@ easier.
         <item name="absListViewStyle">@android:style/Widget.DeviceDefault.Light.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.DeviceDefault.Light.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.DeviceDefault.Light.CompoundButton.CheckBox</item>
+        <item name="checkedTextViewStyle">@android:style/Widget.DeviceDefault.Light.CheckedTextView</item>
         <item name="dropDownListViewStyle">@android:style/Widget.DeviceDefault.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.DeviceDefault.Light.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.DeviceDefault.Light.ExpandableListView</item>
