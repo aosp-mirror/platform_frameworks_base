@@ -45,11 +45,6 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void clearUserActivityTimeout(long arg0, long arg1) throws RemoteException {
-        // pass for now.
-    }
-
-    @Override
     public void crash(String arg0) throws RemoteException {
         // pass for now.
     }
