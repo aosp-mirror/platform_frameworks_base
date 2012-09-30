@@ -324,7 +324,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"wys ongemagtigde vensters"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Laat die program toe om vensters te skep wat bedoel is om deur die interne stelsel se gebruikerkoppelvlak gebruik te word. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"teken oor ander programme"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Laat die program toe om bo-oor ande programme of dele van die gebruikerkoppelvlak te teken.  Hulle kan met jou gebruik van die koppelvlak in enige program inmeng, of verander wat jy dink jy in ander programme sien."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Laat die program toe om bo-oor ande programme of dele van die gebruikerkoppelvlak te teken. Hulle kan met jou gebruik van die koppelvlak in enige program inmeng, of verander wat jy dink jy in ander programme sien."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"verander globale animasiespoed"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Laat die program toe om die globale animasiespoed te eniger tyd te verander (vinniger of stadiger animasie)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"bestuur programtokens"</string>
@@ -372,8 +372,8 @@
     <string name="permlab_installPackages" msgid="2199128482820306924">"installeer programme direk"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Laat die program toe om nuwe of opgedateerde Android-pakkette te installeer. Kwaadwillige programme kan dit dalk gebruik om nuwe programme by te voeg met arbitrêr kragtige toestemmings."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"vee alle programkasdata uit"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Laat die program toe om tabletberging vry te stel deur lêers in die cache-gidse van ander programme uit te vee. Dit kan veroorsaak dat ander programme stadiger begin omdat hulle hulle data moet herophaal."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Laat die program toe om foonberging vry te stel deur lêers in die cache-gidse van ander programme uit te vee. Dit kan veroorsaak dat ander programme stadiger begin omdat hulle hulle data moet herophaal."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Laat die program toe om tabletberging oop te maak deur lêers in die kas-gidse van ander programme uit te vee. Dit kan veroorsaak dat ander programme stadiger begin omdat hulle hulle data moet herophaal."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Laat die program toe om foonberging oop te maak deur lêers in die kas-gidse van ander programme uit te vee. Dit kan veroorsaak dat ander programme stadiger begin omdat hulle hulle data moet herophaal."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"skuif programhulpbronne"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Laat die program toe om hulpbronne van interne na eksterne media te skuif, en omgekeerd."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lees sensitiewe logdata"</string>
@@ -437,7 +437,7 @@
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presiese ligging (GPS en netwerkgebaseer)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Laat die program toe om jou presiese ligging te kry met behulp van die globaleposisioneringstelsel (GPS) of netwerkliggingbronne soos seltorings en Wi-Fi. Hierdie liggingdienste moet aangeskakel en beskikbaar wees aan jou toestel vir die program om dit te gebruik. Programme kan dit gebruik om te bepaal waar jy is en kan batterylewe opgebruik."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"benaderde ligging (netwerkgebaseer)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Laat die program toe om jou benaderde ligging te kry. Hierdie plek is verkry deur liggingdienste met gebruik van netwerkliggingbronne soos seltorings en Wi-Fie. Hierdie liggingdienste moet aangeskakel en beskikbaar wees aan jou toestel vir die program om dit te gebruik. Programme kan dit gebruik om te bepaal waar omtrent jy is."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Laat die program toe om jou benaderde ligging te kry. Hierdie ligging word verkry deur liggingdienste met gebruik van netwerkliggingbronne soos seltorings en Wi-Fi. Hierdie liggingdienste moet aangeskakel en beskikbaar wees aan jou toestel vir die program om dit te gebruik. Programme kan dit gebruik om te bepaal waar omtrent jy is."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"kry toegang tot SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Laat die program toe om SurfaceFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lees raambuffer"</string>
@@ -559,7 +559,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"gaan in by Bluetooth-instellings"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Laat die program toe om die plaaslike Bluetooth-tablet op te stel, en om met afstandbeheer toestelle saam te bind."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Laat die program toe om die plaaslike Bluetooth-foon op te stel en te ontdek en met afgeleë toestelle saam te bind."</string>
-    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koppel en ontkoppel van WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koppel aan en ontkoppel van WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Laat die program toe om te bepaal of WiMAX geaktiveer is en of enige WiMAX-netwerke gekoppel is."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Laat die program toe om die tablet aan WiMAX-netwerke te koppel en daarvan te ontkoppel."</string>
@@ -1107,7 +1107,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Kanselleer"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Onthou my keuse"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Laat altyd toe"</string>
-    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Moet nooit toelaat dat"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Moet nooit toelaat nie"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart verwyder"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Die mobielnetwerk sal nie beskikbaar wees nie totdat jy weer begin met \'n geldige SIM-kaart."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Klaar"</string>
@@ -1121,7 +1121,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NUUT: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Verskaf deur <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"dit kan jou geld kos"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"dit kan jou dalk geld kos"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-geheue"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB gekoppel"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Jy het via USB aan jou rekenaar gekoppel. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se USB-geheue wil kopieer."</string>
@@ -1409,7 +1409,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Die foon sal nou na fabrieksverstek teruggestel word."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Verhoog volume bo veilige vlak?"\n"Deur vir lang tydperke na hoë volume te luister, kan jou gehoor beskadig word."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Moet volume bo veilige vlak verhoog word?"\n"Deur vir lang tydperke op hoë volume te luister, kan jou gehoor beskadig."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
     <!-- no translation found for accessibility_enabled (1381972048564547685) -->
