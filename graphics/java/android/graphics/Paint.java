@@ -371,12 +371,30 @@ public class Paint {
     public void reset() {
         native_reset(mNativePaint);
         setFlags(DEFAULT_PAINT_FLAGS);
+
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
+
+        mColorFilter = null;
+        mMaskFilter = null;
+        mPathEffect = null;
+        mRasterizer = null;
+        mShader = null;
+        mTypeface = null;
+        mXfermode = null;
+
         mHasCompatScaling = false;
-        mCompatScaling = mInvCompatScaling = 1;
+        mCompatScaling = 1;
+        mInvCompatScaling = 1;
+
+        hasShadow = false;
+        shadowDx = 0;
+        shadowDy = 0;
+        shadowRadius = 0;
+        shadowColor = 0;
+
         mBidiFlags = BIDI_DEFAULT_LTR;
         setTextLocale(Locale.getDefault());
     }
