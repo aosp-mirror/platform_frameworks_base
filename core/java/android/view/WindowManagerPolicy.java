@@ -500,6 +500,16 @@ public interface WindowManagerPolicy {
     public int checkAddPermission(WindowManager.LayoutParams attrs);
 
     /**
+     * Check permissions when adding a window.
+     *
+     * @param attrs The window's LayoutParams.
+     *
+     * @return True if the window may only be shown to the current user, false if the window can
+     * be shown on all users' windows.
+     */
+    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs);
+
+    /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
      * input focus.
