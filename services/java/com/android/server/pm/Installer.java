@@ -254,10 +254,12 @@ public final class Installer {
         return execute(builder.toString());
     }
 
-    public int deleteCacheFiles(String name) {
+    public int deleteCacheFiles(String name, int userId) {
         StringBuilder builder = new StringBuilder("rmcache");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        builder.append(userId);
         return execute(builder.toString());
     }
 
