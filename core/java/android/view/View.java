@@ -14802,6 +14802,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    public void resetPaddingToInitialValues() {
+        mPaddingLeft = mUserPaddingLeftInitial;
+        mPaddingRight = mUserPaddingRightInitial;
+    }
+
+    /**
+     * @hide
+     */
     public Insets getOpticalInsets() {
         if (mLayoutInsets == null) {
             mLayoutInsets = computeOpticalInsets();
