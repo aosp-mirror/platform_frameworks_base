@@ -45,6 +45,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
@@ -5890,6 +5891,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Check if installing from ADB
         if ((flags & PackageManager.INSTALL_FROM_ADB) != 0) {
+            // Do not run verification in a test harness environment
+            if (ActivityManager.isRunningInTestHarness()) {
+                return false;
+            }
             // Check if the developer does not want package verification for ADB installs
             if (android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                     android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) == 0) {
