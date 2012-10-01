@@ -71,6 +71,7 @@ import java.util.ArrayList;
  *
  */
 class QuickSettings {
+    public static final boolean SHOW_IME_TILE = false;
 
     private Context mContext;
     private PanelBar mBar;
@@ -561,32 +562,34 @@ class QuickSettings {
         });
         parent.addView(wifiDisplayTile);
 
-        // IME
-        QuickSettingsTileView imeTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
-        imeTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    mBar.collapseAllPanels(true);
-                    Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-                    pendingIntent.send();
-                } catch (Exception e) {}
-            }
-        });
-        mModel.addImeTile(imeTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.ime_textview);
-                if (state.label != null) {
-                    tv.setText(state.label);
+        if (SHOW_IME_TILE) {
+            // IME
+            QuickSettingsTileView imeTile = (QuickSettingsTileView)
+                    inflater.inflate(R.layout.quick_settings_tile, parent, false);
+            imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
+            imeTile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        mBar.collapseAllPanels(true);
+                        Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                        pendingIntent.send();
+                    } catch (Exception e) {}
                 }
-                view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
-            }
-        });
-        parent.addView(imeTile);
+            });
+            mModel.addImeTile(imeTile, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView view, State state) {
+                    TextView tv = (TextView) view.findViewById(R.id.ime_textview);
+                    if (state.label != null) {
+                        tv.setText(state.label);
+                    }
+                    view.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
+                }
+            });
+            parent.addView(imeTile);
+        }
 
         // Bug reports
         QuickSettingsTileView bugreportTile = (QuickSettingsTileView)
