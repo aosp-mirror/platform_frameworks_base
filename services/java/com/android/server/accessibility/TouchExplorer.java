@@ -700,13 +700,6 @@ class TouchExplorer implements EventStreamTransformation {
                     }
                 }
             } break;
-            case MotionEvent.ACTION_POINTER_UP: {
-                final int pointerId = event.getPointerId(event.getActionIndex());
-                if (mReceivedPointerTracker.isActiveOrWasLastActiveUpPointer(pointerId)) {
-                    sendUpForInjectedDownPointers(event, policyFlags);
-                    mCurrentState = STATE_TOUCH_EXPLORING;
-                }
-             } break;
             case MotionEvent.ACTION_UP: {
                 // Announce the end of a new touch interaction.
                 sendAccessibilityEvent(
