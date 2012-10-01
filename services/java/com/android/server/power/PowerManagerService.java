@@ -266,6 +266,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use -1 to disable.
     private int mScreenBrightnessOverrideFromWindowManager = -1;
 
+    // The user activity timeout override from the window manager
+    // to allow the current foreground activity to override the user activity timeout.
+    // Use -1 to disable.
+    private long mUserActivityTimeoutOverrideFromWindowManager = -1;
+
     // The screen brightness setting override from the settings application
     // to temporarily adjust the brightness until next updated,
     // Use -1 to disable.
@@ -1156,6 +1161,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
             timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
         }
+        if (mUserActivityTimeoutOverrideFromWindowManager >= 0) {
+            timeout = (int)Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
+        }
         return Math.max(timeout, MINIMUM_SCREEN_OFF_TIMEOUT);
     }
 
@@ -1573,12 +1581,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    @Override // Binder call
-    public void setPokeLock(int pokey, IBinder lock, String tag) {
-        // TODO Auto-generated method stub
-        // Only used by phone app, delete this
-    }
-
     /**
      * Set the setting that determines whether the device stays on when plugged in.
      * The argument is a bit string, with each bit specifying a power source that,
@@ -1718,6 +1720,36 @@ public final class PowerManagerService extends IPowerManager.Stub
         // Do nothing.
         // Button lights are not currently supported in the new implementation.
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+    }
+
+    /**
+     * Used by the window manager to override the user activity timeout based on the
+     * current foreground activity.  It can only be used to make the timeout shorter
+     * than usual, not longer.
+     *
+     * This method must only be called by the window manager.
+     *
+     * @param timeoutMillis The overridden timeout, or -1 to disable the override.
+     */
+    public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setUserActivityTimeoutOverrideFromWindowManagerInternal(long timeoutMillis) {
+        synchronized (mLock) {
+            if (mUserActivityTimeoutOverrideFromWindowManager != timeoutMillis) {
+                mUserActivityTimeoutOverrideFromWindowManager = timeoutMillis;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
     }
 
     /**
@@ -1869,6 +1901,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mScreenBrightnessModeSetting=" + mScreenBrightnessModeSetting);
             pw.println("  mScreenBrightnessOverrideFromWindowManager="
                     + mScreenBrightnessOverrideFromWindowManager);
+            pw.println("  mUserActivityTimeoutOverrideFromWindowManager="
+                    + mUserActivityTimeoutOverrideFromWindowManager);
             pw.println("  mTemporaryScreenBrightnessSettingOverride="
                     + mTemporaryScreenBrightnessSettingOverride);
             pw.println("  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride="

@@ -21,9 +21,7 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.os.RemoteException;
 import android.os.Handler;
-import android.os.LocalPowerManager;
 import android.os.ServiceManager;
 import android.os.PowerManager;
 
@@ -104,70 +102,6 @@ public class PowerTest extends TestActivity
                         mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
                     }
                 }, 5000);
-            }
-        },
-        new Test("Touch events don't poke") {
-            public void run() {
-                mPokeState |= LocalPowerManager.POKE_LOCK_IGNORE_TOUCH_EVENTS;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-
-        new Test("Touch events poke") {
-            public void run() {
-                mPokeState &= ~LocalPowerManager.POKE_LOCK_IGNORE_TOUCH_EVENTS;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-        new Test("Short timeout") {
-            public void run() {
-                mPokeState &= ~LocalPowerManager.POKE_LOCK_TIMEOUT_MASK;
-                mPokeState |= LocalPowerManager.POKE_LOCK_SHORT_TIMEOUT;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-        new Test("Medium timeout") {
-            public void run() {
-                mPokeState &= ~LocalPowerManager.POKE_LOCK_TIMEOUT_MASK;
-                mPokeState |= LocalPowerManager.POKE_LOCK_MEDIUM_TIMEOUT;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-        new Test("Normal timeout") {
-            public void run() {
-                mPokeState &= ~LocalPowerManager.POKE_LOCK_TIMEOUT_MASK;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-        new Test("Illegal timeout") {
-            public void run() {
-                mPokeState |= LocalPowerManager.POKE_LOCK_SHORT_TIMEOUT
-                        | LocalPowerManager.POKE_LOCK_MEDIUM_TIMEOUT;
-                try {
-                    mPowerManager.setPokeLock(mPokeState, mPokeToken, TAG);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
             }
         },
     };
