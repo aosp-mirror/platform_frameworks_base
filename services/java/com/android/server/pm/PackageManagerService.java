@@ -8540,11 +8540,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
             return false;
         }
-        // TODO: Pass userId to deleteCacheFiles
-        int retCode = mInstaller.deleteCacheFiles(packageName);
+        int retCode = mInstaller.deleteCacheFiles(packageName, userId);
         if (retCode < 0) {
             Slog.w(TAG, "Couldn't remove cache files for package: "
-                       + packageName);
+                       + packageName + " u" + userId);
             return false;
         }
         return true;

@@ -199,7 +199,7 @@ int delete_user_data(const char *pkgname, uid_t persona);
 int make_user_data(const char *pkgname, uid_t uid, uid_t persona);
 int delete_persona(uid_t persona);
 int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy);
-int delete_cache(const char *pkgname);
+int delete_cache(const char *pkgname, uid_t persona);
 int move_dex(const char *src, const char *dst);
 int rm_dex(const char *path);
 int protect(char *pkgname, gid_t gid);
