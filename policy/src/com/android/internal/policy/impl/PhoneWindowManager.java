@@ -4298,6 +4298,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardMediator != null) {
             mKeyguardMediator.setCurrentUser(newUserId);
         }
+        if (mStatusBarService != null) {
+            try {
+                mStatusBarService.setCurrentUser(newUserId);
+            } catch (RemoteException e) {
+                // oh well
+            }
+        }
     }
 
     @Override
