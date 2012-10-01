@@ -483,6 +483,8 @@
         <attr name="autoCompleteTextViewStyle" format="reference" />
         <!-- Default Checkbox style. -->
         <attr name="checkboxStyle" format="reference" />
+        <!-- Default CheckedTextView style. -->
+        <attr name="checkedTextViewStyle" format="reference" />
         <!-- Default ListView style for drop downs. -->
         <attr name="dropDownListViewStyle" format="reference" />
         <!-- Default EditText style. -->
