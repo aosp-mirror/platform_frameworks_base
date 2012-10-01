@@ -111,7 +111,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             return;
         } else {
             // Reset the previously active user to appear inactive
-            avatar.lockDrawableState();
+            avatar.lockPressedState();
             mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
             mActiveUserAvatar.setActive(false, true,  SWITCH_ANIMATION_DURATION, new Runnable() {
                 @Override
@@ -120,7 +120,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
                         ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
                         WindowManagerGlobal.getWindowManagerService().lockNow();
                         // Set the new active user, and make it appear active
-                        avatar.resetDrawableState();
+                        avatar.resetPressedState();
                         mCallback.showSecurityView();
                         mActiveUserAvatar = avatar;
                         mActiveUserAvatar.setActive(true, false, 0, null);

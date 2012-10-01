@@ -45,6 +45,9 @@ class KeyguardMultiUserAvatar extends FrameLayout {
     private boolean mInit = true;
     private KeyguardMultiUserSelectorView mUserSelector;
 
+    boolean mPressedStateLocked = false;
+    boolean mTempPressedStateHolder = false;
+
     public static KeyguardMultiUserAvatar fromXml(int resId, Context context,
             KeyguardMultiUserSelectorView userSelector, UserInfo info) {
         KeyguardMultiUserAvatar icon = (KeyguardMultiUserAvatar)
@@ -135,25 +138,33 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         }
     }
 
-    boolean mLockDrawableState = false;
-
-    public void lockDrawableState() {
-        mLockDrawableState = true;
+    public void lockPressedState() {
+        mPressedStateLocked = true;
     }
 
-    public void resetDrawableState() {
-        mLockDrawableState = false;
+    public void resetPressedState() {
+        mPressedStateLocked = false;
         post(new Runnable() {
             @Override
             public void run() {
-                refreshDrawableState();
+                KeyguardMultiUserAvatar.this.setPressed(mTempPressedStateHolder);
             }
         });
     }
 
-    protected void drawableStateChanged() {
-        if (!mLockDrawableState) {
-            super.drawableStateChanged();
+    @Override
+    public void setPressed(boolean pressed) {
+        if (!mPressedStateLocked) {
+            super.setPressed(pressed);
+            if (pressed) {
+                mUserImage.setColorFilter(Color.argb(0, INACTIVE_COLOR,
+                        INACTIVE_COLOR, INACTIVE_COLOR));
+            } else if (!mActive) {
+                mUserImage.setColorFilter(Color.argb(INACTIVE_ALPHA, INACTIVE_COLOR,
+                        INACTIVE_COLOR, INACTIVE_COLOR));
+            }
+        } else {
+            mTempPressedStateHolder = pressed;
         }
     }
 
