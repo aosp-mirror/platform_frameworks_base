@@ -598,6 +598,7 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
+        private long mUserActivityTimeout = -1;
         private boolean mUpdateRotation = false;
 
         private static final int DISPLAY_CONTENT_UNKNOWN = 0;
@@ -8775,6 +8776,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     && mInnerFields.mButtonBrightness < 0) {
                 mInnerFields.mButtonBrightness = w.mAttrs.buttonBrightness;
             }
+            if (!mInnerFields.mSyswin && w.mAttrs.userActivityTimeout >= 0
+                    && mInnerFields.mUserActivityTimeout < 0) {
+                mInnerFields.mUserActivityTimeout = w.mAttrs.userActivityTimeout;
+            }
+
             final int type = attrs.type;
             if (canBeSeen
                     && (type == TYPE_SYSTEM_DIALOG
@@ -8874,7 +8880,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mHoldScreen = null;
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
+        mInnerFields.mUserActivityTimeout = -1;
         mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
+
         mTransactionSequence++;
 
         final DisplayContent defaultDisplay = getDefaultDisplayContentLocked();
@@ -9349,6 +9357,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPowerManager.setButtonBrightnessOverrideFromWindowManager(
                         toBrightnessOverride(mInnerFields.mButtonBrightness));
             }
+            mPowerManager.setUserActivityTimeoutOverrideFromWindowManager(
+                    mInnerFields.mUserActivityTimeout);
         }
 
         if (mTurnOnScreen) {

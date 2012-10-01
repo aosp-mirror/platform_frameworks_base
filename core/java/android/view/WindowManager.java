@@ -1176,13 +1176,41 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 0x00000002;
 
         /**
+         * When this window has focus, does not call user activity for all input events so
+         * the application will have to do it itself.  Should only be used by
+         * the keyguard and phone app.
+         * <p>
+         * Should only be used by the keyguard and phone app.
+         * </p>
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
+
+        /**
          * Control special features of the input subsystem.
          *
          * @see #INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES
          * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
+         * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
          * @hide
          */
         public int inputFeatures;
+
+        /**
+         * Sets the number of milliseconds before the user activity timeout occurs
+         * when this window has focus.  A value of -1 uses the standard timeout.
+         * A value of 0 uses the minimum support display timeout.
+         * <p>
+         * This property can only be used to reduce the user specified display timeout;
+         * it can never make the timeout longer than it normally would be.
+         * </p><p>
+         * Should only be used by the keyguard and phone app.
+         * </p>
+         *
+         * @hide
+         */
+        public long userActivityTimeout = -1;
 
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -1268,6 +1296,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(subtreeSystemUiVisibility);
             out.writeInt(hasSystemUiListeners ? 1 : 0);
             out.writeInt(inputFeatures);
+            out.writeLong(userActivityTimeout);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1308,6 +1337,7 @@ public interface WindowManager extends ViewManager {
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readInt() != 0;
             inputFeatures = in.readInt();
+            userActivityTimeout = in.readLong();
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1333,6 +1363,8 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURES_CHANGED = 1<<15;
         /** {@hide} */
         public static final int PRIVATE_FLAGS_CHANGED = 1<<16;
+        /** {@hide} */
+        public static final int USER_ACTIVITY_TIMEOUT_CHANGED = 1<<17;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -1455,6 +1487,11 @@ public interface WindowManager extends ViewManager {
                 changes |= INPUT_FEATURES_CHANGED;
             }
 
+            if (userActivityTimeout != o.userActivityTimeout) {
+                userActivityTimeout = o.userActivityTimeout;
+                changes |= USER_ACTIVITY_TIMEOUT_CHANGED;
+            }
+
             return changes;
         }
     
@@ -1546,6 +1583,9 @@ public interface WindowManager extends ViewManager {
             }
             if (inputFeatures != 0) {
                 sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
+            }
+            if (userActivityTimeout >= 0) {
+                sb.append(" userActivityTimeout=").append(userActivityTimeout);
             }
             sb.append('}');
             return sb.toString();
