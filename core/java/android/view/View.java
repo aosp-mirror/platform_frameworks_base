@@ -17234,7 +17234,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @return the measure specification based on size and mode
          */
         public static int makeMeasureSpec(int size, int mode) {
-            return (size & ~MODE_MASK) | (mode & MODE_MASK);
+            return size + mode;
         }
 
         /**
