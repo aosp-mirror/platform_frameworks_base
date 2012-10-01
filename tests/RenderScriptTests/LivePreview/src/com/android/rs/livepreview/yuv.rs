@@ -3,8 +3,6 @@
 #pragma rs java_package_name(com.android.rs.livepreview)
 #pragma rs_fp_relaxed
 
-uchar *gYuvIn;
-
 static int gWidth;
 static int gHeight;
 static uchar crossProcess_tableR[256];
@@ -80,13 +78,9 @@ static uchar4 vignette(uchar4 color, uint32_t x, uint32_t y) {
     return convert_uchar4(c);
 }
 
-void root(uchar4 *out, uint32_t x, uint32_t y) {
-    uchar Y = gYuvIn[(y * gWidth) + x];
-    uchar *uv = &gYuvIn[gWidth * gHeight];
-    uv += (((x>>1)<<1) + (y>>1) * gWidth);
-
-    uchar4 p = rsYuvToRGBA_uchar4(Y, uv[1], uv[0]);
-    p = crossProcess_i(p);
+void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
+    uchar4 p;
+    p = crossProcess_i(*in);
     p = vignette(p, x, y);
 
     out->rgba = p;

@@ -305,8 +305,7 @@ public class CameraPreviewActivity extends Activity
 
             long t1 = java.lang.System.currentTimeMillis();
 
-            mFilterYuv.execute(data);
-            mFilterYuv.copyOut(mCallbackBitmap);
+            mFilterYuv.execute(data, mCallbackBitmap);
 
             long t2 = java.lang.System.currentTimeMillis();
             mTiming[mTimingSlot++] = t2 - t1;
