@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 89;
+    private static final int DATABASE_VERSION = 90;
 
     private Context mContext;
     private int mUserHandle;
@@ -1380,6 +1380,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 89;
         }
 
+        if (upgradeVersion == 89) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    String[] prefixesToMove = {
+                            Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
+                            Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
+                            Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
+                    };
+
+                    movePrefixedSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, prefixesToMove);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 90;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1432,6 +1452,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 insertStmt.execute();
 
                 deleteStmt.bindString(1, setting);
+                deleteStmt.execute();
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            if (insertStmt != null) {
+                insertStmt.close();
+            }
+            if (deleteStmt != null) {
+                deleteStmt.close();
+            }
+        }
+    }
+
+    /**
+     * Move any settings with the given prefixes from the source table to the
+     * destination table.
+     */
+    private void movePrefixedSettingsToNewTable(
+            SQLiteDatabase db, String sourceTable, String destTable, String[] prefixesToMove) {
+        SQLiteStatement insertStmt = null;
+        SQLiteStatement deleteStmt = null;
+
+        db.beginTransaction();
+        try {
+            insertStmt = db.compileStatement("INSERT INTO " + destTable
+                    + " (name,value) SELECT name,value FROM " + sourceTable
+                    + " WHERE substr(name,0,?)=?");
+            deleteStmt = db.compileStatement(
+                    "DELETE FROM " + sourceTable + " WHERE substr(name,0,?)=?");
+
+            for (String prefix : prefixesToMove) {
+                insertStmt.bindLong(1, prefix.length() + 1);
+                insertStmt.bindString(2, prefix);
+                insertStmt.execute();
+
+                deleteStmt.bindLong(1, prefix.length() + 1);
+                deleteStmt.bindString(2, prefix);
                 deleteStmt.execute();
             }
             db.setTransactionSuccessful();
