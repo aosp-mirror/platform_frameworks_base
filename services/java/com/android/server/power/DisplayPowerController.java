@@ -44,7 +44,6 @@ import android.util.TimeUtils;
 import android.view.Display;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.concurrent.Executor;
 
 /**
@@ -95,7 +94,8 @@ final class DisplayPowerController {
     // when it is especially dark outside.  The light sensor tends to perform
     // poorly at low light levels so we compensate for it by making an
     // assumption about the environment.
-    private static final boolean USE_TWILIGHT_ADJUSTMENT = true;
+    private static final boolean USE_TWILIGHT_ADJUSTMENT =
+            PowerManager.useTwilightAdjustmentFeature();
 
     // Specifies the maximum magnitude of the time of day adjustment.
     private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1.5f;
