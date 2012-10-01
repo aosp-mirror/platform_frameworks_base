@@ -271,11 +271,11 @@ int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
     return 0;
 }
 
-int delete_cache(const char *pkgname)
+int delete_cache(const char *pkgname, uid_t persona)
 {
     char cachedir[PKG_PATH_MAX];
 
-    if (create_pkg_path(cachedir, pkgname, CACHE_DIR_POSTFIX, 0))
+    if (create_pkg_path(cachedir, pkgname, CACHE_DIR_POSTFIX, persona))
         return -1;
 
         /* delete contents, not the directory, no exceptions */
