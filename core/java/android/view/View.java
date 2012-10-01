@@ -3654,11 +3654,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!leftPaddingDefined && startPaddingDefined) {
                 leftPadding = startPadding;
             }
-            mUserPaddingLeftInitial = (leftPadding > 0) ? leftPadding : 0;
+            mUserPaddingLeftInitial = (leftPadding >= 0) ? leftPadding : mUserPaddingLeftInitial;
             if (!rightPaddingDefined && endPaddingDefined) {
                 rightPadding = endPadding;
             }
-            mUserPaddingRightInitial = (rightPadding > 0) ? rightPadding : 0;
+            mUserPaddingRightInitial = (rightPadding >= 0) ? rightPadding : mUserPaddingRightInitial;
         } else {
             // Jelly Bean MR1 and after case: if start/end defined, they will override any left/right
             // values defined. Otherwise, left /right values are used.
