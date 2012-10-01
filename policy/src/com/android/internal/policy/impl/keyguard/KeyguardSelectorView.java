@@ -76,6 +76,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
                 case com.android.internal.R.drawable.ic_lockscreen_unlock_phantom:
                 case com.android.internal.R.drawable.ic_lockscreen_unlock:
+                    mCallback.userActivity(0);
                     mCallback.dismiss(false);
                 break;
             }
@@ -86,6 +87,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         public void onGrabbed(View v, int handle) {
+            mCallback.userActivity(0);
             doTransition(mFadeView, 0.0f);
         }
 
