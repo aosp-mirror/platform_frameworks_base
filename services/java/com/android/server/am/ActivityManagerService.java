@@ -11745,7 +11745,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             users = mStartedUserArray;
         } else {
             // Caller wants broadcast to go to one specific user.
-            users = mCurrentUserArray;
+            users = new int[] {userId};
         }
 
         // Figure out who all will receive this broadcast.
