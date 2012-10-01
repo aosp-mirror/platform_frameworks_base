@@ -274,12 +274,7 @@ class QuickSettings {
         timeTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Jump into the clock application
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(
-                        "com.google.android.deskclock",
-                        "com.android.deskclock.DeskClock"));
-                startSettingsActivity(intent);
+                startSettingsActivity(android.provider.Settings.ACTION_DATE_SETTINGS);
             }
         });
         mModel.addTimeTile(timeTile, new QuickSettingsModel.RefreshCallback() {
