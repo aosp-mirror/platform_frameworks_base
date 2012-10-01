@@ -18,19 +18,24 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
@@ -594,6 +599,11 @@ public class WindowManagerService extends IWindowManager.Stub
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
         private boolean mUpdateRotation = false;
+
+        private static final int DISPLAY_CONTENT_UNKNOWN = 0;
+        private static final int DISPLAY_CONTENT_MIRROR = 1;
+        private static final int DISPLAY_CONTENT_UNIQUE = 2;
+        private int mDisplayHasContent = DISPLAY_CONTENT_UNKNOWN;
     }
     final LayoutFields mInnerFields = new LayoutFields();
 
@@ -1118,10 +1128,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAppToken != null && addToToken) {
             win.mAppToken.allAppWindows.add(win);
         }
-
-        if (windows.size() == 1) {
-            mDisplayManagerService.setDisplayHasContent(win.getDisplayId(), true);
-        }
     }
 
     /** TODO(cmautner): Is this the same as {@link WindowState#canReceiveKeys()} */
@@ -1129,7 +1135,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
         if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)
-                || w.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+                || w.mAttrs.type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.i(TAG, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
                 if (!w.isVisibleOrAdding()) {
@@ -1177,7 +1183,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // is not actually looking to move the IME, look down below
                 // for a real window to target...
                 if (!willMove
-                        && w.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
+                        && w.mAttrs.type == TYPE_APPLICATION_STARTING
                         && i > 0) {
                     WindowState wb = windows.get(i-1);
                     if (wb.mAppToken == w.mAppToken && canBeImeTarget(wb)) {
@@ -1576,7 +1582,7 @@ public class WindowManagerService extends IWindowManager.Stub
         while (i > 0) {
             i--;
             w = windows.get(i);
-            if ((w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER)) {
+            if ((w.mAttrs.type == TYPE_WALLPAPER)) {
                 if (topCurW == null) {
                     topCurW = w;
                     topCurI = i;
@@ -2411,9 +2417,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final WindowList windows = win.getWindowList();
         windows.remove(win);
-        if (windows.isEmpty()) {
-            mDisplayManagerService.setDisplayHasContent(win.getDisplayId(), false);
-        }
         mPendingRemove.remove(win);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Final remove of window: " + win);
@@ -2774,13 +2777,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mHScale = win.mVScale = 1;
             }
 
-            boolean imMayMove = (flagChanges&(
-                    WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM |
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) != 0;
+            boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
 
             final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
-                    || ((flagChanges&WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0)
+                    || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
                     || (!win.mRelayoutCalled));
 
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
@@ -3094,8 +3095,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int windowCount = windows.size();
             for (int i = 0; i < windowCount; i++) {
                 WindowState window = windows.get(i);
-                if (window.isVisibleLw() ||
-                        window.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+                if (window.isVisibleLw() || window.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                     WindowInfo info = getWindowInfoForWindowStateLocked(window);
                     outInfos.add(info);
                 }
@@ -3149,8 +3149,7 @@ public class WindowManagerService extends IWindowManager.Stub
         info.type = window.mAttrs.type;
         info.displayId = window.getDisplayId();
         info.compatibilityScale = window.mGlobalScale;
-        info.visible = window.isVisibleLw()
-                || info.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
+        info.visible = window.isVisibleLw() || info.type == TYPE_UNIVERSE_BACKGROUND;
         info.layer = window.mLayer;
         window.getTouchableRegion(mTempRegion);
         mTempRegion.getBounds(info.touchableRegion);
@@ -4375,7 +4374,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // an opaque window and our starting window transition animation
                         // can still work.  We just need to make sure the starting window
                         // is also showing the wallpaper.
-                        windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+                        windowFlags |= FLAG_SHOW_WALLPAPER;
                     } else {
                         return;
                     }
@@ -5497,7 +5496,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (int i=0; i<N; i++) {
                     WindowState w = windows.get(i);
-                    if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD) {
+                    if (w.mAttrs.type == TYPE_KEYGUARD) {
                         // Only if there is a keyguard attached to the window manager
                         // will we consider ourselves as having a keyguard.  If it
                         // isn't attached, we don't know if it wants to be shown or
@@ -5513,13 +5512,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         return;
                     }
                     if (w.isDrawnLw()) {
-                        if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
+                        if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
                             haveBootMsg = true;
-                        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION) {
+                        } else if (w.mAttrs.type == TYPE_APPLICATION) {
                             haveApp = true;
-                        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
+                        } else if (w.mAttrs.type == TYPE_WALLPAPER) {
                             haveWallpaper = true;
-                        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD) {
+                        } else if (w.mAttrs.type == TYPE_KEYGUARD) {
                             haveKeyguard = true;
                         }
                     }
@@ -5715,9 +5714,8 @@ public class WindowManagerService extends IWindowManager.Stub
             dw = displayInfo.logicalWidth;
             dh = displayInfo.logicalHeight;
 
-            int aboveAppLayer = mPolicy.windowTypeToLayerLw(
-                    WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
-                    + TYPE_LAYER_OFFSET;
+            int aboveAppLayer = mPolicy.windowTypeToLayerLw(TYPE_APPLICATION)
+                    * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
             aboveAppLayer += TYPE_LAYER_MULTIPLIER;
 
             boolean isImeTarget = mInputMethodTarget != null
@@ -7994,8 +7992,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 numRemoved++;
                 continue;
             } else if (lastBelow == i-1) {
-                if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER
-                        || w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
+                if (w.mAttrs.type == TYPE_WALLPAPER || w.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                     lastBelow = i;
                 }
             }
@@ -8778,11 +8775,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     && mInnerFields.mButtonBrightness < 0) {
                 mInnerFields.mButtonBrightness = w.mAttrs.buttonBrightness;
             }
+            final int type = attrs.type;
             if (canBeSeen
-                    && (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
-                     || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
-                     || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR)) {
+                    && (type == TYPE_SYSTEM_DIALOG
+                     || type == TYPE_KEYGUARD
+                     || type == TYPE_SYSTEM_ERROR)) {
                 mInnerFields.mSyswin = true;
+            }
+
+            if (canBeSeen) {
+                if (type == TYPE_DREAM || type == TYPE_KEYGUARD) {
+                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_MIRROR;
+                } else if (mInnerFields.mDisplayHasContent
+                        == LayoutFields.DISPLAY_CONTENT_UNKNOWN) {
+                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNIQUE;
+                }
             }
         }
 
@@ -8802,7 +8809,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowStateAnimator winAnimator = w.mWinAnimator;
                 if (!mAnimator.isDimmingLocked(winAnimator)) {
                     final int width, height;
-                    if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
+                    if (attrs.type == TYPE_BOOT_PROGRESS) {
                         final DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
                         width = displayInfo.logicalWidth;
                         height = displayInfo.logicalHeight;
@@ -8867,6 +8874,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mHoldScreen = null;
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
+        mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
         mTransactionSequence++;
 
         final DisplayContent defaultDisplay = getDefaultDisplayContentLocked();
@@ -8886,10 +8894,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStrictModeFlash.positionSurface(defaultDw, defaultDh);
             }
 
-            // Give the display manager a chance to adjust properties
-            // like display rotation if it needs to.
-            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
-
             boolean focusDisplayed = false;
             boolean updateAllDrawn = false;
 
@@ -8904,6 +8908,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int innerDw = displayInfo.appWidth;
                 final int innerDh = displayInfo.appHeight;
                 final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
+
+                // Reset for each display unless we are forcing mirroring.
+                if (mInnerFields.mDisplayHasContent != LayoutFields.DISPLAY_CONTENT_MIRROR) {
+                    mInnerFields.mDisplayHasContent = LayoutFields.DISPLAY_CONTENT_UNKNOWN;
+                }
 
                 int repeats = 0;
                 do {
@@ -9024,9 +9033,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         final boolean committed =
                                 winAnimator.commitFinishDrawingLocked(currentTime);
                         if (isDefaultDisplay && committed) {
-                            if ((w.mAttrs.flags
-                                    & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                                if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+                            if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                                if (DEBUG_WALLPAPER) Slog.v(TAG,
                                         "First draw done in potential wallpaper target " + w);
                                 mInnerFields.mWallpaperMayChange = true;
                                 displayContent.pendingLayoutChanges |=
@@ -9042,7 +9050,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         winAnimator.setSurfaceBoundariesLocked(recoveringMemory);
 
                         final AppWindowToken atoken = w.mAppToken;
-                        if (DEBUG_STARTING_WINDOW && atoken != null && w == atoken.startingWindow) {
+                        if (DEBUG_STARTING_WINDOW && atoken != null
+                                && w == atoken.startingWindow) {
                             Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen="
                                 + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
                                 + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
@@ -9054,8 +9063,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
                                 atoken.startingDisplayed = false;
                             }
-                            if ((w.isOnScreen() || winAnimator.mAttrType
-                                    == WindowManager.LayoutParams.TYPE_BASE_APPLICATION)
+                            if ((w.isOnScreen() || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
                                     && !w.mExiting && !w.mDestroying) {
                                 if (WindowManagerService.DEBUG_VISIBILITY ||
                                         WindowManagerService.DEBUG_ORIENTATION) {
@@ -9098,6 +9106,22 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateResizingWindows(w);
                 }
 
+                final boolean hasUniqueContent;
+                switch (mInnerFields.mDisplayHasContent) {
+                    case LayoutFields.DISPLAY_CONTENT_MIRROR:
+                        hasUniqueContent = isDefaultDisplay;
+                        break;
+                    case LayoutFields.DISPLAY_CONTENT_UNIQUE:
+                        hasUniqueContent = true;
+                        break;
+                    case LayoutFields.DISPLAY_CONTENT_UNKNOWN:
+                    default:
+                        hasUniqueContent = false;
+                        break;
+                }
+                mDisplayManagerService.setDisplayHasContent(displayId, hasUniqueContent,
+                        true /* inTraversal, must call performTraversalInTrans... below */);
+
                 if (!mInnerFields.mDimming && mAnimator.isDimmingLocked(displayId)) {
                     stopDimmingLocked(displayId);
                 }
@@ -9110,6 +9134,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (focusDisplayed) {
                 mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
             }
+
+            // Give the display manager a chance to adjust properties
+            // like display rotation if it needs to.
+            mDisplayManagerService.performTraversalInTransactionFromWindowManager();
+
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
