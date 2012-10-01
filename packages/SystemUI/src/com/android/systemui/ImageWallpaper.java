@@ -261,6 +261,19 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
+        @Override
+        public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+            if (DEBUG) {
+                Log.d(TAG, "onSurfaceRedrawNeeded:");
+            }
+            super.onSurfaceRedrawNeeded(holder);
+
+            synchronized (mLock) {
+                mRedrawNeeded = true;
+                drawFrameLocked();
+            }
+        }
+
         void drawFrameLocked() {
             if (!mVisible) {
                 if (DEBUG) {
