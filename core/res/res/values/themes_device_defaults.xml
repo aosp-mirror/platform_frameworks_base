@@ -263,7 +263,7 @@ easier.
         <item name="autoCompleteTextViewStyle">@android:style/Widget.DeviceDefault.Light.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.DeviceDefault.Light.CompoundButton.CheckBox</item>
         <item name="checkedTextViewStyle">@android:style/Widget.DeviceDefault.Light.CheckedTextView</item>
-        <item name="dropDownListViewStyle">@android:style/Widget.DeviceDefault.ListView.DropDown</item>
+        <item name="dropDownListViewStyle">@android:style/Widget.DeviceDefault.Light.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.DeviceDefault.Light.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.DeviceDefault.Light.ExpandableListView</item>
         <item name="expandableListViewWhiteStyle">@android:style/Widget.DeviceDefault.Light.ExpandableListView.White</item>
@@ -298,7 +298,7 @@ easier.
         <item name="webViewStyle">@android:style/Widget.DeviceDefault.Light.WebView</item>
         <item name="dropDownItemStyle">@android:style/Widget.DeviceDefault.Light.DropDownItem</item>
         <item name="spinnerDropDownItemStyle">@android:style/Widget.DeviceDefault.Light.DropDownItem.Spinner</item>
-        <item name="spinnerItemStyle">@android:style/Widget.DeviceDefault.TextView.SpinnerItem</item>
+        <item name="spinnerItemStyle">@android:style/Widget.DeviceDefault.Light.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.DeviceDefault.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.DeviceDefault.KeyboardView</item>
         <item name="quickContactBadgeStyleWindowSmall">@android:style/Widget.DeviceDefault.QuickContactBadge.WindowSmall</item>
