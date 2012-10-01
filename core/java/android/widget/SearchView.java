@@ -1354,8 +1354,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     };
 
     @Override
-    public void onRtlPropertiesChanged() {
-        mQueryTextView.setLayoutDirection(getLayoutDirection());
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        mQueryTextView.setLayoutDirection(layoutDirection);
     }
 
     /**

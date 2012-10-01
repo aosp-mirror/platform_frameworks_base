@@ -5632,7 +5632,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onRtlPropertiesChanged() {
+    public void onRtlPropertiesChanged(int layoutDirection) {
         if (mLayoutAlignment != null) {
             if (mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_START ||
                     mResolvedTextAlignment == TEXT_ALIGNMENT_VIEW_END) {

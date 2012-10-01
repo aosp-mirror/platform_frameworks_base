@@ -104,7 +104,7 @@ public class CheckedTextView extends TextView implements Checkable {
     /**
      * Set the checkmark to a given Drawable, identified by its resourece id. This will be drawn
      * when {@link #isChecked()} is true.
-     * 
+     *
      * @param resid The Drawable to use for the checkmark.
      *
      * @see #setCheckMarkDrawable(Drawable)
@@ -147,7 +147,7 @@ public class CheckedTextView extends TextView implements Checkable {
             d.setVisible(getVisibility() == VISIBLE, false);
             d.setState(CHECKED_STATE_SET);
             setMinHeight(d.getIntrinsicHeight());
-            
+
             mCheckMarkWidth = d.getIntrinsicWidth();
             d.setState(getDrawableState());
         } else {
@@ -184,13 +184,8 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    public void onPaddingChanged(int layoutDirection) {
-        updatePadding();
-    }
-
-    @Override
-    public void onRtlPropertiesChanged() {
-        super.onRtlPropertiesChanged();
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
         updatePadding();
     }
 

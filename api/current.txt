@@ -25113,10 +25113,9 @@ package android.view {
     method protected void onLayout(boolean, int, int, int, int);
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
-    method public void onPaddingChanged(int);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method protected void onRestoreInstanceState(android.os.Parcelable);
-    method public void onRtlPropertiesChanged();
+    method public void onRtlPropertiesChanged(int);
     method protected android.os.Parcelable onSaveInstanceState();
     method public void onScreenStateChanged(int);
     method protected void onScrollChanged(int, int, int, int);

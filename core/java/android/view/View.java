@@ -11560,7 +11560,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         requestLayout();
         invalidate(true);
-        onRtlPropertiesChanged();
+        onRtlPropertiesChanged(getLayoutDirection());
     }
 
     // Reset resolution of all RTL related properties.
@@ -11622,8 +11622,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * resolved layout direction, or to inform child views that inherit their layout direction.
      *
      * The default implementation does nothing.
+     *
+     * @param layoutDirection the direction of the layout
+     *
+     * @see #LAYOUT_DIRECTION_LTR
+     * @see #LAYOUT_DIRECTION_RTL
      */
-    public void onRtlPropertiesChanged() {
+    public void onRtlPropertiesChanged(int layoutDirection) {
     }
 
     /**
@@ -11768,7 +11773,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight,
                     mUserPaddingBottom);
-            onPaddingChanged(resolvedLayoutDirection);
+            onRtlPropertiesChanged(resolvedLayoutDirection);
         }
 
         mPrivateFlags2 |= PFLAG2_PADDING_RESOLVED;
@@ -11781,19 +11786,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void resetResolvedPadding() {
         mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
-    }
-
-    /**
-     * Resolve padding depending on the layout direction. Subclasses that care about
-     * padding resolution should override this method. The default implementation does
-     * nothing.
-     *
-     * @param layoutDirection the direction of the layout
-     *
-     * @see #LAYOUT_DIRECTION_LTR
-     * @see #LAYOUT_DIRECTION_RTL
-     */
-    public void onPaddingChanged(int layoutDirection) {
     }
 
     /**
@@ -11827,7 +11819,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mCurrentAnimation = null;
 
         resetRtlProperties();
-        onRtlPropertiesChanged();
+        onRtlPropertiesChanged(LAYOUT_DIRECTION_DEFAULT);
         resetAccessibilityStateChanged();
     }
 
@@ -16675,7 +16667,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Do resolution
             resolveTextDirection();
             // Notify change
-            onRtlPropertiesChanged();
+            onRtlPropertiesChanged(getLayoutDirection());
             // Refresh
             requestLayout();
             invalidate(true);
@@ -16869,7 +16861,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Do resolution
             resolveTextAlignment();
             // Notify change
-            onRtlPropertiesChanged();
+            onRtlPropertiesChanged(getLayoutDirection());
             // Refresh
             requestLayout();
             invalidate(true);
