@@ -241,6 +241,7 @@ please see themes_device_defaults.xml.
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.AutoCompleteTextView</item>        
         <item name="checkboxStyle">@android:style/Widget.CompoundButton.CheckBox</item>
+        <item name="checkedTextViewStyle">@android:style/Widget.CheckedTextView</item>
         <item name="dropDownListViewStyle">@android:style/Widget.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView</item>
@@ -876,12 +877,12 @@ please see themes_device_defaults.xml.
          <p>This is the default system theme for apps that target API level 11 - 13. Starting
          with API level 14, the default system theme is supplied by {@link #Theme_DeviceDefault},
          which might apply a different style on different devices. If you want to ensure that your
-         app consistenly uses the Holo theme at all times, you must explicitly declare it in your
+         app consistently uses the Holo theme at all times, you must explicitly declare it in your
          manifest. For example, {@code &lt;application android:theme="@android:style/Theme.Holo"&gt;}.
          For more information, read <a
          href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo
          Everywhere</a>.</p>
-         <p>The widgets in the holographic theme are translucent on their brackground, so
+         <p>The widgets in the holographic theme are translucent on their background, so
          applications must ensure that any background they use with this theme is itself
          dark; otherwise, it will be difficult to see the widgets. This UI style also includes a
          full action bar by default.</p>
@@ -1071,6 +1072,7 @@ please see themes_device_defaults.xml.
         <item name="absListViewStyle">@android:style/Widget.Holo.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.Holo.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.Holo.CompoundButton.CheckBox</item>
+        <item name="checkedTextViewStyle">@android:style/Widget.Holo.CheckedTextView</item>
         <item name="dropDownListViewStyle">@android:style/Widget.Holo.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.Holo.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.Holo.ExpandableListView</item>
@@ -1384,6 +1386,7 @@ please see themes_device_defaults.xml.
         <item name="absListViewStyle">@android:style/Widget.Holo.Light.AbsListView</item>
         <item name="autoCompleteTextViewStyle">@android:style/Widget.Holo.Light.AutoCompleteTextView</item>
         <item name="checkboxStyle">@android:style/Widget.Holo.Light.CompoundButton.CheckBox</item>
+        <item name="checkedTextViewStyle">@android:style/Widget.Holo.Light.CheckedTextView</item>
         <item name="dropDownListViewStyle">@android:style/Widget.Holo.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.Holo.Light.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.Holo.Light.ExpandableListView</item>
