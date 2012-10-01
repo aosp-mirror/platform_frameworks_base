@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -1766,9 +1767,10 @@ public class WifiService extends IWifiManager.Stub {
                 mNotification.when = 0;
                 mNotification.icon = ICON_NETWORKS_AVAILABLE;
                 mNotification.flags = Notification.FLAG_AUTO_CANCEL;
-                mNotification.contentIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                        new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 0,
-                        null, UserHandle.CURRENT);
+                mNotification.contentIntent = TaskStackBuilder.create(mContext)
+                        .addNextIntentWithParentStack(
+                                new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK))
+                        .getPendingIntent(0, 0, null, UserHandle.CURRENT);
             }
 
             CharSequence title = mContext.getResources().getQuantityText(
