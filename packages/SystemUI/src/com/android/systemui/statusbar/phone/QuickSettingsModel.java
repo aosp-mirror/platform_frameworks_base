@@ -184,7 +184,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private State mLocationState = new State();
 
     private QuickSettingsTileView mImeTile;
-    private RefreshCallback mImeCallback;
+    private RefreshCallback mImeCallback = null;
     private State mImeState = new State();
 
     private QuickSettingsTileView mRotationLockTile;
@@ -551,7 +551,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mImeState.enabled = (visible && needsToShowImeSwitchOngoingNotification(imm));
         mImeState.label = getCurrentInputMethodName(mContext, mContext.getContentResolver(),
                 imm, imis, mContext.getPackageManager());
-        mImeCallback.refreshView(mImeTile, mImeState);
+        if (mImeCallback != null) {
+            mImeCallback.refreshView(mImeTile, mImeState);
+        }
     }
     private static String getCurrentInputMethodName(Context context, ContentResolver resolver,
             InputMethodManager imm, List<InputMethodInfo> imis, PackageManager pm) {
