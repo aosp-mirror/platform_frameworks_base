@@ -181,6 +181,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_PROCESS_OBSERVERS = localLOGV || false;
+    static final boolean DEBUG_CLEANUP = localLOGV || false;
     static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
@@ -1968,7 +1969,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 // An application record is attached to a previous process,
                 // clean it up now.
-                if (DEBUG_PROCESSES) Slog.v(TAG, "App died: " + app);
+                if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
                 handleAppDiedLocked(app, true, true);
             }
         }
@@ -2925,7 +2926,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Just in case...
         if (mMainStack.mPausingActivity != null && mMainStack.mPausingActivity.app == app) {
-            if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " +mMainStack.mPausingActivity);
+            if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG,
+                    "App died while pausing: " + mMainStack.mPausingActivity);
             mMainStack.mPausingActivity = null;
         }
         if (mMainStack.mLastPausedActivity != null && mMainStack.mLastPausedActivity.app == app) {
@@ -2933,61 +2935,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Remove this application's activities from active lists.
-        mMainStack.removeHistoryRecordsForAppLocked(app);
-
-        boolean atTop = true;
-        boolean hasVisibleActivities = false;
-
-        // Clean out the history list.
-        int i = mMainStack.mHistory.size();
-        if (localLOGV) Slog.v(
-            TAG, "Removing app " + app + " from history with " + i + " entries");
-        while (i > 0) {
-            i--;
-            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            if (localLOGV) Slog.v(
-                TAG, "Record #" + i + " " + r + ": app=" + r.app);
-            if (r.app == app) {
-                if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
-                    if (ActivityStack.DEBUG_ADD_REMOVE) {
-                        RuntimeException here = new RuntimeException("here");
-                        here.fillInStackTrace();
-                        Slog.i(TAG, "Removing activity " + r + " from stack at " + i
-                                + ": haveState=" + r.haveState
-                                + " stateNotNeeded=" + r.stateNotNeeded
-                                + " finishing=" + r.finishing
-                                + " state=" + r.state, here);
-                    }
-                    if (!r.finishing) {
-                        Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
-                        EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                                r.userId, System.identityHashCode(r),
-                                r.task.taskId, r.shortComponentName,
-                                "proc died without state saved");
-                    }
-                    mMainStack.removeActivityFromHistoryLocked(r);
-
-                } else {
-                    // We have the current state for this activity, so
-                    // it can be restarted later when needed.
-                    if (localLOGV) Slog.v(
-                        TAG, "Keeping entry, setting app to null");
-                    if (r.visible) {
-                        hasVisibleActivities = true;
-                    }
-                    r.app = null;
-                    r.nowVisible = false;
-                    if (!r.haveState) {
-                        if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
-                                "App died, clearing saved state of " + r);
-                        r.icicle = null;
-                    }
-                }
-
-                r.stack.cleanUpActivityLocked(r, true, true);
-            }
-            atTop = false;
-        }
+        boolean hasVisibleActivities = mMainStack.removeHistoryRecordsForAppLocked(app);
 
         app.activities.clear();
         
@@ -3053,7 +3001,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + ") has died.");
             }
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName);
-            if (localLOGV) Slog.v(
+            if (DEBUG_CLEANUP) Slog.v(
                 TAG, "Dying app: " + app + ", pid: " + pid
                 + ", thread: " + thread.asBinder());
             boolean doLowMem = app.instrumentationClass == null;
@@ -10757,7 +10705,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         // If the app is undergoing backup, tell the backup manager about it
         if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
-            if (DEBUG_BACKUP) Slog.d(TAG, "App " + mBackupTarget.appInfo + " died during backup");
+            if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG, "App "
+                    + mBackupTarget.appInfo + " died during backup");
             try {
                 IBackupManager bm = IBackupManager.Stub.asInterface(
                         ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -10783,7 +10732,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (!app.persistent || app.isolated) {
-            if (DEBUG_PROCESSES) Slog.v(TAG,
+            if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG,
                     "Removing non-persistent process during cleanup: " + app);
             mProcessNames.remove(app.processName, app.uid);
             mIsolatedProcesses.remove(app.uid);
@@ -10801,7 +10750,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 restart = true;
             }
         }
-        if (DEBUG_PROCESSES && mProcessesOnHold.contains(app)) Slog.v(TAG,
+        if ((DEBUG_PROCESSES || DEBUG_CLEANUP) && mProcessesOnHold.contains(app)) Slog.v(TAG,
                 "Clean-up removing on hold: " + app);
         mProcessesOnHold.remove(app);
 

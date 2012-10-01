@@ -81,6 +81,7 @@ final class ActivityStack {
     static final boolean DEBUG_RESULTS = ActivityManagerService.DEBUG_RESULTS;
     static final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
     static final boolean DEBUG_TASKS = ActivityManagerService.DEBUG_TASKS;
+    static final boolean DEBUG_CLEANUP = ActivityManagerService.DEBUG_CLEANUP;
     
     static final boolean DEBUG_STATES = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -1142,9 +1143,13 @@ final class ActivityStack {
             resumeTopActivityLocked(prev);
         } else {
             checkReadyForSleepLocked();
-            if (topRunningActivityLocked(null) == null) {
-                // If there are no more activities available to run, then
-                // do resume anyway to start something.
+            ActivityRecord top = topRunningActivityLocked(null);
+            if (top == null || (prev != null && top != prev)) {
+                // If there are no more activities available to run,
+                // do resume anyway to start something.  Also if the top
+                // activity on the stack is not the just paused activity,
+                // we need to go ahead and resume it to ensure we complete
+                // an in-flight app switch.
                 resumeTopActivityLocked(null);
             }
         }
@@ -1461,7 +1466,8 @@ final class ActivityStack {
         // If we are currently pausing an activity, then don't do anything
         // until that is done.
         if (mPausingActivity != null) {
-            if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: pausing=" + mPausingActivity);
+            if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG,
+                    "Skip resume: pausing=" + mPausingActivity);
             return false;
         }
 
@@ -3862,6 +3868,7 @@ final class ActivityStack {
         if (setState) {
             if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r + " (cleaning up)");
             r.state = ActivityState.DESTROYED;
+            r.app = null;
         }
 
         // Make sure this record is no longer in the pending finishes list.
@@ -3905,26 +3912,26 @@ final class ActivityStack {
     }
 
     final void removeActivityFromHistoryLocked(ActivityRecord r) {
-        if (r.state != ActivityState.DESTROYED) {
-            finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
-            r.makeFinishing();
-            if (DEBUG_ADD_REMOVE) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.i(TAG, "Removing activity " + r + " from stack");
-            }
-            mHistory.remove(r);
-            r.takeFromHistory();
-            if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
-                    + " (removed from history)");
-            r.state = ActivityState.DESTROYED;
-            mService.mWindowManager.removeAppToken(r.appToken);
-            if (VALIDATE_TOKENS) {
-                validateAppTokensLocked();
-            }
-            cleanUpActivityServicesLocked(r);
-            r.removeUriPermissionsLocked();
+        finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
+        r.makeFinishing();
+        if (DEBUG_ADD_REMOVE) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.i(TAG, "Removing activity " + r + " from stack");
         }
+        mHistory.remove(r);
+        r.takeFromHistory();
+        removeTimeoutsForActivityLocked(r);
+        if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
+                + " (removed from history)");
+        r.state = ActivityState.DESTROYED;
+        r.app = null;
+        mService.mWindowManager.removeAppToken(r.appToken);
+        if (VALIDATE_TOKENS) {
+            validateAppTokensLocked();
+        }
+        cleanUpActivityServicesLocked(r);
+        r.removeUriPermissionsLocked();
     }
     
     /**
@@ -3992,7 +3999,7 @@ final class ActivityStack {
      */
     final boolean destroyActivityLocked(ActivityRecord r,
             boolean removeFromApp, boolean oomAdj, String reason) {
-        if (DEBUG_SWITCH) Slog.v(
+        if (DEBUG_SWITCH || DEBUG_CLEANUP) Slog.v(
             TAG, "Removing activity from " + reason + ": token=" + r
               + ", app=" + (r.app != null ? r.app.processName : "(null)"));
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
@@ -4000,11 +4007,11 @@ final class ActivityStack {
                 r.task.taskId, r.shortComponentName, reason);
 
         boolean removedFromHistory = false;
-        
+
         cleanUpActivityLocked(r, false, false);
 
         final boolean hadApp = r.app != null;
-        
+
         if (hadApp) {
             if (removeFromApp) {
                 int idx = r.app.activities.indexOf(r);
@@ -4040,7 +4047,6 @@ final class ActivityStack {
                 }
             }
 
-            r.app = null;
             r.nowVisible = false;
             
             // If the activity is finishing, we need to wait on removing it
@@ -4061,6 +4067,7 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
                         + " (destroy skipped)");
                 r.state = ActivityState.DESTROYED;
+                r.app = null;
             }
         } else {
             // remove this record from the history.
@@ -4071,6 +4078,7 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to DESTROYED: " + r
                         + " (no app)");
                 r.state = ActivityState.DESTROYED;
+                r.app = null;
             }
         }
 
@@ -4106,30 +4114,85 @@ final class ActivityStack {
         }
     }
     
-    private void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app) {
+    private void removeHistoryRecordsForAppLocked(ArrayList list, ProcessRecord app,
+            String listName) {
         int i = list.size();
-        if (localLOGV) Slog.v(
-            TAG, "Removing app " + app + " from list " + list
+        if (DEBUG_CLEANUP) Slog.v(
+            TAG, "Removing app " + app + " from list " + listName
             + " with " + i + " entries");
         while (i > 0) {
             i--;
             ActivityRecord r = (ActivityRecord)list.get(i);
-            if (localLOGV) Slog.v(
-                TAG, "Record #" + i + " " + r + ": app=" + r.app);
+            if (DEBUG_CLEANUP) Slog.v(TAG, "Record #" + i + " " + r);
             if (r.app == app) {
-                if (localLOGV) Slog.v(TAG, "Removing this entry!");
+                if (DEBUG_CLEANUP) Slog.v(TAG, "---> REMOVING this entry!");
                 list.remove(i);
                 removeTimeoutsForActivityLocked(r);
             }
         }
     }
 
-    void removeHistoryRecordsForAppLocked(ProcessRecord app) {
-        removeHistoryRecordsForAppLocked(mLRUActivities, app);
-        removeHistoryRecordsForAppLocked(mStoppingActivities, app);
-        removeHistoryRecordsForAppLocked(mGoingToSleepActivities, app);
-        removeHistoryRecordsForAppLocked(mWaitingVisibleActivities, app);
-        removeHistoryRecordsForAppLocked(mFinishingActivities, app);
+    boolean removeHistoryRecordsForAppLocked(ProcessRecord app) {
+        removeHistoryRecordsForAppLocked(mLRUActivities, app, "mLRUActivities");
+        removeHistoryRecordsForAppLocked(mStoppingActivities, app, "mStoppingActivities");
+        removeHistoryRecordsForAppLocked(mGoingToSleepActivities, app, "mGoingToSleepActivities");
+        removeHistoryRecordsForAppLocked(mWaitingVisibleActivities, app,
+                "mWaitingVisibleActivities");
+        removeHistoryRecordsForAppLocked(mFinishingActivities, app, "mFinishingActivities");
+
+        boolean hasVisibleActivities = false;
+
+        // Clean out the history list.
+        int i = mHistory.size();
+        if (DEBUG_CLEANUP) Slog.v(
+            TAG, "Removing app " + app + " from history with " + i + " entries");
+        while (i > 0) {
+            i--;
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            if (DEBUG_CLEANUP) Slog.v(
+                TAG, "Record #" + i + " " + r + ": app=" + r.app);
+            if (r.app == app) {
+                if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
+                    if (ActivityStack.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
+                        RuntimeException here = new RuntimeException("here");
+                        here.fillInStackTrace();
+                        Slog.i(TAG, "Removing activity " + r + " from stack at " + i
+                                + ": haveState=" + r.haveState
+                                + " stateNotNeeded=" + r.stateNotNeeded
+                                + " finishing=" + r.finishing
+                                + " state=" + r.state, here);
+                    }
+                    if (!r.finishing) {
+                        Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
+                        EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
+                                r.userId, System.identityHashCode(r),
+                                r.task.taskId, r.shortComponentName,
+                                "proc died without state saved");
+                    }
+                    removeActivityFromHistoryLocked(r);
+
+                } else {
+                    // We have the current state for this activity, so
+                    // it can be restarted later when needed.
+                    if (localLOGV) Slog.v(
+                        TAG, "Keeping entry, setting app to null");
+                    if (r.visible) {
+                        hasVisibleActivities = true;
+                    }
+                    r.app = null;
+                    r.nowVisible = false;
+                    if (!r.haveState) {
+                        if (ActivityStack.DEBUG_SAVED_STATE) Slog.i(TAG,
+                                "App died, clearing saved state of " + r);
+                        r.icicle = null;
+                    }
+                }
+
+                r.stack.cleanUpActivityLocked(r, true, true);
+            }
+        }
+
+        return hasVisibleActivities;
     }
     
     /**
@@ -4375,7 +4438,7 @@ final class ActivityStack {
             return null;
         }
 
-        // Remove all of this task's activies starting at the sub task.
+        // Remove all of this task's activities starting at the sub task.
         TaskAccessInfo.SubTask subtask = info.subtasks.get(subTaskIndex);
         performClearTaskAtIndexLocked(taskId, subtask.index);
         return subtask.activity;
