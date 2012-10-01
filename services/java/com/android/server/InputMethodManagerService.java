@@ -900,14 +900,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
                     + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
                     + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId());
+                    + mSettings.getCurrentUserId() + ", calling uid = " + Binder.getCallingPid());
         }
         if (uid == Process.SYSTEM_UID || userId == mSettings.getCurrentUserId()) {
             return true;
-        } else {
-            Slog.w(TAG, "--- IPC called from background users. Ignore. \n" + getStackTrace());
-            return false;
         }
+
+        // Caveat: A process which has INTERACT_ACROSS_USERS_FULL gets results for the
+        // foreground user, not for the user of that process. Accordingly InputMethodManagerService
+        // must not manage background users' states in any functions.
+        // Note that privacy-sensitive IPCs, such as setInputMethod, are still securely guarded
+        // by a token.
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                        == PackageManager.PERMISSION_GRANTED) {
+            if (DEBUG) {
+                Slog.d(TAG, "--- Access granted because the calling process has "
+                        + "the INTERACT_ACROSS_USERS_FULL permission");
+            }
+            return true;
+        }
+        Slog.w(TAG, "--- IPC called from background users. Ignore. \n" + getStackTrace());
+        return false;
     }
 
     private boolean bindCurrentInputMethodService(
@@ -1475,9 +1489,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final CharSequence title = mRes.getText(
                             com.android.internal.R.string.select_input_method);
                     final CharSequence imiLabel = imi.loadLabel(pm);
-                    if (DEBUG) {
-                        Slog.d(TAG, "--- imiLabel = " + imiLabel);
-                    }
                     final CharSequence summary = mCurrentSubtype != null
                             ? TextUtils.concat(mCurrentSubtype.getDisplayName(mContext,
                                         imi.getPackageName(), imi.getServiceInfo().applicationInfo),
@@ -1488,15 +1499,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mImeSwitcherNotification.setLatestEventInfo(
                             mContext, title, summary, mImeSwitchPendingIntent);
                     if (mNotificationManager != null) {
-                        mNotificationManager.notify(
+                        if (DEBUG) {
+                            Slog.d(TAG, "--- show notification: label =  " + imiLabel
+                                    + ", summary = " + summary);
+                        }
+                        mNotificationManager.notifyAsUser(null,
                                 com.android.internal.R.string.select_input_method,
-                                mImeSwitcherNotification);
+                                mImeSwitcherNotification, UserHandle.ALL);
                         mNotificationShown = true;
                     }
                 } else {
                     if (mNotificationShown && mNotificationManager != null) {
-                        mNotificationManager.cancel(
-                                com.android.internal.R.string.select_input_method);
+                        if (DEBUG) {
+                            Slog.d(TAG, "--- hide notification");
+                        }
+                        mNotificationManager.cancelAsUser(null,
+                                com.android.internal.R.string.select_input_method, UserHandle.ALL);
                         mNotificationShown = false;
                     }
                 }
