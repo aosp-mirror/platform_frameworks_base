@@ -20,6 +20,7 @@ import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -61,6 +62,12 @@ public class KeyguardWidgetPager extends PagedView {
         widget.setPadding(0,  0, 0, 0);
         frame.addView(widget, lp);
         addView(frame);
+    }
+
+    protected void onUnhandledTap(MotionEvent ev) {
+        if (getParent() instanceof KeyguardWidgetRegion) {
+            ((KeyguardWidgetRegion) getParent()).showPagingFeedback();
+        }
     }
 
     /*

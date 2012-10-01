@@ -5780,4 +5780,11 @@
         <attr name="scrollIndicatorPaddingRight" format="dimension" />
     </declare-styleable>
 
+    <declare-styleable name="KeyguardGlowStripView">
+        <attr name="dotSize" format="dimension" />
+        <attr name="numDots" format="integer" />
+        <attr name="glowDot" format="reference" />
+        <attr name="leftToRight" format="boolean" />
+    </declare-styleable>
+
 </resources>

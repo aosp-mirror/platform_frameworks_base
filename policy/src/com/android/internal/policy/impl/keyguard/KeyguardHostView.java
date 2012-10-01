@@ -141,7 +141,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     protected void onFinishInflate() {
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
-        mAppWidgetContainer.setVisibility(VISIBLE);
+        KeyguardWidgetRegion kgwr = (KeyguardWidgetRegion) findViewById(R.id.kg_widget_region);
+        kgwr.setVisibility(VISIBLE);
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
 
         // This code manages showing/hiding the transport control. We keep it around and only

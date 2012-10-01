@@ -33,7 +33,6 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
-
 import com.android.internal.R;
 
 /**
