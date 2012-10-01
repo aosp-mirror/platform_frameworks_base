@@ -395,6 +395,31 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * @hide
+     * Note that UserHandle.CURRENT will be interpreted at the time the
+     * activity is started, not when the pending intent is created.
+     */
+    public static PendingIntent getActivitiesAsUser(Context context, int requestCode,
+            Intent[] intents, int flags, Bundle options, UserHandle user) {
+        String packageName = context.getPackageName();
+        String[] resolvedTypes = new String[intents.length];
+        for (int i=0; i<intents.length; i++) {
+            intents[i].setAllowFds(false);
+            resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
+        }
+        try {
+            IIntentSender target =
+                ActivityManagerNative.getDefault().getIntentSender(
+                    ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
+                    null, null, requestCode, intents, resolvedTypes,
+                    flags, options, user.getIdentifier());
+            return target != null ? new PendingIntent(target) : null;
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
      * Retrieve a PendingIntent that will perform a broadcast, like calling
      * {@link Context#sendBroadcast(Intent) Context.sendBroadcast()}.
      *
