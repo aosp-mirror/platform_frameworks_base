@@ -683,8 +683,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 com.android.internal.R.layout.input_method, null);
         mWindow.setContentView(mRootView);
         mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
-        if (Settings.System.getInt(getContentResolver(),
-                Settings.System.FANCY_IME_ANIMATIONS, 0) != 0) {
+        if (Settings.Global.getInt(getContentResolver(),
+                Settings.Global.FANCY_IME_ANIMATIONS, 0) != 0) {
             mWindow.getWindow().setWindowAnimations(
                     com.android.internal.R.style.Animation_InputMethodFancy);
         }

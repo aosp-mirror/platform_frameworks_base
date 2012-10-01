@@ -19,6 +19,7 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.SearchManager;
+import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -940,6 +941,17 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SLEEP_POLICY);
             MOVED_TO_GLOBAL.add(Settings.Global.MODE_RINGER);
+            MOVED_TO_GLOBAL.add(Settings.Global.WINDOW_ANIMATION_SCALE);
+            MOVED_TO_GLOBAL.add(Settings.Global.TRANSITION_ANIMATION_SCALE);
+            MOVED_TO_GLOBAL.add(Settings.Global.ANIMATOR_DURATION_SCALE);
+            MOVED_TO_GLOBAL.add(Settings.Global.FANCY_IME_ANIMATIONS);
+            MOVED_TO_GLOBAL.add(Settings.Global.COMPATIBILITY_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.EMERGENCY_TONE);
+            MOVED_TO_GLOBAL.add(Settings.Global.CALL_AUTO_RETRY);
+            MOVED_TO_GLOBAL.add(Settings.Global.DEBUG_APP);
+            MOVED_TO_GLOBAL.add(Settings.Global.WAIT_FOR_DEBUGGER);
+            MOVED_TO_GLOBAL.add(Settings.Global.SHOW_PROCESSES);
+            MOVED_TO_GLOBAL.add(Settings.Global.ALWAYS_FINISH_ACTIVITIES);
         }
 
         /**
@@ -1608,14 +1620,20 @@ public final class Settings {
 
         /**
          * Name of an application package to be debugged.
+         *
+         * @deprecated Use {@link Global#DEBUG_APP} instead
          */
-        public static final String DEBUG_APP = "debug_app";
+        @Deprecated
+        public static final String DEBUG_APP = Global.DEBUG_APP;
 
         /**
          * If 1, when launching DEBUG_APP it will wait for the debugger before
          * starting user code.  If 0, it will run normally.
+         *
+         * @deprecated Use {@link Global#WAIT_FOR_DEBUGGER} instead
          */
-        public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
+        @Deprecated
+        public static final String WAIT_FOR_DEBUGGER = Global.WAIT_FOR_DEBUGGER;
 
         /**
          * Whether or not to dim the screen. 0=no  1=yes
@@ -1628,14 +1646,6 @@ public final class Settings {
          * The timeout before the screen turns off.
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
-
-        /**
-         * If 0, the compatibility mode is off for all applications.
-         * If 1, older applications run under compatibility mode.
-         * TODO: remove this settings before code freeze (bug/1907571)
-         * @hide
-         */
-        public static final String COMPATIBILITY_MODE = "compatibility_mode";
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -1666,16 +1676,21 @@ public final class Settings {
 
         /**
          * Control whether the process CPU usage meter should be shown.
+         *
+         * @deprecated Use {@link Global#SHOW_PROCESSES} instead
          */
-        public static final String SHOW_PROCESSES = "show_processes";
+        @Deprecated
+        public static final String SHOW_PROCESSES = Global.SHOW_PROCESSES;
 
         /**
          * If 1, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
          * extended lifetime is used.
+         *
+         * @deprecated Use {@link Global#ALWAYS_FINISH_ACTIVITIES} instead
          */
-        public static final String ALWAYS_FINISH_ACTIVITIES =
-                "always_finish_activities";
+        @Deprecated
+        public static final String ALWAYS_FINISH_ACTIVITIES = Global.ALWAYS_FINISH_ACTIVITIES;
 
         /**
          * Determines which streams are affected by ringer mode changes. The
@@ -1899,7 +1914,10 @@ public final class Settings {
 
         /**
          * Name of activity to use for wallpaper on the home screen.
+         *
+         * @deprecated Use {@link WallpaperManager} instead.
          */
+        @Deprecated
         public static final String WALLPAPER_ACTIVITY = "wallpaper_activity";
 
         /**
@@ -1943,28 +1961,30 @@ public final class Settings {
         /**
          * Scaling factor for normal window animations. Setting to 0 will disable window
          * animations.
+         *
+         * @deprecated Use {@link Global#WINDOW_ANIMATION_SCALE} instead
          */
-        public static final String WINDOW_ANIMATION_SCALE = "window_animation_scale";
+        @Deprecated
+        public static final String WINDOW_ANIMATION_SCALE = Global.WINDOW_ANIMATION_SCALE;
 
         /**
          * Scaling factor for activity transition animations. Setting to 0 will disable window
          * animations.
+         *
+         * @deprecated Use {@link Global#TRANSITION_ANIMATION_SCALE} instead
          */
-        public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
+        @Deprecated
+        public static final String TRANSITION_ANIMATION_SCALE = Global.TRANSITION_ANIMATION_SCALE;
 
         /**
          * Scaling factor for Animator-based animations. This affects both the start delay and
          * duration of all such animations. Setting to 0 will cause animations to end immediately.
          * The default value is 1.
+         *
+         * @deprecated Use {@link Global#ANIMATOR_DURATION_SCALE} instead
          */
-        public static final String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
-
-        /**
-         * Scaling factor for normal window animations. Setting to 0 will disable window
-         * animations.
-         * @hide
-         */
-        public static final String FANCY_IME_ANIMATIONS = "fancy_ime_animations";
+        @Deprecated
+        public static final String ANIMATOR_DURATION_SCALE = Global.ANIMATOR_DURATION_SCALE;
 
         /**
          * Control whether the accelerometer will be used to change screen
@@ -2026,23 +2046,6 @@ public final class Settings {
          * @hide
          */
         public static final String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
-
-        /**
-         * CDMA only settings
-         * Emergency Tone  0 = Off
-         *                 1 = Alert
-         *                 2 = Vibrate
-         * @hide
-         */
-        public static final String EMERGENCY_TONE = "emergency_tone";
-
-        /**
-         * CDMA only settings
-         * Whether the auto retry is enabled. The value is
-         * boolean (1 or 0).
-         * @hide
-         */
-        public static final String CALL_AUTO_RETRY = "call_auto_retry";
 
         /**
          * Whether the hearing aid is enabled. The value is
@@ -2296,8 +2299,8 @@ public final class Settings {
             DATE_FORMAT,
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
-            EMERGENCY_TONE,
-            CALL_AUTO_RETRY,
+            Global.EMERGENCY_TONE,
+            Global.CALL_AUTO_RETRY,
             HEARING_AID,
             TTY_MODE,
             SOUND_EFFECTS_ENABLED,
@@ -2695,6 +2698,8 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
             MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
+            MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_CDMA_SUBSCRIPTION);
         }
 
         /**
@@ -3653,20 +3658,6 @@ public final class Settings {
                 = "allowed_geolocation_origins";
 
         /**
-         * The preferred network mode   7 = Global
-         *                              6 = EvDo only
-         *                              5 = CDMA w/o EvDo
-         *                              4 = CDMA / EvDo auto
-         *                              3 = GSM / WCDMA auto
-         *                              2 = WCDMA only
-         *                              1 = GSM only
-         *                              0 = GSM / WCDMA preferred
-         * @hide
-         */
-        public static final String PREFERRED_NETWORK_MODE =
-                "preferred_network_mode";
-
-        /**
          * The preferred TTY mode     0 = TTy Off, CDMA default
          *                            1 = TTY Full
          *                            2 = TTY HCO
@@ -3675,14 +3666,6 @@ public final class Settings {
          */
         public static final String PREFERRED_TTY_MODE =
                 "preferred_tty_mode";
-
-        /**
-         * The cdma subscription 0 = Subscription from RUIM, when available
-         *                       1 = Subscription from NV
-         * @hide
-         */
-        public static final String PREFERRED_CDMA_SUBSCRIPTION =
-                "preferred_cdma_subscription";
 
         /**
          * Whether the enhanced voice privacy mode is enabled.
@@ -5169,6 +5152,104 @@ public final class Settings {
         public static final String getBluetoothInputDevicePriorityKey(String address) {
             return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase();
         }
+
+        /**
+         * Scaling factor for normal window animations. Setting to 0 will
+         * disable window animations.
+         */
+        public static final String WINDOW_ANIMATION_SCALE = "window_animation_scale";
+
+        /**
+         * Scaling factor for activity transition animations. Setting to 0 will
+         * disable window animations.
+         */
+        public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
+
+        /**
+         * Scaling factor for Animator-based animations. This affects both the
+         * start delay and duration of all such animations. Setting to 0 will
+         * cause animations to end immediately. The default value is 1.
+         */
+        public static final String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
+
+        /**
+         * Scaling factor for normal window animations. Setting to 0 will
+         * disable window animations.
+         *
+         * @hide
+         */
+        public static final String FANCY_IME_ANIMATIONS = "fancy_ime_animations";
+
+        /**
+         * If 0, the compatibility mode is off for all applications.
+         * If 1, older applications run under compatibility mode.
+         * TODO: remove this settings before code freeze (bug/1907571)
+         * @hide
+         */
+        public static final String COMPATIBILITY_MODE = "compatibility_mode";
+
+        /**
+         * CDMA only settings
+         * Emergency Tone  0 = Off
+         *                 1 = Alert
+         *                 2 = Vibrate
+         * @hide
+         */
+        public static final String EMERGENCY_TONE = "emergency_tone";
+
+        /**
+         * CDMA only settings
+         * Whether the auto retry is enabled. The value is
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String CALL_AUTO_RETRY = "call_auto_retry";
+
+        /**
+         * The preferred network mode   7 = Global
+         *                              6 = EvDo only
+         *                              5 = CDMA w/o EvDo
+         *                              4 = CDMA / EvDo auto
+         *                              3 = GSM / WCDMA auto
+         *                              2 = WCDMA only
+         *                              1 = GSM only
+         *                              0 = GSM / WCDMA preferred
+         * @hide
+         */
+        public static final String PREFERRED_NETWORK_MODE =
+                "preferred_network_mode";
+
+        /**
+         * The cdma subscription 0 = Subscription from RUIM, when available
+         *                       1 = Subscription from NV
+         * @hide
+         */
+        public static final String PREFERRED_CDMA_SUBSCRIPTION =
+                "preferred_cdma_subscription";
+
+        /**
+         * Name of an application package to be debugged.
+         */
+        public static final String DEBUG_APP = "debug_app";
+
+        /**
+         * If 1, when launching DEBUG_APP it will wait for the debugger before
+         * starting user code.  If 0, it will run normally.
+         */
+        public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
+
+        /**
+         * Control whether the process CPU usage meter should be shown.
+         */
+        public static final String SHOW_PROCESSES = "show_processes";
+
+        /**
+         * If 1, the activity manager will aggressively finish activities and
+         * processes as soon as they are no longer needed.  If 0, the normal
+         * extended lifetime is used.
+         */
+        public static final String ALWAYS_FINISH_ACTIVITIES =
+                "always_finish_activities";
 
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = new NameValueCache(
