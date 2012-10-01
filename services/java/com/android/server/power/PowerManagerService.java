@@ -282,6 +282,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use NaN to disable.
     private float mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
 
+    // Time when we last logged a warning about calling userActivity() without permission.
+    private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
+
     private native void nativeInit();
     private static native void nativeShutdown();
     private static native void nativeReboot(String reason) throws IOException;
@@ -688,11 +691,28 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     @Override // Binder call
     public void userActivity(long eventTime, int event, int flags) {
+        final long now = SystemClock.uptimeMillis();
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Once upon a time applications could call userActivity().
+            // Now we require the DEVICE_POWER permission.  Log a warning and ignore the
+            // request instead of throwing a SecurityException so we don't break old apps.
+            synchronized (mLock) {
+                if (now >= mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
+                    mLastWarningAboutUserActivityPermission = now;
+                    Slog.w(TAG, "Ignoring call to PowerManager.userActivity() because the "
+                            + "caller does not have DEVICE_POWER permission.  "
+                            + "Please fix your app!  "
+                            + " pid=" + Binder.getCallingPid()
+                            + " uid=" + Binder.getCallingUid());
+                }
+            }
+            return;
+        }
+
         if (eventTime > SystemClock.uptimeMillis()) {
             throw new IllegalArgumentException("event time must not be in the future");
         }
-
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
