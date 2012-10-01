@@ -104,7 +104,6 @@ public class KeyguardViewMediator {
         "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
 
     // used for handler messages
-    private static final int TIMEOUT = 1;
     private static final int SHOW = 2;
     private static final int HIDE = 3;
     private static final int RESET = 4;
@@ -167,12 +166,6 @@ public class KeyguardViewMediator {
     private UserManager mUserManager;
 
     /**
-     * Used to keep the device awake while the keyguard is showing, i.e for
-     * calls to {@link #pokeWakelock()}
-     */
-    private PowerManager.WakeLock mWakeLock;
-
-    /**
      * Used to keep the device awake while to ensure the keyguard finishes opening before
      * we sleep.
      */
@@ -214,8 +207,6 @@ public class KeyguardViewMediator {
      * it turned off due to timeout. see {@link #onScreenTurnedOff(int)}
      */
     private int mDelayedShowingSequence;
-
-    private int mWakelockSequence;
 
     /**
      * If the user has disabled the keyguard, then requests to exit, this is
@@ -262,15 +253,16 @@ public class KeyguardViewMediator {
     public interface ViewMediatorCallback {
 
         /**
-         * Request the wakelock to be poked for the default amount of time.
+         * Wake the device immediately.
          */
-        void pokeWakelock();
+        void wakeUp();
 
         /**
-         * Request the wakelock to be poked for a specific amount of time.
+         * Reports user activity and requests that the screen stay on for the specified
+         * amount of time.
          * @param millis The amount of time in millis.
          */
-        void pokeWakelock(long millis);
+        void userActivity(long millis);
 
         /**
          * Report that the keyguard is done.
@@ -402,12 +394,12 @@ public class KeyguardViewMediator {
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
-        public void pokeWakelock() {
-            KeyguardViewMediator.this.pokeWakelock();
+        public void wakeUp() {
+            KeyguardViewMediator.this.wakeUp();
         }
 
-        public void pokeWakelock(long holdMs) {
-            KeyguardViewMediator.this.pokeWakelock(holdMs);
+        public void userActivity(long holdMs) {
+            KeyguardViewMediator.this.userActivity(holdMs);
         }
 
         public void keyguardDone(boolean authenticated) {
@@ -424,19 +416,18 @@ public class KeyguardViewMediator {
         }
     };
 
-    public void pokeWakelock() {
-        pokeWakelock(AWAKE_INTERVAL_DEFAULT_MS);
+    public void wakeUp() {
+        mPM.wakeUp(SystemClock.uptimeMillis());
     }
 
-    public void pokeWakelock(long holdMs) {
-        synchronized (this) {
-            if (DBG_WAKE) Log.d(TAG, "pokeWakelock(" + holdMs + ")");
-            mWakeLock.acquire();
-            mHandler.removeMessages(TIMEOUT);
-            mWakelockSequence++;
-            Message msg = mHandler.obtainMessage(TIMEOUT, mWakelockSequence, 0);
-            mHandler.sendMessageDelayed(msg, holdMs);
-        }
+    public void userActivity() {
+        userActivity(AWAKE_INTERVAL_DEFAULT_MS);
+    }
+
+    public void userActivity(long holdMs) {
+        // We ignore the hold time.  Eventually we should remove it.
+        // Instead, the keyguard window has an explicit user activity timeout set on it.
+        mPM.userActivity(SystemClock.uptimeMillis(), false);
     }
 
     /**
@@ -448,9 +439,6 @@ public class KeyguardViewMediator {
         mContext = context;
         mPM = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mWakeLock = mPM.newWakeLock(
-                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "keyguard");
-        mWakeLock.setReferenceCounted(false);
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
@@ -737,7 +725,6 @@ public class KeyguardViewMediator {
             if (mHidden != isHidden) {
                 mHidden = isHidden;
                 updateActivityLockScreenState();
-                adjustUserActivityLocked();
                 adjustStatusBarLocked();
             }
         }
@@ -1050,9 +1037,6 @@ public class KeyguardViewMediator {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case TIMEOUT:
-                    handleTimeout(msg.arg1);
-                    return ;
                 case SHOW:
                     handleShow();
                     return ;
@@ -1103,9 +1087,8 @@ public class KeyguardViewMediator {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         handleHide();
         if (wakeup) {
-            mPM.wakeUp(SystemClock.uptimeMillis());
+            wakeUp();
         }
-        mWakeLock.release();
 
         sendUserPresentBroadcast();
     }
@@ -1133,21 +1116,6 @@ public class KeyguardViewMediator {
                 // as a result of the callback, so remove any remaining messages from
                 // the queue
                 mHandler.removeMessages(KEYGUARD_DONE_DRAWING);
-            }
-        }
-    }
-
-    /**
-     * Handles the message sent by {@link #pokeWakelock}
-     * @param seq used to determine if anything has changed since the message
-     *   was sent.
-     * @see #TIMEOUT
-     */
-    private void handleTimeout(int seq) {
-        synchronized (KeyguardViewMediator.this) {
-            if (DEBUG) Log.d(TAG, "handleTimeout");
-            if (seq == mWakelockSequence) {
-                mWakeLock.release();
             }
         }
     }
@@ -1200,8 +1168,8 @@ public class KeyguardViewMediator {
             mKeyguardViewManager.show();
             mShowing = true;
             updateActivityLockScreenState();
-            adjustUserActivityLocked();
             adjustStatusBarLocked();
+            userActivity();
             try {
                 ActivityManagerNative.getDefault().closeSystemDialogs("lock");
             } catch (RemoteException e) {
@@ -1235,20 +1203,7 @@ public class KeyguardViewMediator {
             mKeyguardViewManager.hide();
             mShowing = false;
             updateActivityLockScreenState();
-            adjustUserActivityLocked();
             adjustStatusBarLocked();
-        }
-    }
-
-    private void adjustUserActivityLocked() {
-        // disable user activity if we are shown and not hidden
-        if (DEBUG) Log.d(TAG, "adjustUserActivityLocked mShowing: " + mShowing + " mHidden: " + mHidden);
-        boolean enabled = !mShowing || mHidden;
-        // FIXME: Replace this with a new timeout control mechanism.
-        //mRealPowerManager.enableUserActivity(enabled);
-        if (!enabled && mScreenOn) {
-            // reinstate our short screen timeout policy
-            pokeWakelock();
         }
     }
 
@@ -1320,7 +1275,7 @@ public class KeyguardViewMediator {
             if (!mKeyguardViewManager.wakeWhenReadyTq(keyCode)) {
                 // poke wakelock ourselves if keyguard is no longer active
                 Log.w(TAG, "mKeyguardViewManager.wakeWhenReadyTq did not poke wake lock, so poke it ourselves");
-                pokeWakelock();
+                userActivity();
             }
 
             /**
@@ -1328,10 +1283,6 @@ public class KeyguardViewMediator {
              * release the handoff wakelock
              */
             mWakeAndHandOff.release();
-
-            if (!mWakeLock.isHeld()) {
-                Log.w(TAG, "mWakeLock not held in mKeyguardViewManager.wakeWhenReadyTq");
-            }
         }
     }
 

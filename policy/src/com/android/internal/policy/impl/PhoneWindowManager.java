@@ -775,7 +775,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
             // poke the wake lock so they have some time to see the dialog.
-            mKeyguardMediator.pokeWakelock();
+            mKeyguardMediator.userActivity();
         }
     }
 
@@ -1140,6 +1140,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            if (ActivityManager.isHighEndGfx()) {
+                lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+                lp.privateFlags |=
+                        WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
+            }
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle("PointerLocation");
             WindowManager wm = (WindowManager)
