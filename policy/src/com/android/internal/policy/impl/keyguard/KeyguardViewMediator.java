@@ -907,6 +907,8 @@ public class KeyguardViewMediator {
 
     /**
      * Update the newUserId. Call while holding WindowManagerService lock.
+     * NOTE: Should only be called by KeyguardViewMediator in response to the user id changing.
+     *
      * @param newUserId The id of the incoming user.
      */
     public void setCurrentUser(int newUserId) {

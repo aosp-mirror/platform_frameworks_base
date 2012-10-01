@@ -23,6 +23,8 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
@@ -37,6 +39,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.internal.R;
+
+import java.util.List;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
@@ -116,12 +120,39 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         this(context, null);
     }
 
+    private boolean wouldLaunchResolverActivity(Intent intent) {
+        PackageManager packageManager = mContext.getPackageManager();
+        ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
+                PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+        final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
+                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+        // If the list contains the above resolved activity, then it can't be
+        // ResolverActivity itself.
+        for (int i = 0; i < appList.size(); i++) {
+            ResolveInfo tmp = appList.get(i);
+            if (tmp.activityInfo.name.equals(resolved.activityInfo.name)
+                    && tmp.activityInfo.packageName.equals(resolved.activityInfo.packageName)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected void launchCamera() {
         if (mLockPatternUtils.isSecure()) {
             // Launch the secure version of the camera
-            Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
+            final Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            launchActivity(intent, true);
+
+            if (wouldLaunchResolverActivity(intent)) {
+                // TODO: Show disambiguation dialog instead.
+                // For now, we'll treat this like launching any other app from secure keyguard.
+                // When they do, user sees the system's ResolverActivity which lets them choose
+                // which secure camera to use.
+                launchActivity(intent, false);
+            } else {
+                launchActivity(intent, true);
+            }
         } else {
             // Launch the normal camera
             launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA), false);
