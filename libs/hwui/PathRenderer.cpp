@@ -323,6 +323,11 @@ void PathRenderer::convexPathVertices(const SkPath &path, const SkPaint* paint,
     convexPathPerimeterVertices(path, threshInvScaleX * threshInvScaleX,
             threshInvScaleY * threshInvScaleY, tempVertices);
 
+    if (!tempVertices.size()) {
+        // path was empty, return without allocating vertex buffer
+        return;
+    }
+
 #if VERTEX_DEBUG
     for (unsigned int i = 0; i < tempVertices.size(); i++) {
         ALOGD("orig path: point at %f %f", tempVertices[i].position[0], tempVertices[i].position[1]);
