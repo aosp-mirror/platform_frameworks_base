@@ -18,15 +18,16 @@ package com.android.internal.policy.impl.keyguard;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 
 import com.android.internal.R;
+import com.android.internal.policy.impl.keyguard.PagedView.PageSwitchListener;
 
-public class KeyguardWidgetRegion extends LinearLayout {
+public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchListener {
     KeyguardGlowStripView mLeftStrip;
     KeyguardGlowStripView mRightStrip;
     KeyguardWidgetPager mPager;
+    private int mPage = 0;
 
     public KeyguardWidgetRegion(Context context) {
         this(context, null, 0);
@@ -46,6 +47,7 @@ public class KeyguardWidgetRegion extends LinearLayout {
         mLeftStrip = (KeyguardGlowStripView) findViewById(R.id.left_strip);
         mRightStrip = (KeyguardGlowStripView) findViewById(R.id.right_strip);
         mPager = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
+        mPager.setPageSwitchListener(this);
 
         setSoundEffectsEnabled(false);
         setOnClickListener(new OnClickListener() {
@@ -57,7 +59,16 @@ public class KeyguardWidgetRegion extends LinearLayout {
     }
 
     public void showPagingFeedback() {
-        mLeftStrip.makeEmGo();
-        mRightStrip.makeEmGo();
+        if (mPage < mPager.getPageCount() - 1) {
+            mLeftStrip.makeEmGo();
+        }
+        if (mPage > 0) {
+            mRightStrip.makeEmGo();
+        }
+    }
+
+    @Override
+    public void onPageSwitch(View newPage, int newPageIndex) {
+        mPage = newPageIndex;
     }
 }
