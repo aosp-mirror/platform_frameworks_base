@@ -1643,12 +1643,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                 && mMaximumScreenOffTimeoutFromDeviceAdmin < Integer.MAX_VALUE;
     }
 
-    @Override // Binder call
-    public void preventScreenOn(boolean prevent) {
-        // TODO Auto-generated method stub
-        // Only used by phone app, delete this
-    }
-
     /**
      * Used by the phone application to make the attention LED flash when ringing.
      */

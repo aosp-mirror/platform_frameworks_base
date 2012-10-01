@@ -65,11 +65,6 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void preventScreenOn(boolean arg0) throws RemoteException {
-        // pass for now.
-    }
-
-    @Override
     public void reboot(String arg0) throws RemoteException {
         // pass for now.
     }
