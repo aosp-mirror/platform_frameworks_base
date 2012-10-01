@@ -234,7 +234,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         public void userActivity(long timeout) {
             if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.pokeWakelock(timeout);
+                mViewMediatorCallback.userActivity(timeout);
             }
         }
 
@@ -638,7 +638,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (DEBUG) Log.d(TAG, "poking wake lock immediately");
         }
         if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.pokeWakelock();
+            mViewMediatorCallback.wakeUp();
         }
     }
 

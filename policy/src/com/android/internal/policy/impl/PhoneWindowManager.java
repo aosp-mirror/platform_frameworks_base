@@ -775,7 +775,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
             // poke the wake lock so they have some time to see the dialog.
-            mKeyguardMediator.pokeWakelock();
+            mKeyguardMediator.userActivity();
         }
     }
 
