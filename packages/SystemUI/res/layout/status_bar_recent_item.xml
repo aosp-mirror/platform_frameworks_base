@@ -23,7 +23,8 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:paddingTop="@dimen/status_bar_recents_item_padding"
-    android:paddingBottom="@dimen/status_bar_recents_item_padding">
+    android:paddingBottom="@dimen/status_bar_recents_item_padding"
+    android:importantForAccessibility="no">
 
     <RelativeLayout android:id="@+id/recent_item"
         android:layout_gravity="center_horizontal"
@@ -44,6 +45,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textColor="@color/status_bar_recents_app_label_color"
+            android:importantForAccessibility="no"
         />
         <FrameLayout android:id="@+id/app_thumbnail"
             android:layout_width="wrap_content"
