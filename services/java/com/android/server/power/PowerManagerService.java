@@ -1574,12 +1574,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     @Override // Binder call
-    public void clearUserActivityTimeout(long now, long timeout) {
-        // TODO Auto-generated method stub
-        // Only used by phone app, delete this
-    }
-
-    @Override // Binder call
     public void setPokeLock(int pokey, IBinder lock, String tag) {
         // TODO Auto-generated method stub
         // Only used by phone app, delete this
