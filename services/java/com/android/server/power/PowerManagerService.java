@@ -51,7 +51,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.service.dreams.Dream;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -363,8 +362,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             mContext.registerReceiver(new BootCompletedReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
-            filter.addAction(Dream.ACTION_DREAMING_STARTED);
-            filter.addAction(Dream.ACTION_DREAMING_STOPPED);
+            filter.addAction(Intent.ACTION_DREAMING_STARTED);
+            filter.addAction(Intent.ACTION_DREAMING_STOPPED);
             mContext.registerReceiver(new DreamReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();

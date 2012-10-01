@@ -46,7 +46,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.Dream;
+import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -265,7 +265,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 .getDefaultDisplay();
 
         mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(Dream.DREAM_SERVICE));
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
         super.start(); // calls createAndAddWindows()
 

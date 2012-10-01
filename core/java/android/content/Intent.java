@@ -1390,6 +1390,24 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
 
     /**
+     * Broadcast Action: Sent after the system stops dreaming.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * It is only sent to registered receivers.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
+
+    /**
+     * Broadcast Action: Sent after the system starts dreaming.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * It is only sent to registered receivers.</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
+
+    /**
      * Broadcast Action: Sent when the user is present after device wakes up (e.g when the
      * keyguard is gone).
      *

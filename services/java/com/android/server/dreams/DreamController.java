@@ -25,7 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
-import android.service.dreams.Dream;
+import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -48,9 +48,9 @@ final class DreamController {
     private final Listener mListener;
     private final IWindowManager mIWindowManager;
 
-    private final Intent mDreamingStartedIntent = new Intent(Dream.ACTION_DREAMING_STARTED)
+    private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-    private final Intent mDreamingStoppedIntent = new Intent(Dream.ACTION_DREAMING_STOPPED)
+    private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
     private final Intent mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -98,8 +98,7 @@ final class DreamController {
             return;
         }
 
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Dream.CATEGORY_DREAM);
+        Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
         intent.setComponent(name);
         intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {

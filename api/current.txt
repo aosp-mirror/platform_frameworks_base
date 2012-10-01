@@ -5777,6 +5777,8 @@ package android.content {
     field public static final java.lang.String ACTION_DEVICE_STORAGE_OK = "android.intent.action.DEVICE_STORAGE_OK";
     field public static final java.lang.String ACTION_DIAL = "android.intent.action.DIAL";
     field public static final java.lang.String ACTION_DOCK_EVENT = "android.intent.action.DOCK_EVENT";
+    field public static final java.lang.String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
+    field public static final java.lang.String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
     field public static final java.lang.String ACTION_EDIT = "android.intent.action.EDIT";
     field public static final java.lang.String ACTION_EXTERNAL_APPLICATIONS_AVAILABLE = "android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE";
     field public static final java.lang.String ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE = "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
@@ -20317,8 +20319,8 @@ package android.security {
 
 package android.service.dreams {
 
-  public class Dream extends android.app.Service implements android.view.Window.Callback {
-    ctor public Dream();
+  public class DreamService extends android.app.Service implements android.view.Window.Callback {
+    ctor public DreamService();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
@@ -20358,10 +20360,8 @@ package android.service.dreams {
     method public void setInteractive(boolean);
     method public void setLowProfile(boolean);
     method public void setScreenBright(boolean);
-    field public static final java.lang.String ACTION_DREAMING_STARTED = "android.intent.action.DREAMING_STARTED";
-    field public static final java.lang.String ACTION_DREAMING_STOPPED = "android.intent.action.DREAMING_STOPPED";
-    field public static final java.lang.String CATEGORY_DREAM = "android.intent.category.DREAM";
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";
   }
 
 }

@@ -5315,9 +5315,9 @@
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that
          describes an
-         {@link android.service.dreams.Dream}, which is
+         {@link android.service.dreams.DreamService}, which is
          referenced from its
-         {@link android.service.dreams.Dream#DREAM_META_DATA}
+         {@link android.service.dreams.DreamService#DREAM_META_DATA}
          meta-data entry.  Described here are the attributes that can be
          included in that tag. -->
     <declare-styleable name="Dream">
