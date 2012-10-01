@@ -3872,14 +3872,20 @@ public final class ActivityThread {
 
     final void applyNonDefaultDisplayMetricsToConfigurationLocked(
             DisplayMetrics dm, Configuration config) {
-        config.screenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE
-                | Configuration.SCREENLAYOUT_LONG_NO;
         config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
-        config.orientation = (dm.widthPixels >= dm.heightPixels) ?
-                Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
         config.densityDpi = dm.densityDpi;
         config.screenWidthDp = (int)(dm.widthPixels / dm.density);
         config.screenHeightDp = (int)(dm.heightPixels / dm.density);
+        int sl = Configuration.resetScreenLayout(config.screenLayout);
+        if (dm.widthPixels > dm.heightPixels) {
+            config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+            config.screenLayout = Configuration.reduceScreenLayout(sl,
+                    config.screenWidthDp, config.screenHeightDp);
+        } else {
+            config.orientation = Configuration.ORIENTATION_PORTRAIT;
+            config.screenLayout = Configuration.reduceScreenLayout(sl,
+                    config.screenHeightDp, config.screenWidthDp);
+        }
         config.smallestScreenWidthDp = config.screenWidthDp; // assume screen does not rotate
         config.compatScreenWidthDp = config.screenWidthDp;
         config.compatScreenHeightDp = config.screenHeightDp;

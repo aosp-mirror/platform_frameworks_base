@@ -6676,9 +6676,6 @@ public class WindowManagerService extends IWindowManager.Stub
         int h = mPolicy.getNonDecorDisplayHeight(dw, dh, rotation);
 
         // Compute the screen layout size class for this rotation.
-        int screenLayoutSize;
-        boolean screenLayoutLong;
-        boolean screenLayoutCompatNeeded;
         int longSize = w;
         int shortSize = h;
         if (longSize < shortSize) {
@@ -6688,64 +6685,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         longSize = (int)(longSize/density);
         shortSize = (int)(shortSize/density);
-
-        // These semi-magic numbers define our compatibility modes for
-        // applications with different screens.  These are guarantees to
-        // app developers about the space they can expect for a particular
-        // configuration.  DO NOT CHANGE!
-        if (longSize < 470) {
-            // This is shorter than an HVGA normal density screen (which
-            // is 480 pixels on its long side).
-            screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_SMALL;
-            screenLayoutLong = false;
-            screenLayoutCompatNeeded = false;
-        } else {
-            // What size is this screen screen?
-            if (longSize >= 960 && shortSize >= 720) {
-                // 1.5xVGA or larger screens at medium density are the point
-                // at which we consider it to be an extra large screen.
-                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_XLARGE;
-            } else if (longSize >= 640 && shortSize >= 480) {
-                // VGA or larger screens at medium density are the point
-                // at which we consider it to be a large screen.
-                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_LARGE;
-            } else {
-                screenLayoutSize = Configuration.SCREENLAYOUT_SIZE_NORMAL;
-            }
-
-            // If this screen is wider than normal HVGA, or taller
-            // than FWVGA, then for old apps we want to run in size
-            // compatibility mode.
-            if (shortSize > 321 || longSize > 570) {
-                screenLayoutCompatNeeded = true;
-            } else {
-                screenLayoutCompatNeeded = false;
-            }
-
-            // Is this a long screen?
-            if (((longSize*3)/5) >= (shortSize-1)) {
-                // Anything wider than WVGA (5:3) is considering to be long.
-                screenLayoutLong = true;
-            } else {
-                screenLayoutLong = false;
-            }
-        }
-
-        // Now reduce the last screenLayout to not be better than what we
-        // have found.
-        if (!screenLayoutLong) {
-            curLayout = (curLayout&~Configuration.SCREENLAYOUT_LONG_MASK)
-                    | Configuration.SCREENLAYOUT_LONG_NO;
-        }
-        if (screenLayoutCompatNeeded) {
-            curLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
-        }
-        int curSize = curLayout&Configuration.SCREENLAYOUT_SIZE_MASK;
-        if (screenLayoutSize < curSize) {
-            curLayout = (curLayout&~Configuration.SCREENLAYOUT_SIZE_MASK)
-                    | screenLayoutSize;
-        }
-        return curLayout;
+        return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 
     private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, boolean rotated,
@@ -6772,15 +6712,13 @@ public class WindowManagerService extends IWindowManager.Stub
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, unrotDh, unrotDw);
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, unrotDw, unrotDh);
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, unrotDh, unrotDw);
-        int sl = Configuration.SCREENLAYOUT_SIZE_XLARGE
-                | Configuration.SCREENLAYOUT_LONG_YES;
+        int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh);
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw);
         outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
-        outConfig.screenLayout =
-                sl|(outConfig.screenLayout&Configuration.SCREENLAYOUT_LAYOUTDIR_MASK);
+        outConfig.screenLayout = sl;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
