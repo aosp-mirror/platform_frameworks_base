@@ -36,6 +36,11 @@ using namespace uirenderer;
  */
 #ifdef USE_OPENGL_RENDERER
 
+static void android_view_GLES20DisplayList_reset(JNIEnv* env,
+        jobject clazz, DisplayList* displayList) {
+    displayList->reset();
+}
+
 // ----------------------------------------------------------------------------
 // DisplayList view properties
 // ----------------------------------------------------------------------------
@@ -185,6 +190,7 @@ const char* const kClassPathName = "android/view/GLES20DisplayList";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
+    { "nReset",                "(I)V",   (void*) android_view_GLES20DisplayList_reset },
     { "nSetCaching",           "(IZ)V",  (void*) android_view_GLES20DisplayList_setCaching },
     { "nSetStaticMatrix",      "(II)V",  (void*) android_view_GLES20DisplayList_setStaticMatrix },
     { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_GLES20DisplayList_setAnimationMatrix },

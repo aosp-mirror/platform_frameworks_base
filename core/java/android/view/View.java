@@ -12394,6 +12394,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mHardwareLayer.destroy();
                 mHardwareLayer = null;
 
+                if (mDisplayList != null) {
+                    mDisplayList.reset();
+                }
                 invalidate(true);
                 invalidateParentCaches();
             }

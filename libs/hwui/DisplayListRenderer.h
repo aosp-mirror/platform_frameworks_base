@@ -137,6 +137,8 @@ public:
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
 
+    ANDROID_API void reset();
+
     void setRenderable(bool renderable) {
         mIsRenderable = renderable;
     }
@@ -399,7 +401,6 @@ public:
 
 private:
     void init();
-    void initProperties();
 
     void clearResources();
 
