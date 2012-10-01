@@ -15,6 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:state_enabled="true" android:drawable="@android:drawable/ic_media_route_connecting_holo_light" />
     <item android:state_activated="true" android:state_enabled="true" android:drawable="@android:drawable/ic_media_route_on_holo_light" />
     <item android:state_enabled="true" android:drawable="@android:drawable/ic_media_route_off_holo_light" />
     <item android:drawable="@android:drawable/ic_media_route_disabled_holo_light" />
