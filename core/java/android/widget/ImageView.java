@@ -789,12 +789,6 @@ public class ImageView extends View {
                     if (resizeWidth) {
                         int newWidth = (int)(desiredAspect * (heightSize - ptop - pbottom)) +
                                 pleft + pright;
-
-                        // Allow the width to outgrow its original estimate if height is fixed.
-                        if (!resizeHeight) {
-                            widthSize = resolveAdjustedSize(newWidth, mMaxWidth, widthMeasureSpec);
-                        }
-
                         if (newWidth <= widthSize) {
                             widthSize = newWidth;
                             done = true;
@@ -805,13 +799,6 @@ public class ImageView extends View {
                     if (!done && resizeHeight) {
                         int newHeight = (int)((widthSize - pleft - pright) / desiredAspect) +
                                 ptop + pbottom;
-
-                        // Allow the height to outgrow its original estimate if width is fixed.
-                        if (!resizeWidth) {
-                            heightSize = resolveAdjustedSize(newHeight, mMaxHeight,
-                                    heightMeasureSpec);
-                        }
-
                         if (newHeight <= heightSize) {
                             heightSize = newHeight;
                         }
