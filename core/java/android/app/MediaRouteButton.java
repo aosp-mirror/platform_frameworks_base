@@ -50,12 +50,17 @@ public class MediaRouteButton extends View {
     private boolean mRemoteActive;
     private boolean mToggleMode;
     private boolean mCheatSheetEnabled;
+    private boolean mIsConnecting;
 
     private int mMinWidth;
     private int mMinHeight;
 
     private OnClickListener mExtendedSettingsClickListener;
     private MediaRouteChooserDialogFragment mDialogFragment;
+
+    private static final int[] CHECKED_STATE_SET = {
+        R.attr.state_checked
+    };
 
     private static final int[] ACTIVATED_STATE_SET = {
         R.attr.state_activated
@@ -210,10 +215,21 @@ public class MediaRouteButton extends View {
     }
 
     void updateRemoteIndicator() {
-        final boolean isRemote =
-                mRouter.getSelectedRoute(mRouteTypes) != mRouter.getSystemAudioRoute();
+        final RouteInfo selected = mRouter.getSelectedRoute(mRouteTypes);
+        final boolean isRemote = selected != mRouter.getSystemAudioRoute();
+        final boolean isConnecting = selected.getStatusCode() == RouteInfo.STATUS_CONNECTING;
+
+        boolean needsRefresh = false;
         if (mRemoteActive != isRemote) {
             mRemoteActive = isRemote;
+            needsRefresh = true;
+        }
+        if (mIsConnecting != isConnecting) {
+            mIsConnecting = isConnecting;
+            needsRefresh = true;
+        }
+
+        if (needsRefresh) {
             refreshDrawableState();
         }
     }
@@ -248,7 +264,14 @@ public class MediaRouteButton extends View {
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
-        if (mRemoteActive) {
+
+        // Technically we should be handling this more completely, but these
+        // are implementation details here. Checked is used to express the connecting
+        // drawable state and it's mutually exclusive with activated for the purposes
+        // of state selection here.
+        if (mIsConnecting) {
+            mergeDrawableStates(drawableState, CHECKED_STATE_SET);
+        } else if (mRemoteActive) {
             mergeDrawableStates(drawableState, ACTIVATED_STATE_SET);
         }
         return drawableState;
@@ -422,6 +445,11 @@ public class MediaRouteButton extends View {
 
         @Override
         public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
+            updateRemoteIndicator();
+        }
+
+        @Override
+        public void onRouteChanged(MediaRouter router, RouteInfo info) {
             updateRemoteIndicator();
         }
 
