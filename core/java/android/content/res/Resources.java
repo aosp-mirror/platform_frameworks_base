@@ -1554,8 +1554,6 @@ public class Resources {
     public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics,
             CompatibilityInfo compat) {
         if (mSystem != null) {
-            // TODO: Remove once b/7094175 is fixed
-            Slog.v(TAG, "updateSystemConfiguration: b/7094175 config=" + config);
             mSystem.updateConfiguration(config, metrics, compat);
             //Log.i(TAG, "Updated system resources " + mSystem
             //        + ": " + mSystem.getConfiguration());
