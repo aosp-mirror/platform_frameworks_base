@@ -50,6 +50,9 @@ easier.
     <style name="Widget.DeviceDefault.TextView" parent="Widget.Holo.TextView" >
 
     </style>
+    <style name="Widget.DeviceDefault.CheckedTextView" parent="Widget.Holo.CheckedTextView" >
+
+    </style>
     <style name="Widget.DeviceDefault.AutoCompleteTextView" parent="Widget.Holo.AutoCompleteTextView" >
 
     </style>
@@ -286,6 +289,9 @@ easier.
 
     </style>
     <style name="Widget.DeviceDefault.Light.TextView" parent="Widget.Holo.Light.TextView" >
+
+    </style>
+    <style name="Widget.DeviceDefault.Light.CheckedTextView" parent="Widget.Holo.Light.CheckedTextView" >
 
     </style>
     <style name="Widget.DeviceDefault.Light.AutoCompleteTextView" parent="Widget.Holo.Light.AutoCompleteTextView" >
