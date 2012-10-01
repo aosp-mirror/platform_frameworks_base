@@ -203,14 +203,15 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     }
 
     @Override
-    public void onMotionEvent(MotionEvent event, int policyFlags) {
+    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent,
+            int policyFlags) {
         mMagnifiedContentInteractonStateHandler.onMotionEvent(event);
         switch (mCurrentState) {
             case STATE_DELEGATING: {
-                handleMotionEventStateDelegating(event, policyFlags);
+                handleMotionEventStateDelegating(event, rawEvent, policyFlags);
             } break;
             case STATE_DETECTING: {
-                mDetectingStateHandler.onMotionEvent(event, policyFlags);
+                mDetectingStateHandler.onMotionEvent(event, rawEvent, policyFlags);
             } break;
             case STATE_VIEWPORT_DRAGGING: {
                 mStateViewportDraggingHandler.onMotionEvent(event, policyFlags);
@@ -259,7 +260,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         mScreenStateObserver.destroy();
     }
 
-    private void handleMotionEventStateDelegating(MotionEvent event, int policyFlags) {
+    private void handleMotionEventStateDelegating(MotionEvent event,
+            MotionEvent rawEvent, int policyFlags) {
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
             if (mDetectingStateHandler.mDelayedEventQueue == null) {
                 transitionToState(STATE_DETECTING);
@@ -290,7 +292,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                         coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
                         event.getFlags());
             }
-            mNext.onMotionEvent(event, policyFlags);
+            mNext.onMotionEvent(event, rawEvent, policyFlags);
         }
     }
 
@@ -533,8 +535,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             }
         };
 
-        public void onMotionEvent(MotionEvent event, int policyFlags) {
-            cacheDelayedMotionEvent(event, policyFlags);
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            cacheDelayedMotionEvent(event, rawEvent, policyFlags);
             final int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
@@ -640,8 +642,10 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             }
         }
 
-        private void cacheDelayedMotionEvent(MotionEvent event, int policyFlags) {
-            MotionEventInfo info = MotionEventInfo.obtain(event, policyFlags);
+        private void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
+                int policyFlags) {
+            MotionEventInfo info = MotionEventInfo.obtain(event, rawEvent,
+                    policyFlags);
             if (mDelayedEventQueue == null) {
                 mDelayedEventQueue = info;
             } else {
@@ -657,7 +661,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             while (mDelayedEventQueue != null) {
                 MotionEventInfo info = mDelayedEventQueue;
                 mDelayedEventQueue = info.mNext;
-                ScreenMagnifier.this.onMotionEvent(info.mEvent, info.mPolicyFlags);
+                ScreenMagnifier.this.onMotionEvent(info.mEvent, info.mRawEvent,
+                        info.mPolicyFlags);
                 info.recycle();
             }
         }
@@ -738,9 +743,11 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private boolean mInPool;
 
         public MotionEvent mEvent;
+        public MotionEvent mRawEvent;
         public int mPolicyFlags;
 
-        public static MotionEventInfo obtain(MotionEvent event, int policyFlags) {
+        public static MotionEventInfo obtain(MotionEvent event, MotionEvent rawEvent,
+                int policyFlags) {
             synchronized (sLock) {
                 MotionEventInfo info;
                 if (sPoolSize > 0) {
@@ -752,13 +759,15 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 } else {
                     info = new MotionEventInfo();
                 }
-                info.initialize(event, policyFlags);
+                info.initialize(event, rawEvent, policyFlags);
                 return info;
             }
         }
 
-        private void initialize(MotionEvent event, int policyFlags) {
+        private void initialize(MotionEvent event, MotionEvent rawEvent,
+                int policyFlags) {
             mEvent = MotionEvent.obtain(event);
+            mRawEvent = MotionEvent.obtain(rawEvent);
             mPolicyFlags = policyFlags;
         }
 
@@ -780,6 +789,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private void clear() {
             mEvent.recycle();
             mEvent = null;
+            mRawEvent.recycle();
+            mRawEvent = null;
             mPolicyFlags = 0;
         }
     }
