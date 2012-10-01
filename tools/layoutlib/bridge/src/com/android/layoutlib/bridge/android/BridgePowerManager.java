@@ -90,11 +90,6 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void setPokeLock(int arg0, IBinder arg1, String arg2) throws RemoteException {
-        // pass for now.
-    }
-
-    @Override
     public void setStayOnSetting(int arg0) throws RemoteException {
         // pass for now.
     }
