@@ -16,6 +16,8 @@
 ** limitations under the License.
 */
 -->
+<!-- This is the SIM PUK view that allows the user to recover their device by entering the
+    carrier-provided PUK code and entering a new SIM PIN for it. -->
 <com.android.internal.policy.impl.keyguard.KeyguardSimPukView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_sim_puk_view"
@@ -24,98 +26,62 @@
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
-    <include layout="@layout/keyguard_navigation"/>
-
-    <Space
-        android:layout_width="match_parent"
+    <LinearLayout
         android:layout_height="0dip"
-        android:layout_weight="1"/>
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
 
-    <LinearLayout android:id="@+id/topDisplayGroup"
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_lockscreen_sim"/>
+
+        <include layout="@layout/keyguard_navigation"/>
+
+     </LinearLayout>
+
+    <!-- Password entry field -->
+    <!-- Note: the entire container is styled to look like the edit field,
+         since the backspace/IME switcher looks better inside -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:layout_marginEnd="4dip"
+        android:layout_marginStart="4dip"
+        android:gravity="center_vertical"
+        android:background="#70000000">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <!-- displays dots as user enters pin -->
+        <EditText android:id="@+id/sim_pin_entry"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@*android:dimen/keyguard_lockscreen_pin_margin_left"
+            android:textStyle="normal"
+            android:inputType="textPassword"
+            android:textSize="36sp"
+            android:background="@null"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffffff"
+            android:imeOptions="flagForceAscii|actionDone"
+        />
 
-            <LinearLayout
-                  android:orientation="vertical"
-                  android:layout_width="wrap_content"
-                  android:layout_weight="1"
-                  android:layout_height="match_parent"
-                  android:paddingEnd="0dip"
-                  android:layout_marginEnd="10dip"
-                  android:layout_marginStart="10dip">
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginEnd="6dip"
-                      android:layout_marginStart="6dip"
-                      android:gravity="center_vertical"
-                      android:background="@*android:drawable/edit_text">
-
-                      <!-- displays dots as user enters puk -->
-                      <EditText android:id="@+id/sim_puk_entry"
-                          android:layout_width="0dip"
-                          android:layout_height="wrap_content"
-                          android:layout_weight="1"
-                          android:maxLines="1"
-                          android:textStyle="bold"
-                          android:inputType="textPassword"
-                          android:textColor="#000"
-                          android:hint="@string/kg_puk_enter_puk_hint"
-                      />
-
-                      <ImageButton android:id="@+id/puk_delete_button"
-                          android:src="@*android:drawable/ic_input_delete"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginEnd="-3dip"
-                          android:layout_marginBottom="-3dip"
-                      />
-
-                  </LinearLayout>
-
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginEnd="6dip"
-                      android:layout_marginStart="6dip"
-                      android:gravity="center_vertical"
-                      android:background="@*android:drawable/edit_text">
-
-                      <!-- displays dots as user enters new pin -->
-                      <EditText android:id="@+id/sim_pin_entry"
-                          android:layout_width="0dip"
-                          android:layout_height="wrap_content"
-                          android:layout_weight="1"
-                          android:maxLines="1"
-                          android:textStyle="bold"
-                          android:inputType="textPassword"
-                          android:textColor="#000"
-                          android:hint="@string/kg_puk_enter_pin_hint"
-                      />
-
-                      <ImageButton android:id="@+id/pin_delete_button"
-                          android:src="@*android:drawable/ic_input_delete"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginEnd="-3dip"
-                          android:layout_marginBottom="-3dip"
-                      />
-                  </LinearLayout>
-
-             </LinearLayout>
-
-        </LinearLayout>
-
+        <ImageButton android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@android:drawable/ic_input_delete"
+            android:clickable="true"
+            android:padding="8dip"
+            android:background="?android:attr/selectableItemBackground"
+        />
     </LinearLayout>
 
     <!-- Numeric keyboard -->
@@ -125,9 +91,14 @@
         android:layout_marginEnd="4dip"
         android:paddingTop="4dip"
         android:paddingBottom="4dip"
-        android:background="#80ffffff"
+        android:background="#40000000"
         android:keyBackground="@*android:drawable/btn_keyboard_key_ics"
         android:clickable="true"
     />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/kg_secure_padding_height"
+        android:background="@drawable/lockscreen_protection_pattern" />
 
 </com.android.internal.policy.impl.keyguard.KeyguardSimPukView>
