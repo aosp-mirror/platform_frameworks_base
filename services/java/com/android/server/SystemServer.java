@@ -631,11 +631,12 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Wired Accessory Observer");
+                Slog.i(TAG, "Wired Accessory Manager");
                 // Listen for wired headset changes
-                new WiredAccessoryObserver(context);
+                inputManager.setWiredAccessoryCallbacks(
+                        new WiredAccessoryManager(context, inputManager));
             } catch (Throwable e) {
-                reportWtf("starting WiredAccessoryObserver", e);
+                reportWtf("starting WiredAccessoryManager", e);
             }
 
             try {
