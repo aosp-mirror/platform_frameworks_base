@@ -261,6 +261,7 @@ public class StateListDrawable extends DrawableContainer {
         return this;
     }
 
+    /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
         final int numStates = getStateCount();

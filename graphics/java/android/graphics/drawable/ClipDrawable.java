@@ -239,6 +239,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         return null;
     }
 
+    /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
         mClipState.mDrawable.setLayoutDirection(layoutDirection);

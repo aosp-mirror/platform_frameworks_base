@@ -9354,7 +9354,6 @@ package android.graphics.drawable {
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setLayoutDirection(int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
     field public static final int HORIZONTAL = 1; // 0x1
     field public static final int VERTICAL = 2; // 0x2
@@ -9546,7 +9545,6 @@ package android.graphics.drawable {
     method public boolean setDrawableByLayerId(int, android.graphics.drawable.Drawable);
     method public void setId(int, int);
     method public void setLayerInset(int, int, int, int, int);
-    method public void setLayoutDirection(int);
     method public void setOpacity(int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
   }
@@ -9640,7 +9638,6 @@ package android.graphics.drawable {
   public class StateListDrawable extends android.graphics.drawable.DrawableContainer {
     ctor public StateListDrawable();
     method public void addState(int[], android.graphics.drawable.Drawable);
-    method public void setLayoutDirection(int);
   }
 
   public class TransitionDrawable extends android.graphics.drawable.LayerDrawable implements android.graphics.drawable.Drawable.Callback {

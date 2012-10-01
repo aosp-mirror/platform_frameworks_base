@@ -590,6 +590,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
         if (getLayoutDirection() != layoutDirection) {
