@@ -59,17 +59,11 @@ public class AppWidgetProviderInfo implements Parcelable {
     public static final int WIDGET_FEATURES_NONE = 0;
 
     /**
-     * Indicates that the widget displays the current time. The host may use this as a hint to not
-     * display the time in other places.
-     */
-    public static final int WIDGET_FEATURES_CLOCK = 1;
-
-    /**
      * Indicates that the widget is output only, ie. has nothing clickable. This may be enforced by
      * the host. Presently, this flag is used by the keyguard to indicate that it can be placed
      * in the first position.
      */
-    public static final int WIDGET_FEATURES_STATUS = 2;
+    public static final int WIDGET_FEATURES_STATUS = 1;
 
     /**
      * Identity of this AppWidget component.  This component should be a {@link
@@ -215,8 +209,7 @@ public class AppWidgetProviderInfo implements Parcelable {
 
     /**
      * A field which specifies any special features that this widget supports. See
-     * {@link #WIDGET_FEATURES_NONE}, {@link #WIDGET_FEATURES_CLOCK},
-     * {@link #WIDGET_FEATURES_STATUS}.
+     * {@link #WIDGET_FEATURES_NONE}, {@link #WIDGET_FEATURES_STATUS}.
      *
      * <p>This field corresponds to the <code>widgetFeatures</code> attribute in
      * the AppWidget meta-data file.
