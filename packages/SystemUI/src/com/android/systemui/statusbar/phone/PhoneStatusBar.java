@@ -1376,12 +1376,34 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void setStatusBarLowProfile(boolean lightsOut) {
         if (mLightsOutAnimation == null) {
-            mLightsOutAnimation = ObjectAnimator.ofFloat(mStatusBarContents, View.ALPHA, 0);
-            mLightsOutAnimation.setDuration(750);
+            final View notifications = mStatusBarView.findViewById(R.id.notification_icon_area);
+            final View systemIcons = mStatusBarView.findViewById(R.id.statusIcons);
+            final View signal = mStatusBarView.findViewById(R.id.signal_cluster);
+            final View battery = mStatusBarView.findViewById(R.id.battery);
+            final View clock = mStatusBarView.findViewById(R.id.clock);
 
-            mLightsOnAnimation = new AnimatorSet();
-            mLightsOnAnimation = ObjectAnimator.ofFloat(mStatusBarContents, View.ALPHA, 1);
-            mLightsOnAnimation.setDuration(250);
+            final AnimatorSet lightsOutAnim = new AnimatorSet();
+            lightsOutAnim.playTogether(
+                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(signal, View.ALPHA, 0),
+                    ObjectAnimator.ofFloat(battery, View.ALPHA, 0.5f),
+                    ObjectAnimator.ofFloat(clock, View.ALPHA, 0.5f)
+                );
+            lightsOutAnim.setDuration(750);
+
+            final AnimatorSet lightsOnAnim = new AnimatorSet();
+            lightsOnAnim.playTogether(
+                    ObjectAnimator.ofFloat(notifications, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(systemIcons, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(signal, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(battery, View.ALPHA, 1),
+                    ObjectAnimator.ofFloat(clock, View.ALPHA, 1)
+                );
+            lightsOnAnim.setDuration(250);
+
+            mLightsOutAnimation = lightsOutAnim;
+            mLightsOnAnimation = lightsOnAnim;
         }
 
         mLightsOutAnimation.cancel();
