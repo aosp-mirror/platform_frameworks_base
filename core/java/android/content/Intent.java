@@ -2414,6 +2414,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_USER_INFO_CHANGED =
             "android.intent.action.USER_INFO_CHANGED";
 
+    /**
+     * Sent when the user taps on the clock widget in the system's "quick settings" area.
+     */
+    public static final String ACTION_QUICK_CLOCK =
+            "android.intent.action.QUICK_CLOCK";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
