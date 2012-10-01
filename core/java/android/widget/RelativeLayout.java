@@ -369,10 +369,10 @@ public class RelativeLayout extends ViewGroup {
         int width = 0;
         int height = 0;
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         // Record our dimensions if they are known;
         if (widthMode != MeasureSpec.UNSPECIFIED) {
@@ -637,7 +637,12 @@ public class RelativeLayout extends ViewGroup {
                 mPaddingLeft, mPaddingRight,
                 myWidth);
         int childHeightMeasureSpec;
-        if (params.width == LayoutParams.MATCH_PARENT) {
+        if (myHeight < 0) {
+            // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
+            // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
+            // Carry it forward.
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        } else if (params.width == LayoutParams.MATCH_PARENT) {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
         } else {
             childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
@@ -664,6 +669,13 @@ public class RelativeLayout extends ViewGroup {
     private int getChildMeasureSpec(int childStart, int childEnd,
             int childSize, int startMargin, int endMargin, int startPadding,
             int endPadding, int mySize) {
+        if (mySize < 0) {
+            // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
+            // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
+            // Carry it forward.
+            return MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        }
+
         int childSpecMode = 0;
         int childSpecSize = 0;
 
