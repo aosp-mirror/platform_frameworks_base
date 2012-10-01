@@ -209,7 +209,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     public void setWindowManager(WindowManagerFuncs windowManagerFuncs) {
         synchronized (mSyncRoot) {
             mWindowManagerFuncs = windowManagerFuncs;
-            scheduleTraversalLocked();
+            scheduleTraversalLocked(false);
         }
     }
 
@@ -220,7 +220,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     public void setInputManager(InputManagerFuncs inputManagerFuncs) {
         synchronized (mSyncRoot) {
             mInputManagerFuncs = inputManagerFuncs;
-            scheduleTraversalLocked();
+            scheduleTraversalLocked(false);
         }
     }
 
@@ -264,7 +264,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 display.setDisplayInfoOverrideFromWindowManagerLocked(info);
                 if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
                     sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
-                    scheduleTraversalLocked();
+                    scheduleTraversalLocked(false);
                 }
             }
         }
@@ -527,7 +527,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
             mDisplayDevices.add(device);
             addLogicalDisplayLocked(device);
-            scheduleTraversalLocked();
+            scheduleTraversalLocked(false);
         }
     }
 
@@ -543,7 +543,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
             device.applyPendingDisplayDeviceInfoChangesLocked();
             if (updateLogicalDisplaysLocked()) {
-                scheduleTraversalLocked();
+                scheduleTraversalLocked(false);
             }
         }
     }
@@ -560,7 +560,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
             mRemovedDisplayDevices.add(device);
             updateLogicalDisplaysLocked();
-            scheduleTraversalLocked();
+            scheduleTraversalLocked(false);
         }
     }
 
@@ -668,13 +668,15 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      *
      * @param displayId The logical display id to update.
      * @param hasContent True if the logical display has content.
+     * @param inTraversal True if called from WindowManagerService during a window traversal prior
+     * to call to performTraversalInTransactionFromWindowManager.
      */
-    public void setDisplayHasContent(int displayId, boolean hasContent) {
+    public void setDisplayHasContent(int displayId, boolean hasContent, boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null && display.hasContentLocked() != hasContent) {
                 display.setHasContentLocked(hasContent);
-                scheduleTraversalLocked();
+                scheduleTraversalLocked(inTraversal);
             }
         }
     }
@@ -741,10 +743,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     // Requests that performTraversalsInTransactionFromWindowManager be called at a
     // later time to apply changes to surfaces and displays.
-    private void scheduleTraversalLocked() {
+    private void scheduleTraversalLocked(boolean inTraversal) {
         if (!mPendingTraversal && mWindowManagerFuncs != null) {
             mPendingTraversal = true;
-            mHandler.sendEmptyMessage(MSG_REQUEST_TRAVERSAL);
+            if (!inTraversal) {
+                mHandler.sendEmptyMessage(MSG_REQUEST_TRAVERSAL);
+            }
         }
     }
 
@@ -911,7 +915,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         @Override
         public void onTraversalRequested() {
             synchronized (mSyncRoot) {
-                scheduleTraversalLocked();
+                scheduleTraversalLocked(false);
             }
         }
     }
