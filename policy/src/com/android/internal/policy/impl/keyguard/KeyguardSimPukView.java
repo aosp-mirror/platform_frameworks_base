@@ -19,13 +19,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.Editable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,16 +40,11 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 import com.android.internal.R;
 
 public class KeyguardSimPukView extends LinearLayout implements View.OnClickListener,
-    View.OnFocusChangeListener, KeyguardSecurityView, OnEditorActionListener {
+    KeyguardSecurityView, OnEditorActionListener {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
-    private TextView mPukText;
-    private TextView mPinText;
-    private TextView mFocusedEntry;
-
-    private View mDelPukButton;
-    private View mDelPinButton;
+    private View mDeleteButton;
 
     private ProgressDialog mSimUnlockProgressDialog = null;
     private KeyguardSecurityCallback mCallback;
@@ -65,6 +58,60 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     private LockPatternUtils mLockPatternUtils;
 
     private volatile boolean mCheckInProgress;
+
+    private TextView mSimPinEntry;
+
+    private String mPukText;
+
+    private String mPinText;
+    private StateMachine mStateMachine = new StateMachine();
+
+    private class StateMachine {
+        final int ENTER_PUK = 0;
+        final int ENTER_PIN = 1;
+        final int CONFIRM_PIN = 2;
+        final int DONE = 3;
+        private int state = ENTER_PUK;
+
+        public void next() {
+            int msg = 0;
+            if (state == ENTER_PUK) {
+                if (checkPuk()) {
+                    state = ENTER_PIN;
+                    msg = R.string.kg_puk_enter_pin_hint;
+                } else {
+                    msg = R.string.kg_invalid_sim_puk_hint;
+                }
+            } else if (state == ENTER_PIN) {
+                if (checkPin()) {
+                    state = CONFIRM_PIN;
+                    msg = R.string.kg_enter_confirm_pin_hint;
+                } else {
+                    msg = R.string.kg_invalid_sim_pin_hint;
+                }
+            } else if (state == CONFIRM_PIN) {
+                if (confirmPin()) {
+                    state = DONE;
+                    msg = R.string.kg_login_checking_password;
+                    updateSim();
+                } else {
+                    msg = R.string.kg_invalid_confirm_pin_hint;
+                }
+            }
+            mSimPinEntry.setText(null);
+            if (msg != 0) {
+                mNavigationManager.setMessage(msg);
+            }
+        }
+
+        void reset() {
+            mPinText="";
+            mPukText="";
+            state = ENTER_PUK;
+            mNavigationManager.setMessage(R.string.kg_puk_enter_puk_hint);
+            mSimPinEntry.requestFocus();
+        }
+    }
 
     public KeyguardSimPukView(Context context) {
         this(context, null);
@@ -86,15 +133,10 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
 
         mNavigationManager = new KeyguardNavigationManager(this);
 
-        mPukText = (TextView) findViewById(R.id.sim_puk_entry);
-        mPukText.setOnEditorActionListener(this);
-        mPinText = (TextView) findViewById(R.id.sim_pin_entry);
-        mPinText.setOnEditorActionListener(this);
-        mDelPukButton = findViewById(R.id.puk_delete_button);
-        mDelPukButton.setOnClickListener(this);
-        mDelPinButton = findViewById(R.id.pin_delete_button);
-        mDelPinButton.setOnClickListener(this);
-
+        mSimPinEntry = (TextView) findViewById(R.id.sim_pin_entry);
+        mSimPinEntry.setOnEditorActionListener(this);
+        mDeleteButton = findViewById(R.id.delete_button);
+        mDeleteButton.setOnClickListener(this);
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
                 new int[] {
@@ -106,22 +148,12 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                 });
         mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
         mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
-
-        mNavigationManager.setMessage(R.string.kg_sim_puk_recovery_hint);
-
-        mPinText.setFocusableInTouchMode(true);
-        mPinText.setOnFocusChangeListener(this);
-        mPukText.setFocusableInTouchMode(true);
-        mPukText.setOnFocusChangeListener(this);
-
-        setFocusableInTouchMode(true);
-
         reset();
     }
 
     @Override
     protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
-        return mPukText.requestFocus(direction, previouslyFocusedRect);
+        return mSimPinEntry.requestFocus(direction, previouslyFocusedRect);
     }
 
     public boolean needsInput() {
@@ -182,30 +214,15 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     }
 
     public void onClick(View v) {
-        if (v == mDelPukButton) {
-            if (mFocusedEntry != mPukText)
-                mPukText.requestFocus();
-            final Editable digits = mPukText.getEditableText();
-            final int len = digits.length();
-            if (len > 0) {
-                digits.delete(len-1, len);
-            }
-        } else if (v == mDelPinButton) {
-            if (mFocusedEntry != mPinText)
-                mPinText.requestFocus();
-            final Editable digits = mPinText.getEditableText();
+        if (v == mDeleteButton) {
+            mSimPinEntry.requestFocus();
+            final Editable digits = mSimPinEntry.getEditableText();
             final int len = digits.length();
             if (len > 0) {
                 digits.delete(len-1, len);
             }
         }
         mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus)
-            mFocusedEntry = (TextView) view;
     }
 
     private Dialog getSimUnlockProgressDialog() {
@@ -223,32 +240,37 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
         return mSimUnlockProgressDialog;
     }
 
-    private void checkPuk() {
+    private boolean checkPuk() {
         // make sure the puk is at least 8 digits long.
-        if (mPukText.getText().length() < 8) {
-            // otherwise, display a message to the user, and don't submit.
-            mNavigationManager.setMessage(R.string.kg_invalid_sim_puk_hint);
-            mPukText.setText("");
-            return;
+        if (mSimPinEntry.getText().length() >= 8) {
+            mPukText = mSimPinEntry.getText().toString();
+            return true;
         }
+        return false;
+    }
 
+    private boolean checkPin() {
         // make sure the PIN is between 4 and 8 digits
-        if (mPinText.getText().length() < 4
-                || mPinText.getText().length() > 8) {
-            // otherwise, display a message to the user, and don't submit.
-            mNavigationManager.setMessage(R.string.kg_invalid_sim_pin_hint);
-            mPinText.setText("");
-            return;
+        int length = mSimPinEntry.getText().length();
+        if (length >= 4 && length <= 8) {
+            mPinText = mSimPinEntry.getText().toString();
+            return true;
         }
+        return false;
+    }
 
+    public boolean confirmPin() {
+        return mPinText.equals(mSimPinEntry.getText().toString());
+    }
+
+    private void updateSim() {
         getSimUnlockProgressDialog().show();
 
         if (!mCheckInProgress) {
             mCheckInProgress = true;
-            new CheckSimPuk(mPukText.getText().toString(),
-                    mPinText.getText().toString()) {
+            new CheckSimPuk(mPukText, mPinText) {
                 void onSimLockChangedResponse(final boolean success) {
-                    mPinText.post(new Runnable() {
+                    post(new Runnable() {
                         public void run() {
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
@@ -256,9 +278,8 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                             if (success) {
                                 mCallback.dismiss(true);
                             } else {
+                                mStateMachine.reset();
                                 mNavigationManager.setMessage(R.string.kg_invalid_puk);
-                                mPukText.setText("");
-                                mPinText.setText("");
                             }
                             mCheckInProgress = false;
                         }
@@ -273,24 +294,10 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
         // Check if this was the result of hitting the enter key
         mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (actionId == EditorInfo.IME_NULL
-                || actionId == EditorInfo.IME_ACTION_DONE
+            if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
                 || actionId == EditorInfo.IME_ACTION_NEXT) {
-                if (view == mPukText && mPukText.getText().length() < 8) {
-                    mNavigationManager.setMessage(R.string.kg_invalid_sim_puk_hint);
-                    mPukText.setText("");
-                    mPukText.requestFocus();
-                    return true;
-                } else if (view == mPinText) {
-                    if (mPinText.getText().length() < 4 || mPinText.getText().length() > 8) {
-                        mNavigationManager.setMessage(R.string.kg_invalid_sim_pin_hint);
-                        mPinText.setText("");
-                        mPinText.requestFocus();
-                    } else {
-                        checkPuk();
-                    }
-                    return true;
-                }
+                mStateMachine.next();
+                return true;
             }
         }
         return false;
@@ -303,10 +310,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
 
     @Override
     public void reset() {
-        mNavigationManager.setMessage(R.string.kg_sim_puk_recovery_hint);
-        mPinText.setText("");
-        mPukText.setText("");
-        mPukText.requestFocus();
+        mStateMachine.reset();
     }
 
     @Override

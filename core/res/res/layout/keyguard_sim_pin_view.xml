@@ -51,7 +51,7 @@
         android:layout_marginEnd="4dip"
         android:layout_marginStart="4dip"
         android:gravity="center_vertical"
-        android:background="@android:drawable/edit_text">
+        android:background="#70000000">
 
         <!-- displays dots as user enters pin -->
         <EditText android:id="@+id/sim_pin_entry"
@@ -60,19 +60,26 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceLargeInverse"
-            android:textColor="@*android:color/primary_text_holo_light"
-            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@*android:dimen/keyguard_lockscreen_pin_margin_left"
+            android:textStyle="normal"
             android:inputType="textPassword"
+            android:textSize="36sp"
+            android:background="@null"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffffff"
             android:imeOptions="flagForceAscii|actionDone"
         />
 
         <ImageButton android:id="@+id/delete_button"
-            android:src="@android:drawable/ic_input_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="-3dip"
-            android:layout_marginBottom="-3dip"
+            android:layout_gravity="center_vertical"
+            android:src="@android:drawable/ic_input_delete"
+            android:clickable="true"
+            android:padding="8dip"
+            android:background="?android:attr/selectableItemBackground"
         />
     </LinearLayout>
 

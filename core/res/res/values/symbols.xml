@@ -1275,10 +1275,7 @@
   <java-symbol type="id" name="glow_pad_view" />
   <java-symbol type="id" name="sim_pin_entry" />
   <java-symbol type="id" name="delete_button" />
-  <java-symbol type="id" name="sim_puk_entry" />
   <java-symbol type="id" name="sim_pin_entry" />
-  <java-symbol type="id" name="puk_delete_button" />
-  <java-symbol type="id" name="pin_delete_button" />
   <java-symbol type="id" name="keyguard_user_avatar" />
   <java-symbol type="id" name="keyguard_user_name" />
   <java-symbol type="id" name="keyguard_transport_control" />
@@ -1409,6 +1406,8 @@
   <java-symbol type="string" name="kg_failed_attempts_almost_at_wipe" />
   <java-symbol type="string" name="kg_failed_attempts_now_wiping" />
   <java-symbol type="string" name="kg_failed_attempts_almost_at_login" />
+  <java-symbol type="string" name="kg_enter_confirm_pin_hint" />
+  <java-symbol type="string" name="kg_invalid_confirm_pin_hint" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />

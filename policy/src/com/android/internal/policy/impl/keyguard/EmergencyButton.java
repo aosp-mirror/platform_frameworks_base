@@ -98,11 +98,19 @@ public class EmergencyButton extends Button {
     }
 
     private void updateEmergencyCallButton(State simState, int phoneState) {
-        boolean enabled = mLockPatternUtils.isEmergencyCallCapable()
-            || (phoneState == TelephonyManager.CALL_STATE_OFFHOOK); // voice call in progress
-        if (enabled && KeyguardUpdateMonitor.isSimLocked(simState)) {
-            // Some countries can't handle emergency calls while SIM is locked.
-            enabled = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
+        boolean enabled = false;
+        if (phoneState == TelephonyManager.CALL_STATE_OFFHOOK) {
+            enabled = true; // always show "return to call" if phone is off-hook
+        } else if (mLockPatternUtils.isEmergencyCallCapable()) {
+            boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext).isSimLocked();
+            if (simLocked) {
+                // Some countries can't handle emergency calls while SIM is locked.
+                enabled = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
+            } else {
+                // True if we need to show a secure screen (pin/pattern/SIM pin/SIM puk);
+                // hides emergency button on "Slide" screen if device is not secure.
+                enabled = mLockPatternUtils.isSecure();
+            }
         }
         mLockPatternUtils.updateEmergencyCallButtonState(this, phoneState, enabled,
                 KeyguardViewManager.USE_UPPER_CASE, false);
