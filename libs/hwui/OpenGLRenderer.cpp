@@ -1265,7 +1265,7 @@ bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, fl
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    if (mSnapshot->isIgnored()) {
+    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
     }
 
@@ -1950,6 +1950,11 @@ void OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
     VertexBuffer vertexBuffer;
     // TODO: try clipping large paths to viewport
     PathRenderer::convexPathVertices(path, paint, mSnapshot->transform, vertexBuffer);
+
+    if (!vertexBuffer.getSize()) {
+        // no vertices to draw
+        return;
+    }
 
     setupDraw();
     setupDrawNoTexture();
