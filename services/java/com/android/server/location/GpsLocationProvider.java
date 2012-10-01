@@ -40,10 +40,8 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -75,7 +73,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -287,12 +284,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private Bundle mLocationExtras = new Bundle();
     private ArrayList<Listener> mListeners = new ArrayList<Listener>();
 
-    // GpsLocationProvider's handler thread
-    private final Thread mThread;
-    // Handler for processing events in mThread.
+    // Handler for processing events
     private Handler mHandler;
-    // Used to signal when our main thread has initialized everything
-    private final CountDownLatch mInitializedLatch = new CountDownLatch(1);
 
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
@@ -437,21 +430,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-        intentFilter.addDataScheme("sms");
-        intentFilter.addDataAuthority("localhost","7275");
-        context.registerReceiver(mBroadcastReciever, intentFilter);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-        try {
-            intentFilter.addDataType("application/vnd.omaloc-supl-init");
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            Log.w(TAG, "Malformed SUPL init mime type");
-        }
-        context.registerReceiver(mBroadcastReciever, intentFilter);
-
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Battery statistics service to be notified when GPS turns on or off
@@ -487,26 +465,43 @@ public class GpsLocationProvider implements LocationProviderInterface {
             Log.w(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         }
 
-        // wait until we are fully initialized before returning
-        mThread = new GpsLocationProviderThread();
-        mThread.start();
-        while (true) {
-            try {
-                mInitializedLatch.await();
-                break;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        // construct handler, listen for events
+        mHandler = new ProviderHandler();
+        listenForBroadcasts();
+
+        // also listen for PASSIVE_PROVIDER updates
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                LocationManager locManager =
+                        (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+                locManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                        0, 0, new NetworkLocationListener(), mHandler.getLooper());                
             }
-        }
+        });
     }
 
-    private void initialize() {
-        // register our receiver on our thread rather than the main thread
+    private void listenForBroadcasts() {
         IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+        intentFilter.addDataScheme("sms");
+        intentFilter.addDataAuthority("localhost","7275");
+        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+        try {
+            intentFilter.addDataType("application/vnd.omaloc-supl-init");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            Log.w(TAG, "Malformed SUPL init mime type");
+        }
+        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
+
+        intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        mContext.registerReceiver(mBroadcastReciever, intentFilter);
+        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
     }
 
     /**
@@ -1535,29 +1530,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
     };
-
-    private final class GpsLocationProviderThread extends Thread {
-
-        public GpsLocationProviderThread() {
-            super("GpsLocationProvider");
-        }
-
-        @Override
-        public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            initialize();
-            Looper.prepare();
-
-            LocationManager locManager =
-                    (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            mHandler = new ProviderHandler();
-            // signal when we are initialized and ready to go
-            mInitializedLatch.countDown();
-            locManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                    0, 0, new NetworkLocationListener(), Looper.myLooper());
-            Looper.loop();
-        }
-    }
 
     private final class NetworkLocationListener implements LocationListener {
         @Override

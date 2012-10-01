@@ -228,6 +228,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private void loadProvidersLocked() {
+        // create a passive location provider, which is always enabled
+        PassiveProvider passiveProvider = new PassiveProvider(this);
+        addProviderLocked(passiveProvider);
+        mEnabledProviders.add(passiveProvider.getName());
+        mPassiveProvider = passiveProvider;
+
         if (GpsLocationProvider.isSupported()) {
             // Create a gps location provider
             GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this);
@@ -236,12 +242,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             addProviderLocked(gpsProvider);
             mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
         }
-
-        // create a passive location provider, which is always enabled
-        PassiveProvider passiveProvider = new PassiveProvider(this);
-        addProviderLocked(passiveProvider);
-        mEnabledProviders.add(passiveProvider.getName());
-        mPassiveProvider = passiveProvider;
 
         /*
         Load package name(s) containing location provider support.
