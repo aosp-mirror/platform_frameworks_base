@@ -3078,30 +3078,6 @@ public final class Settings {
         public static final String BLUETOOTH_ON = Global.BLUETOOTH_ON;
 
         /**
-         * Get the key that retrieves a bluetooth headset's priority.
-         * @hide
-         */
-        public static final String getBluetoothHeadsetPriorityKey(String address) {
-            return ("bluetooth_headset_priority_" + address.toUpperCase());
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth a2dp sink's priority.
-         * @hide
-         */
-        public static final String getBluetoothA2dpSinkPriorityKey(String address) {
-            return ("bluetooth_a2dp_sink_priority_" + address.toUpperCase());
-        }
-
-        /**
-         * Get the key that retrieves a bluetooth Input Device's priority.
-         * @hide
-         */
-        public static final String getBluetoothInputDevicePriorityKey(String address) {
-            return ("bluetooth_input_device_priority_" + address.toUpperCase());
-        }
-
-        /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
          */
         @Deprecated
@@ -5159,6 +5135,40 @@ public final class Settings {
          * @hide
          */
         public static final String DEFAULT_DNS_SERVER = "default_dns_server";
+
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_HEADSET_PRIORITY_PREFIX = "bluetooth_headset_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX = "bluetooth_a2dp_sink_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX = "bluetooth_input_device_priority_";
+
+        /**
+         * Get the key that retrieves a bluetooth headset's priority.
+         * @hide
+         */
+        public static final String getBluetoothHeadsetPriorityKey(String address) {
+            return BLUETOOTH_HEADSET_PRIORITY_PREFIX + address.toUpperCase();
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth a2dp sink's priority.
+         * @hide
+         */
+        public static final String getBluetoothA2dpSinkPriorityKey(String address) {
+            return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase();
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth Input Device's priority.
+         * @hide
+         */
+        public static final String getBluetoothInputDevicePriorityKey(String address) {
+            return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase();
+        }
 
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = new NameValueCache(
