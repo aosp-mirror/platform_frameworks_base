@@ -268,8 +268,6 @@ void Caches::deleteDisplayListDeferred(DisplayList* displayList) {
 void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
-    clearGarbage();
-
     switch (mode) {
         case kFlushMode_Full:
             textureCache.clear();
@@ -293,6 +291,8 @@ void Caches::flush(FlushMode mode) {
             layerCache.clear();
             break;
     }
+
+    clearGarbage();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
