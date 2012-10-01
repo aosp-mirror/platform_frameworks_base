@@ -274,6 +274,20 @@ public class TaskStackBuilder {
     }
 
     /**
+     * @hide
+     */
+    public PendingIntent getPendingIntent(int requestCode, int flags, Bundle options,
+            UserHandle user) {
+        if (mIntents.isEmpty()) {
+            throw new IllegalStateException(
+                    "No intents added to TaskStackBuilder; cannot getPendingIntent");
+        }
+
+        return PendingIntent.getActivitiesAsUser(mSourceContext, requestCode, getIntents(), flags,
+                options, user);
+    }
+
+    /**
      * Return an array containing the intents added to this builder. The intent at the
      * root of the task stack will appear as the first item in the array and the
      * intent at the top of the stack will appear as the last item.
