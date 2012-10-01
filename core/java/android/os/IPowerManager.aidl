@@ -40,7 +40,6 @@ interface IPowerManager
     void reboot(String reason);
     void crash(String message);
 
-    void clearUserActivityTimeout(long now, long timeout);
     void setPokeLock(int pokey, IBinder lock, String tag);
     void setStayOnSetting(int val);
     void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
