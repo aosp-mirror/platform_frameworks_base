@@ -49,12 +49,21 @@ public class DigitsKeyListener extends NumberKeyListener
      * @see KeyEvent#getMatch
      * @see #getAcceptedChars
      */
-    private static final char[][] CHARACTERS = new char[][] {
-        new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' },
-        new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' },
-        new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.' },
-        new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.' },
+    private static final char[][] CHARACTERS = {
+        { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' },
+        { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+' },
+        { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.' },
+        { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+', '.' },
     };
+
+    private static boolean isSignChar(final char c) {
+        return c == '-' || c == '+';
+    }
+
+    // TODO: Needs internationalization
+    private static boolean isDecimalPointChar(final char c) {
+        return c == '.';
+    }
 
     /**
      * Allocates a DigitsKeyListener that accepts the digits 0 through 9.
@@ -145,32 +154,32 @@ public class DigitsKeyListener extends NumberKeyListener
         int dlen = dest.length();
 
         /*
-         * Find out if the existing text has '-' or '.' characters.
+         * Find out if the existing text has a sign or decimal point characters.
          */
 
         for (int i = 0; i < dstart; i++) {
             char c = dest.charAt(i);
 
-            if (c == '-') {
+            if (isSignChar(c)) {
                 sign = i;
-            } else if (c == '.') {
+            } else if (isDecimalPointChar(c)) {
                 decimal = i;
             }
         }
         for (int i = dend; i < dlen; i++) {
             char c = dest.charAt(i);
 
-            if (c == '-') {
-                return "";    // Nothing can be inserted in front of a '-'.
-            } else if (c == '.') {
+            if (isSignChar(c)) {
+                return "";    // Nothing can be inserted in front of a sign character.
+            } else if (isDecimalPointChar(c)) {
                 decimal = i;
             }
         }
 
         /*
          * If it does, we must strip them out from the source.
-         * In addition, '-' must be the very first character,
-         * and nothing can be inserted before an existing '-'.
+         * In addition, a sign character must be the very first character,
+         * and nothing can be inserted before an existing sign character.
          * Go in reverse order so the offsets are stable.
          */
 
@@ -180,7 +189,7 @@ public class DigitsKeyListener extends NumberKeyListener
             char c = source.charAt(i);
             boolean strip = false;
 
-            if (c == '-') {
+            if (isSignChar(c)) {
                 if (i != start || dstart != 0) {
                     strip = true;
                 } else if (sign >= 0) {
@@ -188,7 +197,7 @@ public class DigitsKeyListener extends NumberKeyListener
                 } else {
                     sign = i;
                 }
-            } else if (c == '.') {
+            } else if (isDecimalPointChar(c)) {
                 if (decimal >= 0) {
                     strip = true;
                 } else {
