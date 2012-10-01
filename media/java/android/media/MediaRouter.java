@@ -105,8 +105,13 @@ public class MediaRouter {
             mDefaultAudioVideo = new RouteInfo(mSystemCategory);
             mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
-            addRoute(mDefaultAudioVideo);
+            addRouteStatic(mDefaultAudioVideo);
 
+            // This will select the active wifi display route if there is one.
+            updateWifiDisplayStatus(mDisplayService.getWifiDisplayStatus());
+
+            appContext.registerReceiver(new WifiDisplayStatusChangedReceiver(),
+                    new IntentFilter(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED));
             appContext.registerReceiver(new VolumeChangeReceiver(),
                     new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
 
@@ -116,13 +121,17 @@ public class MediaRouter {
             } catch (RemoteException e) {
             }
             if (newAudioRoutes != null) {
+                // This will select the active BT route if there is one and the current
+                // selected route is the default system route, or if there is no selected
+                // route yet.
                 updateAudioRoutes(newAudioRoutes);
             }
 
-            updateWifiDisplayStatus(mDisplayService.getWifiDisplayStatus());
-
-            appContext.registerReceiver(new WifiDisplayStatusChangedReceiver(),
-                    new IntentFilter(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED));
+            // Select the default route if the above didn't sync us up
+            // appropriately with relevant system state.
+            if (mSelectedRoute == null) {
+                selectRouteStatic(mDefaultAudioVideo.getSupportedTypes(), mDefaultAudioVideo);
+            }
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
@@ -159,7 +168,7 @@ public class MediaRouter {
                         info.mName = mCurAudioRoutesInfo.mBluetoothName;
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
-                        addRoute(sStatic.mBluetoothA2dpRoute);
+                        addRouteStatic(sStatic.mBluetoothA2dpRoute);
                     } else {
                         sStatic.mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.mBluetoothName;
                         dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
@@ -175,7 +184,8 @@ public class MediaRouter {
                         mSelectedRoute == mBluetoothA2dpRoute) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
                 } else if (mCurAudioRoutesInfo.mMainType == AudioRoutesInfo.MAIN_SPEAKER &&
-                        mSelectedRoute == mDefaultAudioVideo && a2dpEnabled) {
+                        (mSelectedRoute == mDefaultAudioVideo || mSelectedRoute == null) &&
+                        a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
                 }
             }
@@ -393,22 +403,21 @@ public class MediaRouter {
      * @see #removeUserRoute(UserRouteInfo)
      */
     public void addUserRoute(UserRouteInfo info) {
-        addRoute(info);
+        addRouteStatic(info);
     }
 
     /**
      * @hide Framework use only
      */
     public void addRouteInt(RouteInfo info) {
-        addRoute(info);
+        addRouteStatic(info);
     }
 
-    static void addRoute(RouteInfo info) {
+    static void addRouteStatic(RouteInfo info) {
         final RouteCategory cat = info.getCategory();
         if (!sStatic.mCategories.contains(cat)) {
             sStatic.mCategories.add(cat);
         }
-        final boolean onlyRoute = sStatic.mRoutes.isEmpty();
         if (cat.isGroupable() && !(info instanceof RouteGroup)) {
             // Enforce that any added route in a groupable category must be in a group.
             final RouteGroup group = new RouteGroup(info.getCategory());
@@ -421,10 +430,6 @@ public class MediaRouter {
         } else {
             sStatic.mRoutes.add(info);
             dispatchRouteAdded(info);
-        }
-
-        if (onlyRoute) {
-            selectRouteStatic(info.getSupportedTypes(), info);
         }
     }
 
@@ -693,17 +698,24 @@ public class MediaRouter {
                 oldStatus.getRememberedDisplays() : new WifiDisplay[0];
         WifiDisplay[] newDisplays = newStatus.getRememberedDisplays();
         WifiDisplay[] availableDisplays = newStatus.getAvailableDisplays();
+        WifiDisplay activeDisplay = newStatus.getActiveDisplay();
 
         for (int i = 0; i < newDisplays.length; i++) {
             final WifiDisplay d = newDisplays[i];
             final WifiDisplay oldRemembered = findMatchingDisplay(d, oldDisplays);
             if (oldRemembered == null) {
-                addRoute(makeWifiDisplayRoute(d));
+                addRouteStatic(makeWifiDisplayRoute(d));
                 needScan = true;
             } else {
                 final boolean available = findMatchingDisplay(d, availableDisplays) != null;
                 final RouteInfo route = findWifiDisplayRoute(d);
                 updateWifiDisplayRoute(route, d, available, newStatus);
+            }
+            if (d.equals(activeDisplay)) {
+                final RouteInfo activeRoute = findWifiDisplayRoute(d);
+                if (activeRoute != null) {
+                    selectRouteStatic(activeRoute.getSupportedTypes(), activeRoute);
+                }
             }
         }
         for (int i = 0; i < oldDisplays.length; i++) {
@@ -840,11 +852,11 @@ public class MediaRouter {
         // A predetermined connection status that can override mStatus
         private int mStatusCode;
 
-        static final int STATUS_NONE = 0;
-        static final int STATUS_SCANNING = 1;
-        static final int STATUS_CONNECTING = 2;
-        static final int STATUS_AVAILABLE = 3;
-        static final int STATUS_NOT_AVAILABLE = 4;
+        /** @hide */ public static final int STATUS_NONE = 0;
+        /** @hide */ public static final int STATUS_SCANNING = 1;
+        /** @hide */ public static final int STATUS_CONNECTING = 2;
+        /** @hide */ public static final int STATUS_AVAILABLE = 3;
+        /** @hide */ public static final int STATUS_NOT_AVAILABLE = 4;
 
         private Object mTag;
 
@@ -938,6 +950,13 @@ public class MediaRouter {
                 return true;
             }
             return false;
+        }
+
+        /**
+         * @hide
+         */
+        public int getStatusCode() {
+            return mStatusCode;
         }
 
         /**
