@@ -18,6 +18,7 @@ package com.android.internal.policy.impl.keyguard;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.R;
@@ -70,5 +71,20 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
     @Override
     public void onPageSwitch(View newPage, int newPageIndex) {
         mPage = newPageIndex;
+
+        // If we're showing the default system status widget, then we want to hide the clock
+        boolean hideClock = false;
+        if ((newPage instanceof ViewGroup)) {
+            ViewGroup vg = (ViewGroup) newPage;
+            if (vg.getChildAt(0) instanceof KeyguardStatusView) {
+                hideClock = true;
+            }
+        }
+
+        if (hideClock) {
+            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_CLOCK);
+        } else {
+            setSystemUiVisibility(getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK);
+        }
     }
 }

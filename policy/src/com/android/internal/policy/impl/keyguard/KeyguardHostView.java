@@ -166,6 +166,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                         // from AudioManager
                         KeyguardHostView.this.addView(mTransportControl);
                         mTransportControl.setVisibility(View.GONE);
+                        showAppropriateWidgetPage();
                     }
                 }
 
@@ -178,6 +179,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                         mTransportControl.setVisibility(View.VISIBLE);
                         // Once shown, leave it showing
                         mSticky = true;
+                        showAppropriateWidgetPage();
                     }
                 }
             });
@@ -736,6 +738,15 @@ public class KeyguardHostView extends KeyguardViewBase {
                 addWidget(widgets[i]);
             }
         }
+        showAppropriateWidgetPage();
+    }
+
+    private void showAppropriateWidgetPage() {
+        int page = mAppWidgetContainer.indexOfChild(findViewById(R.id.keyguard_status_view));
+        if (mAppWidgetContainer.indexOfChild(mTransportControl) != -1) {
+            page = mAppWidgetContainer.indexOfChild(mTransportControl);
+        }
+        mAppWidgetContainer.setCurrentPage(page);
     }
 
     private void inflateAndAddUserSelectorWidgetIfNecessary() {
