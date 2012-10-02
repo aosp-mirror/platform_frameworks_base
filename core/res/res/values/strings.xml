@@ -3926,13 +3926,12 @@
        "Raise volume above safe level?\nListening at high volume for long periods may damage your hearing."
     </string>
 
-
     <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
-    <string name="continue_to_enable_accessibility">Continue touching the screen to enable accessibility.</string>
+    <string name="continue_to_enable_accessibility">Keep holding down your two fingers to enable accessibility.</string>
     <!-- Text spoken when the user enabled accessibility. [CHAR LIMIT=none] -->
     <string name="accessibility_enabled">Accessibility enabled.</string>
     <!-- Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none] -->
-    <string name="enable_accessibility_canceled">Enable accessibility canceled.</string>
+    <string name="enable_accessibility_canceled">Accessibility canceled.</string>
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Switched to user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
 
