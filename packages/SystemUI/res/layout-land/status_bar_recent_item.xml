@@ -23,7 +23,8 @@
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:paddingLeft="@dimen/status_bar_recents_item_padding"
-    android:paddingRight="@dimen/status_bar_recents_item_padding">
+    android:paddingRight="@dimen/status_bar_recents_item_padding"
+    android:importantForAccessibility="no">
 
     <RelativeLayout android:id="@+id/recent_item"
         android:layout_gravity="center_vertical"
@@ -75,6 +76,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textColor="@color/status_bar_recents_app_label_color"
+            android:importantForAccessibility="no"
         />
 
         <TextView android:id="@+id/app_description"
