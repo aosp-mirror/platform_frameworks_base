@@ -29,6 +29,12 @@
     android:layout_marginLeft="@dimen/notification_panel_margin_left"
     >
 
+    <View
+        android:id="@+id/handle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/close_handle_height"
+        />
+
     <include
         layout="@layout/carrier_label"
         android:layout_height="@dimen/carrier_label_height"
@@ -75,10 +81,4 @@
                 />
         </ScrollView>
     </LinearLayout>
-
-    <View
-        android:id="@+id/handle"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/close_handle_height"
-        />
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->
