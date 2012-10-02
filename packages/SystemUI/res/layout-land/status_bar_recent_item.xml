@@ -24,13 +24,16 @@
     android:layout_width="wrap_content"
     android:paddingLeft="@dimen/status_bar_recents_item_padding"
     android:paddingRight="@dimen/status_bar_recents_item_padding"
-    android:importantForAccessibility="no">
+    android:importantForAccessibility="no"
+    android:clipChildren="false">
 
     <RelativeLayout android:id="@+id/recent_item"
         android:layout_gravity="center_vertical"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:paddingTop="@*android:dimen/status_bar_height">
+        android:paddingTop="@*android:dimen/status_bar_height"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <FrameLayout android:id="@+id/app_thumbnail"
             android:layout_width="wrap_content"

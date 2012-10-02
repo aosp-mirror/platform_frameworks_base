@@ -544,7 +544,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             - p.getFontMetricsInt().top;
                     float descriptionTextSize = res
                             .getDimensionPixelSize(R.dimen.status_bar_recents_app_description_text_size);
-                    p.setTextSize(labelTextSize);
+                    p.setTextSize(descriptionTextSize);
                     float descriptionTextHeight = p.getFontMetricsInt().bottom
                             - p.getFontMetricsInt().top;
 
@@ -567,10 +567,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                             + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
                 }
 
+                final SystemUIApplication app =
+                        (SystemUIApplication) ((Service) mContext).getApplication();
+                app.setWaitingForWinAnimStart(true);
                 ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
                         getStatusBarView(),
                         first, x, y,
-                        null);
+                        new ActivityOptions.OnAnimationStartedListener() {
+                            public void onAnimationStarted() {
+                                app.onWindowAnimationStart();
+                            }
+                        });
                 mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
                         UserHandle.USER_CURRENT));
             }

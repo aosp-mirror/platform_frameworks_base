@@ -51,6 +51,10 @@ public class RecentsActivity extends Activity {
         }
     };
 
+    public static interface WindowAnimationStartListener {
+        void onWindowAnimationStart();
+    }
+
     public class TouchOutsideListener implements View.OnTouchListener {
         private StatusBarPanel mPanel;
 
@@ -88,15 +92,15 @@ public class RecentsActivity extends Activity {
     @Override
     public void onStart() {
         mShowing = true;
+        if (mRecentsPanel != null) {
+            mRecentsPanel.refreshViews();
+        }
         super.onStart();
     }
 
     @Override
     public void onResume() {
         mForeground = true;
-        if (mRecentsPanel != null) {
-            mRecentsPanel.refreshViews();
-        }
         super.onResume();
     }
 
@@ -150,6 +154,7 @@ public class RecentsActivity extends Activity {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         registerReceiver(mIntentReceiver, mIntentFilter);
+        app.setWindowAnimationStartListener(mRecentsPanel);
         super.onCreate(savedInstanceState);
     }
 
@@ -164,6 +169,7 @@ public class RecentsActivity extends Activity {
         final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
         recentTasksLoader.setRecentsPanel(null, mRecentsPanel);
         unregisterReceiver(mIntentReceiver);
+        app.setWindowAnimationStartListener(null);
         super.onDestroy();
     }
 
