@@ -31,6 +31,7 @@ import android.os.UserHandle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.util.State;
@@ -63,6 +64,7 @@ public class CaptivePortalTracker extends StateMachine {
     private boolean mNotificationShown = false;
     private boolean mIsCaptivePortalCheckEnabled = false;
     private IConnectivityManager mConnService;
+    private TelephonyManager mTelephonyManager;
     private Context mContext;
     private NetworkInfo mNetworkInfo;
 
@@ -84,6 +86,7 @@ public class CaptivePortalTracker extends StateMachine {
 
         mContext = context;
         mConnService = cs;
+        mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -326,13 +329,25 @@ public class CaptivePortalTracker extends StateMachine {
 
         if (visible) {
             CharSequence title;
-            if (mNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                title = r.getString(R.string.wifi_available_sign_in, 0);
-            } else {
-                title = r.getString(R.string.network_available_sign_in, 0);
+            CharSequence details;
+            switch (mNetworkInfo.getType()) {
+                case ConnectivityManager.TYPE_WIFI:
+                    title = r.getString(R.string.wifi_available_sign_in, 0);
+                    details = r.getString(R.string.network_available_sign_in_detailed,
+                            mNetworkInfo.getExtraInfo());
+                    break;
+                case ConnectivityManager.TYPE_MOBILE:
+                    title = r.getString(R.string.network_available_sign_in, 0);
+                    // TODO: Change this to pull from NetworkInfo once a printable
+                    // name has been added to it
+                    details = mTelephonyManager.getNetworkOperatorName();
+                    break;
+                default:
+                    title = r.getString(R.string.network_available_sign_in, 0);
+                    details = r.getString(R.string.network_available_sign_in_detailed,
+                            mNetworkInfo.getExtraInfo());
+                    break;
             }
-            CharSequence details = r.getString(R.string.network_available_sign_in_detailed,
-                    mNetworkInfo.getExtraInfo());
 
             Notification notification = new Notification();
             notification.when = 0;
