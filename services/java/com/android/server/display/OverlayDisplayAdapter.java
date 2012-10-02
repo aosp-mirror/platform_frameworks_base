@@ -19,14 +19,11 @@ package com.android.server.display;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -192,28 +189,42 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final int mDensityDpi;
 
         private Surface mSurface;
+        private SurfaceTexture mSurfaceTexture;
         private DisplayDeviceInfo mInfo;
 
         public OverlayDisplayDevice(IBinder displayToken, String name,
                 int width, int height, float refreshRate, int densityDpi,
-                Surface surface) {
+                SurfaceTexture surfaceTexture) {
             super(OverlayDisplayAdapter.this, displayToken);
             mName = name;
             mWidth = width;
             mHeight = height;
             mRefreshRate = refreshRate;
             mDensityDpi = densityDpi;
-            mSurface = surface;
+            mSurfaceTexture = surfaceTexture;
         }
 
-        public void clearSurfaceLocked() {
-            mSurface = null;
+        public void clearSurfaceTextureLocked() {
+            if (mSurfaceTexture != null) {
+                mSurfaceTexture = null;
+            }
             sendTraversalRequestLocked();
         }
 
         @Override
         public void performTraversalInTransactionLocked() {
-            setSurfaceInTransactionLocked(mSurface);
+            if (mSurfaceTexture != null) {
+                if (mSurface == null) {
+                    mSurface = new Surface(mSurfaceTexture);
+                }
+                setSurfaceInTransactionLocked(mSurface);
+            } else {
+                setSurfaceInTransactionLocked(null);
+                if (mSurface != null) {
+                    mSurface.destroy();
+                    mSurface = null;
+                }
+            }
         }
 
         @Override
@@ -268,11 +279,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
 
         // Called on the UI thread.
         @Override
-        public void onWindowCreated(Surface surface, float refreshRate) {
+        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
             synchronized (getSyncRoot()) {
                 IBinder displayToken = Surface.createDisplay(mName);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
-                        mWidth, mHeight, refreshRate, mDensityDpi, surface);
+                        mWidth, mHeight, refreshRate, mDensityDpi, surfaceTexture);
 
                 sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_ADDED);
             }
@@ -283,7 +294,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowDestroyed() {
             synchronized (getSyncRoot()) {
                 if (mDevice != null) {
-                    mDevice.clearSurfaceLocked();
+                    mDevice.clearSurfaceTextureLocked();
                     sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
                 }
             }
