@@ -38,9 +38,15 @@ final class DisplayDeviceInfo {
     public static final int FLAG_SUPPORTS_ROTATION = 1 << 1;
 
     /**
-     * Flag: Indicates that this display device can show secure surfaces.
+     * Flag: Indicates that this display device has secure video output, such as HDCP.
      */
-    public static final int FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT = 1 << 2;
+    public static final int FLAG_SECURE = 1 << 2;
+
+    /**
+     * Flag: Indicates that this display device supports compositing
+     * from gralloc protected buffers.
+     */
+    public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1 << 3;
 
     /**
      * Touch attachment: Display does not receive touch.
@@ -182,8 +188,11 @@ final class DisplayDeviceInfo {
         if ((flags & FLAG_SUPPORTS_ROTATION) != 0) {
             msg.append(", FLAG_SUPPORTS_ROTATION");
         }
-        if ((flags & FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
-            msg.append(", FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT");
+        if ((flags & FLAG_SECURE) != 0) {
+            msg.append(", FLAG_SECURE");
+        }
+        if ((flags & FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
+            msg.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
         }
         return msg.toString();
     }

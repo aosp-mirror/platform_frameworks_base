@@ -299,11 +299,8 @@ public final class DisplayInfo implements Parcelable {
 
     private static String flagsToString(int flags) {
         StringBuilder result = new StringBuilder();
-        if ((flags & Display.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
-            result.append(", FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT");
-        }
-        if ((flags & Display.FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS) != 0) {
-            result.append(", FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS");
+        if ((flags & Display.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
+            result.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
         }
         return result.toString();
     }
