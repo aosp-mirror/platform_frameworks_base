@@ -111,7 +111,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     // TODO: This is arbitrary. When there is time implement this by watching
     //       when that accessibility services are bound.
-    private static final int WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS = 5000;
+    private static final int WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS = 3000;
 
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
@@ -659,6 +659,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         oldUserState.mUserId, 0).sendToTarget();
             }
 
+            // Announce user changes only if more that one exist.
+            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            final boolean announceNewUser = userManager.getUsers().size() > 1;
+
             // The user changed.
             mCurrentUserId = userId;
 
@@ -666,9 +670,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mMainHandler.obtainMessage(MainHandler.MSG_SEND_RECREATE_INTERNAL_STATE,
                     mCurrentUserId, 0).sendToTarget();
 
-            // Schedule announcement of the current user if needed.
-            mMainHandler.sendEmptyMessageDelayed(MainHandler.MSG_ANNOUNCE_NEW_USER_IF_NEEDED,
-                    WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
+            if (announceNewUser) {
+                // Schedule announcement of the current user if needed.
+                mMainHandler.sendEmptyMessageDelayed(MainHandler.MSG_ANNOUNCE_NEW_USER_IF_NEEDED,
+                        WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
+            }
         }
     }
 
