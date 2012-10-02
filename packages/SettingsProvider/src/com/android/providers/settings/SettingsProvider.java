@@ -227,6 +227,8 @@ public class SettingsProvider extends ContentProvider {
         sSecureGlobalKeys.add(Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
         sSecureGlobalKeys.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
         sSecureGlobalKeys.add(Settings.Global.DEFAULT_DNS_SERVER);
+        sSecureGlobalKeys.add(Settings.Global.PREFERRED_NETWORK_MODE);
+        sSecureGlobalKeys.add(Settings.Global.PREFERRED_CDMA_SUBSCRIPTION);
 
         // Keys from the 'system' table now moved to 'global'
         // These must match Settings.System.MOVED_TO_GLOBAL
@@ -249,6 +251,17 @@ public class SettingsProvider extends ContentProvider {
         sSystemGlobalKeys.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
         sSystemGlobalKeys.add(Settings.Global.WIFI_SLEEP_POLICY);
         sSystemGlobalKeys.add(Settings.Global.MODE_RINGER);
+        sSystemGlobalKeys.add(Settings.Global.WINDOW_ANIMATION_SCALE);
+        sSystemGlobalKeys.add(Settings.Global.TRANSITION_ANIMATION_SCALE);
+        sSystemGlobalKeys.add(Settings.Global.ANIMATOR_DURATION_SCALE);
+        sSystemGlobalKeys.add(Settings.Global.FANCY_IME_ANIMATIONS);
+        sSystemGlobalKeys.add(Settings.Global.COMPATIBILITY_MODE);
+        sSystemGlobalKeys.add(Settings.Global.EMERGENCY_TONE);
+        sSystemGlobalKeys.add(Settings.Global.CALL_AUTO_RETRY);
+        sSystemGlobalKeys.add(Settings.Global.DEBUG_APP);
+        sSystemGlobalKeys.add(Settings.Global.WAIT_FOR_DEBUGGER);
+        sSystemGlobalKeys.add(Settings.Global.SHOW_PROCESSES);
+        sSystemGlobalKeys.add(Settings.Global.ALWAYS_FINISH_ACTIVITIES);
     }
 
     private boolean settingMovedToGlobal(final String name) {

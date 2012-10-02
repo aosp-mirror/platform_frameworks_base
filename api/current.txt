@@ -18815,11 +18815,14 @@ package android.provider {
     field public static final java.lang.String ADB_ENABLED = "adb_enabled";
     field public static final java.lang.String AIRPLANE_MODE_ON = "airplane_mode_on";
     field public static final java.lang.String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
+    field public static final java.lang.String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
+    field public static final java.lang.String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
     field public static final java.lang.String AUTO_TIME = "auto_time";
     field public static final java.lang.String AUTO_TIME_ZONE = "auto_time_zone";
     field public static final java.lang.String BLUETOOTH_ON = "bluetooth_on";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_ROAMING = "data_roaming";
+    field public static final java.lang.String DEBUG_APP = "debug_app";
     field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
     field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
     field public static final java.lang.String HTTP_PROXY = "http_proxy";
@@ -18830,10 +18833,13 @@ package android.provider {
     field public static final java.lang.String RADIO_CELL = "cell";
     field public static final java.lang.String RADIO_NFC = "nfc";
     field public static final java.lang.String RADIO_WIFI = "wifi";
+    field public static final java.lang.String SHOW_PROCESSES = "show_processes";
     field public static final java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_global_version";
+    field public static final java.lang.String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
     field public static final java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
     field public static final java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
+    field public static final java.lang.String WAIT_FOR_DEBUGGER = "wait_for_debugger";
     field public static final java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     field public static final java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
     field public static final java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
@@ -18845,6 +18851,7 @@ package android.provider {
     field public static final int WIFI_SLEEP_POLICY_NEVER = 2; // 0x2
     field public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1; // 0x1
     field public static final java.lang.String WIFI_WATCHDOG_ON = "wifi_watchdog_on";
+    field public static final java.lang.String WINDOW_ANIMATION_SCALE = "window_animation_scale";
   }
 
   public static class Settings.NameValueTable implements android.provider.BaseColumns {
@@ -18959,9 +18966,9 @@ package android.provider {
     field public static final deprecated java.lang.String AIRPLANE_MODE_ON = "airplane_mode_on";
     field public static final deprecated java.lang.String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
     field public static final java.lang.String ALARM_ALERT = "alarm_alert";
-    field public static final java.lang.String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
+    field public static final deprecated java.lang.String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
     field public static final deprecated java.lang.String ANDROID_ID = "android_id";
-    field public static final java.lang.String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
+    field public static final deprecated java.lang.String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final deprecated java.lang.String AUTO_TIME = "auto_time";
     field public static final deprecated java.lang.String AUTO_TIME_ZONE = "auto_time_zone";
@@ -18971,7 +18978,7 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String DATA_ROAMING = "data_roaming";
     field public static final java.lang.String DATE_FORMAT = "date_format";
-    field public static final java.lang.String DEBUG_APP = "debug_app";
+    field public static final deprecated java.lang.String DEBUG_APP = "debug_app";
     field public static final android.net.Uri DEFAULT_ALARM_ALERT_URI;
     field public static final android.net.Uri DEFAULT_NOTIFICATION_URI;
     field public static final android.net.Uri DEFAULT_RINGTONE_URI;
@@ -19010,7 +19017,7 @@ package android.provider {
     field public static final deprecated java.lang.String SETTINGS_CLASSNAME = "settings_classname";
     field public static final java.lang.String SETUP_WIZARD_HAS_RUN = "setup_wizard_has_run";
     field public static final java.lang.String SHOW_GTALK_SERVICE_STATUS = "SHOW_GTALK_SERVICE_STATUS";
-    field public static final java.lang.String SHOW_PROCESSES = "show_processes";
+    field public static final deprecated java.lang.String SHOW_PROCESSES = "show_processes";
     field public static final deprecated java.lang.String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
     field public static final java.lang.String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
     field public static final deprecated java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
@@ -19020,7 +19027,7 @@ package android.provider {
     field public static final java.lang.String TEXT_AUTO_REPLACE = "auto_replace";
     field public static final java.lang.String TEXT_SHOW_PASSWORD = "show_password";
     field public static final java.lang.String TIME_12_24 = "time_12_24";
-    field public static final java.lang.String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
+    field public static final deprecated java.lang.String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
     field public static final deprecated java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
     field public static final java.lang.String USER_ROTATION = "user_rotation";
     field public static final deprecated java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
@@ -19033,8 +19040,8 @@ package android.provider {
     field public static final java.lang.String[] VOLUME_SETTINGS;
     field public static final java.lang.String VOLUME_SYSTEM = "volume_system";
     field public static final java.lang.String VOLUME_VOICE = "volume_voice";
-    field public static final java.lang.String WAIT_FOR_DEBUGGER = "wait_for_debugger";
-    field public static final java.lang.String WALLPAPER_ACTIVITY = "wallpaper_activity";
+    field public static final deprecated java.lang.String WAIT_FOR_DEBUGGER = "wait_for_debugger";
+    field public static final deprecated java.lang.String WALLPAPER_ACTIVITY = "wallpaper_activity";
     field public static final deprecated java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     field public static final deprecated java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
     field public static final deprecated java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
@@ -19062,7 +19069,7 @@ package android.provider {
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
     field public static final deprecated java.lang.String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
-    field public static final java.lang.String WINDOW_ANIMATION_SCALE = "window_animation_scale";
+    field public static final deprecated java.lang.String WINDOW_ANIMATION_SCALE = "window_animation_scale";
   }
 
   public class SyncStateContract {
