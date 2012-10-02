@@ -811,12 +811,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mBatteryStats = BatteryStatsService.getService();
 
         // Get persisted window scale setting
-        mWindowAnimationScale = Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
-        mTransitionAnimationScale = Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
-        setAnimatorDurationScale(Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale));
+        mWindowAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
+        mTransitionAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+        setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale));
 
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
@@ -7480,12 +7480,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case PERSIST_ANIMATION_SCALE: {
-                    Settings.System.putFloat(mContext.getContentResolver(),
-                            Settings.System.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
-                    Settings.System.putFloat(mContext.getContentResolver(),
-                            Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
-                    Settings.System.putFloat(mContext.getContentResolver(),
-                            Settings.System.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale);
+                    Settings.Global.putFloat(mContext.getContentResolver(),
+                            Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
+                    Settings.Global.putFloat(mContext.getContentResolver(),
+                            Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+                    Settings.Global.putFloat(mContext.getContentResolver(),
+                            Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale);
                     break;
                 }
 
