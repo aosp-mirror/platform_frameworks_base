@@ -67,6 +67,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mSecurityViewContainer;
+    private KeyguardTransportControlView mTransportControl;
     private boolean mEnableMenuKey;
     private boolean mIsVerifyUnlockOnly;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
@@ -80,7 +81,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
 
     private Rect mTempRect = new Rect();
-    private KeyguardTransportControlView mTransportControl;
 
     /*package*/ interface TransportCallback {
         void hide();
@@ -145,45 +145,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         kgwr.setVisibility(VISIBLE);
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
 
-        // This code manages showing/hiding the transport control. We keep it around and only
-        // add it to the hierarchy if it needs to be present.
-        mTransportControl =
-                (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
-        if (mTransportControl != null) {
-            mTransportControl.setKeyguardCallback(new TransportCallback() {
-                boolean mSticky = false;
-                @Override
-                public void hide() {
-                    int page = getWidgetPosition(R.id.keyguard_transport_control);
-                    if (page != -1 && !mSticky) {
-                        if (page == mAppWidgetContainer.getCurrentPage()) {
-                            // Switch back to clock view if music was showing.
-                            mAppWidgetContainer
-                                .setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
-                        }
-                        mAppWidgetContainer.removeView(mTransportControl);
-                        // XXX keep view attached to hierarchy so we still get show/hide events
-                        // from AudioManager
-                        KeyguardHostView.this.addView(mTransportControl);
-                        mTransportControl.setVisibility(View.GONE);
-                        showAppropriateWidgetPage();
-                    }
-                }
-
-                @Override
-                public void show() {
-                    if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
-                        KeyguardHostView.this.removeView(mTransportControl);
-                        mAppWidgetContainer.addView(mTransportControl,
-                                getWidgetPosition(R.id.keyguard_status_view) + 1);
-                        mTransportControl.setVisibility(View.VISIBLE);
-                        // Once shown, leave it showing
-                        mSticky = true;
-                        showAppropriateWidgetPage();
-                    }
-                }
-            });
-        }
+        addDefaultWidgets();
         updateSecurityViews();
         setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
     }
@@ -699,6 +661,52 @@ public class KeyguardHostView extends KeyguardViewBase {
             addWidget(view);
         } else {
             Log.w(TAG, "AppWidgetInfo was null; not adding widget id " + appId);
+        }
+    }
+
+    private void addDefaultWidgets() {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        inflater.inflate(R.layout.keyguard_status_view, mAppWidgetContainer, true);
+        inflater.inflate(R.layout.keyguard_transport_control_view, mAppWidgetContainer, true);
+
+        mTransportControl =
+            (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
+
+
+        // This code manages showing/hiding the transport control. We keep it around and only
+        // add it to the hierarchy if it needs to be present.
+        if (mTransportControl != null) {
+            mTransportControl.setKeyguardCallback(new TransportCallback() {
+                boolean mSticky = false;
+                @Override
+                public void hide() {
+                    int page = getWidgetPosition(R.id.keyguard_transport_control);
+                    if (page != -1 && !mSticky) {
+                        if (page == mAppWidgetContainer.getCurrentPage()) {
+                            // Switch back to clock view if music was showing.
+                            mAppWidgetContainer
+                                .setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
+                        }
+                        mAppWidgetContainer.removeView(mTransportControl);
+                        // XXX keep view attached to hierarchy so we still get show/hide events
+                        // from AudioManager
+                        KeyguardHostView.this.addView(mTransportControl);
+                        mTransportControl.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void show() {
+                    if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
+                        KeyguardHostView.this.removeView(mTransportControl);
+                        mAppWidgetContainer.addView(mTransportControl,
+                                getWidgetPosition(R.id.keyguard_status_view) + 1);
+                        mTransportControl.setVisibility(View.VISIBLE);
+                        // Once shown, leave it showing
+                        mSticky = true;
+                    }
+                }
+            });
         }
     }
 
