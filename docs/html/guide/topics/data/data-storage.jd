@@ -232,7 +232,12 @@ save files. This can be a removable storage media (such as an SD card) or an int
 (non-removable) storage. Files saved to the external storage are world-readable and can
 be modified by the user when they enable USB mass storage to transfer files on a computer.</p>
 
-<p class="caution"><strong>Caution:</strong> External files can disappear if the user mounts the
+<p>It's possible that a device using a partition of the
+internal storage for the external storage may also offer an SD card slot. In this case,
+the SD card is <em>not</em> part of the external storage and your app cannot access it (the extra
+storage is intended only for user-provided media that the system scans).</p>
+
+<p class="caution"><strong>Caution:</strong> External storage can become unavailable if the user mounts the
 external storage on a computer or removes the media, and there's no security enforced upon files you
 save to the external storage. All applications can read and write files placed on the external
 storage and the user can remove them.</p>
