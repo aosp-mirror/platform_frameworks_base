@@ -16,8 +16,6 @@
 
 package com.android.systemui.usb;
 
-import com.android.internal.app.ResolverActivity;
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -30,9 +28,11 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.widget.CheckBox;
 
+import com.android.internal.app.ResolverActivity;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -92,34 +92,36 @@ public class UsbResolverActivity extends ResolverActivity {
         super.onDestroy();
     }
 
+    @Override
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
         try {
             IBinder b = ServiceManager.getService(USB_SERVICE);
             IUsbManager service = IUsbManager.Stub.asInterface(b);
-            int uid = ri.activityInfo.applicationInfo.uid;
+            final int uid = ri.activityInfo.applicationInfo.uid;
+            final int userId = UserHandle.myUserId();
 
             if (mDevice != null) {
                 // grant permission for the device
                 service.grantDevicePermission(mDevice, uid);
                 // set or clear default setting
                 if (alwaysCheck) {
-                    service.setDevicePackage(mDevice, ri.activityInfo.packageName);
+                    service.setDevicePackage(mDevice, ri.activityInfo.packageName, userId);
                 } else {
-                    service.setDevicePackage(mDevice, null);
+                    service.setDevicePackage(mDevice, null, userId);
                 }
             } else if (mAccessory != null) {
                 // grant permission for the accessory
                 service.grantAccessoryPermission(mAccessory, uid);
                 // set or clear default setting
                 if (alwaysCheck) {
-                    service.setAccessoryPackage(mAccessory, ri.activityInfo.packageName);
+                    service.setAccessoryPackage(mAccessory, ri.activityInfo.packageName, userId);
                 } else {
-                    service.setAccessoryPackage(mAccessory, null);
+                    service.setAccessoryPackage(mAccessory, null, userId);
                 }
             }
 
             try {
-                startActivity(intent);
+                startActivityAsUser(intent, new UserHandle(userId));
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "startActivity failed", e);
             }

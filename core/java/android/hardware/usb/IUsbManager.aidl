@@ -44,12 +44,12 @@ interface IUsbManager
     /* Sets the default package for a USB device
      * (or clears it if the package name is null)
      */
-    void setDevicePackage(in UsbDevice device, String packageName);
+    void setDevicePackage(in UsbDevice device, String packageName, int userId);
 
     /* Sets the default package for a USB accessory
      * (or clears it if the package name is null)
      */
-    void setAccessoryPackage(in UsbAccessory accessory, String packageName);
+    void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
 
     /* Returns true if the caller has permission to access the device. */
     boolean hasDevicePermission(in UsbDevice device);
@@ -77,10 +77,10 @@ interface IUsbManager
     void grantAccessoryPermission(in UsbAccessory accessory, int uid);
 
     /* Returns true if the USB manager has default preferences or permissions for the package */
-    boolean hasDefaults(String packageName);
+    boolean hasDefaults(String packageName, int userId);
 
     /* Clears default preferences and permissions for the package */
-    void clearDefaults(String packageName);
+    void clearDefaults(String packageName, int userId);
 
     /* Sets the current USB function. */
     void setCurrentFunction(String function, boolean makeDefault);
