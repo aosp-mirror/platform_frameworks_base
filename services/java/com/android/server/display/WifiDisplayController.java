@@ -639,9 +639,9 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private void handlePeersChanged() {
-        if (mWfdEnabled) {
-            requestPeers();
-        }
+        // Even if wfd is disabled, it is best to get the latest set of peers to
+        // keep in sync with the p2p framework
+        requestPeers();
     }
 
     private void handleConnectionChanged(NetworkInfo networkInfo) {
