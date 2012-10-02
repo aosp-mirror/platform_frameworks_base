@@ -65,8 +65,7 @@ class PackageSettingBase extends GrantedPermissions {
     boolean permissionsFixed;
     boolean haveGids;
 
-    private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState(false);
-    private static final PackageUserState DEFAULT_SYSTEM_USER_STATE = new PackageUserState(true);
+    private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
 
     // Whether this package is currently stopped, thus can not be
     // started until explicitly launched by the user.
@@ -176,7 +175,7 @@ class PackageSettingBase extends GrantedPermissions {
     private PackageUserState modifyUserState(int userId) {
         PackageUserState state = userState.get(userId);
         if (state == null) {
-            state = new PackageUserState((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0);
+            state = new PackageUserState();
             userState.put(userId, state);
         }
         return state;
@@ -187,8 +186,7 @@ class PackageSettingBase extends GrantedPermissions {
         if (state != null) {
             return state;
         }
-        return ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0)
-                ? DEFAULT_SYSTEM_USER_STATE : DEFAULT_USER_STATE;
+        return DEFAULT_USER_STATE;
     }
 
     void setEnabled(int state, int userId) {
