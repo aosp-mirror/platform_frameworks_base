@@ -19,14 +19,41 @@ package com.android.systemui;
 import android.app.Application;
 
 import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.recent.RecentsActivity;
 
 public class SystemUIApplication extends Application {
     private RecentTasksLoader mRecentTasksLoader;
+    private boolean mWaitingForWinAnimStart;
+    private RecentsActivity.WindowAnimationStartListener mWinAnimStartListener;
 
     public RecentTasksLoader getRecentTasksLoader() {
         if (mRecentTasksLoader == null) {
             mRecentTasksLoader = new RecentTasksLoader(this);
         }
         return mRecentTasksLoader;
+    }
+
+    public void setWaitingForWinAnimStart(boolean waiting) {
+        mWaitingForWinAnimStart = waiting;
+    }
+
+    public void setWindowAnimationStartListener(
+            RecentsActivity.WindowAnimationStartListener startListener) {
+        mWinAnimStartListener = startListener;
+    }
+
+    public RecentsActivity.WindowAnimationStartListener getWindowAnimationListener() {
+        return mWinAnimStartListener;
+    }
+
+    public void onWindowAnimationStart() {
+        if (mWinAnimStartListener != null) {
+            mWinAnimStartListener.onWindowAnimationStart();
+        }
+        mWaitingForWinAnimStart = false;
+    }
+
+    public boolean isWaitingForWindowAnimationStart() {
+        return mWaitingForWinAnimStart;
     }
 }
