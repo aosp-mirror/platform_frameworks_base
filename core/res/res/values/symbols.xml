@@ -1299,6 +1299,7 @@
   <java-symbol type="id" name="kg_widget_region" />
   <java-symbol type="id" name="left_strip" />
   <java-symbol type="id" name="right_strip" />
+  <java-symbol type="id" name="keyguard_multi_user_selector" />
 
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
