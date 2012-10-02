@@ -25,43 +25,47 @@
         android:visibility="gone"
         android:gravity="center"
         android:orientation="vertical">
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1" />
     <com.android.internal.policy.impl.keyguard.KeyguardWidgetPager
         android:id="@+id/app_widget_container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/kg_widget_container_height">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
             <!-- TODO: Remove this when supported as a widget -->
             <include layout="@layout/keyguard_status_view"/>
             <include layout="@layout/keyguard_transport_control_view"/>
     </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="10dp"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/kg_widget_pager_horizontal_padding"
+        android:paddingRight="@dimen/kg_widget_pager_horizontal_padding">
         <com.android.internal.policy.impl.keyguard.KeyguardGlowStripView
             android:id="@+id/left_strip"
-            android:layout_width="0dip"
+            android:paddingTop="@dimen/kg_runway_lights_vertical_padding"
+            android:paddingBottom="@dimen/kg_runway_lights_vertical_padding"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             prvandroid:numDots="5"
-            prvandroid:dotSize="7dip"
+            prvandroid:dotSize="@dimen/kg_runway_lights_height"
             prvandroid:leftToRight="false"
             prvandroid:glowDot="@*android:drawable/ic_lockscreen_glowdot" />
         <Space
-            android:layout_width="0dip"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1.6"/>
         <com.android.internal.policy.impl.keyguard.KeyguardGlowStripView
             android:id="@+id/right_strip"
-            android:layout_width="0dip"
+            android:paddingTop="@dimen/kg_runway_lights_vertical_padding"
+            android:paddingBottom="@dimen/kg_runway_lights_vertical_padding"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             prvandroid:numDots="5"
-            prvandroid:dotSize="7dip"
+            prvandroid:dotSize="@dimen/kg_runway_lights_height"
             prvandroid:leftToRight="true"
             prvandroid:glowDot="@*android:drawable/ic_lockscreen_glowdot" />
     </LinearLayout>
