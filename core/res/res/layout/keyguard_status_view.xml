@@ -20,9 +20,9 @@
 <!-- This is a view that shows general status information in Keyguard. -->
 <com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_status_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/keyguard_status_view"
     android:gravity="center_horizontal">
 
     <com.android.internal.policy.impl.keyguard.KeyguardStatusView

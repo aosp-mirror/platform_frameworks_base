@@ -33,7 +33,6 @@ import com.android.internal.R;
 public class KeyguardWidgetFrame extends FrameLayout {
     private final static PorterDuffXfermode sAddBlendMode =
             new PorterDuffXfermode(PorterDuff.Mode.ADD);
-    private static int sWidgetPagePadding;
     private static Drawable sLeftOverscrollDrawable;
     private static Drawable sRightOverscrollDrawable;
 
@@ -52,13 +51,16 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     public KeyguardWidgetFrame(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        Resources res = context.getResources();
         if (sLeftOverscrollDrawable == null) {
-            Resources res = context.getResources();
             sLeftOverscrollDrawable = res.getDrawable(R.drawable.kg_widget_overscroll_layer_left);
             sRightOverscrollDrawable = res.getDrawable(R.drawable.kg_widget_overscroll_layer_right);
-            sWidgetPagePadding = res.getDimensionPixelSize(R.dimen.kg_widget_page_padding);
         }
-        setPadding(sWidgetPagePadding, sWidgetPagePadding, sWidgetPagePadding, sWidgetPagePadding);
+
+        int hPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_horizontal_padding);
+        int topPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_top_padding);
+        int bottomPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
+        setPadding(hPadding, topPadding, hPadding, bottomPadding);
     }
 
     @Override
@@ -76,8 +78,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mForegroundRect.set(sWidgetPagePadding, sWidgetPagePadding,
-                w - sWidgetPagePadding, h - sWidgetPagePadding);
+        mForegroundRect.set(getPaddingLeft(), getPaddingTop(),
+                w - getPaddingRight(), h - getPaddingBottom());
     }
 
     void setOverScrollAmount(float r, boolean left) {
