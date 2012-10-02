@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
@@ -39,6 +40,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.inputmethodservice.InputMethodService;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -259,6 +261,26 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    // ensure quick settings is disabled until the current user makes it through the setup wizard
+    private boolean mUserSetup = false;
+    private ContentObserver mUserSetupObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            final boolean userSetup = 0 != Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE,
+                    0 /*default */,
+                    mCurrentUserId);
+            if (userSetup != mUserSetup) {
+                mUserSetup = userSetup;
+                if (mSettingsPanel != null)
+                    mSettingsPanel.setEnabled(mUserSetup);
+                if (!mUserSetup && mStatusBarView != null)
+                    animateCollapseQuickSettings();
+            }
+        }
+    };
+
     @Override
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
@@ -460,6 +482,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        // listen for USER_SETUP_COMPLETE setting (per-user)
+        resetUserSetupObserver();
 
         return mStatusBarView;
     }
@@ -1827,8 +1852,18 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
         updateNotificationIcons();
+        resetUserSetupObserver();
     }
-    
+
+    private void resetUserSetupObserver() {
+        mContext.getContentResolver().unregisterContentObserver(mUserSetupObserver);
+        mUserSetupObserver.onChange(false);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE), true,
+                mUserSetupObserver,
+                mCurrentUserId);
+    }
+
     private void setIntruderAlertVisibility(boolean vis) {
         if (!ENABLE_INTRUDERS) return;
         if (DEBUG) {
