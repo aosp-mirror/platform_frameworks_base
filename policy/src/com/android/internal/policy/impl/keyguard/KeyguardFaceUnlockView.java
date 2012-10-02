@@ -153,7 +153,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             if (mBiometricUnlock != null) {
                 mBiometricUnlock.stop();
             }
-            mLockPatternUtils.setCurrentUser(userId);
+            // No longer required; static value set by KeyguardViewMediator
+            // mLockPatternUtils.setCurrentUser(userId);
         }
     };
 
