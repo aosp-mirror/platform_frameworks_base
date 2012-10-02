@@ -165,19 +165,18 @@ public class RecentsVerticalScrollView extends ScrollView
         }
         setLayoutTransition(transitioner);
 
-        // Scroll to end after layout.
-        final ViewTreeObserver observer = getViewTreeObserver();
-
+        // Scroll to end after initial layout.
         final OnGlobalLayoutListener updateScroll = new OnGlobalLayoutListener() {
                 public void onGlobalLayout() {
                     mLastScrollPosition = scrollPositionOfMostRecent();
                     scrollTo(0, mLastScrollPosition);
+                    final ViewTreeObserver observer = getViewTreeObserver();
                     if (observer.isAlive()) {
                         observer.removeOnGlobalLayoutListener(this);
                     }
                 }
             };
-        observer.addOnGlobalLayoutListener(updateScroll);
+        getViewTreeObserver().addOnGlobalLayoutListener(updateScroll);
     }
 
     @Override
