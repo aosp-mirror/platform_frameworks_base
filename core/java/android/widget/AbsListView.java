@@ -1055,30 +1055,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             if (mChoiceMode == CHOICE_MODE_MULTIPLE ||
                     (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
-                boolean newValue = !mCheckStates.get(position, false);
-                mCheckStates.put(position, newValue);
+                boolean checked = !mCheckStates.get(position, false);
+                mCheckStates.put(position, checked);
                 if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
-                    if (newValue) {
+                    if (checked) {
                         mCheckedIdStates.put(mAdapter.getItemId(position), position);
                     } else {
                         mCheckedIdStates.delete(mAdapter.getItemId(position));
                     }
                 }
-                if (newValue) {
+                if (checked) {
                     mCheckedItemCount++;
                 } else {
                     mCheckedItemCount--;
                 }
                 if (mChoiceActionMode != null) {
                     mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
-                            position, id, newValue);
+                            position, id, checked);
                     dispatchItemClick = false;
                 }
                 checkedStateChanged = true;
             } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
-                boolean newValue = !mCheckStates.get(position, false);
-                if (newValue) {
-                    mCheckStates.clear();
+                boolean checked = !mCheckStates.get(position, false);
+                mCheckStates.clear();
+                if (checked) {
                     mCheckStates.put(position, true);
                     if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                         mCheckedIdStates.clear();
