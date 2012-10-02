@@ -645,12 +645,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     /**
      * Returns all providers by name, including passive, but excluding
-     * fused.
+     * fused, also including ones that are not permitted to
+     * be accessed by the calling activity or are currently disabled.
      */
     @Override
     public List<String> getAllProviders() {
-        checkPermission();
-
         ArrayList<String> out;
         synchronized (mLock) {
             out = new ArrayList<String>(mProviders.size());
