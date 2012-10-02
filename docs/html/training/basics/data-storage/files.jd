@@ -1,0 +1,382 @@
+page.title=Saving Files
+parent.title=Data Storage
+parent.link=index.html
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#InternalVsExternalStorage">Choose Internal or External Storage</a></li>
+  <li><a href="#GetWritePermission">Obtain Permissions for External Storage</a></li>
+  <li><a href="#WriteInternalStorage">Save a File on Internal Storage</a></li>
+  <li><a href="#WriteExternalStorage">Save a File on External Storage</a></li>
+  <li><a href="#GetFreeSpace">Query Free Space</a></li>
+  <li><a href="#DeleteFile">Delete a File</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesInternal">Using the Internal
+Storage</a></li>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">Using the External
+Storage</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>Android uses a file system that's
+similar to disk-based file systems on other platforms. This lesson describes
+how to work with the Android file system to read and write files with the {@link java.io.File}
+APIs.</p>
+
+<p>A {@link java.io.File} object is suited to reading or writing large amounts of data in
+start-to-finish order without skipping around. For example, it's good for image files or
+anything exchanged over a network.</p>
+
+<p>This lesson shows how to perform basic file-related tasks in your app.
+The lesson assumes that you are familiar with the basics of the Linux file system and the
+standard file input/output APIs in {@link java.io}.</p>
+
+
+<h2 id="InternalVsExternalStorage">Choose Internal or External Storage</h2>
+
+<p>All Android devices have two file storage areas: "internal" and "external" storage.  These names
+come from the early days of Android, when most devices offered built-in non-volatile memory
+(internal storage), plus a removable storage medium such as a micro SD card (external storage).
+Some devices divide the permanent storage space into "internal" and "external" partitions, so even
+without a removable storage medium, there are always two storage spaces and
+the API behavior is the same whether the external storage is removable or not.
+The following lists summarize the facts about each storage space.</p>
+
+<div class="col-5" style="margin-left:0">
+<p><b>Internal storage:</b></p>
+<ul>
+<li>It's always available.</li>
+<li>Files saved here are accessible by only your app by default.</li>
+<li>When the user uninstalls your app, the system removes all your app's files from
+internal storage.</li>
+</ul>
+<p>Internal storage is best when you want to be sure that neither the user nor other apps can
+access your files.</p>
+</div>
+
+<div class="col-7" style="margin-right:0">
+<p><b>External storage:</b></p>
+<ul>
+<li>It's not always available, because the user can mount the external storage as USB storage
+and in some cases remove it from the device.</li>
+<li>It's world-readable, so
+files saved here may be read outside of your control.</li>
+<li>When the user uninstalls your app, the system removes your app's files from here
+only if you save them in the directory from {@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()}.</li>
+</ul>
+<p>External storage is the best
+place for files that don't require access restrictions and for files that you want to share
+with other apps or allow the user to access with a computer.</p>
+</div>
+
+
+<p class="note" style="clear:both">
+<strong>Tip:</strong> Although apps are installed onto the internal storage by
+default, you can specify the <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#install">{@code
+android:installLocation}</a> attribute in your manifest so your app may
+be installed on external storage. Users appreciate this option when the APK size is very large and
+they have an external storage space that's larger than the internal storage. For more
+information, see <a
+href="{@docRoot}guide/topics/data/install-location.html">App Install Location</a>.</p>
+
+
+<h2 id="GetWritePermission">Obtain Permissions for External Storage</h2>
+
+<p>To write to the external storage, you must request the
+  {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission in your <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a>:</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+<div class="caution"><p><strong>Caution:</strong>
+Currently, all apps have the ability to read the external storage
+without a special permission. However, this will change in a future release. If your app needs
+to read the external storage (but not write to it), then you will need to declare the {@link
+android.Manifest.permission#READ_EXTERNAL_STORAGE} permission. To ensure that your app continues
+to work as expected, you should declare this permission now, before the change takes effect.</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;
+    ...
+&lt;/manifest>
+</pre>
+<p>However, if your app uses the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+permission, then it implicitly has permission to read the external storage as well.</p>
+</div>
+
+<p>You don’t need any permissions to save files on the internal
+storage. Your application always has permission to read and
+write files in its internal storage directory.</p>
+
+
+
+
+
+<h2 id="WriteInternalStorage">Save a File on Internal Storage</h2>
+
+<p>When saving a file to internal storage, you can acquire the appropriate directory as a
+{@link java.io.File} by calling one of two methods:</p>
+
+<dl>
+  <dt>{@link android.content.Context#getFilesDir}</dt>
+  <dd>Returns a {@link java.io.File} representing an internal directory for your app.</dd>
+  <dt>{@link android.content.Context#getCacheDir}</dt>
+  <dd>Returns a {@link java.io.File} representing an internal directory for your app's temporary
+cache files. Be sure to delete each file once it is no
+longer needed and implement a reasonable size limit for the amount of memory you use at any given
+time, such as 1MB. If the system begins running low on storage, it may delete your cache files
+without warning.</dd>
+</dl>
+
+<p>To create a new file in one of these directories, you can use the {@link
+java.io.File#File(File,String) File()} constructor, passing the {@link java.io.File} provided by one
+of the above methods that specifies your internal storage directory. For example:</p>
+
+<pre>
+File file = new File(context.getFilesDir(), filename);
+</pre>
+
+<p>Alternatively, you can call {@link
+android.content.Context#openFileOutput openFileOutput()} to get a {@link java.io.FileOutputStream}
+that writes to a file in your internal directory. For example, here's
+how to write some text to a file:</p>
+
+<pre>
+String filename = "myfile";
+String string = "Hello world!";
+FileOutputStream outputStream;
+
+try {
+  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+  outputStream.write(string.getBytes());
+  outputStream.close();
+} catch (Exception e) {
+  e.printStackTrace();
+}
+</pre>
+
+<p>Or, if you need to cache some files, you should instead use {@link
+java.io.File#createTempFile createTempFile()}. For example, the following method extracts the
+file name from a {@link java.net.URL} and creates a file with that name
+in your app's internal cache directory:</p>
+
+<pre>
+public File getTempFile(Context context, String url) {
+    File file;
+    try {
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, null, context.getCacheDir());
+    catch (IOException e) {
+        // Error while creating file
+    }
+    return file;
+}
+</pre>
+
+<p class="note"><strong>Note:</strong>
+Your app's internal storage directory is specified
+by your app's package name in a special location of the Android file system.
+Technically, another app can read your internal files if you set
+the file mode to be readable. However, the other app would also need to know your app package
+name and file names. Other apps cannot browse your internal directories and do not have
+read or write access unless you explicitly set the files to be readable or writable. So as long
+as you use {@link android.content.Context#MODE_PRIVATE} for your files on the internal storage,
+they are never accessible to other apps.</p>
+
+
+
+
+
+<h2 id="WriteExternalStorage">Save a File on External Storage</h2>
+
+<p>Because the external storage may be unavailable&mdash;such as when the user has mounted the
+storage to a PC or has removed the SD card that provides the external storage&mdash;you
+should always verify that the volume is available before accessing it. You can query the external
+storage state by calling {@link android.os.Environment#getExternalStorageState}. If the returned
+state is equal to {@link android.os.Environment#MEDIA_MOUNTED}, then you can read and
+write your files. For example, the following methods are useful to determine the storage
+availability:</p>
+
+<pre>
+/* Checks if external storage is available for read and write */
+public boolean isExternalStorageWritable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+        return true;
+    }
+    return false;
+}
+
+/* Checks if external storage is available to at least read */
+public boolean isExternalStorageReadable() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state) ||
+        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        return true;
+    }
+    return false;
+}
+</pre>
+
+<p>Although the external storage is modifiable by the user and other apps, there are two
+categories of files you might save here:</p>
+
+<dl>
+  <dt>Public files</dt>
+  <dd>Files that
+should be freely available to other apps and to the user. When the user uninstalls your app,
+these files should remain available to the user.
+  <p>For example, photos captured by your app or other downloaded files.</p>
+  </dd>
+  <dt>Private files</dt>
+  <dd>Files that rightfully belong to your app and should be deleted when the user uninstalls
+  your app. Although these files are technically accessible by the user and other apps because they
+  are on the external storage, they are files that realistically don't provide value to the user
+  outside your app. When the user uninstalls your app, the system deletes
+  all files in your app's external private  directory. 
+  <p>For example, additional resources downloaded by your app or temporary media files.</p>
+  </dd>
+</dl>
+
+<p>If you want to save public files on the external storage, use the
+{@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} method to get a {@link java.io.File} representing
+the appropriate directory on the external storage. The method takes an argument specifying
+the type of file you want to save so that they can be logically organized with other public
+files, such as {@link android.os.Environment#DIRECTORY_MUSIC} or {@link
+android.os.Environment#DIRECTORY_PICTURES}. For example:</p>
+
+<pre>
+public File getAlbumStorageDir(String albumName) {
+    // Get the directory for the user's public pictures directory. 
+    File file = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+
+<p>If you want to save files that are private to your app, you can acquire the
+appropriate directory by calling {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} and passing it a name indicating
+the type of directory you'd like. Each directory created this way is added to a parent
+directory that encapsulates all your app's external storage files, which the system deletes when the
+user uninstalls your app.</p>
+
+<p>For example, here's a method you can use to create a directory for an individual photo album:</p>
+
+<pre>
+public File getAlbumStorageDir(Context context, String albumName) {
+    // Get the directory for the app's private pictures directory. 
+    File file = new File(context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES), albumName);
+    if (!file.mkdirs()) {
+        Log.e(LOG_TAG, "Directory not created");
+    }
+    return file;
+}
+</pre>
+
+<p>If none of the pre-defined sub-directory names suit your files, you can instead call {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()} and pass {@code null}. This
+returns the root directory for your app's private directory on the external storage.</p>
+
+<p>Remember that {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+creates a directory inside a directory that is deleted when the user uninstalls your app.
+If the files you're saving should remain available after the user uninstalls your
+app&mdash;such as when your app is a camera and the user will want to keep the photos&mdash;you
+should instead use {@link android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()}.</p>
+
+
+<p>Regardless of whether you use {@link
+android.os.Environment#getExternalStoragePublicDirectory
+getExternalStoragePublicDirectory()} for files that are shared or
+{@link android.content.Context#getExternalFilesDir
+getExternalFilesDir()} for files that are private to your app, it's important that you use
+directory names provided by API constants like
+{@link android.os.Environment#DIRECTORY_PICTURES}. These directory names ensure
+that the files are treated properly by the system. For instance, files saved in {@link
+android.os.Environment#DIRECTORY_RINGTONES} are categorized by the system media scanner as ringtones
+instead of music.</p>
+
+
+
+
+<h2 id="GetFreeSpace">Query Free Space</h2>
+
+<p>If you know ahead of time how much data you're saving, you can find out
+whether sufficient space is available without causing an {@link
+java.io.IOException} by calling {@link java.io.File#getFreeSpace} or {@link
+java.io.File#getTotalSpace}. These methods provide the current available space and the
+total space in the storage volume, respectively. This information is also useful to avoid filling
+the storage volume above a certain threshold.</p>
+
+<p>However, the system does not guarantee that you can write as many bytes as are
+indicated by {@link java.io.File#getFreeSpace}.  If the number returned is a
+few MB more than the size of the data you want to save, or if the file system
+is less than 90% full, then it's probably safe to proceed.
+Otherwise, you probably shouldn't write to storage.</p>
+
+<p class="note"><strong>Note:</strong> You aren't required to check the amount of available space
+before you save your file. You can instead try writing the file right away, then
+catch an {@link java.io.IOException} if one occurs. You may need to do
+this if you don't know exactly how much space you need. For example, if you
+change the file's encoding before you save it by converting a PNG image to
+JPEG, you won't know the file's size beforehand.</p>
+
+
+
+
+<h2 id="DeleteFile">Delete a File</h2>
+
+<p>You should always delete files that you no longer need. The most straightforward way to delete a
+file is to have the opened file reference call {@link java.io.File#delete} on itself.</p>
+
+<pre>
+myFile.delete();
+</pre>
+
+<p>If the file is saved on internal storage, you can also ask the {@link android.content.Context} to locate and
+delete a file by calling {@link android.content.Context#deleteFile deleteFile()}:</p>
+
+<pre>
+myContext.deleteFile(fileName);
+</pre>
+
+<div class="note">
+<p><strong>Note:</strong> When the user uninstalls your app, the Android system deletes
+the following:</p> 
+<ul>
+<li>All files you saved on internal storage</li>
+<li>All files you saved on external storage using {@link
+android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
+</ul>
+<p>However, you should manually delete all cached files created with
+{@link android.content.Context#getCacheDir()} on a regular basis and also regularly delete
+other files you no longer need.</p>
+</div>
+
