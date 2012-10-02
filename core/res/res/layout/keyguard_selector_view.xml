@@ -29,10 +29,7 @@
     <include layout="@layout/keyguard_widget_region"
         android:layout_width="match_parent"
         android:layout_height="0dip"
-        android:layout_weight="0.45"
-        android:layout_marginTop="35dip"
-        android:layout_marginLeft="33dip"
-        android:layout_marginRight="33dip"/>
+        android:layout_weight="0.45" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
