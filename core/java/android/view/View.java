@@ -5871,6 +5871,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     ((layoutDirection << PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) & PFLAG2_LAYOUT_DIRECTION_MASK);
             // We need to resolve all RTL properties as they all depend on layout direction
             resolveRtlPropertiesIfNeeded();
+            requestLayout();
+            invalidate(true);
         }
     }
 
@@ -11568,8 +11570,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!isDrawablesResolved()) {
             resolveDrawables();
         }
-        requestLayout();
-        invalidate(true);
         onRtlPropertiesChanged(getLayoutDirection());
     }
 
