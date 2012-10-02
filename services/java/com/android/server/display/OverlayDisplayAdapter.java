@@ -238,7 +238,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.flags = DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
+                mInfo.flags = 0;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
             return mInfo;

@@ -50,7 +50,8 @@ import java.util.Arrays;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
-    private PersistentDataStore mPersistentDataStore;
+    private final PersistentDataStore mPersistentDataStore;
+    private final boolean mSupportsProtectedBuffers;
 
     private WifiDisplayController mDisplayController;
     private WifiDisplayDevice mDisplayDevice;
@@ -70,6 +71,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             PersistentDataStore persistentDataStore) {
         super(syncRoot, context, handler, listener, TAG);
         mPersistentDataStore = persistentDataStore;
+        mSupportsProtectedBuffers = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_wifiDisplaySupportsProtectedBuffers);
     }
 
     @Override
@@ -84,6 +87,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         pw.println("mAvailableDisplays=" + Arrays.toString(mAvailableDisplays));
         pw.println("mRememberedDisplays=" + Arrays.toString(mRememberedDisplays));
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
+        pw.println("mSupportsProtectedBuffers=" + mSupportsProtectedBuffers);
 
         // Try to dump the controller state.
         if (mDisplayController == null) {
@@ -217,7 +221,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         int deviceFlags = 0;
         if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
-            deviceFlags |= DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
+            deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
+        }
+        if (mSupportsProtectedBuffers) {
+            deviceFlags |= DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
         }
 
         float refreshRate = 60.0f; // TODO: get this for real
