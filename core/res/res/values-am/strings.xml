@@ -1094,22 +1094,18 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ለ፦"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"የሚፈለገውን ፒን ተይብ፦"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ፒን፦"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"ስልኩ ከ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ጋር ተገናኝቶ ባለበት ጊዜ በጊዜያዊነት ከWi-Fi ጋር ያለው ግንኙነት ይቋረጣል"</string>
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"ስልኩ ከ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ጋር ተገናኝቶ ባለበት ጊዜ በጊዜያዊነት ከWi-Fi ጋር ይላቀቃል"</string>
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"የSMS መልዕክቶች መበላክ ላይ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቁጥራቸው ብዙ የሆኑ የኤስ.ኤም.ኤስ. መልዕክቶችን እየላከ ነው። ይሄ መተግበሪያ መልዕክቶችን መላኩን እንዲቀጥል መፍቀድ ትፈልጋለህ?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"ፍቀድ"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ከልክል"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ለ&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; መልዕክት ለመላክ ይፈልጋል።"</string>
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="4992814738863678373">"ይሄ በተንቀሳቃሽ ስልክ መለያዎ ላይ ክፍያዎችን ሊያስከፍል ይችላል።"</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"ይሄ በተንቀሳቃሽ ስልክ መለያዎ ላይ ክፍያዎችን ያስከፍላል።"</string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ላክ"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ሰርዝ"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ምርጫዬን አስታውስ"</string>
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
-    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"ሁልጊዜ ፍቀድ"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"በጭራሽ አትፍቀድ"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM ካርድ ተወግዷል"</string>
@@ -1369,20 +1365,11 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ስልክ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"የጆሮ ማዳመጫዎች"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"የትከል ድምፅ ማጉያዎች"</string>
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI ድምጽ"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"ስርዓት"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"የብሉቱዝ ድምጽ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"ተከናውኗል"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"የሚዲያ ውጽዓት"</string>
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
-    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"ውስጥ የተሰራ ማያ ገጽ"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI ማያ ገጽ"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ተደራቢ #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1397,21 +1384,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"የሲም ፒን ያስገቡ"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ፒን ያስገቡ"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"የይለፍ ቃል ያስገቡ"</string>
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"የPUK ኮድ"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"አዲስ ፒን ኮድ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ሲም ካርዱን በመክፈት ላይ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ትክክል ያልሆነ ፒን ኮድ።"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"8 ወይም ከዚያ በላይ ቁጥሮችን የሆነ PUK ይተይቡ።"</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUK እና አዲስ ፒን ይተይቡ"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"የተየቡት PUK ትክክል  አይደለም።"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"በጣም ብዙ የስርዓተ ጥለት ሙከራዎች"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ለመክፈት በGoogle መለያዎ ይግቡ።"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"የተጠቃሚ ስም (ኢሜይል)"</string>
@@ -1419,8 +1399,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ግባ"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ልክ ያልሆነ የተጠቃሚ ስም ወይም የይለፍ ቃል።"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"የተጠቃሚ ስምዎን ወይም የይለፍ ቃልዎን ረሱት?"\n<b>"google.com/accounts/recovery"</b>"ይጎብኙ።"</string>
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
-    <skip />
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"በማረጋገጥ ላይ…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"ፒንዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልተየቡም። "\n\n"በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"የይለፍ ቃልዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ተይበዋል።"\n\n"በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"የመክፈቻ ስርዓተ ጥለትዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። "\n\n" ከ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
