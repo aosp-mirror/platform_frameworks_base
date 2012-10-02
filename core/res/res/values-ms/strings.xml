@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Membenarkan apl untuk mendapatkan semula keadaan dalaman sistem. Apl hasad boleh mendapatkan pelbagai maklumat peribadi dan selamat yang biasanya tidak ia perlukan."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"dapatkan semula kandungan skrin"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Membenarkan apl untuk mendapatkan kandungan tetingkap aktif. Apl hasad boleh mengambil keseluruhan kandungan tetingkap dan memeriksa semua teks kecuali kata laluan."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"dayakan kebolehcapaian untuk sementara"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Membenarkan aplikasi untuk mendayakan kebolehcapaian untuk sementara pada peranti. Apl hasad mungkin mendayakan kebolehcapaian tanpa izin pengguna."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"dapatkan maklumat tetingkap"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Membolehkan aplikasi mendapatkan maklumat tentang tetingkap dari pengurus tetingkap. Apl hasad boleh mendapatkan maklumat yang bertujuan untuk penggunaan sistem dalaman."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"tapis acara"</string>
@@ -324,7 +322,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"memapaparkan tetingkap yang tiada kebenaran"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Membenarkan apl untuk membuat tetingkap yang dimaksudkan untuk digunakan oleh antara muka pengguna sistem dalaman. Bukan untuk digunakan oleh apl biasa."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"lukis atas apl lain"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Membenarkan aplikasi bertindih di atas aplikasi lain atau sebahagian daripada antara muka pengguna. Ia mungkin mengganggu penggunaan antara muk anda dalam sebarang aplikasi atau menukar apa yang anda rasa anda lihat dalam aplikasi lain."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Membenarkan aplikasi bertindih di atas aplikasi lain atau sebahagian daripada antara muka pengguna. Ini mungkin mengganggu penggunaan antara muka anda dalam sebarang aplikasi atau menukar apa yang anda rasa anda lihat dalam aplikasi lain."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"mengubah suai kelajuan animasi global"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Membenarkan apl menukar kelajuan animasi global (animasi yang lebih laju atau lebih perlahan) pada bila-bila masa sahaja."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"urus token apl"</string>
@@ -559,7 +557,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"akses tetapan Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Membenarkan apl mengkonfigurasikan tablet Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Membenarkan apl mengkonfigurasikan telefon Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
-    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambung dan nyahsambung dari WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambung dan putuskan sambungan WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Membenarkan apl menentukan sama ada WiMaX didayakan dan maklumat tentang sebarang rangkaian WiMaX yang disambungkan."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Tukar keadaan WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Membenarkan apl untuk menyambungkan tablet ke dan menyahsambungkan tablet dari rangkaian WiMaX."</string>
@@ -1094,18 +1092,22 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kepada:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Taipkan PIN yang diperlukan:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Telefon akan dinyahsambung buat sementara dari Wi-Fi semasa disambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Sambungan telefon ke Wi-Fi akan diputuskan buat sementara waktu semasa telefon bersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang menghantar banyak mesej SMS. Adakah anda mahu membenarkan apl ini terus menghantar mesej?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Benarkan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nafikan"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin menghantar mesej kepada &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Ini akan menyebabkan bayaran dikenakan kepada akaun mudah alih anda."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Ini akan menyebabkan bayaran dikenakan kepada akaun mudah alih anda."</string>
+    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Hantar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Batal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Ingat pilihan saya"</string>
+    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
+    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Sentiasa Benarkan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Jangan Benarkan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kad SIM dikeluarkan"</string>
@@ -1365,11 +1367,20 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fon kepala"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Pembesar suara dok"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Audio HDMI"</string>
+    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Output media"</string>
+    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
+    <skip />
+    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
+    <skip />
+    <!-- no translation found for media_route_status_available (6983258067194649391) -->
+    <skip />
+    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
+    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Skrin Terbina Dalam"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Skrin HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tindih #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1395,21 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Masukkan PIN SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Masukkan PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Masukkan Kata Laluan"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Kod PUK"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Kod PIN Baharu"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
+    <skip />
+    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <skip />
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Membuka kunci kad SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Kod PIN salah."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Taipkan PIN yang mengandungi 4 hingga 8 nombor."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Taipkan PUK yang mempunyai 8 nombor atau lebih panjang."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Taip PUK dan kod PIN baharu"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"Kod PUK yang anda taipkan tidak betul."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <skip />
+    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <skip />
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak percubaan melukis corak"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nama Pengguna (E-mel)"</string>
@@ -1399,7 +1417,8 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Log masuk"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau kata laluan tidak sah."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?"\n"Lawati"<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Menyemak…"</string>
+    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <skip />
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
@@ -1410,12 +1429,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tingkatkan kelantangan di atas tahap selamat?"\n"Mendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
     <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>
+    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
+    <!-- no translation found for user_switched (3768006783166984410) -->
     <skip />
 </resources>
