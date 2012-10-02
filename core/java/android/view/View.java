@@ -6466,11 +6466,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (viewRootImpl != null) {
                 viewRootImpl.setAccessibilityFocus(this, null);
             }
-            if (mAttachInfo != null) {
-                Rect rectangle = mAttachInfo.mTmpInvalRect;
-                getDrawingRect(rectangle);
-                requestRectangleOnScreen(rectangle);
-            }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
             notifyAccessibilityStateChanged();
