@@ -392,14 +392,14 @@ public class KeyguardViewMediator implements KeyguardViewCallback {
         mScreenOn = mPM.isScreenOn();
 
         mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
-        String soundPath = Settings.System.getString(cr, Settings.System.LOCK_SOUND);
+        String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);
         if (soundPath != null) {
             mLockSoundId = mLockSounds.load(soundPath, 1);
         }
         if (soundPath == null || mLockSoundId == 0) {
             if (DEBUG) Log.d(TAG, "failed to load sound from " + soundPath);
         }
-        soundPath = Settings.System.getString(cr, Settings.System.UNLOCK_SOUND);
+        soundPath = Settings.Global.getString(cr, Settings.Global.UNLOCK_SOUND);
         if (soundPath != null) {
             mUnlockSoundId = mLockSounds.load(soundPath, 1);
         }
