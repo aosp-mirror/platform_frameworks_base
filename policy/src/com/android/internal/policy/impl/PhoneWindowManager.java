@@ -730,14 +730,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void run() {
             // The context isn't read
             if (mLongPressOnPowerBehavior < 0) {
-                if (FactoryTest.isLongPressOnPowerOffEnabled()) {
-                    mLongPressOnPowerBehavior = LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
-                } else {
-                    mLongPressOnPowerBehavior = mContext.getResources().getInteger(
-                            com.android.internal.R.integer.config_longPressOnPowerBehavior);
-                }
+                mLongPressOnPowerBehavior = mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
             }
-            switch (mLongPressOnPowerBehavior) {
+            int resolvedBehavior = mLongPressOnPowerBehavior;
+            if (FactoryTest.isLongPressOnPowerOffEnabled()) {
+                resolvedBehavior = LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
+            }
+
+            switch (resolvedBehavior) {
             case LONG_PRESS_POWER_NOTHING:
                 break;
             case LONG_PRESS_POWER_GLOBAL_ACTIONS:
@@ -753,8 +754,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerKeyHandled = true;
                 performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-                mWindowManagerFuncs.shutdown(
-                        mLongPressOnPowerBehavior == LONG_PRESS_POWER_SHUT_OFF);
+                mWindowManagerFuncs.shutdown(resolvedBehavior == LONG_PRESS_POWER_SHUT_OFF);
                 break;
             }
         }
