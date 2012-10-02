@@ -173,9 +173,9 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Нет соединения"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нет сети"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Модуль Wi-Fi отключен"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Экран, подключенный через Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Экран не подключен через Wi-Fi"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Проектор вкл."</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Проектор выкл."</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркость"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
 </resources>
