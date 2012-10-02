@@ -32,9 +32,6 @@
         android:layout_weight="1"
         android:clipChildren="false"
         android:clipToPadding="false">
-            <!-- TODO: Remove this when supported as a widget -->
-            <include layout="@layout/keyguard_status_view"/>
-            <include layout="@layout/keyguard_transport_control_view"/>
     </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
     <LinearLayout
         android:layout_width="match_parent"

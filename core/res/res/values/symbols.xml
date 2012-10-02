@@ -1330,6 +1330,8 @@
   <java-symbol type="layout" name="screen_title" />
   <java-symbol type="layout" name="screen_title_icons" />
   <java-symbol type="layout" name="keyguard_host_view" />
+  <java-symbol type="layout" name="keyguard_transport_control_view" />
+  <java-symbol type="layout" name="keyguard_status_view" />
   <java-symbol type="string" name="abbrev_wday_month_day_no_year" />
   <java-symbol type="string" name="android_upgrading_title" />
   <java-symbol type="string" name="bugreport_title" />
