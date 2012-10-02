@@ -29,7 +29,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:contentDescription="@string/keyguard_accessibility_status">
 
         <com.android.internal.policy.impl.keyguard.ClockView
             android:id="@+id/clock_view"
