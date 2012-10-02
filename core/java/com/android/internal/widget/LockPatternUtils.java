@@ -125,7 +125,9 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
-    private int mCurrentUserId = UserHandle.USER_NULL;
+
+    // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
+    private static volatile int sCurrentUserId = UserHandle.USER_NULL;
 
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
@@ -215,13 +217,13 @@ public class LockPatternUtils {
     }
 
     public void setCurrentUser(int userId) {
-        mCurrentUserId = userId;
+        sCurrentUserId = userId;
     }
 
     public int getCurrentUser() {
-        if (mCurrentUserId != UserHandle.USER_NULL) {
+        if (sCurrentUserId != UserHandle.USER_NULL) {
             // Someone is regularly updating using setCurrentUser() use that value.
-            return mCurrentUserId;
+            return sCurrentUserId;
         }
         try {
             return ActivityManagerNative.getDefault().getCurrentUser().id;
