@@ -198,7 +198,7 @@ class TouchExplorer implements EventStreamTransformation {
     private GestureLibrary mGestureLibrary;
 
     // The long pressing pointer id if coordinate remapping is needed.
-    private int mLongPressingPointerId;
+    private int mLongPressingPointerId = -1;
 
     // The long pressing pointer X if coordinate remapping is needed.
     private int mLongPressingPointerDeltaX;
@@ -702,10 +702,24 @@ class TouchExplorer implements EventStreamTransformation {
                     }
                 }
             } break;
+            case MotionEvent.ACTION_POINTER_UP: {
+                 final int pointerId = event.getPointerId(event.getActionIndex());
+                 if (pointerId == mDraggingPointerId) {
+                     mDraggingPointerId = INVALID_POINTER_ID;
+                     // Send an event to the end of the drag gesture.
+                     sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                 }
+            } break;
             case MotionEvent.ACTION_UP: {
                 // Announce the end of a new touch interaction.
                 sendAccessibilityEvent(
                         AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+                final int pointerId = event.getPointerId(event.getActionIndex());
+                if (pointerId == mDraggingPointerId) {
+                    mDraggingPointerId = INVALID_POINTER_ID;
+                    // Send an event to the end of the drag gesture.
+                    sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                }
                 mCurrentState = STATE_TOUCH_EXPLORING;
             } break;
             case MotionEvent.ACTION_CANCEL: {
