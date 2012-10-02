@@ -1884,10 +1884,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
             R.integer.def_lockscreen_sounds_enabled);
-        loadStringSetting(stmt, Settings.System.LOCK_SOUND,
-            R.string.def_lock_sound);
-        loadStringSetting(stmt, Settings.System.UNLOCK_SOUND,
-            R.string.def_unlock_sound);
     }
 
     private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
@@ -2102,6 +2098,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Global.WIFI_DISPLAY_ON,
                     R.bool.def_wifi_display_on);
+
+            loadStringSetting(stmt, Settings.Global.LOCK_SOUND,
+                    R.string.def_lock_sound);
+
+            loadStringSetting(stmt, Settings.Global.UNLOCK_SOUND,
+                    R.string.def_unlock_sound);
 
             // --- New global settings start here
         } finally {
