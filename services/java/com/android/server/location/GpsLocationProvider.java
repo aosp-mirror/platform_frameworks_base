@@ -783,6 +783,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
         sendMessage(SET_REQUEST, 0, new GpsRequest(request, source));
     }
 
+    @Override
+    public void switchUser(int userId) {
+        // nothing to do here
+    }
+
     private void handleSetRequest(ProviderRequest request, WorkSource source) {
         if (DEBUG) Log.d(TAG, "setRequest " + request);
 

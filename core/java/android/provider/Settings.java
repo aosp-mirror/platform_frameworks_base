@@ -4052,7 +4052,20 @@ public final class Settings {
          * @return true if the provider is enabled
          */
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-            String allowedProviders = Settings.Secure.getString(cr, LOCATION_PROVIDERS_ALLOWED);
+            return isLocationProviderEnabledForUser(cr, provider, UserHandle.myUserId());
+        }
+
+        /**
+         * Helper method for determining if a location provider is enabled.
+         * @param cr the content resolver to use
+         * @param provider the location provider to query
+         * @param userId the userId to query
+         * @return true if the provider is enabled
+         * @hide
+         */
+        public static final boolean isLocationProviderEnabledForUser(ContentResolver cr, String provider, int userId) {
+            String allowedProviders = Settings.Secure.getStringForUser(cr,
+                    LOCATION_PROVIDERS_ALLOWED, userId);
             return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
         }
 
@@ -4064,6 +4077,19 @@ public final class Settings {
          */
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
+            setLocationProviderEnabledForUser(cr, provider, enabled, UserHandle.myUserId());
+        }
+
+        /**
+         * Thread-safe method for enabling or disabling a single location provider.
+         * @param cr the content resolver to use
+         * @param provider the location provider to enable or disable
+         * @param enabled true if the provider should be enabled
+         * @param userId the userId for which to enable/disable providers
+         * @hide
+         */
+        public static final void setLocationProviderEnabledForUser(ContentResolver cr,
+                String provider, boolean enabled, int userId) {
             // to ensure thread safety, we write the provider name with a '+' or '-'
             // and let the SettingsProvider handle it rather than reading and modifying
             // the list of enabled providers.
@@ -4072,7 +4098,8 @@ public final class Settings {
             } else {
                 provider = "-" + provider;
             }
-            putString(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider);
+            putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
+                    userId);
         }
     }
 
