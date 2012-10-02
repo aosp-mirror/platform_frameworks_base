@@ -79,38 +79,23 @@ public final class Display {
     public static final int DEFAULT_DISPLAY = 0;
 
     /**
-     * Display flag: Indicates that the display supports secure video output.
+     * Display flag: Indicates that the display supports compositing content
+     * that is stored in protected graphics buffers.
      * <p>
-     * This flag is used to indicate that the display supports content protection
-     * mechanisms for secure video output at the display interface, such as HDCP.
-     * These mechanisms may be used to protect secure content as it leaves the device.
+     * Secure (DRM) video decoders may allocate protected graphics buffers to request that
+     * a hardware-protected path be provided between the video decoder and the external
+     * display sink.  If a hardware-protected path is not available, then content stored
+     * in protected graphics buffers may not be composited.
      * </p><p>
-     * While mirroring content to multiple displays, it can happen that certain
-     * display devices support secure video output while other display devices do not.
-     * The secure content will be shown only on the display devices that support
-     * secure video output and will be blanked on other display devices that do
-     * not support secure video output.
-     * </p><p>
-     * This flag mainly applies to external display devices such as HDMI or
-     * Wifi display.  Built-in display devices are usually considered secure.
+     * If this flag is not set, then the display device does not support compositing
+     * protected buffers; the user may see a blank region on the screen instead of
+     * the protected content.  An application can use this flag as a hint that it should
+     * select an alternate content stream or adopt a different strategy for decoding
+     * content that does not rely on protected buffers so as to ensure that the user
+     * can view the content on the display as expected.
      * </p>
-     *
-     * @hide pending review
      */
-    public static final int FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT = 1 << 0;
-
-    /**
-     * Display flag: Indicates that the display supports secure in-memory video buffers.
-     * <p>
-     * This flag is used to indicate that the display supports content protection
-     * mechanisms for in-memory video buffers, such as secure memory areas.
-     * These mechanisms may be used to protect secure video buffers in memory from
-     * the video decoder to the display compositor and the video interface.
-     * </p>
-     *
-     * @hide pending review
-     */
-    public static final int FLAG_SUPPORTS_SECURE_VIDEO_BUFFERS = 1 << 1;
+    public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1 << 0;
 
     /**
      * Internal method to create a display.
@@ -196,7 +181,7 @@ public final class Display {
      *
      * @return The display flags.
      *
-     * @hide pending review
+     * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
      */
     public int getFlags() {
         synchronized (this) {

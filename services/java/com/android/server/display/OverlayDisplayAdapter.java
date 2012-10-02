@@ -19,14 +19,10 @@ package com.android.server.display;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -227,7 +223,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.flags = DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
+                mInfo.flags = 0;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
             return mInfo;
