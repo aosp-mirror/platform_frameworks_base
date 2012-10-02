@@ -1,0 +1,121 @@
+page.title=Saving Key-Value Sets
+parent.title=Data Storage
+parent.link=index.html
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#GetSharedPreferences">Get a Handle to a SharedPreferences</a></li>
+  <li><a href="#WriteSharedPreference">Write to Shared Preferences</a></li>
+  <li><a href="#ReadSharedPreference">Read from Shared Preferences</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/data/data-storage.html#pref">Using Shared Preferences</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>If you have a relatively small collection of key-values that you'd like to save,
+you should use the {@link android.content.SharedPreferences} APIs.
+A {@link android.content.SharedPreferences} object points to a file containing
+key-value pairs and provides simple methods to read and write them. Each
+{@link android.content.SharedPreferences} file is
+managed by the framework and can be private or shared.</p>
+
+<p>This class shows you how to use the {@link android.content.SharedPreferences} APIs to store and
+retrieve simple values.</p>
+
+<p class="note"><strong>Note:</strong> The {@link android.content.SharedPreferences} APIs are
+only for reading and writing key-value pairs and you should not confuse them with the
+{@link android.preference.Preference} APIs, which help you build a user interface
+for your app settings (although they use {@link android.content.SharedPreferences} as their
+implementation to save the app settings). For information about using the {@link
+android.preference.Preference} APIs, see the <a href="{@docRoot}guide/topics/ui/settings.html"
+>Settings</a> guide.</p>
+
+<h2 id="GetSharedPreferences">Get a Handle to a SharedPreferences</h2>
+
+<p>You can create a new shared preference file or access an existing
+one by calling one of two methods:</p>
+<ul>
+  <li>{@link android.content.Context#getSharedPreferences(String,int)
+getSharedPreferences()} &mdash; Use this if you need multiple shared preference files identified
+by name, which you specify with the first parameter. You can call this from any
+{@link android.content.Context} in your app.</li>
+  <li>{@link android.app.Activity#getPreferences(int) getPreferences()} &mdash; Use this from an
+{@link android.app.Activity} if you need
+to use only one shared preference file for the activity. Because this retrieves a default shared
+preference file that belongs to the activity, you don't need to supply a name.</li>
+</ul>
+
+<p>For example, the following code is executed inside a {@link android.app.Fragment}.
+It accesses the shared preferences file that's
+identified by the resource string {@code R.string.preference_file_key} and opens it using
+the private mode so the file is accessible by only your app.</p>
+
+<pre>
+Context context = getActivity();
+SharedPreferences sharedPref = context.getSharedPreferences(
+        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+</pre>
+
+<p>When naming your shared preference files, you should use a name that's uniquely identifiable
+to your app, such as {@code "com.example.myapp.PREFERENCE_FILE_KEY"}</p>
+
+<p>Alternatively, if you need just one shared preference file for your activity, you can use the
+{@link android.app.Activity#getPreferences(int) getPreferences()} method:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+</pre>
+
+<p class="caution"><strong>Caution:</strong> If you create a shared preferences file
+with {@link android.content.Context#MODE_WORLD_READABLE} or {@link
+android.content.Context#MODE_WORLD_WRITEABLE}, then any other apps that know the file identifier
+can access your data.</p>
+
+
+<h2 id="WriteSharedPreference">Write to Shared Preferences</h2>
+
+<p>To write to a shared preferences file, create a {@link
+android.content.SharedPreferences.Editor} by calling {@link
+android.content.SharedPreferences#edit} on your {@link android.content.SharedPreferences}.</p>
+
+<p>Pass the keys and values you want to write with methods such as {@link
+android.content.SharedPreferences.Editor#putInt putInt()} and {@link
+android.content.SharedPreferences.Editor#putString putString()}. Then call {@link
+android.content.SharedPreferences.Editor#commit} to save the changes. For example:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+SharedPreferences.Editor editor = sharedPref.edit();
+editor.putInt(getString(R.string.saved_high_score), newHighScore);
+editor.commit();
+</pre>
+
+
+<h2 id="ReadSharedPreference">Read from Shared Preferences</h2>
+
+<p>To retrieve values from a shared preferences file, call methods such as {@link
+android.content.SharedPreferences#getInt getInt()} and {@link
+android.content.SharedPreferences#getString getString()}, providing the key for the value
+you want, and optionally a default value to return if the key isn't
+present. For example:</p>
+
+<pre>
+SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+long default = getResources().getInteger(R.string.saved_high_score_default));
+long highScore = sharedPref.getInt(getString(R.string.saved_high_score), default);
+</pre>
+
