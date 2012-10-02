@@ -1094,18 +1094,22 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Aan:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer die vereiste PIN in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Die telefoon sal tydelik van Wi-Fi ontkoppel terwyl dit aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gekoppel is"</string>
+    <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Die foon sal tydelik van Wi-Fi ontkoppel terwyl dit aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gekoppel is"</string>
     <string name="select_character" msgid="3365550120617701745">"Voeg karakter in"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Stuur SMS-boodskappe"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; stuur \'n groot aantal SMS-boodskappe. Wil jy hierdie program toelaat om voort te gaan om boodskappe te stuur?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Laat toe"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Weier"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil \'n boodskap na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; stuur."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Dit kan onkoste op jou selfoonrekening veroorsaak."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Dit sal onkoste op jou selfoonrekening veroorsaak."</string>
+    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Stuur"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Kanselleer"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Onthou my keuse"</string>
+    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
+    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Laat altyd toe"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Moet nooit toelaat nie"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kaart verwyder"</string>
@@ -1365,11 +1369,20 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Foon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Oorfone"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dokluidsprekers"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-klank"</string>
+    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Stelsel"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-oudio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Klaar"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Media-uitvoer"</string>
+    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
+    <skip />
+    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
+    <skip />
+    <!-- no translation found for media_route_status_available (6983258067194649391) -->
+    <skip />
+    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
+    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Ingeboude skerm"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Oorlegger #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1397,21 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Voer SIM-PIN in"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Voer PIN in"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Voer wagwoord in"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-kode"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nuwe PIN-kode"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
+    <skip />
+    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <skip />
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ontsluit tans SIM-kaart…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Verkeerde PIN-kode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Tik \'n PIN in wat 4 tot 8 syfers lank is."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Tik \'n PUK in wat 8 syfers of meer is."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Voer PUK en nuwe PIN-kode in"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"Jy het die verkeerde PUK getik."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <skip />
+    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <skip />
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogings"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Om te ontsluit, meld met jou Google-rekening aan."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Gebruikernaam (e-pos)"</string>
@@ -1399,7 +1419,8 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Meld aan"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ongeldige gebruikernaam of wagwoord."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Kontroleer tans..."</string>
+    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <skip />
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
