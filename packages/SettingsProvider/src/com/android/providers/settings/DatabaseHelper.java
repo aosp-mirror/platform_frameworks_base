@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 90;
+    private static final int DATABASE_VERSION = 91;
 
     private Context mContext;
     private int mUserHandle;
@@ -1400,6 +1400,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 90;
         }
 
+        if (upgradeVersion == 90) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    String[] systemToGlobal = {
+                            Settings.Global.WINDOW_ANIMATION_SCALE,
+                            Settings.Global.TRANSITION_ANIMATION_SCALE,
+                            Settings.Global.ANIMATOR_DURATION_SCALE,
+                            Settings.Global.FANCY_IME_ANIMATIONS,
+                            Settings.Global.COMPATIBILITY_MODE,
+                            Settings.Global.EMERGENCY_TONE,
+                            Settings.Global.CALL_AUTO_RETRY,
+                            Settings.Global.DEBUG_APP,
+                            Settings.Global.WAIT_FOR_DEBUGGER,
+                            Settings.Global.SHOW_PROCESSES,
+                            Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                    };
+                    String[] secureToGlobal = {
+                            Settings.Global.PREFERRED_NETWORK_MODE,
+                            Settings.Global.PREFERRED_CDMA_SUBSCRIPTION,
+                    };
+
+                    moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, systemToGlobal, true);
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, secureToGlobal, true);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 91;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1816,12 +1849,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
                     R.integer.def_screen_off_timeout);
 
-            // Set default cdma emergency tone
-            loadSetting(stmt, Settings.System.EMERGENCY_TONE, 0);
-
-            // Set default cdma call auto retry
-            loadSetting(stmt, Settings.System.CALL_AUTO_RETRY, 0);
-
             // Set default cdma DTMF type
             loadSetting(stmt, Settings.System.DTMF_TONE_TYPE_WHEN_DIALING, 0);
 
@@ -1846,9 +1873,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
                     R.bool.def_notification_pulse);
-            loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
-            loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
-                    PackageHelper.APP_INSTALL_AUTO);
 
             loadUISoundEffectsSettings(stmt);
 
@@ -1911,16 +1935,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (!TextUtils.isEmpty(wifiWatchList)) {
                 loadSetting(stmt, Settings.Secure.WIFI_WATCHDOG_WATCH_LIST, wifiWatchList);
             }
-
-            // Set the preferred network mode to 0 = Global, CDMA default
-            int type;
-            if (TelephonyManager.getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
-                type = Phone.NT_MODE_GLOBAL;
-            } else {
-                type = SystemProperties.getInt("ro.telephony.default_network",
-                        RILConstants.PREFERRED_NETWORK_MODE);
-            }
-            loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
 
             // Don't do this.  The SystemServer will initialize ADB_ENABLED from a
             // persistent system property instead.
@@ -2104,6 +2118,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadStringSetting(stmt, Settings.Global.UNLOCK_SOUND,
                     R.string.def_unlock_sound);
+
+            loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
+            loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
+                    PackageHelper.APP_INSTALL_AUTO);
+
+            // Set default cdma emergency tone
+            loadSetting(stmt, Settings.Global.EMERGENCY_TONE, 0);
+
+            // Set default cdma call auto retry
+            loadSetting(stmt, Settings.Global.CALL_AUTO_RETRY, 0);
+
+            // Set the preferred network mode to 0 = Global, CDMA default
+            int type;
+            if (TelephonyManager.getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
+                type = Phone.NT_MODE_GLOBAL;
+            } else {
+                type = SystemProperties.getInt("ro.telephony.default_network",
+                        RILConstants.PREFERRED_NETWORK_MODE);
+            }
+            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, type);
 
             // --- New global settings start here
         } finally {

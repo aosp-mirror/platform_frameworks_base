@@ -183,8 +183,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 com.android.internal.R.integer.config_longAnimTime);
         mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mMultiTapDistanceSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
-        mWindowAnimationScale = Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.WINDOW_ANIMATION_SCALE, DEFAULT_WINDOW_ANIMATION_SCALE);
+        mWindowAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
+                Settings.Global.WINDOW_ANIMATION_SCALE, DEFAULT_WINDOW_ANIMATION_SCALE);
 
         mMagnificationController = new MagnificationController(mShortAnimationDuration);
         mDisplayProvider = new DisplayProvider(context, mWindowManager);
