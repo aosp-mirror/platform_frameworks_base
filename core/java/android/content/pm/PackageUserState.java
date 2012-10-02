@@ -34,14 +34,6 @@ public class PackageUserState {
     public HashSet<String> enabledComponents;
 
     public PackageUserState() {
-        this(true);
-    }
-
-    /** @hide */
-    public PackageUserState(boolean isSystem) {
-        if (!isSystem) {
-            stopped = notLaunched = true;
-        }
         installed = true;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
     }
