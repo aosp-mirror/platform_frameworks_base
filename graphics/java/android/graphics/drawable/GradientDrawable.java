@@ -513,7 +513,10 @@ public class GradientDrawable extends Drawable {
                         canvas.drawRoundRect(mRect, rad, rad, mStrokePaint);
                     }
                 } else {
-                    canvas.drawRect(mRect, mFillPaint);
+                    if (mFillPaint.getColor() != 0 || mColorFilter != null ||
+                            mFillPaint.getShader() != null) {
+                        canvas.drawRect(mRect, mFillPaint);
+                    }
                     if (haveStroke) {
                         canvas.drawRect(mRect, mStrokePaint);
                     }
@@ -1251,6 +1254,11 @@ public class GradientDrawable extends Drawable {
     private void initializeWithState(GradientState state) {
         if (state.mHasSolidColor) {
             mFillPaint.setColor(state.mSolidColor);
+        } else if (state.mColors == null) {
+            // If we don't have a solid color and we don't have a gradient,
+            // the app is stroking the shape, set the color to the default
+            // value of state.mSolidColor
+            mFillPaint.setColor(0);
         }
         mPadding = state.mPadding;
         if (state.mStrokeWidth >= 0) {
