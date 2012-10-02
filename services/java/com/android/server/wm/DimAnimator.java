@@ -30,37 +30,37 @@ import java.io.PrintWriter;
  * all state used for dim animation.
  */
 class DimAnimator {
+    static final String TAG = "DimAnimator";
+
     Surface mDimSurface;
     boolean mDimShown = false;
     float mDimCurrentAlpha;
     float mDimTargetAlpha;
     float mDimDeltaPerMs;
     long mLastDimAnimTime;
-    
+
     int mLastDimWidth, mLastDimHeight;
 
     DimAnimator (SurfaceSession session, final int layerStack) {
-        if (mDimSurface == null) {
-            try {
-                if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                    mDimSurface = new WindowStateAnimator.SurfaceTrace(session,
-                        "DimAnimator",
-                        16, 16, PixelFormat.OPAQUE,
-                        Surface.FX_SURFACE_DIM | Surface.HIDDEN);
-                } else {
-                    mDimSurface = new Surface(session, "DimAnimator",
-                        16, 16, PixelFormat.OPAQUE,
-                        Surface.FX_SURFACE_DIM | Surface.HIDDEN);
-                }
-                if (WindowManagerService.SHOW_TRANSACTIONS ||
-                        WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
-                                "  DIM " + mDimSurface + ": CREATE");
-                mDimSurface.setLayerStack(layerStack);
-                mDimSurface.setAlpha(0.0f);
-                mDimSurface.show();
-            } catch (Exception e) {
-                Slog.e(WindowManagerService.TAG, "Exception creating Dim surface", e);
+        try {
+            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+                mDimSurface = new WindowStateAnimator.SurfaceTrace(session,
+                    "DimAnimator",
+                    16, 16, PixelFormat.OPAQUE,
+                    Surface.FX_SURFACE_DIM | Surface.HIDDEN);
+            } else {
+                mDimSurface = new Surface(session, "DimAnimator",
+                    16, 16, PixelFormat.OPAQUE,
+                    Surface.FX_SURFACE_DIM | Surface.HIDDEN);
             }
+            if (WindowManagerService.SHOW_TRANSACTIONS ||
+                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                            "  DIM " + mDimSurface + ": CREATE");
+            mDimSurface.setLayerStack(layerStack);
+            mDimSurface.setAlpha(0.0f);
+            mDimSurface.show();
+        } catch (Exception e) {
+            Slog.e(WindowManagerService.TAG, "Exception creating Dim surface", e);
         }
     }
 
@@ -69,6 +69,11 @@ class DimAnimator {
      * {@link #updateSurface} after all windows are examined.
      */
     void updateParameters(final Resources res, final Parameters params, final long currentTime) {
+        if (mDimSurface == null) {
+            Slog.e(TAG, "updateParameters: no Surface");
+            return;
+        }
+
         // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose a
         // corner.
         final int dw = (int) (params.mDimWidth * 1.5);
@@ -133,6 +138,11 @@ class DimAnimator {
      * false when the animation is finished and the dim surface is hidden.
      */
     boolean updateSurface(boolean dimming, long currentTime, boolean displayFrozen) {
+        if (mDimSurface == null) {
+            Slog.e(TAG, "updateSurface: no Surface");
+            return false;
+        }
+
         if (!dimming) {
             if (mDimTargetAlpha != 0) {
                 mLastDimAnimTime = currentTime;
@@ -185,6 +195,13 @@ class DimAnimator {
             }
         }
         return animating;
+    }
+
+    public void kill() {
+        if (mDimSurface != null) {
+            mDimSurface.destroy();
+            mDimSurface = null;
+        }
     }
 
     public void printTo(String prefix, PrintWriter pw) {
