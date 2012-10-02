@@ -77,20 +77,15 @@ public:
     TextLayoutCacheKey(const TextLayoutCacheKey& other);
 
     /**
-     * We need to copy the text when we insert the key into the cache itself.
-     * We don't need to copy the text when we are only comparing keys.
-     */
-    void internalTextCopy();
-
-    /**
      * Get the size of the Cache key.
      */
     size_t getSize() const;
 
     static int compare(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs);
 
+    inline const UChar* getText() const { return textCopy.string(); }
+
 private:
-    const UChar* text; // if text is NULL, use textCopy
     String16 textCopy;
     size_t start;
     size_t count;
@@ -104,8 +99,6 @@ private:
     SkPaint::Hinting hinting;
     SkPaint::FontVariant variant;
     SkLanguage language;
-
-    inline const UChar* getText() const { return text ? text : textCopy.string(); }
 
 }; // TextLayoutCacheKey
 
@@ -316,6 +309,12 @@ public:
     TextLayoutEngine();
     virtual ~TextLayoutEngine();
 
+    /**
+     * Note: this method currently does a defensive copy of the text argument, in case
+     * there is concurrent mutation of it. The contract may change, and may in the
+     * future require the caller to guarantee that the contents will not change during
+     * the call. Be careful of this when doing optimization.
+     **/
     sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
             jint count, jint contextCount, jint dirFlags);
 
