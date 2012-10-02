@@ -275,7 +275,8 @@ class QuickSettings {
         timeTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_DATE_SETTINGS);
+                // Quick. Clock. Quick. Clock. Quick. Clock.
+                startSettingsActivity(Intent.ACTION_QUICK_CLOCK);
             }
         });
         mModel.addTimeTile(timeTile, new QuickSettingsModel.RefreshCallback() {
