@@ -2440,16 +2440,33 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     return drawShape(left, top, texture, paint);
 }
 
+// See SkPaintDefaults.h
+#define SkPaintDefaults_MiterLimit SkIntToScalar(4)
+
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
     if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
         return DrawGlInfo::kStatusDone;
     }
 
-    // only fill style is supported by drawConvexPath, since others have to handle joins
     if (p->getStyle() != SkPaint::kFill_Style) {
-        mCaches.activeTexture(0);
-        const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, p);
-        return drawShape(left, top, texture, p);
+        // only fill style is supported by drawConvexPath, since others have to handle joins
+        if (p->getPathEffect() != 0 || p->getStrokeJoin() != SkPaint::kMiter_Join ||
+                p->getStrokeMiter() != SkPaintDefaults_MiterLimit) {
+            mCaches.activeTexture(0);
+            const PathTexture* texture =
+                    mCaches.rectShapeCache.getRect(right - left, bottom - top, p);
+            return drawShape(left, top, texture, p);
+        }
+
+        SkPath path;
+        SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+        if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+            rect.outset(p->getStrokeWidth() / 2, p->getStrokeWidth() / 2);
+        }
+        path.addRect(rect);
+        drawConvexPath(path, p);
+
+        return DrawGlInfo::kStatusDrew;
     }
 
     if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
