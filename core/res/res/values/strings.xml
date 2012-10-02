@@ -3934,6 +3934,6 @@
     <!-- Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none] -->
     <string name="enable_accessibility_canceled">Enable accessibility canceled.</string>
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
-    <string name="user_switched">Switched to user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
+    <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
 
 </resources>
