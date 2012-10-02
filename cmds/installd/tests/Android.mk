@@ -18,13 +18,7 @@ static_libraries := \
     libgtest_main
 
 c_includes := \
-    frameworks/base/cmds/installd \
-    bionic \
-    bionic/libstdc++/include \
-    external/gtest/include \
-    external/stlport/stlport
-
-module_tags := eng tests
+    frameworks/base/cmds/installd
 
 $(foreach file,$(test_src_files), \
     $(eval include $(CLEAR_VARS)) \
@@ -33,6 +27,5 @@ $(foreach file,$(test_src_files), \
     $(eval LOCAL_SRC_FILES := $(file)) \
     $(eval LOCAL_C_INCLUDES := $(c_includes)) \
     $(eval LOCAL_MODULE := $(notdir $(file:%.cpp=%))) \
-    $(eval LOCAL_MODULE_TAGS := $(module_tags)) \
-    $(eval include $(BUILD_EXECUTABLE)) \
+    $(eval include $(BUILD_NATIVE_TEST)) \
 )
