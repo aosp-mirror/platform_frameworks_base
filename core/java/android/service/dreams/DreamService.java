@@ -47,24 +47,30 @@ import com.android.internal.policy.PolicyManager;
  *
  * <p>Dreams should be declared in the manifest as follows:</p>
  * <pre>
- * {@code
- * <service
+ * &lt;service
  *     android:name=".MyDream"
  *     android:exported="true"
  *     android:icon="@drawable/my_icon"
  *     android:label="@string/my_dream_label" >
  *
- *     <intent-filter>
- *         <action android:name="android.intent.action.MAIN" />
- *         <category android:name="android.intent.category.DREAM" />
- *     </intent-filter>
+ *     &lt;intent-filter>
+ *         &lt;action android:name="android.service.dreams.DreamService" />
+ *         &lt;category android:name="android.intent.category.DEFAULT" />
+ *     &lt;/intent-filter>
  *
- *     <!-- Point to additional information for this dream (optional) -->
- *     <meta-data
+ *     &lt;!-- Point to additional information for this dream (optional) -->
+ *     &lt;meta-data
  *         android:name="android.service.dream"
  *         android:resource="@xml/my_dream" />
- * </service>
- * }
+ * &lt;/service>
+ * </pre>
+ * <p>If specified, additional information for the dream is defined using the
+ * <code>&lt;{@link android.R.styleable#Dream dream}&gt;</code> element.  For example:</p>
+ * <pre>
+ * (in res/xml/my_dream.xml)
+ *
+ * &lt;dream xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:settingsActivity="com.example.app/.MyDreamSettingsActivity" />
  * </pre>
  */
 public class DreamService extends Service implements Window.Callback {
