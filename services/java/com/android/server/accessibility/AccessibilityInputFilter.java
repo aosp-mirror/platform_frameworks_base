@@ -119,13 +119,16 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mCurrentDeviceId = deviceId;
         }
         mPm.userActivity(event.getEventTime(), false);
-        MotionEvent motionEvent = (MotionEvent) event;
-        mEventHandler.onMotionEvent(motionEvent, policyFlags);
+        MotionEvent rawEvent = (MotionEvent) event;
+        MotionEvent transformedEvent = MotionEvent.obtain(rawEvent);
+        mEventHandler.onMotionEvent(transformedEvent, rawEvent, policyFlags);
+        transformedEvent.recycle();
     }
 
     @Override
-    public void onMotionEvent(MotionEvent event, int policyFlags) {
-        sendInputEvent(event, policyFlags);
+    public void onMotionEvent(MotionEvent transformedEvent, MotionEvent rawEvent,
+            int policyFlags) {
+        sendInputEvent(transformedEvent, policyFlags);
     }
 
     @Override

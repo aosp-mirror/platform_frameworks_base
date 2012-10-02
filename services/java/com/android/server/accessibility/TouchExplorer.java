@@ -162,7 +162,7 @@ class TouchExplorer implements EventStreamTransformation {
     private EventStreamTransformation mNext;
 
     // Helper to track gesture velocity.
-    private VelocityTracker mVelocityTracker;
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
 
     // Helper class to track received pointers.
     private final ReceivedPointerTracker mReceivedPointerTracker;
@@ -309,18 +309,18 @@ class TouchExplorer implements EventStreamTransformation {
     }
 
     @Override
-    public void onMotionEvent(MotionEvent event, int policyFlags) {
+    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (DEBUG) {
             Slog.d(LOG_TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
             Slog.d(LOG_TAG, getStateSymbolicName(mCurrentState));
         }
 
-        mReceivedPointerTracker.onMotionEvent(event);
+        mReceivedPointerTracker.onMotionEvent(rawEvent);
 
         switch(mCurrentState) {
             case STATE_TOUCH_EXPLORING: {
-                handleMotionEventStateTouchExploring(event, policyFlags);
+                handleMotionEventStateTouchExploring(event, rawEvent, policyFlags);
             } break;
             case STATE_DRAGGING: {
                 handleMotionEventStateDragging(event, policyFlags);
@@ -329,7 +329,7 @@ class TouchExplorer implements EventStreamTransformation {
                 handleMotionEventStateDelegating(event, policyFlags);
             } break;
             case STATE_GESTURE_DETECTING: {
-                handleMotionEventGestureDetecting(event, policyFlags);
+                handleMotionEventGestureDetecting(rawEvent, policyFlags);
             } break;
             default:
                 throw new IllegalStateException("Illegal state: " + mCurrentState);
@@ -382,16 +382,15 @@ class TouchExplorer implements EventStreamTransformation {
      * Handles a motion event in touch exploring state.
      *
      * @param event The event to be handled.
+     * @param rawEvent The raw (unmodified) motion event.
      * @param policyFlags The policy flags associated with the event.
      */
-    private void handleMotionEventStateTouchExploring(MotionEvent event, int policyFlags) {
+    private void handleMotionEventStateTouchExploring(MotionEvent event, MotionEvent rawEvent,
+            int policyFlags) {
         ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
         final int activePointerCount = receivedTracker.getActivePointerCount();
 
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
-        mVelocityTracker.addMovement(event);
+        mVelocityTracker.addMovement(rawEvent);
 
         mDoubleTapDetector.onMotionEvent(event, policyFlags);
 
@@ -410,7 +409,7 @@ class TouchExplorer implements EventStreamTransformation {
                 // have a distance slop before getting into gesture detection
                 // mode and not using the points within this slop significantly
                 // decreases the quality of gesture recognition.
-                handleMotionEventGestureDetecting(event, policyFlags);
+                handleMotionEventGestureDetecting(rawEvent, policyFlags);
                 //$FALL-THROUGH$
             case MotionEvent.ACTION_POINTER_DOWN: {
                 switch (activePointerCount) {
@@ -471,12 +470,13 @@ class TouchExplorer implements EventStreamTransformation {
                             // have a distance slop before getting into gesture detection
                             // mode and not using the points within this slop significantly
                             // decreases the quality of gesture recognition.
-                            handleMotionEventGestureDetecting(event, policyFlags);
-
+                            handleMotionEventGestureDetecting(rawEvent, policyFlags);
+                            // It is *important* to use the distance traveled by the pointers
+                            // on the screen which may or may not be magnified.
                             final float deltaX = receivedTracker.getReceivedPointerDownX(pointerId)
-                                - event.getX(pointerIndex);
+                                - rawEvent.getX(pointerIndex);
                             final float deltaY = receivedTracker.getReceivedPointerDownY(pointerId)
-                                - event.getY(pointerIndex);
+                                - rawEvent.getY(pointerIndex);
                             final double moveDelta = Math.hypot(deltaX, deltaY);
                             // The user has moved enough for us to decide.
                             if (moveDelta > mDoubleTapSlop) {
@@ -491,6 +491,7 @@ class TouchExplorer implements EventStreamTransformation {
                                     // We have to perform gesture detection, so
                                     // clear the current state and try to detect.
                                     mCurrentState = STATE_GESTURE_DETECTING;
+                                    mVelocityTracker.clear();
                                     mSendHoverEnterDelayed.remove();
                                     mSendHoverExitDelayed.remove();
                                     mPerformLongPressDelayed.remove();
@@ -535,10 +536,12 @@ class TouchExplorer implements EventStreamTransformation {
                             // If the user is touch exploring the second pointer may be
                             // performing a double tap to activate an item without need
                             // for the user to lift his exploring finger.
+                            // It is *important* to use the distance traveled by the pointers
+                            // on the screen which may or may not be magnified.
                             final float deltaX = receivedTracker.getReceivedPointerDownX(pointerId)
-                                    - event.getX(pointerIndex);
+                                    - rawEvent.getX(pointerIndex);
                             final float deltaY = receivedTracker.getReceivedPointerDownY(pointerId)
-                                    - event.getY(pointerIndex);
+                                    - rawEvent.getY(pointerIndex);
                             final double moveDelta = Math.hypot(deltaX, deltaY);
                             if (moveDelta < mDoubleTapSlop) {
                                 break;
@@ -565,6 +568,7 @@ class TouchExplorer implements EventStreamTransformation {
                             mCurrentState = STATE_DELEGATING;
                             sendDownForAllActiveNotInjectedPointers(event, policyFlags);
                         }
+                        mVelocityTracker.clear();
                     } break;
                     default: {
                         // More than one pointer so the user is not touch exploring
@@ -585,6 +589,7 @@ class TouchExplorer implements EventStreamTransformation {
                         // More than two pointers are delegated to the view hierarchy.
                         mCurrentState = STATE_DELEGATING;
                         sendDownForAllActiveNotInjectedPointers(event, policyFlags);
+                        mVelocityTracker.clear();
                     }
                 }
             } break;
@@ -615,10 +620,7 @@ class TouchExplorer implements EventStreamTransformation {
                         }
                     } break;
                 }
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.clear();
-                    mVelocityTracker = null;
-                }
+                mVelocityTracker.clear();
             } break;
             case MotionEvent.ACTION_CANCEL: {
                 clear(event, policyFlags);
@@ -1046,7 +1048,10 @@ class TouchExplorer implements EventStreamTransformation {
         // Make sure that the user will see the event.
         policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
         if (mNext != null) {
-            mNext.onMotionEvent(event, policyFlags);
+            // TODO: For now pass null for the raw event since the touch
+            //       explorer is the last event transformation and it does
+            //       not care about the raw event.
+            mNext.onMotionEvent(event, null, policyFlags);
         }
 
         mInjectedPointerTracker.onMotionEvent(event);

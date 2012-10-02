@@ -57,12 +57,15 @@ import android.view.accessibility.AccessibilityEvent;
 interface EventStreamTransformation {
 
     /**
-     * Receives a motion event.
+     * Receives motion event. Passed are the event transformed by previous
+     * transformations and the raw event to which no transformations have
+     * been applied.
      *
-     * @param event The motion event.
+     * @param event The transformed motion event.
+     * @param rawEvent The raw motion event.
      * @param policyFlags Policy flags for the event.
      */
-    public void onMotionEvent(MotionEvent event, int policyFlags);
+    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
     /**
      * Receives an accessibility event.
