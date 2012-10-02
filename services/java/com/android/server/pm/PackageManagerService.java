@@ -851,7 +851,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, args.packageURI,
-                                    PackageManager.VERIFICATION_ALLOW);
+                                    PackageManager.VERIFICATION_ALLOW,
+                                    state.getInstallArgs().getUser());
                             try {
                                 ret = args.copyApk(mContainerService, true);
                             } catch (RemoteException e) {
@@ -859,7 +860,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             }
                         } else {
                             broadcastPackageVerified(verificationId, args.packageURI,
-                                    PackageManager.VERIFICATION_REJECT);
+                                    PackageManager.VERIFICATION_REJECT,
+                                    state.getInstallArgs().getUser());
                         }
 
                         processPendingInstall(args, ret);
@@ -889,7 +891,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (state.isInstallAllowed()) {
                             ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                             broadcastPackageVerified(verificationId, args.packageURI,
-                                    response.code);
+                                    response.code, state.getInstallArgs().getUser());
                             try {
                                 ret = args.copyApk(mContainerService, true);
                             } catch (RemoteException e) {
@@ -5741,14 +5743,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void broadcastPackageVerified(int verificationId, Uri packageUri,
-            int verificationCode) {
+            int verificationCode, UserHandle user) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_VERIFIED);
         intent.setDataAndType(packageUri, PACKAGE_MIME_TYPE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
         intent.putExtra(PackageManager.EXTRA_VERIFICATION_RESULT, verificationCode);
 
-        mContext.sendBroadcast(intent, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+        mContext.sendBroadcastAsUser(intent, user,
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
     }
 
     private ComponentName matchComponentForVerifier(String packageName,
@@ -6477,7 +6480,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 final Intent sufficientIntent = new Intent(verification);
                                 sufficientIntent.setComponent(verifierComponent);
 
-                                mContext.sendBroadcast(sufficientIntent);
+                                mContext.sendBroadcastAsUser(sufficientIntent, getUser());
                             }
                         }
                     }
@@ -6492,7 +6495,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * target BroadcastReceivers have run.
                          */
                         verification.setComponent(requiredVerifierComponent);
-                        mContext.sendOrderedBroadcast(verification,
+                        mContext.sendOrderedBroadcastAsUser(verification, getUser(),
                                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                                 new BroadcastReceiver() {
                                     @Override
@@ -6778,6 +6781,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         protected boolean isFwdLocked() {
             return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+        }
+
+        UserHandle getUser() {
+            return user;
         }
     }
 
