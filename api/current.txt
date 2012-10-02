@@ -23719,6 +23719,7 @@ package android.view {
   public final class Display {
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method public int getDisplayId();
+    method public int getFlags();
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
     method public java.lang.String getName();
@@ -23733,6 +23734,7 @@ package android.view {
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
+    field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
   }
 
   public class DragEvent implements android.os.Parcelable {

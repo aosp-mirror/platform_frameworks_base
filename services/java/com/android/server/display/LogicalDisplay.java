@@ -179,8 +179,8 @@ final class LogicalDisplay {
         if (!Objects.equal(mPrimaryDisplayDeviceInfo, deviceInfo)) {
             mBaseDisplayInfo.layerStack = mLayerStack;
             mBaseDisplayInfo.flags = 0;
-            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT) != 0) {
-                mBaseDisplayInfo.flags |= Display.FLAG_SUPPORTS_SECURE_VIDEO_OUTPUT;
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_SUPPORTS_PROTECTED_BUFFERS;
             }
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.appWidth = deviceInfo.width;
