@@ -83,7 +83,11 @@ public class PanelBar extends FrameLayout {
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             final PanelView panel = selectPanelForTouchX(event.getX());
-            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s", mState, panel);
+            boolean enabled = panel.isEnabled();
+            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
+                    (enabled ? "" : " (disabled)"));
+            if (!enabled)
+                return false;
             startOpeningPanel(panel);
         }
         final boolean result = mTouchingPanel.getHandle().dispatchTouchEvent(event);
