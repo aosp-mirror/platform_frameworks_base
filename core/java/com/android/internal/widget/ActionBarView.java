@@ -556,12 +556,16 @@ public class ActionBarView extends AbsActionBarView {
         // Make sure the home button has an accurate content description for accessibility.
         if (!enable) {
             mHomeLayout.setContentDescription(null);
-        } else if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            mHomeLayout.setContentDescription(mContext.getResources().getText(
-                    R.string.action_bar_up_description));
+            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
-            mHomeLayout.setContentDescription(mContext.getResources().getText(
-                    R.string.action_bar_home_description));
+            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+                mHomeLayout.setContentDescription(mContext.getResources().getText(
+                        R.string.action_bar_up_description));
+            } else {
+                mHomeLayout.setContentDescription(mContext.getResources().getText(
+                        R.string.action_bar_home_description));
+            }
         }
     }
 
@@ -624,12 +628,16 @@ public class ActionBarView extends AbsActionBarView {
         // Make sure the home button has an accurate content description for accessibility.
         if (!mHomeLayout.isEnabled()) {
             mHomeLayout.setContentDescription(null);
-        } else if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            mHomeLayout.setContentDescription(mContext.getResources().getText(
-                    R.string.action_bar_up_description));
+            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         } else {
-            mHomeLayout.setContentDescription(mContext.getResources().getText(
-                    R.string.action_bar_home_description));
+            mHomeLayout.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+                mHomeLayout.setContentDescription(mContext.getResources().getText(
+                        R.string.action_bar_up_description));
+            } else {
+                mHomeLayout.setContentDescription(mContext.getResources().getText(
+                        R.string.action_bar_home_description));
+            }
         }
     }
 
