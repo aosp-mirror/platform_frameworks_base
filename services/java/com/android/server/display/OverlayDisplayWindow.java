@@ -29,7 +29,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
@@ -146,6 +145,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         }
     }
 
+    @Override
     public void dump(PrintWriter pw) {
         pw.println("mWindowVisible=" + mWindowVisible);
         pw.println("mWindowX=" + mWindowX);
@@ -291,8 +291,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture,
                 int width, int height) {
-            mListener.onWindowCreated(new Surface(surfaceTexture),
-                    mDefaultDisplayInfo.refreshRate);
+            mListener.onWindowCreated(surfaceTexture, mDefaultDisplayInfo.refreshRate);
         }
 
         @Override
@@ -361,7 +360,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
      * Watches for significant changes in the overlay display window lifecycle.
      */
     public interface Listener {
-        public void onWindowCreated(Surface surface, float refreshRate);
+        public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate);
         public void onWindowDestroyed();
     }
 }

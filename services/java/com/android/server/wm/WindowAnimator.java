@@ -147,6 +147,22 @@ public class WindowAnimator {
     }
 
     void removeDisplayLocked(final int displayId) {
+        final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
+        if (displayAnimator != null) {
+            if (displayAnimator.mWindowAnimationBackgroundSurface != null) {
+                displayAnimator.mWindowAnimationBackgroundSurface.kill();
+                displayAnimator.mWindowAnimationBackgroundSurface = null;
+            }
+            if (displayAnimator.mScreenRotationAnimation != null) {
+                displayAnimator.mScreenRotationAnimation.kill();
+                displayAnimator.mScreenRotationAnimation = null;
+            }
+            if (displayAnimator.mDimAnimator != null) {
+                displayAnimator.mDimAnimator.kill();
+                displayAnimator.mDimAnimator = null;
+            }
+        }
+
         mDisplayContentsAnimators.delete(displayId);
     }
 
@@ -527,11 +543,15 @@ public class WindowAnimator {
                 }
             }
 
-            windowAnimationBackgroundSurface.show(mDw, mDh,
-                    animLayer - WindowManagerService.LAYER_OFFSET_DIM,
-                    windowAnimationBackgroundColor);
+            if (windowAnimationBackgroundSurface != null) {
+                windowAnimationBackgroundSurface.show(mDw, mDh,
+                        animLayer - WindowManagerService.LAYER_OFFSET_DIM,
+                        windowAnimationBackgroundColor);
+            }
         } else {
-            windowAnimationBackgroundSurface.hide();
+            if (windowAnimationBackgroundSurface != null) {
+                windowAnimationBackgroundSurface.hide();
+            }
         }
     }
 
@@ -643,9 +663,8 @@ public class WindowAnimator {
 
                 final DimAnimator.Parameters dimParams = displayAnimator.mDimParams;
                 final DimAnimator dimAnimator = displayAnimator.mDimAnimator;
-                if (dimParams != null) {
-                    dimAnimator.updateParameters(
-                            mContext.getResources(), dimParams, mCurrentTime);
+                if (dimAnimator != null && dimParams != null) {
+                    dimAnimator.updateParameters(mContext.getResources(), dimParams, mCurrentTime);
                 }
                 if (dimAnimator != null && dimAnimator.mDimShown) {
                     mAnimating |= dimAnimator.updateSurface(isDimmingLocked(displayId),
@@ -801,9 +820,9 @@ public class WindowAnimator {
 
     private class DisplayContentsAnimator {
         WinAnimatorList mWinAnimators = new WinAnimatorList();
-        final DimAnimator mDimAnimator;
+        DimAnimator mDimAnimator = null;
         DimAnimator.Parameters mDimParams = null;
-        final DimSurface mWindowAnimationBackgroundSurface;
+        DimSurface mWindowAnimationBackgroundSurface = null;
         ScreenRotationAnimation mScreenRotationAnimation = null;
 
         public DisplayContentsAnimator(int displayId) {
