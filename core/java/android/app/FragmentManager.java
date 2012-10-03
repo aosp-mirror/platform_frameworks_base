@@ -318,6 +318,12 @@ public abstract class FragmentManager {
     public abstract Fragment.SavedState saveFragmentInstanceState(Fragment f);
 
     /**
+     * Returns true if the final {@link Activity#onDestroy() Activity.onDestroy()}
+     * call has been made on the FragmentManager's Activity, so this instance is now dead.
+     */
+    public abstract boolean isDestroyed();
+
+    /**
      * Print the FragmentManager's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.
@@ -585,6 +591,11 @@ final class FragmentManagerImpl extends FragmentManager {
             return result != null ? new Fragment.SavedState(result) : null;
         }
         return null;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return mDestroyed;
     }
 
     @Override
