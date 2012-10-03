@@ -21,14 +21,16 @@ public class PanelBar extends FrameLayout {
     public static final int STATE_OPENING = 1;
     public static final int STATE_OPEN = 2;
 
-    private PanelHolder mPanelHolder;
-    private ArrayList<PanelView> mPanels = new ArrayList<PanelView>();
-    protected PanelView mTouchingPanel;
+    PanelHolder mPanelHolder;
+    ArrayList<PanelView> mPanels = new ArrayList<PanelView>();
+    PanelView mTouchingPanel;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
 
+    float mPanelExpandedFractionSum;
+
     public void go(int state) {
-        LOG("go state: %d -> %d", mState, state);
+        if (DEBUG) LOG("go state: %d -> %d", mState, state);
         mState = state;
     }
 
@@ -84,7 +86,7 @@ public class PanelBar extends FrameLayout {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             final PanelView panel = selectPanelForTouchX(event.getX());
             boolean enabled = panel.isEnabled();
-            LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
+            if (DEBUG) LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
                     (enabled ? "" : " (disabled)"));
             if (!enabled)
                 return false;
@@ -96,15 +98,21 @@ public class PanelBar extends FrameLayout {
 
     // called from PanelView when self-expanding, too
     public void startOpeningPanel(PanelView panel) {
-        LOG("startOpeningPanel: " + panel);
+        if (DEBUG) LOG("startOpeningPanel: " + panel);
         mTouchingPanel = panel;
         mPanelHolder.setSelectedPanel(mTouchingPanel);
+        for (PanelView pv : mPanels) {
+            if (pv != panel) {
+                pv.collapse();
+            }
+        }
     }
 
     public void panelExpansionChanged(PanelView panel, float frac) {
         boolean fullyClosed = true;
         PanelView fullyOpenedPanel = null;
-        LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
+        if (DEBUG) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
+        mPanelExpandedFractionSum = 0f;
         for (PanelView pv : mPanels) {
             final boolean visible = pv.getVisibility() == View.VISIBLE;
             // adjust any other panels that may be partially visible
@@ -115,11 +123,10 @@ public class PanelBar extends FrameLayout {
                 }
                 fullyClosed = false;
                 final float thisFrac = pv.getExpandedFraction();
-                LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
+                mPanelExpandedFractionSum += (visible ? thisFrac : 0);
+                if (DEBUG) LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
                 if (panel == pv) {
                     if (thisFrac == 1f) fullyOpenedPanel = panel;
-                } else {
-                    pv.setExpandedFraction(1f-frac);
                 }
             }
             if (pv.getExpandedHeight() > 0f) {
@@ -128,6 +135,7 @@ public class PanelBar extends FrameLayout {
                 if (visible) pv.setVisibility(View.GONE);
             }
         }
+        mPanelExpandedFractionSum /= mPanels.size();
         if (fullyOpenedPanel != null && !mTracking) {
             go(STATE_OPEN);
             onPanelFullyOpened(fullyOpenedPanel);
@@ -136,7 +144,7 @@ public class PanelBar extends FrameLayout {
             onAllPanelsCollapsed();
         }
 
-        LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
+        if (DEBUG) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
                 (fullyOpenedPanel!=null)?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
@@ -148,9 +156,10 @@ public class PanelBar extends FrameLayout {
                 waiting = true;
             } else {
                 pv.setExpandedFraction(0); // just in case
+                pv.setVisibility(View.GONE);
             }
-            pv.setVisibility(View.GONE);
         }
+        if (DEBUG) LOG("collapseAllPanels: animate=%s waiting=%s", animate, waiting);
         if (!waiting) {
             // it's possible that nothing animated, so we replicate the termination 
             // conditions of panelExpansionChanged here
@@ -160,20 +169,20 @@ public class PanelBar extends FrameLayout {
     }
 
     public void onPanelPeeked() {
-        LOG("onPanelPeeked");
+        if (DEBUG) LOG("onPanelPeeked");
     }
 
     public void onAllPanelsCollapsed() {
-        LOG("onAllPanelsCollapsed");
+        if (DEBUG) LOG("onAllPanelsCollapsed");
     }
 
     public void onPanelFullyOpened(PanelView openPanel) {
-        LOG("onPanelFullyOpened");
+        if (DEBUG) LOG("onPanelFullyOpened");
     }
 
     public void onTrackingStarted(PanelView panel) {
         mTracking = true;
-        if (panel != mTouchingPanel) {
+        if (DEBUG && panel != mTouchingPanel) {
             LOG("shouldn't happen: onTrackingStarted(%s) != mTouchingPanel(%s)",
                     panel, mTouchingPanel);
         }

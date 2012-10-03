@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 
 public class PanelHolder extends FrameLayout {
 
-    private int mSelectedPanelIndex;
+    private int mSelectedPanelIndex = -1;
     private PanelBar mBar;
 
     public PanelHolder(Context context, AttributeSet attrs) {
@@ -53,6 +53,7 @@ public class PanelHolder extends FrameLayout {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                PanelBar.LOG("PanelHolder got touch in open air, closing panels");
                 mBar.collapseAllPanels(true);
                 break;
         }
