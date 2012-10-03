@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.app.AlertActivity;
@@ -90,7 +91,7 @@ public class UsbAccessoryUriActivity extends AlertActivity
             intent.addCategory(Intent.CATEGORY_BROWSABLE);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             try {
-                startActivity(intent);
+                startActivityAsUser(intent, UserHandle.CURRENT);
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "startActivity failed for " + mUri);
             }

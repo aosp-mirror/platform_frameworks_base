@@ -16,35 +16,19 @@
 
 package com.android.server.usb;
 
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
-import android.hardware.usb.UsbManager;
-import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
-import android.os.UEventObserver;
-import android.provider.Settings;
+import android.os.Parcelable;
 import android.util.Slog;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * UsbHostManager manages USB state in host mode.
@@ -54,20 +38,33 @@ public class UsbHostManager {
     private static final boolean LOG = false;
 
     // contains all connected USB devices
-    private final HashMap<String,UsbDevice> mDevices = new HashMap<String,UsbDevice>();
+    private final HashMap<String, UsbDevice> mDevices = new HashMap<String, UsbDevice>();
 
     // USB busses to exclude from USB host support
     private final String[] mHostBlacklist;
 
     private final Context mContext;
     private final Object mLock = new Object();
-    private final UsbSettingsManager mSettingsManager;
 
-    public UsbHostManager(Context context, UsbSettingsManager settingsManager) {
+    // @GuardedBy("mLock")
+    private UsbSettingsManager mCurrentSettings;
+
+    public UsbHostManager(Context context) {
         mContext = context;
-        mSettingsManager = settingsManager;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
+    }
+
+    public void setCurrentSettings(UsbSettingsManager settings) {
+        synchronized (mLock) {
+            mCurrentSettings = settings;
+        }
+    }
+
+    private UsbSettingsManager getCurrentSettings() {
+        synchronized (mLock) {
+            return mCurrentSettings;
+        }
     }
 
     private boolean isBlackListed(String deviceName) {
@@ -154,7 +151,7 @@ public class UsbHostManager {
             UsbDevice device = new UsbDevice(deviceName, vendorID, productID,
                     deviceClass, deviceSubclass, deviceProtocol, interfaces);
             mDevices.put(deviceName, device);
-            mSettingsManager.deviceAttached(device);
+            getCurrentSettings().deviceAttached(device);
         }
     }
 
@@ -163,7 +160,7 @@ public class UsbHostManager {
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
-                mSettingsManager.deviceDetached(device);
+                getCurrentSettings().deviceDetached(device);
             }
         }
     }
@@ -202,7 +199,7 @@ public class UsbHostManager {
                 throw new IllegalArgumentException(
                         "device " + deviceName + " does not exist or is restricted");
             }
-            mSettingsManager.checkPermission(device);
+            getCurrentSettings().checkPermission(device);
             return nativeOpenDevice(deviceName);
         }
     }

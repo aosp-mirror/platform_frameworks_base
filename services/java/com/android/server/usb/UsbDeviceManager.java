@@ -16,9 +16,9 @@
 
 package com.android.server.usb;
 
-import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -30,23 +30,19 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
-import android.os.Binder;
-import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.UserHandle;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
+import android.os.UserHandle;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.util.Pair;
 import android.util.Slog;
@@ -56,10 +52,9 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -106,9 +101,12 @@ public class UsbDeviceManager {
     private UsbHandler mHandler;
     private boolean mBootCompleted;
 
+    private final Object mLock = new Object();
+
     private final Context mContext;
     private final ContentResolver mContentResolver;
-    private final UsbSettingsManager mSettingsManager;
+    // @GuardedBy("mLock")
+    private UsbSettingsManager mCurrentSettings;
     private NotificationManager mNotificationManager;
     private final boolean mHasUsbAccessory;
     private boolean mUseUsbNotification;
@@ -149,10 +147,9 @@ public class UsbDeviceManager {
         }
     };
 
-    public UsbDeviceManager(Context context, UsbSettingsManager settingsManager) {
+    public UsbDeviceManager(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mSettingsManager = settingsManager;
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
         initRndisAddress();
@@ -172,6 +169,18 @@ public class UsbDeviceManager {
 
         if ("1".equals(SystemProperties.get("ro.adb.secure"))) {
             mDebuggingManager = new UsbDebuggingManager(context);
+        }
+    }
+
+    public void setCurrentSettings(UsbSettingsManager settings) {
+        synchronized (mLock) {
+            mCurrentSettings = settings;
+        }
+    }
+
+    private UsbSettingsManager getCurrentSettings() {
+        synchronized (mLock) {
+            return mCurrentSettings;
         }
     }
 
@@ -516,7 +525,7 @@ public class UsbDeviceManager {
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
-                        mSettingsManager.accessoryAttached(mCurrentAccessory);
+                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     } // else handle in mBootCompletedReceiver
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
@@ -529,7 +538,7 @@ public class UsbDeviceManager {
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
-                        mSettingsManager.accessoryDetached(mCurrentAccessory);
+                        getCurrentSettings().accessoryDetached(mCurrentAccessory);
                     }
                     mCurrentAccessory = null;
                     mAccessoryStrings = null;
@@ -618,7 +627,7 @@ public class UsbDeviceManager {
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
                     if (mCurrentAccessory != null) {
-                        mSettingsManager.accessoryAttached(mCurrentAccessory);
+                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
                     if (mDebuggingManager != null) {
                         mDebuggingManager.setAdbEnabled(mAdbEnabled);
@@ -774,7 +783,7 @@ public class UsbDeviceManager {
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        mSettingsManager.checkPermission(accessory);
+        getCurrentSettings().checkPermission(accessory);
         return nativeOpenAccessory();
     }
 
