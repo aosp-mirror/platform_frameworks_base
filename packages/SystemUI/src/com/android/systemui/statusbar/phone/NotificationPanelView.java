@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.GestureRecorder;
 
 public class NotificationPanelView extends PanelView {
 
@@ -47,9 +48,12 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public void fling(float vel, boolean always) {
-        ((PhoneStatusBarView) mBar).mBar.getGestureRecorder().tag(
-            "fling " + ((vel > 0) ? "open" : "closed"),
-            "notifications,v=" + vel);
+        GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
+        if (gr != null) {
+            gr.tag(
+                "fling " + ((vel > 0) ? "open" : "closed"),
+                "notifications,v=" + vel);
+        }
         super.fling(vel, always);
     }
 

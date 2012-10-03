@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -95,9 +96,12 @@ public class SettingsPanelView extends PanelView {
 
     @Override
     public void fling(float vel, boolean always) {
-        ((PhoneStatusBarView) mBar).mBar.getGestureRecorder().tag(
-            "fling " + ((vel > 0) ? "open" : "closed"),
-            "settings,v=" + vel);
+        GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
+        if (gr != null) {
+            gr.tag(
+                "fling " + ((vel > 0) ? "open" : "closed"),
+                "settings,v=" + vel);
+        }
         super.fling(vel, always);
     }
 
