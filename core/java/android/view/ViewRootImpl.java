@@ -52,7 +52,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -2817,10 +2816,10 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_RESIZED: {
                 // Recycled in the fall through...
                 SomeArgs args = (SomeArgs) msg.obj;
-                if (mWinFrame.equals((Rect) args.arg1)
-                        && mPendingContentInsets.equals((Rect) args.arg2)
-                        && mPendingVisibleInsets.equals((Rect) args.arg3)
-                        && ((Configuration) args.arg4 == null)) {
+                if (mWinFrame.equals(args.arg1)
+                        && mPendingContentInsets.equals(args.arg2)
+                        && mPendingVisibleInsets.equals(args.arg3)
+                        && args.arg4 == null) {
                     break;
                 }
                 } // fall through...
@@ -2882,8 +2881,10 @@ public final class ViewRootImpl implements ViewParent,
                                 mSurface != null && mSurface.isValid()) {
                             mFullRedrawNeeded = true;
                             try {
-                                mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                        mHolder.getSurface());
+                                if (mAttachInfo.mHardwareRenderer.initializeIfNeeded(
+                                        mWidth, mHeight, mHolder.getSurface())) {
+                                    mFullRedrawNeeded = true;
+                                }
                             } catch (Surface.OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {

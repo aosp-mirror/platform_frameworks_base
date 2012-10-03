@@ -20,6 +20,7 @@ import android.graphics.*;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.ViewDebug;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -34,6 +35,7 @@ import java.io.IOException;
  * @attr ref android.R.styleable#ColorDrawable_color
  */
 public class ColorDrawable extends Drawable {
+    @ViewDebug.ExportedProperty(deepExport = true, prefix = "state_")
     private ColorState mState;
     private final Paint mPaint = new Paint();
     private boolean mMutated;
@@ -174,6 +176,7 @@ public class ColorDrawable extends Drawable {
 
     final static class ColorState extends ConstantState {
         int mBaseColor; // base color, independent of setAlpha()
+        @ViewDebug.ExportedProperty
         int mUseColor;  // basecolor modulated by setAlpha()
         int mChangingConfigurations;
 

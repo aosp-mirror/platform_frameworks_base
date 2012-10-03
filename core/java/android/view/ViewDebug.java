@@ -923,8 +923,12 @@ public class ViewDebug {
     private static void dumpViewProperties(Context context, Object view,
             BufferedWriter out, String prefix) throws IOException {
 
-        Class<?> klass = view.getClass();
+        if (view == null) {
+            out.write(prefix + "=4,null ");
+            return;
+        }
 
+        Class<?> klass = view.getClass();
         do {
             exportFields(context, view, out, klass, prefix);
             exportMethods(context, view, out, klass, prefix);
@@ -1064,8 +1068,8 @@ public class ViewDebug {
                     return;
                 } else if (!type.isPrimitive()) {
                     if (property.deepExport()) {
-                        dumpViewProperties(context, field.get(view), out, prefix
-                                + property.prefix());
+                        dumpViewProperties(context, field.get(view), out, prefix +
+                                property.prefix());
                         continue;
                     }
                 }
