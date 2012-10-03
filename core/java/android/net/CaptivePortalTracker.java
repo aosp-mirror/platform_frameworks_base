@@ -330,28 +330,32 @@ public class CaptivePortalTracker extends StateMachine {
         if (visible) {
             CharSequence title;
             CharSequence details;
+            int icon;
             switch (mNetworkInfo.getType()) {
                 case ConnectivityManager.TYPE_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             mNetworkInfo.getExtraInfo());
+                    icon = R.drawable.stat_notify_wifi_in_range;
                     break;
                 case ConnectivityManager.TYPE_MOBILE:
                     title = r.getString(R.string.network_available_sign_in, 0);
                     // TODO: Change this to pull from NetworkInfo once a printable
                     // name has been added to it
                     details = mTelephonyManager.getNetworkOperatorName();
+                    icon = R.drawable.stat_notify_rssi_in_range;
                     break;
                 default:
                     title = r.getString(R.string.network_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             mNetworkInfo.getExtraInfo());
+                    icon = R.drawable.stat_notify_rssi_in_range;
                     break;
             }
 
             Notification notification = new Notification();
             notification.when = 0;
-            notification.icon = com.android.internal.R.drawable.stat_notify_wifi_in_range;
+            notification.icon = icon;
             notification.flags = Notification.FLAG_AUTO_CANCEL;
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUrl));
             intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
