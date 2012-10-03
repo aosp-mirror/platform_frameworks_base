@@ -130,10 +130,21 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
     private static final int MINIMUM_SCREEN_OFF_TIMEOUT = 10 * 1000;
 
-    // The screen dim duration, in seconds.
+    // The screen dim duration, in milliseconds.
     // This is subtracted from the end of the screen off timeout so the
     // minimum screen off timeout should be longer than this.
     private static final int SCREEN_DIM_DURATION = 7 * 1000;
+
+    // The maximum screen dim time expressed as a ratio relative to the screen
+    // off timeout.  If the screen off timeout is very short then we want the
+    // dim timeout to also be quite short so that most of the time is spent on.
+    // Otherwise the user won't get much screen on time before dimming occurs.
+    private static final float MAXIMUM_SCREEN_DIM_RATIO = 0.2f;
+
+    // Upper bound on the battery charge percentage in order to consider turning
+    // the screen on when the device starts charging wirelessly.
+    // See point of use for more details.
+    private static final int WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT = 95;
 
     private Context mContext;
     private LightsService mLightsService;
@@ -217,6 +228,9 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // True if the device is plugged into a power source.
     private boolean mIsPowered;
+
+    // The current plug type, such as BatteryManager.BATTERY_PLUGGED_WIRELESS.
+    private int mPlugType;
 
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
@@ -1013,15 +1027,19 @@ public final class PowerManagerService extends IPowerManager.Stub
      */
     private void updateIsPoweredLocked(int dirty) {
         if ((dirty & DIRTY_BATTERY_STATE) != 0) {
-            boolean wasPowered = mIsPowered;
+            final boolean wasPowered = mIsPowered;
+            final int oldPlugType = mPlugType;
             mIsPowered = mBatteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+            mPlugType = mBatteryService.getPlugType();
 
             if (DEBUG) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
-                        + ", mIsPowered=" + mIsPowered);
+                        + ", mIsPowered=" + mIsPowered
+                        + ", oldPlugType=" + oldPlugType
+                        + ", mPlugType=" + mPlugType);
             }
 
-            if (wasPowered != mIsPowered) {
+            if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
                 mDirty |= DIRTY_IS_POWERED;
 
                 // Treat plugging and unplugging the devices as a user activity.
@@ -1030,13 +1048,51 @@ public final class PowerManagerService extends IPowerManager.Stub
                 // Some devices also wake the device when plugged or unplugged because
                 // they don't have a charging LED.
                 final long now = SystemClock.uptimeMillis();
-                if (mWakeUpWhenPluggedOrUnpluggedConfig) {
+                if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType)) {
                     wakeUpNoUpdateLocked(now);
                 }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
             }
         }
+    }
+
+    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(boolean wasPowered, int oldPlugType) {
+        if (mWakeUpWhenPluggedOrUnpluggedConfig) {
+            // FIXME: Need more accurate detection of wireless chargers.
+            //
+            // We are unable to accurately detect whether the device is resting on the
+            // charger unless it is actually receiving power.  This causes us some grief
+            // because the device might not appear to be plugged into the wireless charger
+            // unless it actually charging.
+            //
+            // To avoid spuriously waking the screen, we apply a special policy to
+            // wireless chargers.
+            //
+            // 1. Don't wake the device when unplugged from wireless charger because
+            //    it might be that the device is still resting on the wireless charger
+            //    but is not receiving power anymore because the battery is full.
+            //
+            // 2. Don't wake the device when plugged into a wireless charger if the
+            //    battery already appears to be mostly full.  This situation may indicate
+            //    that the device was resting on the charger the whole time and simply
+            //    wasn't receiving power because the battery was full.  We can't tell
+            //    whether the device was just placed on the charger or whether it has
+            //    been there for half of the night slowly discharging until it hit
+            //    the point where it needed to start charging again.
+            if (wasPowered && !mIsPowered
+                    && oldPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
+                return false;
+            }
+            if (!wasPowered && mIsPowered
+                    && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                    && mBatteryService.getBatteryLevel() >=
+                            WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1118,7 +1174,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             long nextTimeout = 0;
             if (mWakefulness != WAKEFULNESS_ASLEEP) {
                 final int screenOffTimeout = getScreenOffTimeoutLocked();
-                final int screenDimDuration = getScreenDimDurationLocked();
+                final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
 
                 mUserActivitySummary = 0;
                 if (mLastUserActivityTime >= mLastWakeTime) {
@@ -1192,8 +1248,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         return Math.max(timeout, MINIMUM_SCREEN_OFF_TIMEOUT);
     }
 
-    private int getScreenDimDurationLocked() {
-        return SCREEN_DIM_DURATION;
+    private int getScreenDimDurationLocked(int screenOffTimeout) {
+        return Math.min(SCREEN_DIM_DURATION,
+                (int)(screenOffTimeout * MAXIMUM_SCREEN_DIM_RATIO));
     }
 
     /**
@@ -1891,6 +1948,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mDirty=0x" + Integer.toHexString(mDirty));
             pw.println("  mWakefulness=" + wakefulnessToString(mWakefulness));
             pw.println("  mIsPowered=" + mIsPowered);
+            pw.println("  mPlugType=" + mPlugType);
             pw.println("  mStayOn=" + mStayOn);
             pw.println("  mBootCompleted=" + mBootCompleted);
             pw.println("  mSystemReady=" + mSystemReady);
@@ -1935,6 +1993,12 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
             pw.println("  mScreenBrightnessSettingMaximum=" + mScreenBrightnessSettingMaximum);
             pw.println("  mScreenBrightnessSettingDefault=" + mScreenBrightnessSettingDefault);
+
+            final int screenOffTimeout = getScreenOffTimeoutLocked();
+            final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            pw.println();
+            pw.println("Screen off timeout: " + screenOffTimeout + " ms");
+            pw.println("Screen dim duration: " + screenDimDuration + " ms");
 
             pw.println();
             pw.println("Wake Locks: size=" + mWakeLocks.size());
