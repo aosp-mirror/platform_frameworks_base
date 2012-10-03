@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +68,7 @@ public class UsbPermissionActivity extends AlertActivity
         mDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         mPendingIntent = (PendingIntent)intent.getParcelableExtra(Intent.EXTRA_INTENT);
-        mUid = intent.getIntExtra("uid", 0);
+        mUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
         mPackageName = intent.getStringExtra("package");
 
         PackageManager packageManager = getPackageManager();
@@ -128,7 +129,8 @@ public class UsbPermissionActivity extends AlertActivity
                 if (mPermissionGranted) {
                     service.grantDevicePermission(mDevice, mUid);
                     if (mAlwaysUse.isChecked()) {
-                        service.setDevicePackage(mDevice, mPackageName);
+                        final int userId = UserHandle.getUserId(mUid);
+                        service.setDevicePackage(mDevice, mPackageName, userId);
                     }
                 }
             }
@@ -137,7 +139,8 @@ public class UsbPermissionActivity extends AlertActivity
                 if (mPermissionGranted) {
                     service.grantAccessoryPermission(mAccessory, mUid);
                     if (mAlwaysUse.isChecked()) {
-                        service.setAccessoryPackage(mAccessory, mPackageName);
+                        final int userId = UserHandle.getUserId(mUid);
+                        service.setAccessoryPackage(mAccessory, mPackageName, userId);
                     }
                 }
             }
