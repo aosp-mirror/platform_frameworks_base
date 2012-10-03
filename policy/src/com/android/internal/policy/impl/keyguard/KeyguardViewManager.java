@@ -24,9 +24,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +91,7 @@ public class KeyguardViewManager {
 
         boolean enableScreenRotation = shouldEnableScreenRotation();
 
-        maybeCreateKeyguardLocked(enableScreenRotation);
+        maybeCreateKeyguardLocked(enableScreenRotation, false);
         maybeEnableScreenRotation(enableScreenRotation);
 
         // Disable common aspects of the system/status/navigation bars that are not appropriate or
@@ -120,12 +122,18 @@ public class KeyguardViewManager {
         @Override
         protected void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
-            maybeCreateKeyguardLocked(shouldEnableScreenRotation());
+            maybeCreateKeyguardLocked(shouldEnableScreenRotation(), false);
         }
     }
 
-    private void maybeCreateKeyguardLocked(boolean enableScreenRotation) {
+    SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
+
+    private void maybeCreateKeyguardLocked(boolean enableScreenRotation, boolean userSwitched) {
         final boolean isActivity = (mContext instanceof Activity); // for test activity
+
+        if (mKeyguardHost != null) {
+            mKeyguardHost.saveHierarchyState(mStateContainer);
+        }
 
         if (mKeyguardHost == null) {
             if (DEBUG) Log.d(TAG, "keyguard host is null, creating it...");
@@ -161,11 +169,13 @@ public class KeyguardViewManager {
             mWindowLayoutParams = lp;
             mViewManager.addView(mKeyguardHost, lp);
         }
-        inflateKeyguardView();
+        inflateKeyguardView(userSwitched);
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
+
+        mKeyguardHost.restoreHierarchyState(mStateContainer);
     }
 
-    private void inflateKeyguardView() {
+    private void inflateKeyguardView(boolean userSwitched) {
         View v = mKeyguardHost.findViewById(R.id.keyguard_host_view);
         if (v != null) {
             mKeyguardHost.removeView(v);
@@ -178,6 +188,10 @@ public class KeyguardViewManager {
         mKeyguardView = (KeyguardHostView) view.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
+
+        if (userSwitched) {
+            mKeyguardView.goToUserSwitcher();
+        }
 
         if (mScreenOn) {
             mKeyguardView.show();
@@ -219,11 +233,11 @@ public class KeyguardViewManager {
     /**
      * Reset the state of the view.
      */
-    public synchronized void reset() {
+    public synchronized void reset(boolean userSwitched) {
         if (DEBUG) Log.d(TAG, "reset()");
         // User might have switched, check if we need to go back to keyguard
         // TODO: It's preferable to stay and show the correct lockscreen or unlock if none
-        maybeCreateKeyguardLocked(shouldEnableScreenRotation());
+        maybeCreateKeyguardLocked(shouldEnableScreenRotation(), userSwitched);
     }
 
     public synchronized void onScreenTurnedOff() {

@@ -71,10 +71,6 @@ class KeyguardMultiUserAvatar extends FrameLayout {
 
     public KeyguardMultiUserAvatar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        Resources res = context.getResources();
-        mActiveTextColor = res.getColor(R.color.kg_multi_user_text_active);
-        mInactiveTextColor = res.getColor(R.color.kg_multi_user_text_inactive);
     }
 
     public void setup(UserInfo user, KeyguardMultiUserSelectorView userSelector) {
@@ -84,8 +80,12 @@ class KeyguardMultiUserAvatar extends FrameLayout {
     }
 
     private void init() {
+        Resources res = mContext.getResources();
+        mActiveTextColor = res.getColor(R.color.kg_multi_user_text_active);
+        mInactiveTextColor = res.getColor(R.color.kg_multi_user_text_inactive);
+
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
-        mUserName = (TextView) findViewById(R.id.keyguard_user_name);
+        mUserName = (TextView) findViewById(R.id.keyguard_user_name);        
 
         mUserImage.setImageDrawable(Drawable.createFromPath(mUserInfo.iconPath));
         mUserName.setText(mUserInfo.name);
