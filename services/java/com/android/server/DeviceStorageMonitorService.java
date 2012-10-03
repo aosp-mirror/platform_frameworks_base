@@ -405,7 +405,7 @@ public class DeviceStorageMonitorService extends Binder {
         notification.setLatestEventInfo(mContext, title, details, intent);
         mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
-        mContext.sendStickyBroadcast(mStorageLowIntent);
+        mContext.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
     }
 
     /**
@@ -428,7 +428,7 @@ public class DeviceStorageMonitorService extends Binder {
      */
     private final void sendFullNotification() {
         if(localLOGV) Slog.i(TAG, "Sending memory full notification");
-        mContext.sendStickyBroadcast(mStorageFullIntent);
+        mContext.sendStickyBroadcastAsUser(mStorageFullIntent, UserHandle.ALL);
     }
 
     /**
