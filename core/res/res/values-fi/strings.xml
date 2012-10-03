@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Antaa sovelluksen noutaa järjestelmän sisäisen tilan. Haitalliset sovellukset voivat noutaa paljon yksityisiä ja suojattuja tietoja, joita niiden ei pitäisi tarvita normaalisti."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"nouda näytön sisältö"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Antaa sovelluksen noutaa aktiivisen ikkunan sisällön. Haitalliset sovellukset voivat noutaa koko ikkunan sisällön ja tarkastella sen kaikkea tekstiä lukuun ottamatta salasanoja."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ota esteettömyystila käyttöön väliaikaisesti"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Antaa sovelluksen ottaa esteettömyystilan käyttöön laitteessa väliaikaisesti. Haitalliset sovellukset voivat ottaa esteettömyystilan käyttöön ilman käyttäjän lupaa."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"nouda ikkunoiden tietoja"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Antaa sovelluksen noutaa ikkunoiden tietoja ikkunanhallinnasta. Haitalliset sovellukset voivat noutaa tietoja, jotka on tarkoitettu järjestelmän sisäiseen käyttöön."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"suodata tapahtumat"</string>
@@ -1101,11 +1099,15 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Salli"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Kiellä"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; haluaa lähettää viestin osoitteeseen &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Matkapuhelinliittymäsi tiliä voidaan veloittaa."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Matkapuhelinliittymäsi tiliä veloitetaan."</string>
+    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Lähetä"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Peruuta"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Muista valintani"</string>
+    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
+    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Salli aina"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Älä koskaan salli"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kortti poistettu"</string>
@@ -1365,11 +1367,20 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Puhelin"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kuulokkeet"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Telineen kaiuttimet"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-ääni"</string>
+    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Järjestelmä"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-ääni"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Valmis"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Median äänentoisto"</string>
+    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
+    <skip />
+    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
+    <skip />
+    <!-- no translation found for media_route_status_available (6983258067194649391) -->
+    <skip />
+    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
+    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Yhdysrakenteinen näyttö"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-ruutu"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Peittokuva # <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1395,21 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Anna SIM-kortin PIN-koodi"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Anna PIN-koodi"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Anna salasana"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-koodi"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Uusi PIN-koodi"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
+    <skip />
+    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <skip />
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortin lukitusta poistetaan…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Virheellinen PIN-koodi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Anna 4–8-numeroinen PIN-koodi."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Kirjoita vähintään 8 numeron pituinen PUK-koodi."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Anna PUK-koodi ja uusi PIN-koodi"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"Antamasi PUK-koodi on virheellinen."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <skip />
+    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <skip />
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Liikaa kuvionpiirtoyrityksiä"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Poista lukitus kirjautumalla sisään Google-tililläsi."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Käyttäjänimi (sähköposti)"</string>
@@ -1399,7 +1417,8 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Kirjaudu sisään"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Virheellinen käyttäjänimi tai salasana."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Unohditko käyttäjänimesi tai salasanasi?"\n"Käy osoitteessa "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Tarkistetaan..."</string>
+    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <skip />
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
@@ -1410,12 +1429,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Nostetaanko äänenvoimakkuus turvallista tasoa voimakkaammaksi?"\n"Jos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
     <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Esteettömyystila käytössä."</string>
+    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
+    <!-- no translation found for user_switched (3768006783166984410) -->
     <skip />
 </resources>
