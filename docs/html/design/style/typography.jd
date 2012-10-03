@@ -18,8 +18,10 @@ italic weights by default.</p>
 
     <img src="{@docRoot}design/media/typography_alphas.png">
 
-<p><a href="{@docRoot}downloads/design/Roboto_Hinted_20120823.zip">Download Roboto</a></p>
-<p><a href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a></p>
+<p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP (@typography page)']);"
+      href="{@docRoot}downloads/design/Roboto_Hinted_20120823.zip">Download Roboto</a></p>
+<p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specimen Booke (@typography page)']);"
+      href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a></p>
 
   </div>
 </div>
