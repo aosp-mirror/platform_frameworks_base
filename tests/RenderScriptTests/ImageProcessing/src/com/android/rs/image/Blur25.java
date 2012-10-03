@@ -33,7 +33,7 @@ public class Blur25 extends TestBase {
 
     private int MAX_RADIUS = 25;
     private ScriptC_threshold mScript;
-    private int mRadius = MAX_RADIUS;
+    private float mRadius = MAX_RADIUS;
     private float mSaturation = 1.0f;
     private Allocation mScratchPixelsAllocation1;
     private Allocation mScratchPixelsAllocation2;
@@ -51,13 +51,14 @@ public class Blur25 extends TestBase {
 
 
     public void onBar1Changed(int progress) {
-        float fRadius = progress / 100.0f;
-        fRadius *= (float)(MAX_RADIUS);
-        mRadius = (int)fRadius;
+        mRadius = ((float)progress) / 100.0f * MAX_RADIUS;
+        if (mRadius <= 0.10f) {
+            mRadius = 0.10f;
+        }
         if (mUseIntrinsic) {
             mIntrinsic.setRadius(mRadius);
         } else {
-            mScript.invoke_setRadius(mRadius);
+            mScript.invoke_setRadius((int)mRadius);
         }
     }
 
@@ -111,7 +112,7 @@ public class Blur25 extends TestBase {
         if (mUseIntrinsic) {
             mIntrinsic.setRadius(mRadius);
         } else {
-            mScript.invoke_setRadius(mRadius);
+            mScript.invoke_setRadius((int)mRadius);
         }
     }
 }

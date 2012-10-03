@@ -69,13 +69,13 @@ public final class ScriptIntrinsicBlur extends ScriptIntrinsic {
     /**
      * Set the radius of the Blur.
      *
-     * Supported range 0-25
+     * Supported range 0 < radius <= 25
      *
      * @param radius The radius of the blur
      */
     public void setRadius(float radius) {
-        if (radius < 0 || radius > 25) {
-            throw new RSIllegalArgumentException("Radius out of range (0-25).");
+        if (radius <= 0 || radius > 25) {
+            throw new RSIllegalArgumentException("Radius out of range (0 < r <= 25).");
         }
         setVar(0, radius);
     }
