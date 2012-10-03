@@ -60,7 +60,12 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public void reboot(String arg0) throws RemoteException {
+    public void reboot(boolean confirm, String reason, boolean wait) {
+        // pass for now.
+    }
+
+    @Override
+    public void shutdown(boolean confirm, boolean wait) {
         // pass for now.
     }
 

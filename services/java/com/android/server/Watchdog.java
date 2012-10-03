@@ -305,7 +305,7 @@ public class Watchdog extends Thread {
     void rebootSystem(String reason) {
         Slog.i(TAG, "Rebooting system because: " + reason);
         PowerManagerService pms = (PowerManagerService) ServiceManager.getService("power");
-        pms.reboot(reason);
+        pms.reboot(false, reason, false);
     }
 
     /**
