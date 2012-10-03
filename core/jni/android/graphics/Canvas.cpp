@@ -20,6 +20,7 @@
 
 #include "SkCanvas.h"
 #include "SkDevice.h"
+#include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkImageRef_GlobalPool.h"
 #include "SkPorterDuff.h"
@@ -784,7 +785,15 @@ public:
 #define kStdUnderline_Thickness (1.0f / 18.0f)
 
 static void doDrawTextDecorations(SkCanvas* canvas, jfloat x, jfloat y, jfloat length, SkPaint* paint) {
-    uint32_t flags = paint->getFlags();
+    uint32_t flags;
+    SkDrawFilter* drawFilter = canvas->getDrawFilter();
+    if (drawFilter) {
+        SkPaint paintCopy(*paint);
+        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
+        flags = paintCopy.getFlags();
+    } else {
+        flags = paint->getFlags();
+    }
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
         SkScalar left = SkFloatToScalar(x);
         SkScalar right = SkFloatToScalar(x + length);
