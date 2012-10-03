@@ -291,7 +291,7 @@ public class KeyguardViewMediator {
         public void onUserSwitched(int userId) {
             // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
             synchronized (KeyguardViewMediator.this) {
-                resetStateLocked();
+                resetStateLocked(true);
             }
             // We should always go back to the locked state when a user
             // switch happens.  Is there a more direct way to do this?
@@ -351,7 +351,7 @@ public class KeyguardViewMediator {
                                         + "device isn't provisioned yet.");
                                 doKeyguardLocked();
                             } else {
-                                resetStateLocked();
+                                resetStateLocked(false);
                             }
                         }
                     }
@@ -364,7 +364,7 @@ public class KeyguardViewMediator {
                                     + "showing; need to show keyguard so user can enter sim pin");
                             doKeyguardLocked();
                         } else {
-                            resetStateLocked();
+                            resetStateLocked(false);
                         }
                     }
                     break;
@@ -377,14 +377,14 @@ public class KeyguardViewMediator {
                         } else {
                             if (DEBUG) Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
                                   + "show permanently disabled message in lockscreen.");
-                            resetStateLocked();
+                            resetStateLocked(false);
                         }
                     }
                     break;
                 case READY:
                     synchronized (this) {
                         if (isShowing()) {
-                            resetStateLocked();
+                            resetStateLocked(false);
                         }
                     }
                     break;
@@ -530,7 +530,7 @@ public class KeyguardViewMediator {
                 }
             } else if (mShowing) {
                 notifyScreenOffLocked();
-                resetStateLocked();
+                resetStateLocked(false);
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 // if the screen turned off because of timeout or the user hit the power button
@@ -644,7 +644,7 @@ public class KeyguardViewMediator {
                     if (DEBUG) Log.d(TAG, "onKeyguardExitResult(false), resetting");
                     mExitSecureCallback.onKeyguardExitResult(false);
                     mExitSecureCallback = null;
-                    resetStateLocked();
+                    resetStateLocked(false);
                 } else {
                     showLocked();
 
@@ -805,11 +805,12 @@ public class KeyguardViewMediator {
 
     /**
      * Send message to keyguard telling it to reset its state.
+     * @param userSwitched true if we're resetting state because user switched
      * @see #handleReset()
      */
-    private void resetStateLocked() {
+    private void resetStateLocked(boolean userSwitched) {
         if (DEBUG) Log.d(TAG, "resetStateLocked");
-        Message msg = mHandler.obtainMessage(RESET);
+        Message msg = mHandler.obtainMessage(RESET, userSwitched ? 1 : 0, 0);
         mHandler.sendMessage(msg);
     }
 
@@ -1046,7 +1047,7 @@ public class KeyguardViewMediator {
                     handleHide();
                     return ;
                 case RESET:
-                    handleReset();
+                    handleReset(msg.arg1 != 0);
                     return ;
                 case VERIFY_UNLOCK:
                     handleVerifyUnlock();
@@ -1289,13 +1290,13 @@ public class KeyguardViewMediator {
     }
 
     /**
-     * Handle message sent by {@link #resetStateLocked()}
+     * Handle message sent by {@link #resetStateLocked(boolean)}
      * @see #RESET
      */
-    private void handleReset() {
+    private void handleReset(boolean userSwitched) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mKeyguardViewManager.reset();
+            mKeyguardViewManager.reset(userSwitched);
         }
     }
 
