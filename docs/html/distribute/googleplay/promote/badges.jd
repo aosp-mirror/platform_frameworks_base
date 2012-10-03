@@ -88,6 +88,9 @@ function buildButton(form) {
     $("#button-preview").html(linkStart + "apps/details?id=" + form["package"].value
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
+            
+    // Send the event to Analytics
+    _gaq.push(['_trackEvent', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue]);
   } else if (form["publisher"].value != "Example, Inc.") {
     $("#preview").show();
     $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
@@ -96,6 +99,9 @@ function buildButton(form) {
     $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
+   
+    // Send the event to Analytics
+    _gaq.push(['_trackEvent', 'Distribute', 'Create Google Play Badge', 'Publisher ' + selectedValue]);
   } else {
     alert("Please enter your package name or publisher name");
   }
@@ -199,8 +205,8 @@ alt="Get it on Google Play (small)" /></label>
 alt="Get it on Google Play (large)" /></label>
 </div>
 
-  <input type="button" onclick="return buildButton(this.parentNode)" value="Build my badge"
-style="padding:10px" />
+  <input onclick="return buildButton(this.parentNode);"
+    value="Build my badge" style="padding:10px" />
   <br/>
 </form>
 
