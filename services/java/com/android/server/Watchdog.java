@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
@@ -329,7 +330,7 @@ public class Watchdog extends Thread {
      * text of why it is not a good time.
      */
     String shouldWeBeBrutalLocked(long curTime) {
-        if (mBattery == null || !mBattery.isPowered()) {
+        if (mBattery == null || !mBattery.isPowered(BatteryManager.BATTERY_PLUGGED_ANY)) {
             return "battery";
         }
 
