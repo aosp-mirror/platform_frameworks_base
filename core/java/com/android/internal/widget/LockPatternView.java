@@ -375,31 +375,31 @@ public class LockPatternView extends View {
     }
 
     private void notifyCellAdded() {
+        sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternCellAdded(mPattern);
         }
-        sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
     }
 
     private void notifyPatternStarted() {
+        sendAccessEvent(R.string.lockscreen_access_pattern_start);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternStart();
         }
-        sendAccessEvent(R.string.lockscreen_access_pattern_start);
     }
 
     private void notifyPatternDetected() {
+        sendAccessEvent(R.string.lockscreen_access_pattern_detected);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternDetected(mPattern);
         }
-        sendAccessEvent(R.string.lockscreen_access_pattern_detected);
     }
 
     private void notifyPatternCleared() {
+        sendAccessEvent(R.string.lockscreen_access_pattern_cleared);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternCleared();
         }
-        sendAccessEvent(R.string.lockscreen_access_pattern_cleared);
     }
 
     /**
@@ -799,9 +799,7 @@ public class LockPatternView extends View {
     }
 
     private void sendAccessEvent(int resId) {
-        setContentDescription(mContext.getString(resId));
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        setContentDescription(null);
+        announceForAccessibility(mContext.getString(resId));
     }
 
     private void handleActionUp(MotionEvent event) {
