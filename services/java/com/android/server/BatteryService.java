@@ -197,6 +197,15 @@ public final class BatteryService extends Binder {
     }
 
     /**
+     * Returns the current plug type.
+     */
+    public int getPlugType() {
+        synchronized (mLock) {
+            return mPlugType;
+        }
+    }
+
+    /**
      * Returns battery level as a percentage.
      */
     public int getBatteryLevel() {
