@@ -26,7 +26,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:foreground="@drawable/ic_lockscreen_player_background">
+        android:foreground="@drawable/ic_lockscreen_player_background"
+        android:contentDescription="@string/keygaurd_accessibility_media_controls">
         <!-- Use ImageView for its cropping features; otherwise could be android:background -->
         <ImageView
             android:id="@+id/albumart"

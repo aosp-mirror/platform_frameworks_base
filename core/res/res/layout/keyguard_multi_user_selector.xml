@@ -21,7 +21,8 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    android:contentDescription="@string/keyguard_accessibility_user_selector">
 
     <com.android.internal.policy.impl.keyguard.KeyguardSubdivisionLayout
         android:id="@+id/keyguard_users_grid"
