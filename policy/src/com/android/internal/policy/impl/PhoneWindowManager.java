@@ -2826,7 +2826,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
-        if (attrs.type == TYPE_INPUT_METHOD && !win.getGivenInsetsPendingLw()) {
+        if (attrs.type == TYPE_INPUT_METHOD && win.isVisibleOrBehindKeyguardLw()
+                && !win.getGivenInsetsPendingLw()) {
             setLastInputMethodWindowLw(null, null);
             offsetInputMethodWindowLw(win);
         }
