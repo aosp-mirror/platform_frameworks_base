@@ -26,7 +26,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
@@ -45,6 +48,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mOverScrollAmount = 0f;
     private final Rect mForegroundRect = new Rect();
     private int mForegroundAlpha = 0;
+    private PowerManager mPowerManager;
+    private boolean mDisableInteraction;
 
     public KeyguardWidgetFrame(Context context) {
         this(context, null, 0);
@@ -56,6 +61,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     public KeyguardWidgetFrame(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
         Resources res = context.getResources();
         int hPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_horizontal_padding);
         int topPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_top_padding);
@@ -63,6 +71,19 @@ public class KeyguardWidgetFrame extends FrameLayout {
         setPadding(hPadding, topPadding, hPadding, bottomPadding);
         mGradientColor = res.getColor(R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
+    }
+
+    public void setDisableUserInteraction(boolean disabled) {
+        mDisableInteraction = disabled;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!mDisableInteraction) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+            return super.onInterceptTouchEvent(ev);
+        }
+        return true;
     }
 
     @Override
