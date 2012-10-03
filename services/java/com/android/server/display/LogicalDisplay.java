@@ -299,7 +299,9 @@ final class LogicalDisplay {
     }
 
     public void dumpLocked(PrintWriter pw) {
+        pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
+        pw.println("mHasContent=" + mHasContent);
         pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
                 mPrimaryDisplayDevice.getNameLocked() : "null"));
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
