@@ -99,6 +99,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = DEBUG;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
+    public static final boolean DEBUG_GESTURES = false;
 
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
@@ -247,7 +248,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     // XXX: gesture research
-    private GestureRecorder mGestureRec = new GestureRecorder("/sdcard/statusbar_gestures.dat");
+    private final GestureRecorder mGestureRec = DEBUG_GESTURES
+        ? new GestureRecorder("/sdcard/statusbar_gestures.dat") 
+        : null;
 
     private int mNavigationIconHints = 0;
     private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
@@ -1350,7 +1353,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        mGestureRec.add(event);
+        if (DEBUG_GESTURES) {
+            mGestureRec.add(event);
+        }
 
         return false;
     }
@@ -1630,8 +1635,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-        pw.print("  status bar gestures: ");
-        mGestureRec.dump(fd, pw, args);
+        if (DEBUG_GESTURES) {
+            pw.print("  status bar gestures: ");
+            mGestureRec.dump(fd, pw, args);
+        }
 
         mNetworkController.dump(fd, pw, args);
     }
@@ -1713,8 +1720,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     // called by makeStatusbar and also by PhoneStatusBarView
     void updateDisplaySize() {
         mDisplay.getMetrics(mDisplayMetrics);
-        mGestureRec.tag("display", 
-                String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+        if (DEBUG_GESTURES) {
+            mGestureRec.tag("display", 
+                    String.format("%dx%d", mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+        }
     }
 
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
