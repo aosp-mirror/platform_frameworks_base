@@ -1737,7 +1737,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 streamState.readSettings();
 
                 // unmute stream that was muted but is not affect by mute anymore
-                if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
+                if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType) &&
+                        !isStreamMutedByRingerMode(streamType)) {
                     int size = streamState.mDeathHandlers.size();
                     for (int i = 0; i < size; i++) {
                         streamState.mDeathHandlers.get(i).mMuteCount = 1;
@@ -2591,6 +2592,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public synchronized void readSettings() {
             int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
 
+            // do not read system stream volume from settings: this stream is always aliased
+            // to another stream type and its volume is never persisted. Values in settings can
+            // only be stale values
+            if ((mStreamType == AudioSystem.STREAM_SYSTEM) ||
+                    (mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED)) {
+                mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT,
+                                          10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
+                mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT,
+                               10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
+                return;
+            }
+
             for (int i = 0; remainingDevices != 0; i++) {
                 int device = (1 << i);
                 if ((device & remainingDevices) == 0) {
@@ -2621,11 +2634,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                 // a last audible index of 0 should never be stored for ring and notification
                 // streams on phones (voice capable devices).
-                // same for system stream on phones and tablets
-                if ((lastAudibleIndex == 0) &&
-                        ((mVoiceCapable &&
-                                (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) ||
-                         (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_SYSTEM))) {
+                if ((lastAudibleIndex == 0) && mVoiceCapable &&
+                                (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) {
                     lastAudibleIndex = AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
                     // Correct the data base
                     sendMsg(mAudioHandler,
@@ -2639,11 +2649,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 mLastAudibleIndex.put(device, getValidIndex(10 * lastAudibleIndex));
                 // the initial index should never be 0 for ring and notification streams on phones
                 // (voice capable devices) if not in silent or vibrate mode.
-                // same for system stream on phones and tablets
                 if ((index == 0) && (mRingerMode == AudioManager.RINGER_MODE_NORMAL) &&
-                        ((mVoiceCapable &&
-                                (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) ||
-                         (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_SYSTEM))) {
+                        mVoiceCapable &&
+                        (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_RING)) {
                     index = lastAudibleIndex;
                     // Correct the data base
                     sendMsg(mAudioHandler,
