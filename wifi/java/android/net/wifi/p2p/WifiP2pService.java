@@ -1662,7 +1662,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private void stopDhcpServer(String intf) {
         try {
             mNwService.stopTethering();
-            mNwService.clearInterfaceAddresses(intf);
         } catch (Exception e) {
             loge("Error stopping Dhcp server" + e);
             return;
@@ -2165,6 +2164,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             mDhcpStateMachine.doQuit();
             mDhcpStateMachine = null;
         }
+
+        try {
+            mNwService.clearInterfaceAddresses(mGroup.getInterface());
+        } catch (Exception e) {
+            loge("Failed to clear addresses " + e);
+        }
+        NetworkUtils.resetConnections(mGroup.getInterface(), NetworkUtils.RESET_ALL_ADDRESSES);
 
         mGroup = null;
         mWifiNative.p2pFlush();
