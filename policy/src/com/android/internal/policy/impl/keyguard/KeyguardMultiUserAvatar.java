@@ -57,32 +57,29 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         KeyguardMultiUserAvatar icon = (KeyguardMultiUserAvatar)
                 LayoutInflater.from(context).inflate(resId, userSelector, false);
 
-        icon.setup(info, userSelector);
+        icon.init(info, userSelector);
         return icon;
     }
 
     public KeyguardMultiUserAvatar(Context context) {
-        super(context, null, 0);
+        this(context, null, 0);
     }
 
     public KeyguardMultiUserAvatar(Context context, AttributeSet attrs) {
-        super(context, attrs, 0);
+        this(context, attrs, 0);
     }
 
     public KeyguardMultiUserAvatar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
 
-    public void setup(UserInfo user, KeyguardMultiUserSelectorView userSelector) {
-        mUserInfo = user;
-        mUserSelector = userSelector;
-        init();
-    }
-
-    private void init() {
         Resources res = mContext.getResources();
         mActiveTextColor = res.getColor(R.color.kg_multi_user_text_active);
         mInactiveTextColor = res.getColor(R.color.kg_multi_user_text_inactive);
+    }
+
+    public void init(UserInfo user, KeyguardMultiUserSelectorView userSelector) {
+        mUserInfo = user;
+        mUserSelector = userSelector;
 
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
         mUserName = (TextView) findViewById(R.id.keyguard_user_name);        

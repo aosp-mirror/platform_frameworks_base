@@ -36,6 +36,7 @@ import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.R;
 
@@ -191,6 +192,7 @@ public class KeyguardViewManager {
 
         if (userSwitched) {
             mKeyguardView.goToUserSwitcher();
+            mKeyguardView.showNextSecurityScreenIfPresent();
         }
 
         if (mScreenOn) {
