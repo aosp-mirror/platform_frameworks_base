@@ -6401,7 +6401,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * do, then we'll defer to them to verify the packages.
                  */
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
-                        : getPackageUid(mRequiredVerifierPackage, 0);
+                        : getPackageUid(mRequiredVerifierPackage, getUser().getIdentifier());
                 if (requiredUid != -1 && isVerificationEnabled(flags)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
