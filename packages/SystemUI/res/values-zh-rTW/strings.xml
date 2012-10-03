@@ -151,7 +151,8 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <string name="start_dreams" msgid="870400522982252717">"啟動 Dream"</string>
+    <!-- no translation found for start_dreams (6170089063982549905) -->
+    <skip />
     <string name="ethernet_label" msgid="7967563676324087464">"乙太網路"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"飛航模式"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"充電中 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -174,8 +175,8 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網路"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"關閉 WiFi"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"WiFi 顯示器"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"無 WiFi 顯示器連線"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"WiFi 顯示裝置"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"無 WiFi 顯示裝置連線"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
 </resources>
