@@ -67,6 +67,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mSecurityViewContainer;
+    private KeyguardSelectorView mKeyguardSelectorView;
     private KeyguardTransportControlView mTransportControl;
     private boolean mEnableMenuKey;
     private boolean mIsVerifyUnlockOnly;
@@ -90,6 +91,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
         void showSecurityView();
+        void showUnlockHint();
     }
 
     public KeyguardHostView(Context context) {
@@ -144,6 +146,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         KeyguardWidgetRegion kgwr = (KeyguardWidgetRegion) findViewById(R.id.kg_widget_region);
         kgwr.setVisibility(VISIBLE);
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
+        mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
 
         addDefaultWidgets();
         updateSecurityViews();
@@ -371,6 +374,18 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void showBackupSecurity() {
         SecurityMode currentMode = mSecurityModel.getAlternateFor(mSecurityModel.getSecurityMode());
         showSecurityScreen(mSecurityModel.getBackupFor(currentMode));
+    }
+
+    public boolean showNextSecurityScreenIfPresent() {
+        SecurityMode securityMode = mSecurityModel.getSecurityMode();
+        // Allow an alternate, such as biometric unlock
+        securityMode = mSecurityModel.getAlternateFor(securityMode);
+        if (SecurityMode.None == securityMode) {
+            return false;
+        } else {
+            showSecurityScreen(securityMode); // switch to the alternate security view
+            return true;
+        }
     }
 
     private void showNextSecurityScreenOrFinish(boolean authenticated) {
@@ -794,6 +809,12 @@ public class KeyguardHostView extends KeyguardViewBase {
                 public void showSecurityView() {
                     mSecurityViewContainer.setAlpha(1.0f);
                 }
+
+                @Override
+                public void showUnlockHint() {
+                    mKeyguardSelectorView.ping();
+                }
+
             };
             multiUser.setCallback(callback);
         }
