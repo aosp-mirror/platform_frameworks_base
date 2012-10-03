@@ -27,6 +27,8 @@ import android.view.animation.DecelerateInterpolator;
 
 import android.widget.FrameLayout;
 
+import com.android.internal.R;
+
 public class KeyguardWidgetPager extends PagedView {
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
     private static float CAMERA_DISTANCE = 10000;
@@ -47,6 +49,9 @@ public class KeyguardWidgetPager extends PagedView {
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     /*
@@ -60,6 +65,7 @@ public class KeyguardWidgetPager extends PagedView {
         // The framework adds a default padding to AppWidgetHostView. We don't need this padding
         // for the Keyguard, so we override it to be 0.
         widget.setPadding(0,  0, 0, 0);
+        widget.setContentDescription(widget.getAppWidgetInfo().label);
         frame.addView(widget, lp);
         addView(frame);
     }
@@ -87,6 +93,21 @@ public class KeyguardWidgetPager extends PagedView {
             return (1.0f - focalLength / (focalLength + input)) /
                 (1.0f - focalLength / (focalLength + 1.0f));
         }
+    }
+
+    @Override
+    public String getCurrentPageDescription() {
+        final int nextPageIndex = getNextPage();
+        if (nextPageIndex >= 0 && nextPageIndex < getChildCount()) {
+            KeyguardWidgetFrame frame = (KeyguardWidgetFrame) getChildAt(nextPageIndex);
+            CharSequence title = frame.getChildAt(0).getContentDescription();
+            if (title == null) {
+                title = "";
+            }
+            return mContext.getString(R.string.keyguard_accessibility_widget_changed,
+                    title, nextPageIndex + 1, getChildCount());
+        }
+        return super.getCurrentPageDescription();
     }
 
     @Override
