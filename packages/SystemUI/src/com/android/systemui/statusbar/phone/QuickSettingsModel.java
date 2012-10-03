@@ -77,6 +77,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class BrightnessState extends State {
         boolean autoBrightness;
     }
+    public static class BluetoothState extends State {
+        boolean connected = false;
+    }
 
     /** The callback to update a given tile. */
     interface RefreshCallback {
@@ -173,7 +176,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mBluetoothTile;
     private RefreshCallback mBluetoothCallback;
-    private State mBluetoothState = new State();
+    private BluetoothState mBluetoothState = new BluetoothState();
 
     private QuickSettingsTileView mBatteryTile;
     private RefreshCallback mBatteryCallback;
@@ -398,7 +401,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBluetoothCallback = cb;
 
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        onBluetoothStateChange(adapter.isEnabled());
+        mBluetoothState.enabled = adapter.isEnabled();
+        mBluetoothState.connected =
+                (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED);
+        onBluetoothStateChange(mBluetoothState);
     }
     boolean deviceSupportsBluetooth() {
         return (BluetoothAdapter.getDefaultAdapter() != null);
@@ -406,11 +412,20 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     // BluetoothController callback
     @Override
     public void onBluetoothStateChange(boolean on) {
+        mBluetoothState.enabled = on;
+        onBluetoothStateChange(mBluetoothState);
+    }
+    public void onBluetoothStateChange(BluetoothState bluetoothStateIn) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
-        mBluetoothState.enabled = on;
-        if (on) {
-            mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_on;
+        mBluetoothState.enabled = bluetoothStateIn.enabled;
+        mBluetoothState.connected = bluetoothStateIn.connected;
+        if (mBluetoothState.enabled) {
+            if (mBluetoothState.connected) {
+                mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_on;
+            } else {
+                mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_not_connected;
+            }
             mBluetoothState.label = r.getString(R.string.quick_settings_bluetooth_label);
         } else {
             mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_off;
@@ -632,5 +647,4 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onNextAlarmChanged();
         onBugreportChanged();
     }
-
 }
