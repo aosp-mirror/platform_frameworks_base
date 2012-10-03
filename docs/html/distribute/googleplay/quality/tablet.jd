@@ -1,0 +1,555 @@
+page.title=Tablet App Quality Checklist
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Checklist</h2>
+<ol>
+
+<li><a href="#core-app-quality">1. Test for Core App Quality</a></li>
+<li><a href="#optimize-layouts">2. Optimize your layouts</a></li>
+<li><a href="#use-extra-space">3. Use the extra screen area</a></li>
+<li><a href="#use-tablet-icons">4. Use assets designed for tablets</a></li>
+<li><a href="#adjust-font-sizes">5. Adjust fonts and touch targets</a></li>
+<li><a href="#adjust-widgets">6. Adjust homescreen widgets</a></li>
+<li><a href="#offer-full-feature-set">7. Offer the app's full feature set</a></li>
+<li><a href="#hardware-requirements">8. Don’t require hardware features</a></li>
+<li><a href="#support-screens">9. Declare tablet screen support</a></li>
+<li><a href="#google-play">10. Follow best practices for publishing in Google Play</a></li>
+
+</ol>
+<h2>Testing</h2>
+<ol>
+<li><a href="#test-environment">Setting Up a Test Environment</a></li>
+</ol>
+</div></div>
+
+
+<p>Before you publish an app on Google Play, it's important to make sure that
+the app meets the basic expectations of tablet users, through compelling features
+and an intuitive, well-designed UI. </p>
+
+<p>Tablets are a growing part of the Android installed base that offers new
+opportunities for <a
+href="{@docRoot}distribute/googleplay/spotlight/tablets.html">user engagement
+and monetization</a>. If your app is targeting tablet users, this document helps
+you focus on key aspects of quality, feature set, and UI that can have a
+significant impact on the app's success. Each focus area is given as checklist
+item, with each one comprising several smaller tasks or best practices.</p>
+
+<p>Although the checklist tasks below are numbered for convenience, 
+you can handle them in any order and address them to the extent that you feel
+is right for your app. In the interest of delivering the best possible product
+to your customers, follow the checklist recommendations
+to the greatest extent possible. </p>
+
+<p>As you move through the checklist, you'll find links to support resources
+that can help you address the topics raised in each task.</p>
+
+
+<h2 id="core-app-quality">1. Test for Core App Quality</h2>
+
+<p>The first step in delivering a great tablet app experience is making sure
+that it meets the <em>core app
+quality criteria</em> for all of the devices and form factors that the app is
+targeting. For complete information, see the <a
+href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality Checklist</a>. 
+</p>
+
+<p>To assess the quality of your app on tablets &mdash; both for core app quality
+and tablet app quality &mdash; you need to set up a suitable
+hardware or emulator environment for testing. For more information, 
+see <a href="#test-environment">Setting Up a Test Environment</a>.</p>
+
+
+<h2 id="optimize-layouts">2. Optimize your layouts for larger screens</h2>
+
+<p>Android makes it easy to develop an app that runs well on a wide range of
+device screen sizes and form factors. This broad compatibility works in your
+favor, since it helps you design a single app that you can distribute widely to
+all of your targeted devices. However, to give your users the best possible
+experience on each screen configuration &mdash; in particular on tablets
+&mdash; you need to optimize your layouts and other UI components for each
+targeted screen configuration. On tablets, optimizing your UI lets you take
+full advantage of the additional screen available, such as to offer new features,
+present new content, or enhance the experience in other ways to deepen user
+engagement.</p>
+
+<p>If you developed your app for handsets and now want to distribute it to
+tablets, you can start by making minor adjustments to your layouts, fonts, and
+spacing. In some cases &mdash; such as for 7-inch tablets or for a game with
+large canvas &mdash; these adjustments may be all
+you need to make your app look great. In other cases, such as for larger
+tablets, you can redesign parts of your UI to replace "stretched UI" with an
+efficient multipane UI, easier navigation, and additional content. </p>
+
+<p>Here are some suggestions:</p>
+
+<div style="width:390px;float:right;margin:1.5em;margin-top:0em;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png" style="width:390px;padding:4px;margin-bottom:0em;">
+<p class="image-caption" style="padding:0em .5em .5em 2em"><span
+style="font-weight:500;">Get rid of "stretched" UI</span>: On tablets, single-pane layouts lead to awkward whitespace and excessive line lengths. Use padding to reduce the width of UI elements and consider using multi-pane layouts.</p>
+</div>
+
+<ul>
+<li>Provide custom layouts as needed for <code>large</code> and
+<code>xlarge</code> screens. You can also provide layouts that are loaded based
+on the screen's <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">shortest
+dimension</a> or the <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">minimum
+available width and height</a>. </li>
+<li>At a minimum, customize dimensions such as font sizes, margins, spacing for
+larger screens, to improve use of space and content legibility. </li>
+<li>Adjust positioning of UI controls so that they are easily accessible to
+users when holding a tablet, such as toward the sides when in
+landscape orientation.</li>
+<li>Padding of UI elements should normally be larger on tablets than on handsets. A
+<a href="{@docRoot}design/style/metrics-grids.html#48dp-rhythm">48dp rhythm</a> (and a 16dp
+grid) is recommended.</li>
+<li>Adequately pad text content so that it is not aligned directly along screen edges.
+Use a minimum <code>16dp</code> padding around content near screen edges.</li>
+</ul>
+
+<p>In particular, make sure that your layouts do not appear "stretched"
+across the screen:</p>
+
+<ul>
+<li>Lines of text should not be excessively long &mdash; optimize for a maximum
+100 characters per line, with best results between 50 and 75.</li>
+<li>ListViews and menus should not use the full screen width.</li>
+<li>Use padding to manage the widths of onscreen elements or switch to a
+multi-pane UI for tablets (see next section).</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="http://developer.android.com/design/style/metrics-grids.html">Metrics and Grids
+</a></strong> &mdash; Android Design document that explains ....</li>
+<li><strong><a href="http://developer.android.com/design/style/devices-displays.html">Devices and Displays
+</a></strong> &mdash; Android Design document that explains ....</li>
+<li><strong><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></strong> &mdash; Developer documentation that explains the details of managing UI for best display on multiple screen sizes.</li>
+<li><strong><a href="http://developer.android.com/guide/practices/screens_support.html#ConfigurationExamples">Configuration examples
+</a></strong> &mdash; Examples of how to declare layouts and other resources for specific screen sizes.</a></li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="use-extra-space">3. Take advantage of extra screen area available on tablets</h2>
+
+<div style="width:290px;float:right;margin:1.5em;margin-bottom:0;margin-top:0;">
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png" style="width:280px;padding:4px;margin-bottom:0em;">
+<p class="image-caption" style="padding:0em .5em .5em 1.5em"><span
+style="font-weight:500;">Multi-pane layouts</span> result in a better visual balance on tablet screens, while offering more utility and legibility.</p>
+</div>
+
+<p>Tablet screens provide significantly more screen real estate to your app,
+especially when in landscape orientation. In particular, 10-inch tablets offer a
+greatly expanded  area, but even 7-inch tablets give you more space for
+displaying content and engaging users. </p>
+
+<p>As you consider the UI of your app when running on tablets, make sure that it
+is taking full advantage of extra screen area available on tablets. Here are
+some suggestions:</p>
+
+<ul>
+<li>Look for opportunities to include additional content or use an alternative
+treatment of existing content.</li>
+<li>Use <a href="{@docRoot}design/patterns/multi-pane-layouts.html">multi-pane
+layouts</a> on tablet screens to combine single views into a compound view. This
+lets you use the additional screen area more efficiently and makes it easier for
+users to navigate your app. </li>
+<li>Plan how you want the panels of your compound views to reorganize when
+screen orientation changes.</li>
+
+
+
+<div style="width:490px;margin:1.5em auto 1.5em 0;">
+
+<div style="">
+<img src="{@docRoot}images/ui-ex-single-panes.png" style="width:490px;padding:4px;margin-bottom:0em;" align="middle">
+<img src="{@docRoot}images/ui-ex-multi-pane.png" style="width:490px;padding:4px;margin-bottom:0em;">
+<p class="image-caption" style="padding:.5em"><span
+style="font-weight:500;">Compound views</span> combine several single views from a handset UI <em>(above)</em> into a richer, more efficient UI for tablets <em>(below)</em>. </p>
+</div>
+</div>
+
+<li>While a single screen is implemented as an {@link android.app.Activity}
+subclass, consider implementing individual content panels as {@link
+android.app.Fragment} subclasses. This lets you maximize code reuse across
+different form factors and across screens that share content.</li>
+<li>Decide on which screen sizes you'll use a multi-pane UI, then provide the
+different layouts in the appropriate screen size buckets (such as
+<code>large</code>/<code>xlarge</code>) or minimum screen widths (such as
+<code>sw600dp</code>/<code>sw720</code>).</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a></strong> &mdash; Android Design guide for using multi-pane UI, including examples of how to flatten navigation and integrate more content into your tablet UI.</li>
+<li><strong><a href="{@docRoot}training/design-navigation/multiple-sizes.html">Planning for Multiple Touchscreen Sizes</a></strong> &mdash; Android Training class that walks you through the essentials of planning an intuitive, effective navigation for tablets and other devices. </li>
+<li><strong><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a></strong> &mdash; Android Training class that walks you through the essentials of planning an intuitive, effective navigation for tablets and other devices. </li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="use-tablet-icons">4. Use Icons and other assets that are designed for tablet screens</h2>
+
+<p>So that your app looks its best, make sure to use icons and other bitmap
+assets that are created specifically for the densities used by tablet screens.
+Specifically, you should create sets of alternative bitmap drawables for each
+density in the range commonly supported by tablets.</p>
+
+<p class="table-caption">Raw asset sizes for icon types.<table>
+<tr>
+<th>Density </th>
+<th colspa>Launcher</th>
+<th>Action Bar</th>
+<th>Small/Contextual</th>
+<th>Notification</th>
+</tr>
+<tr>
+<td><code>mdpi</code></td>
+<td>48x48px</td>
+<td>32x32px</td>
+<td>16x16px</td>
+<td>24x24px</td>
+</tr>
+<tr>
+<td><code>hdpi</code></td>
+<td>72x72px</td>
+<td>48x48px</td>
+<td>24x24px</td>
+<td>36x36px</td>
+</tr>
+<tr>
+<td><code>tvdpi</code></td>
+<td><em>(use hdpi)</em></td>
+<td><em>(use hdpi)</em></td>
+<td><em>(use hdpi)</em></td>
+<td><em>(use hdpi)</em></td>
+</tr>
+<tr>
+<td><code>xhdpi</code></td>
+<td>96x96px</td>
+<td>64x64px</td>
+<td>32x32px</td>
+<td>48x48px</td>
+</tr>
+
+</table>
+
+<p>Other points to consider: </p>
+
+<ul>
+<li>Icons in the action bar, notifications, and launcher should be designed
+according to the icon design guidelines and have the same physical size on
+tablets as on phones.</li>
+<li>Use density-specific <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+resource qualifiers</a> to ensure that the proper set of alternative resources
+gets loaded.</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}design/style/iconography.html">Iconography</a></strong> &mdash; Android Design document that shows how to use various types of icons.</li>
+<li><strong><a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a></strong> &mdash; Developer documentation on how to provide sets of layouts and drawable resources for specific ranges of device screens. </li>
+<li><strong><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></strong> &mdash; API Guide documentation that explains the details of managing UI for best display on multiple screen sizes.</li>
+<li><strong><a href="{@docRoot}training/basics/supporting-devices/screens.html">Supporting Different Screens</a></strong> &mdash; Android Training class that takes you through the process of optimizing the user experience for different screen sizes and densities.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="adjust-font-sizes">5. Adjust font sizes and touch targets for tablet screens</h2>
+
+<p>To make sure your app is easy to use on tablets, take some time to adjust the
+font sizes and touch targets in your tablet UI, for all of the screen
+configurations you are targeting. You can adjust font sizes through <a
+href="{@docRoot}guide/topics/ui/themes.html">styleable attributes</a> or <a
+href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">dimension
+resources</a>, and you can adjust touch targets through layouts and bitmap
+drawables, as discussed above. </p>
+
+<p>Here are some considerations:</p>
+<ul>
+<li>Text should not be excessively large or small on tablet screen sizes and
+densities. Make sure that labels are sized appropriately for the UI elements they
+correspond to, and ensure that there are no improper line breaks in labels,
+titles, and other elements.</li>
+<li>The recommended touch-target size for onscreen elements is 48dp (32dp
+minimum) &mdash; some adjustments may be needed in your tablet UI. Read <a
+href="http://developer.android.com/design/style/metrics-grids.html">Metrics and
+Grids
+</a> to learn about implementation strategies to help most of your users. To
+meet the accessibility needs of certain users, it may be appropriate to use
+larger touch targets. </li>
+<li>When possible, for smaller icons, expand the touchable area to more than
+48dp using {@link android.view.TouchDelegate} or just centering the icon within
+the transparent button.</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="http://developer.android.com/design/style/metrics-grids.html">Metrics and Grids
+</a></strong> &mdash; Android Design document that explains how to arrange and size touch targets and other UI elements on the screen.</li>
+<li><strong><a href="{@docRoot}design/style/typography.html">Typography</a></strong> &mdash; Android Design document that gives an overview of how to use typography in your apps. </li>
+<li><strong><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></strong> &mdash; Developer documentation that explains the details of managing UI for best display on multiple screen sizes.</li>
+<li><strong><a href="{@docRoot}training/multiscreen/screendensities.html">Supporting Different Densities</a></strong> &mdash; Android Training class that shows you how to provide sets of layouts and drawable resources for specific ranges of device screens. </li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="adjust-widgets">6. Adjust sizes of home screen widgets for tablet screens</h2>
+
+<p>If your app includes a home screen widget, here are a few points to consider
+to ensure a great user experience on tablet screens: </p>
+
+<ul>
+<li>Make sure that the widget's default height and width are set appropriately
+for tablet screens, as well as the minimum and maximum resize height and width.
+</li>
+<li>The widget should be resizable to 420dp or more, to span 5 or more home
+screen rows (if this is a vertical or square widget) or columns (if this is a
+horizontal or square widget). </li>
+<li>Make sure that 9-patch images render correctly.</li>
+<li>Use default system margins.</li>
+<li>Set the app's <code>targetSdkVersion</code> to 14 or higher, if
+possible.</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}guide/topics/appwidgets/index.html#MetaData">Adding the AppWidgetProviderInfo Metadata
+</a></strong> &mdash; API Guide that explains how to set the height and width dimensions of a widget.</li>
+<li><strong><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">App Widget Design Guidelines</a></strong> &mdash; API Guide that provides best practices and techniques for designing and managing the size of widgets.  </li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="offer-full-feature-set">7. Offer the app's full feature set to tablet users</h2>
+
+<p>Let your tablet users experience the best features of your app. Here are
+some recommendations:</p>
+
+<ul>
+<li>Design your app to offer at least the same set of features on tablets as it does on
+handsets. </li>
+<li>In exceptional cases, your app might omit or replace certain features on
+tablets if they are not supported by the hardware or use-case of most tablets.
+For example:
+<ul>
+<li>If the handset uses telephony features but telephony is not available on the
+current tablet, you can omit or replace the related functionality.</li>
+<li>Many tablets have a GPS sensor, but most users would not normally carry
+their tablets while running. If your phone app provides functionality to let the
+user record a GPS track of their runs while carrying their phones, the app would not need to
+provide that functionality on tablets because the use-case is not
+compelling.</li>
+</ul>
+</li>
+<li>If you will omit a feature or capability from your tablet UI, make sure
+that it is not accessible to users or that it offers “graceful degradation”
+to a replacement feature (also see the section below on hardware features).</li>
+</ul>
+
+
+<h2 id="hardware-requirements">8. Don’t require hardware features that might not be available on tablets</h2>
+
+<p>Handsets and tablets typically offer slightly different hardware support for
+sensors, camera, telephony, and other features. For example, many tablets are
+available in a "Wi-Fi" configuration that does not include telephony support.</p>
+
+<p>To ensure that you can deliver a single APK broadly across the
+your full customer base, make sure that your app does not have built-in
+requirements for hardware features that aren't commonly available on tablets.
+</p>
+
+<ul>
+<li>Your app's manifest should not include <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+elements for hardware features or capabilities that might not be
+available on tablets, except when they are declared with the
+<code>android:required=”false”</code> attribute. For example, your app should
+not <em>require</em> features such as:
+<ul>
+<li><code>android.hardware.telephony</code></li>
+<li><code>android.hardware.camera</code> (refers to back camera), or</li>
+<li><code>android.hardware.camera.front</code></li>
+</ul>
+</li>
+<li>Similarly, your app manifest should not include any <a
+href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> elements that <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">imply
+feature requirements</a> that might not be appropriate for tablets, except when
+accompanied by a corresponding <code>&lt;uses-feature&gt;</code> element
+declared with the <code>android:required=”false”</code> attribute.</li>
+</ul>
+
+<p>In all cases, the app must function normally when the hardware features it
+uses are not available and should offer “graceful degradation” and alternative
+functionality where appropriate. For example, if GPS is not supported on the device,
+your app could let the user set their location manually. The app should do
+run-time checking for the hardware capability that it needs and handle as needed.</p>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">Permissions that Imply Feature Requirements</a></strong> &mdash; A list of permissions that may cause unwanted filtering if declared in your app's manifest.</li>
+<li><strong><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a></strong> &mdash; Description and reference documentation for the <code>&lt;uses-feature&gt;</code> manifest element.</li>
+<li><strong><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#testing">Testing the features required by your application</a></strong> &mdash; Description of how to determine the actual set of hardware and software requirements (explicit or implied) that your app requires.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="support-screens">9. Declare support for tablet screen configurations</h2>
+
+<p>To ensure that you can distribute your app to a broad range of tablets,
+declare all the screen sizes that your app supports in its manifest:</p>
+
+<ul>
+<li>Declare a <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> element
+with appropriate attributes, as needed.</li>
+<li>If the app declares a <code>&lt;compatible-screens&gt;</code> element in the
+manifest, the element must include attributes that specify <em>all of the size and
+density combinations for tablet screens</em> that the app supports. Note that, if possible,
+you should avoid using this element in your app.</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a></strong>
+&mdash; Description and reference documentation for the <code>&lt;supports-screens&gt;</code>
+manifest element.</li>
+<li><strong><a href="{@docRoot}guide/practices/screens_support.html#DeclaringScreenSizeSupport">Declaring Screen Size
+Support</a></strong> &mdash; Developer documentation that explains the details of managing UI
+for best display on multiple screen sizes.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="google-play">10. Follow best practices for publishing in Google Play</h2>
+
+<ul>
+<li>Publish your app as a single APK for all screen sizes (handsets
+and tablets), with a single Google Play listing:
+  <ul style="margin-top:.25em;">
+    <li>Easier for users to find your app from search, browsing, or promotions</li>
+    <li>Easier for users to restore your app automatically if they get a new device.</li>
+    <li>Your ratings and download stats are consolidated across all devices.</li>
+    <li>Publishing a tablet app in a second listing can dilute ratings for your brand.</li>
+  </ul>
+</li>
+<li>If necessary, you can alternatively choose to deliver your app using <a 
+href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>, 
+although in most cases using a single APK to reach all devices is strongly recommended.</li>
+
+<li>Highlight your app’s tablet capabilities in the product details page:
+  <ul style="margin-top:.25em;">
+    <li>Add <strong>at least one screenshot taken while the app is running on a
+    tablet</strong>. It's recommended that you add one screenshot of landscape orientation
+    and one of portrait orientation, if possible. These screenshots make it clear to users
+    that your app is designed for tablets and highlight all the effort you've put into designing
+    a great tablet app experience.</li>
+    <li>Mention tablet support in the app description.</li>
+    <li>Include information about tablet support in the app's release notes and update
+    information.</li>
+    <li>In your app's promo video, add shots of your app running on a tablet.</li>
+  </ul>
+</li>
+<li>Make sure you are distributing to tablet devices. Check the app's Supported Devices
+list in the <a href="https://play.google.com/apps/publish/">Developer Console</a>
+to make sure your app is not filtered from tablet devices that you want to target.</li>
+
+<li>Let tablet users know about your app! Plan a marketing or advertising campaign that
+highlights the use of your app on tablets.</li>
+</ul>
+
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a href="https://play.google.com/apps/publish/">Google Play Android Developer Console</a></strong> &mdash; The tools console for publishing your app to Android users.</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<h2 id="test-environment">Setting Up a Test Environment for Tablets</h2>
+
+<p>To assess the quality of your app on tablets &mdash; both for core app quality
+and tablet app quality &mdash; you need to set up a suitable
+hardware or emulator environment for testing. </p>
+
+<p>The ideal test environment would
+include a small number of actual hardware devices that represent key form
+factors and hardware/software combinations currently available to consumers.
+It's not necessary to test on <em>every</em> device that's on the market &mdash;
+rather, you should focus on a small number of representative devices, even using
+one or two devices per form factor.  The table below provides an overview of
+devices you could use for testing.</p>
+
+<p>If you are not able to obtain actual hardware devices for testing, you should
+set up emulated devices (AVDs) to represent the most common form factors and
+hardware/software combinations. See the table below for suggestions on the emulator
+configurations to use. </p>
+
+<p>To go beyond basic testing, you can add more devices, more form factors, or
+new hardware/software combinations to your test environment. For example, you
+could include mid-size tablets, tablets with more or fewer hardware/software
+features, and so on. You can also increase the number or complexity of tests
+and quality criteria. </p>
+
+<p class="table-caption"><strong>Table 1</strong>. A typical tablet test environment might
+include one or two devices from each row in the table below, with one of the
+listed chipsets, platform versions, and hardware feature configurations.</p>
+
+<table>
+<tr>
+<th>Type</th>
+<th>Size</th>
+<th>Density</th>
+<th>Version</th>
+<th>AVD Skin</th>
+</tr>
+
+<tr>
+<td>7-inch tablet</td>
+<td><span style="white-space:nowrap"><code>large</code> or</span><br /><code>-sw600</code></td>
+<td><code>hdpi</code>,<br /><code>tvdpi</code></td>
+<td>Android 4.0+</td>
+<td>WXGA800-7in</td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">10-inch</span> tablet</td>
+<td><span style="white-space:nowrap"><code>xlarge</code> or</span><br /><code>-sw800</code></td>
+<td><code>mdpi</code>,<br /><code>hdpi</code></td>
+<td>Android 3.2+</td>
+<td>WXGA800</td>
+</tr>
+</table>
