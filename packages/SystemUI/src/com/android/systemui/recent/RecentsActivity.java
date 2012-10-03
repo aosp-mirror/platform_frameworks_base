@@ -17,6 +17,7 @@
 package com.android.systemui.recent;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,8 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
+
+import java.util.List;
 
 public class RecentsActivity extends Activity {
     public static final String TOGGLE_RECENTS_INTENT = "com.android.systemui.TOGGLE_RECENTS";
@@ -122,11 +125,15 @@ public class RecentsActivity extends Activity {
 
     public void dismissAndGoBack() {
         if (mRecentsPanel != null) {
-            final SystemUIApplication app = (SystemUIApplication) getApplication();
-            final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
-            TaskDescription firstTask = mRecentsPanel.getBottomTask();
-            if (firstTask != null && mRecentsPanel.simulateClick(firstTask)) {
-                // recents panel will take care of calling show(false);
+            final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+
+            final List<ActivityManager.RecentTaskInfo> recentTasks =
+                    am.getRecentTasks(2,
+                            ActivityManager.RECENT_WITH_EXCLUDED |
+                            ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+            if (recentTasks.size() > 1 &&
+                    mRecentsPanel.simulateClick(recentTasks.get(1).persistentId)) {
+                // recents panel will take care of calling show(false) through simulateClick
                 return;
             }
             mRecentsPanel.show(false);

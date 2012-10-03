@@ -76,11 +76,11 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         }
     }
 
-    public View findViewForTask(TaskDescription task) {
+    public View findViewForTask(int persistentTaskId) {
         for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
             View v = mLinearLayout.getChildAt(i);
             RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) v.getTag();
-            if (holder.taskDescription == task) {
+            if (holder.taskDescription.persistentTaskId == persistentTaskId) {
                 return v;
             }
         }
