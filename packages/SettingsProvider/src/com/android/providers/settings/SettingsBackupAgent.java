@@ -46,7 +46,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,25 +63,35 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
+    private static final String KEY_GLOBAL = "global";
     private static final String KEY_LOCALE = "locale";
-
-    //Version 2 adds STATE_WIFI_CONFIG
-    private static final int STATE_VERSION_1       = 1;
-    private static final int STATE_VERSION_1_SIZE  = 4;
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 2;
+    private static final int STATE_VERSION = 3;
 
+    // Slots in the checksum array.  Never insert new items in the middle
+    // of this array; new slots must be appended.
     private static final int STATE_SYSTEM          = 0;
     private static final int STATE_SECURE          = 1;
     private static final int STATE_LOCALE          = 2;
     private static final int STATE_WIFI_SUPPLICANT = 3;
     private static final int STATE_WIFI_CONFIG     = 4;
-    private static final int STATE_SIZE            = 5; // The number of state items
+    private static final int STATE_GLOBAL          = 5;
+
+    private static final int STATE_SIZE            = 6; // The current number of state items
+
+    // Number of entries in the checksum array at various version numbers
+    private static final int STATE_SIZES[] = {
+        0,
+        4,              // version 1
+        5,              // version 2 added STATE_WIFI_CONFIG
+        STATE_SIZE      // version 3 added STATE_GLOBAL
+    };
 
     // Versioning of the 'full backup' format
-    private static final int FULL_BACKUP_VERSION = 1;
+    private static final int FULL_BACKUP_VERSION = 2;
+    private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -257,6 +266,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
+        byte[] globalSettingsData = getGlobalSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -267,6 +277,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
         stateChecksums[STATE_SECURE] =
             writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
+        stateChecksums[STATE_GLOBAL] =
+            writeIfChanged(stateChecksums[STATE_GLOBAL], KEY_GLOBAL, secureSettingsData, data);
         stateChecksums[STATE_LOCALE] =
             writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
         stateChecksums[STATE_WIFI_SUPPLICANT] =
@@ -283,14 +295,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
 
+        HashSet<String> movedToGlobal = new HashSet<String>();
+        Settings.System.getMovedKeys(movedToGlobal);
+        Settings.Secure.getMovedKeys(movedToGlobal);
+
         while (data.readNextHeader()) {
             final String key = data.getKey();
             final int size = data.getDataSize();
             if (KEY_SYSTEM.equals(key)) {
-                restoreSettings(data, Settings.System.CONTENT_URI);
+                restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal);
                 mSettingsHelper.applyAudioSettings();
             } else if (KEY_SECURE.equals(key)) {
-                restoreSettings(data, Settings.Secure.CONTENT_URI);
+                restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
             } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
                 int retainedWifiState = enableWifi(false);
                 restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, data);
@@ -317,6 +333,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     public void onFullBackup(FullBackupDataOutput data)  throws IOException {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
+        byte[] globalSettingsData = getGlobalSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -339,6 +356,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
             out.writeInt(secureSettingsData.length);
             out.write(secureSettingsData);
+            if (DEBUG_BACKUP) Log.d(TAG, globalSettingsData.length + " bytes of global settings data");
+            out.writeInt(globalSettingsData.length);
+            out.write(globalSettingsData);
             if (DEBUG_BACKUP) Log.d(TAG, locale.length + " bytes of locale data");
             out.writeInt(locale.length);
             out.write(locale);
@@ -371,20 +391,35 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         int version = in.readInt();
         if (DEBUG_BACKUP) Log.d(TAG, "Flattened data version " + version);
-        if (version == FULL_BACKUP_VERSION) {
+        if (version <= FULL_BACKUP_VERSION) {
+            // Generate the moved-to-global lookup table
+            HashSet<String> movedToGlobal = new HashSet<String>();
+            Settings.System.getMovedKeys(movedToGlobal);
+            Settings.Secure.getMovedKeys(movedToGlobal);
+
             // system settings data first
             int nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of settings data");
             byte[] buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI);
+            restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal);
 
             // secure settings
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI);
+            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal);
+
+            // Global only if sufficiently new
+            if (version >= FULL_BACKUP_ADDED_GLOBAL) {
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of global settings data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                in.readFully(buffer, 0, nBytes);
+                movedToGlobal.clear();  // no redirection; this *is* the global namespace
+                restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI, movedToGlobal);
+            }
 
             // locale
             nBytes = in.readInt();
@@ -430,14 +465,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         try {
             int stateVersion = dataInput.readInt();
-            if (stateVersion == STATE_VERSION_1) {
-                for (int i = 0; i < STATE_VERSION_1_SIZE; i++) {
-                    stateChecksums[i] = dataInput.readLong();
-                }
-            } else if (stateVersion == STATE_VERSION) {
-                for (int i = 0; i < STATE_SIZE; i++) {
-                    stateChecksums[i] = dataInput.readLong();
-                }
+            for (int i = 0; i < STATE_SIZES[stateVersion]; i++) {
+                stateChecksums[i] = dataInput.readLong();
             }
         } catch (EOFException eof) {
             // With the default 0 checksum we'll wind up forcing a backup of
@@ -496,7 +525,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
     }
 
-    private void restoreSettings(BackupDataInput data, Uri contentUri) {
+    private byte[] getGlobalSettings() {
+        Cursor cursor = getContentResolver().query(Settings.Global.CONTENT_URI, PROJECTION, null,
+                null, null);
+        try {
+            return extractRelevantValues(cursor, Settings.Global.SETTINGS_TO_BACKUP);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private void restoreSettings(BackupDataInput data, Uri contentUri,
+            HashSet<String> movedToGlobal) {
         byte[] settings = new byte[data.getDataSize()];
         try {
             data.readEntityData(settings, 0, settings.length);
@@ -504,20 +544,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Log.e(TAG, "Couldn't read entity data");
             return;
         }
-        restoreSettings(settings, settings.length, contentUri);
+        restoreSettings(settings, settings.length, contentUri, movedToGlobal);
     }
 
-    private void restoreSettings(byte[] settings, int bytes, Uri contentUri) {
+    private void restoreSettings(byte[] settings, int bytes, Uri contentUri,
+            HashSet<String> movedToGlobal) {
         if (DEBUG) {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
 
-        // Figure out the white list.
+        // Figure out the white list and redirects to the global table.
         String[] whitelist = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = Settings.Secure.SETTINGS_TO_BACKUP;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = Settings.System.SETTINGS_TO_BACKUP;
+        } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
+            whitelist = Settings.Global.SETTINGS_TO_BACKUP;
         } else {
             throw new IllegalArgumentException("Unknown URI: " + contentUri);
         }
@@ -556,15 +599,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
+            final Uri destination = (movedToGlobal.contains(key))
+                    ? Settings.Global.CONTENT_URI
+                    : contentUri;
+
+            // The helper doesn't care what namespace the keys are in
             if (settingsHelper.restoreValue(key, value)) {
                 contentValues.clear();
                 contentValues.put(Settings.NameValueTable.NAME, key);
                 contentValues.put(Settings.NameValueTable.VALUE, value);
-                getContentResolver().insert(contentUri, contentValues);
+                getContentResolver().insert(destination, contentValues);
             }
 
             if (DEBUG || true) {
-                Log.d(TAG, "Restored setting: " + key + "=" + value);
+                Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
             }
         }
     }
