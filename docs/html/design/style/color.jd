@@ -115,7 +115,8 @@ between visual components. Note that red and green may be indistinguishable to c
 
 <p>Blue is the standard accent color in Android's color palette. Each color has a corresponding darker
 shade that can be used as a complement when needed.</p>
-<p><a href="{@docRoot}downloads/design/Android_Design_Color_Swatches_20120229.zip">Download the swatches</a></p>
+<p><a onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Color Swatches (@color page)']);"
+      href="{@docRoot}downloads/design/Android_Design_Color_Swatches_20120229.zip">Download the swatches</a></p>
 
 <img src="{@docRoot}design/media/color_spectrum.png">
 
