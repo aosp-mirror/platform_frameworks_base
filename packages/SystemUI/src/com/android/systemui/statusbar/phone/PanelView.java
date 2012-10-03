@@ -267,7 +267,7 @@ public class PanelView extends FrameLayout {
                             // preventing spurious flings due to touch screen jitter
                             final float deltaY = Math.abs(mFinalTouchY - mInitialTouchY);
                             if (deltaY < mFlingGestureMinDistPx
-                                    || vel < mFlingGestureMinDistPx) {
+                                    || vel < mFlingExpandMinVelocityPx) {
                                 vel = 0;
                             }
 
