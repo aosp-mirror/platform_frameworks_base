@@ -122,6 +122,7 @@ public class Editor {
     InputMethodState mInputMethodState;
 
     DisplayList[] mTextDisplayLists;
+    int mLastLayoutHeight;
 
     boolean mFrozenWithFocus;
     boolean mSelectionMoved;
@@ -1256,6 +1257,16 @@ public class Editor {
         if (layout instanceof DynamicLayout) {
             if (mTextDisplayLists == null) {
                 mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
+            }
+
+            // If the height of the layout changes (usually when inserting or deleting a line,
+            // but could be changes within a span), invalidate everything. We could optimize
+            // more aggressively (for example, adding offsets to blocks) but it would be more
+            // complex and we would only get the benefit in some cases.
+            int layoutHeight = layout.getHeight();
+            if (mLastLayoutHeight != layoutHeight) {
+                invalidateTextDisplayList();
+                mLastLayoutHeight = layoutHeight;
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
