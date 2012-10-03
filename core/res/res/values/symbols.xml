@@ -1410,7 +1410,6 @@
   <java-symbol type="string" name="kg_password_wrong_pin_code" />
   <java-symbol type="string" name="kg_invalid_sim_pin_hint" />
   <java-symbol type="string" name="kg_invalid_sim_puk_hint" />
-  <java-symbol type="string" name="kg_sim_puk_recovery_hint" />
   <java-symbol type="string" name="kg_invalid_puk" />
   <java-symbol type="string" name="kg_login_too_many_attempts" />
   <java-symbol type="string" name="kg_login_instructions" />
