@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,6 +82,7 @@ class QuickSettings {
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
+    private QuickSettingsModel.BluetoothState mBluetoothState;
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
@@ -115,6 +117,7 @@ class QuickSettings {
         mContainerView = container;
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
+        mBluetoothState = new QuickSettingsModel.BluetoothState();
         mHandler = new Handler();
 
         Resources r = mContext.getResources();
@@ -128,6 +131,7 @@ class QuickSettings {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
     }
 
@@ -738,6 +742,10 @@ class QuickSettings {
         mModel.onWifiDisplayStateChanged(mWifiDisplayStatus);
     }
 
+    private void applyBluetoothStatus() {
+        mModel.onBluetoothStateChange(mBluetoothState);
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -746,6 +754,12 @@ class QuickSettings {
                         DisplayManager.EXTRA_WIFI_DISPLAY_STATUS);
                 mWifiDisplayStatus = status;
                 applyWifiDisplayStatus();
+            }
+            if (intent.getAction().equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+                int status = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                        BluetoothAdapter.STATE_DISCONNECTED);
+                mBluetoothState.connected = (status == BluetoothAdapter.STATE_CONNECTED);
+                applyBluetoothStatus();
             }
         }
     };
