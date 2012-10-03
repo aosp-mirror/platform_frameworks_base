@@ -10870,8 +10870,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         mDisplayContents.delete(displayId);
         WindowList windows = displayContent.getWindowList();
-        for (int i = windows.size() - 1; i >= 0; --i) {
-            final WindowState win = windows.get(i);
+        while (!windows.isEmpty()) {
+            final WindowState win = windows.get(windows.size() - 1);
             removeWindowLocked(win.mSession, win);
         }
         mAnimator.removeDisplayLocked(displayId);
