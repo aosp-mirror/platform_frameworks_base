@@ -357,7 +357,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mWifiState.label = removeDoubleQuotes(enabledDesc);
         } else if (wifiNotConnected) {
             mWifiState.iconId = R.drawable.ic_qs_wifi_0;
-            mWifiState.label = r.getString(R.string.quick_settings_wifi_not_connected);
+            mWifiState.label = r.getString(R.string.quick_settings_wifi_label);
         } else {
             mWifiState.iconId = R.drawable.ic_qs_wifi_no_network;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_off_label);
