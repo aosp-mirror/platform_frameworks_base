@@ -2678,6 +2678,7 @@ package android.app {
     method public void invalidateOptionsMenu();
     method public boolean isChangingConfigurations();
     method public final boolean isChild();
+    method public boolean isDestroyed();
     method public boolean isFinishing();
     method public boolean isTaskRoot();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
@@ -3485,6 +3486,7 @@ package android.app {
     method public abstract int getBackStackEntryCount();
     method public abstract android.app.Fragment getFragment(android.os.Bundle, java.lang.String);
     method public void invalidateOptionsMenu();
+    method public abstract boolean isDestroyed();
     method public abstract void popBackStack();
     method public abstract void popBackStack(java.lang.String, int);
     method public abstract void popBackStack(int, int);

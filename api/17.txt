@@ -331,6 +331,7 @@ package android {
     field public static final int checkboxStyle = 16842860; // 0x101006c
     field public static final int checked = 16843014; // 0x1010106
     field public static final int checkedButton = 16843080; // 0x1010148
+    field public static final int checkedTextViewStyle = 16843720; // 0x10103c8
     field public static final int childDivider = 16843025; // 0x1010111
     field public static final int childIndicator = 16843020; // 0x101010c
     field public static final int childIndicatorLeft = 16843023; // 0x101010f
@@ -1789,6 +1790,7 @@ package android {
     field public static final int Widget_DeviceDefault_Button_Small = 16974146; // 0x1030142
     field public static final int Widget_DeviceDefault_Button_Toggle = 16974148; // 0x1030144
     field public static final int Widget_DeviceDefault_CalendarView = 16974190; // 0x103016e
+    field public static final int Widget_DeviceDefault_CheckedTextView = 16974299; // 0x10301db
     field public static final int Widget_DeviceDefault_CompoundButton_CheckBox = 16974152; // 0x1030148
     field public static final int Widget_DeviceDefault_CompoundButton_RadioButton = 16974169; // 0x1030159
     field public static final int Widget_DeviceDefault_CompoundButton_Star = 16974173; // 0x103015d
@@ -1822,6 +1824,7 @@ package android {
     field public static final int Widget_DeviceDefault_Light_Button_Small = 16974198; // 0x1030176
     field public static final int Widget_DeviceDefault_Light_Button_Toggle = 16974200; // 0x1030178
     field public static final int Widget_DeviceDefault_Light_CalendarView = 16974238; // 0x103019e
+    field public static final int Widget_DeviceDefault_Light_CheckedTextView = 16974300; // 0x10301dc
     field public static final int Widget_DeviceDefault_Light_CompoundButton_CheckBox = 16974204; // 0x103017c
     field public static final int Widget_DeviceDefault_Light_CompoundButton_RadioButton = 16974224; // 0x1030190
     field public static final int Widget_DeviceDefault_Light_CompoundButton_Star = 16974228; // 0x1030194
@@ -1907,6 +1910,7 @@ package android {
     field public static final int Widget_Holo_Button_Small = 16973964; // 0x103008c
     field public static final int Widget_Holo_Button_Toggle = 16973966; // 0x103008e
     field public static final int Widget_Holo_CalendarView = 16974060; // 0x10300ec
+    field public static final int Widget_Holo_CheckedTextView = 16974297; // 0x10301d9
     field public static final int Widget_Holo_CompoundButton_CheckBox = 16973969; // 0x1030091
     field public static final int Widget_Holo_CompoundButton_RadioButton = 16973986; // 0x10300a2
     field public static final int Widget_Holo_CompoundButton_Star = 16973990; // 0x10300a6
@@ -1940,6 +1944,7 @@ package android {
     field public static final int Widget_Holo_Light_Button_Small = 16974007; // 0x10300b7
     field public static final int Widget_Holo_Light_Button_Toggle = 16974009; // 0x10300b9
     field public static final int Widget_Holo_Light_CalendarView = 16974061; // 0x10300ed
+    field public static final int Widget_Holo_Light_CheckedTextView = 16974298; // 0x10301da
     field public static final int Widget_Holo_Light_CompoundButton_CheckBox = 16974012; // 0x10300bc
     field public static final int Widget_Holo_Light_CompoundButton_RadioButton = 16974032; // 0x10300d0
     field public static final int Widget_Holo_Light_CompoundButton_Star = 16974036; // 0x10300d4
@@ -2673,6 +2678,7 @@ package android.app {
     method public void invalidateOptionsMenu();
     method public boolean isChangingConfigurations();
     method public final boolean isChild();
+    method public boolean isDestroyed();
     method public boolean isFinishing();
     method public boolean isTaskRoot();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
@@ -3480,6 +3486,7 @@ package android.app {
     method public abstract int getBackStackEntryCount();
     method public abstract android.app.Fragment getFragment(android.os.Bundle, java.lang.String);
     method public void invalidateOptionsMenu();
+    method public abstract boolean isDestroyed();
     method public abstract void popBackStack();
     method public abstract void popBackStack(java.lang.String, int);
     method public abstract void popBackStack(int, int);
