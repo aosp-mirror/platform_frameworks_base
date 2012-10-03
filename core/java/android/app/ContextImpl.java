@@ -1703,6 +1703,7 @@ class ContextImpl extends Context {
         if (packageName.equals("system") || packageName.equals("android")) {
             final ContextImpl context = new ContextImpl(mMainThread.getSystemContext());
             context.mBasePackageName = mBasePackageName;
+            context.mUser = user;
             return context;
         }
 
