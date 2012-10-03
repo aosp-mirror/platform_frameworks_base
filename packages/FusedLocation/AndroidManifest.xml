@@ -39,7 +39,7 @@
            <intent-filter>
                <action android:name="com.android.location.service.FusedLocationProvider" />
            </intent-filter>
-           <meta-data android:name="version" android:value="1" />
+           <meta-data android:name="serviceVersion" android:value="1" />
         </service>
     </application>
 </manifest>

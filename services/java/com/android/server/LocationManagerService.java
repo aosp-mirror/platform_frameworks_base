@@ -275,14 +275,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         */
         Resources resources = mContext.getResources();
         ArrayList<String> providerPackageNames = new ArrayList<String>();
-        String[] pkgs1 = resources.getStringArray(
+        String[] pkgs = resources.getStringArray(
                 com.android.internal.R.array.config_locationProviderPackageNames);
-        String[] pkgs2 = resources.getStringArray(
-                com.android.internal.R.array.config_overlay_locationProviderPackageNames);
-        if (D) Log.d(TAG, "built-in location providers: " + Arrays.toString(pkgs1));
-        if (D) Log.d(TAG, "overlay location providers: " + Arrays.toString(pkgs2));
-        if (pkgs1 != null) providerPackageNames.addAll(Arrays.asList(pkgs1));
-        if (pkgs2 != null) providerPackageNames.addAll(Arrays.asList(pkgs2));
+        if (D) Log.d(TAG, "built-in location providers: " + Arrays.toString(pkgs));
+        if (pkgs != null) providerPackageNames.addAll(Arrays.asList(pkgs));
 
         // bind to network provider
         LocationProviderProxy networkProvider = LocationProviderProxy.createAndBind(
