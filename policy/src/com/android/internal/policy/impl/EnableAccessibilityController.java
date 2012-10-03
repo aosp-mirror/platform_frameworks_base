@@ -40,6 +40,7 @@ import android.view.accessibility.IAccessibilityManager;
 
 import com.android.internal.R;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -131,8 +132,9 @@ public class EnableAccessibilityController {
 
     private static List<AccessibilityServiceInfo> getInstalledSpeakingAccessibilityServices(
             Context context) {
-        List<AccessibilityServiceInfo> services = AccessibilityManager.getInstance(
-                context).getInstalledAccessibilityServiceList();
+        List<AccessibilityServiceInfo> services = new ArrayList<AccessibilityServiceInfo>();
+        services.addAll(AccessibilityManager.getInstance(context)
+                .getInstalledAccessibilityServiceList());
         Iterator<AccessibilityServiceInfo> iterator = services.iterator();
         while (iterator.hasNext()) {
             AccessibilityServiceInfo service = iterator.next();
