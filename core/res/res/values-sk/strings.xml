@@ -287,8 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Umožňuje aplikácii načítať interný stav systému. Škodlivé aplikácie môžu načítať široký rozsah súkromných a zabezpečených informácií, ktoré by obvykle nemali nikdy potrebovať."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"načítanie obsahu obrazovky"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Umožňuje aplikácii načítať obsah aktívneho okna. Škodlivé aplikácie môžu získať celý obsah okna a preskúmať celý jeho text okrem hesiel."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"dočasné povolenie zjednodušenia ovládania"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Umožňuje aplikácii dočasne povoliť zjednodušenie ovládania v zariadení. Škodlivé aplikáciu môžu zjednodušenie ovládania povoliť bez súhlasu používateľa."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"načítanie informácií o oknách"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Umožňuje aplikácii načítať informácie o oknách zo správcu okien. Škodlivé aplikácie môžu načítať informácie, ktoré sú určené pre interné využitie systému."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrovanie udalostí"</string>
@@ -1099,15 +1101,11 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Povoliť"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmietnuť"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať správu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="4992814738863678373">"To môže spôsobiť, že sa na váš mobilný účet budú účtovať poplatky."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"To spôsobí, že sa na váš mobilný účet budú účtovať poplatky."</string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Odoslať"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Zrušiť"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapamätať si voľbu"</string>
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
-    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Vždy povoliť"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nikdy nepovoliť"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM bola odobraná"</string>
@@ -1367,20 +1365,11 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefón"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Slúchadlá"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Reproduktory doku"</string>
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Zvuk HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Systém"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Hotovo"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Výstup médií"</string>
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
-    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Vstavaná obrazovka"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Obrazovka HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Prekrytie č. <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1395,21 +1384,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Zadajte kód PIN karty SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Zadajte kód PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Zadajte heslo"</string>
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Kód PUK"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nový kód PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Prebieha odomykanie karty SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Nesprávny kód PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Zadajte kód PUK, ktorý má 8 alebo viac číslic."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Zadajte kód PUK a nový kód PIN"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"Zadaný kód PUK nie je správny."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Príliš veľa pokusov o nakreslenie vzoru"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Ak chcete telefón odomknúť, prihláste sa pomocou svojho účtu Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Používateľské meno (e-mail)"</string>
@@ -1417,8 +1399,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prihlásiť sa"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Neplatné používateľské meno alebo heslo."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zabudli ste svoje používateľské meno alebo heslo?"\n" Navštívte stránky "<b>"google.com/accounts/recovery"</b>"."</string>
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
-    <skip />
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"Prebieha kontrola..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávny kód PIN. "\n\n"Skúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste zadali nesprávne heslo. "\n\n"Skúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. "\n\n"Skúste to znova o <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
@@ -1429,11 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Chcete zvýšiť hlasitosť nad bezpečnú úroveň?"\n"Dlhodobé počúvanie pri vysokej hlasitosti môže viesť k poškodeniu vášho sluchu."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
     <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
     <skip />
 </resources>
