@@ -2272,6 +2272,15 @@
     <!-- Accessibility description sent when user completes drawing a pattern. [CHAR LIMIT=NONE] -->
     <string name="lockscreen_access_pattern_detected">Pattern completed</string>
 
+    <!-- Accessibility description sent when user changes the current lock screen widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_changed">%1$s. Widget %2$d of %3$d.</string>
+    <!-- Accessibility description of the lock screen user selector widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_user_selector">User selector</string>
+    <!-- Accessibility description of the lock screen status widget. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_status">Status</string>
+    <!-- Accessibility description of the lock media control widget. [CHAR_LIMIT=none] -->
+    <string name="keygaurd_accessibility_media_controls">Media controls</string>
+
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
     <string name="password_keyboard_label_symbol_key">\?123</string>
