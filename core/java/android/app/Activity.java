@@ -685,6 +685,7 @@ public class Activity extends ContextThemeWrapper
     private boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
+    private boolean mDestroyed;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -4089,6 +4090,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Returns true if the final {@link #onDestroy()} call has been made
+     * on the Activity, so this instance is now dead.
+     */
+    public boolean isDestroyed() {
+        return mDestroyed;
+    }
+
+    /**
      * Check to see whether this activity is in the process of being destroyed in order to be
      * recreated with a new configuration. This is often used in
      * {@link #onStop} to determine whether the state needs to be cleaned up or will be passed
@@ -5258,6 +5267,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performDestroy() {
+        mDestroyed = true;
         mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
