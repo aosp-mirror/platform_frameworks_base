@@ -115,6 +115,11 @@
     <color name="lockscreen_clock_am_pm">#ffffffff</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
+    <!-- keyguard overscroll widget pager -->
+    <color name="kg_multi_user_text_active">#ffffffff</color>
+    <color name="kg_multi_user_text_inactive">#ff808080</color>
+    <color name="kg_widget_pager_gradient">#ff33B5E5</color>
+
     <!-- FaceLock -->
     <color name="facelock_spotlight_mask">#CC000000</color>
 

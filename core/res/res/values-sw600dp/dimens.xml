@@ -77,5 +77,13 @@
     <!-- Preference fragment padding, sides -->
     <dimen name="preference_fragment_padding_side">24dp</dimen>
     <dimen name="preference_screen_header_padding_side">24dip</dimen>
+
+    <!-- Keyguard dimensions -->
+    <!-- Bottom padding for the widget pager -->
+    <dimen name="kg_widget_pager_bottom_padding">16dp</dimen>
+
+    <!-- Top margin for the runway lights. We add a negative margin in large
+        devices to account for the widget pager padding -->
+    <dimen name="kg_runway_lights_top_margin">-10dp</dimen>
 </resources>
 
