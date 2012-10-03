@@ -314,7 +314,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationPanelIsFullScreenWidth =
             (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
         mNotificationPanel.setSystemUiVisibility(
-                  View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER | View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS);
+                  View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER |
+                  View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
+                  View.STATUS_BAR_DISABLE_CLOCK);
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
