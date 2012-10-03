@@ -155,8 +155,8 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueig de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apaga"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe d\'error"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Crea informe d\'errors"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu, que s\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Realització d\'informe d\'errors"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu per enviar-la com a missatge de correu electrònic. Passarà un cert temps a partir del moment en què comenci a elaborar-se l\'informe d\'errors fins que no estigui llest per enviar; tingues paciència."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mode silenciós"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"So desactivat"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El so està activat"</string>
@@ -272,7 +272,7 @@
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definició de la compatibilitat de pantalla"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permet que l\'aplicació controli el mode de compatibilitat de pantalla d\'altres aplicacions. És possible que les aplicacions malicioses interrompin el comportament d\'altres aplicacions."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activa la depuració d\'aplicacions"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet que l\'aplicació activi la depuració d\'altra aplicació. Les aplicacions malicioses poden utilitzar aquest permís per interrompre l\'execució d\'altres aplicacions."</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet que una aplicació activi la depuració per a una altra aplicació. Les aplicacions malicioses poden utilitzar aquesta funció per finalitzar altres aplicacions."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"canvi de la configuració de pantalla del sistema"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permet que una aplicació canviï la configuració actual, com ara la configuració regional o la mida global del tipus de lletra."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar el mode de cotxe"</string>
@@ -287,8 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permet que l\'aplicació recuperi l\'estat intern del sistema. Les aplicacions malicioses poden recuperar una àmplia gamma d\'informació privada i de seguretat que normalment no haurien de necessitar mai."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"recuperació del contingut de la pantalla"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permet que l\'aplicació recuperi el contingut de la finestra activa. Les aplicacions malicioses poden recuperar el contingut de tota la finestra i examinar-ne tot el text, excepte les contrasenyes."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activació temporal de l\'accessibilitat"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permet que una aplicació activi temporalment l\'accessibilitat al dispositiu. És possible que les aplicacions malicioses activin l\'accessibilitat sense el consentiment de l\'usuari."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recupera informació de les finestres"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet que una aplicació recuperi informació sobre les finestres del gestor de finestres. Aplicacions malicioses podrien recuperar informació dirigida a la utilització per part del sistema intern."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtra els esdeveniments"</string>
@@ -342,7 +344,7 @@
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normals mai no ho haurien de necessitar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincula a un servei de VPN"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de VPN. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"enllaça amb un fons de pantalla"</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un empaperat"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Permet que el titular vinculi a la interfície de nivell superior d\'un fons de pantalla. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
@@ -884,9 +886,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Neteja la consulta"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Envia la consulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Cerca per veu"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Vols activar l\'exploració tàctil?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb la tauleta."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb el telèfon."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Vols activar l\'Exploració per tacte?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'Exploració per tacte. Quan l\'Exploració per tacte està activada, pots escoltar o veure les descripcions del que hi ha sota el dit o fer gestos per interactuar amb la tauleta."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'Exploració per tacte. Quan l\'Exploració per tacte està activada, pots escoltar o veure les descripcions del que hi ha sota el dit o fer gestos per interactuar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Fa menys d\'1 mes"</string>
   <plurals name="num_seconds_ago">
@@ -1099,12 +1101,11 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Permet"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Denega"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vol enviar un missatge a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Aquesta acció "<font fgcolor="#ffffb060">"pot fer que s\'apliquin càrrecs"</font>" al compte del mòbil."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Aquesta acció farà que s\'apliquin càrrecs al compte del mòbil."</font></string>
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Això pot comportar càrrecs al teu compte de mòbil."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Això comportarà càrrecs al teu compte de mòbil."</string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Envia"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancel·la"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Recorda la meva selecció"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Pots canviar aquesta opció més endavant a Configuració &gt; Aplicacions"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Permet sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"No permetis mai"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Extracció de la targeta SIM"</string>
@@ -1151,8 +1152,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"S\'esborraran tots els fitxers emmagatzemats al dispositiu d\'emmagatzematge USB. Aquesta acció no es pot desfer."</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Es perdran totes les dades d\'aquesta targeta."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formata"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració d\'USB connectada"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca-ho per desactivar la depuració USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Selecciona un mètodes d\'entrada"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configura els mètodes d\'entrada"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclat físic"</string>
@@ -1214,7 +1215,7 @@
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronització"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fons de pantalla"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvia el fons de pantalla"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvi de l\'empaperat"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ha activat VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca per gestionar la xarxa."</string>
@@ -1274,7 +1275,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Desfés les supressions"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"No facis res per ara"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Tria un compte"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Afegeix un compte"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Addició d\'un compte"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Afegeix un compte"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Incrementa"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Redueix"</string>
@@ -1364,15 +1365,11 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telèfon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculars"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Altaveus del connector"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Àudio HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Àudio per Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fet"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortida de contingut multimèdia"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"S\'està explorant..."</string>
-    <string name="media_route_status_connecting" msgid="6422571716007825440">"S\'està connectant..."</string>
-    <string name="media_route_status_available" msgid="6983258067194649391">"Disponible"</string>
-    <string name="media_route_status_not_available" msgid="6739899962681886401">"No disponible"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantalla integrada"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Pantalla HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposa #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1387,15 +1384,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Introdueix el PIN de la SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Introdueix el PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Introdueix la contrasenya"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"La SIM està desactivada. Introdueix el codi PUK per continuar. Contacta amb l\'operador de telefonia mòbil per obtenir detalls."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Introdueix el codi PIN"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirma el codi PIN"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Codi PUK"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Codi PIN nou"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"S\'està desbloquejant la targeta SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Codi PIN incorrecte."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Escriu un PIN que tingui de 4 a 8 números."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"El codi PUK ha de tenir 8 números o més."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM de manera permanent."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Els codis PIN no coincideixen"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Introdueix un PUK que tingui com a mínim 8 números."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Introdueix el codi PUK i el codi PIN nou"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"El PUK que has escrit no és correcte."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Massa intents incorrectes"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Per desbloquejar el telèfon, inicia la sessió amb el compte de Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nom d\'usuari (correu electrònic)"</string>
@@ -1403,7 +1399,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Inicia la sessió"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nom d\'usuari o contrasenya no vàlids."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Has oblidat el teu nom d\'usuari o la contrasenya?"\n"Visita "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"S\'està desbloquejant la targeta SIM…"</string>
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"S\'està comprovant..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%d</xliff:g> vegades. "\n\n"Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%d</xliff:g> vegades. "\n\n"Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%d</xliff:g> vegades. "\n\n"Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
@@ -1414,11 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vols augmentar el volum per sobre del nivell de seguretat?"\n"Escoltar música a un volum alt durant períodes llargs pot perjudicar l\'oïda."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
-    <string name="accessibility_enabled" msgid="1381972048564547685">"S\'ha activat l\'accessibilitat."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
     <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
     <skip />
 </resources>

@@ -1711,17 +1711,15 @@
     <skip />
     <!-- no translation found for sms_short_code_confirm_message (1645436466285310855) -->
     <skip />
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <!-- no translation found for sms_short_code_details (4992814738863678373) -->
     <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <!-- no translation found for sms_premium_short_code_details (4291752905667807485) -->
     <skip />
     <!-- no translation found for sms_short_code_confirm_allow (4458878637111023413) -->
     <skip />
     <!-- no translation found for sms_short_code_confirm_deny (2927389840209170706) -->
     <skip />
     <!-- no translation found for sms_short_code_remember_choice (5289538592272218136) -->
-    <skip />
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
     <skip />
     <!-- no translation found for sms_short_code_confirm_always_allow (3241181154869493368) -->
     <skip />
@@ -2182,7 +2180,7 @@
     <skip />
     <!-- no translation found for default_audio_route_name_dock_speakers (6240602982276591864) -->
     <skip />
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <!-- no translation found for default_audio_route_name_hdmi (7986404173839007682) -->
     <skip />
     <!-- no translation found for default_audio_route_category_name (3722811174003886946) -->
     <skip />
@@ -2191,14 +2189,6 @@
     <!-- no translation found for media_route_chooser_grouping_done (7966438307723317169) -->
     <skip />
     <!-- no translation found for media_route_button_content_description (5758553567065145276) -->
-    <skip />
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
     <skip />
     <!-- no translation found for display_manager_built_in_display_name (2583134294292563941) -->
     <skip />
@@ -2228,11 +2218,9 @@
     <skip />
     <!-- no translation found for kg_password_instructions (5753646556186936819) -->
     <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <!-- no translation found for kg_puk_enter_puk_hint (5183097160254244459) -->
     <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <!-- no translation found for kg_puk_enter_pin_hint (597821135578014901) -->
     <skip />
     <!-- no translation found for kg_sim_unlock_progress_dialog_message (8950398016976865762) -->
     <skip />
@@ -2240,11 +2228,11 @@
     <skip />
     <!-- no translation found for kg_invalid_sim_pin_hint (8795159358110620001) -->
     <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <!-- no translation found for kg_invalid_sim_puk_hint (5216603185442368307) -->
     <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <!-- no translation found for kg_sim_puk_recovery_hint (5577753137718442566) -->
     <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <!-- no translation found for kg_invalid_puk (5809955359950817326) -->
     <skip />
     <!-- no translation found for kg_login_too_many_attempts (6486842094005698475) -->
     <skip />
@@ -2260,7 +2248,7 @@
     <skip />
     <!-- no translation found for kg_login_account_recovery_hint (5690709132841752974) -->
     <skip />
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <!-- no translation found for kg_login_checking_password (8849589033659332457) -->
     <skip />
     <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8276745642049502550) -->
     <skip />
@@ -2282,12 +2270,12 @@
     <skip />
     <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
     <!-- no translation found for accessibility_enabled (1381972048564547685) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
     <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
+    <!-- no translation found for user_switched (1030428084901139446) -->
     <skip />
 </resources>
