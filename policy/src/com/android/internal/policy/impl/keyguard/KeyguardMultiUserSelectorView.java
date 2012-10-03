@@ -107,7 +107,8 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
         if (!(v instanceof KeyguardMultiUserAvatar)) return;
         final KeyguardMultiUserAvatar avatar = (KeyguardMultiUserAvatar) v;
         if (mActiveUserAvatar == avatar) {
-            // They clicked the active user, no need to do anything
+            // If they click the currently active user, show the unlock hint
+            mCallback.showUnlockHint();
             return;
         } else {
             // Reset the previously active user to appear inactive
