@@ -911,17 +911,20 @@ public final class Settings {
         }
 
         private static final HashSet<String> MOVED_TO_GLOBAL;
+        private static final HashSet<String> MOVED_TO_SECURE_THEN_GLOBAL;
         static {
             MOVED_TO_GLOBAL = new HashSet<String>();
+            MOVED_TO_SECURE_THEN_GLOBAL = new HashSet<String>();
+
             // these were originally in system but migrated to secure in the past,
             // so are duplicated in the Secure.* namespace
-            MOVED_TO_GLOBAL.add(Global.ADB_ENABLED);
-            MOVED_TO_GLOBAL.add(Global.BLUETOOTH_ON);
-            MOVED_TO_GLOBAL.add(Global.DATA_ROAMING);
-            MOVED_TO_GLOBAL.add(Global.DEVICE_PROVISIONED);
-            MOVED_TO_GLOBAL.add(Global.INSTALL_NON_MARKET_APPS);
-            MOVED_TO_GLOBAL.add(Global.USB_MASS_STORAGE_ENABLED);
-            MOVED_TO_GLOBAL.add(Global.HTTP_PROXY);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.ADB_ENABLED);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.BLUETOOTH_ON);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.DATA_ROAMING);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.DEVICE_PROVISIONED);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.INSTALL_NON_MARKET_APPS);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.USB_MASS_STORAGE_ENABLED);
+            MOVED_TO_SECURE_THEN_GLOBAL.add(Global.HTTP_PROXY);
 
             // these are moving directly from system to global
             MOVED_TO_GLOBAL.add(Settings.Global.AIRPLANE_MODE_ON);
@@ -954,6 +957,17 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.ALWAYS_FINISH_ACTIVITIES);
         }
 
+        /** @hide */
+        public static void getMovedKeys(HashSet<String> outKeySet) {
+            outKeySet.addAll(MOVED_TO_GLOBAL);
+            outKeySet.addAll(MOVED_TO_SECURE_THEN_GLOBAL);
+        }
+
+        /** @hide */
+        public static void getNonLegacyMovedKeys(HashSet<String> outKeySet) {
+            outKeySet.addAll(MOVED_TO_GLOBAL);
+        }
+
         /**
          * Look up a name in the database.
          * @param resolver to access the database with
@@ -972,7 +986,7 @@ public final class Settings {
                         + " to android.provider.Settings.Secure, returning read-only value.");
                 return Secure.getStringForUser(resolver, name, userHandle);
             }
-            if (MOVED_TO_GLOBAL.contains(name)) {
+            if (MOVED_TO_GLOBAL.contains(name) || MOVED_TO_SECURE_THEN_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Global, returning read-only value.");
                 return Global.getStringForUser(resolver, name, userHandle);
@@ -999,7 +1013,7 @@ public final class Settings {
                         + " to android.provider.Settings.Secure, value is unchanged.");
                 return false;
             }
-            if (MOVED_TO_GLOBAL.contains(name)) {
+            if (MOVED_TO_GLOBAL.contains(name) || MOVED_TO_SECURE_THEN_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Global, value is unchanged.");
                 return false;
@@ -1019,7 +1033,7 @@ public final class Settings {
                     + " to android.provider.Settings.Secure, returning Secure URI.");
                 return Secure.getUriFor(Secure.CONTENT_URI, name);
             }
-            if (MOVED_TO_GLOBAL.contains(name)) {
+            if (MOVED_TO_GLOBAL.contains(name) || MOVED_TO_SECURE_THEN_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Global, returning read-only global URI.");
                 return Global.getUriFor(Global.CONTENT_URI, name);
@@ -2257,7 +2271,7 @@ public final class Settings {
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
-            STAY_ON_WHILE_PLUGGED_IN,
+            STAY_ON_WHILE_PLUGGED_IN,   // moved to global
             WIFI_USE_STATIC_IP,
             WIFI_STATIC_IP,
             WIFI_STATIC_GATEWAY,
@@ -2272,7 +2286,7 @@ public final class Settings {
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             VIBRATE_INPUT_DEVICES,
-            MODE_RINGER,
+            MODE_RINGER,                // moved to global
             MODE_RINGER_STREAMS_AFFECTED,
             MUTE_STREAMS_AFFECTED,
             VOLUME_VOICE,
@@ -2293,20 +2307,18 @@ public final class Settings {
             TEXT_AUTO_CAPS,
             TEXT_AUTO_PUNCTUATE,
             TEXT_SHOW_PASSWORD,
-            AUTO_TIME,
-            AUTO_TIME_ZONE,
+            AUTO_TIME,                  // moved to global
+            AUTO_TIME_ZONE,             // moved to global
             TIME_12_24,
             DATE_FORMAT,
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
-            Global.EMERGENCY_TONE,
-            Global.CALL_AUTO_RETRY,
             HEARING_AID,
             TTY_MODE,
             SOUND_EFFECTS_ENABLED,
             HAPTIC_FEEDBACK_ENABLED,
-            POWER_SOUNDS_ENABLED,
-            DOCK_SOUNDS_ENABLED,
+            POWER_SOUNDS_ENABLED,       // moved to global
+            DOCK_SOUNDS_ENABLED,        // moved to global
             LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE,
@@ -2700,6 +2712,11 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_CDMA_SUBSCRIPTION);
+        }
+
+        /** @hide */
+        public static void getMovedKeys(HashSet<String> outKeySet) {
+            outKeySet.addAll(MOVED_TO_GLOBAL);
         }
 
         /**
@@ -3993,12 +4010,11 @@ public final class Settings {
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
-            ADB_ENABLED,
             BUGREPORT_IN_POWER_MENU,
             ALLOW_MOCK_LOCATION,
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
-            USB_MASS_STORAGE_ENABLED,
+            USB_MASS_STORAGE_ENABLED,                           // moved to global
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
@@ -4017,9 +4033,9 @@ public final class Settings {
             TTS_DEFAULT_COUNTRY,
             TTS_ENABLED_PLUGINS,
             TTS_DEFAULT_LOCALE,
-            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-            WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
-            WIFI_NUM_OPEN_NETWORKS_KEPT,
+            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
+            WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
+            WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
             MOUNT_PLAY_NOTIFICATION_SND,
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
@@ -5250,6 +5266,38 @@ public final class Settings {
          */
         public static final String ALWAYS_FINISH_ACTIVITIES =
                 "always_finish_activities";
+
+        /**
+         * Settings to backup. This is here so that it's in the same place as the settings
+         * keys and easy to update.
+         *
+         * These keys may be mentioned in the SETTINGS_TO_BACKUP arrays in System
+         * and Secure as well.  This is because those tables drive both backup and
+         * restore, and restore needs to properly whitelist keys that used to live
+         * in those namespaces.  The keys will only actually be backed up / restored
+         * if they are also mentioned in this table (Global.SETTINGS_TO_BACKUP).
+         *
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
+         *
+         * @hide
+         */
+        public static final String[] SETTINGS_TO_BACKUP = {
+            STAY_ON_WHILE_PLUGGED_IN,
+            MODE_RINGER,
+            AUTO_TIME,
+            AUTO_TIME_ZONE,
+            POWER_SOUNDS_ENABLED,
+            DOCK_SOUNDS_ENABLED,
+            USB_MASS_STORAGE_ENABLED,
+            ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
+            WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+            WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+            WIFI_NUM_OPEN_NETWORKS_KEPT,
+            EMERGENCY_TONE,
+            CALL_AUTO_RETRY,
+        };
 
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = new NameValueCache(
