@@ -30,8 +30,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.PopupWindow.OnDismissListener;
 
 
 /**
@@ -978,6 +981,30 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
+
+            // Make sure we hide if our anchor goes away.
+            // TODO: This might be appropriate to push all the way down to PopupWindow,
+            // but it may have other side effects to investigate first. (Text editing handles, etc.)
+            final ViewTreeObserver vto = getViewTreeObserver();
+            if (vto != null) {
+                final OnGlobalLayoutListener layoutListener = new OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (!Spinner.this.isVisibleToUser()) {
+                            dismiss();
+                        }
+                    }
+                };
+                vto.addOnGlobalLayoutListener(layoutListener);
+                setOnDismissListener(new OnDismissListener() {
+                    @Override public void onDismiss() {
+                        final ViewTreeObserver vto = getViewTreeObserver();
+                        if (vto != null) {
+                            vto.removeOnGlobalLayoutListener(layoutListener);
+                        }
+                    }
+                });
+            }
         }
     }
 }
