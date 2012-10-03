@@ -95,7 +95,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         public void setAdapter(TaskDescriptionAdapter adapter);
         public void setCallback(RecentsCallback callback);
         public void setMinSwipeAlpha(float minAlpha);
-        public View findViewForTask(TaskDescription task);
+        public View findViewForTask(int persistentTaskId);
     }
 
     private final class OnLongClickDelegate implements View.OnLongClickListener {
@@ -518,24 +518,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         showIfReady();
     }
 
-    public TaskDescription getBottomTask() {
-        if (mRecentsContainer != null) {
-            ViewGroup container = mRecentsContainer;
-            if (container instanceof RecentsScrollView) {
-                container = (ViewGroup) container.findViewById(
-                        R.id.recents_linear_layout);
-            }
-            if (container.getChildCount() > 0) {
-                View v = container.getChildAt(container.getChildCount() - 1);
-                if (v.getTag() instanceof ViewHolder) {
-                    ViewHolder h = (ViewHolder)v.getTag();
-                    return h.taskDescription;
-                }
-            }
-        }
-        return null;
-    }
-
     public void onWindowAnimationStart() {
         if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
             final int startDelay = 100;
@@ -590,7 +572,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void onTasksLoaded(ArrayList<TaskDescription> tasks, boolean firstScreenful) {
         mNumItemsWaitingForThumbnailsAndIcons = firstScreenful
-                ? tasks.size() : mRecentTaskDescriptions == null 
+                ? tasks.size() : mRecentTaskDescriptions == null
                         ? 0 : mRecentTaskDescriptions.size();
         if (mRecentTaskDescriptions == null) {
             mRecentTaskDescriptions = new ArrayList<TaskDescription>(tasks);
@@ -622,11 +604,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         setContentDescription(recentAppsAccessibilityDescription);
     }
 
-    public boolean simulateClick(TaskDescription task) {
+    public boolean simulateClick(int persistentTaskId) {
         if (mRecentsContainer instanceof RecentsScrollView){
             RecentsScrollView scrollView
                 = (RecentsScrollView) mRecentsContainer;
-            View v = scrollView.findViewForTask(task);
+            View v = scrollView.findViewForTask(persistentTaskId);
             if (v != null) {
                 handleOnClick(v);
                 return true;
