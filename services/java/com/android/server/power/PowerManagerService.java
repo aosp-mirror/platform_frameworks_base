@@ -130,10 +130,16 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
     private static final int MINIMUM_SCREEN_OFF_TIMEOUT = 10 * 1000;
 
-    // The screen dim duration, in seconds.
+    // The screen dim duration, in milliseconds.
     // This is subtracted from the end of the screen off timeout so the
     // minimum screen off timeout should be longer than this.
     private static final int SCREEN_DIM_DURATION = 7 * 1000;
+
+    // The maximum screen dim time expressed as a ratio relative to the screen
+    // off timeout.  If the screen off timeout is very short then we want the
+    // dim timeout to also be quite short so that most of the time is spent on.
+    // Otherwise the user won't get much screen on time before dimming occurs.
+    private static final float MAXIMUM_SCREEN_DIM_RATIO = 0.2f;
 
     // Upper bound on the battery charge percentage in order to consider turning
     // the screen on when the device starts charging wirelessly.
@@ -1168,7 +1174,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             long nextTimeout = 0;
             if (mWakefulness != WAKEFULNESS_ASLEEP) {
                 final int screenOffTimeout = getScreenOffTimeoutLocked();
-                final int screenDimDuration = getScreenDimDurationLocked();
+                final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
 
                 mUserActivitySummary = 0;
                 if (mLastUserActivityTime >= mLastWakeTime) {
@@ -1242,8 +1248,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         return Math.max(timeout, MINIMUM_SCREEN_OFF_TIMEOUT);
     }
 
-    private int getScreenDimDurationLocked() {
-        return SCREEN_DIM_DURATION;
+    private int getScreenDimDurationLocked(int screenOffTimeout) {
+        return Math.min(SCREEN_DIM_DURATION,
+                (int)(screenOffTimeout * MAXIMUM_SCREEN_DIM_RATIO));
     }
 
     /**
@@ -1986,6 +1993,12 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
             pw.println("  mScreenBrightnessSettingMaximum=" + mScreenBrightnessSettingMaximum);
             pw.println("  mScreenBrightnessSettingDefault=" + mScreenBrightnessSettingDefault);
+
+            final int screenOffTimeout = getScreenOffTimeoutLocked();
+            final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            pw.println();
+            pw.println("Screen off timeout: " + screenOffTimeout + " ms");
+            pw.println("Screen dim duration: " + screenDimDuration + " ms");
 
             pw.println();
             pw.println("Wake Locks: size=" + mWakeLocks.size());
