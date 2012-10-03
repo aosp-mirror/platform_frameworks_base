@@ -16,6 +16,8 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
     KeyguardGlowStripView mRightStrip;
     KeyguardWidgetPager mPager;
     private int mPage = 0;
+    private PowerManager mPowerManager;
 
     public KeyguardWidgetRegion(Context context) {
         this(context, null, 0);
@@ -40,6 +43,7 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
 
     public KeyguardWidgetRegion(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
     @Override
@@ -70,21 +74,25 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
 
     @Override
     public void onPageSwitch(View newPage, int newPageIndex) {
-        mPage = newPageIndex;
-
-        // If we're showing the default system status widget, then we want to hide the clock
-        boolean hideClock = false;
+        boolean showingStatusWidget = false;
         if ((newPage instanceof ViewGroup)) {
             ViewGroup vg = (ViewGroup) newPage;
             if (vg.getChildAt(0) instanceof KeyguardStatusView) {
-                hideClock = true;
+                showingStatusWidget = true;
             }
         }
 
-        if (hideClock) {
+        // Disable the status bar clock if we're showing the default status widget
+        if (showingStatusWidget) {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_CLOCK);
         } else {
             setSystemUiVisibility(getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK);
+        }
+
+        // Extend the display timeout if the user switches pages
+        if (mPage != newPageIndex) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+            mPage = newPageIndex;
         }
     }
 }
