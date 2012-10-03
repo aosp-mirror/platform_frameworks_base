@@ -724,6 +724,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         inflateAndAddUserSelectorWidgetIfNecessary();
 
         // Add status widget
+        View statusView = null;
         int statusWidgetId = mLockPatternUtils.getStatusWidget();
         if (statusWidgetId != -1) {
             addWidget(statusWidgetId);
@@ -737,6 +738,16 @@ public class KeyguardHostView extends KeyguardViewBase {
             mAppWidgetContainer.removeView(newStatusWidget);
             newStatusWidget.setId(R.id.keyguard_status_view);
             mAppWidgetContainer.addView(newStatusWidget, oldStatusWidgetPosition);
+            statusView = newStatusWidget;
+        } else {
+            statusView = findViewById(R.id.keyguard_status_view);
+        }
+
+        // Disable all user interaction on status view. This is done to prevent falsing in the
+        // pocket from triggering useractivity and prevents 3rd party replacement widgets
+        // from responding to user interaction while in this position.
+        if (statusView instanceof KeyguardWidgetFrame) {
+            ((KeyguardWidgetFrame) statusView).setDisableUserInteraction(true);
         }
 
         // Add user-selected widget
