@@ -287,8 +287,10 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permet à l\'application de récupérer l\'état interne du système. Des applications malveillantes peuvent récupérer de nombreuses informations confidentielles et sécurisées dont elles ne devraient pas avoir besoin normalement."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"récupérer le contenu de l\'écran"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permet à l\'application de récupérer le contenu de la fenêtre active. Des applications malveillantes peuvent exploiter cette fonctionnalité pour récupérer et lire la totalité du contenu de la fenêtre, à l\'exception des mots de passe."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"activer temporairement l\'accessibilité"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permet à une application d\'activer temporairement l\'accessibilité sur l\'appareil. Des applications malveillantes peuvent activer l\'accessibilité sans le consentement de l\'utilisateur."</string>
+    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
+    <skip />
+    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
+    <skip />
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"récupérer les informations sur les fenêtres"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permet à une application de récupérer les informations sur les fenêtres depuis le gestionnaire de fenêtres. Des applications malveillantes peuvent récupérer des informations destinées à un usage interne du système."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrer les événements"</string>
@@ -1099,15 +1101,11 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Autoriser"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Refuser"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; souhaite envoyer un message à &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="4992814738863678373">"Cela peut engendrer des frais sur votre facture mobile."</string>
+    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Cela va engendrer des frais sur votre facture mobile."</string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Envoyer"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annuler"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Mémoriser mon choix"</string>
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
-    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Toujours autoriser"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ne jamais autoriser"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Carte SIM retirée"</string>
@@ -1367,20 +1365,11 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Téléphone"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Écouteurs"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Haut-parleurs de la station d\'accueil"</string>
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
-    <skip />
+    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Audio HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Système"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"OK"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Sortie multimédia"</string>
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
-    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Écran intégré"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Écran HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1395,21 +1384,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Saisissez le code PIN."</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Saisissez votre mot de passe."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Clé PUK"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Nouveau code PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Le code PIN est erroné."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Veuillez saisir un code PIN comprenant entre quatre et huit chiffres."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Veuillez saisir une clé PUK comportant au moins huit chiffres."</string>
+    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Saisissez la clé PUK et le nouveau code PIN"</string>
+    <string name="kg_invalid_puk" msgid="5809955359950817326">"La clé PUK saisie est incorrecte."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Trop de tentatives."</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Pour déverrouiller le téléphone, veuillez vous connecter avec votre compte Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nom d\'utilisateur (e-mail)"</string>
@@ -1417,8 +1399,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Connexion"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nom d\'utilisateur ou mot de passe non valide."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe ?"\n"Rendez-vous sur la page "<b>"google.com/accounts/recovery"</b>"."</string>
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
-    <skip />
+    <string name="kg_login_checking_password" msgid="8849589033659332457">"Vérification en cours…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Vous avez saisi un code PIN incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Vous avez saisi un mot de passe incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises."\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
@@ -1429,11 +1410,12 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Augmenter le volume au-dessus du niveau de sécurité ?"\n"L\'écoute à un volume élevé pendant des périodes prolongées peut endommager votre audition."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
+    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
-    <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
+    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
     <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
+    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
+    <skip />
+    <!-- no translation found for user_switched (1030428084901139446) -->
     <skip />
 </resources>
