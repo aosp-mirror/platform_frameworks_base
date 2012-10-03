@@ -286,7 +286,7 @@
     <dimen name="kg_runway_lights_height">7dp</dimen>
 
     <!-- The height of the runway lights strip -->
-    <dimen name="kg_runway_lights_vertical_padding">3dp</dimen>
+    <dimen name="kg_runway_lights_vertical_padding">2dp</dimen>
 
     <!-- Horizontal padding for the widget pager -->
     <dimen name="kg_widget_pager_horizontal_padding">16dp</dimen>
@@ -296,6 +296,10 @@
 
     <!-- Bottom padding for the widget pager -->
     <dimen name="kg_widget_pager_bottom_padding">6dp</dimen>
+
+    <!-- Top margin for the runway lights. We add a negative margin in large
+        devices to account for the widget pager padding -->
+    <dimen name="kg_runway_lights_top_margin">0dp</dimen>
 
     <!-- Touch slop for the global toggle accessibility gesture -->
     <dimen name="accessibility_touch_slop">80dip</dimen>

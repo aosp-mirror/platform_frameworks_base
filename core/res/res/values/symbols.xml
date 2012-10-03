@@ -1188,6 +1188,9 @@
   <java-symbol type="bool" name="config_reverseDefaultRotation" />
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
+  <java-symbol type="color" name="kg_multi_user_text_active" />
+  <java-symbol type="color" name="kg_multi_user_text_inactive" />
+  <java-symbol type="color" name="kg_widget_pager_gradient" />
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
@@ -1213,8 +1216,6 @@
   <java-symbol type="drawable" name="magnified_region_frame" />
   <java-symbol type="drawable" name="menu_background" />
   <java-symbol type="drawable" name="stat_sys_secure" />
-  <java-symbol type="drawable" name="kg_widget_overscroll_layer_left" />
-  <java-symbol type="drawable" name="kg_widget_overscroll_layer_right" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="alarm_status" />
   <java-symbol type="id" name="backspace" />
