@@ -149,17 +149,16 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"O ecrã está bloqueado na orientação horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"O ecrã está bloqueado na orientação vertical."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <!-- no translation found for start_dreams (6170089063982549905) -->
-    <skip />
+    <string name="start_dreams" msgid="870400522982252717">"Iniciar sonhos"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo de avião"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"A carregar, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Carregada"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Dispositivos)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Desat."</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Desativado"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brilho"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rodar Automat."</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rodar Automaticamente"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotação Bloqueada"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de Introdução"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Localização em utilização"</string>
