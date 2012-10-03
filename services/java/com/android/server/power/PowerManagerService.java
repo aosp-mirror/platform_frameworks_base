@@ -1014,7 +1014,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     private void updateIsPoweredLocked(int dirty) {
         if ((dirty & DIRTY_BATTERY_STATE) != 0) {
             boolean wasPowered = mIsPowered;
-            mIsPowered = mBatteryService.isPowered();
+            mIsPowered = mBatteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+
+            if (DEBUG) {
+                Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
+                        + ", mIsPowered=" + mIsPowered);
+            }
 
             if (wasPowered != mIsPowered) {
                 mDirty |= DIRTY_IS_POWERED;
