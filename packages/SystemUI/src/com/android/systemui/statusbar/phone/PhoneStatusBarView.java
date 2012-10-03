@@ -19,27 +19,14 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.FrameLayout;
-
 import com.android.systemui.R;
-import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.policy.FixedSizeDrawable;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -53,6 +40,7 @@ public class PhoneStatusBarView extends PanelBar {
     boolean mFullWidthNotifications;
     PanelView mFadingPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
+    private boolean mShouldFade;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -112,7 +100,7 @@ public class PhoneStatusBarView extends PanelBar {
             if (DEBUG) {
                 Slog.v(TAG, "notif frac=" + mNotificationPanel.getExpandedFraction());
             }
-            return (mNotificationPanel.getExpandedFraction() == 1.0f)
+            return (mNotificationPanel.getExpandedFraction() > 0f)
                 ? mSettingsPanel : mNotificationPanel;
         }
 
@@ -120,7 +108,7 @@ public class PhoneStatusBarView extends PanelBar {
         // right 1/3 for quick settings. If you pull the status bar down a second time you'll
         // toggle panels no matter where you pull it down.
 
-        final float w = (float) getMeasuredWidth();
+        final float w = getMeasuredWidth();
         float region = (w * mSettingsPanelDragzoneFrac);
 
         if (DEBUG) {
@@ -138,9 +126,18 @@ public class PhoneStatusBarView extends PanelBar {
     public void onPanelPeeked() {
         super.onPanelPeeked();
         mBar.makeExpandedVisible(true);
-        if (mFadingPanel == null) {
-            mFadingPanel = mTouchingPanel;
+    }
+
+    @Override
+    public void startOpeningPanel(PanelView panel) {
+        super.startOpeningPanel(panel);
+        // we only want to start fading if this is the "first" or "last" panel,
+        // which is kind of tricky to determine
+        mShouldFade = (mFadingPanel == null || mFadingPanel.isFullyExpanded());
+        if (DEBUG) {
+            Slog.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
         }
+        mFadingPanel = panel;
     }
 
     @Override
@@ -153,6 +150,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onPanelFullyOpened(PanelView openPanel) {
         mFadingPanel = openPanel;
+        mShouldFade = true; // now you own the fade, mister
     }
 
     @Override
@@ -166,24 +164,24 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void panelExpansionChanged(PanelView pv, float frac) {
-        super.panelExpansionChanged(pv, frac);
+    public void panelExpansionChanged(PanelView panel, float frac) {
+        super.panelExpansionChanged(panel, frac);
 
         if (DEBUG) {
             Slog.v(TAG, "panelExpansionChanged: f=" + frac);
         }
 
-        if (mFadingPanel == pv
-                && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
-            // woo, special effects
-            final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
-            // attenuate background color alpha by k
-            final int color = (int) ((float)(mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
-            mBar.mStatusBarWindow.setBackgroundColor(color);
+        if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
+            if (mShouldFade) {
+                frac = mPanelExpandedFractionSum; // don't judge me
+                // woo, special effects
+                final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
+                // attenuate background color alpha by k
+                final int color = (int) ((mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
+                mBar.mStatusBarWindow.setBackgroundColor(color);
+            }
         }
 
         mBar.updateCarrierLabelVisibility(false);
     }
-
-
 }
