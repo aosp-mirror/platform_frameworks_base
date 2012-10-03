@@ -3639,8 +3639,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wtoken != null) {
                 boolean delayed = false;
                 if (!wtoken.hidden) {
-                    wtoken.hidden = true;
-
                     final int N = wtoken.windows.size();
                     boolean changed = false;
 
@@ -3660,6 +3658,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             win.mDisplayContent.layoutNeeded = true;
                         }
                     }
+
+                    wtoken.hidden = true;
 
                     if (changed) {
                         performLayoutAndPlaceSurfacesLocked();
