@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 91;
+    private static final int DATABASE_VERSION = 92;
 
     private Context mContext;
     private int mUserHandle;
@@ -1433,6 +1433,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 91;
         }
 
+        if (upgradeVersion == 91) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    // Move ringer mode from system to global settings
+                    String[] settingsToMove = { Settings.System.MODE_RINGER };
+                    moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 92;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1757,9 +1773,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     Settings.System.VOLUME_BLUETOOTH_SCO,
                     AudioManager.DEFAULT_STREAM_VOLUME[AudioManager.STREAM_BLUETOOTH_SCO]);
 
-            loadSetting(stmt, Settings.System.MODE_RINGER,
-                    AudioManager.RINGER_MODE_NORMAL);
-
             // By default:
             // - ringtones, notification, system and music streams are affected by ringer mode
             // on non voice capable devices (tablets)
@@ -2048,6 +2061,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Global.WIFI_SLEEP_POLICY,
                     R.integer.def_wifi_sleep_policy);
+
+            loadSetting(stmt, Settings.Global.MODE_RINGER,
+                    AudioManager.RINGER_MODE_NORMAL);
 
             // --- Previously in 'secure'
             loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
