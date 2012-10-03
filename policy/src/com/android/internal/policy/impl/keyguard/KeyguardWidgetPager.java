@@ -76,6 +76,25 @@ public class KeyguardWidgetPager extends PagedView {
         }
     }
 
+    @Override
+    protected void onPageBeginMoving() {
+        // Enable hardware layers while pages are moving
+        // TODO: We should only do this for the two views that are actually moving
+        int children = getChildCount();
+        for (int i = 0; i < children; i++) {
+            getChildAt(i).setLayerType(LAYER_TYPE_HARDWARE, null);
+        }
+    }
+
+    @Override
+    protected void onPageEndMoving() {
+        // Disable hardware layers while pages are moving
+        int children = getChildCount();
+        for (int i = 0; i < children; i++) {
+            getChildAt(i).setLayerType(LAYER_TYPE_NONE, null);
+        }
+    }
+
     /*
      * This interpolator emulates the rate at which the perceived scale of an object changes
      * as its distance from a camera increases. When this interpolator is applied to a scale

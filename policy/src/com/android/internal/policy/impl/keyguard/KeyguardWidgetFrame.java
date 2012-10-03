@@ -117,14 +117,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
             mOverScrollAmount = r;
             mForegroundGradient = left ? mLeftToRightGradient : mRightToLeftGradient;
             mForegroundAlpha = (int) Math.round((0.85f * r * 255));
-            if (getLayerType() != LAYER_TYPE_HARDWARE) {
-                setLayerType(LAYER_TYPE_HARDWARE, null);
-            }
             invalidate();
-        } else {
-            if (getLayerType() != LAYER_TYPE_NONE) {
-                setLayerType(LAYER_TYPE_NONE, null);
-            }
         }
     }
 }
