@@ -1282,15 +1282,25 @@ public final class PowerManagerService extends IPowerManager.Stub
         return changed;
     }
 
-    // Also used when exiting a dream to determine whether we should go back
-    // to being fully awake or else go to sleep for good.
+    /**
+     * Returns true if the device should go to sleep now.
+     * Also used when exiting a dream to determine whether we should go back
+     * to being fully awake or else go to sleep for good.
+     */
     private boolean isItBedTimeYetLocked() {
-        return mBootCompleted && !mStayOn
-                && (mWakeLockSummary
-                        & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
-                                | WAKE_LOCK_PROXIMITY_SCREEN_OFF)) == 0
-                && (mUserActivitySummary
-                        & (USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) == 0;
+        return mBootCompleted && !isScreenBeingKeptOnLocked();
+    }
+
+    /**
+     * Returns true if the screen is being kept on by a wake lock, user activity
+     * or the stay on while powered setting.
+     */
+    private boolean isScreenBeingKeptOnLocked() {
+        return mStayOn
+                || (mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
+                        | WAKE_LOCK_PROXIMITY_SCREEN_OFF)) != 0
+                || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
+                        | USER_ACTIVITY_SCREEN_DIM)) != 0;
     }
 
     /**
@@ -1298,6 +1308,9 @@ public final class PowerManagerService extends IPowerManager.Stub
      */
     private void updateDreamLocked(int dirty) {
         if ((dirty & (DIRTY_WAKEFULNESS
+                | DIRTY_USER_ACTIVITY
+                | DIRTY_WAKE_LOCKS
+                | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS
                 | DIRTY_IS_POWERED
                 | DIRTY_STAY_ON
@@ -1380,15 +1393,15 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     /**
-     * Returns true if the device is allowed to dream in its current state,
-     * assuming that there was either an explicit request to nap or the user activity
-     * timeout expired and no wake locks are held.
+     * Returns true if the device is allowed to dream in its current state
+     * assuming that it is currently napping or dreaming.
      */
     private boolean canDreamLocked() {
-        return mIsPowered
-                && mDreamsSupportedConfig
+        return mDreamsSupportedConfig
                 && mDreamsEnabledSetting
-                && mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF;
+                && mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF
+                && mBootCompleted
+                && (mIsPowered || isScreenBeingKeptOnLocked());
     }
 
     /**
