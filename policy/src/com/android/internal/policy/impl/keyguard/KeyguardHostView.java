@@ -820,4 +820,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
+    public void goToUserSwitcher() {
+        mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
+    }
+
 }
