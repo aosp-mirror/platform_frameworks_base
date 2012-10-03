@@ -22,10 +22,11 @@
     android:background="@drawable/notification_panel_bg"
     >
     <!-- TODO: Put into ScrollView -->
-    <ScrollView
+    <com.android.systemui.statusbar.phone.QuickSettingsScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
+        android:overScrollMode="ifContentScrolls"
         >
         <com.android.systemui.statusbar.phone.QuickSettingsContainerView
             android:id="@+id/quick_settings_container"
@@ -34,7 +35,7 @@
             android:animateLayoutChanges="true"
             android:columnCount="@integer/quick_settings_num_columns"
             />
-    </ScrollView>
+    </com.android.systemui.statusbar.phone.QuickSettingsScrollView>
 
     <View
         android:id="@+id/handle"
