@@ -291,6 +291,7 @@ public class KeyguardViewMediator {
         public void onUserSwitched(int userId) {
             // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
             synchronized (KeyguardViewMediator.this) {
+                adjustStatusBarLocked();
                 resetStateLocked(true);
             }
             // We should always go back to the locked state when a user
