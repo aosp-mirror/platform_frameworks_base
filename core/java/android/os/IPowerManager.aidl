@@ -37,7 +37,8 @@ interface IPowerManager
     void nap(long time);
 
     boolean isScreenOn();
-    void reboot(String reason);
+    void reboot(boolean confirm, String reason, boolean wait);
+    void shutdown(boolean confirm, boolean wait);
     void crash(String message);
 
     void setStayOnSetting(int val);

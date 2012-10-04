@@ -596,7 +596,7 @@ public final class PowerManager {
      */
     public void reboot(String reason) {
         try {
-            mService.reboot(reason);
+            mService.reboot(false, reason, true);
         } catch (RemoteException e) {
         }
     }

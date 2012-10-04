@@ -1602,22 +1602,39 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     /**
-     * Reboot the device immediately, passing 'reason' (may be null)
+     * Reboot the device, passing 'reason' (may be null)
      * to the underlying __reboot system call.  Should not return.
      */
     @Override // Binder call
-    public void reboot(String reason) {
+    public void reboot(boolean confirm, String reason, boolean wait) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            rebootInternal(reason);
+            rebootInternal(false, confirm, reason, wait);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void rebootInternal(final String reason) {
+    /**
+     * Shutdown the devic, passing 'reason' (may be null)
+     * to the underlying __reboot system call.  Should not return.
+     */
+    @Override // Binder call
+    public void shutdown(boolean confirm, boolean wait) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            rebootInternal(true, confirm, null, wait);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void rebootInternal(final boolean shutdown, final boolean confirm,
+            final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
             throw new IllegalStateException("Too early to call reboot()");
         }
@@ -1625,7 +1642,11 @@ public final class PowerManagerService extends IPowerManager.Stub
         Runnable runnable = new Runnable() {
             public void run() {
                 synchronized (this) {
-                    ShutdownThread.reboot(mContext, reason, false);
+                    if (shutdown) {
+                        ShutdownThread.shutdown(mContext, confirm);
+                    } else {
+                        ShutdownThread.reboot(mContext, reason, confirm);
+                    }
                 }
             }
         };
@@ -1636,11 +1657,13 @@ public final class PowerManagerService extends IPowerManager.Stub
         mHandler.sendMessage(msg);
 
         // PowerManager.reboot() is documented not to return so just wait for the inevitable.
-        synchronized (runnable) {
-            while (true) {
-                try {
-                    runnable.wait();
-                } catch (InterruptedException e) {
+        if (wait) {
+            synchronized (runnable) {
+                while (true) {
+                    try {
+                        runnable.wait();
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
         }
