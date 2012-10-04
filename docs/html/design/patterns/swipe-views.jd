@@ -77,3 +77,13 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
     </ul>
   </div>
 </div>
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create swipe views, read
+  <a href="{@docRoot}training/implementing-navigation/lateral.html">Implementing Lateral Navigation</a>.
+  </p>
+</div>
+
+

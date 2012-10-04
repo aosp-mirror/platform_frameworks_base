@@ -36,3 +36,10 @@ use borderless buttons with both icons and text. Borderless buttons are visually
 than basic buttons and integrate nicely with other content.</p>
 
 <img src="{@docRoot}design/media/buttons_borderless.png">
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build and customize buttons in your app,
+  see the <a href="{@docRoot}guide/topics/ui/controls/button.html">Buttons</a> API guide.</p>
+</div>
