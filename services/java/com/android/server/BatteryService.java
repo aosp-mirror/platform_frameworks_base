@@ -127,6 +127,8 @@ public final class BatteryService extends Binder {
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
 
+    private boolean mUpdatesStopped;
+
     private Led mLed;
 
     private boolean mSentLowBatteryBroadcast = false;
@@ -231,7 +233,7 @@ public final class BatteryService extends Binder {
             Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
             intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
     }
 
@@ -244,16 +246,18 @@ public final class BatteryService extends Binder {
             Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
             intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
     }
 
     private void updateLocked() {
-        // Update the values of mAcOnline, et. all.
-        native_update();
+        if (!mUpdatesStopped) {
+            // Update the values of mAcOnline, et. all.
+            native_update();
 
-        // Process the new values.
-        processValuesLocked();
+            // Process the new values.
+            processValuesLocked();
+        }
     }
 
     private void processValuesLocked() {
@@ -543,6 +547,9 @@ public final class BatteryService extends Binder {
         synchronized (mLock) {
             if (args == null || args.length == 0 || "-a".equals(args[0])) {
                 pw.println("Current Battery Service state:");
+                if (mUpdatesStopped) {
+                    pw.println("  (UPDATES STOPPED -- use 'reset' to restart)");
+                }
                 pw.println("  AC powered: " + mAcOnline);
                 pw.println("  USB powered: " + mUsbOnline);
                 pw.println("  Wireless powered: " + mWirelessOnline);
@@ -554,35 +561,41 @@ public final class BatteryService extends Binder {
                 pw.println("  voltage:" + mBatteryVoltage);
                 pw.println("  temperature: " + mBatteryTemperature);
                 pw.println("  technology: " + mBatteryTechnology);
-            } else if (false) {
-                // DO NOT SUBMIT WITH THIS TURNED ON
-                if (args.length == 3 && "set".equals(args[0])) {
-                    String key = args[1];
-                    String value = args[2];
-                    try {
-                        boolean update = true;
-                        if ("ac".equals(key)) {
-                            mAcOnline = Integer.parseInt(value) != 0;
-                        } else if ("usb".equals(key)) {
-                            mUsbOnline = Integer.parseInt(value) != 0;
-                        } else if ("wireless".equals(key)) {
-                            mWirelessOnline = Integer.parseInt(value) != 0;
-                        } else if ("status".equals(key)) {
-                            mBatteryStatus = Integer.parseInt(value);
-                        } else if ("level".equals(key)) {
-                            mBatteryLevel = Integer.parseInt(value);
-                        } else if ("invalid".equals(key)) {
-                            mInvalidCharger = Integer.parseInt(value);
-                        } else {
-                            update = false;
-                        }
-                        if (update) {
-                            processValuesLocked();
-                        }
-                    } catch (NumberFormatException ex) {
-                        pw.println("Bad value: " + value);
+            } else if (args.length == 3 && "set".equals(args[0])) {
+                String key = args[1];
+                String value = args[2];
+                try {
+                    boolean update = true;
+                    if ("ac".equals(key)) {
+                        mAcOnline = Integer.parseInt(value) != 0;
+                    } else if ("usb".equals(key)) {
+                        mUsbOnline = Integer.parseInt(value) != 0;
+                    } else if ("wireless".equals(key)) {
+                        mWirelessOnline = Integer.parseInt(value) != 0;
+                    } else if ("status".equals(key)) {
+                        mBatteryStatus = Integer.parseInt(value);
+                    } else if ("level".equals(key)) {
+                        mBatteryLevel = Integer.parseInt(value);
+                    } else if ("invalid".equals(key)) {
+                        mInvalidCharger = Integer.parseInt(value);
+                    } else {
+                        pw.println("Unknown set option: " + key);
+                        update = false;
                     }
+                    if (update) {
+                        mUpdatesStopped = true;
+                        processValuesLocked();
+                    }
+                } catch (NumberFormatException ex) {
+                    pw.println("Bad value: " + value);
                 }
+            } else if (args.length == 1 && "reset".equals(args[0])) {
+                mUpdatesStopped = false;
+                updateLocked();
+            } else {
+                pw.println("Dump current battery state, or:");
+                pw.println("  set ac|usb|wireless|status|level|invalid <value>");
+                pw.println("  reset");
             }
         }
     }
