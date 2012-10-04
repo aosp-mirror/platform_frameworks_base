@@ -1078,8 +1078,11 @@ public final class InputMethodManager {
         Handler vh = view.getHandler();
         if (vh == null) {
             // If the view doesn't have a handler, something has changed out
-            // from under us, so just bail.
-            if (DEBUG) Log.v(TAG, "ABORT input: no handler for view!");
+            // from under us, so just close the current input.
+            // If we don't close the current input, the current input method can remain on the
+            // screen without a connection.
+            if (DEBUG) Log.v(TAG, "ABORT input: no handler for view! Close current input.");
+            closeCurrentInput();
             return false;
         }
         if (vh.getLooper() != Looper.myLooper()) {
