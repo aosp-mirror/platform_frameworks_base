@@ -174,9 +174,11 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     public interface NetworkSignalChangedCallback {
-        void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String description);
-        void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId, int dataTypeIconId,
-                String description);
+        void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+                String wifitSignalContentDescriptionId, String description);
+        void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
+                String mobileSignalContentDescriptionId, int dataTypeIconId,
+                String dataTypeContentDescriptionId, String description);
         void onAirplaneModeChanged(boolean enabled);
     }
 
@@ -347,19 +349,23 @@ public class NetworkController extends BroadcastReceiver {
         boolean wifiEnabled = mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature);
         String wifiDesc = wifiEnabled ?
                 mWifiSsid : null;
-        cb.onWifiSignalChanged(wifiEnabled, mQSWifiIconId, wifiDesc);
+        cb.onWifiSignalChanged(wifiEnabled, mQSWifiIconId, mContentDescriptionWifi, wifiDesc);
 
         if (isEmergencyOnly()) {
-            cb.onMobileDataSignalChanged(false, mQSPhoneSignalIconId, mQSDataTypeIconId, null);
+            cb.onMobileDataSignalChanged(false, mQSPhoneSignalIconId,
+                    mContentDescriptionPhoneSignal, mQSDataTypeIconId, mContentDescriptionDataType,
+                    null);
         } else {
             if (mIsWimaxEnabled && mWimaxConnected) {
                 // Wimax is special
-                cb.onMobileDataSignalChanged(true, mQSPhoneSignalIconId, mQSDataTypeIconId,
-                        mNetworkName);
+                cb.onMobileDataSignalChanged(true, mQSPhoneSignalIconId,
+                        mContentDescriptionPhoneSignal, mQSDataTypeIconId,
+                        mContentDescriptionDataType, mNetworkName);
             } else {
                 // Normal mobile data
                 cb.onMobileDataSignalChanged(mHasMobileDataFeature, mQSPhoneSignalIconId,
-                        mQSDataTypeIconId, mNetworkName);
+                        mContentDescriptionPhoneSignal, mQSDataTypeIconId,
+                        mContentDescriptionDataType, mNetworkName);
             }
         }
         cb.onAirplaneModeChanged(mAirplaneMode);
@@ -1005,7 +1011,7 @@ public class NetworkController extends BroadcastReceiver {
             //   - We are connected to mobile data, or
             //   - We are not connected to mobile data, as long as the *reason* packets are not
             //     being routed over that link is that we have better connectivity via wifi.
-            // If data is disconnected for some other reason but wifi (or ethernet/bluetooth) 
+            // If data is disconnected for some other reason but wifi (or ethernet/bluetooth)
             // is connected, we show nothing.
             // Otherwise (nothing connected) we show "No internet connection".
 
@@ -1350,7 +1356,7 @@ public class NetworkController extends BroadcastReceiver {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
-        pw.println(String.format("  %s network type %d (%s)", 
+        pw.println(String.format("  %s network type %d (%s)",
                 mConnected?"CONNECTED":"DISCONNECTED",
                 mConnectedNetworkType, mConnectedNetworkTypeName));
         pw.println("  - telephony ------");
