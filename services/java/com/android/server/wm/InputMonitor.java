@@ -21,6 +21,7 @@ import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerService.AllWindowsIterator;
 
+import android.app.ActivityManagerNative;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
@@ -89,8 +90,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public long notifyANR(InputApplicationHandle inputApplicationHandle,
             InputWindowHandle inputWindowHandle) {
         AppWindowToken appWindowToken = null;
+        WindowState windowState = null;
+        boolean aboveSystem = false;
         synchronized (mService.mWindowMap) {
-            WindowState windowState = null;
             if (inputWindowHandle != null) {
                 windowState = (WindowState) inputWindowHandle.windowState;
                 if (windowState != null) {
@@ -104,6 +106,12 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             if (windowState != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
                         + "sending to " + windowState.mAttrs.getTitle());
+                // Figure out whether this window is layered above system windows.
+                // We need to do this here to help the activity manager know how to
+                // layer its ANR dialog.
+                int systemAlertLayer = mService.mPolicy.windowTypeToLayerLw(
+                        WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                aboveSystem = windowState.mBaseLayer > systemAlertLayer;
             } else if (appWindowToken != null) {
                 Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
                         + "sending to application " + appWindowToken.stringName);
@@ -123,6 +131,19 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
                     return appWindowToken.inputDispatchingTimeoutNanos;
+                }
+            } catch (RemoteException ex) {
+            }
+        } else if (windowState != null) {
+            try {
+                // Notify the activity manager about the timeout and let it decide whether
+                // to abort dispatching or keep waiting.
+                long timeout = ActivityManagerNative.getDefault().inputDispatchingTimedOut(
+                        windowState.mSession.mPid, aboveSystem);
+                if (timeout >= 0) {
+                    // The activity manager declined to abort dispatching.
+                    // Wait a bit longer and timeout again later.
+                    return timeout;
                 }
             } catch (RemoteException ex) {
             }

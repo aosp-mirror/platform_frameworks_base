@@ -970,7 +970,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     if (mShowDialogs) {
                         Dialog d = new AppNotRespondingDialog(ActivityManagerService.this,
-                                mContext, proc, (ActivityRecord)data.get("activity"));
+                                mContext, proc, (ActivityRecord)data.get("activity"),
+                                msg.arg1 != 0);
                         d.show();
                         proc.anrDialog = d;
                     } else {
@@ -3247,7 +3248,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,
-            ActivityRecord parent, final String annotation) {
+            ActivityRecord parent, boolean aboveSystem, final String annotation) {
         ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
         SparseArray<Boolean> lastPids = new SparseArray<Boolean>(20);
 
@@ -3388,6 +3389,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             HashMap map = new HashMap();
             msg.what = SHOW_NOT_RESPONDING_MSG;
             msg.obj = map;
+            msg.arg1 = aboveSystem ? 1 : 0;
             map.put("app", app);
             if (activity != null) {
                 map.put("activity", activity);
@@ -7338,6 +7340,51 @@ public final class ActivityManagerService extends ActivityManagerNative
         // it will just eventually cause the user to be presented with
         // a UI to select where the bug report goes.
         SystemProperties.set("ctl.start", "bugreport");
+    }
+
+    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) {
+        if (checkCallingPermission(android.Manifest.permission.FILTER_EVENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.FILTER_EVENTS);
+        }
+
+        ProcessRecord proc;
+
+        // TODO: Unify this code with ActivityRecord.keyDispatchingTimedOut().
+        synchronized (this) {
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            if (proc != null) {
+                if (proc.debugging) {
+                    return -1;
+                }
+
+                if (mDidDexOpt) {
+                    // Give more time since we were dexopting.
+                    mDidDexOpt = false;
+                    return -1;
+                }
+
+                if (proc.instrumentationClass != null) {
+                    Bundle info = new Bundle();
+                    info.putString("shortMsg", "keyDispatchingTimedOut");
+                    info.putString("longMsg", "Timed out while dispatching key event");
+                    finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
+                    proc = null;
+                }
+            }
+        }
+
+        if (proc != null) {
+            appNotResponding(proc, null, null, aboveSystem, "keyDispatchingTimedOut");
+            if (proc.instrumentationClass != null || proc.usingWrapper) {
+                return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
+            }
+        }
+
+        return KEY_DISPATCHING_TIMEOUT;
     }
 
     public void registerProcessObserver(IProcessObserver observer) {

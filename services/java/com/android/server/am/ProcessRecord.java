@@ -407,7 +407,7 @@ class ProcessRecord {
             sb.append('u');
             sb.append(userId);
             sb.append('a');
-            sb.append(info.uid%Process.FIRST_APPLICATION_UID);
+            sb.append(UserHandle.getAppId(info.uid));
             if (uid != info.uid) {
                 sb.append('i');
                 sb.append(UserHandle.getAppId(uid) - Process.FIRST_ISOLATED_UID);
