@@ -35,3 +35,10 @@ tabs.</p>
 <div class="figure-caption">
   Spinners in the Holo Dark and Holo Light themes, in various states.
 </div>
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create spinners,
+  see the <a href="{@docRoot}guide/topics/ui/controls/spinner.html">Spinners</a> API guide.</p>
+</div>
