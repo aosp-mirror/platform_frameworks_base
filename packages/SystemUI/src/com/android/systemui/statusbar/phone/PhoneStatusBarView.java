@@ -149,6 +149,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public void onPanelFullyOpened(PanelView openPanel) {
+        super.onPanelFullyOpened(openPanel);
         mFadingPanel = openPanel;
         mShouldFade = true; // now you own the fade, mister
     }
