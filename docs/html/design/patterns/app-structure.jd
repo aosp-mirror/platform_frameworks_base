@@ -86,6 +86,9 @@ important actions.</p>
   through the navigation hierarchy.</li>
 </ul>
 
+<p>For more discussion, see the <a href="{@docRoot}design/patterns/actionbar.html">Action Bar</a>
+design guide.</p>
+
   </div>
   <div class="layout-content-col span-8">
 
@@ -164,6 +167,10 @@ in view at the same time.</p>
   </div>
 </div>
 
+<p>For more discussion, see the <a href="{@docRoot}design/building-blocks/tabs.html">Tabs</a>
+design guide.</p>
+
+
 <h4>Allow cutting through hierarchies</h4>
 <p>Take advantage of shortcuts that allow people to reach their goals quicker. To allow top-level
 invocation of actions for a data item from within list or grid views, display prominent actions
@@ -183,6 +190,12 @@ are often good reasons to act on collections of data as well.</p>
 delete multiple items in the category view. Analyze which detail view actions are applicable to
 collections of items. Then use multi-select to allow application of those actions to multiple items
 in a category view.</p>
+
+
+<p>For more discussion, see the <a href="{@docRoot}design/patterns/selection.html">Selection</a>
+design guide.</p>
+
+
 <h2 id="details">Details</h2>
 
 <p>The detail view allows you to view and act on your data. The layout of the detail view depends on the data type being displayed, and therefore differs widely among apps.</p>
@@ -238,6 +251,10 @@ to achieve this.</p>
   In addition to supporting swipe gestures to move left or right through pages, Magazines provides a
   thumbnail view control that lets people quickly jump to specific pages.
 </div>
+
+<p>For more discussion, see the <a href="{@docRoot}design/patterns/swipe-views.html">Swipe Views</a>
+design guide.</p>
+
 
 <h2 id="checklist">Checklist</h2>
 
