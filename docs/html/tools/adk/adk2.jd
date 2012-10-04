@@ -28,19 +28,22 @@ page.title=Accessory Development Kit 2012 Guide
     <ol>
       <li><a href="https://developers.google.com/events/io/sessions/gooio2012/128/">
         Google I/O Session Video</a></li>
-      <li><a href="aoa.html">Android Open Accessory Protocol</a></li>
-      <li><a href="aoa2.html">Android Open Accessory Protocol 2.0</a></li>
+      <li><a href="http://source.android.com/tech/accessories/aoap/aoa.html">
+        Android Open Accessory Protocol</a></li>
+      <li><a href="http://source.android.com/tech/accessories/aoap/aoa2.html">
+        Android Open Accessory Protocol 2.0</a></li>
       <li><a href="{@docRoot}guide/topics/connectivity/usb/accessory.html">
         USB Accessory Dev Guide</a></li>
     </ol>
   </div>
 </div>
 
-<p>The Android Accessory Development Kit (ADK) for 2012 is the latest reference implementation of
-an <a href="aoa.html">Android Open Accessory</a> device, designed to help Android hardware accessory
-builders and software developers create accessories for Android. The ADK 2012 is based on the <a
-href="http://arduino.cc">Arduino</a> open source electronics prototyping platform, with some
-hardware and software extensions that allow it to communicate with Android devices.</p>
+<p>The Android Accessory Development Kit (ADK) for 2012 is the latest reference implementation of an
+<a href="http://source.android.com/tech/accessories/index.html">Android Open Accessory</a> device,
+designed to help Android hardware accessory builders and software developers create accessories
+for Android. The ADK 2012 is based on the <a href="http://arduino.cc">Arduino</a> open source
+electronics prototyping platform, with some hardware and software extensions that allow it to
+communicate with Android devices.</p>
 
 <p>A limited number of these kits were produced and distributed at the Google I/O 2012 developer
 conference. If you did not receive one of these kits, fear not! The specifications and design files
@@ -537,7 +540,7 @@ void loop() {
     L.accessorySend(outmsg, outmsgLen);
   }
   L.adkEventProcess();
-}  
+}
 </pre>
 
 <p>For more details, review the implementations of these methods in the {@code clock.ino}
@@ -604,8 +607,8 @@ implementation details.</p>
 
 <p>One of the important new features introduced with the ADK 2012 is the ability to play audio over
 a USB connection. This innovation was introduced as an update to Android Open Accessory (AOA)
-<a href="aoa2.html">protocol 2.0</a> and is available on devices running Android 4.1 (API Level 16)
-and higher.</p>
+<a href="http://source.android.com/tech/accessories/aoap/aoa2.html">protocol 2.0</a> and is
+available on devices running Android 4.1 (API Level 16) and higher.</p>
 
 <p>The ADK 2012 provides a reference implementation of this functionality for accessory developers.
 No software application is required to be installed on the connected Android device, accessory
