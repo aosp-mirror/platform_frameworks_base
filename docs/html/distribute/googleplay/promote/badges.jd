@@ -206,7 +206,7 @@ alt="Get it on Google Play (large)" /></label>
 </div>
 
   <input onclick="return buildButton(this.parentNode);"
-    value="Build my badge" style="padding:10px" />
+    type="button" value="Build my badge" style="padding:10px" />
   <br/>
 </form>
 
