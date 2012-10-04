@@ -20,6 +20,7 @@ package com.android.server.location;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -48,6 +49,8 @@ public final class LocationBlacklist extends ContentObserver {
     // all fields below synchronized on mLock
     private String[] mWhitelist = new String[0];
     private String[] mBlacklist = new String[0];
+
+    private int mCurrentUserId = UserHandle.USER_OWNER;
     
     public LocationBlacklist(Context context, Handler handler) {
         super(handler);
@@ -56,20 +59,22 @@ public final class LocationBlacklist extends ContentObserver {
 
     public void init() {
         mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                BLACKLIST_CONFIG_NAME), false, this);
+                BLACKLIST_CONFIG_NAME), false, this, UserHandle.USER_ALL);
 //        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-//                WHITELIST_CONFIG_NAME), false, this);
+//                WHITELIST_CONFIG_NAME), false, this, UserHandle.USER_ALL);
         reloadBlacklist();
     }
 
+    private void reloadBlacklistLocked() {
+        mWhitelist = getStringArrayLocked(WHITELIST_CONFIG_NAME);
+        Slog.i(TAG, "whitelist: " + Arrays.toString(mWhitelist));
+        mBlacklist = getStringArrayLocked(BLACKLIST_CONFIG_NAME);
+        Slog.i(TAG, "blacklist: " + Arrays.toString(mBlacklist));
+    }
+
     private void reloadBlacklist() {
-        String blacklist[] = getStringArray(BLACKLIST_CONFIG_NAME);
-        String whitelist[] = getStringArray(WHITELIST_CONFIG_NAME);
         synchronized (mLock) {
-            mWhitelist = whitelist;
-            Slog.i(TAG, "whitelist: " + Arrays.toString(mWhitelist));
-            mBlacklist = blacklist;
-            Slog.i(TAG, "blacklist: " + Arrays.toString(mBlacklist));
+            reloadBlacklistLocked();
         }
     }
 
@@ -78,7 +83,6 @@ public final class LocationBlacklist extends ContentObserver {
      * (package name matches blacklist, and does not match whitelist)
      */
     public boolean isBlacklisted(String packageName) {
-        /*
         synchronized (mLock) {
             for (String black : mBlacklist) {
                 if (packageName.startsWith(black)) {
@@ -92,7 +96,6 @@ public final class LocationBlacklist extends ContentObserver {
                 }
             }
         }
-        */
         return false;
     }
 
@@ -113,8 +116,19 @@ public final class LocationBlacklist extends ContentObserver {
         reloadBlacklist();
     }
 
-    private String[] getStringArray(String key) {
-        String flatString = Settings.Secure.getString(mContext.getContentResolver(), key);
+    public void switchUser(int userId) {
+        synchronized(mLock) {
+            mCurrentUserId = userId;
+            reloadBlacklistLocked();
+        }
+    }
+
+    private String[] getStringArrayLocked(String key) {
+        String flatString;
+        synchronized(mLock) {
+            flatString = Settings.Secure.getStringForUser(mContext.getContentResolver(), key,
+                    mCurrentUserId);
+        }
         if (flatString == null) {
             return new String[0];
         }
