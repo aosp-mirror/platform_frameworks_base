@@ -135,6 +135,7 @@ public class SettingsProvider extends ContentProvider {
         /** Operate on existing rows. */
         SqlArguments(Uri url, String where, String[] args) {
             if (url.getPathSegments().size() == 1) {
+                // of the form content://settings/secure, arbitrary where clause
                 this.table = url.getPathSegments().get(0);
                 if (!DatabaseHelper.isValidTable(this.table)) {
                     throw new IllegalArgumentException("Bad root path: " + this.table);
@@ -146,6 +147,7 @@ public class SettingsProvider extends ContentProvider {
             } else if (!TextUtils.isEmpty(where)) {
                 throw new UnsupportedOperationException("WHERE clause not supported: " + url);
             } else {
+                // of the form content://settings/secure/element_name, no where clause
                 this.table = url.getPathSegments().get(0);
                 if (!DatabaseHelper.isValidTable(this.table)) {
                     throw new IllegalArgumentException("Bad root path: " + this.table);
@@ -153,8 +155,16 @@ public class SettingsProvider extends ContentProvider {
                 if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table) ||
                     TABLE_GLOBAL.equals(this.table)) {
                     this.where = Settings.NameValueTable.NAME + "=?";
-                    this.args = new String[] { url.getPathSegments().get(1) };
+                    final String name = url.getPathSegments().get(1);
+                    this.args = new String[] { name };
+                    // Rewrite the table for known-migrated names
+                    if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table)) {
+                        if (sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name)) {
+                            this.table = TABLE_GLOBAL;
+                        }
+                    }
                 } else {
+                    // of the form content://bookmarks/19
                     this.where = "_id=" + ContentUris.parseId(url);
                     this.args = null;
                 }
@@ -846,6 +856,17 @@ public class SettingsProvider extends ContentProvider {
         String name = initialValues.getAsString(Settings.Secure.NAME);
         if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
             if (!parseProviderList(url, initialValues)) return null;
+        }
+
+        // If this is an insert() of a key that has been migrated to the global store,
+        // redirect the operation to that store
+        if (name != null) {
+            if (sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name)) {
+                if (!TABLE_GLOBAL.equals(args.table)) {
+                    if (LOCAL_LOGV) Slog.i(TAG, "Rewrite of insert() of now-global key " + name);
+                }
+                args.table = TABLE_GLOBAL;  // next condition will rewrite the user handle
+            }
         }
 
         // The global table is stored under the owner, always
