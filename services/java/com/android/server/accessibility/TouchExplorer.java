@@ -645,7 +645,9 @@ class TouchExplorer implements EventStreamTransformation {
                 // We are in dragging state so we have two pointers and another one
                 // goes down => delegate the three pointers to the view hierarchy
                 mCurrentState = STATE_DELEGATING;
-                sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                if (mDraggingPointerId != INVALID_POINTER_ID) {
+                    sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
+                }
                 sendDownForAllActiveNotInjectedPointers(event, policyFlags);
             } break;
             case MotionEvent.ACTION_MOVE: {
