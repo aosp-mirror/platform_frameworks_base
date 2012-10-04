@@ -325,6 +325,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      * @param userId the new active user's UserId
      */
     private void switchUser(int userId) {
+        mBlacklist.switchUser(userId);
         //Log.d("LocationManagerService", "switchUser(" + mCurrentUserId + " -> " + userId + ")"); // TODO: remove this
         synchronized (mLock) {
             // TODO: inform previous user's Receivers that they will no longer receive updates
