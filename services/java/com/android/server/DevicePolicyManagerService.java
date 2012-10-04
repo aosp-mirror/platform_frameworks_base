@@ -401,6 +401,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("disable-camera".equals(tag)) {
                     disableCamera = Boolean.parseBoolean(
                             parser.getAttributeValue(null, "value"));
+                } else if ("disable-keyguard-features".equals(tag)) {
+                    disabledKeyguardFeatures = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
                 }
@@ -457,6 +460,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(encryptionRequested);
             pw.print(prefix); pw.print("disableCamera=");
                     pw.println(disableCamera);
+            pw.print(prefix); pw.print("disabledKeyguardFeatures=");
+                    pw.println(disabledKeyguardFeatures);
         }
     }
 
