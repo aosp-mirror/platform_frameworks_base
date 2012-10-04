@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.animation.TimeAnimator.TimeListener;
 import android.content.Context;
@@ -45,14 +46,17 @@ public class PanelView extends FrameLayout {
     private float mBrakingSpeedPx = 150; // XXX Resource
 
     private View mHandleView;
+    private float mPeekHeight;
     private float mTouchOffset;
     private float mExpandedFraction = 0;
     private float mExpandedHeight = 0;
+    private boolean mJustPeeked;
     private boolean mClosing;
     private boolean mRubberbanding;
     private boolean mTracking;
 
     private TimeAnimator mTimeAnimator;
+    private ObjectAnimator mPeekAnimator;
     private VelocityTracker mVelocityTracker;
 
     private int[] mAbsPos = new int[2];
@@ -68,7 +72,7 @@ public class PanelView extends FrameLayout {
     private final Runnable mStopAnimator = new Runnable() {
         @Override
         public void run() {
-            if (mTimeAnimator.isStarted()) {
+            if (mTimeAnimator != null && mTimeAnimator.isStarted()) {
                 mTimeAnimator.end();
                 mRubberbanding = false;
                 mClosing = false;
@@ -82,11 +86,26 @@ public class PanelView extends FrameLayout {
     protected float mInitialTouchY;
     protected float mFinalTouchY;
 
+    private void runPeekAnimation() {
+        if (DEBUG) LOG("peek to height=%.1f", mPeekHeight);
+        if (mTimeAnimator.isStarted()) {
+            return;
+        }
+        if (mPeekAnimator == null) {
+            mPeekAnimator = ObjectAnimator.ofFloat(this, 
+                    "expandedHeight", mPeekHeight)
+                .setDuration(300);
+        }
+        mPeekAnimator.start();
+    }
+
     private void animationTick(long dtms) {
         if (!mTimeAnimator.isStarted()) {
             // XXX HAX to work around bug in TimeAnimator.end() not resetting its last time
             mTimeAnimator = new TimeAnimator();
             mTimeAnimator.setTimeListener(mAnimationCallback);
+
+            mPeekAnimator.cancel();
 
             mTimeAnimator.start();
 
@@ -182,6 +201,10 @@ public class PanelView extends FrameLayout {
         mFlingGestureMaxXVelocityPx = res.getDimension(R.dimen.fling_gesture_max_x_velocity);
 
         mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
+
+        mPeekHeight = res.getDimension(R.dimen.close_handle_height) 
+            + getPaddingBottom() // our window might have a dropshadow
+            - (mHandleView == null ? 0 : mHandleView.getPaddingTop()); // the handle might have a topshadow
     }
 
     private void trackMovement(MotionEvent event) {
@@ -203,9 +226,10 @@ public class PanelView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mHandleView = findViewById(R.id.handle);
+
         loadDimens();
 
-        mHandleView = findViewById(R.id.handle);
         if (DEBUG) LOG("handle view: " + mHandleView);
         if (mHandleView != null) {
             mHandleView.setOnTouchListener(new View.OnTouchListener() {
@@ -228,12 +252,24 @@ public class PanelView extends FrameLayout {
                             mTimeAnimator.cancel(); // end any outstanding animations
                             mBar.onTrackingStarted(PanelView.this);
                             mTouchOffset = (rawY - mAbsPos[1]) - PanelView.this.getExpandedHeight();
+                            if (mExpandedHeight == 0) {
+                                mJustPeeked = true;
+                                runPeekAnimation();
+                            }
                             break;
 
                         case MotionEvent.ACTION_MOVE:
-                            PanelView.this.setExpandedHeightInternal(rawY - mAbsPos[1] - mTouchOffset);
-
-                            mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
+                            final float h = rawY - mAbsPos[1] - mTouchOffset;
+                            if (h > mPeekHeight) {
+                                if (mPeekAnimator.isRunning()) {
+                                    mPeekAnimator.cancel();
+                                }
+                                mJustPeeked = false;
+                            }
+                            if (!mJustPeeked) {
+                                PanelView.this.setExpandedHeightInternal(h);
+                                mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
+                            }
 
                             trackMovement(event);
                             break;
@@ -267,7 +303,8 @@ public class PanelView extends FrameLayout {
                             // preventing spurious flings due to touch screen jitter
                             final float deltaY = Math.abs(mFinalTouchY - mInitialTouchY);
                             if (deltaY < mFlingGestureMinDistPx
-                                    || vel < mFlingExpandMinVelocityPx) {
+                                    || vel < mFlingExpandMinVelocityPx
+                                    || mJustPeeked) {
                                 vel = 0;
                             }
 
@@ -347,9 +384,13 @@ public class PanelView extends FrameLayout {
 
 
     public void setExpandedHeight(float height) {
+        if (DEBUG) LOG("setExpandedHeight(%.1f)", height);
         mTracking = mRubberbanding = false;
-        post(mStopAnimator);
+        if (mTimeAnimator.isRunning()) {
+            post(mStopAnimator);
+        }
         setExpandedHeightInternal(height);
+        mBar.panelExpansionChanged(PanelView.this, mExpandedFraction);
     }
 
     @Override
