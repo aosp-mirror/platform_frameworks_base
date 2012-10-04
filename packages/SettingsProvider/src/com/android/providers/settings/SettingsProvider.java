@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -685,7 +686,16 @@ public class SettingsProvider extends ContentProvider {
         qb.setTables(args.table);
 
         Cursor ret = qb.query(db, select, args.where, args.args, null, null, sort);
-        ret.setNotificationUri(getContext().getContentResolver(), url);
+        // the default Cursor interface does not support per-user observation
+        try {
+            AbstractCursor c = (AbstractCursor) ret;
+            c.setNotificationUri(getContext().getContentResolver(), url, forUser);
+        } catch (ClassCastException e) {
+            // details of the concrete Cursor implementation have changed and this code has
+            // not been updated to match -- complain and fail hard.
+            Log.wtf(TAG, "Incompatible cursor derivation!");
+            throw e;
+        }
         return ret;
     }
 
