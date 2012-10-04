@@ -19,6 +19,7 @@ package android.database;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -350,6 +351,11 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      * specific row URI, or a base URI for a whole class of content.
      */
     public void setNotificationUri(ContentResolver cr, Uri notifyUri) {
+        setNotificationUri(cr, notifyUri, UserHandle.myUserId());
+    }
+
+    /** @hide - set the notification uri but with an observer for a particular user's view */
+    public void setNotificationUri(ContentResolver cr, Uri notifyUri, int userHandle) {
         synchronized (mSelfObserverLock) {
             mNotifyUri = notifyUri;
             mContentResolver = cr;
@@ -357,7 +363,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
                 mContentResolver.unregisterContentObserver(mSelfObserver);
             }
             mSelfObserver = new SelfContentObserver(this);
-            mContentResolver.registerContentObserver(mNotifyUri, true, mSelfObserver);
+            mContentResolver.registerContentObserver(mNotifyUri, true, mSelfObserver, userHandle);
             mSelfObserverRegistered = true;
         }
     }
