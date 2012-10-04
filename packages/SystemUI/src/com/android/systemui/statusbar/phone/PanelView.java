@@ -295,6 +295,7 @@ public class PanelView extends FrameLayout {
     }
 
     public void fling(float vel, boolean always) {
+        if (DEBUG) LOG("fling: vel=%.3f, this=%s", vel, this);
         mVel = vel;
 
         if (always||mVel != 0) {
@@ -416,7 +417,10 @@ public class PanelView extends FrameLayout {
 
     public void collapse() {
         // TODO: abort animation or ongoing touch
+        if (DEBUG) LOG("collapse: " + this);
         if (!isFullyCollapsed()) {
+            mTimeAnimator.cancel();
+            mClosing = true;
             // collapse() should never be a rubberband, even if an animation is already running
             mRubberbanding = false;
             fling(-mSelfCollapseVelocityPx, /*always=*/ true);
@@ -424,10 +428,10 @@ public class PanelView extends FrameLayout {
     }
 
     public void expand() {
+        if (DEBUG) LOG("expand: " + this);
         if (isFullyCollapsed()) {
             mBar.startOpeningPanel(this);
-            if (DEBUG) LOG("expand: calling fling(%s, true)", mSelfExpandVelocityPx);
-            fling (mSelfExpandVelocityPx, /*always=*/ true);
+            fling(mSelfExpandVelocityPx, /*always=*/ true);
         } else if (DEBUG) {
             if (DEBUG) LOG("skipping expansion: is expanded");
         }
