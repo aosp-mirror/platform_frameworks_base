@@ -68,3 +68,11 @@ Selection mode includes:</p>
 
   </div>
 </div>
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create text fields, provide auto-complete suggestions,
+  and specify the input mode,
+  see the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a> API guide.</p>
+</div>
