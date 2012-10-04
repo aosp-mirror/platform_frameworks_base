@@ -20340,7 +20340,7 @@ package android.service.dreams {
     method public boolean dispatchTouchEvent(android.view.MotionEvent);
     method public boolean dispatchTrackballEvent(android.view.MotionEvent);
     method public android.view.View findViewById(int);
-    method public void finish();
+    method public final void finish();
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
     method public boolean isFullscreen();
@@ -20355,12 +20355,13 @@ package android.service.dreams {
     method public boolean onCreatePanelMenu(int, android.view.Menu);
     method public android.view.View onCreatePanelView(int);
     method public void onDetachedFromWindow();
+    method public void onDreamingStarted();
+    method public void onDreamingStopped();
     method public boolean onMenuItemSelected(int, android.view.MenuItem);
     method public boolean onMenuOpened(int, android.view.Menu);
     method public void onPanelClosed(int, android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public boolean onSearchRequested();
-    method public void onStart();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
