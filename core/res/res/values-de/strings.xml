@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Ermöglicht der App, den internen Systemstatus abzurufen. Schädliche Apps können so eine Vielzahl an privaten und geschützten Daten abrufen, die sie in der Regel nicht benötigen."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"Bildschirminhalt abrufen"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ermöglicht der App, den Inhalt des aktiven Fensters abzurufen. Schädliche Apps können so den gesamten Fensterinhalt abrufen und mit Ausnahme von Passwörtern den gesamten Text auswerten."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Bedienungshilfen vorübergehend aktivieren"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ermöglicht einer App, die Bedienungshilfen auf dem Gerät vorübergehend zu aktivieren. Schädliche Apps können Bedienungshilfen ohne die Zustimmung des Nutzers aktivieren."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"Fensterinformationen abrufen"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Ermöglicht einer App, Informationen über die Fenster vom Fenster-Manager abzurufen. Schädliche Apps können Informationen abrufen, die für die systeminterne Nutzung gedacht sind."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"Ereignisse filtern"</string>
@@ -812,6 +810,14 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Muster gelöscht"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Zelle hinzugefügt"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Muster abgeschlossen"</string>
+    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
+    <skip />
+    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1016,8 +1022,8 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"App für USB-Gerät auswählen"</string>
     <string name="noApplications" msgid="2991814273936504689">"Diese Aktion kann von keiner App ausgeführt werden."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" wurde leider beendet."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Leider wurde der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> beendet."</string>
+    <string name="aerr_application" msgid="932628488013092776">"\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" wurde beendet."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> wurde beendet."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> reagiert nicht."\n\n"Möchten Sie die App schließen?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Aktivität \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\" reagiert nicht."\n\n"Möchten Sie sie beenden?"</string>
@@ -1101,11 +1107,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Zulassen"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nicht zulassen"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; möchte eine Nachricht an &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; senden."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Hierfür können Ihrem Mobilfunkkonto Gebühren berechnet werden."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Hierfür werden Ihrem Mobilfunkkonto Gebühren berechnet."</string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Hierfür könnten Ihrem Mobilfunkkonto "<font fgcolor="#ffffb060">"Gebühren berechnet werden"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Hierfür werden Ihrem Mobilfunkkonto Gebühren berechnet."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Senden"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Abbrechen"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Auswahl merken"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Sie können dies unter \"Einstellungen &gt; Apps\" ändern."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Immer zulassen"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nie zulassen"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
@@ -1365,11 +1372,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kopfhörer"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dock-Lautsprecher"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-Audio"</string>
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-Audio"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fertig"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medienausgabe"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Wird gescannt..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Verbindung wird hergestellt..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"Verfügbar"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Nicht verfügbar"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Integrierter Bildschirm"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1395,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM-PIN eingeben"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN eingeben"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Passwort eingeben"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-Code"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Neuer PIN-Code"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Die SIM-Karte ist jetzt deaktiviert. Geben Sie den PUK-Code ein, um fortzufahren. Weitere Informationen erhalten Sie von Ihrem Mobilfunkanbieter."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Gewünschten PIN-Code eingeben"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Gewünschten PIN-Code bestätigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Falscher PIN-Code"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Geben Sie eine 4- bis 8-stellige PIN ein."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Geben Sie eine mindestens 8-stellige PUK ein."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUK und neuen PIN-Code eingeben"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"Die von Ihnen eingegebene PUK ist nicht korrekt."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Der PUK-Code muss mindestens 8 Ziffern betragen."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Geben Sie den richtigen PUK-Code ein. Bei wiederholten Versuchen wird die SIM-Karte dauerhaft deaktiviert."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-Codes stimmen nicht überein"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Zu viele Musterversuche"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Melden Sie sich zum Entsperren mit Ihrem Google-Konto an."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nutzername (E-Mail)"</string>
@@ -1399,7 +1411,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Anmelden"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ungültiger Nutzername oder ungültiges Passwort"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nutzernamen oder Passwort vergessen?"\n"Besuchen Sie "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Überprüfung…"</string>
+    <string name="kg_login_checking_password" msgid="5316091912653672681">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Sie haben Ihre PIN <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben."\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
@@ -1410,12 +1422,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lautstärke höher als Schwellenwert stellen?"\n"Wenn Sie über längere Zeiträume hinweg Musik in hoher Lautstärke hören, kann dies Ihr Gehör schädigen."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
     <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Bedienungshilfen aktiviert"</string>
+    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
+    <!-- no translation found for user_switched (3768006783166984410) -->
     <skip />
 </resources>

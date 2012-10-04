@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Cho phép ứng dụng truy xuất trạng thái nội bộ của hệ thống. Ứng dụng độc hại có thể truy xuất nhiều loại thông tin riêng tư và bảo mật khác nhau mà thông thường chúng không bao giờ cần."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"truy xuất nội dung màn hình"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Cho phép ứng dụng truy xuất nội dung của cửa sổ hiện hành. Ứng dụng độc hại có thể truy xuất toàn bộ nội dung của cửa sổ cũng như xem xét toàn bộ văn bản của cửa sổ ngoại trừ mật khẩu."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"tạm thời bật trợ năng"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Cho phép ứng dụng tạm thời bật trợ năng trên thiết bị. Các ứng dụng độc hại có thể bật trợ năng mà không có sự đồng ý của người dùng."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"truy xuất thông tin cửa sổ"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Cho phép ứng dụng truy xuất thông tin về các cửa sổ từ trình quản lý cửa sổ. Các ứng dụng độc hại có thể truy xuất thông tin được dành để sử dụng trong hệ thống nội bộ."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"lọc sự kiện"</string>
@@ -812,6 +810,14 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Đã xóa hình"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Đã thêm ô"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Đã vẽ xong hình"</string>
+    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
+    <skip />
+    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1101,11 +1107,15 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Cho phép"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Từ chối"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; muốn gửi thư đến &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Điều này có thể khiến bạn phải trả phí cho tài khoản di động của mình."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Điều này sẽ dẫn đến việc tính phí vào tài khoản di động của bạn."</string>
+    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Gửi"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Hủy"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Nhớ lựa chọn của tôi"</string>
+    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
+    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Luôn cho phép"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Không bao giờ cho phép"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Đã xóa thẻ SIM"</string>
@@ -1365,11 +1375,20 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Điện thoại"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Tai nghe"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Loa đế"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Âm thanh HDMI"</string>
+    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Hệ thống"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Âm thanh Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Xong"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Đầu ra phương tiện"</string>
+    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
+    <skip />
+    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
+    <skip />
+    <!-- no translation found for media_route_status_available (6983258067194649391) -->
+    <skip />
+    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
+    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Màn hình tích hợp"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Màn hình HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Lớp phủ #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1403,21 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Nhập PIN của SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Nhập PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Nhập mật khẩu"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Mã PUK"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Mã PIN mới"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
+    <skip />
+    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <skip />
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Đang mở khóa thẻ SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Mã PIN không chính xác."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Nhập mã PIN có từ 4 đến 8 số."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Nhập PUK có từ 8 số trở lên."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Nhập PUK và mã PIN mới"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"PUK bạn đã nhập không đúng."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <skip />
+    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <skip />
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Quá nhiều lần nhập hình"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Để mở khóa, hãy đăng nhập bằng tài khoản Google của bạn."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Tên người dùng (email)"</string>
@@ -1399,7 +1425,8 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Đăng nhập"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Bạn quên tên người dùng hoặc mật khẩu?"\n"Hãy truy cập "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Đang kiểm tra…"</string>
+    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <skip />
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
@@ -1410,12 +1437,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tăng âm lượng trên mức an toàn?"\n"Nghe ở âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
     <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Trợ năng đã được bật."</string>
+    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
+    <!-- no translation found for user_switched (3768006783166984410) -->
     <skip />
 </resources>
