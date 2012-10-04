@@ -233,7 +233,7 @@ public final class DisplayInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(layerStack);
-        dest.writeInt(flags);
+        dest.writeInt(this.flags);
         dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
