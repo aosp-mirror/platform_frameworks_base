@@ -29,6 +29,7 @@
 
     <include layout="@layout/keyguard_widget_region"
         android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight=".45" />
 
     <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
