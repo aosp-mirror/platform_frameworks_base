@@ -507,17 +507,22 @@ public abstract class HardwareRenderer {
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
      * @param surface The surface to hardware accelerate
+     *                
+     * @return true if the surface was initialized, false otherwise. Returning
+     *         false might mean that the surface was already initialized.
      */
-    void initializeIfNeeded(int width, int height, Surface surface)
+    boolean initializeIfNeeded(int width, int height, Surface surface)
             throws Surface.OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
                 if (initialize(surface)) {
                     setup(width, height);
+                    return true;
                 }
             }
-        }        
+        }
+        return false;
     }
 
     /**
