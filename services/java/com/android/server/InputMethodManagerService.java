@@ -1843,7 +1843,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 if (mCurFocusedWindow == windowToken) {
                     Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
-                            + " attribute=" + attribute);
+                            + " attribute=" + attribute + ", token = " + windowToken);
                     if (attribute != null) {
                         return startInputUncheckedLocked(cs, inputContext, attribute,
                                 controlFlags);
