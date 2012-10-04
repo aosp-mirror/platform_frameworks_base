@@ -114,7 +114,7 @@ class KeyguardStatusViewManager {
         mClockView = (ClockView) view.findViewById(R.id.clock_view);
 
         // Use custom font in mDateView
-        mDateView.setTypeface(Typeface.SANS_SERIF);
+        mDateView.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
 
         // Required to get Marquee to work.
         final View marqueeViews[] = { mDateView, mStatus1View, mOwnerInfoView, mAlarmStatusView };
