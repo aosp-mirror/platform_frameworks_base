@@ -102,10 +102,6 @@ class TouchExplorer implements EventStreamTransformation {
     // The timeout after which we are no longer trying to detect a gesture.
     private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
 
-    // The timeout to send interaction end events in case we did not
-    // receive the expected hover exit event due to a misbehaving app.
-    private static final int SEND_INTERACTION_END_EVENTS_TIMEOUT = 200;
-
     // Temporary array for storing pointer IDs.
     private final int[] mTempPointerIds = new int[MAX_POINTER_COUNT];
 
@@ -139,8 +135,11 @@ class TouchExplorer implements EventStreamTransformation {
     // Command for delayed sending of a hover exit event.
     private final SendHoverDelayed mSendHoverExitDelayed;
 
-    // Command for delayed sending of interaction ending events.
-    private final SendInteractionEndEventsDelayed mSendInteractionEndEventsDelayed;
+    // Command for delayed sending of touch exploration end events.
+    private final SendAccessibilityEventDelayed mSendTouchExplorationEndDelayed;
+
+    // Command for delayed sending of touch interaction end events.
+    private final SendAccessibilityEventDelayed mSendTouchInteractionEndDelayed;
 
     // Command for delayed sending of a long press.
     private final PerformLongPressDelayed mPerformLongPressDelayed;
@@ -209,11 +208,8 @@ class TouchExplorer implements EventStreamTransformation {
     // The id of the last touch explored window.
     private int mLastTouchedWindowId;
 
-    // Whether touch exploration gesture has ended.
-    private boolean mTouchExplorationGestureEnded;
-
-    // Whether touch interaction has ended.
-    private boolean mTouchInteractionEnded;
+    // Whether touch exploration is in progress.
+    private boolean mTouchExplorationInProgress;
 
     /**
      * Creates a new instance.
@@ -240,7 +236,12 @@ class TouchExplorer implements EventStreamTransformation {
         mGestureLibrary.load();
         mSendHoverEnterDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_ENTER, true);
         mSendHoverExitDelayed = new SendHoverDelayed(MotionEvent.ACTION_HOVER_EXIT, false);
-        mSendInteractionEndEventsDelayed = new SendInteractionEndEventsDelayed();
+        mSendTouchExplorationEndDelayed = new SendAccessibilityEventDelayed(
+                AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END,
+                mDetermineUserIntentTimeout);
+        mSendTouchInteractionEndDelayed = new SendAccessibilityEventDelayed(
+                AccessibilityEvent.TYPE_TOUCH_INTERACTION_END,
+                mDetermineUserIntentTimeout);
         mDoubleTapDetector = new DoubleTapDetector();
         final float density = context.getResources().getDisplayMetrics().density;
         mScaledMinPointerDistanceToUseMiddleLocation =
@@ -265,7 +266,7 @@ class TouchExplorer implements EventStreamTransformation {
         switch (mCurrentState) {
             case STATE_TOUCH_EXPLORING: {
                 // If a touch exploration gesture is in progress send events for its end.
-                sendExitEventsIfNeeded(policyFlags);
+                sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
             } break;
             case STATE_DRAGGING: {
                 mDraggingPointerId = INVALID_POINTER_ID;
@@ -286,7 +287,8 @@ class TouchExplorer implements EventStreamTransformation {
         mSendHoverExitDelayed.remove();
         mPerformLongPressDelayed.remove();
         mExitGestureDetectionModeDelayed.remove();
-        mSendInteractionEndEventsDelayed.remove();
+        mSendTouchExplorationEndDelayed.remove();
+        mSendTouchInteractionEndDelayed.remove();
         // Reset the pointer trackers.
         mReceivedPointerTracker.clear();
         mInjectedPointerTracker.clear();
@@ -301,6 +303,7 @@ class TouchExplorer implements EventStreamTransformation {
         if (mNext != null) {
             mNext.clear();
         }
+        mTouchExplorationInProgress = false;
     }
 
     @Override
@@ -341,19 +344,17 @@ class TouchExplorer implements EventStreamTransformation {
 
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mTouchExplorationGestureEnded
+        if (mSendTouchExplorationEndDelayed.isPending()
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-            mSendInteractionEndEventsDelayed.remove();
-            mTouchExplorationGestureEnded = false;
+                    mSendTouchExplorationEndDelayed.remove();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
 
         // The event for touch interaction end should be strictly after the
         // last hover exit and the touch exploration gesture end events.
-        if (mTouchInteractionEnded
+        if (mSendTouchInteractionEndDelayed.isPending()
                 && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-            mSendInteractionEndEventsDelayed.remove();
-            mTouchInteractionEnded = false;
+            mSendTouchInteractionEndDelayed.remove();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
 
@@ -396,15 +397,6 @@ class TouchExplorer implements EventStreamTransformation {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                // The delayed enter not delivered implies that we have delivered
-                // TYPE_TOUCH_INTERACTION_START and not TYPE_TOUCH_INTERACTION_END,
-                // therefore we need to deliver the interaction end event here.
-                if (mSendHoverEnterDelayed.isPending()) {
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-                }
-                // Announce the start of a new touch interaction.
-                sendAccessibilityEvent(
-                        AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
                 // Pre-feed the motion events to the gesture detector since we
                 // have a distance slop before getting into gesture detection
                 // mode and not using the points within this slop significantly
@@ -426,8 +418,20 @@ class TouchExplorer implements EventStreamTransformation {
                             mSendHoverExitDelayed.remove();
                         }
 
-                        if (mSendInteractionEndEventsDelayed.isPending()) {
-                            mSendInteractionEndEventsDelayed.forceSendAndRemove();
+                        if (mSendTouchExplorationEndDelayed.isPending()) {
+                            mSendTouchExplorationEndDelayed.forceSendAndRemove();
+                        }
+
+                        if (mSendTouchInteractionEndDelayed.isPending()) {
+                            mSendTouchInteractionEndDelayed.forceSendAndRemove();
+                        }
+
+                        // Every pointer that goes down is active until it moves or
+                        // another one goes down. Hence, having more than one pointer
+                        // down we have already send the interaction start event.
+                        if (event.getPointerCount() == 1) {
+                            sendAccessibilityEvent(
+                                    AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
                         }
 
                         mPerformLongPressDelayed.remove();
@@ -443,11 +447,13 @@ class TouchExplorer implements EventStreamTransformation {
                             mPerformLongPressDelayed.post(event, policyFlags);
                             break;
                         }
-                        // Deliver hover enter with a delay to have a chance
-                        // to detect what the user is trying to do.
-                        final int pointerId = receivedTracker.getPrimaryActivePointerId();
-                        final int pointerIdBits = (1 << pointerId);
-                        mSendHoverEnterDelayed.post(event, true, pointerIdBits, policyFlags);
+                        if (!mTouchExplorationInProgress) {
+                            // Deliver hover enter with a delay to have a chance
+                            // to detect what the user is trying to do.
+                            final int pointerId = receivedTracker.getPrimaryActivePointerId();
+                            final int pointerIdBits = (1 << pointerId);
+                            mSendHoverEnterDelayed.post(event, true, pointerIdBits, policyFlags);
+                        }
                     } break;
                     default: {
                         /* do nothing - let the code for ACTION_MOVE decide what to do */
@@ -512,12 +518,27 @@ class TouchExplorer implements EventStreamTransformation {
                                 break;
                             }
                         } else {
+                            // Cancel the long press if pending and the user
+                            // moved more than the slop.
+                            if (mPerformLongPressDelayed.isPending()) {
+                                final float deltaX =
+                                        receivedTracker.getReceivedPointerDownX(pointerId)
+                                        - rawEvent.getX(pointerIndex);
+                                final float deltaY =
+                                        receivedTracker.getReceivedPointerDownY(pointerId)
+                                        - rawEvent.getY(pointerIndex);
+                                final double moveDelta = Math.hypot(deltaX, deltaY);
+                                // The user has moved enough for us to decide.
+                                if (moveDelta > mTouchSlop) {
+                                    mPerformLongPressDelayed.remove();
+                                }
+                            }
                             // The user is wither double tapping or performing long
                             // press so do not send move events yet.
                             if (mDoubleTapDetector.firstTapDetected()) {
                                 break;
                             }
-                            sendEnterEventsIfNeeded(policyFlags);
+                            sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
                             sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits,
                                     policyFlags);
                         }
@@ -548,7 +569,7 @@ class TouchExplorer implements EventStreamTransformation {
                             }
                             // We are sending events so send exit and gesture
                             // end since we transition to another state.
-                            sendExitEventsIfNeeded(policyFlags);
+                            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                         }
 
                         // We know that a new state transition is to happen and the
@@ -583,7 +604,7 @@ class TouchExplorer implements EventStreamTransformation {
                             mPerformLongPressDelayed.remove();
                             // We are sending events so send exit and gesture
                             // end since we transition to another state.
-                            sendExitEventsIfNeeded(policyFlags);
+                            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                         }
 
                         // More than two pointers are delegated to the view hierarchy.
@@ -612,11 +633,14 @@ class TouchExplorer implements EventStreamTransformation {
 
                         // If we have not delivered the enter schedule exit.
                         if (mSendHoverEnterDelayed.isPending()) {
-                            mSendHoverEnterDelayed.mTouchExplorationInProgress = false;
                             mSendHoverExitDelayed.post(event, false, pointerIdBits, policyFlags);
                         } else {
                             // The user is touch exploring so we send events for end.
-                            sendExitEventsIfNeeded(policyFlags);
+                            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+                        }
+
+                        if (!mSendTouchInteractionEndDelayed.isPending()) {
+                            mSendTouchInteractionEndDelayed.post();
                         }
                     } break;
                 }
@@ -844,6 +868,14 @@ class TouchExplorer implements EventStreamTransformation {
         if (accessibilityManager.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(type);
             accessibilityManager.sendAccessibilityEvent(event);
+            switch (type) {
+                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START: {
+                    mTouchExplorationInProgress = true;
+                } break;
+                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END: {
+                    mTouchExplorationInProgress = false;
+                } break;
+            }
         }
     }
 
@@ -891,14 +923,12 @@ class TouchExplorer implements EventStreamTransformation {
      *
      * @param policyFlags The policy flags associated with the event.
      */
-    private void sendExitEventsIfNeeded(int policyFlags) {
+    private void sendHoverExitAndTouchExplorationGestureEndIfNeeded(int policyFlags) {
         MotionEvent event = mInjectedPointerTracker.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
-            mTouchExplorationGestureEnded = true;
-            mTouchInteractionEnded = true;
-            if (!mSendInteractionEndEventsDelayed.isPending()) {
-                mSendInteractionEndEventsDelayed.post();
+            if (!mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.post();
             }
             sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT, pointerIdBits, policyFlags);
         }
@@ -910,10 +940,11 @@ class TouchExplorer implements EventStreamTransformation {
      *
      * @param policyFlags The policy flags associated with the event.
      */
-    private void sendEnterEventsIfNeeded(int policyFlags) {
+    private void sendTouchExplorationGestureStartAndHoverEnterIfNeeded(int policyFlags) {
         MotionEvent event = mInjectedPointerTracker.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
             sendMotionEvent(event, MotionEvent.ACTION_HOVER_ENTER, pointerIdBits, policyFlags);
         }
     }
@@ -1179,8 +1210,12 @@ class TouchExplorer implements EventStreamTransformation {
             mSendHoverExitDelayed.remove();
             mPerformLongPressDelayed.remove();
 
-            // The touch interaction has ended since we will send a click.
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
+            if (mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.forceSendAndRemove();
+            }
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                mSendTouchInteractionEndDelayed.forceSendAndRemove();
+            }
 
             int clickLocationX;
             int clickLocationY;
@@ -1414,7 +1449,7 @@ class TouchExplorer implements EventStreamTransformation {
             mLongPressingPointerDeltaX = (int) mEvent.getX(pointerIndex) - clickLocationX;
             mLongPressingPointerDeltaY = (int) mEvent.getY(pointerIndex) - clickLocationY;
 
-            sendExitEventsIfNeeded(mPolicyFlags);
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
 
             mCurrentState = STATE_DELEGATING;
             sendDownForAllActiveNotInjectedPointers(mEvent, mPolicyFlags);
@@ -1443,7 +1478,6 @@ class TouchExplorer implements EventStreamTransformation {
         private MotionEvent mPrototype;
         private int mPointerIdBits;
         private int mPolicyFlags;
-        private boolean mTouchExplorationInProgress;
 
         public SendHoverDelayed(int hoverAction, boolean gestureStarted) {
             mHoverAction = hoverAction;
@@ -1454,7 +1488,6 @@ class TouchExplorer implements EventStreamTransformation {
                 int pointerIdBits, int policyFlags) {
             remove();
             mPrototype = MotionEvent.obtain(prototype);
-            mTouchExplorationInProgress = touchExplorationInProgress;
             mPointerIdBits = pointerIdBits;
             mPolicyFlags = policyFlags;
             mHandler.postDelayed(this, mDetermineUserIntentTimeout);
@@ -1491,7 +1524,6 @@ class TouchExplorer implements EventStreamTransformation {
             mPrototype = null;
             mPointerIdBits = -1;
             mPolicyFlags = 0;
-            mTouchExplorationInProgress = false;
         }
 
         public void forceSendAndRemove() {
@@ -1508,22 +1540,15 @@ class TouchExplorer implements EventStreamTransformation {
                 Slog.d(LOG_TAG_SEND_HOVER_DELAYED, mGestureStarted ?
                         "touchExplorationGestureStarted" : "touchExplorationGestureEnded");
             }
-            if (mTouchExplorationInProgress) {
-                if (mGestureStarted) {
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
-                } else {
-                    mTouchExplorationGestureEnded = true;
-                    mTouchInteractionEnded = true;
-                    if (!mSendInteractionEndEventsDelayed.isPending()) {
-                        mSendInteractionEndEventsDelayed.post();
-                    }
-                }
+            if (mGestureStarted) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START);
             } else {
-                if (!mGestureStarted) {
-                    mTouchInteractionEnded = true;
-                    if (!mSendInteractionEndEventsDelayed.isPending()) {
-                        mSendInteractionEndEventsDelayed.post();
-                    }
+                if (!mSendTouchExplorationEndDelayed.isPending()) {
+                    mSendTouchExplorationEndDelayed.post();
+                }
+                if (mSendTouchInteractionEndDelayed.isPending()) {
+                    mSendTouchInteractionEndDelayed.remove();
+                    mSendTouchInteractionEndDelayed.post();
                 }
             }
             sendMotionEvent(mPrototype, mHoverAction, mPointerIdBits, mPolicyFlags);
@@ -1531,14 +1556,21 @@ class TouchExplorer implements EventStreamTransformation {
         }
     }
 
-    private class SendInteractionEndEventsDelayed implements Runnable {
+    private class SendAccessibilityEventDelayed implements Runnable {
+        private final int mEventType;
+        private final int mDelay;
+
+        public SendAccessibilityEventDelayed(int eventType, int delay) {
+            mEventType = eventType;
+            mDelay = delay;
+        }
 
         public void remove() {
             mHandler.removeCallbacks(this);
         }
 
         public void post() {
-            mHandler.postDelayed(this, SEND_INTERACTION_END_EVENTS_TIMEOUT);
+            mHandler.postDelayed(this, mDelay);
         }
 
         public boolean isPending() {
@@ -1554,14 +1586,7 @@ class TouchExplorer implements EventStreamTransformation {
 
         @Override
         public void run() {
-            if (mTouchExplorationGestureEnded) {
-                mTouchExplorationGestureEnded = false;
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
-            }
-            if (mTouchInteractionEnded) {
-                mTouchInteractionEnded = false;
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
-            }
+            sendAccessibilityEvent(mEventType);
         }
     }
 
