@@ -122,7 +122,15 @@ A music player widget is primarily a control widget, but also keeps the user inf
   </div>
 </div>
 
-<h3>Checklist</h3>
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build widgets for the home screen, see the
+  <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>
+  API guide.</p>
+</div>
+
+<h2>Checklist</h2>
 <ul>
   <li>Focus on small portions of glanceable information on your widget. Expand on the information in your app.</li>
   <li>Choose the right widget type for your purpose.</li>

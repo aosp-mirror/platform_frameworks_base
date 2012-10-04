@@ -57,3 +57,10 @@ to the next/previous view, swipe left or right.</p>
 permits fast view switching even on narrower screens.</p>
 
 <img src="{@docRoot}design/media/tabs_stacked.png">
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create tabs,
+  see the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API guide.</p>
+</div>
