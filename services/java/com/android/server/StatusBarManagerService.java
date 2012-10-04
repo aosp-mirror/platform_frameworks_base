@@ -544,7 +544,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         int i;
         for (i=0; i<N; i++) {
             DisableRecord t = mDisableRecords.get(i);
-            if (t.token == token) {
+            if (t.token == token && t.userId == userId) {
                 tok = t;
                 break;
             }
