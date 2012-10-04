@@ -122,6 +122,12 @@ available based on the title and the text of the action buttons.</p>
   </div>
 </div>
 
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build dialogs in your app,
+  see the <a href="{@docRoot}guide/topics/ui/dialogs.html">Dialogs</a> API guide.</p>
+</div>
+
 <h2 id="popups">Popups</h2>
 
 <p>Popups are lightweight version of dialogs that require a single selection from the user. Popups
@@ -149,4 +155,11 @@ continue editing later. Toasts automatically disappear after a timeout.</p>
     <img src="{@docRoot}design/media/dialogs_toasts.png">
 
   </div>
+</div>
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create toasts,
+  see the <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Toasts</a> API guide.</p>
 </div>

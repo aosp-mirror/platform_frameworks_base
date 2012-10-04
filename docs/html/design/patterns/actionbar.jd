@@ -349,6 +349,17 @@ sharing options.</p>
   The Gallery app's share action provider with extended spinner for additional sharing options.
 </div>
 
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build an action bar
+  see the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> API guide.
+  For information about contextual action bars, read
+  <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Creating Contextual Menus</a>.
+  </p>
+</div>
+
+
 <h2 id="checklist">Action Bar Checklist</h2>
 
 <p>When planning your split action bars, ask yourself questions like these:</p>
