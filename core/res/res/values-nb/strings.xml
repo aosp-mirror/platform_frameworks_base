@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Lar appen hente ut informasjon om systemets indre tilstand. Ondsinnede apper kan hente et bredt spekter av privat og sikker informasjon som de vanligvis aldri burde ha behov for."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"hent av skjerminnhold"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Lar appen hente ut innholdet i det aktive vinduet. Ondsinnede apper kan hente ut hele vindusinnholdet og undersøke all teksten, med unntak av passord."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Aktiver tilgjengelighet midlertidig"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Lar en app midlertidig aktivere tilgjengelighet på enheten. Skadelige apper kan aktivere tilgjengelighet uten bekreftelse fra brukeren."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"hente vindusinformasjon"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Lar appen hente informasjon om vinduene fra vindusbehandleren. Skadelige apper kan hente informasjon som ikke er ment for intern systembruk."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrere hendelser"</string>
@@ -812,6 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Mønsteret er slettet"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celle er lagt til"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønsteret er fullført"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %2$d av %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Brukervelgeren"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediekontroll"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1101,11 +1103,15 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Tillat"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Sperr"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ønsker å sende en melding til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Dette kan medføre belastninger på mobilkontoen din."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Dette medfører kostnader på mobilkontoen din."</string>
+    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Send"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Avbryt"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Husk valget mitt"</string>
+    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
+    <skip />
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Alltid tillat"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Aldri tillat"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
@@ -1365,11 +1371,20 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hodetelefoner"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dokkhøyttalere"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI-lyd"</string>
+    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
+    <skip />
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"System"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-lyd"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Fullført"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medieutgang"</string>
+    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
+    <skip />
+    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
+    <skip />
+    <!-- no translation found for media_route_status_available (6983258067194649391) -->
+    <skip />
+    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
+    <skip />
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Innebygd skjerm"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skjerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlegg #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1399,21 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Skriv inn PIN-koden for SIM-kortet"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Skriv inn PIN-koden"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Skriv inn passordet"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK-kode"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Ny PIN-kode"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
+    <skip />
+    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
+    <skip />
+    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
+    <skip />
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser opp SIM-kortet ..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Feil PIN-kode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Skriv inn en PIN-kode på fire til åtte sifre."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Skriv inn en PUK-kode på åtte sifre eller mer."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Skriv inn PUK-koden og en ny PIN-kode"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"PUK-koden du har skrevet inn er ikke riktig."</string>
+    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
+    <skip />
+    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
+    <skip />
+    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
+    <skip />
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"For mange forsøk på tegning av mønster"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Logg deg på med Google-kontoen din for å låse opp."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Brukernavn (e-postadresse)"</string>
@@ -1399,7 +1421,8 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Logg på"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ugyldig brukernavn eller passord."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Har du glemt brukernavnet eller passordet?"\n"Gå til "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Kontrollerer …"</string>
+    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
+    <skip />
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Du har oppgitt feil PIN-kode <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har tastet inn passordet ditt feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har tegnet opplåsningsmønsteret ditt feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. "\n\n"Prøv på nytt om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
@@ -1410,12 +1433,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp nettbrettet via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vil du øke lydnivået over trygt nivå?"\n"Lytting på høyt lydnivå i lange perioder kan skade hørselen din."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
-    <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
-    <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Fortsett å holde nede to fingre for å aktivere tilgjengelighetstjenesten."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgjengelighet er aktivert."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgjengelighetstjenesten ble avbrutt."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Gjeldene bruker: <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
