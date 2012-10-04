@@ -1219,7 +1219,7 @@ public abstract class ContentResolver {
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
             ContentObserver observer)
     {
-        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.getCallingUserId());
+        registerContentObserver(uri, notifyForDescendents, observer, UserHandle.myUserId());
     }
 
     /** @hide - designated user version */
