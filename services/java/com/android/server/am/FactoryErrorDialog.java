@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
+import android.view.WindowManager;
 
 class FactoryErrorDialog extends BaseErrorDialog {
     public FactoryErrorDialog(Context context, CharSequence msg) {
@@ -30,7 +31,9 @@ class FactoryErrorDialog extends BaseErrorDialog {
         setButton(DialogInterface.BUTTON_POSITIVE,
                 context.getText(com.android.internal.R.string.factorytest_reboot),
                 mHandler.obtainMessage(0));
-        getWindow().setTitle("Factory Error");
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.setTitle("Factory Error");
+        getWindow().setAttributes(attrs);
     }
     
     public void onStop() {
