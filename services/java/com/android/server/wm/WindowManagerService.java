@@ -9450,18 +9450,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
-        synchronized (mWindowMap) {
-            WindowState win = windowForClientLocked(null, token, true);
-            if (win != null) {
-                Pair<WindowState, IRemoteCallback> pair =
-                        new Pair<WindowState, IRemoteCallback>(win, callback);
-                Message m = mH.obtainMessage(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
-                mH.sendMessageDelayed(m, 2000);
-                mWaitingForDrawn.add(pair);
-                checkDrawnWindowsLocked();
+    public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
+        if (token != null && callback != null) {
+            synchronized (mWindowMap) {
+                WindowState win = windowForClientLocked(null, token, true);
+                if (win != null) {
+                    Pair<WindowState, IRemoteCallback> pair =
+                            new Pair<WindowState, IRemoteCallback>(win, callback);
+                    Message m = mH.obtainMessage(H.WAITING_FOR_DRAWN_TIMEOUT, pair);
+                    mH.sendMessageDelayed(m, 2000);
+                    mWaitingForDrawn.add(pair);
+                    checkDrawnWindowsLocked();
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     void setHoldScreenLocked(final Session newHoldScreen) {
@@ -9475,10 +9479,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean state = mHoldingScreenWakeLock.isHeld();
         if (hold != state) {
             if (hold) {
-                mPolicy.screenOnStartedLw();
                 mHoldingScreenWakeLock.acquire();
+                mPolicy.keepScreenOnStartedLw();
             } else {
-                mPolicy.screenOnStoppedLw();
+                mPolicy.keepScreenOnStoppedLw();
                 mHoldingScreenWakeLock.release();
             }
         }

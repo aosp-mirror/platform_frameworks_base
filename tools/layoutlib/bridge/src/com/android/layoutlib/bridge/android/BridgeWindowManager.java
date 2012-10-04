@@ -414,8 +414,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
-        // TODO Auto-generated method stub
+    public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
+        return false;
     }
 
     @Override

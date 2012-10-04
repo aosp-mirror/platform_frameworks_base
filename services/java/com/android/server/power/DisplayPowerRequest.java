@@ -52,12 +52,20 @@ final class DisplayPowerRequest {
     // If true, enables automatic brightness control.
     public boolean useAutoBrightness;
 
+    // If true, prevents the screen from turning on if it is currently off.
+    // The display does not enter a "ready" state if this flag is true and the screen
+    // is off and is being prevented from turning on.  The window manager policy blocks
+    // screen on while it prepares the keyguard to prevent the user from seeing
+    // intermediate updates.
+    public boolean blockScreenOn;
+
     public DisplayPowerRequest() {
         screenState = SCREEN_STATE_BRIGHT;
         useProximitySensor = false;
         screenBrightness = PowerManager.BRIGHTNESS_ON;
         screenAutoBrightnessAdjustment = 0.0f;
         useAutoBrightness = false;
+        blockScreenOn = false;
     }
 
     public DisplayPowerRequest(DisplayPowerRequest other) {
@@ -70,6 +78,7 @@ final class DisplayPowerRequest {
         screenBrightness = other.screenBrightness;
         screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
         useAutoBrightness = other.useAutoBrightness;
+        blockScreenOn = other.blockScreenOn;
     }
 
     @Override
@@ -84,7 +93,8 @@ final class DisplayPowerRequest {
                 && useProximitySensor == other.useProximitySensor
                 && screenBrightness == other.screenBrightness
                 && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
-                && useAutoBrightness == other.useAutoBrightness;
+                && useAutoBrightness == other.useAutoBrightness
+                && blockScreenOn == other.blockScreenOn;
     }
 
     @Override
@@ -98,6 +108,7 @@ final class DisplayPowerRequest {
                 + ", useProximitySensor=" + useProximitySensor
                 + ", screenBrightness=" + screenBrightness
                 + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
-                + ", useAutoBrightness=" + useAutoBrightness;
+                + ", useAutoBrightness=" + useAutoBrightness
+                + ", blockScreenOn=" + blockScreenOn;
     }
 }

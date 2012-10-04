@@ -35,7 +35,6 @@ import android.os.WorkSource;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.ScreenOnListener;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -71,8 +70,8 @@ final class Notifier {
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
     private final SuspendBlocker mSuspendBlocker;
+    private final ScreenOnBlocker mScreenOnBlocker;
     private final WindowManagerPolicy mPolicy;
-    private final ScreenOnListener mScreenOnListener;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -95,14 +94,17 @@ final class Notifier {
     // True if a user activity message should be sent.
     private boolean mUserActivityPending;
 
+    // True if the screen on blocker has been acquired.
+    private boolean mScreenOnBlockerAcquired;
+
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
-            SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-            ScreenOnListener screenOnListener) {
+            SuspendBlocker suspendBlocker, ScreenOnBlocker screenOnBlocker,
+            WindowManagerPolicy policy) {
         mContext = context;
         mBatteryStats = batteryStats;
         mSuspendBlocker = suspendBlocker;
+        mScreenOnBlocker = screenOnBlocker;
         mPolicy = policy;
-        mScreenOnListener = screenOnListener;
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -227,6 +229,10 @@ final class Notifier {
             if (mActualPowerState != POWER_STATE_AWAKE) {
                 mActualPowerState = POWER_STATE_AWAKE;
                 mPendingWakeUpBroadcast = true;
+                if (!mScreenOnBlockerAcquired) {
+                    mScreenOnBlockerAcquired = true;
+                    mScreenOnBlocker.acquire();
+                }
                 updatePendingBroadcastLocked();
             }
         }
@@ -387,6 +393,7 @@ final class Notifier {
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
 
         mPolicy.screenTurningOn(mScreenOnListener);
+
         try {
             ActivityManagerNative.getDefault().wakingUp();
         } catch (RemoteException e) {
@@ -401,6 +408,19 @@ final class Notifier {
             sendNextBroadcast();
         }
     }
+
+    private final WindowManagerPolicy.ScreenOnListener mScreenOnListener =
+            new WindowManagerPolicy.ScreenOnListener() {
+        @Override
+        public void onScreenOn() {
+            synchronized (mLock) {
+                if (mScreenOnBlockerAcquired && !mPendingWakeUpBroadcast) {
+                    mScreenOnBlockerAcquired = false;
+                    mScreenOnBlocker.release();
+                }
+            }
+        }
+    };
 
     private final BroadcastReceiver mWakeUpBroadcastDone = new BroadcastReceiver() {
         @Override
