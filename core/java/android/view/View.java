@@ -2904,6 +2904,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mOldHeightMeasureSpec = Integer.MIN_VALUE;
 
+    @ViewDebug.ExportedProperty(deepExport = true, prefix = "bg_")
     private Drawable mBackground;
 
     private int mBackgroundResource;

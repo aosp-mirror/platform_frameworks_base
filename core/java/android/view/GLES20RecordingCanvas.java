@@ -236,18 +236,6 @@ class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20Recor
     }
 
     @Override
-    public void drawRect(Rect r, Paint paint) {
-        super.drawRect(r, paint);
-        recordShaderBitmap(paint);
-    }
-
-    @Override
-    public void drawRect(RectF r, Paint paint) {
-        super.drawRect(r, paint);
-        recordShaderBitmap(paint);
-    }
-
-    @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
         super.drawRoundRect(rect, rx, ry, paint);
         recordShaderBitmap(paint);
