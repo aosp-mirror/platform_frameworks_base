@@ -1077,8 +1077,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 checkedStateChanged = true;
             } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
                 boolean checked = !mCheckStates.get(position, false);
-                mCheckStates.clear();
                 if (checked) {
+                    mCheckStates.clear();
                     mCheckStates.put(position, true);
                     if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
                         mCheckedIdStates.clear();
