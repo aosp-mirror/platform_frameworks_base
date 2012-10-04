@@ -149,6 +149,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDialog = createDialog();
         prepareDialog();
 
+        WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
+        attrs.setTitle("GlobalActions");
+        mDialog.getWindow().setAttributes(attrs);
         mDialog.show();
         mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
     }

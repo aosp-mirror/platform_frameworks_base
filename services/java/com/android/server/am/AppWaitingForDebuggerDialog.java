@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
+import android.view.WindowManager;
 
 class AppWaitingForDebuggerDialog extends BaseErrorDialog {
     final ActivityManagerService mService;
@@ -52,7 +53,9 @@ class AppWaitingForDebuggerDialog extends BaseErrorDialog {
         setMessage(text.toString());
         setButton(DialogInterface.BUTTON_POSITIVE, "Force Close", mHandler.obtainMessage(1, app));
         setTitle("Waiting For Debugger");
-        getWindow().setTitle("Waiting For Debugger: " + app.info.processName);
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.setTitle("Waiting For Debugger: " + app.info.processName);
+        getWindow().setAttributes(attrs);
     }
     
     public void onStop() {
