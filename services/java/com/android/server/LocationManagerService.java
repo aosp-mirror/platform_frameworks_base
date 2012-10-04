@@ -639,7 +639,27 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     == PackageManager.PERMISSION_GRANTED) ||
                     (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED);
+        } else {
+            // mock providers
+            LocationProviderInterface lp = mMockProviders.get(provider);
+            if (lp != null) {
+                ProviderProperties properties = lp.getProperties();
+                if (properties != null) {
+                    if (properties.mRequiresSatellite) {
+                        // provider requiring satellites require FINE permission
+                        return mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED;
+                    } else if (properties.mRequiresNetwork || properties.mRequiresCell) {
+                        // provider requiring network and or cell require COARSE or FINE
+                        return (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED) ||
+                                (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
+                                 == PackageManager.PERMISSION_GRANTED);
+                    }
+                }
+            }
         }
+
         return false;
     }
 
