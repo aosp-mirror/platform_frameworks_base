@@ -202,3 +202,15 @@ with Task B&mdash;the prior context is abandoned in favor of the user's new goal
 <p>When your app registers to handle intents with an activity deep within the app's hierarchy,
 refer to <a href="#into-your-app">Navigation into Your App via Home Screen Widgets and
 Notifications</a> for guidance on how to specify Up navigation.</p>
+
+
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build your app with proper Up and Back navigation, read
+  <a href="{@docRoot}training/implementing-navigation/ancestral.html">Implementing
+  Ancestral Navigation</a> and 
+  <a href="{@docRoot}training/implementing-navigation/temporal.html">Implementing
+  Temporal Navigation</a>, respectively.
+  </p>
+</div>
