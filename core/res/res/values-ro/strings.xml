@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Modelul a fost şters"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celulă adăugată"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Modelul a fost desenat"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d din %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Selector utilizator"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Stare"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Comenzi media"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1437,11 +1433,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ridicaţi volumul mai sus de nivelul sigur?"\n"Ascultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Menţineţi două degete pe ecran pentru a activa accesibilitatea."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
+    <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
