@@ -1240,7 +1240,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 if ((r.notification.flags & mustNotHaveFlags) != 0) {
                     continue;
                 }
-                if (!r.pkg.equals(pkg)) {
+                if (pkg != null && !r.pkg.equals(pkg)) {
                     continue;
                 }
                 canceledSomething = true;
