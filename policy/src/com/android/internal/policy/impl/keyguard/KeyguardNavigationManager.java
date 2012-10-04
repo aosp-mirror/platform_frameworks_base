@@ -42,11 +42,13 @@ public class KeyguardNavigationManager {
 
     public void setMessage(CharSequence msg) {
         mMessageArea.setText(msg);
+        mMessageArea.announceForAccessibility(mMessageArea.getText());
     }
 
     public void setMessage(int resId) {
         if (resId != 0) {
             mMessageArea.setText(resId);
+            mMessageArea.announceForAccessibility(mMessageArea.getText());
         } else {
             mMessageArea.setText("");
         }
@@ -55,6 +57,7 @@ public class KeyguardNavigationManager {
     public void setMessage(int resId, Object... formatArgs) {
         if (resId != 0) {
             mMessageArea.setText(mMessageArea.getContext().getString(resId, formatArgs));
+            mMessageArea.announceForAccessibility(mMessageArea.getText());
         } else {
             mMessageArea.setText("");
         }
