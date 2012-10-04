@@ -1219,7 +1219,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mLastTitle = mAttrs.getTitle();
             mWasPaused = mToken.paused;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
-                    + " " + mLastTitle + " paused=" + mWasPaused + "}";
+                    + " u" + UserHandle.getUserId(mSession.mUid)
+                    + " " + mLastTitle + (mWasPaused ? " PAUSED}" : "}");
         }
         return mStringNameCache;
     }

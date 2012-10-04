@@ -363,6 +363,8 @@ public interface IActivityManager extends IInterface {
 
     public void requestBugReport() throws RemoteException;
 
+    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -616,4 +618,5 @@ public interface IActivityManager extends IInterface {
     int UNREGISTER_USER_SWITCH_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+155;
     int GET_RUNNING_USER_IDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+156;
     int REQUEST_BUG_REPORT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+157;
+    int INPUT_DISPATCHING_TIMED_OUT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+158;
 }

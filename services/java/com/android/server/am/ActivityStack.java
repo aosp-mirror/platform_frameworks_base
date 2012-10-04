@@ -2444,8 +2444,8 @@ final class ActivityStack {
 
         if (err == ActivityManager.START_SUCCESS) {
             final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
-            Slog.i(TAG, "START {" + intent.toShortString(true, true, true, false)
-                    + " u=" + userId + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
+            Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
+                    + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
         }
 
         ActivityRecord sourceRecord = null;

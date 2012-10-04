@@ -30,8 +30,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
@@ -69,8 +71,17 @@ final class Session extends IWindowSession.Stub
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(" uid ");
-        sb.append(mUid);
+        sb.append(" ");
+        sb.append(mPid);
+        if (mUid < Process.FIRST_APPLICATION_UID) {
+            sb.append(":");
+            sb.append(mUid);
+        } else {
+            sb.append(":u");
+            sb.append(UserHandle.getUserId(mUid));
+            sb.append('a');
+            sb.append(UserHandle.getAppId(mUid));
+        }
         sb.append("}");
         mStringName = sb.toString();
 
