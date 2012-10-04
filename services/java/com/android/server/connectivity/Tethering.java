@@ -454,7 +454,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             if (mTetheredNotification.icon == icon) {
                 return;
             }
-            notificationManager.cancel(mTetheredNotification.icon);
+            notificationManager.cancelAsUser(null, mTetheredNotification.icon,
+                    UserHandle.ALL);
         }
 
         Intent intent = new Intent();
