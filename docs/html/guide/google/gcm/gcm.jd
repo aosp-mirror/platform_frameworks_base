@@ -647,7 +647,7 @@ when the device is offline, so that only the last message gets sent to the
 client. This is intended to avoid sending too many messages to the phone when it
 comes back online. Note that since there is no guarantee of the order in which
 messages get sent, the &quot;last&quot; message may not actually be the last
-message sent by the application server. See <a href="adv.html#collapsible">Advanced Topics</a> for more discussion of this topic. Optional, unless you are using the <code>time_to_live</code> parameter&mdash;in that case, you must also specify a <code>collapse_key</code>.</td>
+message sent by the application server. See <a href="adv.html#collapsible">Advanced Topics</a> for more discussion of this topic. Optional.</td>
   </tr>
   <tr>
     <td><code>data</code></td>
@@ -665,7 +665,7 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
   </tr>
   <tr>
     <td><code>time_to_live</code></td>
-    <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number). If you use this parameter, you must also specify a <code>collapse_key</code>.</td>
+    <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number). </td>
   </tr>
 </table>
 
