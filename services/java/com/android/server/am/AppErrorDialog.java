@@ -23,12 +23,9 @@ import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Slog;
 import android.view.WindowManager;
 
 class AppErrorDialog extends BaseErrorDialog {
-    private final static String TAG = "AppErrorDialog";
-
     private final ActivityManagerService mService;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
@@ -76,7 +73,9 @@ class AppErrorDialog extends BaseErrorDialog {
 
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
-        getWindow().setTitle("Application Error: " + app.info.processName);
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.setTitle("Application Error: " + app.info.processName);
+        getWindow().setAttributes(attrs);
         if (app.persistent) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }

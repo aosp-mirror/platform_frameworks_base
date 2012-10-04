@@ -841,6 +841,7 @@ final class ActivityRecord {
     }
 
     public boolean keyDispatchingTimedOut() {
+        // TODO: Unify this code with ActivityManagerService.inputDispatchingTimedOut().
         ActivityRecord r;
         ProcessRecord anrApp = null;
         synchronized(service) {
@@ -869,8 +870,7 @@ final class ActivityRecord {
         }
         
         if (anrApp != null) {
-            service.appNotResponding(anrApp, r, this,
-                    "keyDispatchingTimedOut");
+            service.appNotResponding(anrApp, r, this, false, "keyDispatchingTimedOut");
         }
         
         return true;

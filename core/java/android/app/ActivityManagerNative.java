@@ -1772,6 +1772,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IUserSwitchObserver observer = IUserSwitchObserver.Stub.asInterface(
                     data.readStrongBinder());
             registerUserSwitchObserver(observer);
+            reply.writeNoException();
             return true;
         }
 
@@ -1780,12 +1781,24 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IUserSwitchObserver observer = IUserSwitchObserver.Stub.asInterface(
                     data.readStrongBinder());
             unregisterUserSwitchObserver(observer);
+            reply.writeNoException();
             return true;
         }
 
         case REQUEST_BUG_REPORT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             requestBugReport();
+            reply.writeNoException();
+            return true;
+        }
+
+        case INPUT_DISPATCHING_TIMED_OUT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int pid = data.readInt();
+            boolean aboveSystem = data.readInt() != 0;
+            long res = inputDispatchingTimedOut(pid, aboveSystem);
+            reply.writeNoException();
+            reply.writeLong(res);
             return true;
         }
 
@@ -4080,6 +4093,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(pid);
+        data.writeInt(aboveSystem ? 1 : 0);
+        mRemote.transact(INPUT_DISPATCHING_TIMED_OUT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        long res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
     }
 
     private IBinder mRemote;
