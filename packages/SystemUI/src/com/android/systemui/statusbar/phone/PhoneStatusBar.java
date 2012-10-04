@@ -274,10 +274,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.Secure.USER_SETUP_COMPLETE,
                     0 /*default */,
                     mCurrentUserId);
+            if (MULTIUSER_DEBUG) Slog.d(TAG, String.format("User setup changed: " +
+                    "selfChange=%s userSetup=%s mUserSetup=%s",
+                    selfChange, userSetup, mUserSetup));
+            if (mSettingsPanel != null)
+                mSettingsPanel.setEnabled(userSetup);
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
-                if (mSettingsPanel != null)
-                    mSettingsPanel.setEnabled(mUserSetup);
                 if (!mUserSetup && mStatusBarView != null)
                     animateCollapseQuickSettings();
             }
