@@ -69,6 +69,15 @@ page.title=Accessibility
 <h4>Try it out yourself</h4>
 <p>Turn on the TalkBack service in <strong>Settings > Accessibility</strong> and navigate your application using directional controls or eyes-free navigation.</p>
 
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to properly implement accessibility in your app, see the
+  <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+  API guide.</p>
+</div>
+
+
 <h2>Checklist</h2>
 <ul>
   <li>Make navigation intuitive</li>
