@@ -849,7 +849,6 @@ public class SettingsProvider extends ContentProvider {
         if (TABLE_FAVORITES.equals(args.table)) {
             return null;
         }
-        checkWritePermissions(args);
 
         // Special case LOCATION_PROVIDERS_ALLOWED.
         // Support enabling/disabling a single provider (using "+" or "-" prefix)
@@ -868,6 +867,9 @@ public class SettingsProvider extends ContentProvider {
                 args.table = TABLE_GLOBAL;  // next condition will rewrite the user handle
             }
         }
+
+        // Check write permissions only after determining which table the insert will touch
+        checkWritePermissions(args);
 
         // The global table is stored under the owner, always
         if (TABLE_GLOBAL.equals(args.table)) {
