@@ -151,7 +151,8 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla está bloqueada en modo vertical."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <string name="start_dreams" msgid="870400522982252717">"Iniciar Dreams"</string>
+    <!-- no translation found for start_dreams (6170089063982549905) -->
+    <skip />
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo de avión"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -166,16 +167,16 @@
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Ubicación en uso"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Solo llamadas de emergencia"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Solo emergencia"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Configuración"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Hora"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Yo"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Tecnología Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Sin conexión"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Sin red"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Tecnología Wi-Fi desactivada"</string>
-    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi Display"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Sin conexión con la tecnología Wi-Fi Display"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivada"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Pantalla Wi-Fi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Sin conexión con la pantalla Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
 </resources>
