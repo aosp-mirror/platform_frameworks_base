@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Schéma effacé."</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cellule ajoutée."</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Schéma terminé."</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d sur %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Sélecteur d\'utilisateur"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"État"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Commandes multimédias"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1422,11 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Augmenter le volume au-dessus du niveau de sécurité ?"\n"L\'écoute à un volume élevé pendant des périodes prolongées peut endommager votre audition."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Appuyez de manière prolongée avec deux doigts pour activer l\'accessibilité."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
 </resources>

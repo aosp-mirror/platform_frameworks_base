@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"प्रतिमान साफ़ किया गया"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"कक्ष जोड़ा गया"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"प्रतिमान पूरा किया गया"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d विजेट में से %2$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"उपयोगकर्ता चयनकर्ता"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"स्थिति"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"मीडिया नियंत्रण"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1422,11 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"वॉल्यूम को सुरक्षित स्तर से अधिक करें?"\n"अधिक देर तक उच्च वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"पहुंच-योग्यता सक्षम करने के लिए अपनी दो अंगुलियों को नीचे की ओर करके रखें."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
+    <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
