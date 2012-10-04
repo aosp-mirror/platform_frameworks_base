@@ -4530,6 +4530,14 @@ public final class ActivityThread {
 
             IContentProvider provider = pr.mProvider;
             IBinder jBinder = provider.asBinder();
+            if (!jBinder.isBinderAlive()) {
+                // The hosting process of the provider has died; we can't
+                // use this one.
+                Log.i(TAG, "Acquiring provider " + auth + " for user " + userId
+                        + ": existing object's process dead");
+                handleUnstableProviderDiedLocked(jBinder, true);
+                return null;
+            }
 
             // Only increment the ref count if we have one.  If we don't then the
             // provider is not reference counted and never needs to be released.
@@ -4670,33 +4678,37 @@ public final class ActivityThread {
     }
 
     final void handleUnstableProviderDied(IBinder provider, boolean fromClient) {
-        synchronized(mProviderMap) {
-            ProviderRefCount prc = mProviderRefCountMap.get(provider);
-            if (prc != null) {
-                if (DEBUG_PROVIDER) Slog.v(TAG, "Cleaning up dead provider "
-                        + provider + " " + prc.holder.info.name);
-                mProviderRefCountMap.remove(provider);
-                if (prc.client != null && prc.client.mNames != null) {
-                    for (String name : prc.client.mNames) {
-                        ProviderClientRecord pr = mProviderMap.get(name);
-                        if (pr != null && pr.mProvider.asBinder() == provider) {
-                            Slog.i(TAG, "Removing dead content provider: " + name);
-                            mProviderMap.remove(name);
-                        }
+        synchronized (mProviderMap) {
+            handleUnstableProviderDiedLocked(provider, fromClient);
+        }
+    }
+
+    final void handleUnstableProviderDiedLocked(IBinder provider, boolean fromClient) {
+        ProviderRefCount prc = mProviderRefCountMap.get(provider);
+        if (prc != null) {
+            if (DEBUG_PROVIDER) Slog.v(TAG, "Cleaning up dead provider "
+                    + provider + " " + prc.holder.info.name);
+            mProviderRefCountMap.remove(provider);
+            if (prc.client != null && prc.client.mNames != null) {
+                for (String name : prc.client.mNames) {
+                    ProviderClientRecord pr = mProviderMap.get(name);
+                    if (pr != null && pr.mProvider.asBinder() == provider) {
+                        Slog.i(TAG, "Removing dead content provider: " + name);
+                        mProviderMap.remove(name);
                     }
                 }
-                if (fromClient) {
-                    // We found out about this due to execution in our client
-                    // code.  Tell the activity manager about it now, to ensure
-                    // that the next time we go to do anything with the provider
-                    // it knows it is dead (so we don't race with its death
-                    // notification).
-                    try {
-                        ActivityManagerNative.getDefault().unstableProviderDied(
-                                prc.holder.connection);
-                    } catch (RemoteException e) {
-                        //do nothing content provider object is dead any way
-                    }
+            }
+            if (fromClient) {
+                // We found out about this due to execution in our client
+                // code.  Tell the activity manager about it now, to ensure
+                // that the next time we go to do anything with the provider
+                // it knows it is dead (so we don't race with its death
+                // notification).
+                try {
+                    ActivityManagerNative.getDefault().unstableProviderDied(
+                            prc.holder.connection);
+                } catch (RemoteException e) {
+                    //do nothing content provider object is dead any way
                 }
             }
         }

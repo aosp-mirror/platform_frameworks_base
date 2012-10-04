@@ -17,9 +17,13 @@
 package com.android.server;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Slog;
 
 import com.android.server.power.ShutdownThread;
@@ -39,15 +43,27 @@ public class ShutdownActivity extends Activity {
         mConfirm = intent.getBooleanExtra(Intent.EXTRA_KEY_CONFIRM, false);
         Slog.i(TAG, "onCreate(): confirm=" + mConfirm);
 
-        Handler h = new Handler();
-        h.post(new Runnable() {
+        Thread thr = new Thread("ShutdownActivity") {
+            @Override
             public void run() {
-                if (mReboot) {
-                    ShutdownThread.reboot(ShutdownActivity.this, null, mConfirm);
-                } else {
-                    ShutdownThread.shutdown(ShutdownActivity.this, mConfirm);
+                IPowerManager pm = IPowerManager.Stub.asInterface(
+                        ServiceManager.getService(Context.POWER_SERVICE));
+                try {
+                    if (mReboot) {
+                        pm.reboot(mConfirm, null, false);
+                    } else {
+                        pm.shutdown(mConfirm, false);
+                    }
+                } catch (RemoteException e) {
                 }
             }
-        });
+        };
+        thr.start();
+        finish();
+        // Wait for us to tell the power manager to shutdown.
+        try {
+            thr.join();
+        } catch (InterruptedException e) {
+        }
     }
 }
