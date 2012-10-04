@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"एप्‍लिकेशन को सिस्‍टम की आंतरिक स्‍थिति पुनर्प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन विभिन्‍न प्रकार की निजी और सुरक्षा जानकारी प्राप्त कर सकते हैं जिनकी उन्‍हें सामान्‍यत: आवश्‍यकता नहीं होती."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"स्‍क्रीन सामग्री पुनर्प्राप्त करें"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"एप्‍लिकेशन को सक्रिय विंडो की सामग्री पुनर्प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन विंडो की संपूर्ण सामग्री प्राप्त कर सकते हैं और पासवर्ड को छोड़कर इसके सभी पाठ जांच सकते हैं."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"पहुंच-योग्यता को अस्थायी रूप से सक्षम करें"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"एप्लिकेशन को उपकरण पर पहुंच-योग्यता को अस्थायी रूप से सक्षम करने देता है. दुर्भावनापूर्ण एप्लिकेशन उपयोगकर्ता की सहमति के बिना पहुंच-योग्यता को सक्षम कर सकते हैं."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"विंडो जानकारी प्राप्त करें"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"एप्‍लिकेशन को विंडो प्रबंधक से windows के बारे में जानकारी प्राप्त करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन आंतरिक सिस्टम उपयोग के लिए अभिप्रेत जानकारी को प्राप्त कर सकते हैं."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"ईवेंट फ़िल्टर करें"</string>
@@ -324,7 +322,7 @@
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"अनधिकृत विंडो दिखाएं"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"किसी एप्‍लिकेशन को ऐसी विंडो बनाने देता है जिनका उपयोग आंतरिक सिस्‍टम उपयोगकर्ता इंटरफ़ेस द्वारा किया जाना है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"अन्‍य एप्‍लिकेशन पर खींचें"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"एप्लिकेशन को अन्य एप्लिकेशन के शीर्ष पर या उपयोगकर्ता इंटरफ़ेस के भागों आने देती है. वे किसी भी एप्लिकेशन में इंटरफ़ेस के आपके उपयोग में हस्तक्षेप कर सकते हैं, या अन्य एप्लिकेशन में वह बदल सकती है जिसके बारे में आपको लगता है कि आप देख रहे हैं."</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"एप्लिकेशन को अन्य एप्लिकेशन के शीर्ष पर या उपयोगकर्ता इंटरफ़ेस के हिस्सों पर आने देती है. वे किसी भी एप्लिकेशन में इंटरफ़ेस के आपके उपयोग में हस्तक्षेप कर सकते हैं, या उस चीज को बदल सकती है जिसके बारे में आपको लगता है कि आप उसे अन्य एप्लिकेशन में देख रहे हैं."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"वैश्विक एनिमेशन गति बदलें"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"एप्‍लिकेशन को किसी भी समय वैश्विक एनिमेशन गति (तेज़ या धीमे एनिमेशन) बदलने देता है."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"एप्‍लिकेशन टोकन प्रबंधित करें"</string>
@@ -812,6 +810,14 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"प्रतिमान साफ़ किया गया"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"कक्ष जोड़ा गया"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"प्रतिमान पूरा किया गया"</string>
+    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
+    <skip />
+    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1101,11 +1107,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
     <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; पर संदेश भेजना चाहता है."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"इससे आपके मोबाइल खाते पर शुल्क लग सकते हैं."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"इससे आपके मोबाइल खाते पर शुल्क लग सकते हैं."</string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"इससे आपके मोबाइल खाते पर "<font fgcolor="#ffffb060">"शुल्क लग सकते हैं"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"इससे आपके मोबाइल खाते पर शुल्क लगेंगे."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"भेजें"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रद्द करें"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरी पसंद को याद रखें"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"आप इसे बाद में सेटिंग &gt; एप्लिकेशन में बदल सकते हैं"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"हमेशा अनुमति दें"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कभी भी अनुमति न दें"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"सिमकार्ड निकाला गया"</string>
@@ -1365,11 +1372,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फ़ोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफ़ोन"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"डॉक स्‍पीकर"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI ऑडियो"</string>
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्‍टम"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ऑडियो"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"पूर्ण"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"मीडिया आउटपुट"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"स्‍कैन कर रहा है..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"कनेक्ट हो रहा है..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"उपलब्ध"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"उपलब्‍ध नहीं"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"अंतर्निहित स्क्रीन"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI स्क्रीन"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ओवरले #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1384,14 +1395,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम PIN डालें"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN डालें"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"पासवर्ड डालें"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK कोड"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"नया PIN कोड"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम अब अक्षम हो गई है. जारी रखने के लिए PUK कोड डालें. विवरण के लिए वाहक से संपर्क करें."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड डालें"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM कार्ड अनलॉक कर रहा है…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"गलत PIN कोड."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ऐसा PIN लिखें, जो 4 से 8 अंकों का हो."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"ऐसा PUK लिखें जो 8 अंकों या अधिक का हो."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUK और नया PIN कोड लिखें"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"आपके द्वारा लिखा गया PUK सही नहीं है."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक प्रतिमान प्रयास"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"उपयोगकर्ता नाम (ईमेल)"</string>
@@ -1399,7 +1411,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"साइन इन करें"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अमान्य उपयोगकर्ता नाम या पासवर्ड."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?"\n" "<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"जांच कर रहा है..."</string>
+    <string name="kg_login_checking_password" msgid="5316091912653672681">"सिम अनलॉक कर रहा है…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आप अपना PIN <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिख चुके हैं. "\n\n" <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से लिख चुके हैं. "\n\n" <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपने अपना अनलॉक प्रतिमान <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. "\n\n" <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
@@ -1410,12 +1422,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"वॉल्यूम को सुरक्षित स्तर से अधिक करें?"\n"अधिक देर तक उच्च वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
+    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
     <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
+    <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
+    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
+    <!-- no translation found for user_switched (3768006783166984410) -->
     <skip />
 </resources>
