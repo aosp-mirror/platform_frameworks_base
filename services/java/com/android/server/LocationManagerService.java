@@ -1293,8 +1293,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public boolean isProviderEnabled(String provider) {
-        checkPermission();
+        String perms = checkPermission();
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
+        if (ACCESS_COARSE_LOCATION.equals(perms) &&
+                !isProviderAllowedByCoarsePermission(provider)) {
+            throw new SecurityException("The \"" + provider +
+                    "\" provider requires ACCESS_FINE_LOCATION permission");
+        }
 
         synchronized (mLock) {
             LocationProviderInterface p = mProvidersByName.get(provider);
