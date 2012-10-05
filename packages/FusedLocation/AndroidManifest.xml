@@ -18,7 +18,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.location.fused"
-        coreApp="true">
+        coreApp="true"
+        android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -39,7 +40,7 @@
            <intent-filter>
                <action android:name="com.android.location.service.FusedLocationProvider" />
            </intent-filter>
-           <meta-data android:name="version" android:value="1" />
+           <meta-data android:name="serviceVersion" android:value="0" />
         </service>
     </application>
 </manifest>
