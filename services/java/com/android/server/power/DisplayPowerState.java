@@ -50,7 +50,7 @@ final class DisplayPowerState {
     private static final int DIRTY_BRIGHTNESS = 1 << 2;
 
     private final Choreographer mChoreographer;
-    private final ElectronBeam mElectronBeam;
+    private final ElectronBeam mElectronBeam; // may be null if only animating backlights
     private final PhotonicModulator mScreenBrightnessModulator;
 
     private int mDirty;
@@ -134,16 +134,22 @@ final class DisplayPowerState {
      * @return True if the electron beam was prepared.
      */
     public boolean prepareElectronBeam(boolean warmUp) {
-        boolean success = mElectronBeam.prepare(warmUp);
-        invalidate(DIRTY_ELECTRON_BEAM);
-        return success;
+        if (mElectronBeam != null) {
+            boolean success = mElectronBeam.prepare(warmUp);
+            invalidate(DIRTY_ELECTRON_BEAM);
+            return success;
+        } else {
+            return true;
+        }
     }
 
     /**
      * Dismisses the electron beam surface.
      */
     public void dismissElectronBeam() {
-        mElectronBeam.dismiss();
+        if (mElectronBeam != null) {
+            mElectronBeam.dismiss();
+        }
     }
 
     /**
@@ -224,7 +230,9 @@ final class DisplayPowerState {
         pw.println("  mScreenBrightness=" + mScreenBrightness);
         pw.println("  mElectronBeamLevel=" + mElectronBeamLevel);
 
-        mElectronBeam.dump(pw);
+        if (mElectronBeam != null) {
+            mElectronBeam.dump(pw);
+        }
     }
 
     private void invalidate(int dirty) {
@@ -243,7 +251,7 @@ final class DisplayPowerState {
                 PowerManagerService.nativeSetScreenState(false);
             }
 
-            if ((mDirty & DIRTY_ELECTRON_BEAM) != 0) {
+            if ((mDirty & DIRTY_ELECTRON_BEAM) != 0 && mElectronBeam != null) {
                 mElectronBeam.draw(mElectronBeamLevel);
             }
 
