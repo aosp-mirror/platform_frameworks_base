@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -40,9 +41,7 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 import com.android.internal.R;
 
 public class KeyguardSimPukView extends LinearLayout implements View.OnClickListener,
-    KeyguardSecurityView, OnEditorActionListener {
-
-    private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+    KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
     private View mDeleteButton;
 
@@ -135,6 +134,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
 
         mSimPinEntry = (TextView) findViewById(R.id.sim_pin_entry);
         mSimPinEntry.setOnEditorActionListener(this);
+        mSimPinEntry.addTextChangedListener(this);
         mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setOnClickListener(this);
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
@@ -222,7 +222,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                 digits.delete(len-1, len);
             }
         }
-        mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
+        mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
     }
 
     private Dialog getSimUnlockProgressDialog() {
@@ -292,7 +292,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     @Override
     public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
-        mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
+        mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
                 || actionId == EditorInfo.IME_ACTION_NEXT) {
@@ -316,6 +316,21 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     @Override
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (mCallback != null) {
+            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
+        }
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
     }
 
 }
