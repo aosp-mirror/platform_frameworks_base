@@ -828,9 +828,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         switch (mWakefulness) {
             case WAKEFULNESS_ASLEEP:
                 Slog.i(TAG, "Waking up from sleep...");
+                sendPendingNotificationsLocked();
                 mNotifier.onWakeUpStarted();
                 mSendWakeUpFinishedNotificationWhenReady = true;
-                mSendGoToSleepFinishedNotificationWhenReady = false;
                 break;
             case WAKEFULNESS_DREAMING:
                 Slog.i(TAG, "Waking up from dream...");
@@ -901,12 +901,13 @@ public final class PowerManagerService extends IPowerManager.Stub
                 break;
         }
 
+        sendPendingNotificationsLocked();
+        mNotifier.onGoToSleepStarted(reason);
+        mSendGoToSleepFinishedNotificationWhenReady = true;
+
         mLastSleepTime = eventTime;
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_ASLEEP;
-        mNotifier.onGoToSleepStarted(reason);
-        mSendGoToSleepFinishedNotificationWhenReady = true;
-        mSendWakeUpFinishedNotificationWhenReady = false;
 
         // Report the number of wake locks that will be cleared by going to sleep.
         int numWakeLocksCleared = 0;
@@ -1005,7 +1006,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         updateDisplayPowerStateLocked(dirtyPhase2);
 
         // Phase 3: Send notifications, if needed.
-        sendPendingNotificationsLocked();
+        if (mDisplayReady) {
+            sendPendingNotificationsLocked();
+        }
 
         // Phase 4: Update suspend blocker.
         // Because we might release the last suspend blocker here, we need to make sure
@@ -1014,15 +1017,13 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private void sendPendingNotificationsLocked() {
-        if (mDisplayReady) {
-            if (mSendWakeUpFinishedNotificationWhenReady) {
-                mSendWakeUpFinishedNotificationWhenReady = false;
-                mNotifier.onWakeUpFinished();
-            }
-            if (mSendGoToSleepFinishedNotificationWhenReady) {
-                mSendGoToSleepFinishedNotificationWhenReady = false;
-                mNotifier.onGoToSleepFinished();
-            }
+        if (mSendWakeUpFinishedNotificationWhenReady) {
+            mSendWakeUpFinishedNotificationWhenReady = false;
+            mNotifier.onWakeUpFinished();
+        }
+        if (mSendGoToSleepFinishedNotificationWhenReady) {
+            mSendGoToSleepFinishedNotificationWhenReady = false;
+            mNotifier.onGoToSleepFinished();
         }
     }
 

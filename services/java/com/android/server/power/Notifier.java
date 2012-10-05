@@ -39,17 +39,20 @@ import android.view.WindowManagerPolicy.ScreenOnListener;
 
 /**
  * Sends broadcasts about important power state changes.
- *
+ * <p>
  * This methods of this class may be called by the power manager service while
  * its lock is being held.  Internally it takes care of sending broadcasts to
  * notify other components of the system or applications asynchronously.
- *
+ * </p><p>
  * The notifier is designed to collapse unnecessary broadcasts when it is not
  * possible for the system to have observed an intermediate state.
- *
- * For example, if the device wakes up, goes to sleep and wakes up again immediately
- * before the go to sleep broadcast has been sent, then no broadcast will be
- * sent about the system going to sleep and waking up.
+ * </p><p>
+ * For example, if the device wakes up, goes to sleep, wakes up again and goes to
+ * sleep again before the wake up notification is sent, then the system will
+ * be told about only one wake up and sleep.  However, we always notify the
+ * fact that at least one transition occurred.  It is especially important to
+ * tell the system when we go to sleep so that it can lock the keyguard if needed.
+ * </p>
  */
 final class Notifier {
     private static final String TAG = "PowerManagerNotifier";
@@ -78,6 +81,10 @@ final class Notifier {
     // The current power state.
     private int mActualPowerState;
     private int mLastGoToSleepReason;
+
+    // True if there is a pending transition that needs to be reported.
+    private boolean mPendingWakeUpBroadcast;
+    private boolean mPendingGoToSleepBroadcast;
 
     // The currently broadcasted power state.  This reflects what other parts of the
     // system have observed.
@@ -219,6 +226,7 @@ final class Notifier {
         synchronized (mLock) {
             if (mActualPowerState != POWER_STATE_AWAKE) {
                 mActualPowerState = POWER_STATE_AWAKE;
+                mPendingWakeUpBroadcast = true;
                 updatePendingBroadcastLocked();
             }
         }
@@ -264,6 +272,7 @@ final class Notifier {
         synchronized (mLock) {
             if (mActualPowerState != POWER_STATE_ASLEEP) {
                 mActualPowerState = POWER_STATE_ASLEEP;
+                mPendingGoToSleepBroadcast = true;
                 if (mUserActivityPending) {
                     mUserActivityPending = false;
                     mHandler.removeMessages(MSG_USER_ACTIVITY);
@@ -300,13 +309,19 @@ final class Notifier {
     private void updatePendingBroadcastLocked() {
         if (!mBroadcastInProgress
                 && mActualPowerState != POWER_STATE_UNKNOWN
-                && mActualPowerState != mBroadcastedPowerState) {
+                && (mPendingWakeUpBroadcast || mPendingGoToSleepBroadcast
+                        || mActualPowerState != mBroadcastedPowerState)) {
             mBroadcastInProgress = true;
             mSuspendBlocker.acquire();
             Message msg = mHandler.obtainMessage(MSG_BROADCAST);
             msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
+    }
+
+    private void finishPendingBroadcastLocked() {
+        mBroadcastInProgress = false;
+        mSuspendBlocker.release();
     }
 
     private void sendUserActivity() {
@@ -324,18 +339,35 @@ final class Notifier {
         final int powerState;
         final int goToSleepReason;
         synchronized (mLock) {
-            if (mActualPowerState == POWER_STATE_UNKNOWN
-                    || mActualPowerState == mBroadcastedPowerState) {
-                mBroadcastInProgress = false;
-                mSuspendBlocker.release();
-                return;
+            if (mBroadcastedPowerState == POWER_STATE_UNKNOWN) {
+                // Broadcasted power state is unknown.  Send wake up.
+                mPendingWakeUpBroadcast = false;
+                mBroadcastedPowerState = POWER_STATE_AWAKE;
+            } else if (mBroadcastedPowerState == POWER_STATE_AWAKE) {
+                // Broadcasted power state is awake.  Send asleep if needed.
+                if (mPendingWakeUpBroadcast || mPendingGoToSleepBroadcast
+                        || mActualPowerState == POWER_STATE_ASLEEP) {
+                    mPendingGoToSleepBroadcast = false;
+                    mBroadcastedPowerState = POWER_STATE_ASLEEP;
+                } else {
+                    finishPendingBroadcastLocked();
+                    return;
+                }
+            } else {
+                // Broadcasted power state is asleep.  Send awake if needed.
+                if (mPendingWakeUpBroadcast || mPendingGoToSleepBroadcast
+                        || mActualPowerState == POWER_STATE_AWAKE) {
+                    mPendingWakeUpBroadcast = false;
+                    mBroadcastedPowerState = POWER_STATE_AWAKE;
+                } else {
+                    finishPendingBroadcastLocked();
+                    return;
+                }
             }
 
-            powerState = mActualPowerState;
-            goToSleepReason = mLastGoToSleepReason;
-
-            mBroadcastedPowerState = powerState;
             mBroadcastStartTime = SystemClock.uptimeMillis();
+            powerState = mBroadcastedPowerState;
+            goToSleepReason = mLastGoToSleepReason;
         }
 
         EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_SEND, 1);
