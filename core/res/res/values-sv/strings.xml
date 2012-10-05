@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Grafiskt lösenord har tagits bort"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"En cell har lagts till"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Grafiskt lösenord har slutförts"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d av %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Användarväljare"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediereglage"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1422,11 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp surfplattan med ett e-postkonto."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vill du höja volymen över den säkra nivån?"\n"Om du lyssnar på hög volym under långa perioder kan din hörsel skadas."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Fortsätt trycka med två fingrar om du vill aktivera tillgänglighetsläget."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tillgänglighetsläget har aktiverats."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Byte till tillgänglighetsläge avbrutet."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
