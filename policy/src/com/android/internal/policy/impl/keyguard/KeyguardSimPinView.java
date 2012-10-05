@@ -30,6 +30,8 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 import com.android.internal.R;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -45,9 +47,7 @@ import android.widget.TextView.OnEditorActionListener;
  * Displays a dialer like interface to unlock the SIM PIN.
  */
 public class KeyguardSimPinView extends LinearLayout
-        implements KeyguardSecurityView, OnEditorActionListener {
-
-    private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
     private EditText mPinEntry;
     private ProgressDialog mSimUnlockProgressDialog = null;
@@ -80,6 +80,7 @@ public class KeyguardSimPinView extends LinearLayout
 
         mPinEntry = (EditText) findViewById(R.id.sim_pin_entry);
         mPinEntry.setOnEditorActionListener(this);
+        mPinEntry.addTextChangedListener(this);
 
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
@@ -163,7 +164,7 @@ public class KeyguardSimPinView extends LinearLayout
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
-        mCallback.userActivity(DIGIT_PRESS_WAKE_MILLIS);
+        mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
         if (event.getAction() == MotionEvent.ACTION_DOWN && (
                 actionId == EditorInfo.IME_NULL
                 || actionId == EditorInfo.IME_ACTION_DONE
@@ -245,6 +246,21 @@ public class KeyguardSimPinView extends LinearLayout
 
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (mCallback != null) {
+            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
+        }
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
     }
 
 }

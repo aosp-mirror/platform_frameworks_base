@@ -52,6 +52,9 @@ public class KeyguardViewManager {
     private static String TAG = "KeyguardViewManager";
     public static boolean USE_UPPER_CASE = true;
 
+    // Timeout used for keypresses
+    static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
+
     private final Context mContext;
     private final ViewManager mViewManager;
     private final KeyguardViewMediator.ViewMediatorCallback mViewMediatorCallback;
