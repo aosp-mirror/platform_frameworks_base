@@ -219,12 +219,14 @@ public interface WindowManager extends ViewManager {
          * Window type: an application window that serves as the "base" window
          * of the overall application; all other application windows will
          * appear on top of it.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_BASE_APPLICATION   = 1;
         
         /**
          * Window type: a normal application window.  The {@link #token} must be
          * an Activity token identifying who the window belongs to.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_APPLICATION        = 2;
     
@@ -233,6 +235,7 @@ public interface WindowManager extends ViewManager {
          * application is starting.  Not for use by applications themselves;
          * this is used by the system to display something until the
          * application can show its own windows.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_APPLICATION_STARTING = 3;
     

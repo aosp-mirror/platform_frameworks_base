@@ -78,7 +78,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4)
+    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
+                            boolean arg5)
             throws RemoteException {
         // TODO Auto-generated method stub
 

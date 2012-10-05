@@ -3703,7 +3703,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void addAppToken(int addPos, IApplicationToken token,
-            int groupId, int requestedOrientation, boolean fullscreen) {
+            int groupId, int requestedOrientation, boolean fullscreen, boolean showWhenLocked) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3733,6 +3733,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.groupId = groupId;
             atoken.appFullscreen = fullscreen;
+            atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
                     + " at " + addPos);
@@ -5411,7 +5412,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowList windows = iterator.next().getWindowList();
                 for (int i = 0; i < windows.size(); i++) {
                     final WindowState win = windows.get(i);
-                    if (win.isOtherUsersAppWindow()) {
+                    if (win.isHiddenFromUserLocked()) {
                         Slog.w(TAG, "current user violation " + newUserId + " hiding "
                                 + win + ", attrs=" + win.mAttrs.type + ", belonging to "
                                 + win.mOwnerUid);
