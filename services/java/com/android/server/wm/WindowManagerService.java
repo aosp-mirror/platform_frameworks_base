@@ -10155,8 +10155,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.hasNavigationBar();
     }
 
-    public void lockNow() {
-        mPolicy.lockNow();
+    public void lockNow(Bundle options) {
+        mPolicy.lockNow(options);
     }
 
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {

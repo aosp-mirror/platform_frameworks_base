@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
 import android.view.IDisplayContentChangeListener;
@@ -209,9 +210,9 @@ interface IWindowManager
     boolean hasNavigationBar();
 
     /**
-     * Lock the device immediately.
+     * Lock the device immediately with the specified options (can be null).
      */
-    void lockNow();
+    void lockNow(in Bundle options);
 
     /**
      * Gets the token for the focused window.

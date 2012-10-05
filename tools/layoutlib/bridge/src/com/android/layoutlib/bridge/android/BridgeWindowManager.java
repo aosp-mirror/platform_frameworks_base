@@ -22,6 +22,7 @@ import com.android.internal.view.IInputMethodClient;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -438,7 +439,7 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void lockNow() {
+    public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
 
