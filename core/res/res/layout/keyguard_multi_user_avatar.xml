@@ -47,6 +47,8 @@
             android:layout_gravity="center_vertical|left"
             android:textSize="16sp"
             android:textColor="#ffffff"
+            android:singleLine="true"
+            android:ellipsize="end"
             android:background="#808080" />
     </LinearLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardMultiUserAvatar>
