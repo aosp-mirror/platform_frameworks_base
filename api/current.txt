@@ -16615,6 +16615,8 @@ package android.os {
   }
 
   public class UserManager {
+    method public long getSerialNumberForUser(android.os.UserHandle);
+    method public android.os.UserHandle getUserForSerialNumber(long);
     method public java.lang.String getUserName();
     method public boolean isUserAGoat();
   }
