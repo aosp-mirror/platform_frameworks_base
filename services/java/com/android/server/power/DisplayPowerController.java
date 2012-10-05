@@ -117,8 +117,9 @@ final class DisplayPowerController {
     private static final int PROXIMITY_NEGATIVE = 0;
     private static final int PROXIMITY_POSITIVE = 1;
 
-    // Proximity sensor debounce delay in milliseconds.
-    private static final int PROXIMITY_SENSOR_DEBOUNCE_DELAY = 250;
+    // Proximity sensor debounce delay in milliseconds for positive or negative transitions.
+    private static final int PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY = 0;
+    private static final int PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY = 500;
 
     // Trigger proximity if distance is less than 5 cm.
     private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
@@ -562,6 +563,7 @@ final class DisplayPowerController {
                 if (!mScreenOffBecauseOfProximity
                         && mProximity == PROXIMITY_POSITIVE) {
                     mScreenOffBecauseOfProximity = true;
+                    sendOnProximityPositive();
                     setScreenOn(false);
                 }
             } else if (mWaitingForNegativeProximity
@@ -734,8 +736,13 @@ final class DisplayPowerController {
         // Only accept a proximity sensor reading if it remains
         // stable for the entire debounce delay.
         mHandler.removeMessages(MSG_PROXIMITY_SENSOR_DEBOUNCED);
-        mPendingProximity = positive ? PROXIMITY_POSITIVE : PROXIMITY_NEGATIVE;
-        mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_DEBOUNCE_DELAY;
+        if (positive) {
+            mPendingProximity = PROXIMITY_POSITIVE;
+            mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY;
+        } else {
+            mPendingProximity = PROXIMITY_NEGATIVE;
+            mPendingProximityDebounceTime = time + PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY;
+        }
         debounceProximitySensor();
     }
 
@@ -973,6 +980,17 @@ final class DisplayPowerController {
         }
     };
 
+    private void sendOnProximityPositive() {
+        mCallbackHandler.post(mOnProximityPositiveRunnable);
+    }
+
+    private final Runnable mOnProximityPositiveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mCallbacks.onProximityPositive();
+        }
+    };
+
     private void sendOnProximityNegative() {
         mCallbackHandler.post(mOnProximityNegativeRunnable);
     }
@@ -1090,6 +1108,7 @@ final class DisplayPowerController {
      */
     public interface Callbacks {
         void onStateChanged();
+        void onProximityPositive();
         void onProximityNegative();
     }
 
