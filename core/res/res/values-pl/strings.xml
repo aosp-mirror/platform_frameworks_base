@@ -811,14 +811,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Wzór wyczyszczony"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Dodano komórkę."</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Wzór ukończony"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widżet %2$d z %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Wybór użytkownika"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Stan"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Elementy sterujące multimediów"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1129,7 +1125,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NOWE: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Dostarczane przez <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"to może spowodować naliczenie opłat"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"to może generować dodatkowe koszty"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Pamięć masowa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Połączenie przez USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Nawiązano połączenie z komputerem przez USB. Jeśli chcesz skopiować pliki między komputerem a nośnikiem USB systemu Android, dotknij poniższego przycisku."</string>
@@ -1423,11 +1419,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> nieprawidłowo narysowałeś wzór odblokowania. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach konieczne będzie odblokowanie tabletu przy użyciu danych logowania na konto Google."\n\n" Spróbuj ponownie za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> nieprawidłowo narysowałeś wzór odblokowania. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach konieczne będzie odblokowanie telefonu przy użyciu danych logowania na konto Google."\n\n" Spróbuj ponownie za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Chcesz ustawić głośność powyżej bezpiecznego poziomu?"\n"Słuchanie przy dużym poziomie głośności przez dłuższy czas może doprowadzić do uszkodzenia słuchu."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Aby włączyć ułatwienia dostępu, przytrzymaj dwa palce."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Włączono ułatwienia dostępu."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ułatwienia dostępu zostały anulowane."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>

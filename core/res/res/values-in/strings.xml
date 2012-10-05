@@ -159,9 +159,9 @@
     <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpulkan informasi tentang status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Akan memakan sedikit waktu dari memulai laporan bug hingga siap untuk dikirim; bersabarlah."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mode senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Suara MATI"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Suara HIDUP"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Suara AKTIF"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode pesawat"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode pesawat HIDUP"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode pesawat AKTIF"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode pesawat MATI"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Pola dihapus"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Sel ditambahkan"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Pola selesai"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d dari %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Pemilih pengguna"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Kontrol media"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1013,7 +1009,7 @@
     <string name="no" msgid="5141531044935541497">"Batal"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Perhatian"</string>
     <string name="loading" msgid="7933681260296021180">"Memuat..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"HIDUP"</string>
+    <string name="capital_on" msgid="1544682755514494298">"AKTIF"</string>
     <string name="capital_off" msgid="6815870386972805832">"MATI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tindakan lengkap menggunakan"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara default untuk tindakan ini."</string>
@@ -1107,15 +1103,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Izinkan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Tolak"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin mengirim pesan kepada &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Hal ini "<font fgcolor="#ffffb060">"dapat menyebabkan akun ponsel Anda"</font>" mendapat tagihan."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Hal ini akan menyebabkan tagihan diberlakukan pada akun seluler Anda."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Kirim"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Batal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Ingat pilihan saya"</string>
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
-    <skip />
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Anda dapat mengubah ini nanti di Setelan &gt; Aplikasi"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Selalu Izinkan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Jangan Pernah Izinkan"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartu SIM dihapus"</string>
@@ -1375,20 +1368,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Ponsel"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Headphone"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Pengeras suara dok"</string>
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
-    <skip />
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Selesai"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Keluaran media"</string>
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
-    <skip />
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Memindai..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Menyambung..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Tidak tersedia"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Bawaan"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Layar HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1403,21 +1391,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Masukkan PIN SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Masukkan PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Masukkan Sandi"</string>
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM telah dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Hubungi operator untuk keterangan selengkapnya."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Masukkan kode PIN yang diinginkan"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Konfirmasi kode PIN yang diinginkan"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Membuka kunci kartu SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Kode PIN salah."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Ketik PIN yang terdiri dari 4 sampai 8 angka."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Kode PUK harus terdiri dari 8 angka atau lebih."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Masukkan kembali kode PUK yang benar. Jika berulang kali gagal, SIM akan dinonaktifkan secara permanen."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kode PIN tidak cocok"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak upaya pola"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Untuk membuka kunci, masuk dengan akun Google Anda."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nama pengguna (email)"</string>
@@ -1425,8 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Masuk"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau sandi tidak valid."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau sandi Anda?"\n"Kunjungi "<b>"google.com/accounts/recovery"</b>"."</string>
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
-    <skip />
+    <string name="kg_login_checking_password" msgid="5316091912653672681">"Membuka kunci kartu SIM…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah mengetik PIN. "\n\n"Coba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah mengetik sandi. "\n\n"Coba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. "\n\n"Coba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik."</string>
@@ -1437,11 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Naikkan volume di atas tingkat aman?"\n"Mendengarkan volume tinggi dalam jangka waktu yang lama dapat merusak pendengaran Anda."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Terus tahan dua jari Anda untuk mengaktifkan aksesibilitas."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Aksesibilitas diaktifkan."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Aksesibilitas dibatalkan."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Pengguna saat ini <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>

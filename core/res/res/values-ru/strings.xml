@@ -810,14 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Графический ключ сброшен"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ячейка добавлена"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Графический ключ введен"</string>
-    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виджет %2$d из %3$d."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Выбор аккаунта"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Статус"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Управление блокировкой"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1107,15 +1103,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Разрешить"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Запретить"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"Приложение &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; собирается отправить сообщение на адрес &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (3492025719868078457) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (5523826349105123687) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="3492025719868078457">"С вашего мобильного счета "<font fgcolor="#ffffb060">"могут быть списаны средства"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"С вашего мобильного счета будут списаны средства."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Отправить"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Отмена"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомнить выбранный телефон"</string>
-    <!-- no translation found for sms_short_code_remember_undo_instruction (4960944133052287484) -->
-    <skip />
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Это можно изменить позже в разделе настроек \"Приложения\"."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Всегда разрешать"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Не разрешать"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карта удалена"</string>
@@ -1375,20 +1368,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Наушники"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Динамики док-станции"</string>
-    <!-- no translation found for default_media_route_name_hdmi (2450970399023478055) -->
-    <skip />
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Система"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Воспроизведение звука через Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Готово"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Перенаправлять поток мультимедиа"</string>
-    <!-- no translation found for media_route_status_scanning (7279908761758293783) -->
-    <skip />
-    <!-- no translation found for media_route_status_connecting (6422571716007825440) -->
-    <skip />
-    <!-- no translation found for media_route_status_available (6983258067194649391) -->
-    <skip />
-    <!-- no translation found for media_route_status_not_available (6739899962681886401) -->
-    <skip />
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Сканирование..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Подключение..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"Доступен"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Недоступные"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Встроенный экран"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Экран HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Наложение № <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1403,21 +1391,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Введите PIN-код SIM-карты"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Введите PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Введите пароль"</string>
-    <!-- no translation found for kg_puk_enter_puk_hint (453227143861735537) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (7871604527429602024) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (325676184762529976) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. За подробной информацией обратитесь к своему оператору связи."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Введите желаемый PIN-код"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Введите PIN-код ещё раз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Разблокировка SIM-карты…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Неверный PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Введите PIN-код (от 4 до 8 цифр)."</string>
-    <!-- no translation found for kg_invalid_sim_puk_hint (7553388325654369575) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (3638289409676051243) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (7003469261464593516) -->
-    <skip />
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK-код должен содержать не менее 8 символов."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Введите правильный PUK-код. После нескольких неудачных попыток SIM-карта будет заблокирована навсегда."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-коды не совпадают"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Слишком много попыток ввода графического ключа"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Чтобы разблокировать устройство, войдите в свой аккаунт Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Имя пользователя (эл. почта)"</string>
@@ -1425,8 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Войти"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неверное имя пользователя или пароль."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Забыли имя пользователя или пароль?"\n"Перейдите на страницу "<b>"google.com/accounts/recovery"</b>"."</string>
-    <!-- no translation found for kg_login_checking_password (5316091912653672681) -->
-    <skip />
+    <string name="kg_login_checking_password" msgid="5316091912653672681">"Разблокировка SIM-карты…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали PIN-код. "\n\n"Повтор через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали пароль."\n\n"Повтор через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ."\n\n"Повтор через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
@@ -1437,11 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки планшетного ПК потребуется войти в аккаунт Google."\n\n"Повтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google."\n\n"Повтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Увеличить громкость до небезопасного уровня?"\n"Долговременное прослушивание на такой громкости может повредить слух."</string>
-    <!-- no translation found for continue_to_enable_accessibility (2184747411804432885) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Чтобы включить специальные возможности, удерживайте пальцы на экране."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Специальные возможности включены."</string>
-    <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
-    <skip />
-    <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Специальные возможности не будут включены."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
