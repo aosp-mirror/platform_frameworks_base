@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
@@ -2083,6 +2084,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState attachedWindow = null;
         WindowState win = null;
         long origId;
+        final int type = attrs.type;
 
         synchronized(mWindowMap) {
             if (!mDisplayReady) {
@@ -2094,7 +2096,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_DUPLICATE_ADD;
             }
 
-            if (attrs.type >= FIRST_SUB_WINDOW && attrs.type <= LAST_SUB_WINDOW) {
+            if (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW) {
                 attachedWindow = windowForClientLocked(null, attrs.token, false);
                 if (attachedWindow == null) {
                     Slog.w(TAG, "Attempted to add window with token that is not a window: "
@@ -2112,31 +2114,29 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean addToken = false;
             WindowToken token = mTokenMap.get(attrs.token);
             if (token == null) {
-                if (attrs.type >= FIRST_APPLICATION_WINDOW
-                        && attrs.type <= LAST_APPLICATION_WINDOW) {
+                if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG, "Attempted to add application window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (attrs.type == TYPE_INPUT_METHOD) {
+                if (type == TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (attrs.type == TYPE_WALLPAPER) {
+                if (type == TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (attrs.type == TYPE_DREAM) {
+                if (type == TYPE_DREAM) {
                     Slog.w(TAG, "Attempted to add Dream window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 token = new WindowToken(this, attrs.token, -1, false);
                 addToken = true;
-            } else if (attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type <= LAST_APPLICATION_WINDOW) {
+            } else if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
                 AppWindowToken atoken = token.appWindowToken;
                 if (atoken == null) {
                     Slog.w(TAG, "Attempted to add window with non-application token "
@@ -2147,25 +2147,25 @@ public class WindowManagerService extends IWindowManager.Stub
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
                 }
-                if (attrs.type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
+                if (type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
                     // No need for this guy!
                     if (localLOGV) Slog.v(
                             TAG, "**** NO NEED TO START: " + attrs.getTitle());
                     return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
                 }
-            } else if (attrs.type == TYPE_INPUT_METHOD) {
+            } else if (type == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG, "Attempted to add input method window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (attrs.type == TYPE_WALLPAPER) {
+            } else if (type == TYPE_WALLPAPER) {
                 if (token.windowType != TYPE_WALLPAPER) {
                     Slog.w(TAG, "Attempted to add wallpaper window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (attrs.type == TYPE_DREAM) {
+            } else if (type == TYPE_DREAM) {
                 if (token.windowType != TYPE_DREAM) {
                     Slog.w(TAG, "Attempted to add Dream window with bad token "
                             + attrs.token + ".  Aborting.");
@@ -2185,6 +2185,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mPolicy.adjustWindowParamsLw(win.mAttrs);
+            win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
             res = mPolicy.prepareAddWindowLw(win, attrs);
             if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -2213,8 +2214,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.attach();
             mWindowMap.put(client.asBinder(), win);
 
-            if (attrs.type == TYPE_APPLICATION_STARTING &&
-                    token.appWindowToken != null) {
+            if (type == TYPE_APPLICATION_STARTING && token.appWindowToken != null) {
                 token.appWindowToken.startingWindow = win;
                 if (DEBUG_STARTING_WINDOW) Slog.v (TAG, "addWindow: " + token.appWindowToken
                         + " startingWindow=" + win);
@@ -2222,19 +2222,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean imMayMove = true;
 
-            if (attrs.type == TYPE_INPUT_METHOD) {
+            if (type == TYPE_INPUT_METHOD) {
                 win.mGivenInsetsPending = true;
                 mInputMethodWindow = win;
                 addInputMethodWindowToListLocked(win);
                 imMayMove = false;
-            } else if (attrs.type == TYPE_INPUT_METHOD_DIALOG) {
+            } else if (type == TYPE_INPUT_METHOD_DIALOG) {
                 mInputMethodDialogs.add(win);
                 addWindowToListInOrderLocked(win, true);
                 adjustInputMethodDialogsLocked();
                 imMayMove = false;
             } else {
                 addWindowToListInOrderLocked(win, true);
-                if (attrs.type == TYPE_WALLPAPER) {
+                if (type == TYPE_WALLPAPER) {
                     mLastWallpaperTimeoutTime = 0;
                     adjustWallpaperWindowsLocked();
                 } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
@@ -5404,6 +5404,22 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
+
+            // Hide windows that should not be seen by the new user.
+            DisplayContentsIterator iterator = new DisplayContentsIterator();
+            while (iterator.hasNext()) {
+                final WindowList windows = iterator.next().getWindowList();
+                for (int i = 0; i < windows.size(); i++) {
+                    final WindowState win = windows.get(i);
+                    if (win.isOtherUsersAppWindow()) {
+                        Slog.w(TAG, "current user violation " + newUserId + " hiding "
+                                + win + ", attrs=" + win.mAttrs.type + ", belonging to "
+                                + win.mOwnerUid);
+                        win.hideLw(false);
+                    }
+                }
+            }
+            performLayoutAndPlaceSurfacesLocked();
         }
     }
 
@@ -8784,6 +8800,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int type = attrs.type;
             if (canBeSeen
                     && (type == TYPE_SYSTEM_DIALOG
+                     || type == TYPE_RECENTS_OVERLAY
                      || type == TYPE_KEYGUARD
                      || type == TYPE_SYSTEM_ERROR)) {
                 mInnerFields.mSyswin = true;

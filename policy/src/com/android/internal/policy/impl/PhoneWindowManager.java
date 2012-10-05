@@ -17,7 +17,6 @@ package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.IUiModeManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.UiModeManager;
@@ -101,6 +100,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -108,6 +108,7 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
@@ -119,6 +120,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -202,7 +204,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int KEYGUARD_LAYER = 11;
     static final int KEYGUARD_DIALOG_LAYER = 12;
     // used for Dreams (screensavers with TYPE_DREAM windows)
-    static final int SCREENSAVER_LAYER = 13; 
+    static final int SCREENSAVER_LAYER = 13;
     static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
     static final int STATUS_BAR_LAYER = 15;
     static final int STATUS_BAR_PANEL_LAYER = 16;
@@ -234,7 +236,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
     static final int APPLICATION_SUB_PANEL_SUBLAYER = 2;
-    
+
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
@@ -289,7 +291,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
-    
+
     // Vibrator pattern for haptic feedback of virtual key press.
     long[] mVirtualKeyVibePattern;
     
@@ -1199,6 +1201,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int checkAddPermission(WindowManager.LayoutParams attrs) {
         int type = attrs.type;
         
@@ -1236,7 +1239,55 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return WindowManagerGlobal.ADD_OKAY;
     }
-    
+
+    @Override
+    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs) {
+
+        // If this switch statement is modified, modify the comment in the declarations of
+        // the type in {@link WindowManager.LayoutParams} as well.
+        switch (attrs.type) {
+            default:
+                // These are the windows that by default are shown only to the user that created
+                // them. If this needs to be overridden, set
+                // {@link WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS} in
+                // {@link WindowManager.LayoutParams}. Note that permission
+                // {@link android.Manifest.permission.INTERNAL_SYSTEM_WINDOW} is required as well.
+                if ((attrs.privateFlags & PRIVATE_FLAG_SHOW_FOR_ALL_USERS) == 0) {
+                    return true;
+                }
+                break;
+
+            // These are the windows that by default are shown to all users. However, to
+            // protect against spoofing, check permissions below.
+            case TYPE_APPLICATION_STARTING:
+            case TYPE_BOOT_PROGRESS:
+            case TYPE_DISPLAY_OVERLAY:
+            case TYPE_HIDDEN_NAV_CONSUMER:
+            case TYPE_KEYGUARD:
+            case TYPE_KEYGUARD_DIALOG:
+            case TYPE_MAGNIFICATION_OVERLAY:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_NAVIGATION_BAR_PANEL:
+            case TYPE_PHONE:
+            case TYPE_POINTER:
+            case TYPE_PRIORITY_PHONE:
+            case TYPE_RECENTS_OVERLAY:
+            case TYPE_SEARCH_BAR:
+            case TYPE_STATUS_BAR:
+            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_SYSTEM_DIALOG:
+            case TYPE_UNIVERSE_BACKGROUND:
+            case TYPE_VOLUME_OVERLAY:
+                break;
+        }
+
+        // Check if third party app has set window to system window type.
+        return mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+                        != PackageManager.PERMISSION_GRANTED;
+    }
+
     public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
             case TYPE_SYSTEM_OVERLAY:
@@ -1355,6 +1406,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return DISPLAY_OVERLAY_LAYER;
         case TYPE_MAGNIFICATION_OVERLAY:
             return MAGNIFICATION_OVERLAY_LAYER;
+        case TYPE_RECENTS_OVERLAY:
+            return SYSTEM_DIALOG_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
@@ -1510,6 +1563,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
             params.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
+            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             params.setTitle("Starting " + packageName);
 
             WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
