@@ -178,6 +178,16 @@ public final class PowerManager {
     /**
      * Wake lock level: Turns the screen off when the proximity sensor activates.
      * <p>
+     * If the proximity sensor detects that an object is nearby, the screen turns off
+     * immediately.  Shortly after the object moves away, the screen turns on again.
+     * </p><p>
+     * A proximity wake lock does not prevent the device from falling asleep
+     * unlike {@link #FULL_WAKE_LOCK}, {@link #SCREEN_BRIGHT_WAKE_LOCK} and
+     * {@link #SCREEN_DIM_WAKE_LOCK}.  If there is no user activity and no other
+     * wake locks are held, then the device will fall asleep (and lock) as usual.
+     * However, the device will not fall asleep while the screen has been turned off
+     * by the proximity sensor because it effectively counts as ongoing user activity.
+     * </p><p>
      * Since not all devices have proximity sensors, use {@link #isWakeLockLevelSupported}
      * to determine whether this wake lock level is supported.
      * </p>
