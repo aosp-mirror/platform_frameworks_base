@@ -1078,41 +1078,51 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(boolean wasPowered, int oldPlugType) {
-        if (mWakeUpWhenPluggedOrUnpluggedConfig) {
-            // FIXME: Need more accurate detection of wireless chargers.
-            //
-            // We are unable to accurately detect whether the device is resting on the
-            // charger unless it is actually receiving power.  This causes us some grief
-            // because the device might not appear to be plugged into the wireless charger
-            // unless it actually charging.
-            //
-            // To avoid spuriously waking the screen, we apply a special policy to
-            // wireless chargers.
-            //
-            // 1. Don't wake the device when unplugged from wireless charger because
-            //    it might be that the device is still resting on the wireless charger
-            //    but is not receiving power anymore because the battery is full.
-            //
-            // 2. Don't wake the device when plugged into a wireless charger if the
-            //    battery already appears to be mostly full.  This situation may indicate
-            //    that the device was resting on the charger the whole time and simply
-            //    wasn't receiving power because the battery was full.  We can't tell
-            //    whether the device was just placed on the charger or whether it has
-            //    been there for half of the night slowly discharging until it hit
-            //    the point where it needed to start charging again.
-            if (wasPowered && !mIsPowered
-                    && oldPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
-                return false;
-            }
-            if (!wasPowered && mIsPowered
-                    && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
-                    && mBatteryService.getBatteryLevel() >=
-                            WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
-                return false;
-            }
-            return true;
+        // Don't wake when powered unless configured to do so.
+        if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
+            return false;
         }
-        return false;
+
+        // FIXME: Need more accurate detection of wireless chargers.
+        //
+        // We are unable to accurately detect whether the device is resting on the
+        // charger unless it is actually receiving power.  This causes us some grief
+        // because the device might not appear to be plugged into the wireless charger
+        // unless it actually charging.
+        //
+        // To avoid spuriously waking the screen, we apply a special policy to
+        // wireless chargers.
+        //
+        // 1. Don't wake the device when unplugged from wireless charger because
+        //    it might be that the device is still resting on the wireless charger
+        //    but is not receiving power anymore because the battery is full.
+        //
+        // 2. Don't wake the device when plugged into a wireless charger if the
+        //    battery already appears to be mostly full.  This situation may indicate
+        //    that the device was resting on the charger the whole time and simply
+        //    wasn't receiving power because the battery was full.  We can't tell
+        //    whether the device was just placed on the charger or whether it has
+        //    been there for half of the night slowly discharging until it hit
+        //    the point where it needed to start charging again.
+        if (wasPowered && !mIsPowered
+                && oldPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
+            return false;
+        }
+        if (!wasPowered && mIsPowered
+                && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                && mBatteryService.getBatteryLevel() >=
+                        WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
+            return false;
+        }
+
+        // If already dreaming and becoming powered, then don't wake.
+        if (mIsPowered && (mWakefulness == WAKEFULNESS_NAPPING
+                || mWakefulness == WAKEFULNESS_DREAMING)) {
+            return false;
+        }
+
+        // Otherwise wake up!
+        return true;
     }
 
     /**
