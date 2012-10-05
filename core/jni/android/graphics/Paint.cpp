@@ -629,7 +629,7 @@ public:
             jint count, jint flags, jint offset, jint opt) {
         jfloat scalarArray[count];
 
-        TextLayout::getTextRunAdvances(paint, text, start, count, count, flags,
+        TextLayout::getTextRunAdvances(paint, text, start, count, start + count, flags,
                 scalarArray, NULL /* dont need totalAdvance */);
 
         jint pos = offset - start;
