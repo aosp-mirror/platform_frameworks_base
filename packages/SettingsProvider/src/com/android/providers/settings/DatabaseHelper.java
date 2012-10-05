@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 92;
+    private static final int DATABASE_VERSION = 93;
 
     private Context mContext;
     private int mUserHandle;
@@ -1449,6 +1449,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 92;
         }
 
+        if (upgradeVersion == 92) {
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                if (mUserHandle == UserHandle.USER_OWNER) {
+                    // consider existing primary users to have made it through user setup
+                    // if the globally-scoped device-provisioned bit is set
+                    // (indicating they already made it through setup as primary)
+                    int deviceProvisioned = getIntValueFromTable(db, TABLE_GLOBAL,
+                            Settings.Global.DEVICE_PROVISIONED, 0);
+                    loadSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
+                            deviceProvisioned);
+                } else {
+                    // otherwise use the default
+                    loadBooleanSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
+                            R.bool.def_user_setup_complete);
+                }
+            } finally {
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 93;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2016,6 +2040,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt,
                     Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
                     R.bool.def_accessibility_display_magnification_auto_update);
+
+            loadBooleanSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
+                    R.bool.def_user_setup_complete);
         } finally {
             if (stmt != null) stmt.close();
         }
