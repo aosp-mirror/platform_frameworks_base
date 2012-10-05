@@ -298,12 +298,14 @@ public interface WindowManager extends ViewManager {
          * Window type: the status bar.  There can be only one status bar
          * window; it is placed at the top of the screen, and all other
          * windows are shifted down so they are below it.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW;
     
         /**
          * Window type: the search bar.  There can be only one search bar
          * window; it is placed at the top of the screen.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+1;
     
@@ -312,22 +314,26 @@ public interface WindowManager extends ViewManager {
          * user interaction with the phone (in particular incoming calls).
          * These windows are normally placed above all applications, but behind
          * the status bar.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_PHONE              = FIRST_SYSTEM_WINDOW+2;
     
         /**
          * Window type: system window, such as low power alert. These windows
          * are always on top of application windows.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3;
         
         /**
          * Window type: keyguard window.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+4;
         
         /**
          * Window type: transient notifications.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_TOAST              = FIRST_SYSTEM_WINDOW+5;
         
@@ -335,6 +341,7 @@ public interface WindowManager extends ViewManager {
          * Window type: system overlay windows, which need to be displayed
          * on top of everything else.  These windows must not take input
          * focus, or they will interfere with the keyguard.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_SYSTEM_OVERLAY     = FIRST_SYSTEM_WINDOW+6;
         
@@ -342,22 +349,26 @@ public interface WindowManager extends ViewManager {
          * Window type: priority phone UI, which needs to be displayed even if
          * the keyguard is active.  These windows must not take input
          * focus, or they will interfere with the keyguard.
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_PRIORITY_PHONE     = FIRST_SYSTEM_WINDOW+7;
         
         /**
          * Window type: panel that slides out from the status bar
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8;
     
         /**
          * Window type: dialogs that the keyguard shows
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_KEYGUARD_DIALOG    = FIRST_SYSTEM_WINDOW+9;
         
         /**
          * Window type: internal system error windows, appear on top of
          * everything they can.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10;
         
@@ -365,23 +376,27 @@ public interface WindowManager extends ViewManager {
          * Window type: internal input methods windows, which appear above
          * the normal UI.  Application windows may be resized or panned to keep
          * the input focus visible while this window is displayed.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_INPUT_METHOD       = FIRST_SYSTEM_WINDOW+11;
 
         /**
          * Window type: internal input methods dialog windows, which appear above
          * the current input method window.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12;
 
         /**
          * Window type: wallpaper window, placed behind any window that wants
          * to sit on top of the wallpaper.
+         * In multiuser systems shows only on the owning user's window.
          */
         public static final int TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13;
 
         /**
          * Window type: panel that slides out from over the status bar
+         * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
 
@@ -393,6 +408,8 @@ public interface WindowManager extends ViewManager {
          * This is exactly like {@link #TYPE_SYSTEM_OVERLAY} except that only the
          * system itself is allowed to create these overlays.  Applications cannot
          * obtain permission to create secure system overlays.
+         *
+         * In multiuser systems shows only on the owning user's window.
          * @hide
          */
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
@@ -400,24 +417,28 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: the drag-and-drop pseudowindow.  There is only one
          * drag layer (at most), and it is placed on top of all other windows.
+         * In multiuser systems shows only on the owning user's window.
          * @hide
          */
         public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16;
 
         /**
          * Window type: panel that slides out from under the status bar
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_STATUS_BAR_SUB_PANEL = FIRST_SYSTEM_WINDOW+17;
 
         /**
          * Window type: (mouse) pointer
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_POINTER = FIRST_SYSTEM_WINDOW+18;
 
         /**
          * Window type: Navigation bar (when distinct from status bar)
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_NAVIGATION_BAR = FIRST_SYSTEM_WINDOW+19;
@@ -425,6 +446,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: The volume level overlay/dialog shown when the user
          * changes the system volume.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_VOLUME_OVERLAY = FIRST_SYSTEM_WINDOW+20;
@@ -432,6 +454,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: The boot progress dialog, goes on top of everything
          * in the world.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_BOOT_PROGRESS = FIRST_SYSTEM_WINDOW+21;
@@ -439,30 +462,35 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: Fake window to consume touch events when the navigation
          * bar is hidden.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_HIDDEN_NAV_CONSUMER = FIRST_SYSTEM_WINDOW+22;
 
         /**
          * Window type: Dreams (screen saver) window, just above keyguard.
+         * In multiuser systems shows only on the owning user's window.
          * @hide
          */
         public static final int TYPE_DREAM = FIRST_SYSTEM_WINDOW+23;
 
         /**
          * Window type: Navigation bar panel (when navigation bar is distinct from status bar)
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_NAVIGATION_BAR_PANEL = FIRST_SYSTEM_WINDOW+24;
 
         /**
          * Window type: Behind the universe of the real windows.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_UNIVERSE_BACKGROUND = FIRST_SYSTEM_WINDOW+25;
 
         /**
          * Window type: Display overlay window.  Used to simulate secondary display devices.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_DISPLAY_OVERLAY = FIRST_SYSTEM_WINDOW+26;
@@ -470,9 +498,18 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: Magnification overlay window. Used to highlight the magnified
          * portion of a display when accessibility magnification is enabled.
+         * In multiuser systems shows on all users' windows.
          * @hide
          */
         public static final int TYPE_MAGNIFICATION_OVERLAY = FIRST_SYSTEM_WINDOW+27;
+
+        /**
+         * Window type: Recents. Same layer as {@link #TYPE_SYSTEM_DIALOG} but only appears on
+         * one user's screen.
+         * In multiuser systems shows on all users' windows.
+         * @hide
+         */
+        public static final int TYPE_RECENTS_OVERLAY = FIRST_SYSTEM_WINDOW+28;
 
         /**
          * End of types of system windows.
@@ -878,6 +915,14 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_SET_NEEDS_MENU_KEY = 0x00000008;
+
+        /** In a multiuser system if this flag is set and the owner is a system process then this
+         * window will appear on all user screens. This overrides the default behavior of window
+         * types that normally only appear on the owning user's screen. Refer to each window type
+         * to determine its default behavior.
+         *
+         * {@hide} */
+        public static final int PRIVATE_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
          * Control flags that are private to the platform.
