@@ -98,6 +98,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DIRTY_STAY_ON = 1 << 7;
     // Dirty bit: battery state changed
     private static final int DIRTY_BATTERY_STATE = 1 << 8;
+    // Dirty bit: proximity state changed
+    private static final int DIRTY_PROXIMITY_POSITIVE = 1 << 9;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
@@ -257,6 +259,9 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // True if the device should stay on.
     private boolean mStayOn;
+
+    // True if the proximity sensor reads a positive result.
+    private boolean mProximityPositive;
 
     // Screen brightness setting limits.
     private int mScreenBrightnessSettingMinimum;
@@ -1101,11 +1106,16 @@ public final class PowerManagerService extends IPowerManager.Stub
      */
     private void updateStayOnLocked(int dirty) {
         if ((dirty & (DIRTY_BATTERY_STATE | DIRTY_SETTINGS)) != 0) {
+            final boolean wasStayOn = mStayOn;
             if (mStayOnWhilePluggedInSetting != 0
                     && !isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
                 mStayOn = mBatteryService.isPowered(mStayOnWhilePluggedInSetting);
             } else {
                 mStayOn = false;
+            }
+
+            if (mStayOn != wasStayOn) {
+                mDirty |= DIRTY_STAY_ON;
             }
         }
     }
@@ -1265,7 +1275,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private boolean updateWakefulnessLocked(int dirty) {
         boolean changed = false;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_BOOT_COMPLETED
-                | DIRTY_WAKEFULNESS | DIRTY_STAY_ON)) != 0) {
+                | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE)) != 0) {
             if (mWakefulness == WAKEFULNESS_AWAKE && isItBedTimeYetLocked()) {
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateWakefulnessLocked: Bed time...");
@@ -1288,17 +1298,17 @@ public final class PowerManagerService extends IPowerManager.Stub
      * to being fully awake or else go to sleep for good.
      */
     private boolean isItBedTimeYetLocked() {
-        return mBootCompleted && !isScreenBeingKeptOnLocked();
+        return mBootCompleted && !isBeingKeptAwakeLocked();
     }
 
     /**
-     * Returns true if the screen is being kept on by a wake lock, user activity
+     * Returns true if the device is being kept awake by a wake lock, user activity
      * or the stay on while powered setting.
      */
-    private boolean isScreenBeingKeptOnLocked() {
+    private boolean isBeingKeptAwakeLocked() {
         return mStayOn
-                || (mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
-                        | WAKE_LOCK_PROXIMITY_SCREEN_OFF)) != 0
+                || mProximityPositive
+                || (mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0
                 || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
                         | USER_ACTIVITY_SCREEN_DIM)) != 0;
     }
@@ -1314,6 +1324,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                 | DIRTY_SETTINGS
                 | DIRTY_IS_POWERED
                 | DIRTY_STAY_ON
+                | DIRTY_PROXIMITY_POSITIVE
                 | DIRTY_BATTERY_STATE)) != 0) {
             scheduleSandmanLocked();
         }
@@ -1401,7 +1412,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                 && mDreamsEnabledSetting
                 && mDisplayPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_OFF
                 && mBootCompleted
-                && (mIsPowered || isScreenBeingKeptOnLocked());
+                && (mIsPowered || isBeingKeptAwakeLocked());
     }
 
     /**
@@ -1528,7 +1539,16 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
 
         @Override
+        public void onProximityPositive() {
+            mProximityPositive = true;
+            mDirty |= DIRTY_PROXIMITY_POSITIVE;
+            updatePowerStateLocked();
+        }
+
+        @Override
         public void onProximityNegative() {
+            mProximityPositive = false;
+            mDirty |= DIRTY_PROXIMITY_POSITIVE;
             userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
             updatePowerStateLocked();
@@ -1986,6 +2006,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mIsPowered=" + mIsPowered);
             pw.println("  mPlugType=" + mPlugType);
             pw.println("  mStayOn=" + mStayOn);
+            pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
             pw.println("  mSystemReady=" + mSystemReady);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
