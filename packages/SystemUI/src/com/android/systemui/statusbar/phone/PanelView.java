@@ -105,7 +105,7 @@ public class PanelView extends FrameLayout {
             mTimeAnimator = new TimeAnimator();
             mTimeAnimator.setTimeListener(mAnimationCallback);
 
-            mPeekAnimator.cancel();
+            if (mPeekAnimator != null) mPeekAnimator.cancel();
 
             mTimeAnimator.start();
 
@@ -261,7 +261,7 @@ public class PanelView extends FrameLayout {
                         case MotionEvent.ACTION_MOVE:
                             final float h = rawY - mAbsPos[1] - mTouchOffset;
                             if (h > mPeekHeight) {
-                                if (mPeekAnimator.isRunning()) {
+                                if (mPeekAnimator != null && mPeekAnimator.isRunning()) {
                                     mPeekAnimator.cancel();
                                 }
                                 mJustPeeked = false;
@@ -385,7 +385,7 @@ public class PanelView extends FrameLayout {
 
     public void setExpandedHeight(float height) {
         if (DEBUG) LOG("setExpandedHeight(%.1f)", height);
-        mTracking = mRubberbanding = false;
+        mRubberbanding = false;
         if (mTimeAnimator.isRunning()) {
             post(mStopAnimator);
         }
