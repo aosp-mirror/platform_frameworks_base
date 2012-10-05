@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class ServiceWatcher implements ServiceConnection {
     private static final boolean D = false;
-    private static final String EXTRA_VERSION = "version";
+    private static final String EXTRA_SERVICE_VERSION = "serviceVersion";
 
     private final String mTag;
     private final Context mContext;
@@ -127,7 +127,7 @@ public class ServiceWatcher implements ServiceConnection {
             // check version
             int version = 0;
             if (rInfo.serviceInfo.metaData != null) {
-                version = rInfo.serviceInfo.metaData.getInt(EXTRA_VERSION, 0);
+                version = rInfo.serviceInfo.metaData.getInt(EXTRA_SERVICE_VERSION, 0);
             }
             if (version > mVersion) {
                 bestVersion = version;
