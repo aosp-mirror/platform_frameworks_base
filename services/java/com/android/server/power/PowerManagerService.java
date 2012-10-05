@@ -79,6 +79,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int MSG_USER_ACTIVITY_TIMEOUT = 1;
     // Message: Sent when the device enters or exits a napping or dreaming state.
     private static final int MSG_SANDMAN = 2;
+    // Message: Sent when the screen on blocker is released.
+    private static final int MSG_SCREEN_ON_BLOCKER_RELEASED = 3;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -100,6 +102,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DIRTY_BATTERY_STATE = 1 << 8;
     // Dirty bit: proximity state changed
     private static final int DIRTY_PROXIMITY_POSITIVE = 1 << 9;
+    // Dirty bit: screen on blocker state became held or unheld
+    private static final int DIRTY_SCREEN_ON_BLOCKER_RELEASED = 1 << 10;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
@@ -222,6 +226,10 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The suspend blocker used to keep the CPU alive when wake locks have been acquired.
     private final SuspendBlocker mWakeLockSuspendBlocker;
 
+    // The screen on blocker used to keep the screen from turning on while the lock
+    // screen is coming up.
+    private final ScreenOnBlockerImpl mScreenOnBlocker;
+
     // True if systemReady() has been called.
     private boolean mSystemReady;
 
@@ -318,6 +326,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService");
             mWakeLockSuspendBlocker.acquire();
+            mScreenOnBlocker = new ScreenOnBlockerImpl();
             mHoldingWakeLockSuspendBlocker = true;
             mWakefulness = WAKEFULNESS_AWAKE;
         }
@@ -368,9 +377,14 @@ public final class PowerManagerService extends IPowerManager.Stub
             mScreenBrightnessSettingMaximum = pm.getMaximumScreenBrightnessSetting();
             mScreenBrightnessSettingDefault = pm.getDefaultScreenBrightnessSetting();
 
-            mNotifier = new Notifier(mHandler.getLooper(), mContext, mBatteryStats,
+            // The notifier runs on the system server's main looper so as not to interfere
+            // with the animations and other critical functions of the power manager.
+            mNotifier = new Notifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
-                    mPolicy, mScreenOnListener);
+                    mScreenOnBlocker, mPolicy);
+
+            // The display power controller runs on the power manager service's
+            // own handler thread.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
                     mContext, mNotifier, mLightsService, twilight,
                     createSuspendBlockerLocked("PowerManagerService.Display"),
@@ -1433,6 +1447,13 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private void handleScreenOnBlockerReleased() {
+        synchronized (mLock) {
+            mDirty |= DIRTY_SCREEN_ON_BLOCKER_RELEASED;
+            updatePowerStateLocked();
+        }
+    }
+
     /**
      * Updates the display power state asynchronously.
      * When the update is finished, mDisplayReady will be set to true.  The display
@@ -1444,8 +1465,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private void updateDisplayPowerStateLocked(int dirty) {
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
-                | DIRTY_SETTINGS)) != 0) {
-            int newScreenState = getDesiredScreenPowerState();
+                | DIRTY_SETTINGS | DIRTY_SCREEN_ON_BLOCKER_RELEASED)) != 0) {
+            int newScreenState = getDesiredScreenPowerStateLocked();
             if (newScreenState != mDisplayPowerRequest.screenState) {
                 if (newScreenState == DisplayPowerRequest.SCREEN_STATE_OFF
                         && mDisplayPowerRequest.screenState
@@ -1493,12 +1514,14 @@ public final class PowerManagerService extends IPowerManager.Stub
 
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
 
+            mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
+
             mDisplayReady = mDisplayPowerController.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {
-                Slog.d(TAG, "updateScreenStateLocked: displayReady=" + mDisplayReady
+                Slog.d(TAG, "updateScreenStateLocked: mDisplayReady=" + mDisplayReady
                         + ", newScreenState=" + newScreenState
                         + ", mWakefulness=" + mWakefulness
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
@@ -1517,7 +1540,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         return value >= -1.0f && value <= 1.0f;
     }
 
-    private int getDesiredScreenPowerState() {
+    private int getDesiredScreenPowerStateLocked() {
         if (mWakefulness == WAKEFULNESS_ASLEEP) {
             return DisplayPowerRequest.SCREEN_STATE_OFF;
         }
@@ -2070,6 +2093,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                 pw.println("  " + sb);
             }
 
+            pw.println();
+            pw.println("Screen On Blocker: " + mScreenOnBlocker);
+
             dpc = mDisplayPowerController;
         }
 
@@ -2152,13 +2178,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private final WindowManagerPolicy.ScreenOnListener mScreenOnListener =
-            new WindowManagerPolicy.ScreenOnListener() {
-        @Override
-        public void onScreenOn() {
-        }
-    };
-
     /**
      * Handler for asynchronous operations performed by the power manager.
      */
@@ -2175,6 +2194,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                     break;
                 case MSG_SANDMAN:
                     handleSandman();
+                    break;
+                case MSG_SCREEN_ON_BLOCKER_RELEASED:
+                    handleScreenOnBlockerReleased();
                     break;
             }
         }
@@ -2321,4 +2343,49 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
     }
+
+    private final class ScreenOnBlockerImpl implements ScreenOnBlocker {
+        private int mNestCount;
+
+        public boolean isHeld() {
+            synchronized (this) {
+                return mNestCount != 0;
+            }
+        }
+
+        @Override
+        public void acquire() {
+            synchronized (this) {
+                mNestCount += 1;
+                if (DEBUG) {
+                    Slog.d(TAG, "Screen on blocked: mNestCount=" + mNestCount);
+                }
+            }
+        }
+
+        @Override
+        public void release() {
+            synchronized (this) {
+                mNestCount -= 1;
+                if (mNestCount < 0) {
+                    Log.wtf(TAG, "Screen on blocker was released without being acquired!",
+                            new Throwable());
+                    mNestCount = 0;
+                }
+                if (mNestCount == 0) {
+                    mHandler.sendEmptyMessage(MSG_SCREEN_ON_BLOCKER_RELEASED);
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, "Screen on unblocked: mNestCount=" + mNestCount);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            synchronized (this) {
+                return "held=" + (mNestCount != 0) + ", mNestCount=" + mNestCount;
+            }
+        }
+    };
 }

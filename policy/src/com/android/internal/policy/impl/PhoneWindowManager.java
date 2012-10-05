@@ -3580,7 +3580,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    /** {@inheritDoc} */
+    @Override
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
         synchronized (mLock) {
@@ -3596,7 +3596,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void screenTurningOn(final ScreenOnListener screenOnListener) {
         EventLog.writeEvent(70000, 1);
         if (false) {
@@ -3604,64 +3604,83 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             here.fillInStackTrace();
             Slog.i(TAG, "Screen turning on...", here);
         }
-        if (screenOnListener != null) {
-            if (mKeyguardMediator != null) {
-                try {
-                    mWindowManager.setEventDispatching(true);
-                } catch (RemoteException unhandled) {
-                }
-                mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
-                    @Override public void onShown(IBinder windowToken) {
-                        if (windowToken != null) {
-                            try {
-                                mWindowManager.waitForWindowDrawn(windowToken,
-                                        new IRemoteCallback.Stub() {
-                                    @Override public void sendResult(Bundle data) {
-                                        Slog.i(TAG, "Lock screen displayed!");
-                                        screenOnListener.onScreenOn();
-                                        synchronized (mLock) {
-                                            mScreenOnFully = true;
-                                        }
-                                    }
-                                });
-                            } catch (RemoteException e) {
-                            }
-                        } else {
-                            Slog.i(TAG, "No lock screen!");
-                            screenOnListener.onScreenOn();
-                            synchronized (mLock) {
-                                mScreenOnFully = true;
-                            }
-                        }
-                    }
-                });
-            }
-        } else {
-            if (mKeyguardMediator != null) {
-                // Must set mScreenOn = true.
-                mKeyguardMediator.onScreenTurnedOn(null);
-            }
-            synchronized (mLock) {
-                mScreenOnFully = true;
-            }
-        }
+
         synchronized (mLock) {
             mScreenOnEarly = true;
             updateOrientationListenerLp();
             updateLockScreenTimeout();
         }
+
+        try {
+            mWindowManager.setEventDispatching(true);
+        } catch (RemoteException unhandled) {
+        }
+
+        waitForKeyguard(screenOnListener);
     }
 
-    /** {@inheritDoc} */
+    private void waitForKeyguard(final ScreenOnListener screenOnListener) {
+        if (mKeyguardMediator != null) {
+            if (screenOnListener != null) {
+                mKeyguardMediator.onScreenTurnedOn(new KeyguardViewManager.ShowListener() {
+                    @Override
+                    public void onShown(IBinder windowToken) {
+                        waitForKeyguardWindowDrawn(windowToken, screenOnListener);
+                    }
+                });
+                return;
+            } else {
+                mKeyguardMediator.onScreenTurnedOn(null);
+            }
+        } else {
+            Slog.i(TAG, "No keyguard mediator!");
+        }
+        finishScreenTurningOn(screenOnListener);
+    }
+
+    private void waitForKeyguardWindowDrawn(IBinder windowToken,
+            final ScreenOnListener screenOnListener) {
+        if (windowToken != null) {
+            try {
+                if (mWindowManager.waitForWindowDrawn(
+                        windowToken, new IRemoteCallback.Stub() {
+                    @Override
+                    public void sendResult(Bundle data) {
+                        Slog.i(TAG, "Lock screen displayed!");
+                        finishScreenTurningOn(screenOnListener);
+                    }
+                })) {
+                    return;
+                }
+            } catch (RemoteException ex) {
+                // Can't happen in system process.
+            }
+        }
+
+        Slog.i(TAG, "No lock screen!");
+        finishScreenTurningOn(screenOnListener);
+    }
+
+    private void finishScreenTurningOn(ScreenOnListener screenOnListener) {
+        synchronized (mLock) {
+            mScreenOnFully = true;
+        }
+
+        if (screenOnListener != null) {
+            screenOnListener.onScreenOn();
+        }
+    }
+
+    @Override
     public boolean isScreenOnEarly() {
         return mScreenOnEarly;
     }
-    
-    /** {@inheritDoc} */
+
+    @Override
     public boolean isScreenOnFully() {
         return mScreenOnFully;
     }
-    
+
     /** {@inheritDoc} */
     public void enableKeyguard(boolean enabled) {
         if (mKeyguardMediator != null) {
@@ -4236,22 +4255,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return true;
     }
-    
-    public void screenOnStartedLw() {
+
+    @Override
+    public void keepScreenOnStartedLw() {
     }
 
-    public void screenOnStoppedLw() {
-        if (mPowerManager.isScreenOn()) {
-            if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
-                long curTime = SystemClock.uptimeMillis();
-                mPowerManager.userActivity(curTime, false);
-            }
+    @Override
+    public void keepScreenOnStoppedLw() {
+        if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
+            long curTime = SystemClock.uptimeMillis();
+            mPowerManager.userActivity(curTime, false);
         }
-    }
-
-    public boolean allowKeyRepeat() {
-        // disable key repeat when screen is off
-        return mScreenOnEarly;
     }
 
     private int updateSystemUiVisibilityLw() {
