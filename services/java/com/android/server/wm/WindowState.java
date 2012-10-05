@@ -22,9 +22,6 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import com.android.server.input.InputWindowHandle;
 
@@ -36,7 +33,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -263,7 +259,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     DisplayContent  mDisplayContent;
 
     // UserId and appId of the owner. Don't display windows of non-current user.
-    final int mOwnerUid;
+    int mOwnerUid;
+
+    /** When true this window can be displayed on screens owther than mOwnerUid's */
+    private boolean mShowToOwnerOnly;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
@@ -654,6 +653,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * surface, or we are in the process of running an exit animation
      * that will remove the surface, or its app token has been hidden.
      */
+    @Override
     public boolean isVisibleLw() {
         final AppWindowToken atoken = mAppToken;
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
@@ -669,6 +669,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * for this "hidden behind keyguard" state rather than overloading
      * mPolicyVisibility.  Ungh.
      */
+    @Override
     public boolean isVisibleOrBehindKeyguardLw() {
         if (mRootToken.waitingToShow &&
                 mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
@@ -940,7 +941,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
         if (isOtherUsersAppWindow()) {
-            Slog.w(TAG, "Current user " + mService.mCurrentUserId + " trying to display "
+            Slog.w(TAG, "current user violation " + mService.mCurrentUserId + " trying to display "
                     + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUid);
             return false;
         }
@@ -1025,15 +1026,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDisplayContent.isDefaultDisplay;
     }
 
+    public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
+        mShowToOwnerOnly = showToOwnerOnly;
+    }
+
     boolean isOtherUsersAppWindow() {
-        final int type = mAttrs.type;
-        if ((UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId)
-                && (mOwnerUid != Process.SYSTEM_UID)
-                && (type >= TYPE_BASE_APPLICATION) && (type <= LAST_APPLICATION_WINDOW)
-                && (type != TYPE_APPLICATION_STARTING)) {
-            return true;
-        }
-        return false;
+        return mShowToOwnerOnly && UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId;
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
@@ -1072,6 +1070,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         pw.print(prefix); pw.print("mDisplayId="); pw.print(mDisplayContent.getDisplayId());
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
+        pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);
+                pw.print(" mShowToOwnerOnly="); pw.println(mShowToOwnerOnly);
         pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
