@@ -284,7 +284,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_SECURE] =
             writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
         stateChecksums[STATE_GLOBAL] =
-            writeIfChanged(stateChecksums[STATE_GLOBAL], KEY_GLOBAL, secureSettingsData, data);
+            writeIfChanged(stateChecksums[STATE_GLOBAL], KEY_GLOBAL, globalSettingsData, data);
         stateChecksums[STATE_LOCALE] =
             writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
         stateChecksums[STATE_WIFI_SUPPLICANT] =
@@ -313,6 +313,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 mSettingsHelper.applyAudioSettings();
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
+            } else if (KEY_GLOBAL.equals(key)) {
+                restoreSettings(data, Settings.Global.CONTENT_URI, null);
             } else if (NAIVE_WIFI_RESTORE && KEY_WIFI_SUPPLICANT.equals(key)) {
                 int retainedWifiState = enableWifi(false);
                 restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, data);
@@ -605,7 +607,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
-            final Uri destination = (movedToGlobal.contains(key))
+            final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
                     ? Settings.Global.CONTENT_URI
                     : contentUri;
 
