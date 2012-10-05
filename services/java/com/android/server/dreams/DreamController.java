@@ -132,8 +132,15 @@ final class DreamController {
         }
 
         if (oldDream.mService != null) {
-            // TODO: It would be nice to tell the dream that it's being stopped so that
-            // it can shut down nicely before we yank its window token out from under it.
+            // Tell the dream that it's being stopped so that
+            // it can shut down nicely before we yank its window token out from
+            // under it.
+            try {
+                oldDream.mService.detach();
+            } catch (RemoteException ex) {
+                // we don't care; this thing is on the way out
+            }
+
             try {
                 oldDream.mService.asBinder().unlinkToDeath(oldDream, 0);
             } catch (NoSuchElementException ex) {
