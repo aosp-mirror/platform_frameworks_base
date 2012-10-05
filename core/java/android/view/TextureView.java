@@ -189,7 +189,7 @@ public class TextureView extends View {
         if (opaque != mOpaque) {
             mOpaque = opaque;
             if (mLayer != null) {
-                updateLayer();
+                updateLayerAndInvalidate();
             }
         }
     }
@@ -310,6 +310,7 @@ public class TextureView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            updateLayer();
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
             }
@@ -352,9 +353,7 @@ public class TextureView extends View {
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     // Per SurfaceTexture's documentation, the callback may be invoked
                     // from an arbitrary thread
-                    synchronized (mLock) {
-                        mUpdateLayer = true;
-                    }
+                    updateLayer();
 
                     if (Looper.myLooper() == Looper.getMainLooper()) {
                         invalidate();
@@ -379,9 +378,7 @@ public class TextureView extends View {
 
             // Since we are updating the layer, force an update to ensure its
             // parameters are correct (width, height, transform, etc.)
-            synchronized (mLock) {
-                mUpdateLayer = true;
-            }
+            updateLayer();
             mMatrixChanged = true;
 
             mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
@@ -404,7 +401,7 @@ public class TextureView extends View {
             // updates listener
             if (visibility == VISIBLE) {
                 mSurface.setOnFrameAvailableListener(mUpdateListener);
-                updateLayer();
+                updateLayerAndInvalidate();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
             }
@@ -412,7 +409,15 @@ public class TextureView extends View {
     }
 
     private void updateLayer() {
-        mUpdateLayer = true;
+        synchronized (mLock) {
+            mUpdateLayer = true;
+        }
+    }
+
+    private void updateLayerAndInvalidate() {
+        synchronized (mLock) {
+            mUpdateLayer = true;
+        }
         invalidate();
     }
 
