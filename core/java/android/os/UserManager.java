@@ -98,6 +98,32 @@ public class UserManager {
     }
 
     /**
+     * Return the serial number for a user.  This is a device-unique
+     * number assigned to that user; if the user is deleted and new users
+     * created, the new users will not be given the same serial number.
+     * @param user The user whose serial number is to be retrieved.
+     * @return The serial number of the given user.
+     * @see #getUserForSerialNumber(long)
+     */
+    public long getSerialNumberForUser(UserHandle user) {
+        return getUserSerialNumber(user.getIdentifier());
+    }
+
+    /**
+     * Return the user associated with a serial number previously
+     * returned by {@link #getSerialNumberForUser(UserHandle)}.
+     * @param serialNumber The serial number of the user that is being
+     * retrieved.
+     * @return Return the user associated with the serial number, or null
+     * if there is not one.
+     * @see #getSerialNumberForUser(UserHandle)
+     */
+    public UserHandle getUserForSerialNumber(long serialNumber) {
+        int ident = getUserHandle((int)serialNumber);
+        return ident >= 0 ? new UserHandle(ident) : null;
+    }
+
+    /**
      * Creates a user with the specified name and options.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
