@@ -481,7 +481,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
                             Intent i = new Intent(IBluetooth.class.getName());
                             if (!mContext.bindService(i, mConnection,
-                                                  Context.BIND_AUTO_CREATE)) {
+                                  Context.BIND_AUTO_CREATE, UserHandle.USER_CURRENT)) {
                                 mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                                 Log.e(TAG, "fail to bind to: " + IBluetooth.class.getName());
                             }
@@ -717,7 +717,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
                 mConnection.setGetNameAddressOnly(false);
                 Intent i = new Intent(IBluetooth.class.getName());
-                if (!mContext.bindService(i, mConnection,Context.BIND_AUTO_CREATE)) {
+                if (!mContext.bindService(i, mConnection, Context.BIND_AUTO_CREATE,
+                                          UserHandle.USER_CURRENT)) {
                     mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                     Log.e(TAG, "Fail to bind to: " + IBluetooth.class.getName());
                 }
