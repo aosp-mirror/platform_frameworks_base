@@ -1058,18 +1058,13 @@ public interface WindowManagerPolicy {
      * Called when we have started keeping the screen on because a window
      * requesting this has become visible.
      */
-    public void screenOnStartedLw();
+    public void keepScreenOnStartedLw();
 
     /**
      * Called when we have stopped keeping the screen on because the last window
      * requesting this is no longer visible.
      */
-    public void screenOnStoppedLw();
-
-    /**
-     * Return false to disable key repeat events from being generated.
-     */
-    public boolean allowKeyRepeat();
+    public void keepScreenOnStoppedLw();
 
     /**
      * Inform the policy that the user has chosen a preferred orientation ("rotation lock"). 
