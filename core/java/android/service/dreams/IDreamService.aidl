@@ -21,4 +21,5 @@ package android.service.dreams;
  */
 oneway interface IDreamService {
     void attach(IBinder windowToken);
+    void detach();
 }

@@ -9,23 +9,23 @@ public class BeanBagDream extends DreamService {
     private Board mBoard;
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
         setInteractive(true);
+        setFullscreen(true);
         mBoard = new Board(this, null);
+        setContentView(mBoard);
     }
 
     @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        setContentView(mBoard);
-        setFullscreen(true);
+    public void onDreamingStarted() {
+        super.onDreamingStarted();
         mBoard.startAnimation();
     }
 
     @Override
-    public void finish() {
+    public void onDreamingStopped() {
         mBoard.stopAnimation();
-        super.finish();
+        super.onDreamingStopped();
     }
 }
