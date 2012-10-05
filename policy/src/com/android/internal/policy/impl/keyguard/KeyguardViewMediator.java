@@ -535,50 +535,7 @@ public class KeyguardViewMediator {
                 resetStateLocked(null);
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
-                // if the screen turned off because of timeout or the user hit the power button
-                // and we don't need to lock immediately, set an alarm
-                // to enable it a little bit later (i.e, give the user a chance
-                // to turn the screen back on within a certain window without
-                // having to unlock the screen)
-                final ContentResolver cr = mContext.getContentResolver();
-
-                // From DisplaySettings
-                long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
-                        KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
-
-                // From SecuritySettings
-                final long lockAfterTimeout = Settings.Secure.getInt(cr,
-                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                        KEYGUARD_LOCK_AFTER_DELAY_DEFAULT);
-
-                // From DevicePolicyAdmin
-                final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
-                        .getMaximumTimeToLock(null, mLockPatternUtils.getCurrentUser());
-
-                long timeout;
-                if (policyTimeout > 0) {
-                    // policy in effect. Make sure we don't go beyond policy limit.
-                    displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
-                    timeout = Math.min(policyTimeout - displayTimeout, lockAfterTimeout);
-                } else {
-                    timeout = lockAfterTimeout;
-                }
-
-                if (timeout <= 0) {
-                    // Lock now
-                    mSuppressNextLockSound = true;
-                    doKeyguardLocked();
-                } else {
-                    // Lock in the future
-                    long when = SystemClock.elapsedRealtime() + timeout;
-                    Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
-                    intent.putExtra("seq", mDelayedShowingSequence);
-                    PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                            0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
-                    if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
-                                     + mDelayedShowingSequence);
-                }
+                doKeyguardLaterLocked();
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
@@ -587,13 +544,64 @@ public class KeyguardViewMediator {
         }
     }
 
+    private void doKeyguardLaterLocked() {
+        // if the screen turned off because of timeout or the user hit the power button
+        // and we don't need to lock immediately, set an alarm
+        // to enable it a little bit later (i.e, give the user a chance
+        // to turn the screen back on within a certain window without
+        // having to unlock the screen)
+        final ContentResolver cr = mContext.getContentResolver();
+
+        // From DisplaySettings
+        long displayTimeout = Settings.System.getInt(cr, SCREEN_OFF_TIMEOUT,
+                KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT);
+
+        // From SecuritySettings
+        final long lockAfterTimeout = Settings.Secure.getInt(cr,
+                Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT);
+
+        // From DevicePolicyAdmin
+        final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
+                .getMaximumTimeToLock(null, mLockPatternUtils.getCurrentUser());
+
+        long timeout;
+        if (policyTimeout > 0) {
+            // policy in effect. Make sure we don't go beyond policy limit.
+            displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
+            timeout = Math.min(policyTimeout - displayTimeout, lockAfterTimeout);
+        } else {
+            timeout = lockAfterTimeout;
+        }
+
+        if (timeout <= 0) {
+            // Lock now
+            mSuppressNextLockSound = true;
+            doKeyguardLocked();
+        } else {
+            // Lock in the future
+            long when = SystemClock.elapsedRealtime() + timeout;
+            Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
+            intent.putExtra("seq", mDelayedShowingSequence);
+            PendingIntent sender = PendingIntent.getBroadcast(mContext,
+                    0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
+            if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
+                             + mDelayedShowingSequence);
+        }
+    }
+
+    private void cancelDoKeyguardLaterLocked() {
+        mDelayedShowingSequence++;
+    }
+
     /**
      * Let's us know the screen was turned on.
      */
     public void onScreenTurnedOn(KeyguardViewManager.ShowListener showListener) {
         synchronized (this) {
             mScreenOn = true;
-            mDelayedShowingSequence++;
+            cancelDoKeyguardLaterLocked();
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
             if (showListener != null) {
                 notifyScreenOnLocked(showListener);
@@ -609,6 +617,29 @@ public class KeyguardViewMediator {
             // In this case, send out ACTION_USER_PRESENT here instead of in
             // handleKeyguardDone()
             sendUserPresentBroadcast();
+        }
+    }
+
+    /**
+     * A dream started.  We should lock after the usual screen-off lock timeout but only
+     * if there is a secure lock pattern.
+     */
+    public void onDreamingStarted() {
+        synchronized (this) {
+            if (mScreenOn && mLockPatternUtils.isSecure()) {
+                doKeyguardLaterLocked();
+            }
+        }
+    }
+
+    /**
+     * A dream stopped.
+     */
+    public void onDreamingStopped() {
+        synchronized (this) {
+            if (mScreenOn) {
+                cancelDoKeyguardLaterLocked();
+            }
         }
     }
 
