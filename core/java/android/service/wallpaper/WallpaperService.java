@@ -574,7 +574,8 @@ public abstract class WallpaperService extends Service {
             final boolean flagsChanged = mCurWindowFlags != mWindowFlags ||
                     mCurWindowPrivateFlags != mWindowPrivateFlags;
             if (forceRelayout || creating || surfaceCreating || formatChanged || sizeChanged
-                    || typeChanged || flagsChanged || redrawNeeded) {
+                    || typeChanged || flagsChanged || redrawNeeded
+                    || !mIWallpaperEngine.mShownReported) {
 
                 if (DEBUG) Log.v(TAG, "Changes: creating=" + creating
                         + " format=" + formatChanged + " size=" + sizeChanged);
@@ -739,6 +740,7 @@ public abstract class WallpaperService extends Service {
                         if (redrawNeeded) {
                             mSession.finishDrawing(mWindow);
                         }
+                        mIWallpaperEngine.reportShown();
                     }
                 } catch (RemoteException ex) {
                 }
@@ -950,6 +952,7 @@ public abstract class WallpaperService extends Service {
         final IBinder mWindowToken;
         final int mWindowType;
         final boolean mIsPreview;
+        boolean mShownReported;
         int mReqWidth;
         int mReqHeight;
         
@@ -1002,6 +1005,18 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        public void reportShown() {
+            if (!mShownReported) {
+                mShownReported = true;
+                try {
+                    mConnection.engineShown(this);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Wallpaper host disappeared", e);
+                    return;
+                }
+            }
+        }
+
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
@@ -1020,12 +1035,6 @@ public abstract class WallpaperService extends Service {
                     mEngine = engine;
                     mActiveEngines.add(engine);
                     engine.attach(this);
-                    try {
-                        mConnection.engineShown(this);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Wallpaper host disappeared", e);
-                        return;
-                    }
                     return;
                 }
                 case DO_DETACH: {
