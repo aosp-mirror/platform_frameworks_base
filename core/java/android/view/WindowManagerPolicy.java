@@ -21,6 +21,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.view.animation.Animation;
@@ -1096,7 +1097,7 @@ public interface WindowManagerPolicy {
     /**
      * Lock the device now.
      */
-    public void lockNow();
+    public void lockNow(Bundle options);
 
     /**
      * Set the last used input method window state. This state is used to make IME transition
