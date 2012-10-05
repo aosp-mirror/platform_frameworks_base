@@ -43,7 +43,7 @@
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"حالت هواپیما"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بیصدا"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بی‌صدا"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"خودکار"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان‌ها"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
@@ -128,7 +128,7 @@
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"دستیابی به GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"زنگ لرزشی."</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"زنگ بیصدا."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"زنگ بی‌صدا."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> نادیده گرفته شد."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"داده 2G-3G غیرفعال شد"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"داده 4G غیر فعال شد"</string>
@@ -149,8 +149,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <!-- no translation found for start_dreams (6170089063982549905) -->
-    <skip />
+    <string name="start_dreams" msgid="6170089063982549905">"اکنون خواب"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"اترنت"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"حالت هواپیما"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"در حال شارژ، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
