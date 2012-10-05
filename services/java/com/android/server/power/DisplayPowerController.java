@@ -197,6 +197,12 @@ final class DisplayPowerController {
     // May be 0 if no warm-up is required.
     private int mLightSensorWarmUpTimeConfig;
 
+    // True if we should animate the backlight when turning the screen on or off, which
+    // tends to be efficient for LCD displays but not for OLED displays.
+    // False if we should play the electron beam animation instead, which is better for
+    // OLED displays.
+    private boolean mElectronBeamAnimatesBacklightConfig;
+
     // The pending power request.
     // Initially null until the first call to requestPowerState.
     // Guarded by mLock.
@@ -362,6 +368,9 @@ final class DisplayPowerController {
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
         }
 
+        mElectronBeamAnimatesBacklightConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_animateScreenLights);
+
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             if (mProximitySensor != null) {
@@ -481,7 +490,8 @@ final class DisplayPowerController {
     private void initialize() {
         final Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
         Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        mPowerState = new DisplayPowerState(new ElectronBeam(display),
+        mPowerState = new DisplayPowerState(
+                mElectronBeamAnimatesBacklightConfig ? null : new ElectronBeam(display),
                 new PhotonicModulator(executor,
                         mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT),
                         mSuspendBlocker));
