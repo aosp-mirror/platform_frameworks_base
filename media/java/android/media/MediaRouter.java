@@ -704,7 +704,8 @@ public class MediaRouter {
             final WifiDisplay d = newDisplays[i];
             final WifiDisplay oldRemembered = findMatchingDisplay(d, oldDisplays);
             if (oldRemembered == null) {
-                addRouteStatic(makeWifiDisplayRoute(d));
+                addRouteStatic(makeWifiDisplayRoute(d,
+                        findMatchingDisplay(d, availableDisplays) != null));
                 needScan = true;
             } else {
                 final boolean available = findMatchingDisplay(d, availableDisplays) != null;
@@ -733,15 +734,16 @@ public class MediaRouter {
         sStatic.mLastKnownWifiDisplayStatus = newStatus;
     }
 
-    static RouteInfo makeWifiDisplayRoute(WifiDisplay display) {
+    static RouteInfo makeWifiDisplayRoute(WifiDisplay display, boolean available) {
         final RouteInfo newRoute = new RouteInfo(sStatic.mSystemCategory);
         newRoute.mDeviceAddress = display.getDeviceAddress();
         newRoute.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
         newRoute.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
         newRoute.mPlaybackType = RouteInfo.PLAYBACK_TYPE_REMOTE;
-        newRoute.mStatus = sStatic.mResources.getText(
-                com.android.internal.R.string.media_route_status_connecting);
-        newRoute.mEnabled = false;
+
+        newRoute.setStatusCode(available ?
+                RouteInfo.STATUS_AVAILABLE : RouteInfo.STATUS_CONNECTING);
+        newRoute.mEnabled = available;
 
         newRoute.mName = makeWifiDisplayName(display);
         return newRoute;
