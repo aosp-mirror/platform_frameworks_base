@@ -531,6 +531,7 @@ final class DisplayPowerController {
         final boolean mustNotify;
         boolean mustInitialize = false;
         boolean updateAutoBrightness = mTwilightChanged;
+        boolean screenOnWasBlocked = false;
         mTwilightChanged = false;
 
         synchronized (mLock) {
@@ -588,7 +589,6 @@ final class DisplayPowerController {
             if (mScreenOffBecauseOfProximity
                     && mProximity != PROXIMITY_POSITIVE) {
                 mScreenOffBecauseOfProximity = false;
-                setScreenOn(true);
                 sendOnProximityNegative();
             }
         } else {
@@ -639,20 +639,43 @@ final class DisplayPowerController {
                 // It is relatively short but if we cancel it and switch to the
                 // on animation immediately then the results are pretty ugly.
                 if (!mElectronBeamOffAnimator.isStarted()) {
-                    setScreenOn(true);
-                    if (USE_ELECTRON_BEAM_ON_ANIMATION) {
-                        if (!mElectronBeamOnAnimator.isStarted()) {
-                            if (mPowerState.getElectronBeamLevel() == 1.0f) {
-                                mPowerState.dismissElectronBeam();
-                            } else if (mPowerState.prepareElectronBeam(true)) {
-                                mElectronBeamOnAnimator.start();
-                            } else {
-                                mElectronBeamOnAnimator.end();
-                            }
+                    if (mPowerRequest.blockScreenOn && !mPowerState.isScreenOn()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Blocked screen on while screen currently off.");
                         }
+                        screenOnWasBlocked = true;
                     } else {
-                        mPowerState.setElectronBeamLevel(1.0f);
-                        mPowerState.dismissElectronBeam();
+                        setScreenOn(true);
+                        if (USE_ELECTRON_BEAM_ON_ANIMATION) {
+                            if (!mElectronBeamOnAnimator.isStarted()) {
+                                if (mPowerState.getElectronBeamLevel() == 1.0f) {
+                                    mPowerState.dismissElectronBeam();
+                                } else if (mPowerState.prepareElectronBeam(true)) {
+                                    mElectronBeamOnAnimator.start();
+                                } else {
+                                    mElectronBeamOnAnimator.end();
+                                }
+                            }
+                        } else {
+                            mPowerState.setElectronBeamLevel(1.0f);
+                            mPowerState.dismissElectronBeam();
+                        }
+                    }
+                } else {
+                    // FIXME: If the electron beam off animation is playing then we have a bit
+                    // of a problem.  The window manager policy would only have requested
+                    // to block screen on if it was about to start preparing the keyguard.
+                    // It's already too late to do anything about that.  Ideally we would
+                    // let the animation play out first but that would require making
+                    // some pretty deep changes to the power manager and we don't have
+                    // time just now.  For now, short-circuit the animation and get ready.
+                    if (mPowerRequest.blockScreenOn) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Blocked screen on while screen off animation running.");
+                        }
+                        screenOnWasBlocked = true;
+                        setScreenOn(false);
+                        mElectronBeamOffAnimator.end();
                     }
                 }
             } else {
@@ -677,12 +700,17 @@ final class DisplayPowerController {
         // We mostly care about the screen state here, ignoring brightness changes
         // which will be handled asynchronously.
         if (mustNotify
+                && !screenOnWasBlocked
                 && !mElectronBeamOnAnimator.isStarted()
                 && !mElectronBeamOffAnimator.isStarted()
                 && mPowerState.waitUntilClean(mCleanListener)) {
             synchronized (mLock) {
                 if (!mPendingRequestChangedLocked) {
                     mDisplayReadyLocked = true;
+
+                    if (DEBUG) {
+                        Slog.d(TAG, "Display ready!");
+                    }
                 }
             }
             sendOnStateChanged();
