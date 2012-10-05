@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -97,6 +98,26 @@ public class LockPatternUtils {
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
+
+    /**
+     * Tells the keyguard to show the user switcher when the keyguard is created.
+     */
+    public static final String KEYGUARD_SHOW_USER_SWITCHER = "showuserswitcher";
+
+    /**
+     * Tells the keyguard to show the security challenge when the keyguard is created.
+     */
+    public static final String KEYGUARD_SHOW_SECURITY_CHALLENGE = "showsecuritychallenge";
+
+    /**
+     * Options used to lock the device upon user switch.
+     */
+    public static final Bundle USER_SWITCH_LOCK_OPTIONS = new Bundle();
+
+    static {
+        USER_SWITCH_LOCK_OPTIONS.putBoolean(KEYGUARD_SHOW_USER_SWITCHER, true);
+        USER_SWITCH_LOCK_OPTIONS.putBoolean(KEYGUARD_SHOW_SECURITY_CHALLENGE, true);
+    }
 
     /**
      * The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should

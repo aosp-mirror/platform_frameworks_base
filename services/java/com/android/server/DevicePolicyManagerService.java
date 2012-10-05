@@ -46,6 +46,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1832,7 +1833,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getIPowerManager().goToSleep(SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
             // Ensure the device is locked
-            getWindowManager().lockNow();
+            getWindowManager().lockNow(null);
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
