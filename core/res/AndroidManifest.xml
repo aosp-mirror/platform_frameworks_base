@@ -620,6 +620,13 @@
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
    
+    <!-- Allows bluetooth stack to access files
+         @hide This should only be used by Bluetooth apk.
+    -->
+    <permission android:name="android.permission.BLUETOOTH_STACK"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
     <!-- Allows applications to perform I/O operations over NFC -->
     <permission android:name="android.permission.NFC"
         android:permissionGroup="android.permission-group.NETWORK"
