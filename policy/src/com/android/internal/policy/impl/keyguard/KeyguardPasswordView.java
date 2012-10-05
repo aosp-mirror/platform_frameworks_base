@@ -54,7 +54,7 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
  */
 
 public class KeyguardPasswordView extends LinearLayout
-        implements KeyguardSecurityView, OnEditorActionListener {
+        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
     private KeyguardSecurityCallback mCallback;
     private EditText mPasswordEntry;
     private LockPatternUtils mLockPatternUtils;
@@ -121,6 +121,7 @@ public class KeyguardPasswordView extends LinearLayout
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
+        mPasswordEntry.addTextChangedListener(this);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
                 new int[] {
@@ -349,6 +350,21 @@ public class KeyguardPasswordView extends LinearLayout
     @Override
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (mCallback != null) {
+            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
+        }
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
     }
 
 }
