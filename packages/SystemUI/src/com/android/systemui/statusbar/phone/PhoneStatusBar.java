@@ -1269,8 +1269,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
 
-        // Ensure the panel is fully collapsed (just in case; bug 6765842)
- // @@@        mStatusBarView.collapseAllPanels(/*animate=*/ false);
+        // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
+        mStatusBarView.collapseAllPanels(/*animate=*/ false);
 
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
