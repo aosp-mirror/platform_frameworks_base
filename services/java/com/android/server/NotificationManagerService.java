@@ -1029,12 +1029,20 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
             }
 
+            final int currentUser;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                currentUser = ActivityManager.getCurrentUser();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
             // If we're not supposed to beep, vibrate, etc. then don't.
             if (((mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) == 0)
                     && (!(old != null
                         && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                     && (r.userId == UserHandle.USER_ALL ||
-                        (r.userId == userId && r.userId == ActivityManager.getCurrentUser()))
+                        (r.userId == userId && r.userId == currentUser))
                     && mSystemReady) {
 
                 final AudioManager audioManager = (AudioManager) mContext
