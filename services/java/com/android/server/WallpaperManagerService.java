@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
@@ -53,6 +54,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -511,6 +513,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 wallpaper = new WallpaperData(userId);
                 mWallpaperMap.put(userId, wallpaper);
                 loadSettingsLocked(userId);
+            }
+            // Not started watching yet, in case wallpaper data was loaded for other reasons.
+            if (wallpaper.wallpaperObserver == null) {
                 wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
                 wallpaper.wallpaperObserver.startWatching();
             }
@@ -580,9 +585,21 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     public boolean hasNamedWallpaper(String name) {
         synchronized (mLock) {
-            for (int i=0; i<mWallpaperMap.size(); i++) {
-                WallpaperData wd = mWallpaperMap.valueAt(i);
-                if (name.equals(wd.name)) {
+            List<UserInfo> users;
+            long ident = Binder.clearCallingIdentity();
+            try {
+                users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE)).getUsers();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            for (UserInfo user: users) {
+                WallpaperData wd = mWallpaperMap.get(user.id);
+                if (wd == null) {
+                    // User hasn't started yet, so load her settings to peek at the wallpaper
+                    loadSettingsLocked(user.id);
+                    wd = mWallpaperMap.get(user.id);
+                }
+                if (wd != null && name.equals(wd.name)) {
                     return true;
                 }
             }
