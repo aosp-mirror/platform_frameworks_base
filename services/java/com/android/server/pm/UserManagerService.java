@@ -78,6 +78,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
 
+    private static final int MIN_USER_ID = 10;
+
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
     private final Context mContext;
@@ -459,6 +461,7 @@ public class UserManagerService extends IUserManager.Stub {
         UserInfo primary = new UserInfo(0, "Primary", null,
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
         mUsers.put(0, primary);
+        mNextSerialNumber = MIN_USER_ID;
         updateUserIdsLocked();
 
         writeUserListLocked();
@@ -832,7 +835,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private int getNextAvailableIdLocked() {
         synchronized (mPackagesLock) {
-            int i = 10;
+            int i = MIN_USER_ID;
             while (i < Integer.MAX_VALUE) {
                 if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.contains(i)) {
                     break;
@@ -862,7 +865,7 @@ public class UserManagerService extends IUserManager.Stub {
             for (int i = 0; i < mUsers.size(); i++) {
                 UserInfo user = mUsers.valueAt(i);
                 if (user == null) continue;
-                pw.print("  "); pw.print(user);
+                pw.print("  "); pw.print(user); pw.print(" serialNo="); pw.print(user.serialNumber);
                 if (mRemovingUserIds.contains(mUsers.keyAt(i))) pw.print(" <removing> ");
                 if (user.partial) pw.print(" <partial>");
                 pw.println();
