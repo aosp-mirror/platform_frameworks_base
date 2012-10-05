@@ -230,7 +230,8 @@ class KeyguardStatusViewManager {
     }
 
     private void maybeSetUpperCaseText(TextView textView, CharSequence text) {
-        if (KeyguardViewManager.USE_UPPER_CASE) { // currently only required for date view
+        if (KeyguardViewManager.USE_UPPER_CASE
+                && textView.getId() != R.id.owner_info) { // currently only required for date view
             textView.setText(text != null ? text.toString().toUpperCase() : null);
         } else {
             textView.setText(text);
