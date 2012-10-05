@@ -226,8 +226,6 @@ class BrowserFrame extends Handler {
             } else {
                 sJavaBridge.setCacheSize(4 * 1024 * 1024);
             }
-            // initialize CacheManager
-            CacheManager.init(appContext);
             // create CookieSyncManager with current Context
             CookieSyncManager.createInstance(appContext);
             // create PluginManager with current Context

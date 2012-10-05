@@ -45,14 +45,6 @@ import java.util.Map;
 // CacheManager may only be used if your activity contains a WebView.
 @Deprecated
 public final class CacheManager {
-
-    private static final String LOGTAG = "cache";
-
-    static final String HEADER_KEY_IFMODIFIEDSINCE = "if-modified-since";
-    static final String HEADER_KEY_IFNONEMATCH = "if-none-match";
-
-    private static File mBaseDir;
-    
     /**
      * Represents a resource stored in the HTTP cache. Instances of this class
      * can be obtained by calling
@@ -239,39 +231,23 @@ public final class CacheManager {
     }
 
     /**
-     * Initializes the HTTP cache. This method must be called before any
-     * CacheManager methods are used. Note that this is called automatically
-     * when a {@link WebView} is created.
-     *
-     * @param context the application context
-     */
-    static void init(Context context) {
-        // This isn't actually where the real cache lives, but where we put files for the
-        // purpose of getCacheFile().
-        mBaseDir = new File(context.getCacheDir(), "webviewCacheChromiumStaging");
-        if (!mBaseDir.exists()) {
-            mBaseDir.mkdirs();
-        }
-    }
-
-    /**
      * Gets the base directory in which the files used to store the contents of
      * cache entries are placed. See
      * {@link CacheManager.CacheResult#getLocalPath CacheManager.CacheResult.getLocalPath()}.
      *
      * @return the base directory of the cache
-     * @deprecated Access to the HTTP cache will be removed in a future release.
+     * @deprecated This method no longer has any effect and always returns null.
      */
     @Deprecated
     public static File getCacheFileBaseDir() {
-        return mBaseDir;
+        return null;
     }
 
     /**
      * Gets whether the HTTP cache is disabled.
      *
      * @return true if the HTTP cache is disabled
-     * @deprecated Access to the HTTP cache will be removed in a future release.
+     * @deprecated This method no longer has any effect and always returns false.
      */
     @Deprecated
     public static boolean cacheDisabled() {
@@ -314,73 +290,11 @@ public final class CacheManager {
      * @param headers a map from HTTP header name to value, to be populated
      *                for the returned cache entry
      * @return the cache entry for the specified URL
-     * @deprecated Access to the HTTP cache will be removed in a future release.
+     * @deprecated This method no longer has any effect and always returns null.
      */
     @Deprecated
     public static CacheResult getCacheFile(String url,
             Map<String, String> headers) {
-        return getCacheFile(url, 0, headers);
-    }
-
-    static CacheResult getCacheFile(String url, long postIdentifier,
-            Map<String, String> headers) {
-        CacheResult result = nativeGetCacheResult(url);
-        if (result == null) {
-            return null;
-        }
-        // A temporary local file will have been created native side and localPath set
-        // appropriately.
-        File src = new File(mBaseDir, result.localPath);
-        try {
-            // Open the file here so that even if it is deleted, the content
-            // is still readable by the caller until close() is called.
-            result.inStream = new FileInputStream(src);
-        } catch (FileNotFoundException e) {
-            Log.v(LOGTAG, "getCacheFile(): Failed to open file: " + e);
-            // TODO: The files in the cache directory can be removed by the
-            // system. If it is gone, what should we do?
-            return null;
-        }
-
-        // A null value for headers is used by CACHE_MODE_CACHE_ONLY to imply
-        // that we should provide the cache result even if it is expired.
-        // Note that a negative expires value means a time in the far future.
-        if (headers != null && result.expires >= 0
-                && result.expires <= System.currentTimeMillis()) {
-            if (result.lastModified == null && result.etag == null) {
-                return null;
-            }
-            // Return HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE
-            // for requesting validation.
-            if (result.etag != null) {
-                headers.put(HEADER_KEY_IFNONEMATCH, result.etag);
-            }
-            if (result.lastModified != null) {
-                headers.put(HEADER_KEY_IFMODIFIEDSINCE, result.lastModified);
-            }
-        }
-
-        if (DebugFlags.CACHE_MANAGER) {
-            Log.v(LOGTAG, "getCacheFile for url " + url);
-        }
-
-        return result;
-    }
-
-    /**
-     * Given a URL and its full headers, gets a CacheResult if a local cache
-     * can be stored. Otherwise returns null. The mimetype is passed in so that
-     * the function can use the mimetype that will be passed to WebCore which
-     * could be different from the mimetype defined in the headers.
-     * forceCache is for out-of-package callers to force creation of a
-     * CacheResult, and is used to supply surrogate responses for URL
-     * interception.
-     *
-     * @return a CacheResult for a given URL
-     */
-    static CacheResult createCacheFile(String url, int statusCode,
-            Headers headers, String mimeType, boolean forceCache) {
-        // This method is public but hidden. We break functionality.
         return null;
     }
 
@@ -424,36 +338,4 @@ public final class CacheManager {
         // use, we should already have thrown an exception above.
         assert false;
     }
-
-    /**
-     * Removes all cache files.
-     *
-     * @return whether the removal succeeded
-     */
-    static boolean removeAllCacheFiles() {
-        // delete cache files in a separate thread to not block UI.
-        final Runnable clearCache = new Runnable() {
-            public void run() {
-                // delete all cache files
-                try {
-                    String[] files = mBaseDir.list();
-                    // if mBaseDir doesn't exist, files can be null.
-                    if (files != null) {
-                        for (int i = 0; i < files.length; i++) {
-                            File f = new File(mBaseDir, files[i]);
-                            if (!f.delete()) {
-                                Log.e(LOGTAG, f.getPath() + " delete failed.");
-                            }
-                        }
-                    }
-                } catch (SecurityException e) {
-                    // Ignore SecurityExceptions.
-                }
-            }
-        };
-        new Thread(clearCache).start();
-        return true;
-    }
-
-    private static native CacheResult nativeGetCacheResult(String url);
 }

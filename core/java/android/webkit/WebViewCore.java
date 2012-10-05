@@ -2001,9 +2001,6 @@ public final class WebViewCore {
 
     private void clearCache(boolean includeDiskFiles) {
         mBrowserFrame.clearCache();
-        if (includeDiskFiles) {
-            CacheManager.removeAllCacheFiles();
-        }
     }
 
     private void loadUrl(String url, Map<String, String> extraHeaders) {
