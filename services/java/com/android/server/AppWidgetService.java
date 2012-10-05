@@ -17,34 +17,28 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
-import com.android.internal.widget.IRemoteViewsAdapterConnection;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,84 +50,10 @@ class AppWidgetService extends IAppWidgetService.Stub
 {
     private static final String TAG = "AppWidgetService";
 
-    /*
-     * When identifying a Host or Provider based on the calling process, use the uid field.
-     * When identifying a Host or Provider based on a package manager broadcast, use the
-     * package given.
-     */
-
-    static class Provider {
-        int uid;
-        AppWidgetProviderInfo info;
-        ArrayList<AppWidgetId> instances = new ArrayList<AppWidgetId>();
-        PendingIntent broadcast;
-        boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
-        
-        int tag;    // for use while saving state (the index)
-    }
-
-    static class Host {
-        int uid;
-        int hostId;
-        String packageName;
-        ArrayList<AppWidgetId> instances = new ArrayList<AppWidgetId>();
-        IAppWidgetHost callbacks;
-        boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
-        
-        int tag;    // for use while saving state (the index)
-    }
-
-    static class AppWidgetId {
-        int appWidgetId;
-        Provider provider;
-        RemoteViews views;
-        Host host;
-    }
-
-    /**
-     * Acts as a proxy between the ServiceConnection and the RemoteViewsAdapterConnection.
-     * This needs to be a static inner class since a reference to the ServiceConnection is held
-     * globally and may lead us to leak AppWidgetService instances (if there were more than one).
-     */
-    static class ServiceConnectionProxy implements ServiceConnection {
-        private final IBinder mConnectionCb;
-
-        ServiceConnectionProxy(Pair<Integer, Intent.FilterComparison> key, IBinder connectionCb) {
-            mConnectionCb = connectionCb;
-        }
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            final IRemoteViewsAdapterConnection cb =
-                IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
-            try {
-                cb.onServiceConnected(service);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        public void onServiceDisconnected(ComponentName name) {
-            disconnect();
-        }
-        public void disconnect() {
-            final IRemoteViewsAdapterConnection cb =
-                IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
-            try {
-                cb.onServiceDisconnected();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     Context mContext;
     Locale mLocale;
     PackageManager mPackageManager;
-    AlarmManager mAlarmManager;
-    ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
-    int mNextAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID + 1;
-    final ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList<AppWidgetId>();
-    ArrayList<Host> mHosts = new ArrayList<Host>();
     boolean mSafeMode;
-
 
     private final SparseArray<AppWidgetServiceImpl> mAppWidgetServices;
 
@@ -195,9 +115,16 @@ class AppWidgetService extends IAppWidgetService.Stub
         }, UserHandle.ALL, userFilter, null, null);
     }
 
+    /**
+     * This returns the user id of the caller, if the caller is not the system process,
+     * otherwise it assumes that the calls are from the lockscreen and hence are meant for the
+     * current user. TODO: Instead, have lockscreen make explicit calls with userId
+     */
     private int getCallingOrCurrentUserId() {
         int callingUid = Binder.getCallingUid();
-        if (callingUid == android.os.Process.myUid()) {
+        // Also check the PID because Settings (power control widget) also runs as System UID
+        if (callingUid == android.os.Process.myUid()
+                && Binder.getCallingPid() == android.os.Process.myPid()) {
             try {
                 return ActivityManagerNative.getDefault().getCurrentUser().id;
             } catch (RemoteException re) {
@@ -272,13 +199,16 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     public void onUserRemoved(int userId) {
-        AppWidgetServiceImpl impl = mAppWidgetServices.get(userId);
         if (userId < 1) return;
-
-        if (impl == null) {
-            AppWidgetServiceImpl.getSettingsFile(userId).delete();
-        } else {
-            impl.onUserRemoved();
+        synchronized (mAppWidgetServices) {
+            AppWidgetServiceImpl impl = mAppWidgetServices.get(userId);
+            mAppWidgetServices.remove(userId);
+    
+            if (impl == null) {
+                AppWidgetServiceImpl.getSettingsFile(userId).delete();
+            } else {
+                impl.onUserRemoved();
+            }
         }
     }
 
@@ -286,17 +216,23 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     private AppWidgetServiceImpl getImplForUser(int userId) {
-        AppWidgetServiceImpl service = mAppWidgetServices.get(userId);
-        if (service == null) {
-            Slog.e(TAG, "Unable to find AppWidgetServiceImpl for the current user");
-            // TODO: Verify that it's a valid user
-            service = new AppWidgetServiceImpl(mContext, userId);
-            service.systemReady(mSafeMode);
-            // Assume that BOOT_COMPLETED was received, as this is a non-primary user.
-            service.sendInitialBroadcasts();
-            mAppWidgetServices.append(userId, service);
+        boolean sendInitial = false;
+        AppWidgetServiceImpl service;
+        synchronized (mAppWidgetServices) {
+            service = mAppWidgetServices.get(userId);
+            if (service == null) {
+                Slog.i(TAG, "Unable to find AppWidgetServiceImpl for user " + userId + ", adding");
+                // TODO: Verify that it's a valid user
+                service = new AppWidgetServiceImpl(mContext, userId);
+                service.systemReady(mSafeMode);
+                // Assume that BOOT_COMPLETED was received, as this is a non-primary user.
+                mAppWidgetServices.append(userId, service);
+                sendInitial = true;
+            }
         }
-
+        if (sendInitial) {
+            service.sendInitialBroadcasts();
+        }
         return service;
     }
 
@@ -323,15 +259,6 @@ class AppWidgetService extends IAppWidgetService.Stub
     @Override
     public Bundle getAppWidgetOptions(int appWidgetId) {
         return getImplForUser(getCallingOrCurrentUserId()).getAppWidgetOptions(appWidgetId);
-    }
-
-    static int[] getAppWidgetIds(Provider p) {
-        int instancesSize = p.instances.size();
-        int appWidgetIds[] = new int[instancesSize];
-        for (int i=0; i<instancesSize; i++) {
-            appWidgetIds[i] = p.instances.get(i).appWidgetId;
-        }
-        return appWidgetIds;
     }
 
     @Override
@@ -378,9 +305,15 @@ class AppWidgetService extends IAppWidgetService.Stub
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // Dump the state of all the app widget providers
-        for (int i = 0; i < mAppWidgetServices.size(); i++) {
-            AppWidgetServiceImpl service = mAppWidgetServices.valueAt(i);
-            service.dump(fd, pw, args);
+        synchronized (mAppWidgetServices) {
+            IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+            for (int i = 0; i < mAppWidgetServices.size(); i++) {
+                pw.println("User: " + mAppWidgetServices.keyAt(i));
+                ipw.increaseIndent();
+                AppWidgetServiceImpl service = mAppWidgetServices.valueAt(i);
+                service.dump(fd, ipw, args);
+                ipw.decreaseIndent();
+            }
         }
     }
 
