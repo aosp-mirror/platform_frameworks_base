@@ -369,7 +369,15 @@ public final class LocationRequest implements Parcelable {
      * @return the same object, so that setters can be chained
      */
     public LocationRequest setExpireIn(long millis) {
-        mExpireAt = millis + SystemClock.elapsedRealtime();
+        long elapsedRealtime = SystemClock.elapsedRealtime();
+
+        // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
+        if (millis > Long.MAX_VALUE - elapsedRealtime) {
+          mExpireAt = Long.MAX_VALUE;
+        } else {
+          mExpireAt = millis + elapsedRealtime;
+        }
+
         if (mExpireAt < 0) mExpireAt = 0;
         return this;
     }
