@@ -207,6 +207,7 @@ public class PowerUI extends SystemUI {
             if (intent.resolveActivity(mContext.getPackageManager()) != null) {
                 b.setNegativeButton(R.string.battery_low_why,
                         new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mContext.startActivity(intent);
                         dismissLowBatteryWarning();
@@ -216,12 +217,15 @@ public class PowerUI extends SystemUI {
 
             AlertDialog d = b.create();
             d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
                     public void onDismiss(DialogInterface dialog) {
                         mLowBatteryDialog = null;
                         mBatteryLevelTextView = null;
                     }
                 });
             d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            d.getWindow().getAttributes().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             d.show();
             mLowBatteryDialog = d;
         }
