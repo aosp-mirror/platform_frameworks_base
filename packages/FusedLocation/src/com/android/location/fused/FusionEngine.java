@@ -247,7 +247,7 @@ public class FusionEngine implements LocationListener {
         mNetworkWeight /= totalWeight;
         mGpsWeight /= totalWeight;
 
-        Location fused = new Location(/* LocationManager.FUSED_PROVIDER */ "fused");
+        Location fused = new Location(LocationManager.FUSED_PROVIDER);
         // fuse lat/long
         // assumes the two locations are close enough that earth curvature doesn't matter
         fused.setLatitude(weigh(mGpsLocation.getLatitude(), mNetworkLocation.getLatitude()));
@@ -303,12 +303,7 @@ public class FusionEngine implements LocationListener {
         }
 
         if (mNetworkLocation != null) {
-            // Manually set the extras for the "no gps" location, pointing at the NLP
-            Bundle extras = new Bundle();
-            extras.putParcelable("noGPSLocation", mNetworkLocation);
-            fused.setExtras(extras);
-            // Done inline above to compile against SDK 17
-            //fused.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
+            fused.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
         }
 
         mFusedLocation = fused;
