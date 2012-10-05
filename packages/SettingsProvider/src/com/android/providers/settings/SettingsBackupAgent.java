@@ -61,6 +61,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_BACKUP = DEBUG || false;
 
+    /* Don't restore wifi config until we have new logic for parsing the
+     * saved wifi config and configuring the new APs without having to
+     * disable and re-enable wifi
+     */
+    private static final boolean NAIVE_WIFI_RESTORE = false;
+
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
     private static final String KEY_GLOBAL = "global";
@@ -307,7 +313,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 mSettingsHelper.applyAudioSettings();
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
-            } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
+            } else if (NAIVE_WIFI_RESTORE && KEY_WIFI_SUPPLICANT.equals(key)) {
                 int retainedWifiState = enableWifi(false);
                 restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, data);
                 FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
@@ -321,7 +327,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 byte[] localeData = new byte[size];
                 data.readEntityData(localeData, 0, size);
                 mSettingsHelper.setLocaleData(localeData, size);
-            } else if (KEY_WIFI_CONFIG.equals(key)) {
+            } else if (NAIVE_WIFI_RESTORE && KEY_WIFI_CONFIG.equals(key)) {
                 restoreFileData(mWifiConfigFile, data);
              } else {
                 data.skipEntityData();

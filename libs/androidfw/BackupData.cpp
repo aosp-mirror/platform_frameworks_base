@@ -327,6 +327,7 @@ BackupDataReader::SkipEntityData()
         if (pos == -1) {
             return errno;
         }
+        m_pos = pos;
     }
     SKIP_PADDING();
     return NO_ERROR;
