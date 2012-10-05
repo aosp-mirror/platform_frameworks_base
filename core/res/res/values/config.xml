@@ -636,11 +636,18 @@
          of new location providers at run-time. The new package does not
          have to be explicitly listed here, however it must have a signature
          that matches the signature of at least one package on this list.
+         Platforms should overlay additional packages in
+         config_overlay_locationProviderPackageNames, instead of overlaying
+         this config, if they only want to append packages and not replace
+         the entire array.
          -->
     <string-array name="config_locationProviderPackageNames" translatable="false">
-        <!-- The standard AOSP fused location provider -->
         <item>com.android.location.fused</item>
     </string-array>
+
+    <!-- Pacakge name(s) supplied by overlay, and appended to
+         config_locationProviderPackageNames. -->
+    <string-array name="config_overlay_locationProviderPackageNames" translatable="false" />
 
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
