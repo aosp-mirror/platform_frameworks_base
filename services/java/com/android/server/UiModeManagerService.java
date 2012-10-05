@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
@@ -90,6 +91,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private NotificationManager mNotificationManager;
 
     private StatusBarManager mStatusBarManager;
+
+    private final PowerManager mPowerManager;
     private final PowerManager.WakeLock mWakeLock;
 
     static Intent buildHomeIntent(String category) {
@@ -163,8 +166,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
         mContext.registerReceiver(mBatteryReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
-        PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
+        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
 
         mConfiguration.setToDefaults();
 
@@ -502,7 +505,17 @@ class UiModeManagerService extends IUiModeManager.Stub {
             try {
                 IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(
                         ServiceManager.getService(DreamService.DREAM_SERVICE));
-                dreamManagerService.dream();
+                if (dreamManagerService != null && !dreamManagerService.isDreaming()) {
+                    // Wake up.
+                    // The power manager will wake up the system when it starts receiving power
+                    // but there is a race between that happening and the UI mode manager
+                    // starting a dream.  We want the system to already be awake
+                    // by the time this happens.  Otherwise the dream may not start.
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
+
+                    // Dream.
+                    dreamManagerService.dream();
+                }
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Could not start dream when docked.", ex);
             }
