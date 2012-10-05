@@ -18,9 +18,6 @@ package com.android.internal.policy.impl.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.widget.LockPatternUtils;
-
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -33,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -50,6 +48,9 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
+
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.widget.LockPatternUtils;
 
 
 /**
@@ -290,15 +291,15 @@ public class KeyguardViewMediator {
         @Override
         public void onUserSwitched(int userId) {
             // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
+            // We need to force a reset of the views, since lockNow (called by
+            // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
+                Bundle options = new Bundle();
+                options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER, true);
+                options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE, true);
+                resetStateLocked(options);
+
                 adjustStatusBarLocked();
-                resetStateLocked(true);
-            }
-            // We should always go back to the locked state when a user
-            // switch happens.  Is there a more direct way to do this?
-            try {
-                WindowManagerGlobal.getWindowManagerService().lockNow();
-            } catch (RemoteException e) {
             }
         }
 
@@ -352,7 +353,7 @@ public class KeyguardViewMediator {
                                         + "device isn't provisioned yet.");
                                 doKeyguardLocked();
                             } else {
-                                resetStateLocked(false);
+                                resetStateLocked(null);
                             }
                         }
                     }
@@ -365,7 +366,7 @@ public class KeyguardViewMediator {
                                     + "showing; need to show keyguard so user can enter sim pin");
                             doKeyguardLocked();
                         } else {
-                            resetStateLocked(false);
+                            resetStateLocked(null);
                         }
                     }
                     break;
@@ -378,14 +379,14 @@ public class KeyguardViewMediator {
                         } else {
                             if (DEBUG) Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
                                   + "show permanently disabled message in lockscreen.");
-                            resetStateLocked(false);
+                            resetStateLocked(null);
                         }
                     }
                     break;
                 case READY:
                     synchronized (this) {
                         if (isShowing()) {
-                            resetStateLocked(false);
+                            resetStateLocked(null);
                         }
                     }
                     break;
@@ -531,7 +532,7 @@ public class KeyguardViewMediator {
                 }
             } else if (mShowing) {
                 notifyScreenOffLocked();
-                resetStateLocked(false);
+                resetStateLocked(null);
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 // if the screen turned off because of timeout or the user hit the power button
@@ -645,9 +646,9 @@ public class KeyguardViewMediator {
                     if (DEBUG) Log.d(TAG, "onKeyguardExitResult(false), resetting");
                     mExitSecureCallback.onKeyguardExitResult(false);
                     mExitSecureCallback = null;
-                    resetStateLocked(false);
+                    resetStateLocked(null);
                 } else {
-                    showLocked();
+                    showLocked(null);
 
                     // block until we know the keygaurd is done drawing (and post a message
                     // to unblock us after a timeout so we don't risk blocking too long
@@ -735,9 +736,9 @@ public class KeyguardViewMediator {
      * Used by PhoneWindowManager to enable the keyguard due to a user activity timeout.
      * This must be safe to call from any thread and with any window manager locks held.
      */
-    public void doKeyguardTimeout() {
+    public void doKeyguardTimeout(Bundle options) {
         mHandler.removeMessages(KEYGUARD_TIMEOUT);
-        Message msg = mHandler.obtainMessage(KEYGUARD_TIMEOUT);
+        Message msg = mHandler.obtainMessage(KEYGUARD_TIMEOUT, options);
         mHandler.sendMessage(msg);
     }
 
@@ -750,12 +751,16 @@ public class KeyguardViewMediator {
         return mShowing || mNeedToReshowWhenReenabled || !mUpdateMonitor.isDeviceProvisioned();
     }
 
+    private void doKeyguardLocked() {
+        doKeyguardLocked(null);
+    }
+
     /**
      * Enable the keyguard if the settings are appropriate.  Return true if all
      * work that will happen is done; returns false if the caller can wait for
      * the keyguard to be shown.
      */
-    private void doKeyguardLocked() {
+    private void doKeyguardLocked(Bundle options) {
         // if another app is disabling us, don't show
         if (!mExternallyEnabled) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
@@ -801,17 +806,17 @@ public class KeyguardViewMediator {
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
-        showLocked();
+        showLocked(options);
     }
 
     /**
      * Send message to keyguard telling it to reset its state.
-     * @param userSwitched true if we're resetting state because user switched
+     * @param options options about how to show the keyguard
      * @see #handleReset()
      */
-    private void resetStateLocked(boolean userSwitched) {
+    private void resetStateLocked(Bundle options) {
         if (DEBUG) Log.d(TAG, "resetStateLocked");
-        Message msg = mHandler.obtainMessage(RESET, userSwitched ? 1 : 0, 0);
+        Message msg = mHandler.obtainMessage(RESET, options);
         mHandler.sendMessage(msg);
     }
 
@@ -871,11 +876,11 @@ public class KeyguardViewMediator {
      * Send message to keyguard telling it to show itself
      * @see #handleShow()
      */
-    private void showLocked() {
+    private void showLocked(Bundle options) {
         if (DEBUG) Log.d(TAG, "showLocked");
         // ensure we stay awake until we are finished displaying the keyguard
         mShowKeyguardWakeLock.acquire();
-        Message msg = mHandler.obtainMessage(SHOW);
+        Message msg = mHandler.obtainMessage(SHOW, options);
         mHandler.sendMessage(msg);
     }
 
@@ -1042,13 +1047,13 @@ public class KeyguardViewMediator {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SHOW:
-                    handleShow();
+                    handleShow((Bundle) msg.obj);
                     return ;
                 case HIDE:
                     handleHide();
                     return ;
                 case RESET:
-                    handleReset(msg.arg1 != 0);
+                    handleReset((Bundle) msg.obj);
                     return ;
                 case VERIFY_UNLOCK:
                     handleVerifyUnlock();
@@ -1076,7 +1081,7 @@ public class KeyguardViewMediator {
                     break;
                 case KEYGUARD_TIMEOUT:
                     synchronized (KeyguardViewMediator.this) {
-                        doKeyguardLocked();
+                        doKeyguardLocked((Bundle) msg.obj);
                     }
                     break;
             }
@@ -1164,12 +1169,12 @@ public class KeyguardViewMediator {
      * Handle message sent by {@link #showLocked}.
      * @see #SHOW
      */
-    private void handleShow() {
+    private void handleShow(Bundle options) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
 
-            mKeyguardViewManager.show();
+            mKeyguardViewManager.show(options);
             mShowing = true;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
@@ -1291,13 +1296,13 @@ public class KeyguardViewMediator {
     }
 
     /**
-     * Handle message sent by {@link #resetStateLocked(boolean)}
+     * Handle message sent by {@link #resetStateLocked(Bundle)}
      * @see #RESET
      */
-    private void handleReset(boolean userSwitched) {
+    private void handleReset(Bundle options) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mKeyguardViewManager.reset(userSwitched);
+            mKeyguardViewManager.reset(options);
         }
     }
 

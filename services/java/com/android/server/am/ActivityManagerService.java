@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
@@ -14102,7 +14103,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
 
-                mWindowManager.lockNow();
                 mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
                         R.anim.screen_user_enter);
 
@@ -14120,6 +14120,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mUserLru.add(userIdInt);
 
                 mWindowManager.setCurrentUser(userId);
+
+                // Once the internal notion of the active user has switched, we lock the device
+                // with the option to show the user switcher on the keyguard.
+                mWindowManager.lockNow(LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
 
                 final UserStartedState uss = mStartedUsers.get(userId);
 

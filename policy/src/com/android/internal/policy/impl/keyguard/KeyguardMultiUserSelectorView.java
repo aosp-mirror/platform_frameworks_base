@@ -119,12 +119,6 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
                 public void run() {
                     try {
                         ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
-                        WindowManagerGlobal.getWindowManagerService().lockNow();
-                        // Set the new active user, and make it appear active
-                        avatar.resetPressedState();
-                        mCallback.showSecurityView();
-                        mActiveUserAvatar = avatar;
-                        mActiveUserAvatar.setActive(true, false, 0, null);
                     } catch (RemoteException re) {
                         Log.e(TAG, "Couldn't switch user " + re);
                     }

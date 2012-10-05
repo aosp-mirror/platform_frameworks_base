@@ -4047,21 +4047,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    Runnable mScreenLockTimeout = new Runnable() {
+    class ScreenLockTimeout implements Runnable {
+        Bundle options;
+
+        @Override
         public void run() {
             synchronized (this) {
                 if (localLOGV) Log.v(TAG, "mScreenLockTimeout activating keyguard");
                 if (mKeyguardMediator != null) {
-                    mKeyguardMediator.doKeyguardTimeout();
+                    mKeyguardMediator.doKeyguardTimeout(options);
                 }
                 mLockScreenTimerActive = false;
+                options = null;
             }
         }
-    };
 
-    public void lockNow() {
+        public void setLockOptions(Bundle options) {
+            this.options = options;
+        }
+    }
+
+    ScreenLockTimeout mScreenLockTimeout = new ScreenLockTimeout();
+
+    public void lockNow(Bundle options) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         mHandler.removeCallbacks(mScreenLockTimeout);
+        if (options != null) {
+            // In case multiple calls are made to lockNow, we don't wipe out the options
+            // until the runnable actually executes.
+            mScreenLockTimeout.setLockOptions(options);
+        }
         mHandler.post(mScreenLockTimeout);
     }
 
