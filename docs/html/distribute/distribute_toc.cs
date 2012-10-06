@@ -28,9 +28,7 @@
        <li><a href="<?cs var:toroot ?>distribute/googleplay/publish/preparing.html">
            <span class="en">Publishing Checklist</span>
           </a></li>
-       <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">
-          <span class="en">App Quality</span>
-         </a></li>
+
      </ul>
   </li>
   
@@ -79,6 +77,26 @@
      </ul>
    </li>
 
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/quality/index.html">
+      <span class="en">App Quality</span></a>
+    </div>
+    <ul>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/quality/core.html">
+          <span class="en">Core App Quality</span>
+         </a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/quality/tablet.html">
+          <span class="en">Tablet App Quality</span>
+         </a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">
+          <span class="en">Improving App Quality</span>
+         </a></li>
+
+    </ul>
+  </li> 
+
+
 <!--    
    <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/after.html">
@@ -92,17 +110,17 @@
   </li> 
 -->
 
-<!--  
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/strategies/index.html">
-      <span class="en">Strategies</span></a>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/index.html">
+      <span class="en">Spotlight</span></a>
     </div>
     <ul>
-          <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/featuring.html">Featuring</a></li>
-          <li><a href="<?cs var:toroot ?>distribute/googleplay/strategies/app-quality.html">App Quality</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/tablets.html">
+          <span class="en">Tablet Stories</span>
+         </a></li>
     </ul>
   </li> 
--->
+
   <li class="nav-section">
     <div class="nav-section-header empty">
       <a href="<?cs var:toroot ?>distribute/open.html">
