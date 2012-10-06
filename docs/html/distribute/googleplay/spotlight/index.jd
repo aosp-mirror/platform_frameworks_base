@@ -1,0 +1,46 @@
+page.title=Spotlight
+walkthru=0
+header.hide=0
+
+@jd:body
+
+
+<p>Android developers, their apps, and their successes with Android and Google Play. </p>
+
+
+
+<div style="background: #F0F0F0;
+            border-top: 1px solid #DDD;
+            padding: 0px 0 24px 0;
+            overflow: auto;
+            clear:both;
+            margin-bottom:-10px;
+            margin-top:30px;"">
+   <div style="padding:0 0 0 29px;">
+        <h4>Developer Story: Robot Invader</h4>
+          <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 17px 20px 9px 0;" src=
+            "//g0.gstatic.com/android/market/com.robotinvader.knightmare/hi-256-0-9e08d83bc8d01649e167131d197ada1cd1783fb0">
+          <div style="width:700px;">
+          <p style="margin-top:26px;margin-bottom:12px;">Robot Invader chose 
+              Android and Google Play as the launch platform for their first game,<br /> 
+              <a data-g-event="Developers Page" data-g-label="Case Study Link" href=
+              "//play.google.com/store/apps/details?id=com.robotinvader.knightmare"><em>Wind-up
+              Knight</em></a>.
+           </p>
+           <p>
+              Hear from the developers how Android helped them reach millions of users 
+              and more than 100 device models with a single app binary, then iterate rapidly to ensure
+              a great user experience.
+           </p>
+           </div>
+           <iframe style="float:left;
+             margin-right:24px;
+             margin-top:14px;" width="700" height="394" src=
+             "http://www.youtube.com/embed/hTtlLiUTowY" frameborder="0" allowfullscreen></iframe>
+   </div> 
+</div>
