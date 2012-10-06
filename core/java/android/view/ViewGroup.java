@@ -4006,7 +4006,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #removeDetachedView(View, boolean)
      */
     protected void detachViewFromParent(View child) {
-        child.clearAccessibilityFocus();
         removeFromArray(indexOfChild(child));
     }
 
@@ -4028,7 +4027,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #removeDetachedView(View, boolean)
      */
     protected void detachViewFromParent(int index) {
-        getChildAt(index).clearAccessibilityFocus();
         removeFromArray(index);
     }
 
