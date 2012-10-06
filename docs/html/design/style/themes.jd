@@ -38,5 +38,12 @@ desire is to have a more distinct look for your app, using one of the system the
 point for your customizations is a good idea. The system themes provide a solid foundation on top
 of which you can selectively implement your own visual stylings.</p>
 
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to apply themes such as Holo Light and Dark, and 
+  how to build your own themes, see the
+  <a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a> API guide.</p>
+</div>
+
   </div>
 </div>
