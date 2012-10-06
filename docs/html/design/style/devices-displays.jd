@@ -36,8 +36,21 @@ ensure that your app looks great on any device.</p>
 
 <h4>Strategies</h4>
 <p>So where do you begin when designing for multiple screens? One approach is to work in the base
-standard (medium size, <acronym title="Medium density (160 dpi)">MDPI</acronym>) and scale it up or
+standard (normal size and <acronym title="Medium density (160 dpi)">MDPI</acronym>) and scale it up or
 down for the other buckets. Another approach is to start with the device with the largest screen
 size, and then scale down and figure out the UI compromises you'll need to make on smaller screens.</p>
-<p>For more detailed information on this topic, please visit <a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple
-Screens</a>.</p>
+
+<p>For details about designing layouts for larger screens, see the <a
+href="{@docRoot}design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a> guide.</p>
+
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to build flexible layouts for multiple screen sizes and densities,
+  read
+  <a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a> and
+  <a href="{@docRoot}training/basics/fragments/index.html">Building a Dynamic UI with
+  Fragments</a>.</p>
+</div>
+
+
+
