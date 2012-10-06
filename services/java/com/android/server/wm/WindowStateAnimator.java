@@ -1500,7 +1500,7 @@ class WindowStateAnimator {
             int attr = -1;
             Animation a = null;
             if (anim != 0) {
-                a = AnimationUtils.loadAnimation(mContext, anim);
+                a = anim != -1 ? AnimationUtils.loadAnimation(mContext, anim) : null;
             } else {
                 switch (transit) {
                     case WindowManagerPolicy.TRANSIT_ENTER:
