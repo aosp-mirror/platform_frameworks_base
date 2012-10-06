@@ -42,7 +42,7 @@ manages the application download.</p>
 <h3 id="payment-methods">Convenient payment options</h3>
 
 <p>Users can purchase your products on Google Play using several convenient
-payment methods&mdash;credit cards, Direct Carrier Billing, and Google Play balance.</p>
+payment methods&mdash;credit cards, Direct Carrier Billing, gift cards, and Google Play balance.</p>
 
 <p><span style="font-weight:500">Credit card</span> is the most common method of payment. Users can pay using any credit card
 that they’ve registered in Google Play. To make it easy for users to get started,
@@ -52,8 +52,9 @@ registration is offered as a part of initial device setup process.</p>
 <div class="sidebox">
 <h2>Payment methods on Google Play</h2>
 <ul>
-<li>Credit Card</li>
+<li>Credit card</li>
 <li>Direct Carrier Billing</li>
+<li>Gift card</li>
 <li>Google Play balance (stored value)</li>
 </ul>
 </div>
