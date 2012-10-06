@@ -129,6 +129,18 @@ public class KeyguardViewManager {
             super.onConfigurationChanged(newConfig);
             maybeCreateKeyguardLocked(shouldEnableScreenRotation(), null);
         }
+
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                    && mKeyguardView != null) {
+                if (mKeyguardView.handleBackKey()) {
+                    return true;
+                }
+            }
+            return super.dispatchKeyEvent(event);
+        }
     }
 
     SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
