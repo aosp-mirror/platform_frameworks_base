@@ -568,6 +568,21 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * Copy an allocation from an allocation.  The types of both allocations
+     * must be identical.
+     *
+     * @param a the source allocation
+     */
+    public void copyFrom(Allocation a) {
+        mRS.validate();
+        if (!mType.equals(a.getType())) {
+            throw new RSIllegalArgumentException("Types of allocations must match.");
+        }
+        copy2DRangeFrom(0, 0, mCurrentDimX, mCurrentDimY, a, 0, 0);
+    }
+
+
+    /**
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
      *

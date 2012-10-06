@@ -19196,6 +19196,7 @@ package android.renderscript {
     method public void copyFrom(byte[]);
     method public void copyFrom(float[]);
     method public void copyFrom(android.graphics.Bitmap);
+    method public void copyFrom(android.renderscript.Allocation);
     method public void copyFromUnchecked(int[]);
     method public void copyFromUnchecked(short[]);
     method public void copyFromUnchecked(byte[]);
