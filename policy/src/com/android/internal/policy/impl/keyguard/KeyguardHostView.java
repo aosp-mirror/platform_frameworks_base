@@ -266,17 +266,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         dialog.show();
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_UP
-                && event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                && mCurrentSecuritySelection != SecurityMode.None) {
-            mCallback.dismiss(false);
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
-    }
-
     private void showTimeoutDialog() {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
         int messageId = 0;
@@ -857,6 +846,14 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     public void goToUserSwitcher() {
         mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
+    }
+
+    public boolean handleBackKey() {
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            mCallback.dismiss(false);
+            return true;
+        }
+        return false;
     }
 
 }
