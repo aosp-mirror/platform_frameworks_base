@@ -2076,7 +2076,7 @@ status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     setupDrawShader();
     setupDrawBlending(isAA, mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity();
+    setupDrawModelViewIdentity(true);
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderIdentityUniforms();
