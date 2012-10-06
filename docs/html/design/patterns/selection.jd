@@ -78,6 +78,13 @@ selected data items of the same kind.</p>
   </div>
 </div>
 
+<div class="note develop">
+<p><strong>Developer Guide</strong></p>
+  <p>For information about how to create a contextual action bar, read
+  <a href="{@docRoot}guide/topics/ui/menus.html#CAB">Using the contextual action mode</a>.</p>
+</div>
+
+
 <h2 id="checklist">Checklist</h2>
 
 <ul>
