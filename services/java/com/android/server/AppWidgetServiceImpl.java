@@ -87,6 +87,8 @@ class AppWidgetServiceImpl {
     private static final String SETTINGS_FILENAME = "appwidgets.xml";
     private static final int MIN_UPDATE_PERIOD = 30 * 60 * 1000; // 30 minutes
 
+    private static boolean DBG = false;
+
     /*
      * When identifying a Host or Provider based on the calling process, use the uid field. When
      * identifying a Host or Provider based on a package manager broadcast, use the package given.
@@ -208,7 +210,12 @@ class AppWidgetServiceImpl {
         }
     }
 
+    private void log(String msg) {
+        Slog.i(TAG, "u=" + mUserId + ": " + msg);
+    }
+
     void onConfigurationChanged() {
+        if (DBG) log("Got onConfigurationChanged()");
         Locale revised = Locale.getDefault();
         if (revised == null || mLocale == null || !(revised.equals(mLocale))) {
             mLocale = revised;
@@ -235,6 +242,7 @@ class AppWidgetServiceImpl {
     }
 
     void onBroadcastReceived(Intent intent) {
+        if (DBG) log("onBroadcast " + intent);
         final String action = intent.getAction();
         boolean added = false;
         boolean changed = false;
@@ -425,7 +433,8 @@ class AppWidgetServiceImpl {
             mAppWidgetIds.add(id);
 
             saveStateLocked();
-
+            if (DBG) log("Allocating AppWidgetId for " + packageName + " host=" + hostId
+                    + " id=" + appWidgetId);
             return appWidgetId;
         }
     }
@@ -518,6 +527,7 @@ class AppWidgetServiceImpl {
     }
 
     void cancelBroadcasts(Provider p) {
+        if (DBG) log("cancelBroadcasts for " + p);
         if (p.broadcast != null) {
             mAlarmManager.cancel(p.broadcast);
             long token = Binder.clearCallingIdentity();
@@ -531,6 +541,8 @@ class AppWidgetServiceImpl {
     }
 
     private void bindAppWidgetIdImpl(int appWidgetId, ComponentName provider, Bundle options) {
+        if (DBG) log("bindAppWidgetIdImpl appwid=" + appWidgetId
+                + " provider=" + provider);
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mAppWidgetIds) {
@@ -825,12 +837,14 @@ class AppWidgetServiceImpl {
     }
 
     public RemoteViews getAppWidgetViews(int appWidgetId) {
+        if (DBG) log("getAppWidgetViews id=" + appWidgetId);
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
             if (id != null) {
                 return cloneIfLocalBinder(id.views);
             }
+            if (DBG) log("   couldn't find appwidgetid");
             return null;
         }
     }
@@ -854,7 +868,7 @@ class AppWidgetServiceImpl {
         if (appWidgetIds == null) {
             return;
         }
-
+        if (DBG) log("updateAppWidgetIds views: " + views);
         int bitmapMemoryUsage = 0;
         if (views != null) {
             bitmapMemoryUsage = views.estimateMemoryUsage();
@@ -1280,8 +1294,8 @@ class AppWidgetServiceImpl {
             intent.setComponent(p.info.provider);
             long token = Binder.clearCallingIdentity();
             try {
-                p.broadcast = PendingIntent.getBroadcast(mContext, 1, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                p.broadcast = PendingIntent.getBroadcastAsUser(mContext, 1, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT, new UserHandle(mUserId));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1353,7 +1367,7 @@ class AppWidgetServiceImpl {
             p.uid = activityInfo.applicationInfo.uid;
 
             Resources res = mContext.getPackageManager()
-                    .getResourcesForApplication(activityInfo.applicationInfo);
+                    .getResourcesForApplicationAsUser(activityInfo.packageName, mUserId);
 
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.AppWidgetProviderInfo);
@@ -1597,8 +1611,7 @@ class AppWidgetServiceImpl {
 
                         final IPackageManager packageManager = AppGlobals.getPackageManager();
                         try {
-                            packageManager.getReceiverInfo(new ComponentName(pkg, cl), 0,
-                                    UserHandle.getCallingUserId());
+                            packageManager.getReceiverInfo(new ComponentName(pkg, cl), 0, mUserId);
                         } catch (RemoteException e) {
                             String[] pkgs = mContext.getPackageManager()
                                     .currentToCanonicalPackageNames(new String[] { pkg });
