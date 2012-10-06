@@ -16,6 +16,19 @@
 
 package com.android.systemui.statusbar.phone;
 
+import com.android.internal.view.RotationPolicy;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BrightnessController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.ToggleSlider;
+
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,41 +42,35 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Loader;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.Profile;
 import android.provider.Settings;
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.android.internal.view.RotationPolicy;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
-import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.BrightnessController;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.ToggleSlider;
 
 import java.util.ArrayList;
 
@@ -72,6 +79,7 @@ import java.util.ArrayList;
  *
  */
 class QuickSettings {
+    private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
 
     private Context mContext;
@@ -91,10 +99,12 @@ class QuickSettings {
     private int mBrightnessDialogShortTimeout;
     private int mBrightnessDialogLongTimeout;
 
-    private CursorLoader mUserInfoLoader;
+    private AsyncTask<Void, Void, Pair<String, BitmapDrawable>> mUserInfoTask;
 
     private LevelListDrawable mBatteryLevels;
     private LevelListDrawable mChargingBatteryLevels;
+
+    boolean mTilesSetUp = false;
 
     private Handler mHandler;
 
@@ -132,7 +142,14 @@ class QuickSettings {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mReceiver, filter);
+
+        IntentFilter profileFilter = new IntentFilter();
+        profileFilter.addAction(ContactsContract.Intents.ACTION_PROFILE_CHANGED);
+        profileFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
+        mContext.registerReceiverAsUser(mProfileReceiver, UserHandle.ALL, profileFilter,
+                null, null);
     }
 
     void setBar(PanelBar bar) {
@@ -168,47 +185,51 @@ class QuickSettings {
     }
 
     private void queryForUserInformation() {
-        System.out.println("queryForUserInformation");
+        Context currentUserContext = null;
+        UserInfo userInfo = null;
+        try {
+            userInfo = ActivityManagerNative.getDefault().getCurrentUser();
+            currentUserContext = mContext.createPackageContextAsUser("android", 0,
+                    new UserHandle(userInfo.id));
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Couldn't create user context", e);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't get user info", e);
+        }
+        final int userId = userInfo.id;
 
-        Uri userContactUri = Uri.withAppendedPath(
-            ContactsContract.Profile.CONTENT_URI,
-            ContactsContract.Contacts.Data.CONTENT_DIRECTORY);
+        final Context context = currentUserContext;
+        mUserInfoTask = new AsyncTask<Void, Void, Pair<String, BitmapDrawable>>() {
+            @Override
+            protected Pair<String, BitmapDrawable> doInBackground(Void... params) {
+                Cursor cursor = context.getContentResolver().query(
+                        Profile.CONTENT_URI, new String[] {Phone._ID, Phone.DISPLAY_NAME},
+                        null, null, null);
 
-        String[] selectArgs = {
-            ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Photo.PHOTO
-        };
-        String where = String.format("(%s = ? OR %s = ?) AND %s IS NULL",
-            ContactsContract.Contacts.Data.MIMETYPE,
-            ContactsContract.Contacts.Data.MIMETYPE,
-            ContactsContract.RawContacts.ACCOUNT_TYPE);
-        String[] whereArgs = {
-            ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
-            ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE
-        };
-
-        mUserInfoLoader = new CursorLoader(mContext, userContactUri, selectArgs, where, whereArgs,
-                null);
-        mUserInfoLoader.registerListener(0,
-                new Loader.OnLoadCompleteListener<Cursor>() {
-                    @Override
-                    public void onLoadComplete(Loader<Cursor> loader,
-                            Cursor cursor) {
-                        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                        if (cursor != null && cursor.moveToFirst()) {
-                            String name = cursor.getString(0); // DISPLAY_NAME
-                            BitmapDrawable d = new BitmapDrawable(userManager.getUserIcon(userManager.getUserHandle()));
-                            mModel.setUserTileInfo(name, d);
-                            /*
-                            byte[] photoData = cursor.getBlob(0);
-                            Bitmap b =
-                                BitmapFactory.decodeByteArray(photoData, 0, photoData.length);
-                             */
-                        }
-                        mUserInfoLoader.stopLoading();
+                String name = null;
+                try {
+                    if (cursor.moveToFirst()) {
+                        name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
                     }
-                });
-        mUserInfoLoader.startLoading();
+                } finally {
+                    cursor.close();
+                }
+                final UserManager userManager =
+                    (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                final BitmapDrawable icon = new BitmapDrawable(mContext.getResources(),
+                        userManager.getUserIcon(userId));
+                return new Pair<String, BitmapDrawable>(name, icon);
+            }
+
+            @Override
+            protected void onPostExecute(Pair<String, BitmapDrawable> result) {
+                super.onPostExecute(result);
+                mModel.setUserTileInfo(result.first, result.second);
+                mUserInfoTask = null;
+            }
+        };
+        mUserInfoTask.execute();
     }
 
     private void setupQuickSettings() {
@@ -220,6 +241,7 @@ class QuickSettings {
         addTemporaryTiles(mContainerView, inflater);
 
         queryForUserInformation();
+        mTilesSetUp = true;
     }
 
     private void startSettingsActivity(String action) {
@@ -251,10 +273,21 @@ class QuickSettings {
             @Override
             public void onClick(View v) {
                 mBar.collapseAllPanels(true);
-                Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(mContext,
-                        v, ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.QuickContact.MODE_LARGE, null);
-                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                final UserManager um =
+                        (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                if (um.getUsers().size() > 1) {
+                    try {
+                        WindowManagerGlobal.getWindowManagerService().lockNow(
+                                LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Couldn't show user switcher", e);
+                    }
+                } else {
+                    Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
+                            mContext, v, ContactsContract.Profile.CONTENT_URI,
+                            ContactsContract.QuickContact.MODE_LARGE, null);
+                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                }
             }
         });
         mModel.addUserTile(userTile, new QuickSettingsModel.RefreshCallback() {
@@ -747,20 +780,50 @@ class QuickSettings {
         mModel.onBluetoothStateChange(mBluetoothState);
     }
 
+    void reloadUserInfo() {
+        if (mUserInfoTask != null) {
+            mUserInfoTask.cancel(false);
+            mUserInfoTask = null;
+        }
+        if (mTilesSetUp) {
+            queryForUserInformation();
+        }
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
+            final String action = intent.getAction();
+            if (DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED.equals(action)) {
                 WifiDisplayStatus status = (WifiDisplayStatus)intent.getParcelableExtra(
                         DisplayManager.EXTRA_WIFI_DISPLAY_STATUS);
                 mWifiDisplayStatus = status;
                 applyWifiDisplayStatus();
-            }
-            if (intent.getAction().equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+            } else if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
                 int status = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                         BluetoothAdapter.STATE_DISCONNECTED);
                 mBluetoothState.connected = (status == BluetoothAdapter.STATE_CONNECTED);
                 applyBluetoothStatus();
+            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                reloadUserInfo();
+            }
+        }
+    };
+
+    private final BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (ContactsContract.Intents.ACTION_PROFILE_CHANGED.equals(action) ||
+                    Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
+                try {
+                    final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+                    if (getSendingUserId() == userId) {
+                        reloadUserInfo();
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Couldn't get current user id for profile change", e);
+                }
             }
         }
     };
