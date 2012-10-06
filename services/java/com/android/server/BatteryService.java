@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.DropBoxManager;
 import android.os.RemoteException;
@@ -66,6 +67,14 @@ import java.io.PrintWriter;
  * <p>&quot;temperature&quot; - int, current battery temperature in tenths of
  * a degree Centigrade</p>
  * <p>&quot;technology&quot; - String, the type of battery installed, e.g. "Li-ion"</p>
+ *
+ * <p>
+ * The battery service may be called by the power manager while holding its locks so
+ * we take care to post all outcalls into the activity manager to a handler.
+ *
+ * FIXME: Ideally the power manager would perform all of its calls into the battery
+ * service asynchronously itself.
+ * </p>
  */
 public final class BatteryService extends Binder {
     private static final String TAG = BatteryService.class.getSimpleName();
@@ -89,6 +98,7 @@ public final class BatteryService extends Binder {
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
+    private final Handler mHandler;
 
     private final Object mLock = new Object();
 
@@ -137,6 +147,7 @@ public final class BatteryService extends Binder {
 
     public BatteryService(Context context, LightsService lights) {
         mContext = context;
+        mHandler = new Handler(true /*async*/);
         mLed = new Led(context, lights);
         mBatteryStats = BatteryStatsService.getService();
 
@@ -228,12 +239,18 @@ public final class BatteryService extends Binder {
     private void shutdownIfNoPowerLocked() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
-        if (mBatteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)
-                && ActivityManagerNative.isSystemReady()) {
-            Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
-            intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        if (mBatteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (ActivityManagerNative.isSystemReady()) {
+                        Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+                        intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    }
+                }
+            });
         }
     }
 
@@ -241,12 +258,18 @@ public final class BatteryService extends Binder {
         // shut down gracefully if temperature is too high (> 68.0C by default)
         // wait until the system has booted before attempting to display the
         // shutdown dialog.
-        if (mBatteryTemperature > mShutdownBatteryTemperature
-                && ActivityManagerNative.isSystemReady()) {
-            Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
-            intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        if (mBatteryTemperature > mShutdownBatteryTemperature) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (ActivityManagerNative.isSystemReady()) {
+                        Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+                        intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    }
+                }
+            });
         }
     }
 
@@ -373,25 +396,47 @@ public final class BatteryService extends Binder {
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
-            Intent statusIntent = new Intent();
-            statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (mPlugType != 0 && mLastPlugType == 0) {
-                statusIntent.setAction(Intent.ACTION_POWER_CONNECTED);
-                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent statusIntent = new Intent(Intent.ACTION_POWER_CONNECTED);
+                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                    }
+                });
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
-                statusIntent.setAction(Intent.ACTION_POWER_DISCONNECTED);
-                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent statusIntent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
+                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                    }
+                });
             }
 
             if (sendBatteryLow) {
                 mSentLowBatteryBroadcast = true;
-                statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
-                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent statusIntent = new Intent(Intent.ACTION_BATTERY_LOW);
+                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                    }
+                });
             } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
-                statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
-                mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
+                        statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL);
+                    }
+                });
             }
 
             // Update the battery LED
@@ -416,7 +461,7 @@ public final class BatteryService extends Binder {
 
     private void sendIntentLocked() {
         //  Pack up the values and broadcast them to everyone
-        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        final Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
@@ -446,7 +491,12 @@ public final class BatteryService extends Binder {
                     ", icon:" + icon  + ", invalid charger:" + mInvalidCharger);
         }
 
-        ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ActivityManagerNative.broadcastStickyIntent(intent, null, UserHandle.USER_ALL);
+            }
+        });
     }
 
     private void logBatteryStatsLocked() {
