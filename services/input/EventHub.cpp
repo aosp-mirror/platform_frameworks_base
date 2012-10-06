@@ -787,6 +787,40 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         event->when = nsecs_t(iev.time.tv_sec) * 1000000000LL
                                 + nsecs_t(iev.time.tv_usec) * 1000LL;
                         ALOGV("event time %lld, now %lld", event->when, now);
+
+                        // Bug 7291243: Add a guard in case the kernel generates timestamps
+                        // that appear to be far into the future because they were generated
+                        // using the wrong clock source.
+                        //
+                        // This can happen because when the input device is initially opened
+                        // it has a default clock source of CLOCK_REALTIME.  Any input events
+                        // enqueued right after the device is opened will have timestamps
+                        // generated using CLOCK_REALTIME.  We later set the clock source
+                        // to CLOCK_MONOTONIC but it is already too late.
+                        //
+                        // Invalid input event timestamps can result in ANRs, crashes and
+                        // and other issues that are hard to track down.  We must not let them
+                        // propagate through the system.
+                        //
+                        // Log a warning so that we notice the problem and recover gracefully.
+                        if (event->when >= now + 10 * 1000000000LL) {
+                            // Double-check.  Time may have moved on.
+                            nsecs_t time = systemTime(SYSTEM_TIME_MONOTONIC);
+                            if (event->when > time) {
+                                ALOGW("An input event from %s has a timestamp that appears to "
+                                        "have been generated using the wrong clock source "
+                                        "(expected CLOCK_MONOTONIC): "
+                                        "event time %lld, current time %lld, call time %lld.  "
+                                        "Using current time instead.",
+                                        device->path.string(), event->when, time, now);
+                                event->when = time;
+                            } else {
+                                ALOGV("Event time is ok but failed the fast path and required "
+                                        "an extra call to systemTime: "
+                                        "event time %lld, current time %lld, call time %lld.",
+                                        event->when, time, now);
+                            }
+                        }
 #else
                         event->when = now;
 #endif
