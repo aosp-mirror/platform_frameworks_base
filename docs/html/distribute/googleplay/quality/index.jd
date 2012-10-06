@@ -1,0 +1,45 @@
+page.title=App Quality
+@jd:body
+
+<p>App quality directly influences the long-term success of your app&mdash;in
+terms of installs, user rating and reviews, engagement, and user retention.
+Android users expect high-quality apps, even more so if they've spent money on
+them. At the same time, users enjoy and value apps that put a priority on
+continuous improvement. </p>
+
+<p>Before you publish an app on Google Play, it's important to make sure that
+your app meets the basic quality expectations of users, across all of the form
+factors and device types that the app is targeting. The documents in this
+section help you assess your app's fundamental quality and address any
+issues that you find. </p>
+
+<div class="vspace size-1">
+  &nbsp;
+</div>
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+    <h4>
+      Core App Quality
+    </h4>
+    <p>
+      A set of core quality criteria that all Android apps should meet on all targeted devices.
+    </p><a href="{@docRoot}distribute/googleplay/quality/core.html">Learn more »</a>
+  </div>
+  <div class="layout-content-col span-4">
+    <h4>
+      Tablet App Quality
+    </h4>
+    <p>
+      A set recommendations for delivering the best possible experience to tablet users.
+    </p><a href="{@docRoot}distribute/googleplay/quality/tablet.html">Learn more »</a>
+  </div>
+  <div class="layout-content-col span-4">
+    <h4>
+      Improving App Quality
+    </h4>
+    <p>
+      Tips on continuously improving your app's quality, ratings, reviews, downloads, and engagement.
+    </p><a href="{@docRoot}distribute/googleplay/strategies/app-quality.html">Learn more
+    »</a>
+  </div>
+</div>
