@@ -846,7 +846,6 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private static final class DisplayContentObserver {
 
         private static final int MESSAGE_SHOW_VIEWPORT_FRAME = 1;
-        private static final int MESSAGE_RECOMPUTE_VIEWPORT_BOUNDS = 2;
         private static final int MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 3;
         private static final int MESSAGE_ON_WINDOW_TRANSITION = 4;
         private static final int MESSAGE_ON_ROTATION_CHANGED = 5;
@@ -892,7 +891,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                                 || info.type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
                             && (transition == WindowManagerPolicy.TRANSIT_EXIT
                                 || transition == WindowManagerPolicy.TRANSIT_HIDE)) {
-                        mHandler.sendMessageDelayed(message, mLongAnimationDuration);
+                        final long delay = (long) (2 * mLongAnimationDuration
+                                * mWindowAnimationScale);
+                        mHandler.sendMessageDelayed(message, delay);
                     } else {
                         message.sendToTarget();
                     }
@@ -1169,10 +1170,6 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 switch (action) {
                     case MESSAGE_SHOW_VIEWPORT_FRAME: {
                         mViewport.setFrameShown(true, true);
-                    } break;
-                    case MESSAGE_RECOMPUTE_VIEWPORT_BOUNDS: {
-                        final boolean animate = message.arg1 == 1;
-                        mViewport.recomputeBounds(animate);
                     } break;
                     case MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED: {
                         SomeArgs args = (SomeArgs) message.obj;
@@ -1526,8 +1523,10 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             Rect magnifiedFrame = mTempRect1;
             magnifiedFrame.set(0, 0, 0, 0);
 
-            Rect notMagnifiedFrame = mTempRect2;
-            notMagnifiedFrame.set(0, 0, 0, 0);
+            DisplayInfo displayInfo = mDisplayProvider.getDisplayInfo();
+
+            Rect availableFrame = mTempRect2;
+            availableFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
             ArrayList<WindowInfo> infos = mTempWindowInfoList;
             infos.clear();
@@ -1542,18 +1541,16 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     if (info.type == WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY) {
                         continue;
                     }
+                    Rect windowFrame = mTempRect3;
+                    windowFrame.set(info.touchableRegion);
                     if (isWindowMagnified(info.type)) {
-                        Rect clippedFrame = mTempRect3;
-                        clippedFrame.set(info.touchableRegion);
-                        subtract(clippedFrame, notMagnifiedFrame);
-                        magnifiedFrame.union(clippedFrame);
+                        magnifiedFrame.union(windowFrame);
+                        magnifiedFrame.intersect(availableFrame);
                     } else {
-                        Rect clippedFrame = mTempRect3;
-                        clippedFrame.set(info.touchableRegion);
-                        subtract(clippedFrame, magnifiedFrame);
-                        notMagnifiedFrame.union(clippedFrame);
+                        subtract(windowFrame, magnifiedFrame);
+                        subtract(availableFrame, windowFrame);
                     }
-                    if (magnifiedFrame.bottom >= notMagnifiedFrame.top) {
+                    if (availableFrame.equals(magnifiedFrame)) {
                         break;
                     }
                 }
