@@ -971,11 +971,10 @@ public class Allocation extends BaseObj {
      *
      * A new type will be created with the new dimension.
      *
-     * @hide
      * @param dimX The new size of the allocation.
      * @param dimY The new size of the allocation.
      */
-    public void resize(int dimX, int dimY) {
+    public synchronized void resize(int dimX, int dimY) {
         if ((mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException(
                 "Resize only support for 2D allocations at this time.");
