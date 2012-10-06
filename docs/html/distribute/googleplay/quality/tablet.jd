@@ -25,7 +25,7 @@ page.title=Tablet App Quality Checklist
 
 
 <p>Before you publish an app on Google Play, it's important to make sure that
-the app meets the basic expectations of tablet users, through compelling features
+the app meets the basic expectations of tablet users through compelling features
 and an intuitive, well-designed UI. </p>
 
 <p>Tablets are a growing part of the Android installed base that offers new
@@ -60,6 +60,18 @@ and tablet app quality &mdash; you need to set up a suitable
 hardware or emulator environment for testing. For more information, 
 see <a href="#test-environment">Setting Up a Test Environment</a>.</p>
 
+<table>
+<tr>
+<td><p>Related resources:</p>
+<ul style="margin-top:-.5em;">
+<li><strong><a
+href="{@docRoot}distribute/googleplay/quality/core.html">Core App Quality
+Guidelines</a></strong> &mdash; A set of core quality criteria that all Android
+apps should meet on all targeted devices.</li>
+</ul>
+</td>
+</tr>
+</table>
 
 <h2 id="optimize-layouts">2. Optimize your layouts for larger screens</h2>
 
@@ -494,6 +506,7 @@ highlights the use of your app on tablets.</li>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
+<li><strong><a href="https://play.google.com/apps/publish/">Publishing Checklist</a></strong> &mdash; Recommendations on how to prepare your app for publishing, test it, and launch successfully on Google Play.</li>
 <li><strong><a href="https://play.google.com/apps/publish/">Google Play Android Developer Console</a></strong> &mdash; The tools console for publishing your app to Android users.</li>
 </ul>
 </td>
