@@ -956,8 +956,9 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
     size_t numMappers = mMappers.size();
     for (const RawEvent* rawEvent = rawEvents; count--; rawEvent++) {
 #if DEBUG_RAW_EVENTS
-        ALOGD("Input event: device=%d type=0x%04x code=0x%04x value=0x%08x",
-                rawEvent->deviceId, rawEvent->type, rawEvent->code, rawEvent->value);
+        ALOGD("Input event: device=%d type=0x%04x code=0x%04x value=0x%08x when=%lld",
+                rawEvent->deviceId, rawEvent->type, rawEvent->code, rawEvent->value,
+                rawEvent->when);
 #endif
 
         if (mDropUntilNextSync) {
