@@ -643,6 +643,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return mSecurityPolicy.mActiveWindowId;
     }
 
+    void onTouchInteractionEnd() {
+        mSecurityPolicy.onTouchInteractionEnd();
+    }
+
     private void switchUser(int userId) {
         synchronized (mLock) {
             // The user switched so we do not need to restore the current user
@@ -2178,14 +2182,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         mActiveWindowId = windowId;
                     }
                 } break;
-                case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
-                case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
+                case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER: {
                     mActiveWindowId = windowId;
                 } break;
-                case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END: {
-                    mActiveWindowId = getFocusedWindowId();
-                } break;
             }
+        }
+
+        public void onTouchInteractionEnd() {
+            // We want to set the active window to be current immediately
+            // after the user has stopped touching the screen since if the
+            // user types with the IME he should get a feedback for the
+            // letter typed in the text view which is in the input focused
+            // window. Note that we always deliver hover accessibility events
+            // (they are a result of user touching the screen) so change of
+            // the active window before all hover accessibility events from
+            // the touched window are delivered is fine.
+            mActiveWindowId = getFocusedWindowId();
         }
 
         public int getRetrievalAllowingWindowLocked() {
