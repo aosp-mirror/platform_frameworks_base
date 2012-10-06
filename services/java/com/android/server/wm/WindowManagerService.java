@@ -8237,7 +8237,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int seq = mLayoutSeq+1;
         if (seq < 0) seq = 0;
         mLayoutSeq = seq;
-        
+
+        boolean behindDream = false;
+
         // First perform layout of any root windows (not attached
         // to another window).
         int topAttached = -1;
@@ -8247,7 +8249,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // Don't do layout of a window if it is not visible, or
             // soon won't be visible, to avoid wasting time and funky
             // changes while a window is animating away.
-            final boolean gone = win.isGoneForLayoutLw();
+            final boolean gone = (behindDream && mPolicy.canBeForceHidden(win, win.mAttrs))
+                    || win.isGoneForLayoutLw();
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
                 Slog.v(TAG, "1ST PASS " + win
@@ -8282,6 +8285,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
+                    if (win.mAttrs.type == TYPE_DREAM) {
+                        // Don't layout windows behind a dream, so that if it
+                        // does stuff like hide the status bar we won't get a
+                        // bad transition when it goes away.
+                        behindDream = true;
+                    }
                     win.mLayoutNeeded = false;
                     win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
@@ -8306,6 +8315,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimator.mUniverseBackground = universeBackground;
         }
 
+        boolean attachedBehindDream = false;
+
         // Now perform layout of attached windows, which usually
         // depend on the position of the window they are attached to.
         // XXX does not deal with windows that are attached to windows
@@ -8323,6 +8334,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 // if they want.  (We do the normal layout for INVISIBLE
                 // windows, since that means "perform layout as normal,
                 // just don't display").
+                if (attachedBehindDream && mPolicy.canBeForceHidden(win, win.mAttrs)) {
+                    continue;
+                }
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                         || !win.mHaveFrame || win.mLayoutNeeded) {
                     if (initial) {
@@ -8338,6 +8352,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             + win.mContainingFrame + " mDisplayFrame="
                             + win.mDisplayFrame);
                 }
+            } else if (win.mAttrs.type == TYPE_DREAM) {
+                // Don't layout windows behind a dream, so that if it
+                // does stuff like hide the status bar we won't get a
+                // bad transition when it goes away.
+                attachedBehindDream = behindDream;
             }
         }
         

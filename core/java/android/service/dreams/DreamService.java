@@ -22,6 +22,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -401,6 +402,9 @@ public class DreamService extends Service implements Window.Callback {
      * Sets View.SYSTEM_UI_FLAG_LOW_PROFILE on the content view.
      *
      * @param lowProfile True to set View.SYSTEM_UI_FLAG_LOW_PROFILE
+     * @hide There is no reason to have this -- dreams can set this flag
+     * on their own content view, and from there can actually do the
+     * correct interactions with it (seeing when it is cleared etc).
      */
     public void setLowProfile(boolean lowProfile) {
         mLowProfile = lowProfile;
@@ -412,20 +416,23 @@ public class DreamService extends Service implements Window.Callback {
      * Returns whether or not this dream is in low profile mode. Defaults to true.
      *
      * @see #setLowProfile(boolean)
+     * @hide
      */
     public boolean isLowProfile() {
         return getSystemUiVisibilityFlagValue(View.SYSTEM_UI_FLAG_LOW_PROFILE, mLowProfile);
     }
 
     /**
-     * Sets View.SYSTEM_UI_FLAG_FULLSCREEN on the content view.
+     * Controls {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}
+     * on the dream's window.
      *
-     * @param fullscreen True to set View.SYSTEM_UI_FLAG_FULLSCREEN
+     * @param fullscreen If true, the fullscreen flag will be set; else it
+     * will be cleared.
      */
     public void setFullscreen(boolean fullscreen) {
         mFullscreen = fullscreen;
-        int flag = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        applySystemUiVisibilityFlags(mFullscreen ? flag : 0, flag);
+        int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        applyWindowFlags(mFullscreen ? flag : 0, flag);
     }
 
     /**
@@ -434,7 +441,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #setFullscreen(boolean)
      */
     public boolean isFullscreen() {
-        return getSystemUiVisibilityFlagValue(View.SYSTEM_UI_FLAG_FULLSCREEN, mFullscreen);
+        return mFullscreen;
     }
 
     /**
@@ -565,6 +572,7 @@ public class DreamService extends Service implements Window.Callback {
         mWindow.setCallback(this);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
+        mWindow.setFormat(PixelFormat.OPAQUE);
 
         if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
                 windowToken, WindowManager.LayoutParams.TYPE_DREAM));
@@ -573,9 +581,12 @@ public class DreamService extends Service implements Window.Callback {
         lp.type = WindowManager.LayoutParams.TYPE_DREAM;
         lp.token = windowToken;
         lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
-        lp.flags |= ( WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+        lp.flags |= ( WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                     | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+                    | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
                     | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
                     );
         mWindow.setAttributes(lp);
@@ -588,9 +599,8 @@ public class DreamService extends Service implements Window.Callback {
         if (mDebug) Slog.v(TAG, "Window added on thread " + Thread.currentThread().getId());
         try {
             applySystemUiVisibilityFlags(
-                    (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0)
-                  | (mFullscreen ? View.SYSTEM_UI_FLAG_FULLSCREEN : 0),
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN);
+                    (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
+                    View.SYSTEM_UI_FLAG_LOW_PROFILE);
             getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
         } catch (Throwable t) {
             Slog.w("Crashed adding window view", t);
