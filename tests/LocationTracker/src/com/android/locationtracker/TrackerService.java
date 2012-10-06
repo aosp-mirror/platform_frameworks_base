@@ -16,8 +16,6 @@
 
 package com.android.locationtracker;
 
-import com.android.locationtracker.data.TrackerDataHelper;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +26,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -43,10 +42,9 @@ import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import com.android.locationtracker.data.TrackerDataHelper;
+
 import java.util.List;
-import java.util.Set;
 
 /**
  * Location Tracking service
@@ -56,12 +54,9 @@ import java.util.Set;
  */
 public class TrackerService extends Service {
 
-    private List<LocationTrackingListener> mListeners;
+    private LocationTrackingListener mListener;
 
     private static final String LOG_TAG = TrackerActivity.LOG_TAG;
-
-    // controls which location providers to track
-    private Set<String> mTrackedProviders;
 
     private TrackerDataHelper mTrackerData;
 
@@ -79,7 +74,7 @@ public class TrackerService extends Service {
 
     // preference constants
     private static final String MIN_TIME_PREF = "mintime_preference";
-    private static final String MIN_DIS_PREF = "mindistance_preference";
+    private static final String POWER_PREF = "power_preference";
     private static final String GPS_PREF = "gps_preference";
     private static final String NETWORK_PREF = "network_preference";
     private static final String SIGNAL_PREF = "signal_preference";
@@ -103,43 +98,34 @@ public class TrackerService extends Service {
      * @param startId
      */
     @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
         mNetworkLocation = null;
 
         initLocationListeners();
         Toast.makeText(this, "Tracking service started", Toast.LENGTH_SHORT);
+        return START_STICKY;
     }
 
     private synchronized void initLocationListeners() {
         mTrackerData = new TrackerDataHelper(this);
+
+        mListener = new LocationTrackingListener();
         LocationManager lm = getLocationManager();
 
-        mTrackedProviders = getTrackedProviders();
-
-        List<String> locationProviders = lm.getAllProviders();
-        mListeners = new ArrayList<LocationTrackingListener>(
-                locationProviders.size());
-
         long minUpdateTime = getLocationUpdateTime();
-        float minDistance = getLocationMinDistance();
-
-        for (String providerName : locationProviders) {
-            if (mTrackedProviders.contains(providerName)) {
-                Log.d(LOG_TAG, "Adding location listener for provider " +
-                        providerName);
-                if (doDebugLogging()) {
-                    mTrackerData.writeEntry("init", String.format(
-                            "start listening to %s : %d ms; %f meters",
-                            providerName, minUpdateTime, minDistance));
-                }    
-                LocationTrackingListener listener =
-                    new LocationTrackingListener();
-                lm.requestLocationUpdates(providerName, minUpdateTime,
-                        minDistance, listener);
-                mListeners.add(listener);
-            }
+        int powerConsumption = getPowerConsumption();
+        LocationRequest lr = LocationRequest.create();
+        lr.setInterval(minUpdateTime);
+        lr.setQuality(powerConsumption);
+        if (doDebugLogging()) {
+            mTrackerData.writeEntry("init", String.format(
+                    "start listening to location update : %d ms; %d power consumption",
+                     minUpdateTime, powerConsumption));
         }
+        Log.d(LOG_TAG, "Adding location listener");
+        lm.requestLocationUpdates(lr, mListener, null);
+
+
         mTelephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 
         if (doDebugLogging()) {
@@ -168,28 +154,8 @@ public class TrackerService extends Service {
         getPreferences().registerOnSharedPreferenceChangeListener(mPrefListener);
     }
 
-    private Set<String> getTrackedProviders() {
-        Set<String> providerSet = new HashSet<String>();
-
-        if (trackGPS()) {
-            providerSet.add(LocationManager.GPS_PROVIDER);
-        }
-        if (trackNetwork()) {
-            providerSet.add(LocationManager.NETWORK_PROVIDER);
-        }
-        return providerSet;
-    }
-
     private SharedPreferences getPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(this);
-    }
-
-    private boolean trackNetwork() {
-        return getPreferences().getBoolean(NETWORK_PREF, true);
-    }
-
-    private boolean trackGPS() {
-        return getPreferences().getBoolean(GPS_PREF, true);
     }
 
     private boolean doDebugLogging() {
@@ -198,17 +164,6 @@ public class TrackerService extends Service {
 
     private boolean trackSignalStrength() {
         return getPreferences().getBoolean(SIGNAL_PREF, false);
-    }
-
-    private float getLocationMinDistance() {
-        try {
-            String disString = getPreferences().getString(MIN_DIS_PREF, "0");
-            return Float.parseFloat(disString);
-        }
-        catch (NumberFormatException e) {
-            Log.e(LOG_TAG, "Invalid preference for location min distance", e);
-        }
-        return 0;
     }
 
     private long getLocationUpdateTime() {
@@ -223,6 +178,15 @@ public class TrackerService extends Service {
         return 0;
     }
 
+    private int getPowerConsumption(){
+        try {
+            String power = getPreferences().getString(POWER_PREF, "203");
+            return Integer.valueOf(power);
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "Invalid preference for power consumption", e);
+        }
+        return 203; //high
+    }
     /**
      * Shuts down this service
      */
@@ -239,19 +203,17 @@ public class TrackerService extends Service {
      */
     protected synchronized void stopListeners() {
         LocationManager lm = getLocationManager();
-        if (mListeners != null) {
-            for (LocationTrackingListener listener : mListeners) {
-                lm.removeUpdates(listener);
-            }
-            mListeners.clear();
+        if (mListener != null) {
+            lm.removeUpdates(mListener);
         }
-        mListeners = null;
+
+        mListener = null;
 
         // stop cell state listener
         if (mTelephonyManager != null) {
             mTelephonyManager.listen(mPhoneStateListener, 0);
-        }    
-        
+        }
+
         // stop network/wifi listener
         if (mNetwork != null) {
             unregisterReceiver(mNetwork);
@@ -318,7 +280,7 @@ public class TrackerService extends Service {
 
         /**
          * Writes update to tracking file
-         * 
+         *
          * @param provider - name of enabled provider
          */
         public void onProviderEnabled(String provider) {
@@ -328,8 +290,8 @@ public class TrackerService extends Service {
         }
 
         /**
-         * Writes update to tracking file 
-         * 
+         * Writes update to tracking file
+         *
          * @param provider - name of provider whose status changed
          * @param status - new status
          * @param extras - optional set of extra status messages
@@ -366,6 +328,7 @@ public class TrackerService extends Service {
             }
         }
 
+        @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             if (mTelephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
                 String updateMsg = "cdma dBM=" + signalStrength.getCdmaDbm();
