@@ -2324,7 +2324,13 @@ public final class ViewRootImpl implements ViewParent,
             mAccessibilityFocusedHost.getDrawingRect(bounds);
             if (mView instanceof ViewGroup) {
                 ViewGroup viewGroup = (ViewGroup) mView;
-                viewGroup.offsetDescendantRectToMyCoords(mAccessibilityFocusedHost, bounds);
+                try {
+                    viewGroup.offsetDescendantRectToMyCoords(mAccessibilityFocusedHost, bounds);
+                } catch (IllegalArgumentException iae) {
+                    Log.e(TAG, "Temporary detached view that was neither removed not reattached: "
+                            + mAccessibilityFocusedHost);
+                    return;
+                }
             }
         } else {
             if (mAccessibilityFocusedVirtualView == null) {
