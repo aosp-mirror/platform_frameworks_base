@@ -428,12 +428,17 @@ final class ActivityStack {
         mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
         mLaunchingActivity.setReferenceCounted(false);
     }
-    
+
+    private boolean okToShow(ActivityRecord r) {
+        return r.userId == mCurrentUser
+                || (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0;
+    }
+
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && r != notTop && r.userId == mCurrentUser) {
+            if (!r.finishing && r != notTop && okToShow(r)) {
                 return r;
             }
             i--;
@@ -445,7 +450,7 @@ final class ActivityStack {
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && !r.delayedResume && r != notTop && r.userId == mCurrentUser) {
+            if (!r.finishing && !r.delayedResume && r != notTop && okToShow(r)) {
                 return r;
             }
             i--;
@@ -468,7 +473,7 @@ final class ActivityStack {
             ActivityRecord r = mHistory.get(i);
             // Note: the taskId check depends on real taskId fields being non-zero
             if (!r.finishing && (token != r.appToken) && (taskId != r.task.taskId)
-                    && r.userId == mCurrentUser) {
+                    && okToShow(r)) {
                 return r;
             }
             i--;
@@ -1814,7 +1819,8 @@ final class ActivityStack {
                         mHistory.add(addPos, r);
                         r.putInHistory();
                         mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
-                                r.info.screenOrientation, r.fullscreen);
+                                r.info.screenOrientation, r.fullscreen,
+                                (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -1878,7 +1884,8 @@ final class ActivityStack {
             }
             r.updateOptionsLocked(options);
             mService.mWindowManager.addAppToken(
-                    addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen);
+                    addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -1916,7 +1923,8 @@ final class ActivityStack {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
             mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
-                    r.info.screenOrientation, r.fullscreen);
+                    r.info.screenOrientation, r.fullscreen,
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
         }
         if (VALIDATE_TOKENS) {
@@ -2624,7 +2632,6 @@ final class ActivityStack {
             Bundle options) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
-        final int userId = r.userId;
 
         int launchFlags = intent.getFlags();
         

@@ -1334,7 +1334,7 @@ class WindowStateAnimator {
 
     // This must be called while inside a transaction.
     boolean performShowLocked() {
-        if (mWin.isOtherUsersAppWindow()) {
+        if (mWin.isHiddenFromUserLocked()) {
             Slog.w(TAG, "current user violation " + mService.mCurrentUserId + " trying to display "
                     + this + ", type " + mWin.mAttrs.type + ", belonging to " + mWin.mOwnerUid);
             return false;
