@@ -137,6 +137,12 @@ public abstract class KeyguardViewBase extends LinearLayout {
      */
     abstract public void cleanUp();
 
+    /**
+     * Gets the desired user activity timeout in milliseconds, or -1 if the
+     * default should be used.
+     */
+    abstract public long getUserActivityTimeout();
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (interceptMediaKey(event)) {
@@ -250,5 +256,4 @@ public abstract class KeyguardViewBase extends LinearLayout {
             KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
     }
-
 }
