@@ -1694,7 +1694,8 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContext(String packageName, int flags)
             throws NameNotFoundException {
-        return createPackageContextAsUser(packageName, flags, Process.myUserHandle());
+        return createPackageContextAsUser(packageName, flags,
+                mUser != null ? mUser : Process.myUserHandle());
     }
 
     @Override
