@@ -20349,7 +20349,6 @@ package android.service.dreams {
     method public android.view.WindowManager getWindowManager();
     method public boolean isFullscreen();
     method public boolean isInteractive();
-    method public boolean isLowProfile();
     method public boolean isScreenBright();
     method public void onActionModeFinished(android.view.ActionMode);
     method public void onActionModeStarted(android.view.ActionMode);
@@ -20374,7 +20373,6 @@ package android.service.dreams {
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void setFullscreen(boolean);
     method public void setInteractive(boolean);
-    method public void setLowProfile(boolean);
     method public void setScreenBright(boolean);
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";

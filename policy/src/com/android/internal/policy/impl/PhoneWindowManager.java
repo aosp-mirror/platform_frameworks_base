@@ -182,56 +182,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
 
-    // wallpaper is at the bottom, though the window manager may move it.
-    static final int UNIVERSE_BACKGROUND_LAYER = 1;
-    static final int WALLPAPER_LAYER = 2;
-    static final int APPLICATION_LAYER = 2;
-    static final int PHONE_LAYER = 3;
-    static final int SEARCH_BAR_LAYER = 4;
-    static final int SYSTEM_DIALOG_LAYER = 5;
-    // toasts and the plugged-in battery thing
-    static final int TOAST_LAYER = 6;
-    // SIM errors and unlock.  Not sure if this really should be in a high layer.
-    static final int PRIORITY_PHONE_LAYER = 7;
-    // like the ANR / app crashed dialogs
-    static final int SYSTEM_ALERT_LAYER = 8;
-    // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 9;
-    // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 10;
-    // the keyguard; nothing on top of these can take focus, since they are
-    // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 11;
-    static final int KEYGUARD_DIALOG_LAYER = 12;
-    // used for Dreams (screensavers with TYPE_DREAM windows)
-    static final int SCREENSAVER_LAYER = 13;
-    static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
-    static final int STATUS_BAR_LAYER = 15;
-    static final int STATUS_BAR_PANEL_LAYER = 16;
-    // the on-screen volume indicator and controller shown when the user
-    // changes the device volume
-    static final int VOLUME_OVERLAY_LAYER = 17;
-    // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 18;
-    // the navigation bar, if available, shows atop most things
-    static final int NAVIGATION_BAR_LAYER = 19;
-    // some panels (e.g. search) need to show on top of the navigation bar
-    static final int NAVIGATION_BAR_PANEL_LAYER = 20;
-    // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 21;
-    // used to highlight the magnified portion of a display
-    static final int MAGNIFICATION_OVERLAY_LAYER = 22;
-    // used to simulate secondary display devices
-    static final int DISPLAY_OVERLAY_LAYER = 23;
-    // the drag layer: input for drag-and-drop is associated with this window,
-    // which sits above all other focusable windows
-    static final int DRAG_LAYER = 24;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 25;
-    static final int BOOT_PROGRESS_LAYER = 26;
-    // the (mouse) pointer layer
-    static final int POINTER_LAYER = 27;
-    static final int HIDDEN_NAV_CONSUMER_LAYER = 28;
-
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
@@ -459,8 +409,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mTopFullscreenOpaqueWindowState;
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
+    boolean mForceStatusBarFromKeyguard;
     boolean mHideLockScreen;
     boolean mDismissKeyguard;
+    boolean mNoDreamEnterAnim;
     boolean mHomePressed;
     boolean mHomeLongPressed;
     Intent mHomeIntent;
@@ -1353,70 +1305,90 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int windowTypeToLayerLw(int type) {
         if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
-            return APPLICATION_LAYER;
+            return 2;
         }
         switch (type) {
-        case TYPE_STATUS_BAR:
-            return STATUS_BAR_LAYER;
-        case TYPE_STATUS_BAR_PANEL:
-            return STATUS_BAR_PANEL_LAYER;
-        case TYPE_STATUS_BAR_SUB_PANEL:
-            return STATUS_BAR_SUB_PANEL_LAYER;
-        case TYPE_SYSTEM_DIALOG:
-            return SYSTEM_DIALOG_LAYER;
-        case TYPE_SEARCH_BAR:
-            return SEARCH_BAR_LAYER;
-        case TYPE_PHONE:
-            return PHONE_LAYER;
-        case TYPE_KEYGUARD:
-            return KEYGUARD_LAYER;
-        case TYPE_KEYGUARD_DIALOG:
-            return KEYGUARD_DIALOG_LAYER;
-        case TYPE_SYSTEM_ALERT:
-            return SYSTEM_ALERT_LAYER;
-        case TYPE_SYSTEM_ERROR:
-            return SYSTEM_ERROR_LAYER;
-        case TYPE_INPUT_METHOD:
-            return INPUT_METHOD_LAYER;
-        case TYPE_INPUT_METHOD_DIALOG:
-            return INPUT_METHOD_DIALOG_LAYER;
-        case TYPE_VOLUME_OVERLAY:
-            return VOLUME_OVERLAY_LAYER;
-        case TYPE_SYSTEM_OVERLAY:
-            return SYSTEM_OVERLAY_LAYER;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
-            return SECURE_SYSTEM_OVERLAY_LAYER;
-        case TYPE_PRIORITY_PHONE:
-            return PRIORITY_PHONE_LAYER;
-        case TYPE_TOAST:
-            return TOAST_LAYER;
-        case TYPE_WALLPAPER:
-            return WALLPAPER_LAYER;
-        case TYPE_DRAG:
-            return DRAG_LAYER;
-        case TYPE_POINTER:
-            return POINTER_LAYER;
-        case TYPE_NAVIGATION_BAR:
-            return NAVIGATION_BAR_LAYER;
-        case TYPE_NAVIGATION_BAR_PANEL:
-            return NAVIGATION_BAR_PANEL_LAYER;
-        case TYPE_BOOT_PROGRESS:
-            return BOOT_PROGRESS_LAYER;
-        case TYPE_HIDDEN_NAV_CONSUMER:
-            return HIDDEN_NAV_CONSUMER_LAYER;
-        case TYPE_DREAM:
-            return SCREENSAVER_LAYER;
         case TYPE_UNIVERSE_BACKGROUND:
-            return UNIVERSE_BACKGROUND_LAYER;
-        case TYPE_DISPLAY_OVERLAY:
-            return DISPLAY_OVERLAY_LAYER;
-        case TYPE_MAGNIFICATION_OVERLAY:
-            return MAGNIFICATION_OVERLAY_LAYER;
+            return 1;
+        case TYPE_WALLPAPER:
+            // wallpaper is at the bottom, though the window manager may move it.
+            return 2;
+        case TYPE_PHONE:
+            return 3;
+        case TYPE_SEARCH_BAR:
+            return 4;
         case TYPE_RECENTS_OVERLAY:
-            return SYSTEM_DIALOG_LAYER;
+        case TYPE_SYSTEM_DIALOG:
+            return 5;
+        case TYPE_TOAST:
+            // toasts and the plugged-in battery thing
+            return 6;
+        case TYPE_PRIORITY_PHONE:
+            // SIM errors and unlock.  Not sure if this really should be in a high layer.
+            return 7;
+        case TYPE_DREAM:
+            // used for Dreams (screensavers with TYPE_DREAM windows)
+            return 8;
+        case TYPE_SYSTEM_ALERT:
+            // like the ANR / app crashed dialogs
+            return 9;
+        case TYPE_INPUT_METHOD:
+            // on-screen keyboards and other such input method user interfaces go here.
+            return 10;
+        case TYPE_INPUT_METHOD_DIALOG:
+            // on-screen keyboards and other such input method user interfaces go here.
+            return 11;
+        case TYPE_KEYGUARD:
+            // the keyguard; nothing on top of these can take focus, since they are
+            // responsible for power management when displayed.
+            return 12;
+        case TYPE_KEYGUARD_DIALOG:
+            return 13;
+        case TYPE_STATUS_BAR_SUB_PANEL:
+            return 14;
+        case TYPE_STATUS_BAR:
+            return 15;
+        case TYPE_STATUS_BAR_PANEL:
+            return 16;
+        case TYPE_VOLUME_OVERLAY:
+            // the on-screen volume indicator and controller shown when the user
+            // changes the device volume
+            return 17;
+        case TYPE_SYSTEM_OVERLAY:
+            // the on-screen volume indicator and controller shown when the user
+            // changes the device volume
+            return 18;
+        case TYPE_NAVIGATION_BAR:
+            // the navigation bar, if available, shows atop most things
+            return 19;
+        case TYPE_NAVIGATION_BAR_PANEL:
+            // some panels (e.g. search) need to show on top of the navigation bar
+            return 20;
+        case TYPE_SYSTEM_ERROR:
+            // system-level error dialogs
+            return 21;
+        case TYPE_MAGNIFICATION_OVERLAY:
+            // used to highlight the magnified portion of a display
+            return 22;
+        case TYPE_DISPLAY_OVERLAY:
+            // used to simulate secondary display devices
+            return 23;
+        case TYPE_DRAG:
+            // the drag layer: input for drag-and-drop is associated with this window,
+            // which sits above all other focusable windows
+            return 24;
+        case TYPE_SECURE_SYSTEM_OVERLAY:
+            return 25;
+        case TYPE_BOOT_PROGRESS:
+            return 26;
+        case TYPE_POINTER:
+            // the (mouse) pointer layer
+            return 27;
+        case TYPE_HIDDEN_NAV_CONSUMER:
+            return 28;
         }
         Log.e(TAG, "Unknown window type: " + type);
-        return APPLICATION_LAYER;
+        return 2;
     }
 
     /** {@inheritDoc} */
@@ -1437,11 +1409,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getMaxWallpaperLayer() {
-        return STATUS_BAR_LAYER;
+        return windowTypeToLayerLw(TYPE_STATUS_BAR);
     }
 
     public int getAboveUniverseLayer() {
-        return SYSTEM_ERROR_LAYER;
+        return windowTypeToLayerLw(TYPE_SYSTEM_ERROR);
     }
 
     public boolean hasSystemNavBar() {
@@ -1493,11 +1465,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD;
     }
-    
+
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
                 && attrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
                 && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER
+                && attrs.type != WindowManager.LayoutParams.TYPE_DREAM
                 && attrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
     }
 
@@ -1730,6 +1703,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (PRINT_ANIM) Log.i(TAG, "**** STARTING EXIT");
                 return com.android.internal.R.anim.app_starting_exit;
             }
+        } else if (win.getAttrs().type == TYPE_DREAM && mNoDreamEnterAnim
+                && transit == TRANSIT_ENTER) {
+            // Special case: we are animating in a dream, while the keyguard
+            // is shown.  We don't want an animation on the dream, because
+            // we need it shown immediately with the keyguard animating away
+            // to reveal it.
+            return -1;
         }
 
         return 0;
@@ -2919,10 +2899,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
+        mForceStatusBarFromKeyguard = false;
         
         mHideLockScreen = false;
         mAllowLockscreenWhenOn = false;
         mDismissKeyguard = false;
+        mNoDreamEnterAnim = false;
     }
 
     /** {@inheritDoc} */
@@ -2933,7 +2915,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
-                mForceStatusBar = true;
+                if (attrs.type == TYPE_KEYGUARD) {
+                    mForceStatusBarFromKeyguard = true;
+                } else {
+                    mForceStatusBar = true;
+                }
+            }
+            if (attrs.type == TYPE_KEYGUARD) {
+                mNoDreamEnterAnim = true;
             }
             if (((attrs.type >= FIRST_APPLICATION_WINDOW && attrs.type <= LAST_APPLICATION_WINDOW)
                         || attrs.type == TYPE_DREAM)
@@ -2942,13 +2931,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
+                if (attrs.type == TYPE_DREAM) {
+                    mNoDreamEnterAnim = true;
+                }
                 if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-                    if (localLOGV) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
                     mHideLockScreen = true;
+                    mForceStatusBarFromKeyguard = false;
                 }
                 if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
-                    if (localLOGV) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
                     mDismissKeyguard = true;
+                    mForceStatusBarFromKeyguard = false;
                 }
                 if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                     mAllowLockscreenWhenOn = true;
@@ -2968,8 +2962,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mStatusBar != null) {
             if (DEBUG_LAYOUT) Log.i(TAG, "force=" + mForceStatusBar
+                    + " forcefkg=" + mForceStatusBarFromKeyguard
                     + " top=" + mTopFullscreenOpaqueWindowState);
-            if (mForceStatusBar) {
+            if (mForceStatusBar || mForceStatusBarFromKeyguard) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar: forced");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
@@ -4349,6 +4344,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mFocusedWindow == null) {
             return 0;
         }
+        if (mFocusedWindow.getAttrs().type == TYPE_KEYGUARD && mHideLockScreen == true) {
+            // We are updating at a point where the keyguard has gotten
+            // focus, but we were last in a state where the top window is
+            // hiding it.  This is probably because the keyguard as been
+            // shown while the top window was displayed, so we want to ignore
+            // it here because this is just a very transient change and it
+            // will quickly lose focus once it correctly gets hidden.
+            return 0;
+        }
         final int visibility = mFocusedWindow.getSystemUiVisibility()
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
@@ -4495,9 +4499,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
         pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
                 pw.println(mTopFullscreenOpaqueWindowState);
-        pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
-                pw.print(" mForceStatusBar="); pw.print(mForceStatusBar);
+            pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
                 pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
+        pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
+                pw.print(" mForceStatusBarFromKeyguard=");
+                pw.println(mForceStatusBarFromKeyguard);
         pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
                 pw.print(" mHomePressed="); pw.println(mHomePressed);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
