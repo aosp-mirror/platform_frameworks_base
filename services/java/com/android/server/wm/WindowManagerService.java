@@ -8726,7 +8726,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
-        if (w.mHasSurface && !w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
+        if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq) {
             w.mContentInsetsChanged |=
                     !w.mLastContentInsets.equals(w.mContentInsets);
             w.mVisibleInsetsChanged |=
@@ -9261,39 +9261,41 @@ public class WindowManagerService extends IWindowManager.Stub
                     defaultDisplay.pendingLayoutChanges);
         }
 
-        if (!mResizingWindows.isEmpty()) {
-            for (i = mResizingWindows.size() - 1; i >= 0; i--) {
-                WindowState win = mResizingWindows.get(i);
-                final WindowStateAnimator winAnimator = win.mWinAnimator;
-                try {
-                    if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Reporting new frame to " + win + ": " + win.mCompatFrame);
-                    int diff = 0;
-                    boolean configChanged = win.isConfigChanged();
-                    if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION
-                            // TODO: Remove once b/7094175 is fixed
-                            || ((String)win.mAttrs.getTitle()).contains("Keyguard"))
-                            && configChanged) {
-                        Slog.i(TAG, "Sending new config to window " + win + ": "
-                                + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
-                                + " / " + mCurConfiguration + " / 0x"
-                                + Integer.toHexString(diff));
-                    }
-                    win.mConfiguration = mCurConfiguration;
-                    if (DEBUG_ORIENTATION &&
-                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
-                            TAG, "Resizing " + win + " WITH DRAW PENDING");
-                    win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
-                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-                            configChanged ? win.mConfiguration : null);
-                    win.mContentInsetsChanged = false;
-                    win.mVisibleInsetsChanged = false;
-                    winAnimator.mSurfaceResized = false;
-                } catch (RemoteException e) {
-                    win.mOrientationChanging = false;
-                }
+        for (i = mResizingWindows.size() - 1; i >= 0; i--) {
+            WindowState win = mResizingWindows.get(i);
+            if (win.mAppFreezing) {
+                // Don't remove this window until rotation has completed.
+                continue;
             }
-            mResizingWindows.clear();
+            final WindowStateAnimator winAnimator = win.mWinAnimator;
+            try {
+                if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
+                        "Reporting new frame to " + win + ": " + win.mCompatFrame);
+                int diff = 0;
+                boolean configChanged = win.isConfigChanged();
+                if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION
+                        // TODO: Remove once b/7094175 is fixed
+                        || ((String)win.mAttrs.getTitle()).contains("Keyguard"))
+                        && configChanged) {
+                    Slog.i(TAG, "Sending new config to window " + win + ": "
+                            + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
+                            + " / " + mCurConfiguration + " / 0x"
+                            + Integer.toHexString(diff));
+                }
+                win.mConfiguration = mCurConfiguration;
+                if (DEBUG_ORIENTATION &&
+                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
+                        TAG, "Resizing " + win + " WITH DRAW PENDING");
+                win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
+                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
+                        configChanged ? win.mConfiguration : null);
+                win.mContentInsetsChanged = false;
+                win.mVisibleInsetsChanged = false;
+                winAnimator.mSurfaceResized = false;
+            } catch (RemoteException e) {
+                win.mOrientationChanging = false;
+            }
+            mResizingWindows.remove(i);
         }
 
         if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
