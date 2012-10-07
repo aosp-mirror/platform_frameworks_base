@@ -161,7 +161,7 @@ public class AppWidgetHostView extends FrameLayout {
      * @param component the component name of the widget
      * @param padding Rect in which to place the output, if null, a new Rect will be allocated and
      *                returned
-     * @return default padding for this widget
+     * @return default padding for this widget, in pixels
      */
     public static Rect getDefaultPaddingForWidget(Context context, ComponentName component,
             Rect padding) {
@@ -241,7 +241,7 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget options and causes a callback to the AppWidgetProvider.
      * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
-     * @param options The bundle of options, in addition to the size information,
+     * @param newOptions The bundle of options, in addition to the size information,
      *          can be null.
      * @param minWidth The minimum width that the widget will be displayed at.
      * @param minHeight The maximum height that the widget will be displayed at.
@@ -249,10 +249,10 @@ public class AppWidgetHostView extends FrameLayout {
      * @param maxHeight The maximum height that the widget will be displayed at.
      *
      */
-    public void updateAppWidgetSize(Bundle options, int minWidth, int minHeight, int maxWidth,
+    public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
-        if (options == null) {
-            options = new Bundle();
+        if (newOptions == null) {
+            newOptions = new Bundle();
         }
 
         Rect padding = new Rect();
@@ -264,11 +264,30 @@ public class AppWidgetHostView extends FrameLayout {
         int xPaddingDips = (int) ((padding.left + padding.right) / density);
         int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
 
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth - xPaddingDips);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight - yPaddingDips);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth - xPaddingDips);
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight - yPaddingDips);
-        updateAppWidgetOptions(options);
+        int newMinWidth = minWidth - xPaddingDips;
+        int newMinHeight = minHeight - yPaddingDips; 
+        int newMaxWidth = maxWidth - xPaddingDips;
+        int newMaxHeight = maxHeight - yPaddingDips;
+
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
+
+        // We get the old options to see if the sizes have changed
+        Bundle oldOptions = widgetManager.getAppWidgetOptions(mAppWidgetId);
+        boolean needsUpdate = false;
+        if (newMinWidth != oldOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) ||
+                newMinHeight != oldOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT) ||
+                newMaxWidth != oldOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) ||
+                newMaxHeight != oldOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)) {
+            needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newMinWidth);
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
+            updateAppWidgetOptions(newOptions);
+        }
     }
 
     /**
