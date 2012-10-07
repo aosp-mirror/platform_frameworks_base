@@ -50,7 +50,7 @@ final class DisplayPowerState {
     private static final int DIRTY_BRIGHTNESS = 1 << 2;
 
     private final Choreographer mChoreographer;
-    private final ElectronBeam mElectronBeam; // may be null if only animating backlights
+    private final ElectronBeam mElectronBeam;
     private final PhotonicModulator mScreenBrightnessModulator;
 
     private int mDirty;
@@ -130,26 +130,19 @@ final class DisplayPowerState {
      * This method should be called before starting an animation because it
      * can take a fair amount of time to prepare the electron beam surface.
      *
-     * @param warmUp True if the electron beam should start warming up.
+     * @param mode The electron beam animation mode to prepare.
      * @return True if the electron beam was prepared.
      */
-    public boolean prepareElectronBeam(boolean warmUp) {
-        if (mElectronBeam != null) {
-            boolean success = mElectronBeam.prepare(warmUp);
-            invalidate(DIRTY_ELECTRON_BEAM);
-            return success;
-        } else {
-            return true;
-        }
+    public boolean prepareElectronBeam(int mode) {
+        invalidate(DIRTY_ELECTRON_BEAM);
+        return mElectronBeam.prepare(mode);
     }
 
     /**
      * Dismisses the electron beam surface.
      */
     public void dismissElectronBeam() {
-        if (mElectronBeam != null) {
-            mElectronBeam.dismiss();
-        }
+        mElectronBeam.dismiss();
     }
 
     /**
@@ -230,9 +223,7 @@ final class DisplayPowerState {
         pw.println("  mScreenBrightness=" + mScreenBrightness);
         pw.println("  mElectronBeamLevel=" + mElectronBeamLevel);
 
-        if (mElectronBeam != null) {
-            mElectronBeam.dump(pw);
-        }
+        mElectronBeam.dump(pw);
     }
 
     private void invalidate(int dirty) {
@@ -251,7 +242,7 @@ final class DisplayPowerState {
                 PowerManagerService.nativeSetScreenState(false);
             }
 
-            if ((mDirty & DIRTY_ELECTRON_BEAM) != 0 && mElectronBeam != null) {
+            if ((mDirty & DIRTY_ELECTRON_BEAM) != 0) {
                 mElectronBeam.draw(mElectronBeamLevel);
             }
 
