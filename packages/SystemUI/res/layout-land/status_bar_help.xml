@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- This is the combined status bar / notification panel window. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/status_bar_cling"
+    android:paddingLeft="40dp"
+    android:paddingRight="40dp"
+    android:background="#DD000000"
+    android:focusable="true"
+    android:orientation="horizontal" 
+    android:gravity="top|left"
+    >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_weight="0"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="50dp"
+        android:gravity="center"
+        android:src="@drawable/arrow_dashed"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginTop="40dp"
+        >
+        <TextView
+            style="@style/ClingTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/status_bar_help_title" />
+
+        <TextView
+            style="@style/ClingText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="@string/status_bar_help_text" />
+
+        <Button
+            android:id="@+id/ok"
+            style="@style/ClingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="50dp"
+            android:paddingRight="50dp"
+            android:text="@android:string/ok" />
+    </LinearLayout>
+</LinearLayout>
