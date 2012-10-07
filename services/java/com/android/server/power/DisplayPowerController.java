@@ -89,6 +89,9 @@ final class DisplayPowerController {
     // auto-brightness adjustment setting.
     private static final float SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_MAX_GAMMA = 3.0f;
 
+    // The minimum reduction in brightness when dimmed.
+    private static final int SCREEN_DIM_MINIMUM_REDUCTION = 10;
+
     // If true, enables the use of the current time as an auto-brightness adjustment.
     // The basic idea here is to expand the dynamic range of auto-brightness
     // when it is especially dark outside.  The light sensor tends to perform
@@ -184,6 +187,12 @@ final class DisplayPowerController {
 
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
+
+    // The minimum allowed brightness.
+    private final int mScreenBrightnessRangeMinimum;
+
+    // The maximum allowed brightness.
+    private final int mScreenBrightnessRangeMaximum;
 
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
@@ -343,8 +352,14 @@ final class DisplayPowerController {
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
         final Resources resources = context.getResources();
-        mScreenBrightnessDimConfig = resources.getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDim);
+
+        mScreenBrightnessDimConfig = clampAbsoluteBrightness(resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDim));
+
+        int screenBrightnessMinimum = Math.min(resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessSettingMinimum),
+                mScreenBrightnessDimConfig);
+
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         if (mUseSoftwareAutoBrightnessConfig) {
@@ -362,11 +377,18 @@ final class DisplayPowerController {
                         + "which must be strictly increasing.  "
                         + "Auto-brightness will be disabled.");
                 mUseSoftwareAutoBrightnessConfig = false;
+            } else {
+                if (screenBrightness[0] < screenBrightnessMinimum) {
+                    screenBrightnessMinimum = screenBrightness[0];
+                }
             }
 
             mLightSensorWarmUpTimeConfig = resources.getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
         }
+
+        mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
+        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
 
         mElectronBeamAnimatesBacklightConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
@@ -394,14 +416,14 @@ final class DisplayPowerController {
             final int n = brightness.length;
             float[] x = new float[n];
             float[] y = new float[n];
-            y[0] = (float)brightness[0] / PowerManager.BRIGHTNESS_ON;
+            y[0] = normalizeAbsoluteBrightness(brightness[0]);
             for (int i = 1; i < n; i++) {
                 x[i] = lux[i - 1];
-                y[i] = (float)brightness[i] / PowerManager.BRIGHTNESS_ON;
+                y[i] = normalizeAbsoluteBrightness(brightness[i]);
             }
 
             Spline spline = Spline.createMonotoneCubicSpline(x, y);
-            if (false) {
+            if (DEBUG) {
                 Slog.d(TAG, "Auto-brightness spline: " + spline);
                 for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
                     Slog.d(TAG, String.format("  %7.1f: %7.1f", v, spline.interpolate(v)));
@@ -602,30 +624,31 @@ final class DisplayPowerController {
         }
 
         // Set the screen brightness.
-        if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
-            // Screen is dimmed.  Overrides everything else.
-            animateScreenBrightness(
-                    clampScreenBrightness(mScreenBrightnessDimConfig),
-                    BRIGHTNESS_RAMP_RATE_FAST);
-            mUsingScreenAutoBrightness = false;
-        } else if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_BRIGHT) {
+        if (wantScreenOn(mPowerRequest.screenState)) {
+            int target;
+            boolean slow;
             if (mScreenAutoBrightness >= 0 && mLightSensorEnabled) {
                 // Use current auto-brightness value.
-                animateScreenBrightness(
-                        clampScreenBrightness(mScreenAutoBrightness),
-                        mUsingScreenAutoBrightness ? BRIGHTNESS_RAMP_RATE_SLOW :
-                                BRIGHTNESS_RAMP_RATE_FAST);
+                target = mScreenAutoBrightness;
+                slow = mUsingScreenAutoBrightness;
                 mUsingScreenAutoBrightness = true;
             } else {
                 // Light sensor is disabled or not ready yet.
                 // Use the current brightness setting from the request, which is expected
                 // provide a nominal default value for the case where auto-brightness
                 // is not ready yet.
-                animateScreenBrightness(
-                        clampScreenBrightness(mPowerRequest.screenBrightness),
-                        BRIGHTNESS_RAMP_RATE_FAST);
+                target = mPowerRequest.screenBrightness;
+                slow = false;
                 mUsingScreenAutoBrightness = false;
             }
+            if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
+                // Screen is dimmed.  Sets an upper bound on everything else.
+                target = Math.min(target - SCREEN_DIM_MINIMUM_REDUCTION,
+                        mScreenBrightnessDimConfig);
+                slow = false;
+            }
+            animateScreenBrightness(clampScreenBrightness(target),
+                    slow ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
         } else {
             // Screen is off.  Don't bother changing the brightness.
             mUsingScreenAutoBrightness = false;
@@ -729,7 +752,25 @@ final class DisplayPowerController {
     }
 
     private int clampScreenBrightness(int value) {
-        return Math.min(Math.max(Math.max(value, mScreenBrightnessDimConfig), 0), 255);
+        return clamp(value, mScreenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum);
+    }
+
+    private static int clampAbsoluteBrightness(int value) {
+        return clamp(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
+    }
+
+    private static int clamp(int value, int min, int max) {
+        if (value <= min) {
+            return min;
+        }
+        if (value >= max) {
+            return max;
+        }
+        return value;
+    }
+
+    private static float normalizeAbsoluteBrightness(int value) {
+        return (float)clampAbsoluteBrightness(value) / PowerManager.BRIGHTNESS_ON;
     }
 
     private void animateScreenBrightness(int target, int rate) {
@@ -1055,6 +1096,8 @@ final class DisplayPowerController {
         pw.println();
         pw.println("Display Controller Configuration:");
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
+        pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
+        pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mUseSoftwareAutoBrightnessConfig="
                 + mUseSoftwareAutoBrightnessConfig);
         pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
