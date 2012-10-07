@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
@@ -42,6 +43,7 @@ import com.android.internal.view.RotationPolicy;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessController.BrightnessStateChangeCallback;
+import com.android.systemui.statusbar.policy.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
@@ -98,16 +100,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
-    /** Broadcast receiver to act on user switches to update visuals of per-user state */
-    private BroadcastReceiver mUserSwitchedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                onUserSwitched(intent);
-            }
-        }
-    };
-
     /** ContentObserver to determine the next alarm */
     private class NextAlarmObserver extends ContentObserver {
         public NextAlarmObserver(Handler handler) {
@@ -141,10 +133,36 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     Settings.Secure.getUriFor(Settings.Secure.BUGREPORT_IN_POWER_MENU), false, this);
         }
     }
-    private Context mContext;
-    private Handler mHandler;
-    private NextAlarmObserver mNextAlarmObserver;
-    private BugreportObserver mBugreportObserver;
+
+    /** ContentObserver to watch brightness **/
+    private class BrightnessObserver extends ContentObserver {
+        public BrightnessObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onBrightnessLevelChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE),
+                    false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
+    private final Context mContext;
+    private final Handler mHandler;
+    private final CurrentUserTracker mUserTracker;
+    private final NextAlarmObserver mNextAlarmObserver;
+    private final BugreportObserver mBugreportObserver;
+    private final BrightnessObserver mBrightnessObserver;
 
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
@@ -209,17 +227,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     public QuickSettingsModel(Context context) {
         mContext = context;
         mHandler = new Handler();
+        mUserTracker = new CurrentUserTracker(mContext) {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                super.onReceive(context, intent);
+                onUserSwitched();
+            }
+        };
+
         mNextAlarmObserver = new NextAlarmObserver(mHandler);
         mNextAlarmObserver.startObserving();
         mBugreportObserver = new BugreportObserver(mHandler);
         mBugreportObserver.startObserving();
+        mBrightnessObserver = new BrightnessObserver(mHandler);
+        mBrightnessObserver.startObserving();
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
-
-        IntentFilter userSwitchedFilter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        context.registerReceiver(mUserSwitchedReceiver, userSwitchedFilter);
     }
 
     void updateResources() {
@@ -627,9 +652,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     @Override
     public void onBrightnessLevelChanged() {
         Resources r = mContext.getResources();
-        int mode = Settings.System.getInt(mContext.getContentResolver(),
+        int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                mUserTracker.getCurrentUserId());
         mBrightnessState.autoBrightness =
                 (mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         mBrightnessState.iconId = mBrightnessState.autoBrightness
@@ -643,7 +669,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     // User switch: need to update visuals of all tiles known to have per-user state
-    void onUserSwitched(Intent intent) {
+    void onUserSwitched() {
+        mBrightnessObserver.startObserving();
         onRotationLockChanged();
         onBrightnessLevelChanged();
         onNextAlarmChanged();
