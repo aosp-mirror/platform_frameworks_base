@@ -2160,11 +2160,17 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_showOnLockScreen,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestActivity_immersive,
                 false)) {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
         }
-        
+
         if (!receiver) {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,

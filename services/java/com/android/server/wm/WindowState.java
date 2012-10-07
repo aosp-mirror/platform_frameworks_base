@@ -940,7 +940,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
-        if (isOtherUsersAppWindow()) {
+        if (isHiddenFromUserLocked()) {
             Slog.w(TAG, "current user violation " + mService.mCurrentUserId + " trying to display "
                     + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUid);
             return false;
@@ -1030,7 +1030,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mShowToOwnerOnly = showToOwnerOnly;
     }
 
-    boolean isOtherUsersAppWindow() {
+    boolean isHiddenFromUserLocked() {
+        // Save some cycles by not calling getDisplayInfo unless it is an application
+        // window intended for all users.
+        if (mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+                && mAppToken != null && mAppToken.showWhenLocked) {
+            final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+            if (isFullscreen(displayInfo.appWidth, displayInfo.appHeight)) {
+                // Is a fullscreen window, like the clock alarm. Show to everyone.
+                return false;
+            }
+        }
+
         return mShowToOwnerOnly && UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId;
     }
 
