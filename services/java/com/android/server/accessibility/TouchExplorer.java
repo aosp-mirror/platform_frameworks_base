@@ -304,6 +304,7 @@ class TouchExplorer implements EventStreamTransformation {
             mNext.clear();
         }
         mTouchExplorationInProgress = false;
+        mAms.onTouchInteractionEnd();
     }
 
     @Override
@@ -615,6 +616,7 @@ class TouchExplorer implements EventStreamTransformation {
                 }
             } break;
             case MotionEvent.ACTION_UP:
+                mAms.onTouchInteractionEnd();
                 // We know that we do not need the pre-fed gesture points are not
                 // needed anymore since the last pointer just went up.
                 mStrokeBuffer.clear();
@@ -737,6 +739,7 @@ class TouchExplorer implements EventStreamTransformation {
                  }
             } break;
             case MotionEvent.ACTION_UP: {
+                mAms.onTouchInteractionEnd();
                 // Announce the end of a new touch interaction.
                 sendAccessibilityEvent(
                         AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
@@ -782,6 +785,7 @@ class TouchExplorer implements EventStreamTransformation {
                         AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
                 //$FALL-THROUGH$
             case MotionEvent.ACTION_POINTER_UP: {
+                mAms.onTouchInteractionEnd();
                 mLongPressingPointerId = -1;
                 mLongPressingPointerDeltaX = 0;
                 mLongPressingPointerDeltaY = 0;
@@ -819,6 +823,7 @@ class TouchExplorer implements EventStreamTransformation {
                 }
             } break;
             case MotionEvent.ACTION_UP: {
+                mAms.onTouchInteractionEnd();
                 // Announce the end of gesture recognition.
                 sendAccessibilityEvent(
                         AccessibilityEvent.TYPE_GESTURE_DETECTION_END);
