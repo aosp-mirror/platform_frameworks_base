@@ -1300,27 +1300,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
                             : 0));
 
-            // Verify that all of the preferred activity components actually
-            // exist.  It is possible for applications to be updated and at
-            // that point remove a previously declared activity component that
-            // had been set as a preferred activity.  We try to clean this up
-            // the next time we encounter that preferred activity, but it is
-            // possible for the user flow to never be able to return to that
-            // situation so here we do a sanity check to make sure we haven't
-            // left any junk around.
-            ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
-            for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
-                if (mActivities.mActivities.get(pa.mPref.mComponent) == null) {
-                    removed.add(pa);
-                }
-            }
-            for (int i=0; i<removed.size(); i++) {
-                PreferredActivity pa = removed.get(i);
-                Slog.w(TAG, "Removing dangling preferred activity: "
-                        + pa.mPref.mComponent);
-                mSettings.mPreferredActivities.removeFilter(pa);
-            }
-
             // can downgrade to reader
             mSettings.writeLPr();
 
@@ -2504,9 +2483,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 intent = intent.getSelector(); 
             }
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-            List<PreferredActivity> prefs =
-                    mSettings.mPreferredActivities.queryIntent(intent, resolvedType,
-                            (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId);
+            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
+            List<PreferredActivity> prefs = pir != null
+                    ? pir.queryIntent(intent, resolvedType,
+                            (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
+                    : null;
             if (prefs != null && prefs.size() > 0) {
                 // First figure out how good the original match set is.
                 // We will only allow preferred activities that came
@@ -2537,9 +2518,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int M = prefs.size();
                 for (int i=0; i<M; i++) {
                     final PreferredActivity pa = prefs.get(i);
-                    if (pa.mUserId != userId) {
-                        continue;
-                    }
                     if (pa.mPref.mMatch != match) {
                         continue;
                     }
@@ -2560,7 +2538,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // it from the preferred activities list, and skip it.
                         Slog.w(TAG, "Removing dangling preferred activity: "
                                 + pa.mPref.mComponent);
-                        mSettings.mPreferredActivities.removeFilter(pa);
+                        pir.removeFilter(pa);
                         continue;
                     }
                     for (int j=0; j<N; j++) {
@@ -2580,7 +2558,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (!pa.mPref.sameSet(query, priority)) {
                             Slog.i(TAG, "Result set changed, dropping preferred activity for "
                                     + intent + " type " + resolvedType);
-                            mSettings.mPreferredActivities.removeFilter(pa);
+                            pir.removeFilter(pa);
                             return null;
                         }
 
@@ -8682,9 +8660,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             Slog.i(TAG, "Adding preferred activity " + activity + " for user " + userId + " :");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-            mSettings.mPreferredActivities.addFilter(
-                    new PreferredActivity(filter, match, set, activity, userId));
-            scheduleWriteSettingsLocked();            
+            mSettings.editPreferredActivitiesLPw(userId).addFilter(
+                    new PreferredActivity(filter, match, set, activity));
+            mSettings.writePackageRestrictionsLPr(userId);
         }
     }
 
@@ -8722,25 +8700,27 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final int callingUserId = UserHandle.getCallingUserId();
             ArrayList<PreferredActivity> removed = null;
-            Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
-            String action = filter.getAction(0);
-            String category = filter.getCategory(0);
-            while (it.hasNext()) {
-                PreferredActivity pa = it.next();
-                if (pa.mUserId != callingUserId) continue;
-                if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
-                    if (removed == null) {
-                        removed = new ArrayList<PreferredActivity>();
+            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(callingUserId);
+            if (pir != null) {
+                Iterator<PreferredActivity> it = pir.filterIterator();
+                String action = filter.getAction(0);
+                String category = filter.getCategory(0);
+                while (it.hasNext()) {
+                    PreferredActivity pa = it.next();
+                    if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
+                        if (removed == null) {
+                            removed = new ArrayList<PreferredActivity>();
+                        }
+                        removed.add(pa);
+                        Log.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
+                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
-                    removed.add(pa);
-                    Log.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
-                    filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                 }
-            }
-            if (removed != null) {
-                for (int i=0; i<removed.size(); i++) {
-                    PreferredActivity pa = removed.get(i);
-                    mSettings.mPreferredActivities.removeFilter(pa);
+                if (removed != null) {
+                    for (int i=0; i<removed.size(); i++) {
+                        PreferredActivity pa = removed.get(i);
+                        pir.removeFilter(pa);
+                    }
                 }
             }
             addPreferredActivity(filter, match, set, activity, callingUserId);
@@ -8776,27 +8756,33 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
         ArrayList<PreferredActivity> removed = null;
-        Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
-        while (it.hasNext()) {
-            PreferredActivity pa = it.next();
-            if (userId != UserHandle.USER_ALL && pa.mUserId != userId) {
+        boolean changed = false;
+        for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
+            final int thisUserId = mSettings.mPreferredActivities.keyAt(i);
+            PreferredIntentResolver pir = mSettings.mPreferredActivities.valueAt(i);
+            if (userId != UserHandle.USER_ALL && userId != thisUserId) {
                 continue;
             }
-            if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
-                if (removed == null) {
-                    removed = new ArrayList<PreferredActivity>();
+            Iterator<PreferredActivity> it = pir.filterIterator();
+            while (it.hasNext()) {
+                PreferredActivity pa = it.next();
+                if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
+                    if (removed == null) {
+                        removed = new ArrayList<PreferredActivity>();
+                    }
+                    removed.add(pa);
                 }
-                removed.add(pa);
+            }
+            if (removed != null) {
+                for (int j=0; j<removed.size(); j++) {
+                    PreferredActivity pa = removed.get(j);
+                    pir.removeFilter(pa);
+                }
+                changed = true;
+                mSettings.writePackageRestrictionsLPr(thisUserId);
             }
         }
-        if (removed != null) {
-            for (int i=0; i<removed.size(); i++) {
-                PreferredActivity pa = removed.get(i);
-                mSettings.mPreferredActivities.removeFilter(pa);
-            }
-            return true;
-        }
-        return false;
+        return changed;
     }
 
     public int getPreferredActivities(List<IntentFilter> outFilters,
@@ -8806,19 +8792,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int userId = UserHandle.getCallingUserId();
         // reader
         synchronized (mPackages) {
-            final Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
-            while (it.hasNext()) {
-                final PreferredActivity pa = it.next();
-                if (pa.mUserId != userId) {
-                    continue;
-                }
-                if (packageName == null
-                        || pa.mPref.mComponent.getPackageName().equals(packageName)) {
-                    if (outFilters != null) {
-                        outFilters.add(new IntentFilter(pa));
-                    }
-                    if (outActivities != null) {
-                        outActivities.add(pa.mPref.mComponent);
+            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
+            if (pir != null) {
+                final Iterator<PreferredActivity> it = pir.filterIterator();
+                while (it.hasNext()) {
+                    final PreferredActivity pa = it.next();
+                    if (packageName == null
+                            || pa.mPref.mComponent.getPackageName().equals(packageName)) {
+                        if (outFilters != null) {
+                            outFilters.add(new IntentFilter(pa));
+                        }
+                        if (outActivities != null) {
+                            outActivities.add(pa.mPref.mComponent);
+                        }
                     }
                 }
             }
@@ -9040,6 +9026,39 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
+        }
+
+        synchronized (mPackages) {
+            // Verify that all of the preferred activity components actually
+            // exist.  It is possible for applications to be updated and at
+            // that point remove a previously declared activity component that
+            // had been set as a preferred activity.  We try to clean this up
+            // the next time we encounter that preferred activity, but it is
+            // possible for the user flow to never be able to return to that
+            // situation so here we do a sanity check to make sure we haven't
+            // left any junk around.
+            ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
+            for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
+                PreferredIntentResolver pir = mSettings.mPreferredActivities.valueAt(i);
+                removed.clear();
+                for (PreferredActivity pa : pir.filterSet()) {
+                    if (mActivities.mActivities.get(pa.mPref.mComponent) == null) {
+                        removed.add(pa);
+                    }
+                }
+                if (removed.size() > 0) {
+                    for (int j=0; j<removed.size(); j++) {
+                        PreferredActivity pa = removed.get(i);
+                        RuntimeException here = new RuntimeException("here");
+                        here.fillInStackTrace();
+                        Slog.w(TAG, "Removing dangling preferred activity: "
+                                + pa.mPref.mComponent, here);
+                        pir.removeFilter(pa);
+                    }
+                    mSettings.writePackageRestrictionsLPr(
+                            mSettings.mPreferredActivities.keyAt(i));
+                }
+            }
         }
     }
 
@@ -9281,11 +9300,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
-                if (mSettings.mPreferredActivities.dump(pw,
-                        dumpState.getTitlePrinted() ? "\nPreferred Activities:"
-                            : "Preferred Activities:", "  ",
-                        packageName, dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
-                    dumpState.setTitlePrinted(true);
+                for (int i=0; i<mSettings.mPreferredActivities.size(); i++) {
+                    PreferredIntentResolver pir = mSettings.mPreferredActivities.valueAt(i);
+                    int user = mSettings.mPreferredActivities.keyAt(i);
+                    if (pir.dump(pw,
+                            dumpState.getTitlePrinted()
+                                ? "\nPreferred Activities User " + user + ":"
+                                : "Preferred Activities User " + user + ":", "  ",
+                            packageName, dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                        dumpState.setTitlePrinted(true);
+                    }
                 }
             }
 
@@ -9299,7 +9323,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     serializer.startDocument(null, true);
                     serializer.setFeature(
                             "http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                    mSettings.writePreferredActivitiesLPr(serializer);
+                    mSettings.writePreferredActivitiesLPr(serializer, 0);
                     serializer.endDocument();
                     serializer.flush();
                 } catch (IllegalArgumentException e) {
@@ -10045,11 +10069,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Called by UserManagerService */
     void cleanUpUserLILPw(int userHandle) {
-        // Disable all the packages for the user first
-        Set<Entry<String, PackageSetting>> entries = mSettings.mPackages.entrySet();
-        for (Entry<String, PackageSetting> entry : entries) {
-            entry.getValue().removeUser(userHandle);
-        }
         if (mDirtyUsers.remove(userHandle));
         mSettings.removeUserLPr(userHandle);
         if (mInstaller != null) {
@@ -10063,17 +10082,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Called by UserManagerService */
     void createNewUserLILPw(int userHandle, File path) {
         if (mInstaller != null) {
-            path.mkdir();
-            FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
-                    | FileUtils.S_IXOTH, -1, -1);
-            for (PackageSetting ps : mSettings.mPackages.values()) {
-                // Only system apps are initially installed.
-                ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
-                // Need to create a data directory for all apps under this user.
-                mInstaller.createUserData(ps.name,
-                        UserHandle.getUid(userHandle, ps.appId), userHandle);
-            }
-            mSettings.writePackageRestrictionsLPr(userHandle);
+            mSettings.createNewUserLILPw(mInstaller, userHandle, path);
         }
     }
 
