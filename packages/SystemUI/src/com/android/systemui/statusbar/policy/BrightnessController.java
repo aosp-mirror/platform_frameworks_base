@@ -39,9 +39,11 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final int mMinimumBacklight;
     private final int mMaximumBacklight;
 
-    private Context mContext;
-    private ToggleSlider mControl;
-    private IPowerManager mPower;
+    private final Context mContext;
+    private final ToggleSlider mControl;
+    private final boolean mAutomaticAvailable;
+    private final IPowerManager mPower;
+    private final CurrentUserTracker mUserTracker;
 
     private ArrayList<BrightnessStateChangeCallback> mChangeCallbacks =
             new ArrayList<BrightnessStateChangeCallback>();
@@ -53,20 +55,31 @@ public class BrightnessController implements ToggleSlider.Listener {
     public BrightnessController(Context context, ToggleSlider control) {
         mContext = context;
         mControl = control;
+        mUserTracker = new CurrentUserTracker(mContext);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mMinimumBacklight = pm.getMinimumScreenBrightnessSetting();
         mMaximumBacklight = pm.getMaximumScreenBrightnessSetting();
 
-        boolean automaticAvailable = context.getResources().getBoolean(
+        mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
 
-        if (automaticAvailable) {
+        control.setOnChangedListener(this);
+    }
+
+    public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
+    }
+
+    @Override
+    public void onInit(ToggleSlider control) {
+        if (mAutomaticAvailable) {
             int automatic;
             try {
-                automatic = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_MODE);
+                automatic = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        mUserTracker.getCurrentUserId());
             } catch (SettingNotFoundException snfe) {
                 automatic = 0;
             }
@@ -78,20 +91,15 @@ public class BrightnessController implements ToggleSlider.Listener {
         
         int value;
         try {
-            value = Settings.System.getInt(mContext.getContentResolver(), 
-                    Settings.System.SCREEN_BRIGHTNESS);
+            value = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS,
+                    mUserTracker.getCurrentUserId());
         } catch (SettingNotFoundException ex) {
             value = mMaximumBacklight;
         }
 
         control.setMax(mMaximumBacklight - mMinimumBacklight);
         control.setValue(value - mMinimumBacklight);
-
-        control.setOnChangedListener(this);
-    }
-
-    public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
     }
 
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
@@ -103,8 +111,9 @@ public class BrightnessController implements ToggleSlider.Listener {
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
                         public void run() {
-                            Settings.System.putInt(mContext.getContentResolver(), 
-                                    Settings.System.SCREEN_BRIGHTNESS, val);
+                            Settings.System.putIntForUser(mContext.getContentResolver(),
+                                    Settings.System.SCREEN_BRIGHTNESS, val,
+                                    mUserTracker.getCurrentUserId());
                         }
                     });
             }
@@ -116,8 +125,9 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     private void setMode(int mode) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_MODE, mode);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE, mode,
+                mUserTracker.getCurrentUserId());
     }
     
     private void setBrightness(int brightness) {
