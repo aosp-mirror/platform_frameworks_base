@@ -259,9 +259,14 @@ public class KeyguardViewMediator {
         void wakeUp();
 
         /**
-         * Reports user activity and requests that the screen stay on for the specified
-         * amount of time.
-         * @param millis The amount of time in millis.
+         * Reports user activity and requests that the screen stay on.
+         */
+        void userActivity();
+
+        /**
+         * Reports user activity and requests that the screen stay on for at least
+         * the specified amount of time.
+         * @param millis The amount of time in millis.  This value is currently ignored.
          */
         void userActivity(long millis);
 
@@ -284,6 +289,12 @@ public class KeyguardViewMediator {
          * @param needsInput
          */
         void setNeedsInput(boolean needsInput);
+
+        /**
+         * Tell view mediator that the keyguard view's desired user activity timeout
+         * has changed and needs to be reapplied to the window.
+         */
+        void onUserActivityTimeoutChanged();
     }
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
@@ -400,6 +411,10 @@ public class KeyguardViewMediator {
             KeyguardViewMediator.this.wakeUp();
         }
 
+        public void userActivity() {
+            KeyguardViewMediator.this.userActivity();
+        }
+
         public void userActivity(long holdMs) {
             KeyguardViewMediator.this.userActivity(holdMs);
         }
@@ -415,6 +430,11 @@ public class KeyguardViewMediator {
         @Override
         public void setNeedsInput(boolean needsInput) {
             mKeyguardViewManager.setNeedsInput(needsInput);
+        }
+
+        @Override
+        public void onUserActivityTimeoutChanged() {
+            mKeyguardViewManager.updateUserActivityTimeout();
         }
     };
 
