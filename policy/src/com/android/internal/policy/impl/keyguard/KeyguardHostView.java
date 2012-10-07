@@ -65,6 +65,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
 
     private AppWidgetHost mAppWidgetHost;
+    private KeyguardWidgetRegion mAppWidgetRegion;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
@@ -142,9 +143,11 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
+        mAppWidgetRegion = (KeyguardWidgetRegion) findViewById(R.id.kg_widget_region);
+        mAppWidgetRegion.setVisibility(VISIBLE);
+        mAppWidgetRegion.setCallbacks(mWidgetCallbacks);
+
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
-        KeyguardWidgetRegion kgwr = (KeyguardWidgetRegion) findViewById(R.id.kg_widget_region);
-        kgwr.setVisibility(VISIBLE);
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
 
@@ -207,6 +210,33 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     void addWidget(AppWidgetHostView view) {
         mAppWidgetContainer.addWidget(view);
+    }
+
+    private KeyguardWidgetRegion.Callbacks mWidgetCallbacks
+            = new KeyguardWidgetRegion.Callbacks() {
+        @Override
+        public void userActivity() {
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.userActivity();
+            }
+        }
+
+        @Override
+        public void onUserActivityTimeoutChanged() {
+            if (mViewMediatorCallback != null) {
+                mViewMediatorCallback.onUserActivityTimeoutChanged();
+            }
+        }
+    };
+
+    @Override
+    public long getUserActivityTimeout() {
+        // Currently only considering user activity timeouts needed by widgets.
+        // Could also take into account longer timeouts for certain security views.
+        if (mAppWidgetRegion != null) {
+            return mAppWidgetRegion.getUserActivityTimeout();
+        }
+        return -1;
     }
 
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {

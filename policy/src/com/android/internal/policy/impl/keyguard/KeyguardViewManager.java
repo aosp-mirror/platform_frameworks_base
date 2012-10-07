@@ -184,12 +184,13 @@ public class KeyguardViewManager {
                 lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             }
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
-            lp.userActivityTimeout = KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
             lp.setTitle(isActivity ? "KeyguardMock" : "Keyguard");
             mWindowLayoutParams = lp;
             mViewManager.addView(mKeyguardHost, lp);
         }
+
         inflateKeyguardView(options);
+        updateUserActivityTimeoutInWindowLayoutParams();
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
 
         mKeyguardHost.restoreHierarchyState(mStateContainer);
@@ -222,6 +223,25 @@ public class KeyguardViewManager {
         if (mScreenOn) {
             mKeyguardView.show();
         }
+    }
+
+    public void updateUserActivityTimeout() {
+        updateUserActivityTimeoutInWindowLayoutParams();
+        mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
+    }
+
+    private void updateUserActivityTimeoutInWindowLayoutParams() {
+        // Use the user activity timeout requested by the keyguard view, if any.
+        if (mKeyguardView != null) {
+            long timeout = mKeyguardView.getUserActivityTimeout();
+            if (timeout >= 0) {
+                mWindowLayoutParams.userActivityTimeout = timeout;
+                return;
+            }
+        }
+
+        // Otherwise, use the default timeout.
+        mWindowLayoutParams.userActivityTimeout = KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
     }
 
     private void maybeEnableScreenRotation(boolean enableScreenRotation) {
