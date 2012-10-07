@@ -444,6 +444,10 @@
          recently launched activities. -->
     <attr name="excludeFromRecents" format="boolean" />
 
+    <!-- Specify that an Activity should be shown over the lock screen and,
+         in a multiuser environment, across all users' windows -->
+    <attr name="showOnLockScreen" format="boolean" />
+
     <!-- Specify the authorities under which this content provider can be
          found.  Multiple authorities may be supplied by separating them
          with a semicolon.  Authority names should use a Java-style naming
@@ -1376,6 +1380,7 @@
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
+        <attr name="showOnLockScreen" />
         <!-- Specify whether the activity is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
