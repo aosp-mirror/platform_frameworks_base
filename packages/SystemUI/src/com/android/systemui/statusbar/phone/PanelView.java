@@ -213,7 +213,7 @@ public class PanelView extends FrameLayout {
         float deltaX = event.getRawX() - event.getX();
         float deltaY = event.getRawY() - event.getY();
         event.offsetLocation(deltaX, deltaY);
-        mVelocityTracker.addMovement(event);
+        if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
         event.offsetLocation(-deltaX, -deltaY);
     }
 
