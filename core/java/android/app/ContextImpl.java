@@ -1702,8 +1702,8 @@ class ContextImpl extends Context {
             throws NameNotFoundException {
         if (packageName.equals("system") || packageName.equals("android")) {
             final ContextImpl context = new ContextImpl(mMainThread.getSystemContext());
-            context.mBasePackageName = mBasePackageName;
-            context.mUser = user;
+            context.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
+            context.init(mPackageInfo, null, mMainThread, mResources, mBasePackageName, user);
             return context;
         }
 
