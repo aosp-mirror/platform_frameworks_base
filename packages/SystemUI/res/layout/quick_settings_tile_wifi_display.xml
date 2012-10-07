@@ -21,6 +21,6 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:drawableTop="@drawable/ic_qs_mirroring"
+    android:drawableTop="@drawable/ic_qs_remote_display"
     android:text="@string/quick_settings_wifi_display_label"
     />
