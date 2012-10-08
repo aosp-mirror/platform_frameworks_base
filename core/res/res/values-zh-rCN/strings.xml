@@ -810,7 +810,7 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"图案已清除"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的窗口小部件%2$d。"</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用户选择器"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"状态"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒体控制"</string>
@@ -1103,12 +1103,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"允许"</string>
     <string name="sms_control_no" msgid="625438561395534982">"拒绝"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;想要向 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; 发送一条短信。"</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"这可能会"<font fgcolor="#ffffb060">"导致您的移动帐户支付费用"</font>"。"</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"这会导致您的移动帐户支付费用。"</font></string>
+    <string name="sms_short_code_details" msgid="3492025719868078457"><font fgcolor="#ffffb060">"这可能会导致您的手机号产生费用。"</font></string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"这会导致您的手机号产生费用。"</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"发送"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"取消"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"记住我的选择"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"以后，您可以在“设置”&gt;“应用”中更改此内容"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"之后，您可以在“设置”&gt;“应用”中更改此设置"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"始终允许"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"永不允许"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"已移除 SIM 卡"</string>
@@ -1375,7 +1375,7 @@
     <string name="media_route_button_content_description" msgid="5758553567065145276">"媒体输出线路"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"正在扫描..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在连接..."</string>
-    <string name="media_route_status_available" msgid="6983258067194649391">"可以连接"</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"可连接"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"无法连接"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"内置屏幕"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 屏幕"</string>
@@ -1391,7 +1391,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入 SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"输入 PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"输入密码"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡现已停用，需要输入 PUK 码才能继续使用。有关详情，请联系您的运营商。"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已被停用，需要输入 PUK 码才能继续使用。有关详情，请联系您的运营商。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"请输入所需 PIN 码"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"请确认所需 PIN 码"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁 SIM 卡..."</string>

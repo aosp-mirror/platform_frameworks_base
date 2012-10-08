@@ -1103,8 +1103,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"İzin ver"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Reddet"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; adresine bir mesaj göndermek istiyor."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Bu işlem, mobil hesabınızdan "<font fgcolor="#ffffb060">"ödeme alınmasına neden olabilir"</font>"."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Bu işlem, mobil hesabınızdan ödeme alınmasına neden olacaktır."</font></string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Bu işlem, mobil hesabınızdan "<font fgcolor="#ffffb060">"ücret alınmasına neden olabilir"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Bu işlem, mobil hesabınızdan ücret alınmasına neden olacaktır."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Gönder"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"İptal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Seçimimi hatırla"</string>
@@ -1398,7 +1398,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Yanlış PIN kodu."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-8 rakamdan oluşan bir PIN girin."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kodu 8 veya daha çok basamaklı bir sayı olmalıdır."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"PUK kodunu tekrar girin. Çok sayıda deneme yapılırsa SIM kart kalıcı olarak devre dışı bırakılır."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Doğru PUK kodunu tekrar girin. Çok sayıda deneme yapılırsa SIM kart kalıcı olarak devre dışı bırakılır."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodları eşleşmiyor"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Çok fazla sayıda desen denemesi yapıldı"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Kilidi açmak için Google hesabınızla oturum açın."</string>

@@ -810,10 +810,10 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Ruwaza imefutwa"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wijeti %2$d ya %3$d."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wiji %2$d ya %3$d."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kiteuzi cha mtumiaji"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Hali"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya midia"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya media"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1392,13 +1392,13 @@
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Ingiza Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingiza msimbo wa PIN uliopendelewa"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha msimbo wa PIN uliopendelewa"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingiza msimbo wa PIN unaopendelewa"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha msimbo wa PIN unaopendelewa"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua kadi ya SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Msimbo wa PIN usio sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Msimbo wa PUK unafaa kuwa na nambari 8 au zaidi."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Ingiza upya msimbo sahihi wa PUK. Majaribio yaliyorudiwa yatalemaza kabisa SIM."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Ingiza upya msimbo sahihi wa PUK. Majaribio yanayorudiwa yatalemaza SIM kabisa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Misimbo ya PIN haifanani"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Majaribio mengi mno ya mchoro"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Ili kufungua, ingia kwa Akaunti yako ya Google."</string>
@@ -1418,7 +1418,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ongeza sauti zaidi ya kiwango salama? "\n"Kusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
-    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Endelea kushikilia chini vidole vyako viwili ili kuwezesha ufikivu."</string>
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Endelea kufinyilia kwa vidole vyako viwili ili kuwezesha ufikivu."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ufikivu umeghairiwa."</string>
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>

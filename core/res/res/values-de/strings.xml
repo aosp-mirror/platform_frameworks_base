@@ -501,10 +501,10 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ermöglicht der App, die Telefonfunktionen des Geräts zu steuern. Eine App mit dieser Berechtigung kann das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Telefonstatus und Identität abrufen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ermöglicht der App, auf die Telefonfunktionen des Geräts zuzugreifen. Die Berechtigung erlaubt der App, die Telefonnummer und Geräte-IDs zu erfassen, festzustellen, ob gerade ein Gespräch geführt wird, und die Rufnummer verbundener Anrufer zu lesen."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Standby-Modus des Tablets deaktivieren"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Standby-Modus deaktivieren"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ermöglicht der App, den Standby-Modus des Tablets zu deaktivieren"</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ermöglicht der App, den Standby-Modus des Telefons zu deaktivieren"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Ruhezustand des Tablets deaktivieren"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Ruhezustand deaktivieren"</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Ermöglicht der App, den Ruhezustand des Tablets zu deaktivieren"</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Ermöglicht der App, den Ruhezustand des Telefons zu deaktivieren"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"Tablet ein- oder ausschalten"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"Gerät ein- oder ausschalten"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ermöglicht der App, das Tablet ein- oder auszuschalten"</string>
