@@ -173,7 +173,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Tinklo nėra"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"„Wi-Fi“ pateiktis"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Nėra „Wi-Fi“ pateikties ryšio"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Belaidis rodymas"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Skaistis"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Pranešimai rodomi čia"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Perbraukę žemyn bet kuriuo metu pasieksite pranešimus."\n"Jei norite naudoti sistemos valdiklius, perbraukite žemyn dar kartą."</string>
 </resources>
