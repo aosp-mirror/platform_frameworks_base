@@ -70,6 +70,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import libcore.io.IoUtils;
 
@@ -123,22 +125,9 @@ final class Settings {
 
     // The user's preferred activities associated with particular intent
     // filters.
-    final IntentResolver<PreferredActivity, PreferredActivity> mPreferredActivities =
-                new IntentResolver<PreferredActivity, PreferredActivity>() {
-        @Override
-        protected PreferredActivity[] newArray(int size) {
-            return new PreferredActivity[size];
-        }
-        @Override
-        protected String packageForFilter(PreferredActivity filter) {
-            return filter.mPref.mComponent.getPackageName();
-        }
-        @Override
-        protected void dumpFilter(PrintWriter out, String prefix,
-                PreferredActivity filter) {
-            filter.mPref.dump(out, prefix, filter);
-        }
-    };
+    final SparseArray<PreferredIntentResolver> mPreferredActivities =
+            new SparseArray<PreferredIntentResolver>();
+
     final HashMap<String, SharedUserSetting> mSharedUsers =
             new HashMap<String, SharedUserSetting>();
     private final ArrayList<Object> mUserIds = new ArrayList<Object>();
@@ -745,6 +734,15 @@ final class Settings {
         }
     }
 
+    PreferredIntentResolver editPreferredActivitiesLPw(int userId) {
+        PreferredIntentResolver pir = mPreferredActivities.get(userId);
+        if (pir == null) {
+            pir = new PreferredIntentResolver();
+            mPreferredActivities.put(userId, pir);
+        }
+        return pir;
+    }
+
     private File getUserPackagesStateFile(int userId) {
         return new File(Environment.getUserSystemDirectory(userId), "package-restrictions.xml");
     }
@@ -772,6 +770,35 @@ final class Settings {
 
         for (UserInfo user : users) {
             readPackageRestrictionsLPr(user.id);
+        }
+    }
+
+    private void readPreferredActivitiesLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_ITEM)) {
+                PreferredActivity pa = new PreferredActivity(parser);
+                if (pa.mPref.getParseError() == null) {
+                    editPreferredActivitiesLPw(userId).addFilter(pa);
+                } else {
+                    PackageManagerService.reportSettingsProblem(Log.WARN,
+                            "Error in package manager settings: <preferred-activity> "
+                                    + pa.mPref.getParseError() + " at "
+                                    + parser.getPositionDescription());
+                }
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <preferred-activities>: " + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
         }
     }
 
@@ -893,6 +920,8 @@ final class Settings {
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched,
                             enabledComponents, disabledComponents);
+                } else if (tagName.equals("preferred-activities")) {
+                    readPreferredActivitiesLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -940,6 +969,20 @@ final class Settings {
             }
         }
         return components;
+    }
+
+    void writePreferredActivitiesLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, "preferred-activities");
+        PreferredIntentResolver pir = mPreferredActivities.get(userId);
+        if (pir != null) {
+            for (final PreferredActivity pa : pir.filterSet()) {
+                serializer.startTag(null, TAG_ITEM);
+                pa.writeToXml(serializer);
+                serializer.endTag(null, TAG_ITEM);
+            }
+        }
+        serializer.endTag(null, "preferred-activities");
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1027,6 +1070,8 @@ final class Settings {
                     serializer.endTag(null, TAG_PACKAGE);
                 }
             }
+
+            writePreferredActivitiesLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
@@ -1237,8 +1282,6 @@ final class Settings {
                 writeDisabledSysPackageLPr(serializer, pkg);
             }
 
-            writePreferredActivitiesLPr(serializer);
-
             for (final SharedUserSetting usr : mSharedUsers.values()) {
                 serializer.startTag(null, "shared-user");
                 serializer.attribute(null, ATTR_NAME, usr.name);
@@ -1364,17 +1407,6 @@ final class Settings {
             }
         }
         //Debug.stopMethodTracing();
-    }
-
-    void writePreferredActivitiesLPr(XmlSerializer serializer)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        serializer.startTag(null, "preferred-activities");
-        for (final PreferredActivity pa : mPreferredActivities.filterSet()) {
-            serializer.startTag(null, TAG_ITEM);
-            pa.writeToXml(serializer);
-            serializer.endTag(null, TAG_ITEM);
-        }
-        serializer.endTag(null, "preferred-activities");
     }
 
     void writeDisabledSysPackageLPr(XmlSerializer serializer, final PackageSetting pkg)
@@ -1554,7 +1586,7 @@ final class Settings {
                     mReadMessages.append("No settings file found\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
-                    readDefaultPreferredAppsLPw();
+                    readDefaultPreferredAppsLPw(0);
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
@@ -1596,7 +1628,9 @@ final class Settings {
                 } else if (tagName.equals("preferred-packages")) {
                     // no longer used.
                 } else if (tagName.equals("preferred-activities")) {
-                    readPreferredActivitiesLPw(parser);
+                    // Upgrading from old single-user implementation;
+                    // these are the preferred activities for user 0.
+                    readPreferredActivitiesLPw(parser, 0);
                 } else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
                 } else if (tagName.equals("cleaning-package")) {
@@ -1733,7 +1767,7 @@ final class Settings {
         return true;
     }
 
-    private void readDefaultPreferredAppsLPw() {
+    private void readDefaultPreferredAppsLPw(int userId) {
         // Read preferred apps from .../etc/preferred-apps directory.
         File preferredDir = new File(Environment.getRootDirectory(), "etc/preferred-apps");
         if (!preferredDir.exists() || !preferredDir.isDirectory()) {
@@ -1776,7 +1810,7 @@ final class Settings {
                             + " does not start with 'preferred-activities'");
                     continue;
                 }
-                readPreferredActivitiesLPw(parser);
+                readPreferredActivitiesLPw(parser, userId);
             } catch (XmlPullParserException e) {
                 Slog.w(TAG, "Error reading apps file " + f, e);
             } catch (IOException e) {
@@ -2291,36 +2325,27 @@ final class Settings {
         }
     }
 
-    private void readPreferredActivitiesLPw(XmlPullParser parser) throws XmlPullParserException,
-            IOException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals(TAG_ITEM)) {
-                PreferredActivity pa = new PreferredActivity(parser);
-                if (pa.mPref.getParseError() == null) {
-                    mPreferredActivities.addFilter(pa);
-                } else {
-                    PackageManagerService.reportSettingsProblem(Log.WARN,
-                            "Error in package manager settings: <preferred-activity> "
-                                    + pa.mPref.getParseError() + " at "
-                                    + parser.getPositionDescription());
-                }
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element under <preferred-activities>: " + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
+    void createNewUserLILPw(Installer installer, int userHandle, File path) {
+        path.mkdir();
+        FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
+                | FileUtils.S_IXOTH, -1, -1);
+        for (PackageSetting ps : mPackages.values()) {
+            // Only system apps are initially installed.
+            ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
+            // Need to create a data directory for all apps under this user.
+            installer.createUserData(ps.name,
+                    UserHandle.getUid(userHandle, ps.appId), userHandle);
         }
+        readDefaultPreferredAppsLPw(userHandle);
+        writePackageRestrictionsLPr(userHandle);
     }
 
     void removeUserLPr(int userId) {
+        Set<Entry<String, PackageSetting>> entries = mPackages.entrySet();
+        for (Entry<String, PackageSetting> entry : entries) {
+            entry.getValue().removeUser(userId);
+        }
+        mPreferredActivities.remove(userId);
         File file = getUserPackagesStateFile(userId);
         file.delete();
         file = getUserPackagesStateBackupFile(userId);
