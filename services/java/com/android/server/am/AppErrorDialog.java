@@ -75,6 +75,7 @@ class AppErrorDialog extends BaseErrorDialog {
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Error: " + app.info.processName);
+        attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
         if (app.persistent) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);

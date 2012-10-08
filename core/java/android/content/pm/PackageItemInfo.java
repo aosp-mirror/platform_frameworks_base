@@ -218,7 +218,7 @@ public class PackageItemInfo {
         }
         return null;
     }
-    
+
     protected void dumpFront(Printer pw, String prefix) {
         if (name != null) {
             pw.println(prefix + "name=" + name);
