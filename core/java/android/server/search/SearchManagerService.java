@@ -17,6 +17,7 @@
 package android.server.search;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.IndentingPrintWriter;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -44,6 +45,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -59,9 +62,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     private final Context mContext;
 
     // This field is initialized lazily in getSearchables(), and then never modified.
-    private SparseArray<Searchables> mSearchables;
-
-    private ContentObserver mGlobalSearchObserver;
+    private final SparseArray<Searchables> mSearchables = new SparseArray<Searchables>();
 
     /**
      * Initializes the Search Manager service in the provided system context.
@@ -73,29 +74,39 @@ public class SearchManagerService extends ISearchManager.Stub {
         mContext = context;
         mContext.registerReceiver(new BootCompletedReceiver(),
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
-        mGlobalSearchObserver = new GlobalSearchProviderObserver(
-                mContext.getContentResolver());
+        mContext.registerReceiver(new UserReceiver(), 
+                new IntentFilter(Intent.ACTION_USER_REMOVED));
+        new MyPackageMonitor().register(context, null, UserHandle.ALL, true);
     }
 
-    private synchronized Searchables getSearchables(int userId) {
-        if (mSearchables == null) {
-            new MyPackageMonitor().register(mContext, null, true);
-            mSearchables = new SparseArray<Searchables>();
-        }
-        Searchables searchables = mSearchables.get(userId);
-
+    private Searchables getSearchables(int userId) {
         long origId = Binder.clearCallingIdentity();
-        boolean userExists = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
-                .getUserInfo(userId) != null;
-        Binder.restoreCallingIdentity(origId);
-
-        if (searchables == null && userExists) {
-            Log.i(TAG, "Building list of searchable activities for userId=" + userId);
-            searchables = new Searchables(mContext, userId);
-            searchables.buildSearchableList();
-            mSearchables.append(userId, searchables);
+        try {
+            boolean userExists = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
+                    .getUserInfo(userId) != null;
+            if (!userExists) return null;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        return searchables;
+        synchronized (mSearchables) {
+            Searchables searchables = mSearchables.get(userId);
+
+            if (searchables == null) {
+                Log.i(TAG, "Building list of searchable activities for userId=" + userId);
+                searchables = new Searchables(mContext, userId);
+                searchables.buildSearchableList();
+                mSearchables.append(userId, searchables);
+            }
+            return searchables;
+        }
+    }
+
+    private void onUserRemoved(int userId) {
+        if (userId != UserHandle.USER_OWNER) {
+            synchronized (mSearchables) {
+                mSearchables.remove(userId);
+            }
+        }
     }
 
     /**
@@ -115,6 +126,13 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
     }
 
+    private final class UserReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_OWNER));
+        }
+    }
+
     /**
      * Refreshes the "searchables" list when packages are added/removed.
      */
@@ -131,16 +149,20 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
 
         private void updateSearchables() {
-            synchronized (SearchManagerService.this) {
+            final int changingUserId = getChangingUserId();
+            synchronized (mSearchables) {
                 // Update list of searchable activities
                 for (int i = 0; i < mSearchables.size(); i++) {
-                    getSearchables(mSearchables.keyAt(i)).buildSearchableList();
+                    if (changingUserId == mSearchables.keyAt(i)) {
+                        getSearchables(mSearchables.keyAt(i)).buildSearchableList();
+                        break;
+                    }
                 }
             }
             // Inform all listeners that the list of searchables has been updated.
             Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(intent, new UserHandle(changingUserId));
         }
     }
 
@@ -158,7 +180,7 @@ public class SearchManagerService extends ISearchManager.Stub {
 
         @Override
         public void onChange(boolean selfChange) {
-            synchronized (SearchManagerService.this) {
+            synchronized (mSearchables) {
                 for (int i = 0; i < mSearchables.size(); i++) {
                     getSearchables(mSearchables.keyAt(i)).buildSearchableList();
                 }
@@ -257,5 +279,18 @@ public class SearchManagerService extends ISearchManager.Stub {
             Log.e(TAG, "Exception in getAssistIntent: " + e);
         }
         return null;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        synchronized (mSearchables) {
+            for (int i = 0; i < mSearchables.size(); i++) {
+                ipw.print("\nUser: "); ipw.println(mSearchables.keyAt(i));
+                ipw.increaseIndent();
+                mSearchables.valueAt(i).dump(fd, ipw, args);
+                ipw.decreaseIndent();
+            }
+        }
     }
 }

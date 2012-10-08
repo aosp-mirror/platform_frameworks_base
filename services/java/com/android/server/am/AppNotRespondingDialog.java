@@ -97,6 +97,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Not Responding: " + app.info.processName);
+        attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
     }
 
