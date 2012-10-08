@@ -1376,14 +1376,20 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void showCling() {
+        // lazily inflate this to accommodate orientation change
+        final ViewStub stub = (ViewStub) mStatusBarWindow.findViewById(R.id.status_bar_cling_stub);
+        if (stub == null) {
+            mClingShown = true;
+            return; // no clings on this device
+        }
+
         mSuppressStatusBarDrags = true;
 
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // lazily inflate this to accommodate orientation change
-                ViewStub stub = (ViewStub) mStatusBarWindow.findViewById(R.id.status_bar_cling_stub);
                 mCling = (ViewGroup) stub.inflate();
+
                 mCling.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
