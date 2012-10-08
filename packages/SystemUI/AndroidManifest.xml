@@ -205,7 +205,7 @@
 
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
-            android:icon="@mipmap/ic_dreams"
+            android:icon="@mipmap/ic_launcher_dreams"
             android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
             android:exported="true"
             android:excludeFromRecents="true"
