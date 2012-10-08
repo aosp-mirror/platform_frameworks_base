@@ -52,11 +52,14 @@ final class DisplayPowerRequest {
     // If true, enables automatic brightness control.
     public boolean useAutoBrightness;
 
-    // If true, prevents the screen from turning on if it is currently off.
-    // The display does not enter a "ready" state if this flag is true and the screen
-    // is off and is being prevented from turning on.  The window manager policy blocks
-    // screen on while it prepares the keyguard to prevent the user from seeing
-    // intermediate updates.
+    // If true, prevents the screen from completely turning on if it is currently off.
+    // The display does not enter a "ready" state if this flag is true and screen on is
+    // blocked.  The window manager policy blocks screen on while it prepares the keyguard to
+    // prevent the user from seeing intermediate updates.
+    //
+    // Technically, we may not block the screen itself from turning on (because that introduces
+    // extra unnecessary latency) but we do prevent content on screen from becoming
+    // visible to the user.
     public boolean blockScreenOn;
 
     public DisplayPowerRequest() {

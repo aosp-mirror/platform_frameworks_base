@@ -26,7 +26,6 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES10;
 import android.opengl.GLUtils;
 import android.os.Looper;
-import android.os.Process;
 import android.util.FloatMath;
 import android.util.Slog;
 import android.view.Display;
@@ -41,12 +40,13 @@ import java.nio.FloatBuffer;
 
 /**
  * Bzzzoooop!  *crackle*
- *
+ * <p>
  * Animates a screen transition from on to off or off to on by applying
  * some GL transformations to a screenshot.
- *
+ * </p><p>
  * This component must only be created or accessed by the {@link Looper} thread
  * that belongs to the {@link DisplayPowerController}.
+ * </p>
  */
 final class ElectronBeam {
     private static final String TAG = "ElectronBeam";
@@ -65,7 +65,7 @@ final class ElectronBeam {
 
     // Set to true when the animation context has been fully prepared.
     private boolean mPrepared;
-    private boolean mWarmUp;
+    private int mMode;
 
     private final Display mDisplay;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -90,6 +90,10 @@ final class ElectronBeam {
     private final FloatBuffer mVertexBuffer = createNativeFloatBuffer(8);
     private final FloatBuffer mTexCoordBuffer = createNativeFloatBuffer(8);
 
+    public static final int MODE_WARM_UP = 0;
+    public static final int MODE_COOL_DOWN = 1;
+    public static final int MODE_BLANK = 2;
+
     public ElectronBeam(Display display) {
         mDisplay = display;
     }
@@ -98,16 +102,15 @@ final class ElectronBeam {
      * Warms up the electron beam in preparation for turning on or off.
      * This method prepares a GL context, and captures a screen shot.
      *
-     * @param warmUp True if the electron beam is about to be turned on, false if
-     * it is about to be turned off.
+     * @param mode The desired mode for the upcoming animation.
      * @return True if the electron beam is ready, false if it is uncontrollable.
      */
-    public boolean prepare(boolean warmUp) {
+    public boolean prepare(int mode) {
         if (DEBUG) {
-            Slog.d(TAG, "prepare: warmUp=" + warmUp);
+            Slog.d(TAG, "prepare: mode=" + mode);
         }
 
-        mWarmUp = warmUp;
+        mMode = mode;
 
         // Get the display size and adjust it for rotation.
         mDisplay.getDisplayInfo(mDisplayInfo);
@@ -123,15 +126,26 @@ final class ElectronBeam {
         }
 
         // Prepare the surface for drawing.
-        if (!createEglContext()
-                || !createEglSurface()
-                || !captureScreenshotTextureAndSetViewport()) {
+        if (!tryPrepare()) {
             dismiss();
             return false;
         }
 
+        // Done.
         mPrepared = true;
         return true;
+    }
+
+    private boolean tryPrepare() {
+        if (createSurface()) {
+            if (mMode == MODE_BLANK) {
+                return true;
+            }
+            return createEglContext()
+                    && createEglSurface()
+                    && captureScreenshotTextureAndSetViewport();
+        }
+        return false;
     }
 
     /**
@@ -148,6 +162,7 @@ final class ElectronBeam {
 
         destroyScreenshotTexture();
         destroyEglSurface();
+        destroySurface();
         mPrepared = false;
     }
 
@@ -161,6 +176,14 @@ final class ElectronBeam {
     public boolean draw(float level) {
         if (DEBUG) {
             Slog.d(TAG, "drawFrame: level=" + level);
+        }
+
+        if (!mPrepared) {
+            return false;
+        }
+
+        if (mMode == MODE_BLANK) {
+            return showSurface(1.0f - level);
         }
 
         if (!attachEglContext()) {
@@ -185,8 +208,7 @@ final class ElectronBeam {
         } finally {
             detachEglContext();
         }
-
-        return showEglSurface();
+        return showSurface(1.0f);
     }
 
     /**
@@ -217,7 +239,7 @@ final class ElectronBeam {
         // bind texture and set blending for drawing planes
         GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, mTexNames[0]);
         GLES10.glTexEnvx(GLES10.GL_TEXTURE_ENV, GLES10.GL_TEXTURE_ENV_MODE,
-                mWarmUp ? GLES10.GL_MODULATE : GLES10.GL_REPLACE);
+                mMode == MODE_WARM_UP ? GLES10.GL_MODULATE : GLES10.GL_REPLACE);
         GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
                 GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_LINEAR);
         GLES10.glTexParameterx(GLES10.GL_TEXTURE_2D,
@@ -251,7 +273,7 @@ final class ElectronBeam {
         GLES10.glColorMask(true, true, true, true);
 
         // draw the white highlight (we use the last vertices)
-        if (!mWarmUp) {
+        if (mMode == MODE_COOL_DOWN) {
             GLES10.glColor4f(ag, ag, ag, 1.0f);
             GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
         }
@@ -472,7 +494,7 @@ final class ElectronBeam {
         }
     }*/
 
-    private boolean createEglSurface() {
+    private boolean createSurface() {
         if (mSurfaceSession == null) {
             mSurfaceSession = new SurfaceSession();
         }
@@ -481,9 +503,15 @@ final class ElectronBeam {
         try {
             if (mSurface == null) {
                 try {
+                    int flags;
+                    if (mMode == MODE_BLANK) {
+                        flags = Surface.FX_SURFACE_DIM | Surface.HIDDEN;
+                    } else {
+                        flags = Surface.OPAQUE | Surface.HIDDEN;
+                    }
                     mSurface = new Surface(mSurfaceSession,
                             "ElectronBeam", mDisplayWidth, mDisplayHeight,
-                            PixelFormat.OPAQUE, Surface.OPAQUE | Surface.HIDDEN);
+                            PixelFormat.OPAQUE, flags);
                 } catch (Surface.OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
                     return false;
@@ -514,7 +542,10 @@ final class ElectronBeam {
         } finally {
             Surface.closeTransaction();
         }
+        return true;
+    }
 
+    private boolean createEglSurface() {
         if (mEglSurface == null) {
             int[] eglSurfaceAttribList = new int[] {
                     EGL14.EGL_NONE
@@ -536,7 +567,9 @@ final class ElectronBeam {
             }
             mEglSurface = null;
         }
+    }
 
+    private void destroySurface() {
         if (mSurface != null) {
             Surface.openTransaction();
             try {
@@ -549,11 +582,12 @@ final class ElectronBeam {
         }
     }
 
-    private boolean showEglSurface() {
+    private boolean showSurface(float alpha) {
         if (!mSurfaceVisible) {
             Surface.openTransaction();
             try {
                 mSurface.setLayer(ELECTRON_BEAM_LAYER);
+                mSurface.setAlpha(alpha);
                 mSurface.show();
             } finally {
                 Surface.closeTransaction();
@@ -643,7 +677,7 @@ final class ElectronBeam {
         pw.println();
         pw.println("Electron Beam State:");
         pw.println("  mPrepared=" + mPrepared);
-        pw.println("  mWarmUp=" + mWarmUp);
+        pw.println("  mMode=" + mMode);
         pw.println("  mDisplayLayerStack=" + mDisplayLayerStack);
         pw.println("  mDisplayRotation=" + mDisplayRotation);
         pw.println("  mDisplayWidth=" + mDisplayWidth);
