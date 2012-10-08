@@ -788,18 +788,21 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * Like isOnScreen, but returns false if the surface hasn't yet
      * been drawn.
      */
+    @Override
     public boolean isDisplayedLw() {
         final AppWindowToken atoken = mAppToken;
         return isDrawnLw() && mPolicyVisibility
             && ((!mAttachedHidden &&
                     (atoken == null || !atoken.hiddenRequested))
-                    || mWinAnimator.mAnimating);
+                        || mWinAnimator.mAnimating
+                        || (atoken != null && atoken.mAppAnimator.animation != null));
     }
 
     /**
      * Return true if this window (or a window it is attached to, but not
      * considering its app token) is currently animating.
      */
+    @Override
     public boolean isAnimatingLw() {
         return mWinAnimator.mAnimation != null;
     }
