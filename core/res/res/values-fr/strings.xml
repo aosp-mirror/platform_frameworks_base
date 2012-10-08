@@ -737,7 +737,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Sœur"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Conjoint"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personnalisée"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Accueil"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domicile"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Professionnelle"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Autre"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Saisissez le code PIN."</string>
@@ -1397,7 +1397,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Le code PIN est erroné."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Veuillez saisir un code PIN comprenant entre quatre et huit chiffres."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Le code PUK doit contenir au moins 8 chiffres"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Le code PUK doit contenir au moins 8 chiffres."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Veuillez saisir de nouveau le code PUK correct. Des tentatives répétées désactivent définitivement la carte SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Les codes PIN ne correspondent pas."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Trop de tentatives."</string>
