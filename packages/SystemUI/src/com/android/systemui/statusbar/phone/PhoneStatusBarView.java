@@ -39,6 +39,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     boolean mFullWidthNotifications;
     PanelView mFadingPanel = null;
+    PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
 
@@ -145,12 +146,17 @@ public class PhoneStatusBarView extends PanelBar {
         super.onAllPanelsCollapsed();
         mBar.makeExpandedInvisible();
         mFadingPanel = null;
+        mLastFullyOpenedPanel = null;
     }
 
     @Override
     public void onPanelFullyOpened(PanelView openPanel) {
         super.onPanelFullyOpened(openPanel);
+        if (openPanel != mLastFullyOpenedPanel) {
+            openPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        }
         mFadingPanel = openPanel;
+        mLastFullyOpenedPanel = openPanel;
         mShouldFade = true; // now you own the fade, mister
     }
 

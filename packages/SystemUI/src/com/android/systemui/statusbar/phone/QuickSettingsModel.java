@@ -71,7 +71,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     static class RSSIState extends State {
         int signalIconId;
+        String signalContentDescription;
         int dataTypeIconId;
+        String dataContentDescription;
+    }
+    static class WifiState extends State {
+        String signalContentDescription;
+        boolean connected;
     }
     static class UserState extends State {
         Drawable avatar;
@@ -81,6 +87,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     public static class BluetoothState extends State {
         boolean connected = false;
+        String stateContentDescription;
     }
 
     /** The callback to update a given tile. */
@@ -182,7 +189,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mWifiTile;
     private RefreshCallback mWifiCallback;
-    private State mWifiState = new State();
+    private WifiState mWifiState = new WifiState();
 
     private QuickSettingsTileView mWifiDisplayTile;
     private RefreshCallback mWifiDisplayCallback;
@@ -371,21 +378,27 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // NetworkSignalChanged callback
     @Override
-    public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId, String enabledDesc) {
+    public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+            String wifiSignalContentDescription, String enabledDesc) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
-        mWifiState.enabled = enabled;
+
         boolean wifiConnected = enabled && (wifiSignalIconId > 0) && (enabledDesc != null);
         boolean wifiNotConnected = (wifiSignalIconId > 0) && (enabledDesc == null);
+        mWifiState.enabled = enabled;
+        mWifiState.connected = wifiConnected;
         if (wifiConnected) {
             mWifiState.iconId = wifiSignalIconId;
             mWifiState.label = removeDoubleQuotes(enabledDesc);
+            mWifiState.signalContentDescription = wifiSignalContentDescription;
         } else if (wifiNotConnected) {
             mWifiState.iconId = R.drawable.ic_qs_wifi_0;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_label);
+            mWifiState.signalContentDescription = r.getString(R.string.accessibility_no_wifi);
         } else {
             mWifiState.iconId = R.drawable.ic_qs_wifi_no_network;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_off_label);
+            mWifiState.signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         }
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
@@ -402,17 +415,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // NetworkSignalChanged callback
     @Override
-    public void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
-            int dataTypeIconId, String enabledDesc) {
+    public void onMobileDataSignalChanged(
+            boolean enabled, int mobileSignalIconId, String signalContentDescription,
+            int dataTypeIconId, String dataContentDescription, String enabledDesc) {
         if (deviceSupportsTelephony()) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
             mRSSIState.signalIconId = enabled && (mobileSignalIconId > 0)
                     ? mobileSignalIconId
                     : R.drawable.ic_qs_signal_no_signal;
+            mRSSIState.signalContentDescription = enabled && (mobileSignalIconId > 0)
+                    ? signalContentDescription
+                    : r.getString(R.string.accessibility_no_signal);
             mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
                     ? dataTypeIconId
                     : 0;
+            mRSSIState.dataContentDescription = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
+                    ? dataContentDescription
+                    : r.getString(R.string.accessibility_no_data);
             mRSSIState.label = enabled
                     ? removeTrailingPeriod(enabledDesc)
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
@@ -448,13 +468,16 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (mBluetoothState.enabled) {
             if (mBluetoothState.connected) {
                 mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_on;
+                mBluetoothState.stateContentDescription = r.getString(R.string.accessibility_desc_connected);
             } else {
                 mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_not_connected;
+                mBluetoothState.stateContentDescription = r.getString(R.string.accessibility_desc_on);
             }
             mBluetoothState.label = r.getString(R.string.quick_settings_bluetooth_label);
         } else {
             mBluetoothState.iconId = R.drawable.ic_qs_bluetooth_off;
             mBluetoothState.label = r.getString(R.string.quick_settings_bluetooth_off_label);
+            mBluetoothState.stateContentDescription = r.getString(R.string.accessibility_desc_off);
         }
         mBluetoothCallback.refreshView(mBluetoothTile, mBluetoothState);
     }
@@ -632,7 +655,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 ? mContext.getString(R.string.quick_settings_rotation_locked_label)
                 : mContext.getString(R.string.quick_settings_rotation_unlocked_label);
 
-        // may be called before addRotationLockTile due to RotationPolicyListener in QuickSettings 
+        // may be called before addRotationLockTile due to RotationPolicyListener in QuickSettings
         if (mRotationLockTile != null && mRotationLockCallback != null) {
             mRotationLockCallback.refreshView(mRotationLockTile, mRotationLockState);
         }

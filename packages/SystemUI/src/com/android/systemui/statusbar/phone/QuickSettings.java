@@ -19,9 +19,12 @@ package com.android.systemui.statusbar.phone;
 import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
+
+import com.android.systemui.statusbar.phone.QuickSettingsModel.BluetoothState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.RSSIState;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.State;
 import com.android.systemui.statusbar.phone.QuickSettingsModel.UserState;
+import com.android.systemui.statusbar.phone.QuickSettingsModel.WifiState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BrightnessController;
@@ -90,7 +93,7 @@ class QuickSettings {
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
-    private QuickSettingsModel.BluetoothState mBluetoothState;
+    private BluetoothState mBluetoothState;
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
@@ -305,6 +308,8 @@ class QuickSettings {
                 if (us.avatar != null) {
                     iv.setImageDrawable(us.avatar);
                 }
+                view.setContentDescription(mContext.getString(
+                        R.string.accessibility_quick_settings_user, state.label));
             }
         });
         parent.addView(userTile);
@@ -363,9 +368,14 @@ class QuickSettings {
         mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
+                WifiState wifiState = (WifiState) state;
                 TextView tv = (TextView) view.findViewById(R.id.wifi_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                tv.setText(state.label);
+                tv.setCompoundDrawablesWithIntrinsicBounds(0, wifiState.iconId, 0, 0);
+                tv.setText(wifiState.label);
+                view.setContentDescription(mContext.getString(
+                        R.string.accessibility_quick_settings_wifi,
+                        wifiState.signalContentDescription,
+                        (wifiState.connected) ? wifiState.label : ""));
             }
         });
         parent.addView(wifiTile);
@@ -393,12 +403,17 @@ class QuickSettings {
                     ImageView iov = (ImageView) view.findViewById(R.id.rssi_overlay_image);
                     TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
                     iv.setImageResource(rssiState.signalIconId);
+
                     if (rssiState.dataTypeIconId > 0) {
                         iov.setImageResource(rssiState.dataTypeIconId);
                     } else {
                         iov.setImageDrawable(null);
                     }
                     tv.setText(state.label);
+                    view.setContentDescription(mContext.getResources().getString(
+                            R.string.accessibility_quick_settings_mobile,
+                            rssiState.signalContentDescription, rssiState.dataContentDescription,
+                            state.label));
                 }
             });
             parent.addView(rssiTile);
@@ -460,6 +475,8 @@ class QuickSettings {
                 iv.setImageDrawable(d);
                 iv.setImageLevel(batteryState.batteryLevel);
                 tv.setText(t);
+                view.setContentDescription(
+                        mContext.getString(R.string.accessibility_quick_settings_battery, t));
             }
         });
         parent.addView(batteryTile);
@@ -473,6 +490,12 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView view, State state) {
                 TextView tv = (TextView) view.findViewById(R.id.airplane_mode_textview);
                 tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+
+                String airplaneState = mContext.getString(
+                        (state.enabled) ? R.string.accessibility_desc_on
+                                : R.string.accessibility_desc_off);
+                view.setContentDescription(
+                        mContext.getString(R.string.accessibility_quick_settings_airplane, airplaneState));
                 tv.setText(state.label);
             }
         });
@@ -492,6 +515,7 @@ class QuickSettings {
             mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
+                    BluetoothState bluetoothState = (BluetoothState) state;
                     TextView tv = (TextView) view.findViewById(R.id.bluetooth_textview);
                     tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
 
@@ -510,6 +534,9 @@ class QuickSettings {
                                 btDevices.size());
                     }
                     */
+                    view.setContentDescription(mContext.getString(
+                            R.string.accessibility_quick_settings_bluetooth,
+                            bluetoothState.stateContentDescription));
                     tv.setText(label);
                 }
             });
@@ -561,6 +588,8 @@ class QuickSettings {
                 TextView tv = (TextView) view.findViewById(R.id.alarm_textview);
                 tv.setText(alarmState.label);
                 view.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
+                view.setContentDescription(mContext.getString(
+                        R.string.accessibility_quick_settings_alarm, alarmState.label));
             }
         });
         parent.addView(alarmTile);
@@ -697,7 +726,7 @@ class QuickSettings {
             showBrightnessDialog();
         }
     }
-    
+
     private void removeAllBrightnessDialogCallbacks() {
         mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
     }
@@ -717,7 +746,7 @@ class QuickSettings {
             mBrightnessDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             mBrightnessDialog.setContentView(R.layout.quick_settings_brightness_dialog);
             mBrightnessDialog.setCanceledOnTouchOutside(true);
-        
+
             mBrightnessController = new BrightnessController(mContext,
                     (ToggleSlider) mBrightnessDialog.findViewById(R.id.brightness_slider));
             mBrightnessController.addStateChangedCallback(mModel);
@@ -727,7 +756,7 @@ class QuickSettings {
                     mBrightnessController = null;
                 }
             });
-            
+
             mBrightnessDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             mBrightnessDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
@@ -831,6 +860,7 @@ class QuickSettings {
                     Log.e(TAG, "Couldn't get current user id for profile change", e);
                 }
             }
+
         }
     };
 }
