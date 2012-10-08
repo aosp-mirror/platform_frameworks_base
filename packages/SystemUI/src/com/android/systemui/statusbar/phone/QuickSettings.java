@@ -207,6 +207,11 @@ class QuickSettings {
                         Profile.CONTENT_URI, new String[] {Phone._ID, Phone.DISPLAY_NAME},
                         null, null, null);
 
+                if (cursor == null) {
+                    // Info not available. Should become available later.
+                    return new Pair<String, BitmapDrawable>(null, null);
+                }
+
                 String name = null;
                 try {
                     if (cursor.moveToFirst()) {
