@@ -281,22 +281,32 @@ public class PanelView extends FrameLayout {
                             mHandleView.setPressed(false);
                             mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
-                            mVelocityTracker.computeCurrentVelocity(1000);
 
-                            float yVel = mVelocityTracker.getYVelocity();
-                            boolean negative = yVel < 0;
+                            float vel = 0, yVel = 0, xVel = 0;
+                            boolean negative = false;
 
-                            float xVel = mVelocityTracker.getXVelocity();
-                            if (xVel < 0) {
-                                xVel = -xVel;
-                            }
-                            if (xVel > mFlingGestureMaxXVelocityPx) {
-                                xVel = mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
-                            }
+                            if (mVelocityTracker != null) {
+                                // the velocitytracker might be null if we got a bad input stream
+                                mVelocityTracker.computeCurrentVelocity(1000);
 
-                            float vel = (float)Math.hypot(yVel, xVel);
-                            if (vel > mFlingGestureMaxOutputVelocityPx) {
-                                vel = mFlingGestureMaxOutputVelocityPx;
+                                yVel = mVelocityTracker.getYVelocity();
+                                negative = yVel < 0;
+
+                                xVel = mVelocityTracker.getXVelocity();
+                                if (xVel < 0) {
+                                    xVel = -xVel;
+                                }
+                                if (xVel > mFlingGestureMaxXVelocityPx) {
+                                    xVel = mFlingGestureMaxXVelocityPx; // limit how much we care about the x axis
+                                }
+
+                                vel = (float)Math.hypot(yVel, xVel);
+                                if (vel > mFlingGestureMaxOutputVelocityPx) {
+                                    vel = mFlingGestureMaxOutputVelocityPx;
+                                }
+
+                                mVelocityTracker.recycle();
+                                mVelocityTracker = null;
                             }
 
                             // if you've barely moved your finger, we treat the velocity as 0
@@ -320,9 +330,6 @@ public class PanelView extends FrameLayout {
                                     vel);
 
                             fling(vel, true);
-
-                            mVelocityTracker.recycle();
-                            mVelocityTracker = null;
 
                             break;
                     }
