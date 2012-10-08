@@ -737,7 +737,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Manžel(ka)"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Vlastní"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Plocha"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domů"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práce"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Jiné"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Zadejte kód PIN"</string>

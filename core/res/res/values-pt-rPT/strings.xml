@@ -737,7 +737,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Irmã"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Cônjuge"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Personalizado"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Página Inicial"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Casa"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Emprego"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Outro"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Escreva o código PIN"</string>
