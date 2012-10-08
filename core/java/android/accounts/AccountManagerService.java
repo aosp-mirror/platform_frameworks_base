@@ -18,7 +18,7 @@ package android.accounts;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.AppGlobals;
+import android.app.ActivityManagerNative;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,10 +32,9 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
-import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -59,6 +58,8 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.util.IndentingPrintWriter;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Sets;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -67,8 +68,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -243,8 +244,7 @@ public class AccountManagerService
     }
 
     public void systemReady() {
-        mAuthenticatorCache.generateServicesMap();
-        initUser(0);
+        initUser(UserHandle.USER_OWNER);
     }
 
     private UserManager getUserManager() {
@@ -300,6 +300,14 @@ public class AccountManagerService
     }
 
     private void validateAccountsAndPopulateCache(UserAccounts accounts) {
+        mAuthenticatorCache.invalidateCache(accounts.userId);
+
+        final HashSet<AuthenticatorDescription> knownAuth = Sets.newHashSet();
+        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service :
+                mAuthenticatorCache.getAllServices(accounts.userId)) {
+            knownAuth.add(service.type);
+        }
+
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             boolean accountDeleted = false;
@@ -314,8 +322,8 @@ public class AccountManagerService
                     final long accountId = cursor.getLong(0);
                     final String accountType = cursor.getString(1);
                     final String accountName = cursor.getString(2);
-                    if (mAuthenticatorCache.getServiceInfo(
-                            AuthenticatorDescription.newKey(accountType)) == null) {
+
+                    if (!knownAuth.contains(AuthenticatorDescription.newKey(accountType))) {
                         Log.d(TAG, "deleting account " + accountName + " because type "
                                 + accountType + " no longer has a registered authenticator");
                         db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
@@ -390,20 +398,9 @@ public class AccountManagerService
         }
     }
 
-    private List<UserInfo> getAllUsers() {
-        return getUserManager().getUsers();
-    }
-
-    public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
-        // Validate accounts for all users
-        List<UserInfo> users = getAllUsers();
-        if (users == null) {
-            validateAccountsAndPopulateCache(getUserAccountsForCaller());
-        } else {
-            for (UserInfo user : users) {
-                validateAccountsAndPopulateCache(getUserAccounts(user.id));
-            }
-        }
+    @Override
+    public void onServiceChanged(AuthenticatorDescription desc, int userId, boolean removed) {
+        validateAccountsAndPopulateCache(getUserAccounts(userId));
     }
 
     public String getPassword(Account account) {
@@ -470,10 +467,11 @@ public class AccountManagerService
                     + "caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
-        long identityToken = clearCallingIdentity();
+        final int userId = UserHandle.getCallingUserId();
+        final long identityToken = clearCallingIdentity();
         try {
             Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
-                    authenticatorCollection = mAuthenticatorCache.getAllServices();
+                    authenticatorCollection = mAuthenticatorCache.getAllServices(userId);
             AuthenticatorDescription[] types =
                     new AuthenticatorDescription[authenticatorCollection.size()];
             int i = 0;
@@ -1055,9 +1053,9 @@ public class AccountManagerService
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
         final UserAccounts accounts = getUserAccountsForCaller();
-        AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
-            mAuthenticatorCache.getServiceInfo(
-                    AuthenticatorDescription.newKey(account.type));
+        final RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo;
+        authenticatorInfo = mAuthenticatorCache.getServiceInfo(
+                AuthenticatorDescription.newKey(account.type), accounts.userId);
         final boolean customTokens =
             authenticatorInfo != null && authenticatorInfo.type.customTokens;
 
@@ -1074,7 +1072,7 @@ public class AccountManagerService
         if (notifyOnAuthFailure) {
             loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
         }
-        
+
         long identityToken = clearCallingIdentity();
         try {
             // if the caller has permission, do the peek. otherwise go the more expensive
@@ -1181,28 +1179,6 @@ public class AccountManagerService
                         PendingIntent.FLAG_CANCEL_CURRENT, null, user));
         installNotification(getCredentialPermissionNotificationId(
                 account, authTokenType, uid), n, user);
-    }
-
-    String getAccountLabel(String accountType) {
-        RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo =
-            mAuthenticatorCache.getServiceInfo(
-                    AuthenticatorDescription.newKey(accountType));
-        if (serviceInfo == null) {
-            throw new IllegalArgumentException("unknown account type: " + accountType);
-        }
-
-        final Context authContext;
-        try {
-            authContext = mContext.createPackageContext(
-                    serviceInfo.type.packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("unknown account type: " + accountType);
-        }
-        try {
-            return authContext.getString(serviceInfo.type.labelId);
-        } catch (Resources.NotFoundException e) {
-            throw new IllegalArgumentException("unknown account type: " + accountType);
-        }
     }
 
     private Intent newGrantCredentialsPermissionIntent(Account account, int uid,
@@ -1506,28 +1482,35 @@ public class AccountManagerService
     }
 
     /**
-     * Returns all the accounts qualified by user.
+     * Returns accounts for all running users.
+     *
      * @hide
      */
-    public AccountAndUser[] getAllAccounts() {
-        ArrayList<AccountAndUser> allAccounts = new ArrayList<AccountAndUser>();
-        List<UserInfo> users = getAllUsers();
-        if (users == null)  return new AccountAndUser[0];
+    public AccountAndUser[] getRunningAccounts() {
+        final int[] runningUserIds;
+        try {
+            runningUserIds = ActivityManagerNative.getDefault().getRunningUserIds();
+        } catch (RemoteException e) {
+            // Running in system_server; should never happen
+            throw new RuntimeException(e);
+        }
 
-        synchronized(mUsers) {
-            for (UserInfo user : users) {
-                UserAccounts userAccounts = getUserAccounts(user.id);
+        final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
+        synchronized (mUsers) {
+            for (int userId : runningUserIds) {
+                UserAccounts userAccounts = getUserAccounts(userId);
                 if (userAccounts == null) continue;
                 synchronized (userAccounts.cacheLock) {
                     Account[] accounts = getAccountsFromCacheLocked(userAccounts, null);
                     for (int a = 0; a < accounts.length; a++) {
-                        allAccounts.add(new AccountAndUser(accounts[a], user.id));
+                        runningAccounts.add(new AccountAndUser(accounts[a], userId));
                     }
                 }
             }
         }
-        AccountAndUser[] accountsArray = new AccountAndUser[allAccounts.size()];
-        return allAccounts.toArray(accountsArray);
+
+        AccountAndUser[] accountsArray = new AccountAndUser[runningAccounts.size()];
+        return runningAccounts.toArray(accountsArray);
     }
 
     public Account[] getAccounts(String type) {
@@ -1836,9 +1819,9 @@ public class AccountManagerService
          * if no authenticator or the bind fails then return false, otherwise return true
          */
         private boolean bindToAuthenticator(String authenticatorType) {
-            AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
-                    mAuthenticatorCache.getServiceInfo(
-                            AuthenticatorDescription.newKey(authenticatorType));
+            final AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo;
+            authenticatorInfo = mAuthenticatorCache.getServiceInfo(
+                    AuthenticatorDescription.newKey(authenticatorType), mAccounts.userId);
             if (authenticatorInfo == null) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "there is no authenticator for " + authenticatorType
@@ -2083,7 +2066,7 @@ public class AccountManagerService
                 }
 
                 fout.println();
-                mAuthenticatorCache.dump(fd, fout, args);
+                mAuthenticatorCache.dump(fd, fout, args, userAccounts.userId);
             }
         }
     }
@@ -2154,11 +2137,21 @@ public class AccountManagerService
         throw new SecurityException(msg);
     }
 
-    private boolean inSystemImage(int callerUid) {
-        String[] packages = mPackageManager.getPackagesForUid(callerUid);
+    private boolean inSystemImage(int callingUid) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        final PackageManager userPackageManager;
+        try {
+            userPackageManager = mContext.createPackageContextAsUser(
+                    "android", 0, new UserHandle(callingUserId)).getPackageManager();
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+
+        String[] packages = userPackageManager.getPackagesForUid(callingUid);
         for (String name : packages) {
             try {
-                PackageInfo packageInfo = mPackageManager.getPackageInfo(name, 0 /* flags */);
+                PackageInfo packageInfo = userPackageManager.getPackageInfo(name, 0 /* flags */);
                 if (packageInfo != null
                         && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                     return true;
@@ -2186,8 +2179,9 @@ public class AccountManagerService
     }
 
     private boolean hasAuthenticatorUid(String accountType, int callingUid) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
-                mAuthenticatorCache.getAllServices()) {
+                mAuthenticatorCache.getAllServices(callingUserId)) {
             if (serviceInfo.type.type.equals(accountType)) {
                 return (serviceInfo.uid == callingUid) ||
                         (mPackageManager.checkSignatures(serviceInfo.uid, callingUid)

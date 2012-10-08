@@ -345,10 +345,11 @@ public final class ContentService extends IContentService.Stub {
     public SyncAdapterType[] getSyncAdapterTypes() {
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
-        long identityToken = clearCallingIdentity();
+        final int userId = UserHandle.getCallingUserId();
+        final long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            return syncManager.getSyncAdapterTypes();
+            return syncManager.getSyncAdapterTypes(userId);
         } finally {
             restoreCallingIdentity(identityToken);
         }

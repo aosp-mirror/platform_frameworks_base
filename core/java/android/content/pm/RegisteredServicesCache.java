@@ -16,49 +16,54 @@
 
 package android.content.pm;
 
-import android.content.Context;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ComponentName;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
-import java.util.Map;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.FileInputStream;
-
 import com.android.internal.util.FastXmlSerializer;
-
-import com.google.android.collect.Maps;
 import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 /**
- * A cache of registered services. This cache
- * is built by interrogating the {@link PackageManager} and is updated as packages are added,
- * removed and changed. The services are referred to by type V and
- * are made available via the {@link #getServiceInfo} method.
+ * Cache of registered services. This cache is lazily built by interrogating
+ * {@link PackageManager} on a per-user basis. It's updated as packages are
+ * added, removed and changed. Users are responsible for calling
+ * {@link #invalidateCache(int)} when a user is started, since
+ * {@link PackageManager} broadcasts aren't sent for stopped users.
+ * <p>
+ * The services are referred to by type V and are made available via the
+ * {@link #getServiceInfo} method.
+ * 
  * @hide
  */
 public abstract class RegisteredServicesCache<V> {
@@ -69,15 +74,29 @@ public abstract class RegisteredServicesCache<V> {
     private final String mMetaDataName;
     private final String mAttributesName;
     private final XmlSerializerAndParser<V> mSerializerAndParser;
-    private final AtomicReference<BroadcastReceiver> mReceiver;
 
     private final Object mServicesLock = new Object();
-    // synchronized on mServicesLock
-    private HashMap<V, Integer> mPersistentServices;
-    // synchronized on mServicesLock
-    private Map<V, ServiceInfo<V>> mServices;
-    // synchronized on mServicesLock
+
+    // @GuardedBy("mServicesLock")
     private boolean mPersistentServicesFileDidNotExist;
+    // @GuardedBy("mServicesLock")
+    private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>();
+
+    private static class UserServices<V> {
+        // @GuardedBy("mServicesLock")
+        public final Map<V, Integer> persistentServices = Maps.newHashMap();
+        // @GuardedBy("mServicesLock")
+        public Map<V, ServiceInfo<V>> services = null;
+    }
+
+    private UserServices<V> findOrCreateUserLocked(int userId) {
+        UserServices<V> services = mUserServices.get(userId);
+        if (services == null) {
+            services = new UserServices<V>();
+            mUserServices.put(userId, services);
+        }
+        return services;
+    }
 
     /**
      * This file contains the list of known services. We would like to maintain this forever
@@ -102,36 +121,59 @@ public abstract class RegisteredServicesCache<V> {
         File syncDir = new File(systemDir, "registered_services");
         mPersistentServicesFile = new AtomicFile(new File(syncDir, interfaceName + ".xml"));
 
-        generateServicesMap();
+        // Load persisted services from disk
+        readPersistentServicesLocked();
 
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context1, Intent intent) {
-                generateServicesMap();
-            }
-        };
-        mReceiver = new AtomicReference<BroadcastReceiver>(receiver);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        mContext.registerReceiver(receiver, intentFilter);
+        mContext.registerReceiverAsUser(mPackageReceiver, UserHandle.ALL, intentFilter, null, null);
+
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(receiver, sdFilter);
+        mContext.registerReceiver(mExternalReceiver, sdFilter);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        Map<V, ServiceInfo<V>> services;
-        synchronized (mServicesLock) {
-            services = mServices;
+    private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            if (uid != -1) {
+                generateServicesMap(UserHandle.getUserId(uid));
+            }
         }
-        fout.println("RegisteredServicesCache: " + services.size() + " services");
-        for (ServiceInfo info : services.values()) {
-            fout.println("  " + info);
+    };
+
+    private final BroadcastReceiver mExternalReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // External apps can't coexist with multi-user, so scan owner
+            generateServicesMap(UserHandle.USER_OWNER);
+        }
+    };
+
+    public void invalidateCache(int userId) {
+        synchronized (mServicesLock) {
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            user.services = null;
+        }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter fout, String[] args, int userId) {
+        synchronized (mServicesLock) {
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            if (user.services != null) {
+                fout.println("RegisteredServicesCache: " + user.services.size() + " services");
+                for (ServiceInfo<?> info : user.services.values()) {
+                    fout.println("  " + info);
+                }
+            } else {
+                fout.println("RegisteredServicesCache: services not loaded");
+            }
         }
     }
 
@@ -151,7 +193,7 @@ public abstract class RegisteredServicesCache<V> {
         }
     }
 
-    private void notifyListener(final V type, final boolean removed) {
+    private void notifyListener(final V type, final int userId, final boolean removed) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.d(TAG, "notifyListener: " + type + " is " + (removed ? "removed" : "added"));
         }
@@ -168,7 +210,7 @@ public abstract class RegisteredServicesCache<V> {
         final RegisteredServicesCacheListener<V> listener2 = listener;
         handler.post(new Runnable() {
             public void run() {
-                listener2.onServiceChanged(type, removed);
+                listener2.onServiceChanged(type, userId, removed);
             }
         });
     }
@@ -200,9 +242,14 @@ public abstract class RegisteredServicesCache<V> {
      * @param type the account type of the authenticator
      * @return the AuthenticatorInfo that matches the account type or null if none is present
      */
-    public ServiceInfo<V> getServiceInfo(V type) {
+    public ServiceInfo<V> getServiceInfo(V type, int userId) {
         synchronized (mServicesLock) {
-            return mServices.get(type);
+            // Find user and lazily populate cache
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            if (user.services == null) {
+                generateServicesMap(userId);
+            }
+            return user.services.get(type);
         }
     }
 
@@ -210,29 +257,15 @@ public abstract class RegisteredServicesCache<V> {
      * @return a collection of {@link RegisteredServicesCache.ServiceInfo} objects for all
      * registered authenticators.
      */
-    public Collection<ServiceInfo<V>> getAllServices() {
+    public Collection<ServiceInfo<V>> getAllServices(int userId) {
         synchronized (mServicesLock) {
-            return Collections.unmodifiableCollection(mServices.values());
+            // Find user and lazily populate cache
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            if (user.services == null) {
+                generateServicesMap(userId);
+            }
+            return Collections.unmodifiableCollection(user.services.values());
         }
-    }
-
-    /**
-     * Stops the monitoring of package additions, removals and changes.
-     */
-    public void close() {
-        final BroadcastReceiver receiver = mReceiver.getAndSet(null);
-        if (receiver != null) {
-            mContext.unregisterReceiver(receiver);
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        if (mReceiver.get() != null) {
-            Log.e(TAG, "RegisteredServicesCache finalized without being closed");
-        }
-        close();
-        super.finalize();
     }
 
     private boolean inSystemImage(int callerUid) {
@@ -251,11 +284,17 @@ public abstract class RegisteredServicesCache<V> {
         return false;
     }
 
-    public void generateServicesMap() {
-        PackageManager pm = mContext.getPackageManager();
-        ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<ServiceInfo<V>>();
-        List<ResolveInfo> resolveInfos = pm.queryIntentServices(new Intent(mInterfaceName),
-                PackageManager.GET_META_DATA);
+    /**
+     * Populate {@link UserServices#services} by scanning installed packages for
+     * given {@link UserHandle}.
+     */
+    private void generateServicesMap(int userId) {
+        Slog.d(TAG, "generateServicesMap() for " + userId);
+
+        final PackageManager pm = mContext.getPackageManager();
+        final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<ServiceInfo<V>>();
+        final List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(
+                new Intent(mInterfaceName), PackageManager.GET_META_DATA, userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             try {
                 ServiceInfo<V> info = parseServiceInfo(resolveInfo);
@@ -272,10 +311,14 @@ public abstract class RegisteredServicesCache<V> {
         }
 
         synchronized (mServicesLock) {
-            if (mPersistentServices == null) {
-                readPersistentServicesLocked();
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            final boolean firstScan = user.services == null;
+            if (firstScan) {
+                user.services = Maps.newHashMap();
+            } else {
+                user.services.clear();
             }
-            mServices = Maps.newHashMap();
+
             StringBuilder changes = new StringBuilder();
             for (ServiceInfo<V> info : serviceInfos) {
                 // four cases:
@@ -287,19 +330,19 @@ public abstract class RegisteredServicesCache<V> {
                 //   - ignore
                 // - exists, the UID is different, and the new one is a system package
                 //   - add, notify user that it was added
-                Integer previousUid = mPersistentServices.get(info.type);
+                Integer previousUid = user.persistentServices.get(info.type);
                 if (previousUid == null) {
                     changes.append("  New service added: ").append(info).append("\n");
-                    mServices.put(info.type, info);
-                    mPersistentServices.put(info.type, info.uid);
-                    if (!mPersistentServicesFileDidNotExist) {
-                        notifyListener(info.type, false /* removed */);
+                    user.services.put(info.type, info);
+                    user.persistentServices.put(info.type, info.uid);
+                    if (!(mPersistentServicesFileDidNotExist && firstScan)) {
+                        notifyListener(info.type, userId, false /* removed */);
                     }
                 } else if (previousUid == info.uid) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         changes.append("  Existing service (nop): ").append(info).append("\n");
                     }
-                    mServices.put(info.type, info);
+                    user.services.put(info.type, info);
                 } else if (inSystemImage(info.uid)
                         || !containsTypeAndUid(serviceInfos, info.type, previousUid)) {
                     if (inSystemImage(info.uid)) {
@@ -309,9 +352,9 @@ public abstract class RegisteredServicesCache<V> {
                         changes.append("  Existing service replacing a removed service: ")
                                 .append(info).append("\n");
                     }
-                    mServices.put(info.type, info);
-                    mPersistentServices.put(info.type, info.uid);
-                    notifyListener(info.type, false /* removed */);
+                    user.services.put(info.type, info);
+                    user.persistentServices.put(info.type, info.uid);
+                    notifyListener(info.type, userId, false /* removed */);
                 } else {
                     // ignore
                     changes.append("  Existing service with new uid ignored: ").append(info)
@@ -320,15 +363,15 @@ public abstract class RegisteredServicesCache<V> {
             }
 
             ArrayList<V> toBeRemoved = Lists.newArrayList();
-            for (V v1 : mPersistentServices.keySet()) {
+            for (V v1 : user.persistentServices.keySet()) {
                 if (!containsType(serviceInfos, v1)) {
                     toBeRemoved.add(v1);
                 }
             }
             for (V v1 : toBeRemoved) {
-                mPersistentServices.remove(v1);
+                user.persistentServices.remove(v1);
                 changes.append("  Service removed: ").append(v1).append("\n");
-                notifyListener(v1, true /* removed */);
+                notifyListener(v1, userId, true /* removed */);
             }
             if (changes.length() > 0) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -342,7 +385,6 @@ public abstract class RegisteredServicesCache<V> {
                             serviceInfos.size() + " services unchanged");
                 }
             }
-            mPersistentServicesFileDidNotExist = false;
         }
     }
 
@@ -415,7 +457,7 @@ public abstract class RegisteredServicesCache<V> {
      * Read all sync status back in to the initial engine state.
      */
     private void readPersistentServicesLocked() {
-        mPersistentServices = Maps.newHashMap();
+        mUserServices.clear();
         if (mSerializerAndParser == null) {
             return;
         }
@@ -444,8 +486,10 @@ public abstract class RegisteredServicesCache<V> {
                                 break;
                             }
                             String uidString = parser.getAttributeValue(null, "uid");
-                            int uid = Integer.parseInt(uidString);
-                            mPersistentServices.put(service, uid);
+                            final int uid = Integer.parseInt(uidString);
+                            final int userId = UserHandle.getUserId(uid);
+                            final UserServices<V> user = findOrCreateUserLocked(userId);
+                            user.persistentServices.put(service, uid);
                         }
                     }
                     eventType = parser.next();
@@ -478,11 +522,14 @@ public abstract class RegisteredServicesCache<V> {
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "services");
-            for (Map.Entry<V, Integer> service : mPersistentServices.entrySet()) {
-                out.startTag(null, "service");
-                out.attribute(null, "uid", Integer.toString(service.getValue()));
-                mSerializerAndParser.writeAsXml(service.getKey(), out);
-                out.endTag(null, "service");
+            for (int i = 0; i < mUserServices.size(); i++) {
+                final UserServices<V> user = mUserServices.valueAt(i);
+                for (Map.Entry<V, Integer> service : user.persistentServices.entrySet()) {
+                    out.startTag(null, "service");
+                    out.attribute(null, "uid", Integer.toString(service.getValue()));
+                    mSerializerAndParser.writeAsXml(service.getKey(), out);
+                    out.endTag(null, "service");
+                }
             }
             out.endTag(null, "services");
             out.endDocument();
