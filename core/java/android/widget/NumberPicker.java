@@ -470,6 +470,11 @@ public class NumberPicker extends LinearLayout {
     private final PressedStateHelper mPressedStateHelper;
 
     /**
+     * The keycode of the last handled DPAD down event.
+     */
+    private int mLastHandledDownDpadKeyCode = -1;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -936,6 +941,31 @@ public class NumberPicker extends LinearLayout {
             case KeyEvent.KEYCODE_ENTER:
                 removeAllCallbacks();
                 break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (!mHasSelectorWheel) {
+                    break;
+                }
+                switch (event.getAction()) {
+                    case KeyEvent.ACTION_DOWN:
+                        if (mWrapSelectorWheel || (keyCode == KeyEvent.KEYCODE_DPAD_UP)
+                                ? getValue() < getMaxValue() : getValue() > getMinValue()) {
+                            requestFocus();
+                            mLastHandledDownDpadKeyCode = keyCode;
+                            removeAllCallbacks();
+                            if (mFlingScroller.isFinished()) {
+                                changeValueByOne(keyCode == KeyEvent.KEYCODE_DPAD_UP);
+                            }
+                            return true;
+                        }
+                        break;
+                    case KeyEvent.ACTION_UP:
+                        if (mLastHandledDownDpadKeyCode == keyCode) {
+                            mLastHandledDownDpadKeyCode = -1;
+                            return true;
+                        }
+                        break;
+                }
         }
         return super.dispatchKeyEvent(event);
     }
