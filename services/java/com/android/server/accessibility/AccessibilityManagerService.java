@@ -1123,7 +1123,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         R.string.enable_explore_by_touch_warning_message, label))
                 .create();
             mEnableTouchExplorationDialog.getWindow().setType(
-                    WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
+                    WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            mEnableTouchExplorationDialog.getWindow().getAttributes().privateFlags
+                    |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
             mEnableTouchExplorationDialog.show();
         }
