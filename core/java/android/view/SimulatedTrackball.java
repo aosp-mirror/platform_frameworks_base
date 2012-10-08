@@ -132,7 +132,7 @@ class SimulatedTrackball {
                 mLastMoveX = 0;
                 mLastMoveY = 0;
                 // Clear any flings
-                mHandler.removeMessages(0);
+                mHandler.removeMessages(FLICK_MSG_ID);
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
                 // Determine whether the move is slop or an intentional move
