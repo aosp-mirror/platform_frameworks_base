@@ -1414,9 +1414,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         long now = SystemClock.elapsedRealtime();
         String provider = (passive ? LocationManager.PASSIVE_PROVIDER : location.getProvider());
-        ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
-        if (records == null || records.size() == 0) return;
 
+        // Skip if the provider is unknown.
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) return;
 
@@ -1436,6 +1435,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
         }
         lastLocation.set(location);
+
+        // Skip if there are no UpdateRecords for this provider.
+        ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
+        if (records == null || records.size() == 0) return;
 
         // Fetch coarse location
         Location coarseLocation = null;
