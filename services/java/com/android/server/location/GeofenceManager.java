@@ -58,7 +58,6 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private Object mLock = new Object();
 
     // access to members below is synchronized on mLock
-    private Location mLastLocation;
     private List<GeofenceState> mFences = new LinkedList<GeofenceState>();
 
     public GeofenceManager(Context context, LocationBlacklist blacklist) {
@@ -77,7 +76,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent, int uid,
             String packageName) {
-        GeofenceState state = new GeofenceState(geofence, mLastLocation,
+        Location lastLocation = mLocationManager.getLastLocation();
+        GeofenceState state = new GeofenceState(geofence, lastLocation,
                 request.getExpireAt(), packageName, intent);
 
         synchronized (mLock) {
@@ -146,8 +146,6 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         List<PendingIntent> exitIntents = new LinkedList<PendingIntent>();
 
         synchronized (mLock) {
-            mLastLocation = location;
-
             removeExpiredFencesLocked();
 
             for (GeofenceState state : mFences) {
