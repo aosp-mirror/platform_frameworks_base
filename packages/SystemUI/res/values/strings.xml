@@ -256,16 +256,18 @@
     <!-- Content description of the data signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_signal_full">Data signal full.</string>
 
+    <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_off">Wifi off.</string>
     <!-- Content description of the WIFI signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_no_wifi">No Wi-Fi.</string>
+    <string name="accessibility_no_wifi">Wifi disconnected.</string>
     <!-- Content description of the WIFI signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_one_bar">Wi-Fi one bar.</string>
+    <string name="accessibility_wifi_one_bar">Wifi one bar.</string>
     <!-- Content description of the WIFI signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_two_bars">Wi-Fi two bars.</string>
+    <string name="accessibility_wifi_two_bars">Wifi two bars.</string>
     <!-- Content description of the WIFI signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_three_bars">Wi-Fi three bars.</string>
+    <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_wifi_signal_full">Wi-Fi signal full.</string>
+    <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
 
     <!-- Content description of the WiMAX signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_wimax">No WiMAX.</string>
@@ -278,8 +280,36 @@
     <!-- Content description of the WiMAX signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wimax_signal_full">WiMAX signal full.</string>
 
+    <!-- Content description of an item with no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_signal">No signal.</string>
+    <!-- Content description of an item with no signal and no connection for accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_not_connected">Not connected.</string>
+    <!-- Content description of an item with zero signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_zero_bars">Zero bars.</string>
+    <!-- Content description of an item with one signal bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_one_bar">One bar.</string>
+    <!-- Content description of an item with two signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_two_bars">Two bars.</string>
+    <!-- Content description of an item with three signal bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_three_bars">Three bars.</string>
+    <!-- Content description of an item with full signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_signal_full">Signal full.</string>
+
+    <!-- Content description of an item that is turned on for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_on">On.</string>
+    <!-- Content description of an item that is turned off for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_off">Off.</string>
+    <!-- Content description of an item that is connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_connected">Connected.</string>
+
     <!-- Content description of the data connection type GPRS for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_gprs">GPRS</string>
+
+    <!-- Content description of the data connection type 1x for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_1x">1 X</string>
+
+    <!-- Content description of the data connection type HSPA and its variants for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_hspa">HSPA</string>
 
     <!-- Content description of the data connection type 3G for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_3g">3G</string>
@@ -292,6 +322,9 @@
 
     <!-- Content description of the data connection type CDMA for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_cdma">CDMA</string>
+
+    <!-- Content description of the roaming data connection type for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_roaming">Roaming</string>
 
     <!-- Content description of the data connection type Edge for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_edge">Edge</string>
@@ -337,6 +370,28 @@
 
     <!-- Content description to tell the user an application has been removed from recents -->
     <string name="accessibility_recents_item_dismissed"><xliff:g id="app" example="Calendar">%s</xliff:g> dismissed.</string>
+    <!-- Content description to tell the user a notification has been removed from the notification shade -->
+    <string name="accessibility_notification_dismissed">Notification dismissed.</string>
+
+    <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_notification_shade">Notification shade.</string>
+    <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_quick_settings">Quick settings.</string>
+
+    <!-- Content description of the user tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_user">User <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
+    <!-- Content description of the wifi tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_wifi"><xliff:g id="signal" example="Three bars">%1$s</xliff:g>. <xliff:g id="network" example="MyWifiNetwork">%2$s</xliff:g></string>
+    <!-- Content description of the mobile data tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_mobile">Mobile <xliff:g id="signal" example="Three bars">%1$s</xliff:g>. <xliff:g id="type" example="4G">%2$s</xliff:g>. <xliff:g id="network" example="T-Mobile">%3$s</xliff:g>.</string>
+    <!-- Content description of the battery tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_battery">Battery <xliff:g id="state" example="50% charging">%s</xliff:g>.</string>
+    <!-- Content description of the airplane mode tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_airplane">Airplane Mode <xliff:g id="state" example="Off">%s</xliff:g>.</string>
+    <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_bluetooth">Bluetooth <xliff:g id="state" example="Off">%s</xliff:g>.</string>
+    <!-- Content description of the alarm tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_alarm">Alarm set for <xliff:g id="time" example="Wed 3:30 PM">%s</xliff:g>.</string>
 
     <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_3g_title">2G-3G data disabled</string>
