@@ -34,6 +34,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -210,59 +212,64 @@ public class Searchables {
         // Use intent resolver to generate list of ACTION_SEARCH & ACTION_WEB_SEARCH receivers.
         List<ResolveInfo> searchList;
         final Intent intent = new Intent(Intent.ACTION_SEARCH);
-        
-        searchList = queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
-        List<ResolveInfo> webSearchInfoList;
-        final Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
-        webSearchInfoList = queryIntentActivities(webSearchIntent, PackageManager.GET_META_DATA);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            searchList = queryIntentActivities(intent, PackageManager.GET_META_DATA);
 
-        // analyze each one, generate a Searchables record, and record
-        if (searchList != null || webSearchInfoList != null) {
-            int search_count = (searchList == null ? 0 : searchList.size());
-            int web_search_count = (webSearchInfoList == null ? 0 : webSearchInfoList.size());
-            int count = search_count + web_search_count;
-            long token = Binder.clearCallingIdentity();
-            for (int ii = 0; ii < count; ii++) {
-                // for each component, try to find metadata
-                ResolveInfo info = (ii < search_count)
-                        ? searchList.get(ii)
-                        : webSearchInfoList.get(ii - search_count);
-                ActivityInfo ai = info.activityInfo;
-                // Check first to avoid duplicate entries.
-                if (newSearchablesMap.get(new ComponentName(ai.packageName, ai.name)) == null) {
-                    SearchableInfo searchable = SearchableInfo.getActivityMetaData(mContext, ai);
-                    if (searchable != null) {
-                        newSearchablesList.add(searchable);
-                        newSearchablesMap.put(searchable.getSearchActivity(), searchable);
-                        if (searchable.shouldIncludeInGlobalSearch()) {
-                            newSearchablesInGlobalSearchList.add(searchable);
+            List<ResolveInfo> webSearchInfoList;
+            final Intent webSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+            webSearchInfoList = queryIntentActivities(webSearchIntent, PackageManager.GET_META_DATA);
+
+            // analyze each one, generate a Searchables record, and record
+            if (searchList != null || webSearchInfoList != null) {
+                int search_count = (searchList == null ? 0 : searchList.size());
+                int web_search_count = (webSearchInfoList == null ? 0 : webSearchInfoList.size());
+                int count = search_count + web_search_count;
+                for (int ii = 0; ii < count; ii++) {
+                    // for each component, try to find metadata
+                    ResolveInfo info = (ii < search_count)
+                            ? searchList.get(ii)
+                            : webSearchInfoList.get(ii - search_count);
+                    ActivityInfo ai = info.activityInfo;
+                    // Check first to avoid duplicate entries.
+                    if (newSearchablesMap.get(new ComponentName(ai.packageName, ai.name)) == null) {
+                        SearchableInfo searchable = SearchableInfo.getActivityMetaData(mContext, ai,
+                                mUserId);
+                        if (searchable != null) {
+                            newSearchablesList.add(searchable);
+                            newSearchablesMap.put(searchable.getSearchActivity(), searchable);
+                            if (searchable.shouldIncludeInGlobalSearch()) {
+                                newSearchablesInGlobalSearchList.add(searchable);
+                            }
                         }
                     }
                 }
             }
-            Binder.restoreCallingIdentity(token);
-        }
 
-        List<ResolveInfo> newGlobalSearchActivities = findGlobalSearchActivities();
+            List<ResolveInfo> newGlobalSearchActivities = findGlobalSearchActivities();
 
-        // Find the global search activity
-        ComponentName newGlobalSearchActivity = findGlobalSearchActivity(
-                newGlobalSearchActivities);
+            // Find the global search activity
+            ComponentName newGlobalSearchActivity = findGlobalSearchActivity(
+                    newGlobalSearchActivities);
 
-        // Find the web search activity
-        ComponentName newWebSearchActivity = findWebSearchActivity(newGlobalSearchActivity);
+            // Find the web search activity
+            ComponentName newWebSearchActivity = findWebSearchActivity(newGlobalSearchActivity);
 
-        // Store a consistent set of new values
-        synchronized (this) {
-            mSearchablesMap = newSearchablesMap;
-            mSearchablesList = newSearchablesList;
-            mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
-            mGlobalSearchActivities = newGlobalSearchActivities;
-            mCurrentGlobalSearchActivity = newGlobalSearchActivity;
-            mWebSearchActivity = newWebSearchActivity;
+            // Store a consistent set of new values
+            synchronized (this) {
+                mSearchablesMap = newSearchablesMap;
+                mSearchablesList = newSearchablesList;
+                mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
+                mGlobalSearchActivities = newGlobalSearchActivities;
+                mCurrentGlobalSearchActivity = newGlobalSearchActivity;
+                mWebSearchActivity = newWebSearchActivity;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
+
     /**
      * Returns a sorted list of installed search providers as per
      * the following heuristics:
@@ -442,5 +449,16 @@ public class Searchables {
      */
     public synchronized ComponentName getWebSearchActivity() {
         return mWebSearchActivity;
+    }
+
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("Searchable authorities:");
+        synchronized (this) {
+            if (mSearchablesList != null) {
+                for (SearchableInfo info: mSearchablesList) {
+                    pw.print("  "); pw.println(info.getSuggestAuthority());
+                }
+            }
+        }
     }
 }

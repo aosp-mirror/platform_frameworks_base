@@ -24,10 +24,12 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -510,16 +512,25 @@ public final class SearchableInfo implements Parcelable {
      *
      * @hide For use by SearchManagerService.
      */
-    public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo) {
+    public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo,
+            int userId) {
+        Context userContext = null;
+        try {
+            userContext = context.createPackageContextAsUser("system", 0,
+                new UserHandle(userId));
+        } catch (NameNotFoundException nnfe) {
+            Log.e(LOG_TAG, "Couldn't create package context for user " + userId);
+            return null;
+        }
         // for each component, try to find metadata
         XmlResourceParser xml = 
-                activityInfo.loadXmlMetaData(context.getPackageManager(), MD_LABEL_SEARCHABLE);
+                activityInfo.loadXmlMetaData(userContext.getPackageManager(), MD_LABEL_SEARCHABLE);
         if (xml == null) {
             return null;
         }
         ComponentName cName = new ComponentName(activityInfo.packageName, activityInfo.name);
         
-        SearchableInfo searchable = getActivityMetaData(context, xml, cName);
+        SearchableInfo searchable = getActivityMetaData(userContext, xml, cName);
         xml.close();
         
         if (DBG) {
