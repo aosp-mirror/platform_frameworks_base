@@ -1210,12 +1210,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowState curTarget = mInputMethodTarget;
         if (curTarget != null && w != null
                 && curTarget.isDisplayedLw()
-                && curTarget.mExiting) {
-            if (curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer) {
-                w = curTarget;
-                i = windows.indexOf(w);
-                if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Current target higher, switching to: " + w);
-            }
+                && (curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer)) {
+            if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Current target higher, not changing");
+            return windows.indexOf(curTarget) + 1;
         }
 
         if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Desired input method target="
@@ -4184,6 +4181,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setAppStartingWindow(IBinder token, String pkg,
             int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon,
