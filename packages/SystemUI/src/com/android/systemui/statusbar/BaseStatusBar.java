@@ -301,8 +301,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int _id = n.id;
             vetoButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
+                        // Accessibility feedback
+                        v.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_notification_dismissed));
                         try {
                             mBarService.onNotificationClear(_pkg, _tag, _id);
+
                         } catch (RemoteException ex) {
                             // system process is dead if we're here.
                         }
@@ -312,6 +316,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             vetoButton.setVisibility(View.GONE);
         }
+        vetoButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         return vetoButton;
     }
 

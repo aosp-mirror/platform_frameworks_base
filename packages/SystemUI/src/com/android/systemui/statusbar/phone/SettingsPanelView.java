@@ -59,6 +59,8 @@ public class SettingsPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
+
+        setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
 
     @Override
