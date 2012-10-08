@@ -175,7 +175,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nessuna rete"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi disattivato"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Display Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Nessuna connessione display Wi-Fi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Visualizzazione wireless"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosità"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Le notifiche vengono visualizzate qui"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Puoi accedervi in qualsiasi momento scorrendo verso il basso."\n"Fai scorrere di nuovo verso il basso per visualizzare i controlli del sistema."</string>
 </resources>
