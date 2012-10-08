@@ -171,7 +171,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Hakuna Mtandao"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Imezimwa"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Onyesho la Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Hakuna Muunganisho wa Onyesho la Wi-Fi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Uonyeshaji Pasiwaya"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Arifa zitaonekana hapa"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Wafikie wakati wowote kwa kupapasa chini."\n"Papasa chini tena kwa ajili ya vidhibiti vya mfumo."</string>
 </resources>

@@ -173,7 +173,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Intet netværk"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi slået fra"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi Display"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="7834964244709912066">"Ingen forbindelse til Wi-Fi Display"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Trådløs skærm"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Lysstyrke"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Underretninger vises her"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Få adgang til dem når som helst ved at stryge ned."\n"Stryg ned igen for at komme til systemindstillingerne."</string>
 </resources>
