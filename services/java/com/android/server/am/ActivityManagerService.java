@@ -3741,8 +3741,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void forceStopUserLocked(int userId) {
         forceStopPackageLocked(null, -1, false, false, true, false, userId);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                | Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
@@ -14130,6 +14129,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 final UserStartedState uss = mStartedUsers.get(userId);
 
+                // Make sure user is in the started state.  If it is currently
+                // stopping, we need to knock that off.
+                if (uss.mState == UserStartedState.STATE_STOPPING) {
+                    // If we are stopping, we haven't sent ACTION_SHUTDOWN,
+                    // so we can just fairly silently bring the user back from
+                    // the almost-dead.
+                    uss.mState = UserStartedState.STATE_RUNNING;
+                } else if (uss.mState == UserStartedState.STATE_SHUTDOWN) {
+                    // This means ACTION_SHUTDOWN has been sent, so we will
+                    // need to treat this as a new boot of the user.
+                    uss.mState = UserStartedState.STATE_BOOTING;
+                }
+
                 mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
                 mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
                 mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
@@ -14206,6 +14218,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
                         android.Manifest.permission.MANAGE_USERS,
+                        false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+                intent = new Intent(Intent.ACTION_USER_STARTING);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, new IIntentReceiver.Stub() {
+                            @Override
+                            public void performReceive(Intent intent, int resultCode, String data,
+                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                    throws RemoteException {
+                            }
+                        }, 0, null, null,
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
                         false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             }
         } finally {
@@ -14295,7 +14320,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void finishUserSwitch(UserStartedState uss) {
         synchronized (this) {
-            if (uss.mState == UserStartedState.STATE_BOOTING
+            if ((uss.mState == UserStartedState.STATE_BOOTING
+                    || uss.mState == UserStartedState.STATE_SHUTDOWN)
                     && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
                 uss.mState = UserStartedState.STATE_RUNNING;
                 final int userId = uss.mHandle.getIdentifier();
@@ -14317,7 +14343,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     num--;
                     continue;
                 }
-                if (oldUss.mState == UserStartedState.STATE_STOPPING) {
+                if (oldUss.mState == UserStartedState.STATE_STOPPING
+                        || oldUss.mState == UserStartedState.STATE_SHUTDOWN) {
                     // This user is already stopping, doesn't count.
                     num--;
                     i++;
@@ -14382,23 +14409,50 @@ public final class ActivityManagerService extends ActivityManagerNative
             uss.mStopCallbacks.add(callback);
         }
 
-        if (uss.mState != UserStartedState.STATE_STOPPING) {
+        if (uss.mState != UserStartedState.STATE_STOPPING
+                && uss.mState != UserStartedState.STATE_SHUTDOWN) {
             uss.mState = UserStartedState.STATE_STOPPING;
 
             long ident = Binder.clearCallingIdentity();
             try {
-                // Inform of user switch
-                Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
-                final IIntentReceiver resultReceiver = new IIntentReceiver.Stub() {
+                // We are going to broadcast ACTION_USER_STOPPING and then
+                // once that is down send a final ACTION_SHUTDOWN and then
+                // stop the user.
+                final Intent stoppingIntent = new Intent(Intent.ACTION_USER_STOPPING);
+                stoppingIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                stoppingIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
+                // This is the result receiver for the final shutdown broadcast.
+                final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
                     @Override
                     public void performReceive(Intent intent, int resultCode, String data,
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                         finishUserStop(uss);
                     }
                 };
-                broadcastIntentLocked(null, null, intent,
-                        null, resultReceiver, 0, null, null, null,
-                        true, false, MY_PID, Process.SYSTEM_UID, userId);
+                // This is the result receiver for the initial stopping broadcast.
+                final IIntentReceiver stoppingReceiver = new IIntentReceiver.Stub() {
+                    @Override
+                    public void performReceive(Intent intent, int resultCode, String data,
+                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                        // On to the next.
+                        synchronized (ActivityManagerService.this) {
+                            if (uss.mState != UserStartedState.STATE_STOPPING) {
+                                // Whoops, we are being started back up.  Abort, abort!
+                                return;
+                            }
+                            uss.mState = UserStartedState.STATE_SHUTDOWN;
+                        }
+                        broadcastIntentLocked(null, null, shutdownIntent,
+                                null, shutdownReceiver, 0, null, null, null,
+                                true, false, MY_PID, Process.SYSTEM_UID, userId);
+                    }
+                };
+                // Kick things off.
+                broadcastIntentLocked(null, null, stoppingIntent,
+                        null, stoppingReceiver, 0, null, null,
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -14413,8 +14467,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         ArrayList<IStopUserCallback> callbacks;
         synchronized (this) {
             callbacks = new ArrayList<IStopUserCallback>(uss.mStopCallbacks);
-            if (uss.mState != UserStartedState.STATE_STOPPING
-                    || mStartedUsers.get(userId) != uss) {
+            if (mStartedUsers.get(userId) != uss) {
+                stopped = false;
+            } else if (uss.mState != UserStartedState.STATE_SHUTDOWN) {
                 stopped = false;
             } else {
                 stopped = true;
@@ -14478,7 +14533,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     boolean isUserRunningLocked(int userId) {
         UserStartedState state = mStartedUsers.get(userId);
-        return state != null && state.mState != UserStartedState.STATE_STOPPING;
+        return state != null && state.mState != UserStartedState.STATE_STOPPING
+                && state.mState != UserStartedState.STATE_SHUTDOWN;
     }
 
     @Override

@@ -23,9 +23,14 @@ import android.app.IStopUserCallback;
 import android.os.UserHandle;
 
 public class UserStartedState {
+    // User is first coming up.
     public final static int STATE_BOOTING = 0;
+    // User is in the normal running state.
     public final static int STATE_RUNNING = 1;
+    // User is in the initial process of being stopped.
     public final static int STATE_STOPPING = 2;
+    // User is in the final phase of stopping, sending Intent.ACTION_SHUTDOWN.
+    public final static int STATE_SHUTDOWN = 3;
 
     public final UserHandle mHandle;
     public final ArrayList<IStopUserCallback> mStopCallbacks
@@ -40,7 +45,14 @@ public class UserStartedState {
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mState="); pw.print(mState);
+        pw.print(prefix); pw.print("mState=");
+        switch (mState) {
+            case STATE_BOOTING: pw.print("BOOTING"); break;
+            case STATE_RUNNING: pw.print("RUNNING"); break;
+            case STATE_STOPPING: pw.print("STOPPING"); break;
+            case STATE_SHUTDOWN: pw.print("SHUTDOWN"); break;
+            default: pw.print(mState); break; 
+        }
         if (switching) pw.print(" SWITCHING");
         if (initializing) pw.print(" INITIALIZING");
         pw.println();
