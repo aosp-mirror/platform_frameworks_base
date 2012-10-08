@@ -418,6 +418,7 @@ bool Caches::enableScissor() {
     if (!scissorEnabled) {
         glEnable(GL_SCISSOR_TEST);
         scissorEnabled = true;
+        resetScissor();
         return true;
     }
     return false;
