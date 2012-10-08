@@ -224,6 +224,8 @@ public class TextureView extends View {
     private void destroySurface() {
         if (mLayer != null) {
             mSurface.detachFromGLContext();
+            // SurfaceTexture owns the texture name and detachFromGLContext
+            // should have deleted it
             mLayer.clearStorage();
 
             boolean shouldRelease = true;
@@ -291,6 +293,9 @@ public class TextureView extends View {
      */
     @Override
     public final void draw(Canvas canvas) {
+        // NOTE: Maintain this carefully (see View.java)
+        mPrivateFlags = (mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
+
         applyUpdate();
         applyTransformMatrix();
     }
@@ -335,6 +340,10 @@ public class TextureView extends View {
 
     @Override
     HardwareLayer getHardwareLayer() {
+        // NOTE: Maintain these two lines very carefully (see View.java)
+        mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
+        mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
                 return null;
@@ -773,6 +782,7 @@ public class TextureView extends View {
          * Invoked when the specified {@link SurfaceTexture} is about to be destroyed.
          * If returns true, no rendering should happen inside the surface texture after this method
          * is invoked. If returns false, the client needs to call {@link SurfaceTexture#release()}.
+         * Most applications should return true.
          * 
          * @param surface The surface about to be destroyed
          */
