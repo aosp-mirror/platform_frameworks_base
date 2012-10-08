@@ -948,13 +948,13 @@ public class NumberPicker extends LinearLayout {
                 }
                 switch (event.getAction()) {
                     case KeyEvent.ACTION_DOWN:
-                        if (mWrapSelectorWheel || (keyCode == KeyEvent.KEYCODE_DPAD_UP)
+                        if (mWrapSelectorWheel || (keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
                                 ? getValue() < getMaxValue() : getValue() > getMinValue()) {
                             requestFocus();
                             mLastHandledDownDpadKeyCode = keyCode;
                             removeAllCallbacks();
                             if (mFlingScroller.isFinished()) {
-                                changeValueByOne(keyCode == KeyEvent.KEYCODE_DPAD_UP);
+                                changeValueByOne(keyCode == KeyEvent.KEYCODE_DPAD_DOWN);
                             }
                             return true;
                         }
