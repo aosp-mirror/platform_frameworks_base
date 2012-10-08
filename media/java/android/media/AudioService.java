@@ -1750,6 +1750,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
+        // apply new ringer mode before checking volume for alias streams so that streams
+        // muted by ringer mode have the correct volume
+        setRingerModeInt(getRingerMode(), false);
+
         checkAllAliasStreamVolumes();
 
         synchronized (mSafeMediaVolumeState) {
@@ -1757,9 +1761,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 enforceSafeMediaVolume();
             }
         }
-
-        // apply new ringer mode
-        setRingerModeInt(getRingerMode(), false);
     }
 
     /** @see AudioManager#setSpeakerphoneOn() */
@@ -2575,9 +2576,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             AudioSystem.initStreamVolume(streamType, 0, mIndexMax);
             mIndexMax *= 10;
 
-            readSettings();
-
+            // mDeathHandlers must be created before calling readSettings()
             mDeathHandlers = new ArrayList<VolumeDeathHandler>();
+
+            readSettings();
         }
 
         public String getSettingNameForDevice(boolean lastAudible, int device) {
@@ -2597,7 +2599,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // do not read system stream volume from settings: this stream is always aliased
             // to another stream type and its volume is never persisted. Values in settings can
             // only be stale values
-            if ((mStreamType == AudioSystem.STREAM_SYSTEM) ||
+            // on first call to readSettings() at init time, muteCount() is always 0 so we will
+            // always create entries for default device
+            if ((muteCount() == 0) && (mStreamType == AudioSystem.STREAM_SYSTEM) ||
                     (mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED)) {
                 mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT,
                                           10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
@@ -2613,6 +2617,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
                 remainingDevices &= ~device;
 
+                // ignore settings for fixed volume devices: volume should always be at max
+                if ((muteCount() == 0) &&
+                        (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) &&
+                        ((device & mFixedVolumeDevices) != 0)) {
+                    mIndex.put(device, mIndexMax);
+                    mLastAudibleIndex.put(device, mIndexMax);
+                    continue;
+                }
                 // retrieve current volume for device
                 String name = getSettingNameForDevice(false /* lastAudible */, device);
                 // if no volume stored for current stream and device, use default volume if default
@@ -2798,7 +2810,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 int device = ((Integer)entry.getKey()).intValue();
                 int index = ((Integer)entry.getValue()).intValue();
                 index = rescaleIndex(index, srcStream.getStreamType(), mStreamType);
-                setIndex(index, device, lastAudible);
+
+                if (lastAudible) {
+                    setLastAudibleIndex(index, device);
+                } else {
+                    setIndex(index, device, false /* lastAudible */);
+                }
             }
         }
 
