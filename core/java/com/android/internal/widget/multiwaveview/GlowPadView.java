@@ -803,12 +803,8 @@ public class GlowPadView extends View {
     private void handleCancel(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle CANCEL");
 
-        // We should drop the active target here but it interferes with
-        // moving off the screen in the direction of the navigation bar. At some point we may
-        // want to revisit how we handle this. For now we'll allow a canceled event to
-        // activate the current target.
-
-        // mActiveTarget = -1; // Drop the active target if canceled.
+        // Drop the active target if canceled.
+        mActiveTarget = -1; 
 
         int actionIndex = event.findPointerIndex(mPointerId);
         actionIndex = actionIndex == -1 ? 0 : actionIndex;
