@@ -1108,7 +1108,7 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"전송"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"취소"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"내 선택사항 기억"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"나중에 설정 &gt; 앱에서 변경할 수 있습니다."</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"나중에 설정 &gt; 애플리케이션에서 변경할 수 있습니다."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"항상 허용"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"허용 안함"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 카드 제거됨"</string>

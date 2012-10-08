@@ -1398,7 +1398,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Netinkamas PIN kodas."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Įveskite PIN kodą, sudarytą iš 4–8 skaičių."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kodas turėtų būti mažiausiai 8 skaitmenų."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Pakartotinai įveskite tinkamą PUK kodą. Pakartotinai bandant bus visam laikui neleidžiama SIM."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Pakartotinai įveskite tinkamą PUK kodą. Pakartotinai bandant SIM bus neleidžiama visam laikui."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodai neatitinka"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Per daug atrakinimo piešinių bandymų"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Jei norite atrakinti, prisijunkite naudodami „Google“ paskyrą."</string>

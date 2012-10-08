@@ -737,7 +737,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Søster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Ektefelle"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Egendefinert"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startside"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hjem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbeid"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Annen"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Skriv inn PIN-kode"</string>
@@ -1421,5 +1421,5 @@
     <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Fortsett å holde nede to fingre for å aktivere tilgjengelighetstjenesten."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgjengelighet er aktivert."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgjengelighetstjenesten ble avbrutt."</string>
-    <string name="user_switched" msgid="3768006783166984410">"Gjeldene bruker: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Gjeldende bruker: <xliff:g id="NAME">%1$s</xliff:g>."</string>
 </resources>
