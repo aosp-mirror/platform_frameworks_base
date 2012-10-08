@@ -2327,7 +2327,9 @@ public class Intent implements Parcelable, Cloneable {
      * party applications because a newly initialized user does not have any
      * third party applications installed for it.)  This is sent early in
      * starting the user, around the time the home app is started, before
-     * {@link #ACTION_BOOT_COMPLETED} is sent.
+     * {@link #ACTION_BOOT_COMPLETED} is sent.  This is sent as a foreground
+     * broadcast, since it is part of a visible user interaction; be as quick
+     * as possible when handling it.
      */
     public static final String ACTION_USER_INITIALIZE =
             "android.intent.action.USER_INITIALIZE";
@@ -2337,7 +2339,9 @@ public class Intent implements Parcelable, Cloneable {
      * brought to the foreground.  This is only sent to receivers registered
      * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver}.  It is sent to the user that is going to the
-     * foreground.
+     * foreground.  This is sent as a foreground
+     * broadcast, since it is part of a visible user interaction; be as quick
+     * as possible when handling it.
      */
     public static final String ACTION_USER_FOREGROUND =
             "android.intent.action.USER_FOREGROUND";
@@ -2347,14 +2351,17 @@ public class Intent implements Parcelable, Cloneable {
      * sent to the background.  This is only sent to receivers registered
      * through {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver}.  It is sent to the user that is going to the
-     * background.
+     * background.  This is sent as a foreground
+     * broadcast, since it is part of a visible user interaction; be as quick
+     * as possible when handling it.
      */
     public static final String ACTION_USER_BACKGROUND =
             "android.intent.action.USER_BACKGROUND";
 
     /**
-     * Broadcast sent to the system when a user is added. Carries an extra EXTRA_USER_HANDLE that has the
-     * userHandle of the new user.  It is sent to all running users.  You must hold
+     * Broadcast sent to the system when a user is added. Carries an extra
+     * EXTRA_USER_HANDLE that has the userHandle of the new user.  It is sent to
+     * all running users.  You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
@@ -2362,22 +2369,59 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_ADDED";
 
     /**
-     * Broadcast sent to the system when a user is started. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user.  This is only sent to
+     * Broadcast sent by the system when a user is started. Carries an extra
+     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only sent to
      * registered receivers, not manifest receivers.  It is sent to the user
-     * that has been started.
+     * that has been started.  This is sent as a foreground
+     * broadcast, since it is part of a visible user interaction; be as quick
+     * as possible when handling it.
      * @hide
      */
     public static final String ACTION_USER_STARTED =
             "android.intent.action.USER_STARTED";
 
     /**
-     * Broadcast sent to the system when a user is stopped. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user.  This is similar to {@link #ACTION_PACKAGE_RESTARTED},
-     * but for an entire user instead of a specific package.  This is only sent to
-     * registered receivers, not manifest receivers.  It is sent to all running
-     * users <em>except</em> the one that has just been stopped (which is no
-     * longer running).
+     * Broadcast sent when a user is in the process of starting.  Carries an extra
+     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only
+     * sent to registered receivers, not manifest receivers.  It is sent to all
+     * users (including the one that is being started).  You must hold
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
+     * this broadcast.  This is sent as a background broadcast, since
+     * its result is not part of the primary UX flow; to safely keep track of
+     * started/stopped state of a user you can use this in conjunction with
+     * {@link #ACTION_USER_STOPPING}.  It is <b>not</b> generally safe to use with
+     * other user state broadcasts since those are foreground broadcasts so can
+     * execute in a different order.
+     * @hide
+     */
+    public static final String ACTION_USER_STARTING =
+            "android.intent.action.USER_STARTING";
+
+    /**
+     * Broadcast sent when a user is going to be stopped.  Carries an extra
+     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only
+     * sent to registered receivers, not manifest receivers.  It is sent to all
+     * users (including the one that is being stopped).  You must hold
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
+     * this broadcast.  The user will not stop until all receivers have
+     * handled the broadcast.  This is sent as a background broadcast, since
+     * its result is not part of the primary UX flow; to safely keep track of
+     * started/stopped state of a user you can use this in conjunction with
+     * {@link #ACTION_USER_STARTING}.  It is <b>not</b> generally safe to use with
+     * other user state broadcasts since those are foreground broadcasts so can
+     * execute in a different order.
+     * @hide
+     */
+    public static final String ACTION_USER_STOPPING =
+            "android.intent.action.USER_STOPPING";
+
+    /**
+     * Broadcast sent to the system when a user is stopped. Carries an extra
+     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is similar to
+     * {@link #ACTION_PACKAGE_RESTARTED}, but for an entire user instead of a
+     * specific package.  This is only sent to registered receivers, not manifest
+     * receivers.  It is sent to all running users <em>except</em> the one that
+     * has just been stopped (which is no longer running).
      * @hide
      */
     public static final String ACTION_USER_STOPPED =
