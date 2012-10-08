@@ -18,7 +18,7 @@ package com.android.server.power;
 
 /**
  * Low-level screen on blocker mechanism which is used to keep the screen off
- * until the window manager is ready to show new content.
+ * or the contents of the screen hidden until the window manager is ready to show new content.
  */
 interface ScreenOnBlocker {
     /**
