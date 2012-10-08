@@ -1103,8 +1103,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Benarkan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nafikan"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin menghantar mesej kepada &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457"><font fgcolor="#ffffb060">"ini boleh menyebabkan caj dikenakan"</font>" kepada akaun mudah alih anda."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Ini akan menyebabkan caj dikenakan kepada akaun mudah alih anda."</font></string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Ini akan menyebabkan akaun mudah alih anda "<font fgcolor="#ffffb060">"dikenakan caj"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Ini akan menyebabkan akaun mudah alih anda dikenakan caj."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Hantar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Batal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Ingat pilihan saya"</string>
@@ -1391,7 +1391,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Masukkan PIN SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Masukkan PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Masukkan Kata Laluan"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM kini dilumpuhkan. Masukkan kod PUK untuk meneruskan. Hubungi pembawa untuk butiran."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Hubungi pembawa untuk butiran."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Masukkan kod PIN yang diingini"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Sahkan kod PIN yang diingini"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Membuka kunci kad SIM..."</string>
