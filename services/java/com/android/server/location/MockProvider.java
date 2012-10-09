@@ -156,6 +156,11 @@ public class MockProvider implements LocationProviderInterface {
     public void setRequest(ProviderRequest request, WorkSource source) { }
 
     @Override
+    public void switchUser(int userId) {
+        // nothing to do here
+    }
+
+    @Override
     public boolean sendExtraCommand(String command, Bundle extras) {
         return false;
     }

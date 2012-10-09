@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.server.ServiceWatcher;
@@ -38,8 +39,8 @@ public class GeocoderProxy {
     private final ServiceWatcher mServiceWatcher;
 
     public static GeocoderProxy createAndBind(Context context,
-            List<String> initialPackageNames) {
-        GeocoderProxy proxy = new GeocoderProxy(context, initialPackageNames);
+            List<String> initialPackageNames, int userId) {
+        GeocoderProxy proxy = new GeocoderProxy(context, initialPackageNames, userId);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -47,11 +48,11 @@ public class GeocoderProxy {
         }
     }
 
-    public GeocoderProxy(Context context, List<String> initialPackageNames) {
+    public GeocoderProxy(Context context, List<String> initialPackageNames, int userId) {
         mContext = context;
 
         mServiceWatcher = new ServiceWatcher(mContext, TAG, SERVICE_ACTION, initialPackageNames,
-                null, null);
+                null, null, userId);
     }
 
     private boolean bind () {
