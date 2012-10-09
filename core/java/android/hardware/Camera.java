@@ -18,13 +18,18 @@ package android.hardware;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.media.IAudioService;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.text.TextUtils;
 import android.view.Surface;
@@ -192,7 +197,21 @@ public class Camera {
      * Returns the information about a particular camera.
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
      */
-    public native static void getCameraInfo(int cameraId, CameraInfo cameraInfo);
+    public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
+        _getCameraInfo(cameraId, cameraInfo);
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService audioService = IAudioService.Stub.asInterface(b);
+        try {
+            if (audioService.isCameraSoundForced()) {
+                // Only set this when sound is forced; otherwise let native code
+                // decide.
+                cameraInfo.canDisableShutterSound = false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Audio service is unavailable for queries");
+        }
+    }
+    private native static void _getCameraInfo(int cameraId, CameraInfo cameraInfo);
 
     /**
      * Information about a camera
@@ -1185,7 +1204,20 @@ public class Camera {
      * @see CameraInfo#canDisableShutterSound
      * @see ShutterCallback
      */
-    public native final boolean enableShutterSound(boolean enabled);
+    public final boolean enableShutterSound(boolean enabled) {
+        if (!enabled) {
+            IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+            IAudioService audioService = IAudioService.Stub.asInterface(b);
+            try {
+                if (audioService.isCameraSoundForced()) return false;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Audio service is unavailable for queries");
+            }
+        }
+        return _enableShutterSound(enabled);
+    }
+
+    private native final boolean _enableShutterSound(boolean enabled);
 
     /**
      * Callback interface for zoom changes during a smooth zoom operation.
