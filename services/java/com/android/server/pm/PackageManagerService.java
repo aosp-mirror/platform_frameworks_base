@@ -6374,12 +6374,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             mArgs = args;
 
             if (ret == PackageManager.INSTALL_SUCCEEDED) {
+                 /*
+                 * ADB installs appear as UserHandle.USER_ALL, and can only be performed by
+                 * UserHandle.USER_OWNER, so use the package verifier for UserHandle.USER_OWNER.
+                 */
+                int userIdentifier = getUser().getIdentifier();
+                if (userIdentifier == UserHandle.USER_ALL
+                        && ((flags & PackageManager.INSTALL_FROM_ADB) != 0)) {
+                    userIdentifier = UserHandle.USER_OWNER;
+                }
+
                 /*
                  * Determine if we have any installed package verifiers. If we
                  * do, then we'll defer to them to verify the packages.
                  */
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
-                        : getPackageUid(mRequiredVerifierPackage, getUser().getIdentifier());
+                        : getPackageUid(mRequiredVerifierPackage, userIdentifier);
                 if (requiredUid != -1 && isVerificationEnabled(flags)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
