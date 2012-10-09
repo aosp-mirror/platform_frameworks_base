@@ -33,6 +33,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -43,12 +45,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.View.BaseSavedState;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 import android.widget.ViewFlipper;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.internal.policy.impl.keyguard.KeyguardTransportControlView.SavedState;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
@@ -63,6 +67,10 @@ public class KeyguardHostView extends KeyguardViewBase {
     // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
     private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
+
+    private static final int TRANSPORT_GONE = 0;
+    private static final int TRANSPORT_INVISIBLE = 1;
+    private static final int TRANSPORT_VISIBLE = 2;
 
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetRegion mAppWidgetRegion;
@@ -83,10 +91,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
 
     private Rect mTempRect = new Rect();
+    private int mTransportState = TRANSPORT_GONE;
 
     /*package*/ interface TransportCallback {
-        void hide();
-        void show();
+        void onListenerDetached();
+        void onListenerAttached();
+        void onPlayStateChanged();
     }
 
     /*package*/ interface UserSwitcherCallback {
@@ -185,7 +195,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetHost.startListening();
         maybePopulateWidgets();
         disableStatusViewInteraction();
-        showAppropriateWidgetPage();
+        post(mSwitchPageRunnable);
     }
 
     private void disableStatusViewInteraction() {
@@ -712,7 +722,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void addDefaultWidgets() {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.keyguard_status_view, mAppWidgetContainer, true);
-        inflater.inflate(R.layout.keyguard_transport_control_view, mAppWidgetContainer, true);
+        inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
 
         inflateAndAddUserSelectorWidgetIfNecessary();
         initializeTransportControl();
@@ -721,16 +731,16 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void initializeTransportControl() {
         mTransportControl =
             (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
+        mTransportControl.setVisibility(View.GONE);
 
         // This code manages showing/hiding the transport control. We keep it around and only
         // add it to the hierarchy if it needs to be present.
         if (mTransportControl != null) {
             mTransportControl.setKeyguardCallback(new TransportCallback() {
-                boolean mSticky = false;
                 @Override
-                public void hide() {
+                public void onListenerDetached() {
                     int page = getWidgetPosition(R.id.keyguard_transport_control);
-                    if (page != -1 && !mSticky) {
+                    if (page != -1) {
                         if (page == mAppWidgetContainer.getCurrentPage()) {
                             // Switch back to clock view if music was showing.
                             mAppWidgetContainer
@@ -741,19 +751,22 @@ public class KeyguardHostView extends KeyguardViewBase {
                         // from AudioManager
                         KeyguardHostView.this.addView(mTransportControl);
                         mTransportControl.setVisibility(View.GONE);
+                        mTransportState = TRANSPORT_GONE;
                     }
                 }
 
                 @Override
-                public void show() {
+                public void onListenerAttached() {
                     if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
                         KeyguardHostView.this.removeView(mTransportControl);
-                        mAppWidgetContainer.addView(mTransportControl,
-                                getWidgetPosition(R.id.keyguard_status_view) + 1);
+                        mAppWidgetContainer.addView(mTransportControl, 0);
                         mTransportControl.setVisibility(View.VISIBLE);
-                        // Once shown, leave it showing
-                        mSticky = true;
                     }
+                }
+
+                @Override
+                public void onPlayStateChanged() {
+                    mTransportControl.post(mSwitchPageRunnable);
                 }
             });
         }
@@ -796,12 +809,87 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private void showAppropriateWidgetPage() {
-        int page = mAppWidgetContainer.indexOfChild(findViewById(R.id.keyguard_status_view));
-        if (mAppWidgetContainer.indexOfChild(mTransportControl) != -1) {
-            page = mAppWidgetContainer.indexOfChild(mTransportControl);
+    Runnable mSwitchPageRunnable = new Runnable() {
+        @Override
+        public void run() {
+           showAppropriateWidgetPage();
         }
-        mAppWidgetContainer.setCurrentPage(page);
+    };
+
+    static class SavedState extends BaseSavedState {
+        int transportState;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            this.transportState = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(this.transportState);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.transportState = mTransportState;
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mTransportState = ss.transportState;
+        post(mSwitchPageRunnable);
+    }
+
+    private void showAppropriateWidgetPage() {
+
+        // The following sets the priority for showing widgets. Transport should be shown if
+        // music is playing, followed by the multi-user widget if enabled, followed by the
+        // status widget.
+        final int pageToShow;
+        if (mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE) {
+            mTransportState = TRANSPORT_VISIBLE;
+            pageToShow = mAppWidgetContainer.indexOfChild(mTransportControl);
+        } else {
+            UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            final View multiUserView = findViewById(R.id.keyguard_multi_user_selector);
+            final int multiUserPosition = mAppWidgetContainer.indexOfChild(multiUserView);
+            if (multiUserPosition != -1 && mUm.getUsers(true).size() > 1) {
+                pageToShow = multiUserPosition;
+            } else {
+                final View statusView = findViewById(R.id.keyguard_status_view);
+                pageToShow = mAppWidgetContainer.indexOfChild(statusView);
+            }
+            if (mTransportState == TRANSPORT_VISIBLE) {
+                mTransportState = TRANSPORT_INVISIBLE;
+            }
+        }
+        mAppWidgetContainer.setCurrentPage(pageToShow);
     }
 
     private void inflateAndAddUserSelectorWidgetIfNecessary() {
