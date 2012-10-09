@@ -51,7 +51,8 @@ final class DisplayPowerState {
 
     private final Choreographer mChoreographer;
     private final ElectronBeam mElectronBeam;
-    private final PhotonicModulator mScreenBrightnessModulator;
+    private final PhotonicModulator mPhotonicModulator;
+    private final DisplayBlanker mDisplayBlanker;
 
     private int mDirty;
     private boolean mScreenOn;
@@ -61,10 +62,11 @@ final class DisplayPowerState {
     private Runnable mCleanListener;
 
     public DisplayPowerState(ElectronBeam electronBean,
-            PhotonicModulator screenBrightnessModulator) {
+            PhotonicModulator photonicModulator, DisplayBlanker displayBlanker) {
         mChoreographer = Choreographer.getInstance();
         mElectronBeam = electronBean;
-        mScreenBrightnessModulator = screenBrightnessModulator;
+        mPhotonicModulator = photonicModulator;
+        mDisplayBlanker = displayBlanker;
 
         // At boot time, we know that the screen is on and the electron beam
         // animation is not playing.  We don't know the screen's brightness though,
@@ -238,8 +240,8 @@ final class DisplayPowerState {
     private void apply() {
         if (mDirty != 0) {
             if ((mDirty & DIRTY_SCREEN_ON) != 0 && !mScreenOn) {
-                mScreenBrightnessModulator.setBrightness(0, true /*sync*/);
-                PowerManagerService.nativeSetScreenState(false);
+                mPhotonicModulator.setBrightness(0, true /*sync*/);
+                mDisplayBlanker.blankAllDisplays();
             }
 
             if ((mDirty & DIRTY_ELECTRON_BEAM) != 0) {
@@ -247,12 +249,12 @@ final class DisplayPowerState {
             }
 
             if ((mDirty & DIRTY_SCREEN_ON) != 0 && mScreenOn) {
-                PowerManagerService.nativeSetScreenState(true);
+                mDisplayBlanker.unblankAllDisplays();
             }
 
             if ((mDirty & (DIRTY_BRIGHTNESS | DIRTY_SCREEN_ON | DIRTY_ELECTRON_BEAM)) != 0
                     && mScreenOn) {
-                mScreenBrightnessModulator.setBrightness(
+                mPhotonicModulator.setBrightness(
                         (int)(mScreenBrightness * mElectronBeamLevel), false /*sync*/);
             }
 

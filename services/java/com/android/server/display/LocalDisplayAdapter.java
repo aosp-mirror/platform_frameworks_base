@@ -92,6 +92,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
+        private boolean mBlanked;
 
         public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
                 PhysicalDisplayInfo phys) {
@@ -150,10 +151,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
+        public void blankLocked() {
+            mBlanked = true;
+            Surface.blankDisplay(getDisplayTokenLocked());
+        }
+
+        @Override
+        public void unblankLocked() {
+            mBlanked = false;
+            Surface.unblankDisplay(getDisplayTokenLocked());
+        }
+
+        @Override
         public void dumpLocked(PrintWriter pw) {
             super.dumpLocked(pw);
             pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
             pw.println("mPhys=" + mPhys);
+            pw.println("mBlanked=" + mBlanked);
         }
     }
 
