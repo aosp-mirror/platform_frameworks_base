@@ -941,6 +941,10 @@
          reported by the hardware. -->
     <dimen name="config_minScalingSpan">27mm</dimen>
 
+    <!-- Minimum accepted value for touchMajor while scaling. This may be tuned
+         per-device in overlays. -->
+    <dimen name="config_minScalingTouchMajor">48dp</dimen>
+
     <!-- Safe headphone volume index. When music stream volume is below this index
     the SPL on headphone output is compliant to EN 60950 requirements for portable music
     players. -->
