@@ -230,11 +230,12 @@ public final class ContentValues implements Parcelable {
     }
 
     /**
-     * Gets a value. Valid value types are {@link String}, {@link Boolean}, and
-     * {@link Number} implementations.
+     * Gets a value. Valid value types are {@link String}, {@link Boolean},
+     * {@link Number}, and {@code byte[]} implementations.
      *
      * @param key the value to get
-     * @return the data for the value
+     * @return the data for the value, or {@code null} if the value is missing or if {@code null}
+     *         was previously added with the given {@code key}
      */
     public Object get(String key) {
         return mValues.get(key);
@@ -255,7 +256,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Long.
      *
      * @param key the value to get
-     * @return the Long value, or null if the value is missing or cannot be converted
+     * @return the Long value, or {@code null} if the value is missing or cannot be converted
      */
     public Long getAsLong(String key) {
         Object value = mValues.get(key);
@@ -280,7 +281,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to an Integer.
      *
      * @param key the value to get
-     * @return the Integer value, or null if the value is missing or cannot be converted
+     * @return the Integer value, or {@code null} if the value is missing or cannot be converted
      */
     public Integer getAsInteger(String key) {
         Object value = mValues.get(key);
@@ -305,7 +306,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Short.
      *
      * @param key the value to get
-     * @return the Short value, or null if the value is missing or cannot be converted
+     * @return the Short value, or {@code null} if the value is missing or cannot be converted
      */
     public Short getAsShort(String key) {
         Object value = mValues.get(key);
@@ -330,7 +331,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Byte.
      *
      * @param key the value to get
-     * @return the Byte value, or null if the value is missing or cannot be converted
+     * @return the Byte value, or {@code null} if the value is missing or cannot be converted
      */
     public Byte getAsByte(String key) {
         Object value = mValues.get(key);
@@ -355,7 +356,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Double.
      *
      * @param key the value to get
-     * @return the Double value, or null if the value is missing or cannot be converted
+     * @return the Double value, or {@code null} if the value is missing or cannot be converted
      */
     public Double getAsDouble(String key) {
         Object value = mValues.get(key);
@@ -380,7 +381,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Float.
      *
      * @param key the value to get
-     * @return the Float value, or null if the value is missing or cannot be converted
+     * @return the Float value, or {@code null} if the value is missing or cannot be converted
      */
     public Float getAsFloat(String key) {
         Object value = mValues.get(key);
@@ -405,7 +406,7 @@ public final class ContentValues implements Parcelable {
      * Gets a value and converts it to a Boolean.
      *
      * @param key the value to get
-     * @return the Boolean value, or null if the value is missing or cannot be converted
+     * @return the Boolean value, or {@code null} if the value is missing or cannot be converted
      */
     public Boolean getAsBoolean(String key) {
         Object value = mValues.get(key);
@@ -428,7 +429,8 @@ public final class ContentValues implements Parcelable {
      * any other types to byte arrays.
      *
      * @param key the value to get
-     * @return the byte[] value, or null is the value is missing or not a byte[]
+     * @return the {@code byte[]} value, or {@code null} is the value is missing or not a
+     *         {@code byte[]}
      */
     public byte[] getAsByteArray(String key) {
         Object value = mValues.get(key);
