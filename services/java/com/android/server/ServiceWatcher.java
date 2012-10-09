@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.content.PackageMonitor;
@@ -58,15 +59,17 @@ public class ServiceWatcher implements ServiceConnection {
     private IBinder mBinder;   // connected service
     private String mPackageName;  // current best package
     private int mVersion;  // current best version
+    private int mCurrentUserId;
 
     public ServiceWatcher(Context context, String logTag, String action,
-            List<String> initialPackageNames, Runnable newServiceWork, Handler handler) {
+            List<String> initialPackageNames, Runnable newServiceWork, Handler handler, int userId) {
         mContext = context;
         mTag = logTag;
         mAction = action;
         mPm = mContext.getPackageManager();
         mNewServiceWork = newServiceWork;
         mHandler = handler;
+        mCurrentUserId = userId;
 
         mSignatureSets = new ArrayList<HashSet<Signature>>();
         for (int i=0; i < initialPackageNames.size(); i++) {
@@ -85,9 +88,11 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     public boolean start() {
-        if (!bindBestPackage(null)) return false;
+        synchronized (mLock) {
+            if (!bindBestPackageLocked(null)) return false;
+        }
 
-        mPackageMonitor.register(mContext, null, true);
+        mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
         return true;
     }
 
@@ -98,13 +103,13 @@ public class ServiceWatcher implements ServiceConnection {
      * is null.
      * Return true if a new package was found to bind to.
      */
-    private boolean bindBestPackage(String justCheckThisPackage) {
+    private boolean bindBestPackageLocked(String justCheckThisPackage) {
         Intent intent = new Intent(mAction);
         if (justCheckThisPackage != null) {
             intent.setPackage(justCheckThisPackage);
         }
-        List<ResolveInfo> rInfos = mPm.queryIntentServices(new Intent(mAction),
-                PackageManager.GET_META_DATA);
+        List<ResolveInfo> rInfos = mPm.queryIntentServicesAsUser(new Intent(mAction),
+                PackageManager.GET_META_DATA, mCurrentUserId);
         int bestVersion = Integer.MIN_VALUE;
         String bestPackage = null;
         for (ResolveInfo rInfo : rInfos) {
@@ -141,36 +146,32 @@ public class ServiceWatcher implements ServiceConnection {
                 (bestPackage == null ? "no new best package" : "new best packge: " + bestPackage)));
 
         if (bestPackage != null) {
-            bindToPackage(bestPackage, bestVersion);
+            bindToPackageLocked(bestPackage, bestVersion);
             return true;
         }
         return false;
     }
 
-    private void unbind() {
+    private void unbindLocked() {
         String pkg;
-        synchronized (mLock) {
-            pkg = mPackageName;
-            mPackageName = null;
-            mVersion = Integer.MIN_VALUE;
-        }
+        pkg = mPackageName;
+        mPackageName = null;
+        mVersion = Integer.MIN_VALUE;
         if (pkg != null) {
             if (D) Log.d(mTag, "unbinding " + pkg);
             mContext.unbindService(this);
         }
     }
 
-    private void bindToPackage(String packageName, int version) {
-        unbind();
+    private void bindToPackageLocked(String packageName, int version) {
+        unbindLocked();
         Intent intent = new Intent(mAction);
         intent.setPackage(packageName);
-        synchronized (mLock) {
-            mPackageName = packageName;
-            mVersion = version;
-        }
+        mPackageName = packageName;
+        mVersion = version;
         if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ")");
         mContext.bindService(intent, this, Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_NOT_VISIBLE);
+                | Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_NOT_VISIBLE, mCurrentUserId);
     }
 
     private boolean isSignatureMatch(Signature[] signatures) {
@@ -197,31 +198,37 @@ public class ServiceWatcher implements ServiceConnection {
          */
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
-            if (packageName.equals(mPackageName)) {
-                // package updated, make sure to rebind
-                unbind();
+            synchronized (mLock) {
+                if (packageName.equals(mPackageName)) {
+                    // package updated, make sure to rebind
+                    unbindLocked();
+                }
+                // check the updated package in case it is better
+                bindBestPackageLocked(packageName);
             }
-            // check the updated package in case it is better
-            bindBestPackage(packageName);
         }
 
         @Override
         public void onPackageAdded(String packageName, int uid) {
-            if (packageName.equals(mPackageName)) {
-                // package updated, make sure to rebind
-                unbind();
+            synchronized (mLock) {
+                if (packageName.equals(mPackageName)) {
+                    // package updated, make sure to rebind
+                    unbindLocked();
+                }
+                // check the new package is case it is better
+                bindBestPackageLocked(packageName);
             }
-            // check the new package is case it is better
-            bindBestPackage(packageName);
         }
 
         @Override
         public void onPackageRemoved(String packageName, int uid) {
-            if (packageName.equals(mPackageName)) {
-                unbind();
-                // the currently bound package was removed,
-                // need to search for a new package
-                bindBestPackage(null);
+            synchronized (mLock) {
+                if (packageName.equals(mPackageName)) {
+                    unbindLocked();
+                    // the currently bound package was removed,
+                    // need to search for a new package
+                    bindBestPackageLocked(null);
+                }
             }
         }
     };
@@ -269,6 +276,14 @@ public class ServiceWatcher implements ServiceConnection {
     public IBinder getBinder() {
         synchronized (mLock) {
             return mBinder;
+        }
+    }
+
+    public void switchUser(int userId) {
+        synchronized (mLock) {
+            unbindLocked();
+            mCurrentUserId = userId;
+            bindBestPackageLocked(null);
         }
     }
 }
