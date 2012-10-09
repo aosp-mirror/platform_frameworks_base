@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.SystemClock;
 import android.util.FloatMath;
 
@@ -162,9 +163,11 @@ public class ScaleGestureDetector {
         mContext = context;
         mListener = listener;
         mSpanSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
-        mTouchMinMajor =
-                (int) (context.getResources().getDisplayMetrics().density * TOUCH_MIN_MAJOR + 0.5f);
-        mMinSpan = context.getResources().getDimensionPixelSize(
+
+        final Resources res = context.getResources();
+        mTouchMinMajor = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_minScalingTouchMajor);
+        mMinSpan = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_minScalingSpan);
     }
 
