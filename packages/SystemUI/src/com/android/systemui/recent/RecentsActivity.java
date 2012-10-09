@@ -205,4 +205,8 @@ public class RecentsActivity extends Activity {
     boolean isForeground() {
         return mForeground;
     }
+
+    boolean isActivityShowing() {
+         return mShowing;
+    }
 }
