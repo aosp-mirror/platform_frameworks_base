@@ -48,7 +48,7 @@ import com.android.internal.widget.LockPatternUtils;
  * reported to this class by the current {@link KeyguardViewBase}.
  */
 public class KeyguardViewManager {
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
     private static String TAG = "KeyguardViewManager";
     public static boolean USE_UPPER_CASE = true;
 
@@ -359,6 +359,12 @@ public class KeyguardViewManager {
 
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
+
+            // We really only want to preserve keyguard state for configuration changes. Hence
+            // we should clear state of widgets (e.g. Music) when we hide keyguard so it can
+            // start with a fresh state when we return.
+            mStateContainer.clear();
+
             // Don't do this right away, so we can let the view continue to animate
             // as it goes away.
             if (mKeyguardView != null) {

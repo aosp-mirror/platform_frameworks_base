@@ -42,7 +42,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -59,7 +58,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
     private static final int MSG_SET_GENERATION_ID = 104;
     private static final int MAXDIM = 512;
     private static final int DISPLAY_TIMEOUT_MS = 5000; // 5s
-    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG = true;
     protected static final String TAG = "TransportControlView";
 
     private ImageView mAlbumArt;
@@ -75,6 +74,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
     private int mCurrentPlayState;
     private AudioManager mAudioManager;
     private IRemoteControlDisplayWeak mIRCD;
+    private boolean mMusicClientPresent = true;
 
     /**
      * The metadata which should be populated into the view once we've been attached
@@ -112,7 +112,9 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
             case MSG_SET_GENERATION_ID:
                 if (msg.arg2 != 0) {
                     // This means nobody is currently registered. Hide the view.
-                    hide();
+                    onListenerDetached();
+                } else {
+                    onListenerAttached();
                 }
                 if (DEBUG) Log.v(TAG, "New genId = " + msg.arg1 + ", clearing = " + msg.arg2);
                 mClientGeneration = msg.arg1;
@@ -193,26 +195,24 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
         mIRCD = new IRemoteControlDisplayWeak(mHandler);
     }
 
-    protected void hide() {
-        if (DEBUG) Log.v(TAG, "Transport was told to hide");
+    protected void onListenerDetached() {
+        mMusicClientPresent = false;
+        if (DEBUG) Log.v(TAG, "onListenerDetached()");
         if (mTransportCallback != null) {
-            mTransportCallback.hide();
+            mTransportCallback.onListenerDetached();
         } else {
-            Log.w(TAG, "Hide music, but callback wasn't set");
+            Log.w(TAG, "onListenerDetached: no callback");
         }
     }
 
-    private void show() {
-        if (DEBUG) Log.v(TAG, "Transport was told to show");
+    private void onListenerAttached() {
+        mMusicClientPresent = true;
+        if (DEBUG) Log.v(TAG, "onListenerAttached()");
         if (mTransportCallback != null) {
-            mTransportCallback.show();
+            mTransportCallback.onListenerAttached();
         } else {
-            Log.w(TAG, "Show music, but callback wasn't set");
+            Log.w(TAG, "onListenerAttached(): no callback");
         }
-    }
-
-    private void userActivity() {
-        // TODO Auto-generated method stub
     }
 
     private void updateTransportControls(int transportControlFlags) {
@@ -341,6 +341,11 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
         updatePlayPauseState(mCurrentPlayState);
     }
 
+    public boolean isMusicPlaying() {
+       return mCurrentPlayState == RemoteControlClient.PLAYSTATE_PLAYING
+               || mCurrentPlayState == RemoteControlClient.PLAYSTATE_BUFFERING;
+    }
+
     private static void setVisibilityBasedOnFlag(View view, int flags, int flag) {
         if ((flags & flag) != 0) {
             view.setVisibility(View.VISIBLE);
@@ -357,7 +362,6 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
         }
         final int imageResId;
         final int imageDescId;
-        boolean showIfHidden = false;
         switch (state) {
             case RemoteControlClient.PLAYSTATE_ERROR:
                 imageResId = com.android.internal.R.drawable.stat_sys_warning;
@@ -369,32 +373,27 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
             case RemoteControlClient.PLAYSTATE_PLAYING:
                 imageResId = com.android.internal.R.drawable.ic_media_pause;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_pause_description;
-                showIfHidden = true;
                 break;
 
             case RemoteControlClient.PLAYSTATE_BUFFERING:
                 imageResId = com.android.internal.R.drawable.ic_media_stop;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_stop_description;
-                showIfHidden = true;
                 break;
 
             case RemoteControlClient.PLAYSTATE_PAUSED:
             default:
                 imageResId = com.android.internal.R.drawable.ic_media_play;
                 imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
-                showIfHidden = false;
                 break;
         }
         mBtnPlay.setImageResource(imageResId);
         mBtnPlay.setContentDescription(getResources().getString(imageDescId));
-        if (showIfHidden) {
-            show();
-        }
         mCurrentPlayState = state;
+        mTransportCallback.onPlayStateChanged();
     }
 
     static class SavedState extends BaseSavedState {
-        boolean wasShowing;
+        boolean clientPresent;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -402,13 +401,13 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
 
         private SavedState(Parcel in) {
             super(in);
-            this.wasShowing = in.readInt() != 0;
+            this.clientPresent = in.readInt() != 0;
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeInt(this.wasShowing ? 1 : 0);
+            out.writeInt(this.clientPresent ? 1 : 0);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -425,24 +424,23 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
 
     @Override
     public Parcelable onSaveInstanceState() {
-        if (DEBUG) Log.v(TAG, "onSaveInstanceState()");
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.wasShowing = getVisibility() == View.VISIBLE;
+        ss.clientPresent = mMusicClientPresent;
         return ss;
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        if (DEBUG) Log.v(TAG, "onRestoreInstanceState()");
         if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        if (ss.wasShowing) {
-            show();
+        if (ss.clientPresent) {
+            if (DEBUG) Log.v(TAG, "Reattaching client because it was attached");
+            onListenerAttached();
         }
     }
 
@@ -458,7 +456,6 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
         }
         if (keyCode != -1) {
             sendMediaButtonClick(keyCode);
-            userActivity();
         }
     }
 
