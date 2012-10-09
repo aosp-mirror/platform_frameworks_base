@@ -46,13 +46,14 @@
             android:background="@color/facelock_spotlight_mask"
         />
 
-        <ImageView
-            android:id="@+id/cancel_button"
+        <ImageButton
+            android:id="@+id/face_unlock_cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dip"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
+            android:background="#00000000"
             android:src="@drawable/ic_facial_backup"
         />
 
