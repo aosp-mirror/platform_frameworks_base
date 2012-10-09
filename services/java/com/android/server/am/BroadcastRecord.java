@@ -81,12 +81,10 @@ class BroadcastRecord extends Binder {
         final long now = SystemClock.uptimeMillis();
 
         pw.print(prefix); pw.print(this); pw.print(" to user "); pw.println(userId);
-        pw.print(prefix); pw.println(intent);
-        if (sticky) {
-            Bundle bundle = intent.getExtras();
-            if (bundle != null) {
-                pw.print(prefix); pw.print("extras: "); pw.println(bundle.toString());
-            }
+        pw.print(prefix); pw.println(intent.toInsecureString());
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            pw.print(prefix); pw.print("extras: "); pw.println(bundle.toString());
         }
         pw.print(prefix); pw.print("caller="); pw.print(callerPackage); pw.print(" ");
                 pw.print(callerApp != null ? callerApp.toShortString() : "null");

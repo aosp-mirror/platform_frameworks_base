@@ -3739,7 +3739,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void forceStopUserLocked(int userId) {
         forceStopPackageLocked(null, -1, false, false, true, false, userId);
         Intent intent = new Intent(Intent.ACTION_USER_STOPPED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         broadcastIntentLocked(null, null, intent,
                 null, null, 0, null, null, null,
@@ -7904,6 +7905,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null, null,
                         false, false, MY_PID, Process.SYSTEM_UID, mCurrentUserId);
+                intent = new Intent(Intent.ACTION_USER_STARTING);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId);
+                broadcastIntentLocked(null, null, intent,
+                        null, new IIntentReceiver.Stub() {
+                            @Override
+                            public void performReceive(Intent intent, int resultCode, String data,
+                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                    throws RemoteException {
+                            }
+                        }, 0, null, null,
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -8879,7 +8893,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  [-a] [-c] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
                 pw.println("    a[ctivities]: activity stack state");
-                pw.println("    b[roadcasts] [PACKAGE_NAME]: broadcast state");
+                pw.println("    b[roadcasts] [PACKAGE_NAME] [history [-s]]: broadcast state");
                 pw.println("    i[ntents] [PACKAGE_NAME]: pending intent state");
                 pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
                 pw.println("    o[om]: out of memory management");
@@ -9713,6 +9727,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean onlyHistory = false;
 
         if ("history".equals(dumpPackage)) {
+            if (opti < args.length && "-s".equals(args[opti])) {
+                dumpAll = false;
+            }
             onlyHistory = true;
             dumpPackage = null;
         }
@@ -14112,11 +14129,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
                         R.anim.screen_user_enter);
 
+                boolean needStart = false;
+
                 // If the user we are switching to is not currently started, then
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
                     mStartedUsers.put(userId, new UserStartedState(new UserHandle(userId), false));
                     updateStartedUserArrayLocked();
+                    needStart = true;
                 }
 
                 mCurrentUserId = userId;
@@ -14141,11 +14161,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // the almost-dead.
                     uss.mState = UserStartedState.STATE_RUNNING;
                     updateStartedUserArrayLocked();
+                    needStart = true;
                 } else if (uss.mState == UserStartedState.STATE_SHUTDOWN) {
                     // This means ACTION_SHUTDOWN has been sent, so we will
                     // need to treat this as a new boot of the user.
                     uss.mState = UserStartedState.STATE_BOOTING;
                     updateStartedUserArrayLocked();
+                    needStart = true;
                 }
 
                 mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
@@ -14154,17 +14176,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         oldUserId, userId, uss));
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
                         oldUserId, userId, uss), USER_SWITCH_TIMEOUT);
-                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null,
-                        false, false, MY_PID, Process.SYSTEM_UID, userId);
+                if (needStart) {
+                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null,
+                            false, false, MY_PID, Process.SYSTEM_UID, userId);
+                }
 
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                     if (userId != 0) {
-                        intent = new Intent(Intent.ACTION_USER_INITIALIZE);
+                        Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
                                 new IIntentReceiver.Stub() {
@@ -14188,6 +14212,21 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 getUserManagerLocked().userForeground(userId);
                 sendUserSwitchBroadcastsLocked(oldUserId, userId);
+                if (needStart) {
+                    Intent intent = new Intent(Intent.ACTION_USER_STARTING);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, new IIntentReceiver.Stub() {
+                                @Override
+                                public void performReceive(Intent intent, int resultCode, String data,
+                                        Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                        throws RemoteException {
+                                }
+                            }, 0, null, null,
+                            android.Manifest.permission.INTERACT_ACROSS_USERS,
+                            false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -14224,19 +14263,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 broadcastIntentLocked(null, null, intent,
                         null, null, 0, null, null,
                         android.Manifest.permission.MANAGE_USERS,
-                        false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-                intent = new Intent(Intent.ACTION_USER_STARTING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode, String data,
-                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
-                                    throws RemoteException {
-                            }
-                        }, 0, null, null,
-                        android.Manifest.permission.INTERACT_ACROSS_USERS,
                         false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             }
         } finally {
