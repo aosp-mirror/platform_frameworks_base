@@ -206,11 +206,9 @@ final class DisplayPowerController {
     // May be 0 if no warm-up is required.
     private int mLightSensorWarmUpTimeConfig;
 
-    // True if we should animate the backlight when turning the screen on or off, which
-    // tends to be efficient for LCD displays but not for OLED displays.
-    // False if we should play the electron beam animation instead, which is better for
-    // OLED displays.
-    private boolean mElectronBeamAnimatesBacklightConfig;
+    // True if we should fade the screen while turning it off, false if we should play
+    // a stylish electron beam animation instead.
+    private boolean mElectronBeamFadesConfig;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -396,7 +394,7 @@ final class DisplayPowerController {
         mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
         mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
 
-        mElectronBeamAnimatesBacklightConfig = resources.getBoolean(
+        mElectronBeamFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
 
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
@@ -682,8 +680,8 @@ final class DisplayPowerController {
                                 if (mPowerState.getElectronBeamLevel() == 1.0f) {
                                     mPowerState.dismissElectronBeam();
                                 } else if (mPowerState.prepareElectronBeam(
-                                        mElectronBeamAnimatesBacklightConfig ?
-                                                ElectronBeam.MODE_BLANK :
+                                        mElectronBeamFadesConfig ?
+                                                ElectronBeam.MODE_FADE :
                                                         ElectronBeam.MODE_WARM_UP)) {
                                     mElectronBeamOnAnimator.start();
                                 } else {
@@ -704,8 +702,8 @@ final class DisplayPowerController {
                         if (mPowerState.getElectronBeamLevel() == 0.0f) {
                             setScreenOn(false);
                         } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamAnimatesBacklightConfig ?
-                                        ElectronBeam.MODE_BLANK :
+                                mElectronBeamFadesConfig ?
+                                        ElectronBeam.MODE_FADE :
                                                 ElectronBeam.MODE_COOL_DOWN)
                                 && mPowerState.isScreenOn()) {
                             mElectronBeamOffAnimator.start();
