@@ -308,6 +308,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             addProviderLocked(fusedLocationProvider);
             mProxyProviders.add(fusedLocationProvider);
             mEnabledProviders.add(fusedLocationProvider.getName());
+            mRealProviders.put(LocationManager.FUSED_PROVIDER, fusedLocationProvider);
         } else {
             Slog.e(TAG, "no fused location provider found",
                     new IllegalStateException("Location service needs a fused location provider"));
