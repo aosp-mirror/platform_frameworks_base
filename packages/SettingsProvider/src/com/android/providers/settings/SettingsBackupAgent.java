@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.Settings;
@@ -60,12 +61,6 @@ import java.util.zip.CRC32;
 public class SettingsBackupAgent extends BackupAgentHelper {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_BACKUP = DEBUG || false;
-
-    /* Don't restore wifi config until we have new logic for parsing the
-     * saved wifi config and configuring the new APs without having to
-     * disable and re-enable wifi
-     */
-    private static final boolean NAIVE_WIFI_RESTORE = false;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -127,9 +122,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // stored in the full-backup tarfile as well, so should not be changed.
     private static final String STAGE_FILE = "flattened-data";
 
+    // Delay in milliseconds between the restore operation and when we will bounce
+    // wifi in order to rewrite the supplicant config etc.
+    private static final long WIFI_BOUNCE_DELAY_MILLIS = 60 * 1000; // one minute
+
     private SettingsHelper mSettingsHelper;
     private WifiManager mWfm;
     private static String mWifiConfigFile;
+
+    WifiRestoreRunnable mWifiRestore = null;
 
     // Class for capturing a network definition from the wifi supplicant config file
     static class Network {
@@ -297,6 +298,66 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         writeNewChecksums(stateChecksums, newState);
     }
 
+    class WifiRestoreRunnable implements Runnable {
+        private byte[] restoredSupplicantData;
+        private byte[] restoredWifiConfigFile;
+
+        void incorporateWifiSupplicant(BackupDataInput data) {
+            restoredSupplicantData = new byte[data.getDataSize()];
+            if (restoredSupplicantData.length <= 0) return;
+            try {
+                data.readEntityData(restoredSupplicantData, 0, data.getDataSize());
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to read supplicant data");
+                restoredSupplicantData = null;
+            }
+        }
+
+        void incorporateWifiConfigFile(BackupDataInput data) {
+            restoredWifiConfigFile = new byte[data.getDataSize()];
+            if (restoredWifiConfigFile.length <= 0) return;
+            try {
+                data.readEntityData(restoredWifiConfigFile, 0, data.getDataSize());
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to read config file");
+                restoredWifiConfigFile = null;
+            }
+        }
+
+        @Override
+        public void run() {
+            if (restoredSupplicantData != null || restoredWifiConfigFile != null) {
+                if (DEBUG_BACKUP) {
+                    Log.v(TAG, "Starting deferred restore of wifi data");
+                }
+                final int retainedWifiState = enableWifi(false);
+                if (restoredSupplicantData != null) {
+                    restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
+                            restoredSupplicantData, restoredSupplicantData.length);
+                    FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
+                            FileUtils.S_IRUSR | FileUtils.S_IWUSR |
+                            FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                            Process.myUid(), Process.WIFI_UID);
+                }
+                if (restoredWifiConfigFile != null) {
+                    restoreFileData(mWifiConfigFile,
+                            restoredWifiConfigFile, restoredWifiConfigFile.length);
+                }
+                // restore the previous WIFI state.
+                enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
+                        retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
+            }
+        }
+    }
+
+    // Instantiate the wifi-config restore runnable, scheduling it for execution
+    // a minute hence
+    void initWifiRestoreIfNecessary() {
+        if (mWifiRestore == null) {
+            mWifiRestore = new WifiRestoreRunnable();
+        }
+    }
+
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
@@ -315,25 +376,25 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
             } else if (KEY_GLOBAL.equals(key)) {
                 restoreSettings(data, Settings.Global.CONTENT_URI, null);
-            } else if (NAIVE_WIFI_RESTORE && KEY_WIFI_SUPPLICANT.equals(key)) {
-                int retainedWifiState = enableWifi(false);
-                restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, data);
-                FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
-                        FileUtils.S_IRUSR | FileUtils.S_IWUSR |
-                        FileUtils.S_IRGRP | FileUtils.S_IWGRP,
-                        Process.myUid(), Process.WIFI_UID);
-                // retain the previous WIFI state.
-                enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
-                        retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
+            } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
+                initWifiRestoreIfNecessary();
+                mWifiRestore.incorporateWifiSupplicant(data);
             } else if (KEY_LOCALE.equals(key)) {
                 byte[] localeData = new byte[size];
                 data.readEntityData(localeData, 0, size);
                 mSettingsHelper.setLocaleData(localeData, size);
-            } else if (NAIVE_WIFI_RESTORE && KEY_WIFI_CONFIG.equals(key)) {
-                restoreFileData(mWifiConfigFile, data);
+            } else if (KEY_WIFI_CONFIG.equals(key)) {
+                initWifiRestoreIfNecessary();
+                mWifiRestore.incorporateWifiConfigFile(data);
              } else {
                 data.skipEntityData();
             }
+        }
+
+        // If we have wifi data to restore, post a runnable to perform the
+        // bounce-and-update operation a little ways in the future.
+        if (mWifiRestore != null) {
+            new Handler(getMainLooper()).postDelayed(mWifiRestore, WIFI_BOUNCE_DELAY_MILLIS);
         }
     }
 
@@ -619,7 +680,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 getContentResolver().insert(destination, contentValues);
             }
 
-            if (DEBUG || true) {
+            if (DEBUG) {
                 Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
             }
         }
@@ -731,17 +792,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     }
 
-    private void restoreFileData(String filename, BackupDataInput data) {
-        byte[] bytes = new byte[data.getDataSize()];
-        if (bytes.length <= 0) return;
-        try {
-            data.readEntityData(bytes, 0, data.getDataSize());
-            restoreFileData(filename, bytes, bytes.length);
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to read file data for " + filename);
-        }
-    }
-
     private void restoreFileData(String filename, byte[] bytes, int size) {
         try {
             File file = new File(filename);
@@ -791,17 +841,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 } catch (IOException e) {
                 }
             }
-        }
-    }
-
-    private void restoreWifiSupplicant(String filename, BackupDataInput data) {
-        byte[] bytes = new byte[data.getDataSize()];
-        if (bytes.length <= 0) return;
-        try {
-            data.readEntityData(bytes, 0, data.getDataSize());
-            restoreWifiSupplicant(filename, bytes, bytes.length);
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to read supplicant data");
         }
     }
 
