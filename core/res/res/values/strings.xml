@@ -3875,7 +3875,7 @@
     <!-- Hint text shown when user has too many failed password attempts in account unlock screen of keyguard -->
     <string name="kg_login_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b>.</string>
     <!-- Message shown while device checks username/password in account unlock screen of keyguard -->
-    <string name="kg_login_checking_password">Unlocking SIM\u2026</string>
+    <string name="kg_login_checking_password">Checking account\u2026</string>
     <!-- Message shown in dialog when max number of attempts are reached for PIN screen of keyguard -->
     <string name="kg_too_many_failed_pin_attempts_dialog_message">
         You have incorrectly typed your PIN <xliff:g id="number">%d</xliff:g> times.
