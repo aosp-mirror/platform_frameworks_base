@@ -26,7 +26,6 @@
 #include <limits.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <gui/ISurfaceComposer.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
@@ -35,8 +34,6 @@
 #include <hardware_legacy/power.h>
 #include <cutils/android_reboot.h>
 #include <suspend/autosuspend.h>
-
-#include <private/gui/ComposerService.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 
@@ -170,40 +167,23 @@ static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass clazz, jstring nameS
     release_wake_lock(name.c_str());
 }
 
-static void nativeSetScreenState(JNIEnv *env, jclass clazz, jboolean on) {
-    sp<ISurfaceComposer> s(ComposerService::getComposerService());
-    if (on) {
-        {
-            ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_disable() while turning screen on");
-            autosuspend_disable();
-        }
-
-        if (gPowerModule) {
-            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
-            gPowerModule->setInteractive(gPowerModule, true);
-        }
-
-        const sp<IBinder>& display = s->getBuiltInDisplay(0);   // TODO: support multiple displays
-        {
-            ALOGD_IF_SLOW(100, "Excessive delay in unblank() while turning screen on");
-            s->unblank(display);
-        }
+static void nativeSetInteractive(JNIEnv *env, jclass clazz, jboolean enable) {
+    if (enable) {
+        ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(true) while turning screen on");
+        gPowerModule->setInteractive(gPowerModule, true);
     } else {
-        const sp<IBinder>& display = s->getBuiltInDisplay(0);   // TODO: support multiple displays
-        {
-            ALOGD_IF_SLOW(100, "Excessive delay in blank() while turning screen off");
-            s->blank(display);
-        }
+        ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(false) while turning screen off");
+        gPowerModule->setInteractive(gPowerModule, false);
+    }
+}
 
-        if (gPowerModule) {
-            ALOGD_IF_SLOW(20, "Excessive delay in setInteractive(false) while turning screen off");
-            gPowerModule->setInteractive(gPowerModule, false);
-        }
-
-        {
-            ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
-            autosuspend_enable();
-        }
+static void nativeSetAutoSuspend(JNIEnv *env, jclass clazz, jboolean enable) {
+    if (enable) {
+        ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
+        autosuspend_enable();
+    } else {
+        ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_disable() while turning screen on");
+        autosuspend_disable();
     }
 }
 
@@ -235,8 +215,10 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeAcquireSuspendBlocker },
     { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeReleaseSuspendBlocker },
-    { "nativeSetScreenState", "(Z)V",
-            (void*) nativeSetScreenState },
+    { "nativeSetInteractive", "(Z)V",
+            (void*) nativeSetInteractive },
+    { "nativeSetAutoSuspend", "(Z)V",
+            (void*) nativeSetAutoSuspend },
     { "nativeShutdown", "()V",
             (void*) nativeShutdown },
     { "nativeReboot", "(Ljava/lang/String;)V",

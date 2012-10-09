@@ -266,6 +266,8 @@ public class Surface implements Parcelable {
             IBinder displayToken, int orientation, Rect layerStackRect, Rect displayRect);
     private static native boolean nativeGetDisplayInfo(
             IBinder displayToken, PhysicalDisplayInfo outInfo);
+    private static native void nativeBlankDisplay(IBinder displayToken);
+    private static native void nativeUnblankDisplay(IBinder displayToken);
 
     private native void nativeCopyFrom(Surface other);
     private native void nativeTransferFrom(Surface other);
@@ -636,6 +638,22 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("outInfo must not be null");
         }
         return nativeGetDisplayInfo(displayToken, outInfo);
+    }
+
+    /** @hide */
+    public static void blankDisplay(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        nativeBlankDisplay(displayToken);
+    }
+
+    /** @hide */
+    public static void unblankDisplay(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        nativeUnblankDisplay(displayToken);
     }
 
     /**

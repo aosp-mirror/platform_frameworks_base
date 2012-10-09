@@ -105,6 +105,18 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Blanks the display, if supported.
+     */
+    public void blankLocked() {
+    }
+
+    /**
+     * Unblanks the display, if supported.
+     */
+    public void unblankLocked() {
+    }
+
+    /**
      * Sets the display layer stack while in a transaction.
      */
     public final void setLayerStackInTransactionLocked(int layerStack) {
