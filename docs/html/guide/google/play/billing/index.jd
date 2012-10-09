@@ -42,10 +42,8 @@ and features, and more. You can use In-app Billing to sell products as</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-  <h2>Support for subscriptions <span class="new">New!</span></h2>
-  <p>In-app Billing now lets you sell subscriptions in your apps, as well as standard in-app products. 
-  For details on how to sell subscriptions to content, services, and features, see the
-  <a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html">Subscriptions</a> documentation.</p>
+  <p><strong>Free trials for subscriptions</strong> <span class="new" style="font-size:.78em;">New!</span></p>
+  <p>You can now offer users a configurable <a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed. 
 </div>
 </div>
 

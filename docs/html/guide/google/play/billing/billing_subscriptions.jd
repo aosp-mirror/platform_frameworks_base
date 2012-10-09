@@ -12,6 +12,7 @@ parent.link=index.html
         <li><a href="#publishing">Subscription publishing and unpublishing</a></li>
         <li><a href="#pricing">Subscription pricing</a></li>
         <li><a href="#user-billing">User billing</a></li>
+        <li><a href="#trials">Free trial period</a></li>
         <li><a href="#cancellation">Subscription cancellation</a></li>
         <li><a href="#uninstallation">App uninstallation</a></li>
         <li><a href="#refunds">Refunds</a></li>
@@ -94,8 +95,10 @@ digital content, from any type of app or game.</p>
 <p>As with other in-app products, you configure and publish subscriptions using
 the Developer Console and then sell them from inside apps installed on an
 Android-powered devices. In the Developer console, you create subscription
-products and add them to a product list, setting a price for each, choosing a
-billing interval of monthly or annually, and then publishing. In your apps, it’s
+products and add them to a product list, then set a price and optional trial
+period for each, choose a billing interval (monthly or annual), and then publish.</p>
+
+<p>In your apps, it’s
 straightforward to add support for subscription purchases. The implementation
 extends the standard In-app Billing API to support a new product type but uses
 the same communication model, data structures, and user interactions as for
@@ -145,6 +148,7 @@ subscription and if so, allow access to your content. </p>
     <li>You can set up subscriptions with either monthly or annual billing</li>
     <li>You can sell multiple subscription items in an app with various billing
     intervals or prices, such as for promotions</li>
+    <li>You can offer a configurable trial period for any subscription. <span class="new" style="font-size:.78em;">New!</span></li>
     <li>Users purchase your subscriptions from inside your apps, rather than
     directly from Google Play</li>
     <li>Users manage their purchased subscriptions from the My Apps screen in
@@ -250,6 +254,41 @@ Your app does not need to grant the user further access to the subscription cont
 notify your backend servers of subscription purchases, tokens, and any billing
 errors that may occur. Your backend servers can use the server-side API to query
 and update your records and follow up with customers directly, if needed.</p>
+
+<h3 id="trials">Free Trial Period</h3>
+
+<p>For any subscription, you can set up a free trial period that lets users
+try your subscription content before buying it. The trial period
+runs for the period of time that you set and then automatically converts to a full subscription
+managed according to the subscription's billing interval and price.</p>
+
+<p>To take advantage of a free trial, a user must "purchase" the full
+subscription through the standard In-app Billing flow, providing a valid form of
+payment to use for billing and completing the normal purchase transaction.
+However, the user is not charged any money, since the initial period corresponds
+to the free trial. Instead, Google Play records a transaction of $0.00 and the
+subscription is marked as purchased for the duration of the trial period or
+until cancellation. When the transaction is complete, Google Play notifies users
+by email that they have purchased a subscription that includes a free trial
+period and that the initial charge was $0.00. </p>
+
+<p>When the trial period ends, Google Play automatically initiates billing
+against the credit card that the user provided during the initial purchase, at the amount set
+for the full subscription, and continuing at the subscription interval. If
+necessary, the user can cancel the subscription at any time during the trial
+period. In this case, Google Play <em>marks the subscription as expired immediately</em>,
+rather than waiting until the end of the trial period. The user has not
+paid for the trial period and so is not entitled to continued access after
+cancellation.</p>
+
+<p>You can set up a trial period for a subscription in the Developer Console,
+without needing to modify or update your APK. Just locate and edit the
+subscription in your product list, set a valid number of days for the trial
+(must be 7 days or longer), and publish. You can change the period any time,
+although note that Google Play does not apply the change to users who have
+already "purchased" a trial period for the subscription. Only new subscription
+purchases will use the updated trial period. You can create one free trial
+period per subscription product.</p>
 
 <h3 id="cancellation">Subscription cancellation</h3>
 
