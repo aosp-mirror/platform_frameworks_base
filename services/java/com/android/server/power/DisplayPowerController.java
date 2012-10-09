@@ -159,6 +159,9 @@ final class DisplayPowerController {
     // A suspend blocker.
     private final SuspendBlocker mSuspendBlocker;
 
+    // The display blanker.
+    private final DisplayBlanker mDisplayBlanker;
+
     // Our handler.
     private final DisplayControllerHandler mHandler;
 
@@ -343,10 +346,12 @@ final class DisplayPowerController {
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
             LightsService lights, TwilightService twilight, SuspendBlocker suspendBlocker,
+            DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
         mHandler = new DisplayControllerHandler(looper);
         mNotifier = notifier;
         mSuspendBlocker = suspendBlocker;
+        mDisplayBlanker = displayBlanker;
         mCallbacks = callbacks;
         mCallbackHandler = callbackHandler;
 
@@ -520,7 +525,8 @@ final class DisplayPowerController {
                 new ElectronBeam(display),
                 new PhotonicModulator(executor,
                         mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT),
-                        mSuspendBlocker));
+                        mSuspendBlocker),
+                mDisplayBlanker);
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
                 mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 0.0f, 1.0f);

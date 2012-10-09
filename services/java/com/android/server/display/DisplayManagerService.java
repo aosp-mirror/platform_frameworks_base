@@ -103,6 +103,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
 
+    private static final int DISPLAY_BLANK_STATE_UNKNOWN = 0;
+    private static final int DISPLAY_BLANK_STATE_BLANKED = 1;
+    private static final int DISPLAY_BLANK_STATE_UNBLANKED = 2;
+
     private final Context mContext;
     private final boolean mHeadless;
     private final DisplayManagerHandler mHandler;
@@ -140,6 +144,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
     private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
+
+    // Set to true if all displays have been blanked by the power manager.
+    private int mAllDisplayBlankStateFromPowerManager;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -282,6 +289,40 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             mPendingTraversal = false;
 
             performTraversalInTransactionLocked();
+        }
+    }
+
+    /**
+     * Called by the power manager to blank all displays.
+     */
+    public void blankAllDisplaysFromPowerManager() {
+        synchronized (mSyncRoot) {
+            if (mAllDisplayBlankStateFromPowerManager != DISPLAY_BLANK_STATE_BLANKED) {
+                mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_BLANKED;
+
+                final int count = mDisplayDevices.size();
+                for (int i = 0; i < count; i++) {
+                    DisplayDevice device = mDisplayDevices.get(i);
+                    device.blankLocked();
+                }
+            }
+        }
+    }
+
+    /**
+     * Called by the power manager to unblank all displays.
+     */
+    public void unblankAllDisplaysFromPowerManager() {
+        synchronized (mSyncRoot) {
+            if (mAllDisplayBlankStateFromPowerManager != DISPLAY_BLANK_STATE_UNBLANKED) {
+                mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_UNBLANKED;
+
+                final int count = mDisplayDevices.size();
+                for (int i = 0; i < count; i++) {
+                    DisplayDevice device = mDisplayDevices.get(i);
+                    device.unblankLocked();
+                }
+            }
         }
     }
 
@@ -528,6 +569,17 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             mDisplayDevices.add(device);
             addLogicalDisplayLocked(device);
             scheduleTraversalLocked(false);
+
+            // Blank or unblank the display immediately to match the state requested
+            // by the power manager (if known).
+            switch (mAllDisplayBlankStateFromPowerManager) {
+                case DISPLAY_BLANK_STATE_BLANKED:
+                    device.blankLocked();
+                    break;
+                case DISPLAY_BLANK_STATE_UNBLANKED:
+                    device.unblankLocked();
+                    break;
+            }
         }
     }
 
@@ -788,9 +840,18 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
 
         pw.println("DISPLAY MANAGER (dumpsys display)");
-        pw.println("  mHeadless=" + mHeadless);
 
         synchronized (mSyncRoot) {
+            pw.println("  mHeadless=" + mHeadless);
+            pw.println("  mOnlyCode=" + mOnlyCore);
+            pw.println("  mSafeMode=" + mSafeMode);
+            pw.println("  mPendingTraversal=" + mPendingTraversal);
+            pw.println("  mAllDisplayBlankStateFromPowerManager="
+                    + mAllDisplayBlankStateFromPowerManager);
+            pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
+            pw.println("  mDefaultViewport=" + mDefaultViewport);
+            pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
+
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
             ipw.increaseIndent();
 
@@ -817,10 +878,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 pw.println("  Display " + displayId + ":");
                 display.dumpLocked(ipw);
             }
-
-            pw.println();
-            pw.println("Default viewport: " + mDefaultViewport);
-            pw.println("External touch viewport: " + mExternalTouchViewport);
         }
     }
 

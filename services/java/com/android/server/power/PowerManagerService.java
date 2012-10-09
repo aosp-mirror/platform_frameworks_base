@@ -155,6 +155,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private Context mContext;
     private LightsService mLightsService;
     private BatteryService mBatteryService;
+    private DisplayManagerService mDisplayManagerService;
     private IBatteryStats mBatteryStats;
     private HandlerThread mHandlerThread;
     private PowerManagerHandler mHandler;
@@ -229,6 +230,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The screen on blocker used to keep the screen from turning on while the lock
     // screen is coming up.
     private final ScreenOnBlockerImpl mScreenOnBlocker;
+
+    // The display blanker used to turn the screen on or off.
+    private final DisplayBlankerImpl mDisplayBlanker;
 
     // True if systemReady() has been called.
     private boolean mSystemReady;
@@ -319,14 +323,15 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeSetPowerState(boolean screenOn, boolean screenBright);
     private static native void nativeAcquireSuspendBlocker(String name);
     private static native void nativeReleaseSuspendBlocker(String name);
-
-    static native void nativeSetScreenState(boolean on);
+    private static native void nativeSetInteractive(boolean enable);
+    private static native void nativeSetAutoSuspend(boolean enable);
 
     public PowerManagerService() {
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService");
             mWakeLockSuspendBlocker.acquire();
             mScreenOnBlocker = new ScreenOnBlockerImpl();
+            mDisplayBlanker = new DisplayBlankerImpl();
             mHoldingWakeLockSuspendBlocker = true;
             mWakefulness = WAKEFULNESS_AWAKE;
         }
@@ -342,23 +347,24 @@ public final class PowerManagerService extends IPowerManager.Stub
     public void init(Context context, LightsService ls,
             ActivityManagerService am, BatteryService bs, IBatteryStats bss,
             DisplayManagerService dm) {
+        mContext = context;
+        mLightsService = ls;
+        mBatteryService = bs;
+        mBatteryStats = bss;
+        mDisplayManagerService = dm;
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
+
+        Watchdog.getInstance().addMonitor(this);
+
         // Forcibly turn the screen on at boot so that it is in a known power state.
         // We do this in init() rather than in the constructor because setting the
         // screen state requires a call into surface flinger which then needs to call back
         // into the activity manager to check permissions.  Unfortunately the
         // activity manager is not running when the constructor is called, so we
         // have to defer setting the screen state until this point.
-        nativeSetScreenState(true);
-
-        mContext = context;
-        mLightsService = ls;
-        mBatteryService = bs;
-        mBatteryStats = bss;
-        mHandlerThread = new HandlerThread(TAG);
-        mHandlerThread.start();
-        mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
-
-        Watchdog.getInstance().addMonitor(this);
+        mDisplayBlanker.unblankAllDisplays();
     }
 
     public void setPolicy(WindowManagerPolicy policy) {
@@ -388,7 +394,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
                     mContext, mNotifier, mLightsService, twilight,
                     createSuspendBlockerLocked("PowerManagerService.Display"),
-                    mDisplayPowerControllerCallbacks, mHandler);
+                    mDisplayBlanker, mDisplayPowerControllerCallbacks, mHandler);
 
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
@@ -2106,6 +2112,9 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println();
             pw.println("Screen On Blocker: " + mScreenOnBlocker);
 
+            pw.println();
+            pw.println("Display Blanker: " + mDisplayBlanker);
+
             dpc = mDisplayPowerController;
         }
 
@@ -2397,5 +2406,36 @@ public final class PowerManagerService extends IPowerManager.Stub
                 return "held=" + (mNestCount != 0) + ", mNestCount=" + mNestCount;
             }
         }
-    };
+    }
+
+    private final class DisplayBlankerImpl implements DisplayBlanker {
+        private boolean mBlanked;
+
+        @Override
+        public void blankAllDisplays() {
+            synchronized (this) {
+                mBlanked = true;
+                mDisplayManagerService.blankAllDisplaysFromPowerManager();
+                nativeSetInteractive(false);
+                nativeSetAutoSuspend(true);
+            }
+        }
+
+        @Override
+        public void unblankAllDisplays() {
+            synchronized (this) {
+                nativeSetAutoSuspend(false);
+                nativeSetInteractive(true);
+                mDisplayManagerService.unblankAllDisplaysFromPowerManager();
+                mBlanked = false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            synchronized (this) {
+                return "blanked=" + mBlanked;
+            }
+        }
+    }
 }
