@@ -900,7 +900,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
                     + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
                     + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId() + ", calling uid = " + Binder.getCallingPid());
+                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid());
         }
         if (uid == Process.SYSTEM_UID || userId == mSettings.getCurrentUserId()) {
             return true;
@@ -2673,6 +2673,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingDialog.setCanceledOnTouchOutside(true);
             mSwitchingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
+            mSwitchingDialog.getWindow().getAttributes().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
             mSwitchingDialog.getWindow().getAttributes().setTitle("Select input method");
             mSwitchingDialog.show();
         }
