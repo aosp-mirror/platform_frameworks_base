@@ -21,15 +21,16 @@
     <PreferenceCategory android:title="@string/update_preference">
         <EditTextPreference android:key="mintime_preference"
             android:defaultValue="0"
-            android:title="@string/title_mintime_preference"
-            android:summary="@string/summary_mintime_preference"
-            android:dialogTitle="@string/dialog_title_mintime_preference" />
+            android:title="@string/title_update_preference"
+            android:summary="@string/summary_update_preference"
+            android:dialogTitle="@string/dialog_update_preference" />
 
-        <EditTextPreference android:key="mindistance_preference"
-            android:defaultValue="0"
-            android:title="@string/title_mindistance_preference"
-            android:summary="@string/summary_mindistance_preference"
-            android:dialogTitle="@string/dialog_title_mindistance_preference" />
+   <ListPreference android:key="power_preference"
+            android:title="@string/title_power_preference"
+            android:summary="@string/summary_power_preference"
+            android:defaultValue="203"
+            android:entries="@array/powerList"
+            android:entryValues="@array/powerValues"/>
 
     </PreferenceCategory>
 

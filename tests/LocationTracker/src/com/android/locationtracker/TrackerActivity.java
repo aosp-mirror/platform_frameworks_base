@@ -16,17 +16,12 @@
 
 package com.android.locationtracker;
 
-import com.android.locationtracker.data.DateUtils;
-import com.android.locationtracker.data.TrackerDataHelper;
-import com.android.locationtracker.data.TrackerListHelper;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -34,6 +29,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.android.locationtracker.data.DateUtils;
+import com.android.locationtracker.data.TrackerDataHelper;
+import com.android.locationtracker.data.TrackerListHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -160,12 +159,8 @@ public class TrackerActivity extends ListActivity {
 
     private void exportKML() {
         String exportFileName = getUniqueFileName(
-                LocationManager.NETWORK_PROVIDER + ".kml");
-        exportFile(LocationManager.NETWORK_PROVIDER, exportFileName,
-                new TrackerDataHelper(this, TrackerDataHelper.KML_FORMATTER));
-        exportFileName = getUniqueFileName(
-                LocationManager.GPS_PROVIDER + ".kml");
-        exportFile(LocationManager.GPS_PROVIDER, exportFileName,
+                "fused" + ".kml");
+        exportFile(null, exportFileName,
                 new TrackerDataHelper(this, TrackerDataHelper.KML_FORMATTER));
     }
 
