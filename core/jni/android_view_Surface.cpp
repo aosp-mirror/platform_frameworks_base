@@ -48,6 +48,7 @@
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/misc.h>
+#include <utils/Log.h>
 
 #include <ScopedUtfChars.h>
 
@@ -710,6 +711,22 @@ static jboolean nativeGetDisplayInfo(JNIEnv* env, jclass clazz,
     return JNI_TRUE;
 }
 
+static void nativeBlankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+
+    ALOGD_IF_SLOW(100, "Excessive delay in blankDisplay() while turning screen off");
+    SurfaceComposerClient::blankDisplay(token);
+}
+
+static void nativeUnblankDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+
+    ALOGD_IF_SLOW(100, "Excessive delay in unblankDisplay() while turning screen on");
+    SurfaceComposerClient::unblankDisplay(token);
+}
+
 // ----------------------------------------------------------------------------
 
 static void nativeCopyFrom(JNIEnv* env, jobject surfaceObj, jobject otherObj) {
@@ -832,6 +849,10 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeSetDisplayProjection },
     {"nativeGetDisplayInfo", "(Landroid/os/IBinder;Landroid/view/Surface$PhysicalDisplayInfo;)Z",
             (void*)nativeGetDisplayInfo },
+    {"nativeBlankDisplay", "(Landroid/os/IBinder;)V",
+            (void*)nativeBlankDisplay },
+    {"nativeUnblankDisplay", "(Landroid/os/IBinder;)V",
+            (void*)nativeUnblankDisplay },
     {"nativeCopyFrom", "(Landroid/view/Surface;)V",
             (void*)nativeCopyFrom },
     {"nativeTransferFrom", "(Landroid/view/Surface;)V",
