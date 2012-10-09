@@ -462,7 +462,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mVolumePanel = new VolumePanel(context, this);
         mMode = AudioSystem.MODE_NORMAL;
         mForcedUseForComm = AudioSystem.FORCE_NONE;
+
         createAudioSystemThread();
+
+        boolean cameraSoundForced = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_camera_sound_forced);
+        mCameraSoundForced = new Boolean(cameraSoundForced);
+        sendMsg(mAudioHandler,
+                MSG_SET_FORCE_USE,
+                SENDMSG_QUEUE,
+                AudioSystem.FOR_SYSTEM,
+                cameraSoundForced ?
+                        AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE,
+                null,
+                0);
+
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
         updateStreamVolumeAlias(false /*updateVolumes*/);
@@ -585,6 +599,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             mStreamStates[i].dump(pw);
             pw.println("");
         }
+        pw.print("\n- mute affected streams = 0x");
+        pw.println(Integer.toHexString(mMuteAffectedStreams));
     }
 
 
@@ -634,35 +650,44 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
         synchronized(mSettingsLock) {
             mRingerMode = ringerMode;
-        }
 
-        // System.VIBRATE_ON is not used any more but defaults for mVibrateSetting
-        // are still needed while setVibrateSetting() and getVibrateSetting() are being deprecated.
-        mVibrateSetting = getValueForVibrateSetting(0,
-                                        AudioManager.VIBRATE_TYPE_NOTIFICATION,
-                                        mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
-                                                        : AudioManager.VIBRATE_SETTING_OFF);
-        mVibrateSetting = getValueForVibrateSetting(mVibrateSetting,
-                                        AudioManager.VIBRATE_TYPE_RINGER,
-                                        mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
-                                                        : AudioManager.VIBRATE_SETTING_OFF);
+            // System.VIBRATE_ON is not used any more but defaults for mVibrateSetting
+            // are still needed while setVibrateSetting() and getVibrateSetting() are being
+            // deprecated.
+            mVibrateSetting = getValueForVibrateSetting(0,
+                                            AudioManager.VIBRATE_TYPE_NOTIFICATION,
+                                            mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
+                                                            : AudioManager.VIBRATE_SETTING_OFF);
+            mVibrateSetting = getValueForVibrateSetting(mVibrateSetting,
+                                            AudioManager.VIBRATE_TYPE_RINGER,
+                                            mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
+                                                            : AudioManager.VIBRATE_SETTING_OFF);
 
-        // make sure settings for ringer mode are consistent with device type: non voice capable
-        // devices (tablets) include media stream in silent mode whereas phones don't.
-        mRingerModeAffectedStreams = Settings.System.getIntForUser(cr,
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                 UserHandle.USER_CURRENT);
-        if (mVoiceCapable) {
-            mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-        } else {
-            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+            // make sure settings for ringer mode are consistent with device type: non voice capable
+            // devices (tablets) include media stream in silent mode whereas phones don't.
+            mRingerModeAffectedStreams = Settings.System.getIntForUser(cr,
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
+                     (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
+                     UserHandle.USER_CURRENT);
+            if (mVoiceCapable) {
+                mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+            } else {
+                mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+            }
+            synchronized (mCameraSoundForced) {
+                if (mCameraSoundForced) {
+                    mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                } else {
+                    mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                }
+            }
+
+            Settings.System.putIntForUser(cr,
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    mRingerModeAffectedStreams,
+                    UserHandle.USER_CURRENT);
         }
-        Settings.System.putIntForUser(cr,
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                mRingerModeAffectedStreams,
-                UserHandle.USER_CURRENT);
 
         mMuteAffectedStreams = System.getIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -2601,12 +2626,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // only be stale values
             // on first call to readSettings() at init time, muteCount() is always 0 so we will
             // always create entries for default device
-            if ((muteCount() == 0) && (mStreamType == AudioSystem.STREAM_SYSTEM) ||
+            if ((mStreamType == AudioSystem.STREAM_SYSTEM) ||
                     (mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED)) {
-                mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT,
-                                          10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
-                mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT,
-                               10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
+                int index = 10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
+                synchronized (mCameraSoundForced) {
+                    if (mCameraSoundForced) {
+                        index = mIndexMax;
+                    }
+                }
+                if (muteCount() == 0) {
+                    mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
+                }
+                mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
                 return;
             }
 
@@ -2618,10 +2649,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 remainingDevices &= ~device;
 
                 // ignore settings for fixed volume devices: volume should always be at max
-                if ((muteCount() == 0) &&
-                        (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) &&
+                if ((mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) &&
                         ((device & mFixedVolumeDevices) != 0)) {
-                    mIndex.put(device, mIndexMax);
+                    if (muteCount() == 0) {
+                        mIndex.put(device, mIndexMax);
+                    }
                     mLastAudibleIndex.put(device, mIndexMax);
                     continue;
                 }
@@ -2676,7 +2708,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                             this,
                             PERSIST_DELAY);
                 }
-                mIndex.put(device, getValidIndex(10 * index));
+                if (muteCount() == 0) {
+                    mIndex.put(device, getValidIndex(10 * index));
+                }
             }
         }
 
@@ -2716,6 +2750,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public synchronized boolean setIndex(int index, int device, boolean lastAudible) {
             int oldIndex = getIndex(device, false  /* lastAudible */);
             index = getValidIndex(index);
+            synchronized (mCameraSoundForced) {
+                if ((mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED) && mCameraSoundForced) {
+                    index = mIndexMax;
+                }
+            }
             mIndex.put(device, getValidIndex(index));
 
             if (oldIndex != index) {
@@ -2816,6 +2855,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 } else {
                     setIndex(index, device, false /* lastAudible */);
                 }
+            }
+        }
+
+        public synchronized void setAllIndexesToMax() {
+            Set set = mIndex.entrySet();
+            Iterator i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
+                entry.setValue(mIndexMax);
+            }
+            set = mLastAudibleIndex.entrySet();
+            i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
+                entry.setValue(mIndexMax);
             }
         }
 
@@ -2967,6 +3021,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         private void dump(PrintWriter pw) {
+            pw.print("   Mute count: ");
+            pw.println(muteCount());
             pw.print("   Current: ");
             Set set = mIndex.entrySet();
             Iterator i = set.iterator();
@@ -3215,6 +3271,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // Restore forced usage for communcations and record
                     AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
                     AudioSystem.setForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm);
+                    AudioSystem.setForceUse(AudioSystem.FOR_SYSTEM, mCameraSoundForced ?
+                                    AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE);
 
                     // Restore stream volumes
                     int numStreamTypes = AudioSystem.getNumStreamTypes();
@@ -3371,6 +3429,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
                 } else {
                     ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+                }
+                synchronized (mCameraSoundForced) {
+                    if (mCameraSoundForced) {
+                        ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                    } else {
+                        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                    }
                 }
                 if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
                     /*
@@ -5587,6 +5652,48 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     0,
                     null,
                     0);
+
+            boolean cameraSoundForced = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_camera_sound_forced);
+            synchronized (mSettingsLock) {
+                synchronized (mCameraSoundForced) {
+                    if (cameraSoundForced != mCameraSoundForced) {
+                        mCameraSoundForced = cameraSoundForced;
+
+                        VolumeStreamState s = mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED];
+                        if (cameraSoundForced) {
+                            s.setAllIndexesToMax();
+                            mRingerModeAffectedStreams &=
+                                    ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        } else {
+                            s.setAllIndexes(mStreamStates[AudioSystem.STREAM_SYSTEM],
+                                            false /*lastAudible*/);
+                            s.setAllIndexes(mStreamStates[AudioSystem.STREAM_SYSTEM],
+                                            true /*lastAudible*/);
+                            mRingerModeAffectedStreams |=
+                                    (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        }
+                        // take new state into account for streams muted by ringer mode
+                        setRingerModeInt(getRingerMode(), false);
+
+                        sendMsg(mAudioHandler,
+                                MSG_SET_FORCE_USE,
+                                SENDMSG_QUEUE,
+                                AudioSystem.FOR_SYSTEM,
+                                cameraSoundForced ?
+                                        AudioSystem.FORCE_SYSTEM_ENFORCED : AudioSystem.FORCE_NONE,
+                                null,
+                                0);
+
+                        sendMsg(mAudioHandler,
+                                MSG_SET_ALL_VOLUMES,
+                                SENDMSG_QUEUE,
+                                0,
+                                0,
+                                mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED], 0);
+                    }
+                }
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error retrieving device orientation: " + e);
         }
@@ -5762,6 +5869,38 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
 
+    //==========================================================================================
+    // Camera shutter sound policy.
+    // config_camera_sound_forced configuration option in config.xml defines if the camera shutter
+    // sound is forced (sound even if the device is in silent mode) or not. This option is false by
+    // default and can be overridden by country specific overlay in values-mccXXX/config.xml.
+    //==========================================================================================
+
+    // cached value of com.android.internal.R.bool.config_camera_sound_forced
+    private Boolean mCameraSoundForced;
+
+    // called by android.hardware.Camera to populate CameraInfo.canDisableShutterSound
+    public boolean isCameraSoundForced() {
+        synchronized (mCameraSoundForced) {
+            return mCameraSoundForced;
+        }
+    }
+
+    private static final String[] RINGER_MODE_NAMES = new String[] {
+            "SILENT",
+            "VIBRATE",
+            "NORMAL"
+    };
+
+    private void dumpRingerMode(PrintWriter pw) {
+        pw.println("\nRinger mode: ");
+        pw.println("- mode: "+RINGER_MODE_NAMES[mRingerMode]);
+        pw.print("- ringer mode affected streams = 0x");
+        pw.println(Integer.toHexString(mRingerModeAffectedStreams));
+        pw.print("- ringer mode muted streams = 0x");
+        pw.println(Integer.toHexString(mRingerModeMutedStreams));
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
@@ -5770,6 +5909,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         dumpRCStack(pw);
         dumpRCCStack(pw);
         dumpStreamStates(pw);
+        dumpRingerMode(pw);
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);

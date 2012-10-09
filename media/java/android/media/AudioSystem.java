@@ -354,7 +354,8 @@ public class AudioSystem
     public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_REMOTE_SUBMIX = 11;
-    private static final int NUM_FORCE_CONFIG = 12;
+    public static final int FORCE_SYSTEM_ENFORCED = 12;
+    private static final int NUM_FORCE_CONFIG = 13;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for setForceUse, must match AudioSystem::force_use
@@ -362,7 +363,8 @@ public class AudioSystem
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
-    private static final int NUM_FORCE_USE = 4;
+    public static final int FOR_SYSTEM = 4;
+    private static final int NUM_FORCE_USE = 5;
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;
