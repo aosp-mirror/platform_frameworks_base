@@ -528,7 +528,8 @@ one or two devices per form factor.  The table below provides an overview of
 devices you could use for testing.</p>
 
 <p>If you are not able to obtain actual hardware devices for testing, you should
-set up emulated devices (AVDs) to represent the most common form factors and
+<a href="{@docRoot}tools/devices/index.html">set up emulated devices (AVDs)</a>
+to represent the most common form factors and
 hardware/software combinations. See the table below for suggestions on the emulator
 configurations to use. </p>
 
