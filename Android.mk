@@ -632,14 +632,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-pdk
 
 include $(BUILD_DROIDDOC)
 
-static_doc_index_redirect := $(out_dir)/index.html
-$(static_doc_index_redirect): \
-	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
-	$(hide) mkdir -p $(dir $@)
-	$(hide) $(ACP) $< $@
-
-$(full_target): $(static_doc_index_redirect)
-$(full_target): $(framework_built)
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
