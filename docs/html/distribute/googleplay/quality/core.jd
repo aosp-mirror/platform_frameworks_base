@@ -589,8 +589,9 @@ rather, you should focus on a small number of representative devices, even using
 one or two devices per form factor. </p>
 
 <p>If you are not able to obtain actual hardware devices for testing, you should
-set up emulated devices (AVDs) to represent the most common form factors and
-hardware/software combinations. </p>
+<a href="{@docRoot}tools/devices/index.html">set up emulated devices (AVDs)</a>
+to represent the most common form factors and
+hardware/software combinations.</p>
 
 <p>To go beyond basic testing, you can add more devices, more form factors, or
 new hardware/software combinations to your test environment. You can also
