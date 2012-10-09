@@ -16,6 +16,8 @@
 package android.os;
 
 import com.android.internal.R;
+
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -81,6 +83,39 @@ public class UserManager {
         return false;
     }
  
+    /**
+     * Return whether the given user is actively running.  This means that
+     * the user is in the "started" state, not "stopped" -- it is currently
+     * allowed to run code through scheduled alarms, receiving broadcasts,
+     * etc.  A started user may be either the current foreground user or a
+     * background user; the result here does not distinguish between the two.
+     * @param user The user to retrieve the running state for.
+     */
+    public boolean isUserRunning(UserHandle user) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(
+                    user.getIdentifier(), false);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return whether the given user is actively running <em>or</em> stopping.
+     * This is like {@link #isUserRunning(UserHandle)}, but will also return
+     * true if the user had been running but is in the process of being stopped
+     * (but is not yet fully stopped, and still running some code).
+     * @param user The user to retrieve the running state for.
+     */
+    public boolean isUserRunningOrStopping(UserHandle user) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(
+                    user.getIdentifier(), true);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     /**
      * Returns the UserInfo object describing a specific user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
