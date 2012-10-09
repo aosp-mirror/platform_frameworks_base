@@ -127,6 +127,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int WAKE_LOCK_SCREEN_DIM = 1 << 2;
     private static final int WAKE_LOCK_BUTTON_BRIGHT = 1 << 3;
     private static final int WAKE_LOCK_PROXIMITY_SCREEN_OFF = 1 << 4;
+    private static final int WAKE_LOCK_STAY_AWAKE = 1 << 5; // only set if already awake
 
     // Summarizes the user activity state.
     private static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
@@ -1172,16 +1173,25 @@ public final class PowerManagerService extends IPowerManager.Stub
                         if (mWakefulness != WAKEFULNESS_ASLEEP) {
                             mWakeLockSummary |= WAKE_LOCK_CPU
                                     | WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
+                            if (mWakefulness == WAKEFULNESS_AWAKE) {
+                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
+                            }
                         }
                         break;
                     case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                         if (mWakefulness != WAKEFULNESS_ASLEEP) {
                             mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_BRIGHT;
+                            if (mWakefulness == WAKEFULNESS_AWAKE) {
+                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
+                            }
                         }
                         break;
                     case PowerManager.SCREEN_DIM_WAKE_LOCK:
                         if (mWakefulness != WAKEFULNESS_ASLEEP) {
                             mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_SCREEN_DIM;
+                            if (mWakefulness == WAKEFULNESS_AWAKE) {
+                                mWakeLockSummary |= WAKE_LOCK_STAY_AWAKE;
+                            }
                         }
                         break;
                     case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
@@ -1339,7 +1349,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private boolean isBeingKeptAwakeLocked() {
         return mStayOn
                 || mProximityPositive
-                || (mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0
+                || (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0
                 || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
                         | USER_ACTIVITY_SCREEN_DIM)) != 0;
     }
