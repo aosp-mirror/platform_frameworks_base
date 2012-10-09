@@ -345,13 +345,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
         // watchdog in an enabled state
         putSettingsGlobalBoolean(contentResolver, Settings.Global.WIFI_WATCHDOG_ON, true);
 
-        // disable poor network avoidance
-        if (sWifiOnly) {
-            logd("Disabling poor network avoidance for wi-fi only device");
-            putSettingsGlobalBoolean(contentResolver,
-                    Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
-        }
-
         WifiWatchdogStateMachine wwsm = new WifiWatchdogStateMachine(context);
         wwsm.start();
         return wwsm;
@@ -441,8 +434,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private void updateSettings() {
         if (DBG) logd("Updating secure settings");
 
-        mPoorNetworkDetectionEnabled = getSettingsGlobalBoolean(mContentResolver,
-                Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, true);
+        // disable poor network avoidance
+        if (sWifiOnly) {
+            logd("Disabling poor network avoidance for wi-fi only device");
+            mPoorNetworkDetectionEnabled = false;
+        } else {
+            mPoorNetworkDetectionEnabled = getSettingsGlobalBoolean(mContentResolver,
+                    Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
+        }
     }
 
     /**
