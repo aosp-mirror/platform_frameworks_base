@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 93;
+    private static final int DATABASE_VERSION = 94;
 
     private Context mContext;
     private int mUserHandle;
@@ -1438,7 +1438,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     // Move ringer mode from system to global settings
-                    String[] settingsToMove = { Settings.System.MODE_RINGER };
+                    String[] settingsToMove = { Settings.Global.MODE_RINGER };
                     moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
 
                     db.setTransactionSuccessful();
@@ -1471,6 +1471,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 93;
+        }
+
+        if (upgradeVersion == 93) {
+            // Redo this step, since somehow it didn't work the first time for some users
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    // Migrate now-global settings
+                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
+                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 94;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -1921,27 +1942,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadUISoundEffectsSettings(SQLiteStatement stmt) {
-        loadIntegerSetting(stmt, Settings.System.POWER_SOUNDS_ENABLED,
-            R.integer.def_power_sounds_enabled);
-        loadStringSetting(stmt, Settings.System.LOW_BATTERY_SOUND,
-            R.string.def_low_battery_sound);
         loadBooleanSetting(stmt, Settings.System.DTMF_TONE_WHEN_DIALING,
                 R.bool.def_dtmf_tones_enabled);
         loadBooleanSetting(stmt, Settings.System.SOUND_EFFECTS_ENABLED,
                 R.bool.def_sound_effects_enabled);
         loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
                 R.bool.def_haptic_feedback);
-
-        loadIntegerSetting(stmt, Settings.System.DOCK_SOUNDS_ENABLED,
-            R.integer.def_dock_sounds_enabled);
-        loadStringSetting(stmt, Settings.System.DESK_DOCK_SOUND,
-            R.string.def_desk_dock_sound);
-        loadStringSetting(stmt, Settings.System.DESK_UNDOCK_SOUND,
-            R.string.def_desk_undock_sound);
-        loadStringSetting(stmt, Settings.System.CAR_DOCK_SOUND,
-            R.string.def_car_dock_sound);
-        loadStringSetting(stmt, Settings.System.CAR_UNDOCK_SOUND,
-            R.string.def_car_undock_sound);
 
         loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
             R.integer.def_lockscreen_sounds_enabled);
@@ -2158,9 +2164,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadStringSetting(stmt, Settings.Global.LOCK_SOUND,
                     R.string.def_lock_sound);
-
             loadStringSetting(stmt, Settings.Global.UNLOCK_SOUND,
                     R.string.def_unlock_sound);
+            loadIntegerSetting(stmt, Settings.Global.POWER_SOUNDS_ENABLED,
+                    R.integer.def_power_sounds_enabled);
+            loadStringSetting(stmt, Settings.Global.LOW_BATTERY_SOUND,
+                    R.string.def_low_battery_sound);
+            loadIntegerSetting(stmt, Settings.Global.DOCK_SOUNDS_ENABLED,
+                    R.integer.def_dock_sounds_enabled);
+            loadStringSetting(stmt, Settings.Global.DESK_DOCK_SOUND,
+                    R.string.def_desk_dock_sound);
+            loadStringSetting(stmt, Settings.Global.DESK_UNDOCK_SOUND,
+                    R.string.def_desk_undock_sound);
+            loadStringSetting(stmt, Settings.Global.CAR_DOCK_SOUND,
+                    R.string.def_car_dock_sound);
+            loadStringSetting(stmt, Settings.Global.CAR_UNDOCK_SOUND,
+                    R.string.def_car_undock_sound);
 
             loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
             loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
