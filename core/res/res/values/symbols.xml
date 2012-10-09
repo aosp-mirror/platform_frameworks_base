@@ -1150,6 +1150,7 @@
   <java-symbol type="string" name="bluetooth_a2dp_audio_route_name" />
 
   <java-symbol type="dimen" name="config_minScalingSpan" />
+  <java-symbol type="dimen" name="config_minScalingTouchMajor" />
 
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
