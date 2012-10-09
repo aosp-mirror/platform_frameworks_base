@@ -579,7 +579,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         } else {
             mRecentTaskDescriptions.addAll(tasks);
         }
-        if (((RecentsActivity)mContext).isForeground()) {
+        if (((RecentsActivity) mContext).isActivityShowing()) {
             refreshViews();
         }
     }
