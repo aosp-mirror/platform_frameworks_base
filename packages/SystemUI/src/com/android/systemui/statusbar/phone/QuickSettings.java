@@ -102,7 +102,7 @@ class QuickSettings {
     private int mBrightnessDialogShortTimeout;
     private int mBrightnessDialogLongTimeout;
 
-    private AsyncTask<Void, Void, Pair<String, BitmapDrawable>> mUserInfoTask;
+    private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
     private LevelListDrawable mBatteryLevels;
     private LevelListDrawable mChargingBatteryLevels;
@@ -203,35 +203,43 @@ class QuickSettings {
         final int userId = userInfo.id;
 
         final Context context = currentUserContext;
-        mUserInfoTask = new AsyncTask<Void, Void, Pair<String, BitmapDrawable>>() {
+        mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
             @Override
-            protected Pair<String, BitmapDrawable> doInBackground(Void... params) {
-                Cursor cursor = context.getContentResolver().query(
+            protected Pair<String, Drawable> doInBackground(Void... params) {
+                final Cursor cursor = context.getContentResolver().query(
                         Profile.CONTENT_URI, new String[] {Phone._ID, Phone.DISPLAY_NAME},
                         null, null, null);
+                final UserManager um =
+                        (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
-                if (cursor == null) {
-                    // Info not available. Should become available later.
-                    return new Pair<String, BitmapDrawable>(null, null);
+                // Fall back to the UserManager nickname if we can't read the name from the local
+                // profile below.
+                String nickName = um.getUserName();
+                String name = nickName;
+                Drawable avatar = null;
+                Bitmap rawAvatar = um.getUserIcon(userId);
+                if (rawAvatar != null) {
+                    avatar = new BitmapDrawable(mContext.getResources(), rawAvatar);
+                } else {
+                    avatar = mContext.getResources().getDrawable(R.drawable.ic_qs_default_user);
                 }
 
-                String name = null;
-                try {
-                    if (cursor.moveToFirst()) {
-                        name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                // Try and read the display name from the local profile
+                if (cursor != null) {
+                    try {
+                        if (cursor.moveToFirst()) {
+                            name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                        }
+                    } finally {
+                        cursor.close();
                     }
-                } finally {
-                    cursor.close();
                 }
-                final UserManager userManager =
-                    (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                final BitmapDrawable icon = new BitmapDrawable(mContext.getResources(),
-                        userManager.getUserIcon(userId));
-                return new Pair<String, BitmapDrawable>(name, icon);
+
+                return new Pair<String, Drawable>(name, avatar);
             }
 
             @Override
-            protected void onPostExecute(Pair<String, BitmapDrawable> result) {
+            protected void onPostExecute(Pair<String, Drawable> result) {
                 super.onPostExecute(result);
                 mModel.setUserTileInfo(result.first, result.second);
                 mUserInfoTask = null;
@@ -305,9 +313,7 @@ class QuickSettings {
                 ImageView iv = (ImageView) view.findViewById(R.id.user_imageview);
                 TextView tv = (TextView) view.findViewById(R.id.user_textview);
                 tv.setText(state.label);
-                if (us.avatar != null) {
-                    iv.setImageDrawable(us.avatar);
-                }
+                iv.setImageDrawable(us.avatar);
                 view.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_user, state.label));
             }
