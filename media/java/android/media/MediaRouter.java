@@ -693,7 +693,8 @@ public class MediaRouter {
         final WifiDisplayStatus oldStatus = sStatic.mLastKnownWifiDisplayStatus;
 
         // TODO Naive implementation. Make this smarter later.
-        boolean needScan = false;
+        boolean wantScan = false;
+        boolean blockScan = false;
         WifiDisplay[] oldDisplays = oldStatus != null ?
                 oldStatus.getRememberedDisplays() : new WifiDisplay[0];
         WifiDisplay[] newDisplays = newStatus.getRememberedDisplays();
@@ -706,7 +707,7 @@ public class MediaRouter {
             if (oldRemembered == null) {
                 addRouteStatic(makeWifiDisplayRoute(d,
                         findMatchingDisplay(d, availableDisplays) != null));
-                needScan = true;
+                wantScan = true;
             } else {
                 final boolean available = findMatchingDisplay(d, availableDisplays) != null;
                 final RouteInfo route = findWifiDisplayRoute(d);
@@ -716,6 +717,10 @@ public class MediaRouter {
                 final RouteInfo activeRoute = findWifiDisplayRoute(d);
                 if (activeRoute != null) {
                     selectRouteStatic(activeRoute.getSupportedTypes(), activeRoute);
+
+                    // Don't scan if we're already connected to a wifi display,
+                    // the scanning process can cause a hiccup with some configurations.
+                    blockScan = true;
                 }
             }
         }
@@ -727,7 +732,7 @@ public class MediaRouter {
             }
         }
 
-        if (needScan) {
+        if (wantScan && !blockScan) {
             sStatic.mDisplayService.scanWifiDisplays();
         }
 
