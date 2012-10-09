@@ -80,6 +80,7 @@ final class ElectronBeam {
     private EGLContext mEglContext;
     private EGLSurface mEglSurface;
     private boolean mSurfaceVisible;
+    private float mSurfaceAlpha;
 
     // Texture names.  We only use one texture, which contains the screenshot.
     private final int[] mTexNames = new int[1];
@@ -90,9 +91,20 @@ final class ElectronBeam {
     private final FloatBuffer mVertexBuffer = createNativeFloatBuffer(8);
     private final FloatBuffer mTexCoordBuffer = createNativeFloatBuffer(8);
 
+    /**
+     * Animates an electron beam warming up.
+     */
     public static final int MODE_WARM_UP = 0;
+
+    /**
+     * Animates an electron beam shutting off.
+     */
     public static final int MODE_COOL_DOWN = 1;
-    public static final int MODE_BLANK = 2;
+
+    /**
+     * Animates a simple dim layer to fade the contents of the screen in or out progressively.
+     */
+    public static final int MODE_FADE = 2;
 
     public ElectronBeam(Display display) {
         mDisplay = display;
@@ -138,7 +150,7 @@ final class ElectronBeam {
 
     private boolean tryPrepare() {
         if (createSurface()) {
-            if (mMode == MODE_BLANK) {
+            if (mMode == MODE_FADE) {
                 return true;
             }
             return createEglContext()
@@ -182,7 +194,7 @@ final class ElectronBeam {
             return false;
         }
 
-        if (mMode == MODE_BLANK) {
+        if (mMode == MODE_FADE) {
             return showSurface(1.0f - level);
         }
 
@@ -504,7 +516,7 @@ final class ElectronBeam {
             if (mSurface == null) {
                 try {
                     int flags;
-                    if (mMode == MODE_BLANK) {
+                    if (mMode == MODE_FADE) {
                         flags = Surface.FX_SURFACE_DIM | Surface.HIDDEN;
                     } else {
                         flags = Surface.OPAQUE | Surface.HIDDEN;
@@ -579,11 +591,12 @@ final class ElectronBeam {
             }
             mSurface = null;
             mSurfaceVisible = false;
+            mSurfaceAlpha = 0f;
         }
     }
 
     private boolean showSurface(float alpha) {
-        if (!mSurfaceVisible) {
+        if (!mSurfaceVisible || mSurfaceAlpha != alpha) {
             Surface.openTransaction();
             try {
                 mSurface.setLayer(ELECTRON_BEAM_LAYER);
@@ -593,6 +606,7 @@ final class ElectronBeam {
                 Surface.closeTransaction();
             }
             mSurfaceVisible = true;
+            mSurfaceAlpha = alpha;
         }
         return true;
     }
@@ -683,5 +697,6 @@ final class ElectronBeam {
         pw.println("  mDisplayWidth=" + mDisplayWidth);
         pw.println("  mDisplayHeight=" + mDisplayHeight);
         pw.println("  mSurfaceVisible=" + mSurfaceVisible);
+        pw.println("  mSurfaceAlpha=" + mSurfaceAlpha);
     }
 }
