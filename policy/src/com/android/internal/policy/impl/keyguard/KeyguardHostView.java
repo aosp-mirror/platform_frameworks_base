@@ -403,8 +403,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      * account unlock screen and biometric unlock to show the user's normal unlock.
      */
     private void showBackupSecurity() {
-        SecurityMode currentMode = mSecurityModel.getAlternateFor(mSecurityModel.getSecurityMode());
-        showSecurityScreen(mSecurityModel.getBackupFor(currentMode));
+        showSecurityScreen(mSecurityModel.getBackupSecurityMode());
     }
 
     public boolean showNextSecurityScreenIfPresent() {

@@ -49,18 +49,23 @@ public class KeyguardSecurityModel {
     }
 
     /**
-     * This returns false if there is any condition that indicates that the biometric unlock should
-     * not be used before the next time the unlock screen is recreated.  In other words, if this
-     * returns false there is no need to even construct the biometric unlock.
+     * Returns true if biometric unlock is installed and selected.  If this returns false there is
+     * no need to even construct the biometric unlock.
      */
     private boolean isBiometricUnlockEnabled() {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        final boolean backupIsTimedOut =
-                monitor.getFailedUnlockAttempts() >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
         return mLockPatternUtils.usingBiometricWeak()
-                && mLockPatternUtils.isBiometricWeakInstalled()
-                && !monitor.getMaxBiometricUnlockAttemptsReached()
-                && !backupIsTimedOut;
+                && mLockPatternUtils.isBiometricWeakInstalled();
+    }
+
+    /**
+     * Returns true if a condition is currently suppressing the biometric unlock.  If this returns
+     * true there is no need to even construct the biometric unlock.
+     */
+    private boolean isBiometricUnlockSuppressed() {
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        final boolean backupIsTimedOut = monitor.getFailedUnlockAttempts() >=
+                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
+        return monitor.getMaxBiometricUnlockAttemptsReached() || backupIsTimedOut;
     }
 
     SecurityMode getSecurityMode() {
@@ -107,7 +112,7 @@ public class KeyguardSecurityModel {
      * @return alternate or the given mode
      */
     SecurityMode getAlternateFor(SecurityMode mode) {
-        if (isBiometricUnlockEnabled()
+        if (isBiometricUnlockEnabled() && !isBiometricUnlockSuppressed()
                 && (mode == SecurityMode.Password || mode == SecurityMode.Pattern)) {
             return SecurityMode.Biometric;
         }
@@ -118,16 +123,23 @@ public class KeyguardSecurityModel {
      * Some unlock methods can have a backup which gives the user another way to get into
      * the device. This is currently only supported for Biometric and Pattern unlock.
      *
-     * @param mode the mode we want the backup for
-     * @return backup method or given mode
+     * @return backup method or current security mode
      */
-    SecurityMode getBackupFor(SecurityMode mode) {
+    SecurityMode getBackupSecurityMode() {
+        SecurityMode mode = getSecurityMode();
+
+        // Note that getAlternateFor() cannot be called here because we want to get the backup for
+        // biometric unlock even if it's suppressed; it just has to be enabled.
+        if (isBiometricUnlockEnabled()
+                && (mode == SecurityMode.Password || mode == SecurityMode.Pattern)) {
+            mode = SecurityMode.Biometric;
+        }
         switch(mode) {
             case Biometric:
                 return getSecurityMode();
             case Pattern:
                 return SecurityMode.Account;
         }
-        return mode; // no backup, return what was given
+        return mode; // no backup, return current security mode
     }
 }
