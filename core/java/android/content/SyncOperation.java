@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 
@@ -25,8 +26,29 @@ import android.os.SystemClock;
  * @hide
  */
 public class SyncOperation implements Comparable {
+    public static final int REASON_BACKGROUND_DATA_SETTINGS_CHANGED = -1;
+    public static final int REASON_ACCOUNTS_UPDATED = -2;
+    public static final int REASON_SERVICE_CHANGED = -3;
+    public static final int REASON_PERIODIC = -4;
+    public static final int REASON_IS_SYNCABLE = -5;
+    public static final int REASON_SYNC_AUTO = -6;
+    public static final int REASON_MASTER_SYNC_AUTO = -7;
+    public static final int REASON_USER_START = -8;
+
+    private static String[] REASON_NAMES = new String[] {
+            "DataSettingsChanged",
+            "AccountsUpdated",
+            "ServiceChanged",
+            "Periodic",
+            "IsSyncable",
+            "AutoSync",
+            "MasterSyncAuto",
+            "UserStart",
+    };
+
     public final Account account;
     public final int userId;
+    public final int reason;
     public int syncSource;
     public String authority;
     public final boolean allowParallelSyncs;
@@ -39,10 +61,12 @@ public class SyncOperation implements Comparable {
     public long delayUntil;
     public long effectiveRunTime;
 
-    public SyncOperation(Account account, int userId, int source, String authority, Bundle extras,
-            long delayInMs, long backoff, long delayUntil, boolean allowParallelSyncs) {
+    public SyncOperation(Account account, int userId, int reason, int source, String authority,
+            Bundle extras, long delayInMs, long backoff, long delayUntil,
+            boolean allowParallelSyncs) {
         this.account = account;
         this.userId = userId;
+        this.reason = reason;
         this.syncSource = source;
         this.authority = authority;
         this.allowParallelSyncs = allowParallelSyncs;
@@ -78,6 +102,7 @@ public class SyncOperation implements Comparable {
     SyncOperation(SyncOperation other) {
         this.account = other.account;
         this.userId = other.userId;
+        this.reason = other.reason;
         this.syncSource = other.syncSource;
         this.authority = other.authority;
         this.extras = new Bundle(other.extras);
@@ -91,10 +116,10 @@ public class SyncOperation implements Comparable {
     }
 
     public String toString() {
-        return dump(true);
+        return dump(null, true);
     }
 
-    public String dump(boolean useOneLine) {
+    public String dump(PackageManager pm, boolean useOneLine) {
         StringBuilder sb = new StringBuilder()
                 .append(account.name)
                 .append(" u")
@@ -110,11 +135,38 @@ public class SyncOperation implements Comparable {
         if (expedited) {
             sb.append(", EXPEDITED");
         }
+        sb.append(", reason: ");
+        sb.append(reasonToString(pm, reason));
         if (!useOneLine && !extras.keySet().isEmpty()) {
             sb.append("\n    ");
             extrasToStringBuilder(extras, sb);
         }
         return sb.toString();
+    }
+
+    public static String reasonToString(PackageManager pm, int reason) {
+        if (reason >= 0) {
+            if (pm != null) {
+                final String[] packages = pm.getPackagesForUid(reason);
+                if (packages != null && packages.length == 1) {
+                    return packages[0];
+                }
+                final String name = pm.getNameForUid(reason);
+                if (name != null) {
+                    return name;
+                }
+                return String.valueOf(reason);
+            } else {
+                return String.valueOf(reason);
+            }
+        } else {
+            final int index = -reason - 1;
+            if (index >= REASON_NAMES.length) {
+                return String.valueOf(reason);
+            } else {
+                return REASON_NAMES[index];
+            }
+        }
     }
 
     public boolean isInitialization() {
