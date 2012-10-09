@@ -22,12 +22,12 @@ Highlights and APIs</a></li>
 
 <p>To develop an Android app, you must install at least one Android platform from the SDK Manager
 against which you can compile your app. Often, any given version of the Android will be revised
-with bug fixes or other changes, as denoted by the "revision" number. Below, you'll find the
+with bug fixes or other changes, as denoted by the revision number. Below, you'll find the
 release notes for each version of the platform and the subsequent revisions to the platform
 version.</p>
 
-<p>To determine what revision of an Android platform you
-have installed, refer to the "Installed Packages" listing in the Android SDK Manager.</p>
+<p>To determine what revision of an Android platform you have installed, refer to the
+<strong>Installed Packages</strong> listing in the Android SDK Manager.</p>
 
 
 
@@ -45,10 +45,29 @@ have installed, refer to the "Installed Packages" listing in the Android SDK Man
 SDK tools to revision 20 or later and restart the Android SDK Manager. If you do not,
 the Android 4.1 system components will not be available for download.</p>
 
+
 <div class="toggle-content opened">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 3</a> <em>(October 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Maintenance update. The system version is 4.1.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r20 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(July 2012)</em>
   </p>
 
@@ -226,10 +245,10 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(December 2011)</em>
     WVGA854 (480x854 high density, normal screen)
   </li>
   <li>
-    WXGA720 (1280x720, extra-high density, normal screen) 
+    WXGA720 (1280x720, extra-high density, normal screen)
   </li>
   <li>
-    WSVGA (1024x600, medium density, large screen) 
+    WSVGA (1024x600, medium density, large screen)
   </li>
   <li>
     WXGA (1280x800, medium density, xlarge screen)
@@ -534,12 +553,12 @@ ADT 12.</p>
 <div class="toggle-content closed">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
        alt="" />Android 3.0, Revision 1</a> <em>(February 2011)</em>
 </p>
 
 <div class="toggle-content-toggleme">
-    
+
 <dl>
 <dt>Dependencies:</dt>
 <dd>
@@ -592,7 +611,7 @@ the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
        alt="" />Android 2.3.4, Revision 1</a> <em>(May 2011)</em>
 </p>
 
@@ -721,7 +740,7 @@ emulator skins are:</p>
     WVGA854 (480x854 high density, normal screen)
   </li>
 </ul>
-  
+
 
 
 
@@ -747,7 +766,7 @@ the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 <div class="toggle-content closed" >
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" 
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
        alt="" />Android 2.3, Revision 1</a> <em>(December 2010)</em>
 </p>
 
@@ -790,7 +809,7 @@ emulator skins are:</p>
 </ul>
 
 
-  
+
 
 
 
