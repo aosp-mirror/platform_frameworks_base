@@ -102,6 +102,8 @@ public class KeyguardUpdateMonitor {
     private int mFailedAttempts = 0;
     private int mFailedBiometricUnlockAttempts = 0;
 
+    private boolean mBiometricUnlockUserSwitched;
+
     private boolean mClockVisible;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
@@ -404,6 +406,7 @@ public class KeyguardUpdateMonitor {
                 cb.onUserSwitched(userId);
             }
         }
+        mBiometricUnlockUserSwitched = true;
         try {
             reply.sendResult(null);
         } catch (RemoteException e) {
@@ -719,6 +722,14 @@ public class KeyguardUpdateMonitor {
 
     public boolean getMaxBiometricUnlockAttemptsReached() {
         return mFailedBiometricUnlockAttempts >= FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
+    }
+
+    public boolean didBiometricUnlockUserSwitch() {
+        return mBiometricUnlockUserSwitched;
+    }
+
+    public void clearBiometricUnlockUserSwitched() {
+        mBiometricUnlockUserSwitched = false;
     }
 
     public boolean isSimLocked() {
