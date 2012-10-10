@@ -3936,7 +3936,7 @@
     </string>
 
     <!-- Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none] -->
-    <string name="continue_to_enable_accessibility">Keep holding down your two fingers to enable accessibility.</string>
+    <string name="continue_to_enable_accessibility">Keep holding down two fingers to enable accessibility.</string>
     <!-- Text spoken when the user enabled accessibility. [CHAR LIMIT=none] -->
     <string name="accessibility_enabled">Accessibility enabled.</string>
     <!-- Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none] -->
