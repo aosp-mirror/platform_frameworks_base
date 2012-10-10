@@ -163,7 +163,7 @@ registerReceiver(mRetryReceiver, filter);
 <p>There are two ways to unregister a device from GCM: manually and automatically.</p>
 <p>An Android application can manually unregister itself by issuing a <code>com.google.android.c2dm.intent.UNREGISTER</code> intent, which is useful when the application offers a logoff feature (so it can unregister on logoff and register again on logon). See the <a href="gcm.html#unregistering">Architectural Overview</a> for more discussion of this topic. This is the sequence of events when an application unregisters itself:</p>
 <ol>
-  <li> The application issues a <code>com.google.android.c2dm.intent.UNREGISTER</code> intent, passing the registration ID (the application should have saved its registration ID when it received the proper <code>com.google.android.c2dm.intent.REGISTRATION</code> intent).</li>
+  <li> The application issues a <code>com.google.android.c2dm.intent.UNREGISTER</code> intent, passing the package name as an extra.</li>
   <li>When the GCM server is done with the unregistration, it sends a <code>com.google.android.c2dm.intent.REGISTRATION</code> intent with the <code>unregistered</code> extra set.</li>
   <li>The application then must contact the 3rd-party server so it can remove the registration ID.</li>
   <li>The application should also clear its registration ID.
@@ -174,7 +174,7 @@ registerReceiver(mRetryReceiver, filter);
   <li>The end user uninstalls the application.</li>
   <li>The 3rd-party server sends a message to GCM server.</li>
   <li>The GCM server sends the message to the device.</li>
-  <li>The GCM client receives the message and queries Package Manager about whether there are broadcast receivers configured to receive it, which returns <code>false</code>.
+  <li>The GCM client receives the message and queries Package Manager about whether there are broadcast receivers configured to receive it, which returns <code>false</code>. 
 </li>
   <li>The GCM client informs the GCM server that the application was uninstalled.</li>
   <li>The GCM server marks the registration ID for deletion.</li>
@@ -183,6 +183,9 @@ registerReceiver(mRetryReceiver, filter);
   <li>The 3rd-party deletes the registration ID.
   </li>
 </ol>
+
+<p class ="note"><strong>Note:</strong> The GCM client is the Google Cloud Messaging framework present on the device.</p>
+
 <p>Note that it might take a while for the registration ID be completely removed from GCM. Thus it is possible that messages sent during step 7 above gets a valid message ID as response, even though the message will not be delivered to the device. Eventually, the registration ID will be removed and the server will get a <code>NotRegistered</code> error, without any further action being required from the 3rd-party server (this scenario happens frequently while an application is being developed and tested).</p>
 
 <h2 id="collapsible">Send-to-Sync  vs. Messages with Payload</h2>
