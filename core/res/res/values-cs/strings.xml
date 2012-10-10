@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Přihlásit se"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Neplatné uživatelské jméno nebo heslo."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zapomněli jste uživatelské jméno nebo heslo?"\n"Přejděte na stránku "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Odblokování SIM karty…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Kontrola účtu…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste zadali nesprávný kód PIN. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně zadali heslo. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste zadali nesprávné bezpečnostní gesto. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
