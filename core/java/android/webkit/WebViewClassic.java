@@ -4085,12 +4085,20 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void addJavascriptInterface(Object object, String name) {
+        addJavascriptInterface(object, name, false);
+    }
+
+    /**
+     * @hide
+     */
+    public void addJavascriptInterface(Object object, String name, boolean requireAnnotation) {
         if (object == null) {
             return;
         }
         WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
         arg.mObject = object;
         arg.mInterfaceName = name;
+        arg.mRequireAnnotation = requireAnnotation;
         mWebViewCore.sendMessage(EventHub.ADD_JS_INTERFACE, arg);
     }
 
