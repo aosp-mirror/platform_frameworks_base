@@ -5542,7 +5542,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * {@link View#LAYOUT_DIRECTION_LTR}
          * {@link View#LAYOUT_DIRECTION_RTL}
          */
-        public void onResolveLayoutDirection(int layoutDirection) {
+        public void resolveLayoutDirection(int layoutDirection) {
         }
 
         /**
@@ -5886,7 +5886,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * may be overridden depending on layout direction.
          */
         @Override
-        public void onResolveLayoutDirection(int layoutDirection) {
+        public void resolveLayoutDirection(int layoutDirection) {
             setLayoutDirection(layoutDirection);
 
             if (!isMarginRelative()) return;

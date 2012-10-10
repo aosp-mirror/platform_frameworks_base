@@ -1098,7 +1098,7 @@ public class ActionBarView extends AbsActionBarView {
         if (customView != null) {
             final int resolvedLayoutDirection = getLayoutDirection();
             ViewGroup.LayoutParams lp = customView.getLayoutParams();
-            lp.onResolveLayoutDirection(resolvedLayoutDirection);
+            lp.resolveLayoutDirection(resolvedLayoutDirection);
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
             final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
@@ -1385,7 +1385,7 @@ public class ActionBarView extends AbsActionBarView {
             int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
                 final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
-                upLp.onResolveLayoutDirection(layoutDirection);
+                upLp.resolveLayoutDirection(layoutDirection);
                 final int upHeight = mUpView.getMeasuredHeight();
                 final int upWidth = mUpView.getMeasuredWidth();
                 upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
@@ -1406,7 +1406,7 @@ public class ActionBarView extends AbsActionBarView {
             }
 
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
-            iconLp.onResolveLayoutDirection(layoutDirection);
+            iconLp.resolveLayoutDirection(layoutDirection);
             final int iconHeight = mIconView.getMeasuredHeight();
             final int iconWidth = mIconView.getMeasuredWidth();
             final int hCenter = (r - l) / 2;

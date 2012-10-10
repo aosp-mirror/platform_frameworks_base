@@ -25677,7 +25677,7 @@ package android.view {
     ctor public ViewGroup.LayoutParams(android.content.Context, android.util.AttributeSet);
     ctor public ViewGroup.LayoutParams(int, int);
     ctor public ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams);
-    method public void onResolveLayoutDirection(int);
+    method public void resolveLayoutDirection(int);
     method protected void setBaseAttributes(android.content.res.TypedArray, int, int);
     field public static final deprecated int FILL_PARENT = -1; // 0xffffffff
     field public static final int MATCH_PARENT = -1; // 0xffffffff
