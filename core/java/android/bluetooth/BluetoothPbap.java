@@ -51,7 +51,8 @@ import android.util.Log;
 public class BluetoothPbap {
 
     private static final String TAG = "BluetoothPbap";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /** int extra for PBAP_STATE_CHANGED_ACTION */
     public static final String PBAP_STATE =
@@ -114,7 +115,7 @@ public class BluetoothPbap {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG,"Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
@@ -127,7 +128,7 @@ public class BluetoothPbap {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG,"Binding service...");
                                     if (!mContext.bindService(
                                                         new Intent(IBluetoothPbap.class.getName()),
                                                         mConnection, 0)) {
@@ -206,7 +207,7 @@ public class BluetoothPbap {
      *         object is currently not connected to the Pbap service.
      */
     public int getState() {
-        if (DBG) log("getState()");
+        if (VDBG) log("getState()");
         if (mService != null) {
             try {
                 return mService.getState();
@@ -225,7 +226,7 @@ public class BluetoothPbap {
      *         the Pbap service.
      */
     public BluetoothDevice getClient() {
-        if (DBG) log("getClient()");
+        if (VDBG) log("getClient()");
         if (mService != null) {
             try {
                 return mService.getClient();
@@ -243,7 +244,7 @@ public class BluetoothPbap {
      * object is not currently connected to the Pbap service.
      */
     public boolean isConnected(BluetoothDevice device) {
-        if (DBG) log("isConnected(" + device + ")");
+        if (VDBG) log("isConnected(" + device + ")");
         if (mService != null) {
             try {
                 return mService.isConnected(device);

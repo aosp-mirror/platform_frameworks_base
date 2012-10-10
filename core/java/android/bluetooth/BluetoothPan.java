@@ -44,6 +44,7 @@ import java.util.List;
 public final class BluetoothPan implements BluetoothProfile {
     private static final String TAG = "BluetoothPan";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Intent used to broadcast the change in connection state of the Pan
@@ -145,7 +146,7 @@ public final class BluetoothPan implements BluetoothProfile {
     }
 
     /*package*/ void close() {
-        if (DBG) log("close()");
+        if (VDBG) log("close()");
         if (mConnection != null) {
             mContext.unbindService(mConnection);
             mConnection = null;
@@ -175,7 +176,7 @@ public final class BluetoothPan implements BluetoothProfile {
                 }
                 Log.d(TAG, "BluetoothPan(), bindService called");
             } else {
-                if (DBG) Log.d(TAG,"Unbinding service...");
+                if (VDBG) Log.d(TAG,"Unbinding service...");
                 synchronized (mConnection) {
                     try {
                         mPanService = null;
@@ -266,7 +267,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getConnectedDevices() {
-        if (DBG) log("getConnectedDevices()");
+        if (VDBG) log("getConnectedDevices()");
         if (mPanService != null && isEnabled()) {
             try {
                 return mPanService.getConnectedDevices();
@@ -283,7 +284,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) log("getDevicesMatchingStates()");
+        if (VDBG) log("getDevicesMatchingStates()");
         if (mPanService != null && isEnabled()) {
             try {
                 return mPanService.getDevicesMatchingConnectionStates(states);
@@ -300,7 +301,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * {@inheritDoc}
      */
     public int getConnectionState(BluetoothDevice device) {
-        if (DBG) log("getState(" + device + ")");
+        if (VDBG) log("getState(" + device + ")");
         if (mPanService != null && isEnabled()
             && isValidDevice(device)) {
             try {
@@ -324,7 +325,7 @@ public final class BluetoothPan implements BluetoothProfile {
     }
 
     public boolean isTetheringOn() {
-        if (DBG) log("isTetheringOn()");
+        if (VDBG) log("isTetheringOn()");
         try {
             return mPanService.isTetheringOn();
         } catch (RemoteException e) {
