@@ -5651,12 +5651,12 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void showStrictModeViolation(boolean on) {
         if (mHeadless) return;
-        mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, on ? 1 : 0, 0));
+        int pid = Binder.getCallingPid();
+        mH.sendMessage(mH.obtainMessage(H.SHOW_STRICT_MODE_VIOLATION, on ? 1 : 0, pid));
     }
 
-    private void showStrictModeViolation(int arg) {
+    private void showStrictModeViolation(int arg, int pid) {
         final boolean on = arg != 0;
-        int pid = Binder.getCallingPid();
         synchronized(mWindowMap) {
             // Ignoring requests to enable the red border from clients
             // which aren't on screen.  (e.g. Broadcast Receivers in
@@ -7646,7 +7646,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case SHOW_STRICT_MODE_VIOLATION: {
-                    showStrictModeViolation(msg.arg1);
+                    showStrictModeViolation(msg.arg1, msg.arg2);
                     break;
                 }
 
