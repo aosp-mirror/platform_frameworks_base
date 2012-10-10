@@ -258,6 +258,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         public void dismiss(boolean authenticated) {
+            // If the biometric unlock was suppressed due to a user switch, it can now be safely
+            // unsuppressed because the user has left the unlock screen.
+            KeyguardUpdateMonitor.getInstance(mContext).clearBiometricUnlockUserSwitched();
             showNextSecurityScreenOrFinish(authenticated);
         }
 
