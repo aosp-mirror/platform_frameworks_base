@@ -223,6 +223,10 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 final RegisteredServicesCacheListener<AuthenticatorDescription> listener,
                 final Handler handler) {
         }
+
+		@Override
+		public void invalidateCache(int userId) {
+		}
     }
 
     static public class MyMockContext extends MockContext {
