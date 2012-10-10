@@ -170,15 +170,17 @@
     <skip />
     <!-- no translation found for accessibility_data_signal_full (2708384608124519369) -->
     <skip />
-    <!-- no translation found for accessibility_no_wifi (7455607460517331976) -->
+    <!-- no translation found for accessibility_wifi_off (3177380296697933627) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_one_bar (6854947280074467207) -->
+    <!-- no translation found for accessibility_no_wifi (1425476551827924474) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_two_bars (3344340012058984348) -->
+    <!-- no translation found for accessibility_wifi_one_bar (7735893178010724377) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_three_bars (928322805193265041) -->
+    <!-- no translation found for accessibility_wifi_two_bars (4994274250497262434) -->
     <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (4826278754383492058) -->
+    <!-- no translation found for accessibility_wifi_three_bars (3495755044276588384) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_signal_full (6853561303586480376) -->
     <skip />
     <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
     <skip />
@@ -190,7 +192,31 @@
     <skip />
     <!-- no translation found for accessibility_wimax_signal_full (2768089986795579558) -->
     <skip />
+    <!-- no translation found for accessibility_no_signal (7064645320782585167) -->
+    <skip />
+    <!-- no translation found for accessibility_not_connected (6395326276213402883) -->
+    <skip />
+    <!-- no translation found for accessibility_zero_bars (3806060224467027887) -->
+    <skip />
+    <!-- no translation found for accessibility_one_bar (1685730113192081895) -->
+    <skip />
+    <!-- no translation found for accessibility_two_bars (6437363648385206679) -->
+    <skip />
+    <!-- no translation found for accessibility_three_bars (2648241415119396648) -->
+    <skip />
+    <!-- no translation found for accessibility_signal_full (9122922886519676839) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_on (2385254693624345265) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_off (6475508157786853157) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_connected (8366256693719499665) -->
+    <skip />
     <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_1x (994133468120244018) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_hspa (2032328855462645198) -->
     <skip />
     <!-- no translation found for accessibility_data_connection_3g (8628562305003568260) -->
     <skip />
@@ -199,6 +225,8 @@
     <!-- no translation found for accessibility_data_connection_4g (7741000750630089612) -->
     <skip />
     <!-- no translation found for accessibility_data_connection_cdma (6132648193978823023) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_roaming (5977362333466556094) -->
     <skip />
     <!-- no translation found for accessibility_data_connection_edge (4477457051631979278) -->
     <skip />
@@ -229,6 +257,28 @@
     <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
     <skip />
     <!-- no translation found for accessibility_recents_item_dismissed (6803574935084867070) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_dismissed (854211387186306927) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_notification_shade (4690274844447504208) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_quick_settings (6186378411582437046) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_user (1104846699869476855) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_wifi (6099781031669728709) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_mobile (4876806564086241341) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_battery (1480931583381408972) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_airplane (4196876722090224753) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth (5749054971341882340) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_alarm (3959908972897295660) -->
     <skip />
     <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
     <skip />

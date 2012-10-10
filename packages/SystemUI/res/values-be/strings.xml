@@ -100,21 +100,35 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"2 планкі дадзеных."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"3 планкі дадзеных."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Поўны сігнал перадачы дадзеных."</string>
-    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Wi-Fi адсутнiчае."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi, адзiн слупок."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi, два слупкi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi, тры слупкi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Моцны сiгнал Wi-Fi."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi выключаны."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi адключаны."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Адзiн слупок Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Два слупкi Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Тры слупкi Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Поўны сігнал Wi-Fi."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Няма сiгналу WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Адзiн слупок сiгналу WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Два слупкi сiгналу WiMAX."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Тры слупкi сiгналу WiMAX."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Моцны сiгнал WiMAX."</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Няма сігналу."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Няма падключэння."</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Няма."</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Адзiн слупок."</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Два слупкi."</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Тры слупкi."</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Сігнал поўны."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Уключана."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Адключана."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Падключана."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Роўмінг"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM-карты."</string>
@@ -132,6 +146,18 @@
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Выклік з вібрацыяй."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Маўклівы выклік."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> выдалены."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Апавяшчэнне прапушчана."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Цень апавяшчэння.."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Хуткія налады."</string>
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Карыстальнік: <xliff:g id="USER">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Мабiльны сiгнал: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Акумулятар: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Рэжым палёту: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth: <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Наладжаны будзiльнiк: <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Дадзеныя 2G-3G адключаныя"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Дадзеныя 4G адключаныя"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мабільная перадача дадзеных адключаная"</string>
@@ -175,12 +201,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма сеткi"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi адключаны"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Дысплей Wi-Fi"</string>
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (2355298740765736918) -->
-    <skip />
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Бесправадны дысплей"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркасць"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АЎТА"</string>
-    <!-- no translation found for status_bar_help_title (1199237744086469217) -->
-    <skip />
-    <!-- no translation found for status_bar_help_text (7874607155052076323) -->
-    <skip />
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Апавяшчэнні з\'яўляюцца тут"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Атрымлівайце доступ да іх у любы час, праводзячы пальцам уніз."\n"Правядзіце пальцам уніз яшчэ раз, каб атрымаць доступ да сродкаў кіравання сістэмай."</string>
 </resources>
