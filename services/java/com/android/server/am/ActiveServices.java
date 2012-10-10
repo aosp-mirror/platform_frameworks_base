@@ -248,8 +248,9 @@ public class ActiveServices {
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
-        if (!bringUpServiceLocked(r, service.getFlags(), false)) {
-            return new ComponentName("!", "Service process is bad");
+        String error = bringUpServiceLocked(r, service.getFlags(), false);
+        if (error != null) {
+            return new ComponentName("!!", error);
         }
         return r.name;
     }
@@ -518,7 +519,7 @@ public class ActiveServices {
 
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
-                if (!bringUpServiceLocked(s, service.getFlags(), false)) {
+                if (bringUpServiceLocked(s, service.getFlags(), false) != null) {
                     return 0;
                 }
             }
@@ -964,19 +965,19 @@ public class ActiveServices {
         return true;
     }
 
-    private final boolean bringUpServiceLocked(ServiceRecord r,
+    private final String bringUpServiceLocked(ServiceRecord r,
             int intentFlags, boolean whileRestarting) {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
         if (r.app != null && r.app.thread != null) {
             sendServiceArgsLocked(r, false);
-            return true;
+            return null;
         }
 
         if (!whileRestarting && r.restartDelay > 0) {
             // If waiting for a restart, then do nothing.
-            return true;
+            return null;
         }
 
         if (DEBUG_SERVICE) Slog.v(TAG, "Bringing up " + r + " " + r.intent);
@@ -988,12 +989,13 @@ public class ActiveServices {
         // Make sure that the user who owns this service is started.  If not,
         // we don't want to allow it to run.
         if (mAm.mStartedUsers.get(r.userId) == null) {
-            Slog.w(TAG, "Unable to launch app "
+            String msg = "Unable to launch app "
                     + r.appInfo.packageName + "/"
                     + r.appInfo.uid + " for service "
-                    + r.intent.getIntent() + ": user " + r.userId + " is stopped");
+                    + r.intent.getIntent() + ": user " + r.userId + " is stopped";
+            Slog.w(TAG, msg);
             bringDownServiceLocked(r, true);
-            return false;
+            return msg;
         }
 
         // Service is now being launched, its package can't be stopped.
@@ -1018,7 +1020,7 @@ public class ActiveServices {
                 try {
                     app.addPackage(r.appInfo.packageName);
                     realStartServiceLocked(r, app);
-                    return true;
+                    return null;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when starting service " + r.shortName, e);
                 }
@@ -1041,12 +1043,13 @@ public class ActiveServices {
         if (app == null) {
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
                     "service", r.name, false, isolated)) == null) {
-                Slog.w(TAG, "Unable to launch app "
+                String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
-                        + r.intent.getIntent() + ": process is bad");
+                        + r.intent.getIntent() + ": process is bad";
+                Slog.w(TAG, msg);
                 bringDownServiceLocked(r, true);
-                return false;
+                return msg;
             }
             if (isolated) {
                 r.isolatedProc = app;
@@ -1057,7 +1060,7 @@ public class ActiveServices {
             mPendingServices.add(r);
         }
 
-        return true;
+        return null;
     }
 
     private final void requestServiceBindingsLocked(ServiceRecord r) {

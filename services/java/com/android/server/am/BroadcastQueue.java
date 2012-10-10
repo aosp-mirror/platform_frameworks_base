@@ -54,6 +54,7 @@ public class BroadcastQueue {
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
 
     static final int MAX_BROADCAST_HISTORY = 25;
+    static final int MAX_BROADCAST_SUMMARY_HISTORY = 100;
 
     final ActivityManagerService mService;
 
@@ -91,6 +92,12 @@ public class BroadcastQueue {
      */
     final BroadcastRecord[] mBroadcastHistory
             = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+
+    /**
+     * Summary of historical data of past broadcasts, for debugging.
+     */
+    final Intent[] mBroadcastSummaryHistory
+            = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
 
     /**
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
@@ -922,6 +929,9 @@ public class BroadcastQueue {
                 MAX_BROADCAST_HISTORY-1);
         r.finishTime = SystemClock.uptimeMillis();
         mBroadcastHistory[0] = r;
+        System.arraycopy(mBroadcastSummaryHistory, 0, mBroadcastSummaryHistory, 1,
+                MAX_BROADCAST_SUMMARY_HISTORY-1);
+        mBroadcastSummaryHistory[0] = r.intent;
     }
 
     final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
@@ -1006,8 +1016,9 @@ public class BroadcastQueue {
             }
         }
 
+        int i;
         boolean printed = false;
-        for (int i=0; i<MAX_BROADCAST_HISTORY; i++) {
+        for (i=0; i<MAX_BROADCAST_HISTORY; i++) {
             BroadcastRecord r = mBroadcastHistory[i];
             if (r == null) {
                 break;
@@ -1028,11 +1039,44 @@ public class BroadcastQueue {
                         pw.print(i); pw.println(":");
                 r.dump(pw, "    ");
             } else {
-                if (i >= 50) {
+                pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
+                pw.print("    ");
+                pw.println(r.intent.toShortString(false, true, true, false));
+                Bundle bundle = r.intent.getExtras();
+                if (bundle != null) {
+                    pw.print("    extras: "); pw.println(bundle.toString());
+                }
+            }
+        }
+
+        if (dumpPackage == null) {
+            if (dumpAll) {
+                i = 0;
+                printed = false;
+            }
+            for (; i<MAX_BROADCAST_SUMMARY_HISTORY; i++) {
+                Intent intent = mBroadcastSummaryHistory[i];
+                if (intent == null) {
+                    break;
+                }
+                if (!printed) {
+                    if (needSep) {
+                        pw.println();
+                    }
+                    needSep = true;
+                    pw.println("  Historical broadcasts summary [" + mQueueName + "]:");
+                    printed = true;
+                }
+                if (!dumpAll && i >= 50) {
                     pw.println("  ...");
                     break;
                 }
-                pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
+                pw.print("  #"); pw.print(i); pw.print(": ");
+                pw.println(intent.toShortString(false, true, true, false));
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    pw.print("    extras: "); pw.println(bundle.toString());
+                }
             }
         }
 
