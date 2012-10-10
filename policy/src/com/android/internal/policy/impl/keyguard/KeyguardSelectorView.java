@@ -28,6 +28,7 @@ import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -203,11 +204,18 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
         }
+        boolean currentUserSetup = 0 != Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE,
+                0 /*default */,
+                currentUserHandle);
         boolean searchActionAvailable =
                 ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT) != null;
-        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraTargetPresent;
-        mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
+        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraTargetPresent
+                || !currentUserSetup;
+        mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent
+                || !currentUserSetup;
         updateResources();
     }
 
