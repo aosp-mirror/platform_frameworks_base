@@ -51,6 +51,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     private static final String NETWORKTYPE = "BLUETOOTH_TETHER";
     private static final String TAG = "BluetoothTethering";
+    private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
@@ -99,10 +101,10 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
      * Begin monitoring connectivity
      */
     public void startMonitoring(Context context, Handler target) {
-        Log.d(TAG, "startMonitoring: target: " + target);
+        if (DBG) Log.d(TAG, "startMonitoring: target: " + target);
         mContext = context;
         mCsHandler = target;
-        Log.d(TAG, "startMonitoring: mCsHandler: " + mCsHandler);
+        if (VDBG) Log.d(TAG, "startMonitoring: mCsHandler: " + mCsHandler);
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             adapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.PAN);
@@ -310,31 +312,31 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     }
     public synchronized void startReverseTether(String iface) {
         mIface = iface;
-        Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
+        if (DBG) Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
          mDhcpThread = new Thread(new Runnable() {
             public void run() {
                 //TODO(): Add callbacks for failure and success case.
                 //Currently this thread runs independently.
-                Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
+                if (DBG) Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
                 String DhcpResultName = "dhcp." + mIface + ".result";;
                 String result = "";
-                Log.d(TAG, "waiting for change of sys prop dhcp result: " + DhcpResultName);
+                if (VDBG) Log.d(TAG, "waiting for change of sys prop dhcp result: " + DhcpResultName);
                 for(int i = 0; i < 30*5; i++) {
                     try { Thread.sleep(200); } catch (InterruptedException ie) { return;}
                     result = SystemProperties.get(DhcpResultName);
-                    Log.d(TAG, "read " + DhcpResultName + ": " + result);
+                    if (VDBG) Log.d(TAG, "read " + DhcpResultName + ": " + result);
                     if(result.equals("failed")) {
                         Log.e(TAG, "startReverseTether, failed to start dhcp service");
                         return;
                     }
                     if(result.equals("ok")) {
-                        Log.d(TAG, "startReverseTether, dhcp resut: " + result);
+                        if (VDBG) Log.d(TAG, "startReverseTether, dhcp resut: " + result);
                         if(readLinkProperty(mIface)) {
 
                             mNetworkInfo.setIsAvailable(true);
                             mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
 
-                            Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
+                            if (VDBG) Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
                             if(mCsHandler != null) {
                                 Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
                                 msg.sendToTarget();
@@ -346,7 +348,7 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
                         return;
                     }
                 }
-                Log.d(TAG, "startReverseTether, dhcp failed, resut: " + result);
+                Log.e(TAG, "startReverseTether, dhcp failed, resut: " + result);
             }
         });
         mDhcpThread.start();
