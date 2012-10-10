@@ -48,6 +48,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -81,6 +82,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int MSG_SANDMAN = 2;
     // Message: Sent when the screen on blocker is released.
     private static final int MSG_SCREEN_ON_BLOCKER_RELEASED = 3;
+    // Message: Sent to poll whether the boot animation has terminated.
+    private static final int MSG_CHECK_IF_BOOT_ANIMATION_FINISHED = 4;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -152,6 +155,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     // the screen on when the device starts charging wirelessly.
     // See point of use for more details.
     private static final int WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT = 95;
+
+    // The name of the boot animation service in init.rc.
+    private static final String BOOT_ANIMATION_SERVICE = "bootanim";
+
+    // Poll interval in milliseconds for watching boot animation finished.
+    private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
     private Context mContext;
     private LightsService mLightsService;
@@ -1662,6 +1671,29 @@ public final class PowerManagerService extends IPowerManager.Stub
         updatePowerStateLocked();
     }
 
+    private void startWatchingForBootAnimationFinished() {
+        mHandler.sendEmptyMessage(MSG_CHECK_IF_BOOT_ANIMATION_FINISHED);
+    }
+
+    private void checkIfBootAnimationFinished() {
+        if (DEBUG) {
+            Slog.d(TAG, "Check if boot animation finished...");
+        }
+
+        if (SystemService.isRunning(BOOT_ANIMATION_SERVICE)) {
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_IF_BOOT_ANIMATION_FINISHED,
+                    BOOT_ANIMATION_POLL_INTERVAL);
+            return;
+        }
+
+        synchronized (mLock) {
+            if (!mBootCompleted) {
+                Slog.i(TAG, "Boot animation finished.");
+                handleBootCompletedLocked();
+            }
+        }
+    }
+
     private void handleBootCompletedLocked() {
         final long now = SystemClock.uptimeMillis();
         mBootCompleted = true;
@@ -2170,9 +2202,13 @@ public final class PowerManagerService extends IPowerManager.Stub
     private final class BootCompletedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                handleBootCompletedLocked();
-            }
+            // This is our early signal that the system thinks it has finished booting.
+            // However, the boot animation may still be running for a few more seconds
+            // since it is ultimately in charge of when it terminates.
+            // Defer transitioning into the boot completed state until the animation exits.
+            // We do this so that the screen does not start to dim prematurely before
+            // the user has actually had a chance to interact with the device.
+            startWatchingForBootAnimationFinished();
         }
     }
 
@@ -2226,6 +2262,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                     break;
                 case MSG_SCREEN_ON_BLOCKER_RELEASED:
                     handleScreenOnBlockerReleased();
+                    break;
+                case MSG_CHECK_IF_BOOT_ANIMATION_FINISHED:
+                    checkIfBootAnimationFinished();
                     break;
             }
         }
