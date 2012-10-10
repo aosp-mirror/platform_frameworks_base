@@ -276,7 +276,6 @@
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
-  <java-symbol type="bool" name="config_dontPreferApn" />
 
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
