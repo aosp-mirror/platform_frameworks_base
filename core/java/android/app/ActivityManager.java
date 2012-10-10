@@ -1981,7 +1981,7 @@ public class ActivityManager {
      */
     public boolean isUserRunning(int userid) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userid);
+            return ActivityManagerNative.getDefault().isUserRunning(userid, false);
         } catch (RemoteException e) {
             return false;
         }

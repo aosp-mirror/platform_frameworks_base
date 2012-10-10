@@ -3587,7 +3587,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.w(TAG, "Failed trying to unstop package "
                                 + packageName + ": " + e);
                     }
-                    if (isUserRunningLocked(user)) {
+                    if (isUserRunningLocked(user, false)) {
                         forceStopPackageLocked(packageName, pkgUid);
                     }
                 }
@@ -9340,6 +9340,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.print("    User #"); pw.print(uss.mHandle.getIdentifier());
                     pw.print(": "); uss.dump("", pw);
         }
+        pw.print("  mStartedUserArray: [");
+        for (int i=0; i<mStartedUserArray.length; i++) {
+            if (i > 0) pw.print(", ");
+            pw.print(mStartedUserArray[i]);
+        }
+        pw.println("]");
         pw.print("  mUserLru: [");
         for (int i=0; i<mUserLru.size(); i++) {
             if (i > 0) pw.print(", ");
@@ -14136,10 +14142,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // so we can just fairly silently bring the user back from
                     // the almost-dead.
                     uss.mState = UserStartedState.STATE_RUNNING;
+                    updateStartedUserArrayLocked();
                 } else if (uss.mState == UserStartedState.STATE_SHUTDOWN) {
                     // This means ACTION_SHUTDOWN has been sent, so we will
                     // need to treat this as a new boot of the user.
                     uss.mState = UserStartedState.STATE_BOOTING;
+                    updateStartedUserArrayLocked();
                 }
 
                 mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
@@ -14320,8 +14328,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void finishUserSwitch(UserStartedState uss) {
         synchronized (this) {
-            if ((uss.mState == UserStartedState.STATE_BOOTING
-                    || uss.mState == UserStartedState.STATE_SHUTDOWN)
+            if (uss.mState == UserStartedState.STATE_BOOTING
                     && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
                 uss.mState = UserStartedState.STATE_RUNNING;
                 final int userId = uss.mHandle.getIdentifier();
@@ -14412,6 +14419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (uss.mState != UserStartedState.STATE_STOPPING
                 && uss.mState != UserStartedState.STATE_SHUTDOWN) {
             uss.mState = UserStartedState.STATE_STOPPING;
+            updateStartedUserArrayLocked();
 
             long ident = Binder.clearCallingIdentity();
             try {
@@ -14516,7 +14524,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean isUserRunning(int userId) {
+    public boolean isUserRunning(int userId, boolean orStopped) {
         if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: isUserRunning() from pid="
@@ -14527,13 +14535,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            return isUserRunningLocked(userId);
+            return isUserRunningLocked(userId, orStopped);
         }
     }
 
-    boolean isUserRunningLocked(int userId) {
+    boolean isUserRunningLocked(int userId, boolean orStopped) {
         UserStartedState state = mStartedUsers.get(userId);
-        return state != null && state.mState != UserStartedState.STATE_STOPPING
+        if (state == null) {
+            return false;
+        }
+        if (orStopped) {
+            return true;
+        }
+        return state.mState != UserStartedState.STATE_STOPPING
                 && state.mState != UserStartedState.STATE_SHUTDOWN;
     }
 
@@ -14554,9 +14568,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void updateStartedUserArrayLocked() {
-        mStartedUserArray = new int[mStartedUsers.size()];
+        int num = 0;
         for (int i=0; i<mStartedUsers.size();  i++) {
-            mStartedUserArray[i] = mStartedUsers.keyAt(i);
+            UserStartedState uss = mStartedUsers.valueAt(i);
+            // This list does not include stopping users.
+            if (uss.mState != UserStartedState.STATE_STOPPING
+                    && uss.mState != UserStartedState.STATE_SHUTDOWN) {
+                num++;
+            }
+        }
+        mStartedUserArray = new int[num];
+        num = 0;
+        for (int i=0; i<mStartedUsers.size();  i++) {
+            UserStartedState uss = mStartedUsers.valueAt(i);
+            if (uss.mState != UserStartedState.STATE_STOPPING
+                    && uss.mState != UserStartedState.STATE_SHUTDOWN) {
+                mStartedUserArray[num] = mStartedUsers.keyAt(i);
+                num++;
+            }
         }
     }
 
