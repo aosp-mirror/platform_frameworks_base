@@ -38,7 +38,7 @@ import android.util.Log;
 public class MediaFrameworkPerfTestRunner extends InstrumentationTestRunner {
 
     public static boolean mGetNativeHeapDump = false;
-
+    public static boolean mGetProcmem = false;
 
     @Override
     public TestSuite getAllTests() {
@@ -61,6 +61,12 @@ public class MediaFrameworkPerfTestRunner extends InstrumentationTestRunner {
         if (get_heap_dump != null) {
             mGetNativeHeapDump = true;
         }
+
+        String get_procmem = (String) icicle.get("get_procmem");
+        if (get_procmem != null) {
+            mGetProcmem = true;
+        }
+
     }
 }
 
