@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -54,6 +55,7 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -70,6 +72,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -261,8 +264,7 @@ public class AccountManagerService
                 accounts = new UserAccounts(mContext, userId);
                 mUsers.append(userId, accounts);
                 purgeOldGrants(accounts);
-                mAuthenticatorCache.invalidateCache(accounts.userId);
-                validateAccountsAndPopulateCache(accounts);
+                validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
             }
             return accounts;
         }
@@ -300,7 +302,28 @@ public class AccountManagerService
         }
     }
 
-    private void validateAccountsAndPopulateCache(UserAccounts accounts) {
+    /**
+     * Validate internal set of accounts against installed authenticators for
+     * given user. Clears cached authenticators before validating.
+     */
+    public void validateAccounts(int userId) {
+        final UserAccounts accounts = getUserAccounts(userId);
+
+        // Invalidate user-specific cache to make sure we catch any
+        // removed authenticators.
+        validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
+    }
+
+    /**
+     * Validate internal set of accounts against installed authenticators for
+     * given user. Clear cached authenticators before validating when requested.
+     */
+    private void validateAccountsInternal(
+            UserAccounts accounts, boolean invalidateAuthenticatorCache) {
+        if (invalidateAuthenticatorCache) {
+            mAuthenticatorCache.invalidateCache(accounts.userId);
+        }
+
         final HashSet<AuthenticatorDescription> knownAuth = Sets.newHashSet();
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service :
                 mAuthenticatorCache.getAllServices(accounts.userId)) {
@@ -323,7 +346,7 @@ public class AccountManagerService
                     final String accountName = cursor.getString(2);
 
                     if (!knownAuth.contains(AuthenticatorDescription.newKey(accountType))) {
-                        Log.d(TAG, "deleting account " + accountName + " because type "
+                        Slog.w(TAG, "deleting account " + accountName + " because type "
                                 + accountType + " no longer has a registered authenticator");
                         db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
                         accountDeleted = true;
@@ -399,7 +422,8 @@ public class AccountManagerService
 
     @Override
     public void onServiceChanged(AuthenticatorDescription desc, int userId, boolean removed) {
-        validateAccountsAndPopulateCache(getUserAccounts(userId));
+        Slog.d(TAG, "onServiceChanged() for userId " + userId);
+        validateAccountsInternal(getUserAccounts(userId), false /* invalidateAuthenticatorCache */);
     }
 
     public String getPassword(Account account) {
@@ -1493,10 +1517,23 @@ public class AccountManagerService
             // Running in system_server; should never happen
             throw new RuntimeException(e);
         }
+        return getAccounts(runningUserIds);
+    }
 
+    /** {@hide} */
+    public AccountAndUser[] getAllAccounts() {
+        final List<UserInfo> users = getUserManager().getUsers();
+        final int[] userIds = new int[users.size()];
+        for (int i = 0; i < userIds.length; i++) {
+            userIds[i] = users.get(i).id;
+        }
+        return getAccounts(userIds);
+    }
+
+    private AccountAndUser[] getAccounts(int[] userIds) {
         final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
         synchronized (mUsers) {
-            for (int userId : runningUserIds) {
+            for (int userId : userIds) {
                 UserAccounts userAccounts = getUserAccounts(userId);
                 if (userAccounts == null) continue;
                 synchronized (userAccounts.cacheLock) {
@@ -2006,6 +2043,7 @@ public class AccountManagerService
         return false;
     }
 
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -2015,17 +2053,15 @@ public class AccountManagerService
             return;
         }
         final boolean isCheckinRequest = scanArgs(args, "--checkin") || scanArgs(args, "-c");
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(fout, "  ");
 
-        fout = new IndentingPrintWriter(fout, "  ");
-        int size = mUsers.size();
-        for (int i = 0; i < size; i++) {
-            fout.println("User " + mUsers.keyAt(i) + ":");
-            ((IndentingPrintWriter) fout).increaseIndent();
-            dumpUser(mUsers.valueAt(i), fd, fout, args, isCheckinRequest);
-            ((IndentingPrintWriter) fout).decreaseIndent();
-            if (i < size - 1) {
-                fout.println();
-            }
+        final List<UserInfo> users = getUserManager().getUsers();
+        for (UserInfo user : users) {
+            ipw.println("User " + user + ":");
+            ipw.increaseIndent();
+            dumpUser(getUserAccounts(user.id), fd, ipw, args, isCheckinRequest);
+            ipw.println();
+            ipw.decreaseIndent();
         }
     }
 
