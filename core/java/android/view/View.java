@@ -6858,12 +6858,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Performs the specified accessibility action on the view. For
      * possible accessibility actions look at {@link AccessibilityNodeInfo}.
-    * <p>
-    * If an {@link AccessibilityDelegate} has been specified via calling
-    * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
-    * {@link AccessibilityDelegate#performAccessibilityAction(View, int, Bundle)}
-    * is responsible for handling this call.
-    * </p>
+     * <p>
+     * If an {@link AccessibilityDelegate} has been specified via calling
+     * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
+     * {@link AccessibilityDelegate#performAccessibilityAction(View, int, Bundle)}
+     * is responsible for handling this call.
+     * </p>
      *
      * @param action The action to perform.
      * @param arguments Optional action arguments.
@@ -6886,12 +6886,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
-                    return performClick();
+                    performClick();
+                    return true;
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
                 if (isLongClickable()) {
-                    return performLongClick();
+                    performLongClick();
+                    return true;
                 }
             } break;
             case AccessibilityNodeInfo.ACTION_FOCUS: {
