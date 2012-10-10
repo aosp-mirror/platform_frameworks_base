@@ -476,6 +476,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                 if (isAction) maxActions--;
 
                 item.setIsActionButton(isAction);
+            } else {
+                // Neither requires nor requests an action button.
+                item.setIsActionButton(false);
             }
         }
         return true;
