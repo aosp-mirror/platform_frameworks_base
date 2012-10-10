@@ -33,7 +33,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -133,7 +132,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -380,9 +378,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private InputFilter[] mFilters = NO_FILTERS;
 
-    private volatile Locale mCurrentTextServicesLocaleCache;
-    private final ReentrantLock mCurrentTextServicesLocaleLock = new ReentrantLock();
-
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
     // a link is pressed). These highlight-related fields do not go in mEditor.
     int mHighlightColor = 0x6633B5E5;
@@ -455,8 +450,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final Resources res = getResources();
         final CompatibilityInfo compat = res.getCompatibilityInfo();
-
-        updateTextServicesLocaleAsync();
 
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.density = res.getDisplayMetrics().density;
@@ -7682,43 +7675,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * This is a temporary method. Future versions may support multi-locale text.
-     * Caveat: This method may not return the latest text services locale, but this should be
-     * acceptable and it's more important to make this method asynchronous.
      *
      * @return The locale that should be used for a word iterator and a spell checker
      * in this TextView, based on the current spell checker settings,
      * the current IME's locale, or the system default locale.
      * @hide
      */
-    // TODO: Support multi-locale
-    // TODO: Update the text services locale immediately after the keyboard locale is switched
-    // by catching intent of keyboard switch event
     public Locale getTextServicesLocale() {
-        if (mCurrentTextServicesLocaleCache == null) {
-            // If there is no cached text services locale, just return the default locale.
-            mCurrentTextServicesLocaleCache = Locale.getDefault();
-        }
-        // Start fetching the text services locale asynchronously.
-        updateTextServicesLocaleAsync();
-        return mCurrentTextServicesLocaleCache;
-    }
-
-    private void updateTextServicesLocaleAsync() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (mCurrentTextServicesLocaleLock.tryLock()) {
-                    try {
-                        updateTextServicesLocaleLocked();
-                    } finally {
-                        mCurrentTextServicesLocaleLock.unlock();
-                    }
-                }
-            }
-        });
-    }
-
-    private void updateTextServicesLocaleLocked() {
         Locale locale = Locale.getDefault();
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
@@ -7726,7 +7689,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (subtype != null) {
             locale = SpellCheckerSubtype.constructLocaleFromString(subtype.getLocale());
         }
-        mCurrentTextServicesLocaleCache = locale;
+        return locale;
     }
 
     void onLocaleChanged() {
