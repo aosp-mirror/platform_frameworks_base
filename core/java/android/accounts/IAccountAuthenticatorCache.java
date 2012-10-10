@@ -39,18 +39,19 @@ public interface IAccountAuthenticatorCache {
      * matches the account type or null if none is present
      */
     RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> getServiceInfo(
-            AuthenticatorDescription type);
+            AuthenticatorDescription type, int userId);
 
     /**
      * @return A copy of a Collection of all the current Authenticators.
      */
-    Collection<RegisteredServicesCache.ServiceInfo<AuthenticatorDescription>> getAllServices();
+    Collection<RegisteredServicesCache.ServiceInfo<AuthenticatorDescription>> getAllServices(
+            int userId);
 
     /**
      * Dumps the state of the cache. See
      * {@link android.os.Binder#dump(java.io.FileDescriptor, java.io.PrintWriter, String[])}
      */
-    void dump(FileDescriptor fd, PrintWriter fout, String[] args);
+    void dump(FileDescriptor fd, PrintWriter fout, String[] args, int userId);
 
     /**
      * Sets a listener that will be notified whenever the authenticator set changes
@@ -61,8 +62,5 @@ public interface IAccountAuthenticatorCache {
     void setListener(RegisteredServicesCacheListener<AuthenticatorDescription> listener,
             Handler handler);
 
-    /**
-     * Refreshes the authenticator cache.
-     */
-    void generateServicesMap();
+    void invalidateCache(int userId);
 }
