@@ -16,17 +16,18 @@
 
 package android.accounts;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.XmlSerializerAndParser;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.content.Context;
-import android.util.AttributeSet;
 import android.text.TextUtils;
+import android.util.AttributeSet;
+
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 

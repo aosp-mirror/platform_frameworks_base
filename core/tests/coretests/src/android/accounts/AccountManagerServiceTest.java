@@ -197,7 +197,9 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             mServices.add(new ServiceInfo<AuthenticatorDescription>(d2, null, 0));
         }
 
-        public ServiceInfo<AuthenticatorDescription> getServiceInfo(AuthenticatorDescription type) {
+        @Override
+        public ServiceInfo<AuthenticatorDescription> getServiceInfo(
+                AuthenticatorDescription type, int userId) {
             for (ServiceInfo<AuthenticatorDescription> service : mServices) {
                 if (service.type.equals(type)) {
                     return service;
@@ -206,20 +208,20 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             return null;
         }
 
-        public Collection<ServiceInfo<AuthenticatorDescription>> getAllServices() {
+        @Override
+        public Collection<ServiceInfo<AuthenticatorDescription>> getAllServices(int userId) {
             return mServices;
         }
 
-        public void dump(final FileDescriptor fd, final PrintWriter fout, final String[] args) {
-        }
-
-        public void setListener(
-                final RegisteredServicesCacheListener<AuthenticatorDescription> listener,
-                final Handler handler) {
+        @Override
+        public void dump(
+                final FileDescriptor fd, final PrintWriter fout, final String[] args, int userId) {
         }
 
         @Override
-        public void generateServicesMap() {
+        public void setListener(
+                final RegisteredServicesCacheListener<AuthenticatorDescription> listener,
+                final Handler handler) {
         }
     }
 
