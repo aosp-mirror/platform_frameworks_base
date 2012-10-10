@@ -2749,7 +2749,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
+            if (DEBUG_LAYOUT
+                    // TODO: Remove once b/7094175 is fixed
+                    || ((String)win.mAttrs.getTitle()).contains("Keyguard")
+                ) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " " + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
 
             win.mEnforceSizeCompat = (win.mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
@@ -9268,7 +9271,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Reporting new frame to " + win + ": " + win.mCompatFrame);
                 int diff = 0;
                 boolean configChanged = win.isConfigChanged();
-                if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
+                if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION
+                        // TODO: Remove once b/7094175 is fixed
+                        || ((String)win.mAttrs.getTitle()).contains("Keyguard"))
                         && configChanged) {
                     Slog.i(TAG, "Sending new config to window " + win + ": "
                             + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
