@@ -889,6 +889,9 @@ public class SyncManager {
     }
 
     private void onUserStarting(int userId) {
+        // Make sure that accounts we're about to use are valid
+        AccountManagerService.getSingleton().validateAccounts(userId);
+
         mSyncAdapters.invalidateCache(userId);
 
         updateRunningAccounts();
@@ -1078,9 +1081,9 @@ public class SyncManager {
         }
         pw.print("memory low: "); pw.println(mStorageIsLow);
 
-        final AccountAndUser[] accounts = mRunningAccounts;
+        final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
 
-        pw.print("running accounts: ");
+        pw.print("accounts: ");
         if (accounts != INITIAL_ACCOUNTS_ARRAY) {
             pw.println(accounts.length);
         } else {
