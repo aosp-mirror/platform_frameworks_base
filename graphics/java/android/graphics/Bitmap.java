@@ -413,6 +413,11 @@ public final class Bitmap implements Parcelable {
         }
 
         nativeCopyPixelsFromBuffer(mNativeBitmap, src);
+
+        // now update the buffer's position
+        int position = src.position();
+        position += bitmapBytes >> shift;
+        src.position(position);
     }
 
     /**
