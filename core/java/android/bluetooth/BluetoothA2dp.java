@@ -45,6 +45,7 @@ import java.util.List;
 public final class BluetoothA2dp implements BluetoothProfile {
     private static final String TAG = "BluetoothA2dp";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Intent used to broadcast the change in connection state of the A2DP
@@ -113,7 +114,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG,"Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
@@ -126,7 +127,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG,"Binding service...");
                                     if (!mContext.bindService(new Intent(IBluetoothA2dp.class.getName()), mConnection, 0)) {
                                         Log.e(TAG, "Could not bind to Bluetooth A2DP Service");
                                     }
@@ -269,7 +270,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getConnectedDevices() {
-        if (DBG) log("getConnectedDevices()");
+        if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getConnectedDevices();
@@ -286,7 +287,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) log("getDevicesMatchingStates()");
+        if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getDevicesMatchingConnectionStates(states);
@@ -303,7 +304,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * {@inheritDoc}
      */
     public int getConnectionState(BluetoothDevice device) {
-        if (DBG) log("getState(" + device + ")");
+        if (VDBG) log("getState(" + device + ")");
         if (mService != null && isEnabled()
             && isValidDevice(device)) {
             try {
@@ -365,7 +366,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     public int getPriority(BluetoothDevice device) {
-        if (DBG) log("getPriority(" + device + ")");
+        if (VDBG) log("getPriority(" + device + ")");
         if (mService != null && isEnabled()
             && isValidDevice(device)) {
             try {

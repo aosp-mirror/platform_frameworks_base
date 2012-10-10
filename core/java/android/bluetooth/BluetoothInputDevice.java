@@ -45,6 +45,7 @@ import java.util.List;
 public final class BluetoothInputDevice implements BluetoothProfile {
     private static final String TAG = "BluetoothInputDevice";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Intent used to broadcast the change in connection state of the Input
@@ -191,7 +192,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG,"Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
@@ -204,7 +205,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG,"Binding service...");
                                     if (!mContext.bindService(new Intent(IBluetoothInputDevice.class.getName()), mConnection, 0)) {
                                         Log.e(TAG, "Could not bind to Bluetooth HID Service");
                                     }
@@ -243,7 +244,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     }
 
     /*package*/ void close() {
-        if (DBG) log("close()");
+        if (VDBG) log("close()");
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
             try {
@@ -344,7 +345,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getConnectedDevices() {
-        if (DBG) log("getConnectedDevices()");
+        if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getConnectedDevices();
@@ -361,7 +362,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) log("getDevicesMatchingStates()");
+        if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getDevicesMatchingConnectionStates(states);
@@ -378,7 +379,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * {@inheritDoc}
      */
     public int getConnectionState(BluetoothDevice device) {
-        if (DBG) log("getState(" + device + ")");
+        if (VDBG) log("getState(" + device + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getConnectionState(device);
@@ -438,7 +439,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @hide
      */
     public int getPriority(BluetoothDevice device) {
-        if (DBG) log("getPriority(" + device + ")");
+        if (VDBG) log("getPriority(" + device + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getPriority(device);
@@ -519,7 +520,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     * @hide
     */
     public boolean getProtocolMode(BluetoothDevice device) {
-        if (DBG) log("getProtocolMode(" + device + ")");
+        if (VDBG) log("getProtocolMode(" + device + ")");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getProtocolMode(device);
@@ -570,7 +571,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
      * @hide
      */
     public boolean getReport(BluetoothDevice device, byte reportType, byte reportId, int bufferSize) {
-        if (DBG) log("getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId + "bufferSize=" + bufferSize);
+        if (VDBG) log("getReport(" + device + "), reportType=" + reportType + " reportId=" + reportId + "bufferSize=" + bufferSize);
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
                 return mService.getReport(device, reportType, reportId, bufferSize);

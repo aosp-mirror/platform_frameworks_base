@@ -58,6 +58,7 @@ import java.util.List;
 public final class BluetoothHealth implements BluetoothProfile {
     private static final String TAG = "BluetoothHealth";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Health Profile Source Role - the health device.
@@ -102,7 +103,7 @@ public final class BluetoothHealth implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG,"Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
@@ -115,7 +116,7 @@ public final class BluetoothHealth implements BluetoothProfile {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG,"Binding service...");
                                     if (!mContext.bindService(new Intent(IBluetoothHealth.class.getName()), mConnection, 0)) {
                                         Log.e(TAG, "Could not bind to Bluetooth Health Service");
                                     }
@@ -148,7 +149,7 @@ public final class BluetoothHealth implements BluetoothProfile {
             BluetoothHealthCallback callback) {
         if (!isEnabled() || name == null) return false;
 
-        if (DBG) log("registerSinkApplication(" + name + ":" + dataType + ")");
+        if (VDBG) log("registerSinkApplication(" + name + ":" + dataType + ")");
         return registerAppConfiguration(name, dataType, SINK_ROLE,
                 CHANNEL_TYPE_ANY, callback);
     }
@@ -174,7 +175,7 @@ public final class BluetoothHealth implements BluetoothProfile {
         boolean result = false;
         if (!isEnabled() || !checkAppParam(name, role, channelType, callback)) return result;
 
-        if (DBG) log("registerApplication(" + name + ":" + dataType + ")");
+        if (VDBG) log("registerApplication(" + name + ":" + dataType + ")");
         BluetoothHealthCallbackWrapper wrapper = new BluetoothHealthCallbackWrapper(callback);
         BluetoothHealthAppConfiguration config =
                 new BluetoothHealthAppConfiguration(name, dataType, role, channelType);
@@ -488,7 +489,7 @@ public final class BluetoothHealth implements BluetoothProfile {
     }
 
     /*package*/ void close() {
-        if (DBG) log("close()");
+        if (VDBG) log("close()");
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
             try {
