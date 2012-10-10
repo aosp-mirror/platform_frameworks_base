@@ -1352,10 +1352,16 @@ class ContextImpl extends Context {
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service,
                 service.resolveTypeIfNeeded(getContentResolver()), user.getIdentifier());
-            if (cn != null && cn.getPackageName().equals("!")) {
-                throw new SecurityException(
-                        "Not allowed to start service " + service
-                        + " without permission " + cn.getClassName());
+            if (cn != null) {
+                if (cn.getPackageName().equals("!")) {
+                    throw new SecurityException(
+                            "Not allowed to start service " + service
+                            + " without permission " + cn.getClassName());
+                } else if (cn.getPackageName().equals("!!")) {
+                    throw new SecurityException(
+                            "Unable to start service " + service
+                            + ": " + cn.getClassName());
+                }
             }
             return cn;
         } catch (RemoteException e) {
