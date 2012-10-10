@@ -648,6 +648,8 @@ public class LinearLayout extends ViewGroup {
 
         int largestChildHeight = Integer.MIN_VALUE;
 
+        final int layoutDirection = getLayoutDirection();
+
         // See how tall everyone is. Also remember max width.
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
@@ -667,6 +669,7 @@ public class LinearLayout extends ViewGroup {
             }
 
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
+            lp.onResolveLayoutDirection(layoutDirection);
 
             totalWeight += lp.weight;
             
@@ -989,6 +992,8 @@ public class LinearLayout extends ViewGroup {
 
         int largestChildWidth = Integer.MIN_VALUE;
 
+        final int layoutDirection = getLayoutDirection();
+
         // See how wide everyone is. Also remember max height.
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
@@ -1009,6 +1014,7 @@ public class LinearLayout extends ViewGroup {
 
             final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                     child.getLayoutParams();
+            lp.onResolveLayoutDirection(layoutDirection);
 
             totalWeight += lp.weight;
             
