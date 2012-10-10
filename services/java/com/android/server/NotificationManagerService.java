@@ -1066,8 +1066,9 @@ public class NotificationManagerService extends INotificationManager.Stub
                     }
                     mSoundNotification = r;
                     // do not play notifications if stream volume is 0
-                    // (typically because ringer mode is silent).
-                    if (audioManager.getStreamVolume(audioStreamType) != 0) {
+                    // (typically because ringer mode is silent) or if speech recognition is active.
+                    if ((audioManager.getStreamVolume(audioStreamType) != 0)
+                            && !audioManager.isSpeechRecognitionActive()) {
                         final long identity = Binder.clearCallingIdentity();
                         try {
                             final IRingtonePlayer player = mAudioService.getRingtonePlayer();
