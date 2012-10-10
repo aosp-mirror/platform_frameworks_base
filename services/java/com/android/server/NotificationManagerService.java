@@ -991,6 +991,14 @@ public class NotificationManagerService extends INotificationManager.Stub
                         | Notification.FLAG_NO_CLEAR;
             }
 
+            final int currentUser;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                currentUser = ActivityManager.getCurrentUser();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
             if (notification.icon != 0) {
                 final StatusBarNotification n = new StatusBarNotification(
                         pkg, id, tag, r.uid, r.initialPid, score, notification, user);
@@ -1015,7 +1023,10 @@ public class NotificationManagerService extends INotificationManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
                 }
-                sendAccessibilityEvent(notification, pkg);
+                // Send accessibility events only for the current user.
+                if (currentUser == userId) {
+                    sendAccessibilityEvent(notification, pkg);
+                }
             } else {
                 Slog.e(TAG, "Ignoring notification with icon==0: " + notification);
                 if (old != null && old.statusBarKey != null) {
@@ -1027,14 +1038,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
                 }
-            }
-
-            final int currentUser;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                currentUser = ActivityManager.getCurrentUser();
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
 
             // If we're not supposed to beep, vibrate, etc. then don't.
