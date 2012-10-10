@@ -65,7 +65,8 @@ public class KeyguardSecurityModel {
         KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
         final boolean backupIsTimedOut = monitor.getFailedUnlockAttempts() >=
                 LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
-        return monitor.getMaxBiometricUnlockAttemptsReached() || backupIsTimedOut;
+        return monitor.getMaxBiometricUnlockAttemptsReached() || backupIsTimedOut
+                || monitor.didBiometricUnlockUserSwitch();
     }
 
     SecurityMode getSecurityMode() {
