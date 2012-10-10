@@ -88,8 +88,19 @@ class BrowserFrame extends Handler {
     // Is this frame the main frame?
     private boolean mIsMainFrame;
 
+    // Javascript interface object
+    private class JSObject {
+        Object object;
+        boolean requireAnnotation;
+
+        public JSObject(Object object, boolean requireAnnotation) {
+            this.object = object;
+            this.requireAnnotation = requireAnnotation;
+        }
+    }
+
     // Attached Javascript interfaces
-    private Map<String, Object> mJavaScriptObjects;
+    private Map<String, JSObject> mJavaScriptObjects;
     private Set<Object> mRemovedJavaScriptObjects;
 
     // Key store handler when Chromium HTTP stack is used.
@@ -233,10 +244,8 @@ class BrowserFrame extends Handler {
         }
         sConfigCallback.addHandler(this);
 
-        mJavaScriptObjects = javascriptInterfaces;
-        if (mJavaScriptObjects == null) {
-            mJavaScriptObjects = new HashMap<String, Object>();
-        }
+        mJavaScriptObjects = new HashMap<String, JSObject>();
+        addJavaScriptObjects(javascriptInterfaces);
         mRemovedJavaScriptObjects = new HashSet<Object>();
 
         mSettings = settings;
@@ -590,13 +599,32 @@ class BrowserFrame extends Handler {
         Iterator<String> iter = mJavaScriptObjects.keySet().iterator();
         while (iter.hasNext())  {
             String interfaceName = iter.next();
-            Object object = mJavaScriptObjects.get(interfaceName);
-            if (object != null) {
+            JSObject jsobject = mJavaScriptObjects.get(interfaceName);
+            if (jsobject != null && jsobject.object != null) {
                 nativeAddJavascriptInterface(nativeFramePointer,
-                        mJavaScriptObjects.get(interfaceName), interfaceName);
+                        jsobject.object, interfaceName, jsobject.requireAnnotation);
             }
         }
         mRemovedJavaScriptObjects.clear();
+    }
+
+    /*
+     * Add javascript objects to the internal list of objects. The default behavior
+     * is to allow access to inherited methods (no annotation needed). This is only
+     * used when js objects are passed through a constructor (via a hidden constructor).
+     *
+     */
+    private void addJavaScriptObjects(Map<String, Object> javascriptInterfaces) {
+
+        if (javascriptInterfaces == null) return;
+        Iterator<String> iter = javascriptInterfaces.keySet().iterator();
+        while (iter.hasNext())  {
+            String interfaceName = iter.next();
+            Object object = javascriptInterfaces.get(interfaceName);
+            if (object != null) {
+                mJavaScriptObjects.put(interfaceName, new JSObject(object, false));
+            }
+        }
     }
 
     /**
@@ -616,11 +644,11 @@ class BrowserFrame extends Handler {
         }
     }
 
-    public void addJavascriptInterface(Object obj, String interfaceName) {
+    public void addJavascriptInterface(Object obj, String interfaceName,
+            boolean requireAnnotation) {
         assert obj != null;
         removeJavascriptInterface(interfaceName);
-
-        mJavaScriptObjects.put(interfaceName, obj);
+        mJavaScriptObjects.put(interfaceName, new JSObject(obj, requireAnnotation));
     }
 
     public void removeJavascriptInterface(String interfaceName) {
@@ -1246,7 +1274,7 @@ class BrowserFrame extends Handler {
      * Add a javascript interface to the main frame.
      */
     private native void nativeAddJavascriptInterface(int nativeFramePointer,
-            Object obj, String interfaceName);
+            Object obj, String interfaceName, boolean requireAnnotation);
 
     public native void clearCache();
 
