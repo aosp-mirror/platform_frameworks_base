@@ -398,6 +398,7 @@ class TouchExplorer implements EventStreamTransformation {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mAms.onTouchInteractionStart();
                 // Pre-feed the motion events to the gesture detector since we
                 // have a distance slop before getting into gesture detection
                 // mode and not using the points within this slop significantly
