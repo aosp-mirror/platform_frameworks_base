@@ -737,7 +737,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"여자 형제"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"배우자"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"맞춤설정"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"홈"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"집"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN 코드 입력"</string>
@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"로그인"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"사용자 이름이나 비밀번호를 잊어버렸습니까?"\n<b>"google.com/accounts/recovery"</b>" 페이지를 방문하세요."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"SIM 잠금해제 중…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"계정 확인 중…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>

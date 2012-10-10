@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Kirjaudu sisään"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Virheellinen käyttäjänimi tai salasana."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Unohditko käyttäjänimesi tai salasanasi?"\n"Käy osoitteessa "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"SIM-kortin lukitusta poistetaan…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Tarkistetaan tiliä..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
