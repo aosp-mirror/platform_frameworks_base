@@ -1391,14 +1391,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"輸入密碼"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已遭停用，需輸入 PUK 碼才能繼續使用。詳情請洽您的行動通訊業者。"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已遭停用，必須輸入 PUK 碼才能繼續使用。詳情請洽您的行動通訊業者。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"確認所需的 PIN 碼"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解除 SIM 卡鎖定..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 碼不正確。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"請輸入 4 到 8 碼的 PIN。"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 碼應為 8 個以上數字。"</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果嘗試錯誤次數過多，SIM 卡將會永久停用。"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 碼至少必須為 8 碼。"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 碼不符"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖形嘗試次數過多"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"如要解除鎖定，請使用 Google 帳戶登入。"</string>
@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登入"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"使用者名稱或密碼無效。"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘了使用者名稱或密碼？"\n"請前往 "<b>"google.com/accounts/recovery"</b>"。"</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"正在解除 SIM 卡鎖定…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"正在檢查帳戶…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
@@ -1418,7 +1418,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"要將音量調高到安全等級以上嗎？"\n"長時間聆聽偏高音量可能會損害您的聽力。"</string>
-    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"持續使用兩指按住即可啟用協助工具。"</string>
+    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"持續用兩指按住即可啟用協助工具。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"協助工具已取消。"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>

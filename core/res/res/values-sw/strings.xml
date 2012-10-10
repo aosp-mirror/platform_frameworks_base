@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Ingia"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Jina la mtumiaji au nenosiri batili."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Je, umesahau jina lako la mtumiaji au nenosiri?"\n"Tembela "<b>"Bgoogle.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Inafungua SIM…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Inakagua akaunti…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Umechora ruwaza yako ya kufunga kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>

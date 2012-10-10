@@ -813,7 +813,7 @@
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Tiện ích %2$d trong số %3$d."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Bộ chọn người dùng"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Trạng thái"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Kiểm soát phương tiện"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Điều khiển phương tiện"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Đăng nhập"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Bạn quên tên người dùng hoặc mật khẩu?"\n"Hãy truy cập "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Đang mở khóa SIM…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Đang kiểm tra tài khoản…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Hãy "\n\n"thử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>

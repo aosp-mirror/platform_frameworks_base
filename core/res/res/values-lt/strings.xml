@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prisijungti"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Netinkamas naudotojo vardas ar slaptažodis."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Pamiršote naudotojo vardą ar slaptažodį?"\n"Apsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Atrakinama SIM…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Tikrinama paskyra…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodą netinkamai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
