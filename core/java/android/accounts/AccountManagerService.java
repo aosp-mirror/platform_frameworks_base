@@ -261,6 +261,7 @@ public class AccountManagerService
                 accounts = new UserAccounts(mContext, userId);
                 mUsers.append(userId, accounts);
                 purgeOldGrants(accounts);
+                mAuthenticatorCache.invalidateCache(accounts.userId);
                 validateAccountsAndPopulateCache(accounts);
             }
             return accounts;
@@ -300,8 +301,6 @@ public class AccountManagerService
     }
 
     private void validateAccountsAndPopulateCache(UserAccounts accounts) {
-        mAuthenticatorCache.invalidateCache(accounts.userId);
-
         final HashSet<AuthenticatorDescription> knownAuth = Sets.newHashSet();
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service :
                 mAuthenticatorCache.getAllServices(accounts.userId)) {
