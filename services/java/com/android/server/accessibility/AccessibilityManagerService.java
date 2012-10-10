@@ -643,6 +643,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return mSecurityPolicy.mActiveWindowId;
     }
 
+    void onTouchInteractionStart() {
+        mSecurityPolicy.onTouchInteractionStart();
+    }
+
     void onTouchInteractionEnd() {
         mSecurityPolicy.onTouchInteractionEnd();
     }
@@ -2138,6 +2142,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED;
 
         private int mActiveWindowId;
+        private boolean mTouchInteractionInProgress;
 
         private boolean canDispatchAccessibilityEvent(AccessibilityEvent event) {
             final int eventType = event.getEventType();
@@ -2185,12 +2190,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 } break;
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER: {
-                    mActiveWindowId = windowId;
+                    // Do not allow delayed hover events to confuse us
+                    // which the active window is.
+                    if (mTouchInteractionInProgress) {
+                        mActiveWindowId = windowId;
+                    }
                 } break;
             }
         }
 
+        public void onTouchInteractionStart() {
+            mTouchInteractionInProgress = true;
+        }
+
         public void onTouchInteractionEnd() {
+            mTouchInteractionInProgress = false;
             // We want to set the active window to be current immediately
             // after the user has stopped touching the screen since if the
             // user types with the IME he should get a feedback for the
