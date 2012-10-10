@@ -46,6 +46,7 @@ import java.util.List;
 public final class BluetoothHeadset implements BluetoothProfile {
     private static final String TAG = "BluetoothHeadset";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     /**
      * Intent used to broadcast the change in connection state of the Headset
@@ -226,7 +227,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        if (VDBG) Log.d(TAG,"Unbinding service...");
                         synchronized (mConnection) {
                             try {
                                 mService = null;
@@ -239,7 +240,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                         synchronized (mConnection) {
                             try {
                                 if (mService == null) {
-                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (VDBG) Log.d(TAG,"Binding service...");
                                     if (!mContext.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
                                         Log.e(TAG, "Could not bind to Bluetooth Headset Service");
                                     }
@@ -281,7 +282,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * are ok.
      */
     /*package*/ void close() {
-        if (DBG) log("close()");
+        if (VDBG) log("close()");
 
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
@@ -387,7 +388,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getConnectedDevices() {
-        if (DBG) log("getConnectedDevices()");
+        if (VDBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getConnectedDevices();
@@ -404,7 +405,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
-        if (DBG) log("getDevicesMatchingStates()");
+        if (VDBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
             try {
                 return mService.getDevicesMatchingConnectionStates(states);
@@ -421,7 +422,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     public int getConnectionState(BluetoothDevice device) {
-        if (DBG) log("getConnectionState(" + device + ")");
+        if (VDBG) log("getConnectionState(" + device + ")");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
             try {
@@ -483,7 +484,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     public int getPriority(BluetoothDevice device) {
-        if (DBG) log("getPriority(" + device + ")");
+        if (VDBG) log("getPriority(" + device + ")");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
             try {
@@ -566,7 +567,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *         false otherwise or on error
      */
     public boolean isAudioConnected(BluetoothDevice device) {
-        if (DBG) log("isAudioConnected()");
+        if (VDBG) log("isAudioConnected()");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
             try {
@@ -594,7 +595,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     public int getBatteryUsageHint(BluetoothDevice device) {
-        if (DBG) log("getBatteryUsageHint()");
+        if (VDBG) log("getBatteryUsageHint()");
         if (mService != null && isEnabled() &&
             isValidDevice(device)) {
             try {
@@ -661,7 +662,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     public int getAudioState(BluetoothDevice device) {
-        if (DBG) log("getAudioState");
+        if (VDBG) log("getAudioState");
         if (mService != null && !isDisabled()) {
             try {
                 return mService.getAudioState(device);
@@ -683,7 +684,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     public boolean isAudioOn() {
-        if (DBG) log("isAudioOn()");
+        if (VDBG) log("isAudioOn()");
         if (mService != null && isEnabled()) {
             try {
               return mService.isAudioOn();
