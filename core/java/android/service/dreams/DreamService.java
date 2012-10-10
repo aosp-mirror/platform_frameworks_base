@@ -120,7 +120,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mInteractive = false;
     private boolean mLowProfile = true;
     private boolean mFullscreen = false;
-    private boolean mScreenBright = false;
+    private boolean mScreenBright = true;
     private boolean mFinished;
 
     private boolean mDebug = false;
