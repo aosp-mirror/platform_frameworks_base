@@ -264,6 +264,9 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
+    /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
+    static final int WINDOW_FREEZE_TIMEOUT_DURATION = 3000;
+
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
@@ -6018,7 +6021,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-        mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT), 2000);
+        mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
+                WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction, 0, 0);
@@ -8380,7 +8384,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // when we first froze the display.
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
                 mH.sendMessageDelayed(mH.obtainMessage(
-                        H.WINDOW_FREEZE_TIMEOUT), 2000);
+                        H.WINDOW_FREEZE_TIMEOUT), WINDOW_FREEZE_TIMEOUT_DURATION);
             }
         }
     }
