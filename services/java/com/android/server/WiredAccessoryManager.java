@@ -152,7 +152,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                     break;
             }
 
-            updateLocked(NAME_H2W, headset);
+            updateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC)) | headset);
         }
     }
 
