@@ -152,6 +152,8 @@ public class MediaRouter {
                 dispatchRouteChanged(sStatic.mDefaultAudioVideo);
             }
 
+            final int mainType = mCurAudioRoutesInfo.mMainType;
+
             boolean a2dpEnabled;
             try {
                 a2dpEnabled = mAudioService.isBluetoothA2dpOn();
@@ -180,11 +182,10 @@ public class MediaRouter {
             }
 
             if (mBluetoothA2dpRoute != null) {
-                if (mCurAudioRoutesInfo.mMainType != AudioRoutesInfo.MAIN_SPEAKER &&
-                        mSelectedRoute == mBluetoothA2dpRoute) {
+                if (mainType != AudioRoutesInfo.MAIN_SPEAKER &&
+                        mSelectedRoute == mBluetoothA2dpRoute && !a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
-                } else if (mCurAudioRoutesInfo.mMainType == AudioRoutesInfo.MAIN_SPEAKER &&
-                        (mSelectedRoute == mDefaultAudioVideo || mSelectedRoute == null) &&
+                } else if ((mSelectedRoute == mDefaultAudioVideo || mSelectedRoute == null) &&
                         a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
                 }
