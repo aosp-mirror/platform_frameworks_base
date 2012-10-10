@@ -145,7 +145,9 @@ page.title=GCM: Getting Started
   <li>If the value is dynamic, the service should override the <code>getSenderIds()</code> method.</li>
 </ul>
 
+
 <h4>Step 3: Write the my_app_package.GCMIntentService class</h4>
+
 <p>Next write the <code>my_app_package.GCMIntentService</code> class, overriding the following callback methods (which are called by <code>GCMBroadcastReceiver</code>):<br>
 </p>
 <ul>
