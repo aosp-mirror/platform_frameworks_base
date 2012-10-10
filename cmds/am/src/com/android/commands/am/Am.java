@@ -415,6 +415,10 @@ public class Am {
         ComponentName cn = mAm.startService(null, intent, intent.getType(), mUserId);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
+        } else if (cn.getPackageName().equals("!")) {
+            System.err.println("Error: Requires permission " + cn.getClassName());
+        } else if (cn.getPackageName().equals("!!")) {
+            System.err.println("Error: " + cn.getClassName());
         }
     }
 
