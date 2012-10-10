@@ -1526,6 +1526,16 @@ public class AudioManager {
 
     /**
      * @hide
+     * Checks whether speech recognition is active
+     * @return true if a recording with source {@link MediaRecorder.AudioSource#VOICE_RECOGNITION}
+     *    is underway.
+     */
+    public boolean isSpeechRecognitionActive() {
+        return AudioSystem.isSourceActive(MediaRecorder.AudioSource.VOICE_RECOGNITION);
+    }
+
+    /**
+     * @hide
      * If the stream is active locally or remotely, adjust its volume according to the enforced
      * priority rules.
      * Note: only AudioManager.STREAM_MUSIC is supported at the moment
