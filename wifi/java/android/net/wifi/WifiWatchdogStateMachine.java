@@ -98,6 +98,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
     static final int POOR_LINK_DETECTED                             = BASE + 21;
     static final int GOOD_LINK_DETECTED                             = BASE + 22;
 
+    public static final boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = false;
+
     /*
      * RSSI levels as used by notification icon
      * Level 4  -55 <= RSSI
@@ -440,7 +442,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
             mPoorNetworkDetectionEnabled = false;
         } else {
             mPoorNetworkDetectionEnabled = getSettingsGlobalBoolean(mContentResolver,
-                    Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
+                    Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
+                    DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED);
         }
     }
 
