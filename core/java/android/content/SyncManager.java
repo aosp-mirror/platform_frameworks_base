@@ -219,20 +219,13 @@ public class SyncManager {
     // Use this as a random offset to seed all periodic syncs
     private int mSyncRandomOffsetMillis;
 
-    private UserManager mUserManager;
+    private final UserManager mUserManager;
 
     private static final long SYNC_ALARM_TIMEOUT_MIN = 30 * 1000; // 30 seconds
     private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
-    private UserManager getUserManager() {
-        if (mUserManager == null) {
-            mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        }
-        return mUserManager;
-    }
-
     private List<UserInfo> getAllUsers() {
-        return getUserManager().getUsers();
+        return mUserManager.getUsers();
     }
 
     private boolean containsAccountAndUser(AccountAndUser[] accounts, Account account, int userId) {
@@ -337,6 +330,7 @@ public class SyncManager {
         // Initialize the SyncStorageEngine first, before registering observers
         // and creating threads and so on; it may fail if the disk is full.
         mContext = context;
+
         SyncStorageEngine.init(context);
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
@@ -402,6 +396,7 @@ public class SyncManager {
             mNotificationMgr = null;
         }
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         // This WakeLock is used to ensure that we stay awake between the time that we receive
         // a sync alarm notification and when we finish processing it. We need to do this
