@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Ngena ngemvume"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Igama lomsebezisi elingalungile noma iphasiwedi."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ukhohlwe igama lomsebenzisi noma iphasiwedi?"\n"Vakashela"<b>"google.com/accounts/recovery"</b></string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Ivula i-SIM…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Ukuhlola i-akhawunti…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Ubhale iphinikhodi ykho ngendlela engafanele izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Ubhale iphasiwedi yakho ngendlela engafanele <xliff:g id="NUMBER_0">%d</xliff:g> izikhathi. "\n\n"Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Udwebe iphathini yakho yokuvula ngendlela engafanele-<xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>"</string>
