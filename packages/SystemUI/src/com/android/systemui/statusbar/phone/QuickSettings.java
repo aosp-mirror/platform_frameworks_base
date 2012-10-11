@@ -767,6 +767,10 @@ class QuickSettings {
             mBrightnessDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
         if (!mBrightnessDialog.isShowing()) {
+            try {
+                WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+            } catch (RemoteException e) {
+            }
             mBrightnessDialog.show();
             dismissBrightnessDialog(mBrightnessDialogLongTimeout);
         }
@@ -805,6 +809,10 @@ class QuickSettings {
         builder.setCancelable(true);
         final Dialog dialog = builder.create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        try {
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+        } catch (RemoteException e) {
+        }
         dialog.show();
     }
 
