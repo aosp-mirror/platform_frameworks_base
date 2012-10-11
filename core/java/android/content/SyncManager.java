@@ -243,6 +243,10 @@ public class SyncManager {
     public void updateRunningAccounts() {
         mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
 
+        if (mBootCompleted) {
+            doDatabaseCleanup();
+        }
+
         for (ActiveSyncContext currentSyncContext : mActiveSyncContexts) {
             if (!containsAccountAndUser(mRunningAccounts,
                     currentSyncContext.mSyncOperation.account,
@@ -256,6 +260,13 @@ public class SyncManager {
         // we must do this since we don't bother scheduling alarms when
         // the accounts are not set yet
         sendCheckAlarmsMessage();
+    }
+
+    private void doDatabaseCleanup() {
+        for (UserInfo user : mUserManager.getUsers()) {
+            Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(user.id);
+            mSyncStorageEngine.doDatabaseCleanup(accountsForUser, user.id);
+        }
     }
 
     private BroadcastReceiver mConnectivityIntentReceiver =
@@ -891,12 +902,10 @@ public class SyncManager {
 
         updateRunningAccounts();
 
-        final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
-        mSyncStorageEngine.doDatabaseCleanup(accounts, userId);
-
         mSyncQueue.addPendingOperations(userId);
 
         // Schedule sync for any accounts under started user
+        final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
         for (Account account : accounts) {
             scheduleSync(account, userId, null, null, 0 /* no delay */,
                     true /* onlyThoseWithUnknownSyncableState */);
@@ -1618,6 +1627,8 @@ public class SyncManager {
 
         public void onBootCompleted() {
             mBootCompleted = true;
+
+            doDatabaseCleanup();
 
             if (mReadyToRunLatch != null) {
                 mReadyToRunLatch.countDown();
