@@ -10000,7 +10000,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private void resolveLayoutParams() {
         if (mLayoutParams != null) {
-            mLayoutParams.onResolveLayoutDirection(getLayoutDirection());
+            mLayoutParams.resolveLayoutDirection(getLayoutDirection());
         }
     }
 
