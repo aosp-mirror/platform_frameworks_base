@@ -415,6 +415,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      * account unlock screen and biometric unlock to show the user's normal unlock.
      */
     private void showBackupSecurity() {
+        if (DEBUG) Log.d(TAG, "showBackupSecurity()");
         showSecurityScreen(mSecurityModel.getBackupSecurityMode());
     }
 
@@ -431,6 +432,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showNextSecurityScreenOrFinish(boolean authenticated) {
+        if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
         if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
@@ -559,7 +561,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      * @param securityMode
      */
     private void showSecurityScreen(SecurityMode securityMode) {
-
+        if (DEBUG) Log.d(TAG, "showSecurityScreen");
         if (securityMode == mCurrentSecuritySelection) return;
 
         KeyguardSecurityView oldView = getSecurityView(mCurrentSecuritySelection);
@@ -577,16 +579,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Find and show this child.
         final int childCount = mSecurityViewContainer.getChildCount();
 
-        // If we're go to/from the selector view, do flip animation, otherwise use fade animation.
-        final boolean doFlip = mCurrentSecuritySelection == SecurityMode.None
-                || securityMode == SecurityMode.None;
-        final int inAnimation = doFlip ? R.anim.keyguard_security_animate_in
-                : R.anim.keyguard_security_fade_in;
-        final int outAnimation = doFlip ? R.anim.keyguard_security_animate_out
-                : R.anim.keyguard_security_fade_out;
-
-        mSecurityViewContainer.setInAnimation(AnimationUtils.loadAnimation(mContext, inAnimation));
-        mSecurityViewContainer.setOutAnimation(AnimationUtils.loadAnimation(mContext, outAnimation));
+        // Do flip animation to the next screen
+        mSecurityViewContainer.setInAnimation(
+                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_in));
+        mSecurityViewContainer.setOutAnimation(
+                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_out));
         final int securityViewIdForMode = getSecurityViewIdForMode(securityMode);
         for (int i = 0; i < childCount; i++) {
             if (mSecurityViewContainer.getChildAt(i).getId() == securityViewIdForMode) {
