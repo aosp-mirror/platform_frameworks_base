@@ -3197,10 +3197,16 @@ public final class Settings {
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
-         * Whether lock pattern will vibrate as user enters (0 = false, 1 = true)
+         * Whether lock pattern will vibrate as user enters (0 = false, 1 =
+         * true)
+         *
+         * @deprecated Starting in {@link VERSION_CODES#JELLY_BEAN_MR1} the
+         *             lockscreen uses
+         *             {@link Settings.System#HAPTIC_FEEDBACK_ENABLED}.
          */
-        public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
-            "lock_pattern_tactile_feedback_enabled";
+        @Deprecated
+        public static final String
+                LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
 
         /**
          * This preference allows the device to be locked given time after screen goes off,
