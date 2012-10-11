@@ -5214,11 +5214,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @RemotableViewMethod
     public void setContentDescription(CharSequence contentDescription) {
+        if (mContentDescription == null) {
+            if (contentDescription == null) {
+                return;
+            }
+        } else if (mContentDescription.equals(contentDescription)) {
+            return;
+        }
         mContentDescription = contentDescription;
         final boolean nonEmptyDesc = contentDescription != null && contentDescription.length() > 0;
         if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
              setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+        notifyAccessibilityStateChanged();
     }
 
     /**
