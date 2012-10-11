@@ -439,14 +439,21 @@ public abstract class LauncherActivity extends ListActivity {
     protected List<ResolveInfo> onQueryPackageManager(Intent queryIntent) {
         return mPackageManager.queryIntentActivities(queryIntent, /* no flags */ 0);
     }
-    
+
+    /**
+     * @hide
+     */
+    protected void onSortResultList(List<ResolveInfo> results) {
+        Collections.sort(results, new ResolveInfo.DisplayNameComparator(mPackageManager));
+    }
+
     /**
      * Perform the query to determine which results to show and return a list of them.
      */
     public List<ListItem> makeListItems() {
         // Load all matching activities and sort correctly
         List<ResolveInfo> list = onQueryPackageManager(mIntent);
-        Collections.sort(list, new ResolveInfo.DisplayNameComparator(mPackageManager));
+        onSortResultList(list);
 
         ArrayList<ListItem> result = new ArrayList<ListItem>(list.size());
         int listSize = list.size();
