@@ -134,7 +134,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         const float fixed = bitmapWidth - stretchSize;
         const float xStretch = fmaxf(right - left - fixed, 0.0f);
         stretchX = xStretch / xStretchTex;
-        rescaleX = fminf(fmaxf(right - left, 0.0f) / fixed, 1.0f);
+        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(right - left, 0.0f) / fixed, 1.0f);
     }
 
     if (yStretchCount > 0) {
@@ -146,7 +146,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         const float fixed = bitmapHeight - stretchSize;
         const float yStretch = fmaxf(bottom - top - fixed, 0.0f);
         stretchY = yStretch / yStretchTex;
-        rescaleY = fminf(fmaxf(bottom - top, 0.0f) / fixed, 1.0f);
+        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(bottom - top, 0.0f) / fixed, 1.0f);
     }
 
     TextureVertex* vertex = mVertices;
