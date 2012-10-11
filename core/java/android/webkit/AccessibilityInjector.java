@@ -21,6 +21,10 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.Engine;
+import android.speech.tts.TextToSpeech.OnInitListener;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -44,6 +48,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * APIs.
  */
 class AccessibilityInjector {
+    private static final String TAG = AccessibilityInjector.class.getSimpleName();
+
+    private static boolean DEBUG = false;
+
     // The WebViewClassic this injector is responsible for managing.
     private final WebViewClassic mWebViewClassic;
 
@@ -90,6 +98,10 @@ class AccessibilityInjector {
     private static final String ACCESSIBILITY_ANDROIDVOX_TEMPLATE =
             "cvox.AndroidVox.performAction('%1s')";
 
+    // JS code used to shut down an active AndroidVox instance.
+    private static final String TOGGLE_CVOX_TEMPLATE =
+            "javascript:(function() { cvox.ChromeVox.host.activateOrDeactivateChromeVox(%b); })();";
+
     /**
      * Creates an instance of the AccessibilityInjector based on
      * {@code webViewClassic}.
@@ -117,6 +129,7 @@ class AccessibilityInjector {
 
         addTtsApis();
         addCallbackApis();
+        toggleAndroidVox(true);
     }
 
     /**
@@ -126,8 +139,18 @@ class AccessibilityInjector {
      * </p>
      */
     public void removeAccessibilityApisIfNecessary() {
+        toggleAndroidVox(false);
         removeTtsApis();
         removeCallbackApis();
+    }
+
+    private void toggleAndroidVox(boolean state) {
+        if (!mAccessibilityScriptInjected) {
+            return;
+        }
+
+        final String code = String.format(TOGGLE_CVOX_TEMPLATE, state);
+        mWebView.loadUrl(code);
     }
 
     /**
@@ -196,7 +219,7 @@ class AccessibilityInjector {
         if (mAccessibilityScriptInjected) {
             return sendActionToAndroidVox(action, arguments);
         }
-        
+
         if (mAccessibilityInjectorFallback != null) {
             return mAccessibilityInjectorFallback.performAccessibilityAction(action, arguments);
         }
@@ -262,6 +285,9 @@ class AccessibilityInjector {
      */
     public void onPageStarted(String url) {
         mAccessibilityScriptInjected = false;
+        if (DEBUG)
+            Log.w(TAG, "[" + mWebView.hashCode() + "] Started loading new page");
+        addAccessibilityApisIfNecessary();
     }
 
     /**
@@ -282,15 +308,23 @@ class AccessibilityInjector {
         if (!shouldInjectJavaScript(url)) {
             mAccessibilityScriptInjected = false;
             toggleFallbackAccessibilityInjector(true);
+            if (DEBUG)
+                Log.d(TAG, "[" + mWebView.hashCode() + "] Using fallback accessibility support");
             return;
         }
 
         toggleFallbackAccessibilityInjector(false);
 
-        final String injectionUrl = getScreenReaderInjectionUrl();
-        mWebView.loadUrl(injectionUrl);
-
-        mAccessibilityScriptInjected = true;
+        if (!mAccessibilityScriptInjected) {
+            mAccessibilityScriptInjected = true;
+            final String injectionUrl = getScreenReaderInjectionUrl();
+            mWebView.loadUrl(injectionUrl);
+            if (DEBUG)
+                Log.d(TAG, "[" + mWebView.hashCode() + "] Loading screen reader into WebView");
+        } else {
+            if (DEBUG)
+                Log.w(TAG, "[" + mWebView.hashCode() + "] Attempted to inject screen reader twice");
+        }
     }
 
     /**
@@ -368,6 +402,8 @@ class AccessibilityInjector {
         if (mTextToSpeech != null) {
             return;
         }
+        if (DEBUG)
+            Log.d(TAG, "[" + mWebView.hashCode() + "] Adding TTS APIs into WebView");
         mTextToSpeech = new TextToSpeechWrapper(mContext);
         mWebView.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE);
     }
@@ -381,6 +417,8 @@ class AccessibilityInjector {
             return;
         }
 
+        if (DEBUG)
+            Log.d(TAG, "[" + mWebView.hashCode() + "] Removing TTS APIs from WebView");
         mWebView.removeJavascriptInterface(ALIAS_TTS_JS_INTERFACE);
         mTextToSpeech.stop();
         mTextToSpeech.shutdown();
@@ -527,35 +565,141 @@ class AccessibilityInjector {
      * Used to protect the TextToSpeech class, only exposing the methods we want to expose.
      */
     private static class TextToSpeechWrapper {
-        private TextToSpeech mTextToSpeech;
+        private static final String WRAP_TAG = TextToSpeechWrapper.class.getSimpleName();
+
+        private final HashMap<String, String> mTtsParams;
+        private final TextToSpeech mTextToSpeech;
+
+        /**
+         * Whether this wrapper is ready to speak. If this is {@code true} then
+         * {@link #mShutdown} is guaranteed to be {@code false}.
+         */
+        private volatile boolean mReady;
+
+        /**
+         * Whether this wrapper was shut down. If this is {@code true} then
+         * {@link #mReady} is guaranteed to be {@code false}.
+         */
+        private volatile boolean mShutdown;
 
         public TextToSpeechWrapper(Context context) {
+            if (DEBUG)
+                Log.d(WRAP_TAG, "[" + hashCode() + "] Initializing text-to-speech on thread "
+                        + Thread.currentThread().getId() + "...");
+
             final String pkgName = context.getPackageName();
-            mTextToSpeech = new TextToSpeech(context, null, null, pkgName + ".**webview**", true);
+
+            mReady = false;
+            mShutdown = false;
+
+            mTtsParams = new HashMap<String, String>();
+            mTtsParams.put(Engine.KEY_PARAM_UTTERANCE_ID, WRAP_TAG);
+
+            mTextToSpeech = new TextToSpeech(
+                    context, mInitListener, null, pkgName + ".**webview**", true);
+            mTextToSpeech.setOnUtteranceProgressListener(mErrorListener);
         }
 
         @JavascriptInterface
         @SuppressWarnings("unused")
         public boolean isSpeaking() {
-            return mTextToSpeech.isSpeaking();
+            synchronized (mTextToSpeech) {
+                if (!mReady) {
+                    return false;
+                }
+
+                return mTextToSpeech.isSpeaking();
+            }
         }
 
         @JavascriptInterface
         @SuppressWarnings("unused")
         public int speak(String text, int queueMode, HashMap<String, String> params) {
-            return mTextToSpeech.speak(text, queueMode, params);
+            synchronized (mTextToSpeech) {
+                if (!mReady) {
+                    if (DEBUG)
+                        Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to speak before TTS init");
+                    return TextToSpeech.ERROR;
+                } else {
+                    if (DEBUG)
+                        Log.i(WRAP_TAG, "[" + hashCode() + "] Speak called from JS binder");
+                }
+
+                return mTextToSpeech.speak(text, queueMode, params);
+            }
         }
 
         @JavascriptInterface
         @SuppressWarnings("unused")
         public int stop() {
-            return mTextToSpeech.stop();
+            synchronized (mTextToSpeech) {
+                if (!mReady) {
+                    if (DEBUG)
+                        Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to stop before initialize");
+                    return TextToSpeech.ERROR;
+                } else {
+                    if (DEBUG)
+                        Log.i(WRAP_TAG, "[" + hashCode() + "] Stop called from JS binder");
+                }
+
+                return mTextToSpeech.stop();
+            }
         }
 
         @SuppressWarnings("unused")
         protected void shutdown() {
-            mTextToSpeech.shutdown();
+            synchronized (mTextToSpeech) {
+                if (!mReady) {
+                    if (DEBUG)
+                        Log.w(WRAP_TAG, "[" + hashCode() + "] Called shutdown before initialize");
+                } else {
+                    if (DEBUG)
+                        Log.i(WRAP_TAG, "[" + hashCode() + "] Shutting down text-to-speech from "
+                                + "thread " + Thread.currentThread().getId() + "...");
+                }
+                mShutdown = true;
+                mReady = false;
+                mTextToSpeech.shutdown();
+            }
         }
+
+        private final OnInitListener mInitListener = new OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                synchronized (mTextToSpeech) {
+                    if (!mShutdown && (status == TextToSpeech.SUCCESS)) {
+                        if (DEBUG)
+                            Log.d(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
+                                    + "] Initialized successfully");
+                        mReady = true;
+                    } else {
+                        if (DEBUG)
+                            Log.w(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
+                                    + "] Failed to initialize");
+                        mReady = false;
+                    }
+                }
+            }
+        };
+
+        private final UtteranceProgressListener mErrorListener = new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+                // Do nothing.
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                if (DEBUG)
+                    Log.w(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
+                            + "] Failed to speak utterance");
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                // Do nothing.
+            }
+        };
     }
 
     /**
@@ -625,6 +769,8 @@ class AccessibilityInjector {
          * @return Whether the result was received.
          */
         private boolean waitForResultTimedLocked(int resultId) {
+            if (DEBUG)
+                Log.d(TAG, "Waiting for CVOX result...");
             long waitTimeMillis = RESULT_TIMEOUT;
             final long startTimeMillis = SystemClock.uptimeMillis();
             while (true) {
@@ -642,6 +788,8 @@ class AccessibilityInjector {
                     }
                     mResultLock.wait(waitTimeMillis);
                 } catch (InterruptedException ie) {
+                    if (DEBUG)
+                        Log.w(TAG, "Timed out while waiting for CVOX result");
                     /* ignore */
                 }
             }
