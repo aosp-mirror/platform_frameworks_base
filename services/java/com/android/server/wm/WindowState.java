@@ -1024,6 +1024,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mClient.asBinder().isBinderAlive();
     }
 
+    boolean isClosing() {
+        return mExiting || (mService.mClosingApps.contains(mAppToken));
+    }
+
     @Override
     public boolean isDefaultDisplay() {
         return mDisplayContent.isDefaultDisplay;
@@ -1234,7 +1238,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mWasPaused = mToken.paused;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
                     + " u" + UserHandle.getUserId(mSession.mUid)
-                    + " " + mLastTitle + (mWasPaused ? " PAUSED}" : "}");
+                    + " " + mLastTitle + (mExiting ? " EXITING}" : "}");
         }
         return mStringNameCache;
     }
