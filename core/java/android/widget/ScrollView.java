@@ -329,11 +329,13 @@ public class ScrollView extends FrameLayout {
             return;
         }
 
+        final int layoutDirection = getLayoutDirection();
         if (getChildCount() > 0) {
             final View child = getChildAt(0);
             int height = getMeasuredHeight();
             if (child.getMeasuredHeight() < height) {
                 final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                lp.resolveLayoutDirection(layoutDirection);
 
                 int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
                         mPaddingLeft + mPaddingRight, lp.width);
