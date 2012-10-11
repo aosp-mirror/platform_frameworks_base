@@ -291,7 +291,7 @@ class QuickSettings {
                 mBar.collapseAllPanels(true);
                 final UserManager um =
                         (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                if (um.getUsers().size() > 1) {
+                if (um.getUsers(true).size() > 1) {
                     try {
                         WindowManagerGlobal.getWindowManagerService().lockNow(
                                 LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
