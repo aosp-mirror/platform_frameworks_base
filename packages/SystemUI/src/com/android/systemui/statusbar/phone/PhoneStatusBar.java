@@ -106,6 +106,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public static final boolean DEBUG_CLINGS = false;
 
+    public static final boolean ENABLE_NOTIFICATION_PANEL_CLING = false;
+
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
@@ -505,8 +507,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClingShown = ! (DEBUG_CLINGS 
             || !Prefs.read(mContext).getBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, false));
 
-        // robots don't need help
-        if (ActivityManager.isRunningInTestHarness()) {
+        if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
             mClingShown = true;
         }
 
