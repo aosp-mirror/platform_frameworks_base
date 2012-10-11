@@ -967,7 +967,7 @@ public final class Bitmap implements Parcelable {
      * @hide
      */
     static public int scaleFromDensity(int size, int sdensity, int tdensity) {
-        if (sdensity == DENSITY_NONE || sdensity == tdensity) {
+        if (sdensity == DENSITY_NONE || tdensity == DENSITY_NONE || sdensity == tdensity) {
             return size;
         }
         
