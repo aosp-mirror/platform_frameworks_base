@@ -49,7 +49,7 @@ static bool isMatch(const char* buffer, size_t length) {
 
         // Consider all zero-delimited fields of the buffer.
         const char* field = buffer;
-        const char* end = buffer + length;
+        const char* end = buffer + length + 1;
         do {
             if (strstr(field, match.string())) {
                 ALOGV("Matched uevent message with pattern: %s", match.string());
