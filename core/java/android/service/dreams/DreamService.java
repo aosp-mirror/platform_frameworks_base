@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -510,8 +511,12 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public void onDestroy() {
         if (mDebug) Slog.v(TAG, "onDestroy()");
-        super.onDestroy();
         // hook for subclasses
+
+        // Just in case destroy came in before detach, let's take care of that now
+        detach();
+
+        super.onDestroy();
     }
 
     // end public api
@@ -521,13 +526,13 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Called when the Dream is about to be unbound and destroyed.
+     * Called by DreamController.stopDream() when the Dream is about to be unbound and destroyed.
      *
      * Must run on mHandler.
      */
     private final void detach() {
         if (mWindow == null) {
-            Slog.e(TAG, "detach() called when not attached");
+            // already detached!
             return;
         }
 
@@ -540,7 +545,11 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDebug) Slog.v(TAG, "detach(): Removing window from window manager");
         try {
-            mWindowManager.removeView(mWindow.getDecorView());
+            // force our window to be removed synchronously
+            mWindowManager.removeViewImmediate(mWindow.getDecorView());
+            // the following will print a log message if it finds any other leaked windows
+            WindowManagerGlobal.getInstance().closeAll(mWindowToken,
+                    this.getClass().getName(), "Dream");
         } catch (Throwable t) {
             Slog.w(TAG, "Crashed removing window view", t);
         }
