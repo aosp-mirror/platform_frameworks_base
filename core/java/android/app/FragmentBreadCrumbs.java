@@ -19,7 +19,9 @@ package android.app;
 import android.animation.LayoutTransition;
 import android.app.FragmentManager.BackStackEntry;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +53,11 @@ public class FragmentBreadCrumbs extends ViewGroup
     private OnClickListener mParentClickListener;
 
     private OnBreadCrumbClickListener mOnBreadCrumbClickListener;
-    
+
+    private int mGravity;
+
+    private static final int DEFAULT_GRAVITY = Gravity.START | Gravity.CENTER_VERTICAL;
+
     /**
      * Interface to intercept clicks on the bread crumbs.
      */
@@ -80,6 +86,14 @@ public class FragmentBreadCrumbs extends ViewGroup
 
     public FragmentBreadCrumbs(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.FragmentBreadCrumbs, defStyle, 0);
+
+        mGravity = a.getInt(com.android.internal.R.styleable.FragmentBreadCrumbs_gravity,
+                DEFAULT_GRAVITY);
+
+        a.recycle();
     }
 
     /**
@@ -159,16 +173,50 @@ public class FragmentBreadCrumbs extends ViewGroup
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // Eventually we should implement our own layout of the views,
-        // rather than relying on a linear layout.
+        // Eventually we should implement our own layout of the views, rather than relying on
+        // a single linear layout.
         final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-
-            int childRight = mPaddingLeft + child.getMeasuredWidth() - mPaddingRight;
-            int childBottom = mPaddingTop + child.getMeasuredHeight() - mPaddingBottom;
-            child.layout(mPaddingLeft, mPaddingTop, childRight, childBottom);
+        if (childCount == 0) {
+            return;
         }
+
+        final View child = getChildAt(0);
+
+        final int childTop = mPaddingTop;
+        final int childBottom = mPaddingTop + child.getMeasuredHeight() - mPaddingBottom;
+
+        int childLeft;
+        int childRight;
+
+        final int layoutDirection = getLayoutDirection();
+        final int horizontalGravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
+        switch (Gravity.getAbsoluteGravity(horizontalGravity, layoutDirection)) {
+            case Gravity.RIGHT:
+                childRight = mRight - mLeft - mPaddingRight;
+                childLeft = childRight - child.getMeasuredWidth();
+                break;
+
+            case Gravity.CENTER_HORIZONTAL:
+                childLeft = mPaddingLeft + (mRight - mLeft - child.getMeasuredWidth()) / 2;
+                childRight = childLeft + child.getMeasuredWidth();
+                break;
+
+            case Gravity.LEFT:
+            default:
+                childLeft = mPaddingLeft;
+                childRight = childLeft + child.getMeasuredWidth();
+                break;
+        }
+
+        if (childLeft < mPaddingLeft) {
+            childLeft = mPaddingLeft;
+        }
+
+        if (childRight > mRight - mLeft - mPaddingRight) {
+            childRight = mRight - mLeft - mPaddingRight;
+        }
+
+        child.layout(childLeft, childTop, childRight, childBottom);
     }
 
     @Override
