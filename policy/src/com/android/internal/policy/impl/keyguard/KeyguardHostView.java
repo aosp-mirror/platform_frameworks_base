@@ -52,7 +52,6 @@ import android.widget.ViewFlipper;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.internal.policy.impl.keyguard.KeyguardTransportControlView.SavedState;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;

@@ -29,14 +29,14 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
+        android:gravity="center_horizontal|top"
         android:contentDescription="@string/keyguard_accessibility_status">
 
         <com.android.internal.policy.impl.keyguard.ClockView
             android:id="@+id/clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-15.5dip"
+            android:layout_marginTop="@dimen/kg_clock_top_margin"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:layout_gravity="end">
 

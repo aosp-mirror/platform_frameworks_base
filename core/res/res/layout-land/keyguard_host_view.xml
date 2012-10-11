@@ -30,15 +30,19 @@
     <include layout="@layout/keyguard_widget_region"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight=".45" />
+        android:layout_weight="@integer/kg_widget_region_weight" />
 
     <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.55"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_weight="@integer/kg_security_flipper_weight"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/keyguard_security_view_margin"
+        android:paddingTop="@dimen/keyguard_security_view_margin"
+        android:paddingRight="@dimen/keyguard_security_view_margin"
+        android:paddingBottom="@dimen/keyguard_security_view_margin"
         android:gravity="center">
 
         <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->

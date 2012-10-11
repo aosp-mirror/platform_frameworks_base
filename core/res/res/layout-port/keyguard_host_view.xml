@@ -22,15 +22,20 @@
 <com.android.internal.policy.impl.keyguard.KeyguardHostView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_host_view"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:clipChildren="false">
+    android:orientation="vertical">
 
     <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
         android:id="@+id/view_flipper"
         android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/keyguard_security_view_margin"
+        android:paddingTop="@dimen/keyguard_security_view_margin"
+        android:paddingRight="@dimen/keyguard_security_view_margin"
+        android:paddingBottom="@dimen/keyguard_security_view_margin"
         android:gravity="center">
 
         <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->

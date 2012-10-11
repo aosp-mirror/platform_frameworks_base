@@ -19,8 +19,4 @@
 <resources>
     <integer name="kg_security_flip_duration">75</integer>
     <integer name="kg_security_fade_duration">75</integer>
-
-    <!-- Gravity to make KeyguardSelectorView work in multiple orientations
-        0x31 == "top|center_horizontal" -->
-    <integer name="kg_selector_gravity">0x31</integer>
 </resources>
