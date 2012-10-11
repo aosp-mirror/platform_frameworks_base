@@ -45,14 +45,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
 
-    public void setBar(PhoneStatusBar bar) {
-        mBar = bar;
-    }
-
-    @Override
-    public void onAttachedToWindow() {
         Resources res = getContext().getResources();
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
         mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
@@ -61,8 +54,22 @@ public class PhoneStatusBarView extends PanelBar {
         } catch (NotFoundException ex) {
             mSettingsPanelDragzoneFrac = 0f;
         }
-
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
+    }
+
+    public void setBar(PhoneStatusBar bar) {
+        mBar = bar;
+    }
+
+    public boolean hasFullWidthNotifications() {
+        return mFullWidthNotifications;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        for (PanelView pv : mPanels) {
+            pv.setRubberbandingEnabled(!mFullWidthNotifications);
+        }
     }
 
     @Override
@@ -73,6 +80,7 @@ public class PhoneStatusBarView extends PanelBar {
         } else if (pv.getId() == R.id.settings_panel){
             mSettingsPanel = pv;
         }
+        pv.setRubberbandingEnabled(!mFullWidthNotifications);
     }
 
     @Override
@@ -96,13 +104,14 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public PanelView selectPanelForTouchX(float x) {
+    public PanelView selectPanelForTouch(MotionEvent touch) {
+        final float x = touch.getX();
+
         if (mFullWidthNotifications) {
-            if (DEBUG) {
-                Slog.v(TAG, "notif frac=" + mNotificationPanel.getExpandedFraction());
-            }
-            return (mNotificationPanel.getExpandedFraction() > 0f)
-                ? mSettingsPanel : mNotificationPanel;
+            // No double swiping. If either panel is open, nothing else can be pulled down.
+            return (mSettingsPanel.getExpandedHeight() + mNotificationPanel.getExpandedHeight()> 0) 
+                    ? null 
+                    : mNotificationPanel;
         }
 
         // We split the status bar into thirds: the left 2/3 are for notifications, and the

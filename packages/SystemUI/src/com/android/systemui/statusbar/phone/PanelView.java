@@ -23,7 +23,7 @@ public class PanelView extends FrameLayout {
     }
 
     public static final boolean BRAKES = false;
-    private static final boolean STRETCH_PAST_CONTENTS = true;
+    private boolean mRubberbandingEnabled = true;
 
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
@@ -86,6 +86,10 @@ public class PanelView extends FrameLayout {
     protected float mInitialTouchY;
     protected float mFinalTouchY;
 
+    public void setRubberbandingEnabled(boolean enable) {
+        mRubberbandingEnabled = enable;
+    }
+
     private void runPeekAnimation() {
         if (DEBUG) LOG("peek to height=%.1f", mPeekHeight);
         if (mTimeAnimator.isStarted()) {
@@ -109,7 +113,7 @@ public class PanelView extends FrameLayout {
 
             mTimeAnimator.start();
 
-            mRubberbanding = STRETCH_PAST_CONTENTS // is it enabled at all?
+            mRubberbanding = mRubberbandingEnabled // is it enabled at all?
                     && mExpandedHeight > getFullHeight() // are we past the end?
                     && mVel >= -mFlingGestureMinDistPx; // was this not possibly a "close" gesture?
             if (mRubberbanding) {
@@ -413,7 +417,7 @@ public class PanelView extends FrameLayout {
         }
 
         if (h < 0) h = 0;
-        if (!(STRETCH_PAST_CONTENTS && (mTracking || mRubberbanding)) && h > fh) h = fh;
+        if (!(mRubberbandingEnabled && (mTracking || mRubberbanding)) && h > fh) h = fh;
         mExpandedHeight = h;
 
         if (DEBUG) LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");

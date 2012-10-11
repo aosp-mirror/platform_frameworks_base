@@ -18,6 +18,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/notification_header_bg"
@@ -61,9 +62,18 @@
         android:padding="2dp"
         />
     
+    <ImageView android:id="@+id/settings_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_notify_quicksettings"
+        android:contentDescription="@string/accessibility_settings_button"
+        />
+
     <ImageView android:id="@+id/clear_all_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="18dp"
         android:scaleType="center"
         android:src="@drawable/ic_notify_clear"
         android:contentDescription="@string/accessibility_clear_all"
