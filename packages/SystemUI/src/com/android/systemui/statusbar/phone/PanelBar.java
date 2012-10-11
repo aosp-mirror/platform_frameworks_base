@@ -68,9 +68,9 @@ public class PanelBar extends FrameLayout {
         return getMeasuredHeight();
     }
 
-    public PanelView selectPanelForTouchX(float x) {
+    public PanelView selectPanelForTouch(MotionEvent touch) {
         final int N = mPanels.size();
-        return mPanels.get((int)(N * x / getMeasuredWidth()));
+        return mPanels.get((int)(N * touch.getX() / getMeasuredWidth()));
     }
 
     public boolean panelsEnabled() {
@@ -84,15 +84,26 @@ public class PanelBar extends FrameLayout {
 
         // figure out which panel needs to be talked to here
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            final PanelView panel = selectPanelForTouchX(event.getX());
+            final PanelView panel = selectPanelForTouch(event);
+            if (panel == null) {
+                // panel is not there, so we'll eat the gesture
+                if (DEBUG) LOG("PanelBar.onTouch: no panel for x=%d, bailing", event.getX());
+                mTouchingPanel = null;
+                return true;
+            }
             boolean enabled = panel.isEnabled();
             if (DEBUG) LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
                     (enabled ? "" : " (disabled)"));
-            if (!enabled)
-                return false;
+            if (!enabled) {
+                // panel is disabled, so we'll eat the gesture
+                mTouchingPanel = null;
+                return true;
+            }
             startOpeningPanel(panel);
         }
-        final boolean result = mTouchingPanel.getHandle().dispatchTouchEvent(event);
+        final boolean result = mTouchingPanel != null
+                ? mTouchingPanel.getHandle().dispatchTouchEvent(event)
+                : true;
         return result;
     }
 
