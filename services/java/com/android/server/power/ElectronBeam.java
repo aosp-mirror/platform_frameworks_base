@@ -63,6 +63,11 @@ final class ElectronBeam {
     private static final float HSTRETCH_DURATION = 0.5f;
     private static final float VSTRETCH_DURATION = 1.0f - HSTRETCH_DURATION;
 
+    // The number of frames to draw when preparing the animation so that it will
+    // be ready to run smoothly.  We use 3 frames because we are triple-buffered.
+    // See code for details.
+    private static final int DEJANK_FRAMES = 3;
+
     // Set to true when the animation context has been fully prepared.
     private boolean mPrepared;
     private int mMode;
@@ -145,6 +150,19 @@ final class ElectronBeam {
 
         // Done.
         mPrepared = true;
+
+        // Dejanking optimization.
+        // Some GL drivers can introduce a lot of lag in the first few frames as they
+        // initialize their state and allocate graphics buffers for rendering.
+        // Work around this problem by rendering the first frame of the animation a few
+        // times.  The rest of the animation should run smoothly thereafter.
+        // The frames we draw here aren't visible because we are essentially just
+        // painting the screenshot as-is.
+        if (mode == MODE_COOL_DOWN) {
+            for (int i = 0; i < DEJANK_FRAMES; i++) {
+                draw(1.0f);
+            }
+        }
         return true;
     }
 

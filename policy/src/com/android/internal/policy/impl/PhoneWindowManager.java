@@ -3692,11 +3692,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             updateLockScreenTimeout();
         }
 
-        try {
-            mWindowManager.setEventDispatching(true);
-        } catch (RemoteException unhandled) {
-        }
-
         waitForKeyguard(screenOnListener);
     }
 
@@ -3745,6 +3740,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void finishScreenTurningOn(ScreenOnListener screenOnListener) {
         synchronized (mLock) {
             mScreenOnFully = true;
+        }
+
+        try {
+            mWindowManager.setEventDispatching(true);
+        } catch (RemoteException unhandled) {
         }
 
         if (screenOnListener != null) {
