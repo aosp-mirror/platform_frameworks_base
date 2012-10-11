@@ -8314,6 +8314,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * @hide
+     */
     protected void resetResolvedDrawables() {
         mResolvedDrawables = false;
     }
