@@ -87,11 +87,8 @@ public class DateView extends TextView {
     }
 
     protected void updateClock() {
-        final Context context = getContext();
-        Date now = new Date();
-        CharSequence dow = DateFormat.format("EEEE", now);
-        CharSequence date = DateFormat.getLongDateFormat(context).format(now);
-        setText(context.getString(R.string.status_bar_date_formatter, dow, date));
+        final String dateFormat = getContext().getString(R.string.abbrev_wday_month_day_no_year);
+        setText(DateFormat.format(dateFormat, new Date()));
     }
 
     private boolean isVisible() {
