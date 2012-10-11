@@ -100,21 +100,35 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Adat két sáv."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Adat három sáv."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Adatjel teljes."</string>
-    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Nincs Wi-Fi"</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi -- egy sáv"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi -- két sáv"</string>
-    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi -- három sáv"</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Wi-Fi -- teljes jel"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi kikapcsolva."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Nincs Wi-Fi kapcsolat."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi jel: egy sáv."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi jel: két sáv."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi jel: három sáv."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi jel teljes."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Nincs WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX-jel: egy sáv."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX-jel: két sáv."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX-jel: három sáv."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX-jel: teljes."</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Nincs jel."</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Nincs csatlakozva."</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Nincs sáv."</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Egy sáv."</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Két sáv."</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Három sáv."</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Teljes jelerősség."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Bekapcsolva."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Kikapcsolva."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Csatlakoztatva."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Barangolás"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nincs SIM."</string>
@@ -130,6 +144,18 @@
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Csengő rezeg."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Csengő néma."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> eltávolítva."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Értesítés elvetve."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Értesítési felület."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Gyorsbeállítások."</string>
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Felhasználó: <xliff:g id="USER">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Akkumulátor <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Repülős üzemmód <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Ébresztés időpontja: <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G adatforgalom letiltva"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G adatforgalom letiltva"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobil adatforgalom letiltva"</string>

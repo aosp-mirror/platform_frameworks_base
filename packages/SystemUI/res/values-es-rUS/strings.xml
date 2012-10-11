@@ -100,21 +100,35 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dos barras de datos"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tres barras de datos"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Señal de datos completa"</string>
-    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Sin conexión Wi-Fi"</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Una barra de señal Wi-Fi"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dos barras de señal Wi-Fi"</string>
-    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Tres barras de señal Wi-Fi"</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Señal Wi-Fi máxima"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi desactivado"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi desconectado"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Una barra de Wi-Fi"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Dos barras de Wi-Fi"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Tres barras de Wi-Fi"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Señal de Wi-Fi excelente"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Sin conexión WiMAX"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Una barra de WiMAX"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Dos barras de WiMAX"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Tres barras de WiMAX"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Señal de WiMAX al máximo"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Sin señal"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"No conectado"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Cero barras"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Una barra"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Dos barras"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Tres barras"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Señal excelente"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activado"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Desactivado"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Conectado"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hay tarjeta SIM."</string>
@@ -132,6 +146,18 @@
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre en silencio"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> descartada."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación ignorada"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Pantalla de notificaciones"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Usuario <xliff:g id="USER">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Celular <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarma: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos de 2G-3G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos de 4G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Se inhabilitaron los datos móviles"</string>
@@ -151,7 +177,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla está bloqueada en modo vertical."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <string name="start_dreams" msgid="6170089063982549905">"Activar susp. ahora"</string>
+    <string name="start_dreams" msgid="6170089063982549905">"Activar suspensión"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo de avión"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -179,5 +205,5 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Las notificaciones aparecen aquí."</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Deslizar el dedo hacia abajo para acceder al contenido."\n"Volver a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Desliza el dedo hacia abajo para acceder al contenido."\n"Vuelve a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
 </resources>

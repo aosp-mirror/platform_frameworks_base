@@ -100,21 +100,35 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"数据信号强度为三格。"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"数据信号满格。"</string>
-    <string name="accessibility_no_wifi" msgid="7455607460517331976">"没有 Wi-Fi 信号。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi 信号强度为 1 格。"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi 信号强度为 2 格。"</string>
-    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi 信号强度为 3 格。"</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Wi-Fi 信号强度为满格。"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭 Wi-Fi。"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi 连接已断开。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wi-Fi 信号强度为一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi 信号强度为两格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi 信号强度为三格。"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi 信号满格。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"无 WiMAX 信号。"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 信号强度为一格。"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 信号强度为两格。"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX 信号强度为三格。"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX 信号满格。"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"无信号。"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"未连接。"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"信号强度为零格。"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"信号强度为一格。"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"信号强度为两格。"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"信号强度为三格。"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"信号满格。"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"打开。"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"关闭。"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"已连接。"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫游中"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
@@ -132,6 +146,18 @@
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"振铃器振动。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"振铃器静音。"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"已删除<xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"已关闭通知。"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知栏。"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快速设置。"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用户：<xliff:g id="USER">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"移动数据连接：<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="TYPE">%2$s</xliff:g>，<xliff:g id="NETWORK">%3$s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"电池电量：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"飞行模式：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"蓝牙：<xliff:g id="STATE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"闹钟已设置为：<xliff:g id="TIME">%s</xliff:g>。"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>
@@ -175,12 +201,9 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"无网络"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 已关闭"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi 显示设备"</string>
-    <!-- no translation found for quick_settings_wifi_display_no_connection_label (2355298740765736918) -->
-    <skip />
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"无线显示"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
-    <!-- no translation found for status_bar_help_title (1199237744086469217) -->
-    <skip />
-    <!-- no translation found for status_bar_help_text (7874607155052076323) -->
-    <skip />
+    <string name="status_bar_help_title" msgid="1199237744086469217">"通知会显示在这里"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑动可随时查看通知。"\n"再次向下滑动可使用系统控制功能。"</string>
 </resources>
