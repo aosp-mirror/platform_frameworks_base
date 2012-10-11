@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Aanmelden"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ongeldige gebruikersnaam of wachtwoord."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Bent u uw gebruikersnaam of wachtwoord vergeten?"\n"Ga naar "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Simkaart ontgrendelen…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Account controleren…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"U heeft uw pincode <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"U heeft uw wachtwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. "\n\n"Probeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>

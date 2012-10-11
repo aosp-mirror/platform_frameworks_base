@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ورود به سیستم"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری یا گذرواژه نامعتبر."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"نام کاربری یا گذرواژه خود را فراموش کردید؟"\n"از "<b>"google.com/accounts/recovery"</b>" بازدید کنید."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"در حال باز کردن قفل سیم کارت…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"درحال بررسی حساب..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"گذرواژه خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. "\n\n"پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیدید. "\n\n"لطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
