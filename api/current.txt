@@ -27467,6 +27467,7 @@ package android.webkit {
     method public void setInitialScale(int);
     method public deprecated void setMapTrackballToArrowKeys(boolean);
     method public void setNetworkAvailable(boolean);
+    method public deprecated void setPictureListener(android.webkit.WebView.PictureListener);
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);

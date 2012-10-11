@@ -1480,7 +1480,6 @@ public class WebView extends AbsoluteLayout
      *
      * @param listener an implementation of WebView.PictureListener
      * @deprecated This method is now obsolete.
-     * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
     @Deprecated
     public void setPictureListener(PictureListener listener) {
