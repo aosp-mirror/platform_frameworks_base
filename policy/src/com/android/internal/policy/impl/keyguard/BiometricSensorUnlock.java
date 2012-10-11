@@ -37,21 +37,9 @@ interface BiometricSensorUnlock {
     public boolean isRunning();
 
     /**
-     * Covers the backup unlock mechanism by showing the contents of the view initialized in
-     * {@link BiometricSensorUnlock#initializeView(View)}.  The view should disappear after the
-     * specified timeout.  If the timeout is 0, the interface shows until another event, such as
-     * calling {@link BiometricSensorUnlock#hide()}, causes it to disappear.  Called on the UI
-     * thread.
-     * @param timeoutMilliseconds Amount of time in milliseconds to display the view before
-     * disappearing.  A value of 0 means the view should remain visible.
+     * Stops and removes the biometric unlock and shows the backup unlock
      */
-    public void show(long timeoutMilliseconds);
-
-    /**
-     * Uncovers the backup unlock mechanism by hiding the contents of the view initialized in
-     * {@link BiometricSensorUnlock#initializeView(View)}.
-     */
-    public void hide();
+    public void stopAndShowBackup();
 
     /**
      * Binds to the biometric unlock service and starts the unlock procedure.  Called on the UI
