@@ -669,7 +669,7 @@ public class LinearLayout extends ViewGroup {
             }
 
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
-            lp.onResolveLayoutDirection(layoutDirection);
+            lp.resolveLayoutDirection(layoutDirection);
 
             totalWeight += lp.weight;
             
@@ -1014,7 +1014,7 @@ public class LinearLayout extends ViewGroup {
 
             final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
                     child.getLayoutParams();
-            lp.onResolveLayoutDirection(layoutDirection);
+            lp.resolveLayoutDirection(layoutDirection);
 
             totalWeight += lp.weight;
             
