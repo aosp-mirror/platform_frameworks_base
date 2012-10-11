@@ -50,6 +50,8 @@ import java.util.Arrays;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
+    private static final boolean DEBUG = false;
+
     private final PersistentDataStore mPersistentDataStore;
     private final boolean mSupportsProtectedBuffers;
 
@@ -116,6 +118,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     public void requestScanLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestScanLocked");
+        }
+
         getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -127,6 +133,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     public void requestConnectLocked(final String address, final boolean trusted) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestConnectLocked: address=" + address + ", trusted=" + trusted);
+        }
+
         if (!trusted) {
             synchronized (getSyncRoot()) {
                 if (!isRememberedDisplayLocked(address)) {
@@ -157,6 +167,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     public void requestDisconnectLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "requestDisconnectedLocked");
+        }
+
         getHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -168,9 +182,13 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     public void requestRenameLocked(String address, String alias) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestRenameLocked: address=" + address + ", alias=" + alias);
+        }
+
         if (alias != null) {
             alias = alias.trim();
-            if (alias.isEmpty()) {
+            if (alias.isEmpty() || alias.equals(address)) {
                 alias = null;
             }
         }
@@ -183,6 +201,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     }
 
     public void requestForgetLocked(String address) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestForgetLocked: address=" + address);
+        }
+
         if (mPersistentDataStore.forgetWifiDisplay(address)) {
             mPersistentDataStore.saveIfNeeded();
             updateRememberedDisplaysLocked();
@@ -199,6 +221,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mCurrentStatus = new WifiDisplayStatus(
                     mFeatureState, mScanState, mActiveDisplayState,
                     mActiveDisplay, mAvailableDisplays, mRememberedDisplays);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "getWifiDisplayStatusLocked: result=" + mCurrentStatus);
         }
         return mCurrentStatus;
     }
@@ -295,6 +321,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        @Override
         public void onScanFinished(WifiDisplay[] availableDisplays) {
             synchronized (getSyncRoot()) {
                 availableDisplays = mPersistentDataStore.applyWifiDisplayAliases(
