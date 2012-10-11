@@ -69,7 +69,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
         int topPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_top_padding);
         int bottomPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
         setPadding(hPadding, topPadding, hPadding, bottomPadding);
-        mGradientColor = res.getColor(R.color.kg_widget_pager_gradient);
+        mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
 

@@ -243,7 +243,7 @@
 
     <!-- Keyguard dimensions -->
     <!-- Width of security view in keyguard. -->
-    <dimen name="kg_security_view_width">500dp</dimen>
+    <dimen name="kg_glow_pad_size">500dp</dimen>
 
     <!-- Height of security view in keyguard. -->
     <dimen name="kg_security_view_height">0dp</dimen>
@@ -264,7 +264,10 @@
     <dimen name="kg_status_line_font_size">14sp</dimen>
 
     <!-- Size of margin on the right of keyguard's status view -->
-    <dimen name="kg_status_line_font_right_margin">0dp</dimen>
+    <dimen name="kg_status_line_font_right_margin">16dp</dimen>
+
+    <!-- Top margin for the clock view --> 
+    <dimen name="kg_clock_top_margin">-16dp</dimen>
 
     <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->
     <dimen name="kg_key_horizontal_gap">0dp</dimen>
@@ -304,4 +307,6 @@
     <!-- Touch slop for the global toggle accessibility gesture -->
     <dimen name="accessibility_touch_slop">80dip</dimen>
 
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_security_view_margin">0dp</dimen>
 </resources>

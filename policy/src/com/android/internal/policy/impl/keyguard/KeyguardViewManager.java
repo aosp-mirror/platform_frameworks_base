@@ -48,7 +48,7 @@ import com.android.internal.widget.LockPatternUtils;
  * reported to this class by the current {@link KeyguardViewBase}.
  */
 public class KeyguardViewManager {
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
     private static String TAG = "KeyguardViewManager";
     public static boolean USE_UPPER_CASE = true;
 
