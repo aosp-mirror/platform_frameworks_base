@@ -111,6 +111,13 @@ public class AudioSystem
     public static native boolean isStreamActive(int stream, int inPastMs);
 
     /*
+     * Checks whether the specified audio source is active.
+     *
+     * return true if any recorder using this source is currently recording
+     */
+    public static native boolean isSourceActive(int source);
+
+    /*
      * Sets a group generic audio configuration parameters. The use of these parameters
      * are platform dependent, see libaudio
      *
