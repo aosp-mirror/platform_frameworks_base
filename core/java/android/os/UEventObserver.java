@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,14 +39,20 @@ import java.util.HashMap;
  * @hide
 */
 public abstract class UEventObserver {
+    private static final String TAG = "UEventObserver";
+    private static final boolean DEBUG = false;
+
     private static UEventThread sThread;
 
-    private static native void native_setup();
-    private static native int next_event(byte[] buffer);
+    private static native void nativeSetup();
+    private static native String nativeWaitForNextEvent();
+    private static native void nativeAddMatch(String match);
+    private static native void nativeRemoveMatch(String match);
 
     public UEventObserver() {
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             stopObserving();
@@ -78,10 +86,18 @@ public abstract class UEventObserver {
      * This method can be called multiple times to register multiple matches.
      * Only one call to stopObserving is required even with multiple registered
      * matches.
-     * @param match A substring of the UEvent to match. Use "" to match all
-     *              UEvent's
+     *
+     * @param match A substring of the UEvent to match.  Try to be as specific
+     * as possible to avoid incurring unintended additional cost from processing
+     * irrelevant messages.  Netlink messages can be moderately high bandwidth and
+     * are expensive to parse.  For example, some devices may send one netlink message
+     * for each vsync period.
      */
     public final void startObserving(String match) {
+        if (match == null || match.isEmpty()) {
+            throw new IllegalArgumentException("match substring must be non-empty");
+        }
+
         final UEventThread t = getThread();
         t.addObserver(match, this);
     }
@@ -117,7 +133,7 @@ public abstract class UEventObserver {
 
             while (offset < length) {
                 int equals = message.indexOf('=', offset);
-                int at = message.indexOf(0, offset);
+                int at = message.indexOf('\0', offset);
                 if (at < 0) break;
 
                 if (equals > offset && equals < at) {
@@ -158,15 +174,17 @@ public abstract class UEventObserver {
             super("UEventObserver");
         }
 
+        @Override
         public void run() {
-            native_setup();
+            nativeSetup();
 
-            byte[] buffer = new byte[1024];
-            int len;
             while (true) {
-                len = next_event(buffer);
-                if (len > 0) {
-                    sendEvent(new String(buffer, 0, len));
+                String message = nativeWaitForNextEvent();
+                if (message != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, message);
+                    }
+                    sendEvent(message);
                 }
             }
         }
@@ -176,7 +194,7 @@ public abstract class UEventObserver {
                 final int N = mKeysAndObservers.size();
                 for (int i = 0; i < N; i += 2) {
                     final String key = (String)mKeysAndObservers.get(i);
-                    if (message.indexOf(key) != -1) {
+                    if (message.contains(key)) {
                         final UEventObserver observer =
                                 (UEventObserver)mKeysAndObservers.get(i + 1);
                         mTempObserversToSignal.add(observer);
@@ -199,6 +217,7 @@ public abstract class UEventObserver {
             synchronized (mKeysAndObservers) {
                 mKeysAndObservers.add(match);
                 mKeysAndObservers.add(observer);
+                nativeAddMatch(match);
             }
         }
 
@@ -208,7 +227,8 @@ public abstract class UEventObserver {
                 for (int i = 0; i < mKeysAndObservers.size(); ) {
                     if (mKeysAndObservers.get(i + 1) == observer) {
                         mKeysAndObservers.remove(i + 1);
-                        mKeysAndObservers.remove(i);
+                        final String match = (String)mKeysAndObservers.remove(i);
+                        nativeRemoveMatch(match);
                     } else {
                         i += 2;
                     }
