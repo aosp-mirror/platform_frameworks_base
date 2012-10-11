@@ -217,6 +217,12 @@ public final class TextServicesManager {
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
+            if (sService == null) {
+                // TODO: This is a workaround. Needs to investigate why sService could be null
+                // here.
+                Log.e(TAG, "sService is null.");
+                return null;
+            }
             // Passing null as a locale until we support multiple enabled spell checker subtypes.
             return sService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
         } catch (RemoteException e) {
