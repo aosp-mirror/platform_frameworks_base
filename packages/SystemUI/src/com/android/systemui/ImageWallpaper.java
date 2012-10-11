@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -62,6 +63,8 @@ public class ImageWallpaper extends WallpaperService {
 
     WallpaperManager mWallpaperManager;
 
+    DrawableEngine mEngine;
+
     boolean mIsHwAccelerated;
 
     @Override
@@ -77,12 +80,20 @@ public class ImageWallpaper extends WallpaperService {
         }
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+        if (mEngine != null) {
+            mEngine.trimMemory(level);
+        }
+    }
+
     private static boolean isEmulator() {
         return "1".equals(SystemProperties.get(PROPERTY_KERNEL_QEMU, "0"));
     }
 
     public Engine onCreateEngine() {
-        return new DrawableEngine();
+        mEngine = new DrawableEngine();
+        return mEngine;
     }
 
     class DrawableEngine extends Engine {
@@ -153,6 +164,15 @@ public class ImageWallpaper extends WallpaperService {
         public DrawableEngine() {
             super();
             setFixedSizeAllowed(true);
+        }
+
+        public void trimMemory(int level) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
+                    mBackground != null && mIsHwAccelerated) {
+                mBackground.recycle();
+                mBackground = null;
+                mWallpaperManager.forgetLoadedWallpaper();
+            }
         }
 
         @Override
@@ -329,16 +349,17 @@ public class ImageWallpaper extends WallpaperService {
                 }
             } else {
                 drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
+                if (FIXED_SIZED_SURFACE) {
+                    // If the surface is fixed-size, we should only need to
+                    // draw it once and then we'll let the window manager
+                    // position it appropriately.  As such, we no longer needed
+                    // the loaded bitmap.  Yay!
+                    // hw-accelerated path retains bitmap for faster rotation
+                    mBackground = null;
+                    mWallpaperManager.forgetLoadedWallpaper();
+                }
             }
 
-            if (FIXED_SIZED_SURFACE) {
-                // If the surface is fixed-size, we should only need to
-                // draw it once and then we'll let the window manager
-                // position it appropriately.  As such, we no longer needed
-                // the loaded bitmap.  Yay!
-                mBackground = null;
-                mWallpaperManager.forgetLoadedWallpaper();
-            }
         }
 
         void updateWallpaperLocked() {
@@ -489,8 +510,6 @@ public class ImageWallpaper extends WallpaperService {
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap, GL_UNSIGNED_BYTE, 0);
             checkGlError();
 
-            bitmap.recycle();
-    
             return texture;
         }
         
