@@ -702,7 +702,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     Log.e(TAG, "MESSAGE_TIMEOUT_BIND");
                     synchronized(mConnection) {
                         mBinding = false;
-                        mEnable = false;
                     }
                     break;
                 }
