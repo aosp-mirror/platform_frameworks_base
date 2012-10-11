@@ -990,7 +990,10 @@ public final class Pm {
         }
         name = arg;
         try {
-            if (mUm.createUser(name, 0) == null) {
+            final UserInfo info = mUm.createUser(name, 0);
+            if (info != null) {
+                System.out.println("Success: created user id " + info.id);
+            } else {
                 System.err.println("Error: couldn't create User.");
             }
         } catch (RemoteException e) {
