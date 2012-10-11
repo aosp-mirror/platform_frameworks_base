@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Logi sisse"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Vale kasutajanimi või parool."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Kas unustasite kasutajanime või parooli?"\n"Külastage aadressi "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"SIM-i avamine ..."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Konto kontrollimine ..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olete PIN-koodi <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud."\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olete parooli <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti sisestanud. "\n\n"Proovige uuesti <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti."\n\n"Proovige <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast uuesti."</string>

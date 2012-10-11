@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ግባ"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ልክ ያልሆነ የተጠቃሚ ስም ወይም የይለፍ ቃል።"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"የተጠቃሚ ስምዎን ወይም የይለፍ ቃልዎን ረሱት?"\n<b>"google.com/accounts/recovery"</b>"ይጎብኙ።"</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"ሲም በመክፈት ላይ…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"መለያውን በማረጋገጥ ላይ…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"ፒንዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልተየቡም። "\n\n"በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"የይለፍ ቃልዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ተይበዋል።"\n\n"በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"የመክፈቻ ስርዓተ ጥለትዎን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። "\n\n" ከ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>

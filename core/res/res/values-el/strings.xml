@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Σύνδεση"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Μη έγκυρο όνομα χρήστη ή κωδικός πρόσβασης."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ξεχάσατε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;"\n"Επισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Ξεκλείδωμα SIM…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Έλεγχος λογαριασμού…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Έχετε πληκτρολογήσει εσφαλμένα τον κωδικό σας PIN <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλετπα."</string>

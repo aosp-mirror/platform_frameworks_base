@@ -1108,7 +1108,7 @@
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Pošalji"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Odustani"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapamti odabir"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Kasnije to možete promijenili u odjeljku Postavke &gt; Aplikacije"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Kasnije to možete promijeniti u odjeljku Postavke &gt; Aplikacije"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Dopusti uvijek"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ne dopuštaj nikada"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kartica uklonjena"</string>
@@ -1407,7 +1407,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prijava"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nevažeće korisničko ime ili zaporka."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zaboravili ste korisničko ime ili zaporku?"\n"Posjetite "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="5316091912653672681">"Otključavanje SIM-a…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Provjera računa..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
