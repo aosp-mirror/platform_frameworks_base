@@ -773,13 +773,8 @@ the HTTP response contains a non-200 status code (such as 400, 401, or 503).</p>
     <td>There was an error authenticating the sender account. <a href="#auth_error">Troubleshoot</a></td>
   </tr>
   <tr>
-    <td>500</td>
-    <td>There was an internal error in the GCM server while trying to process the request. <a href="#internal_error">Troubleshoot</a></td>
-  </tr>
-  <tr>
-    <td>503</td>
-    <td>Indicates that the server is temporarily unavailable (i.e., because of timeouts, etc ). Sender must retry later, honoring any <code>Retry-After</code> header
-      included in the response. Application servers must implement exponential back-off. The GCM server took too long to process the request. <a href="#internal_error">Troubleshoot</a></td>
+    <td>5xx</td>
+    <td>Errors in the 500-599 range (such as 500 or 503) indicate that there was an internal error in the GCM server while trying to process the request, or that the server is temporarily unavailable (for example, because of timeouts). Sender must retry later, honoring any <code>Retry-After</code> header included in the response. Application servers must implement exponential back-off. <a href="#internal_error">Troubleshoot</a></td>
   </tr>
 </table>
 
@@ -936,17 +931,15 @@ all messages at the same time.</li>
 
 Senders that cause problems risk being blacklisted. 
 <br />
-Happens when the HTTP status code is 503, or when the <code>error</code> field of a JSON object in the results array is <code>Unavailable</code>.
+Happens when the HTTP status code is between 501 and 599, or when the <code>error</code> field of a JSON object in the results array is <code>Unavailable</code>.
 </dd>
 
 <dt id="internal_error"><strong>Internal Server Error</strong></dt>
 
 <dd>
 The server encountered an error while trying to process the request. You
-could retry the same request (obeying the requirements listed in the <strong>Timeout</strong>
+could retry the same request (obeying the requirements listed in the <a href="#timeout">Timeout</a>
 section), but if the error persists, please report the problem in the <a href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a>.
-<br /> 
-Senders that cause problems risk being blacklisted. 
 <br />
 Happens when the HTTP status code is 500, or when the <code>error</code> field of a JSON
 object in the results array is <code>InternalServerError</code>.
