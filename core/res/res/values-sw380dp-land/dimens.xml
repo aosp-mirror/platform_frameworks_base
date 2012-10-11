@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
+/* //device/apps/common/assets/res/any/dimens.xml
+**
 ** Copyright 2012, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +18,6 @@
 */
 -->
 <resources>
-    <!-- Gravity to make KeyguardSelectorView work in multiple orientations
-        0x13 == "left|center_vertical" -->
-    <integer name="kg_selector_gravity">0x13</integer>
-    <integer name="kg_widget_region_weight">45</integer>
-    <integer name="kg_security_flipper_weight">55</integer>
+    <!-- Top margin for the clock view --> 
+    <dimen name="kg_clock_top_margin">67dp</dimen>
 </resources>

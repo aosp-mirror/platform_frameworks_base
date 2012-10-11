@@ -123,7 +123,8 @@ public class KeyguardWidgetPager extends PagedView {
             if (title == null) {
                 title = "";
             }
-            return mContext.getString(R.string.keyguard_accessibility_widget_changed,
+            return mContext.getString(
+                    com.android.internal.R.string.keyguard_accessibility_widget_changed,
                     title, nextPageIndex + 1, getChildCount());
         }
         return super.getCurrentPageDescription();

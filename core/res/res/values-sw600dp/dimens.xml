@@ -79,11 +79,34 @@
     <dimen name="preference_screen_header_padding_side">24dip</dimen>
 
     <!-- Keyguard dimensions -->
+    <!-- Size of the clock font in keyguard's status view -->
+    <dimen name="kg_status_clock_font_size">141dp</dimen>
+
+    <!-- Size of the date font in keyguard's status view  -->
+    <dimen name="kg_status_date_font_size">25.5dp</dimen>
+
+    <!-- Size of the generic status lines keyguard's status view  -->
+    <dimen name="kg_status_line_font_size">16sp</dimen>
+
+    <!-- Top margin for the clock view --> 
+    <dimen name="kg_clock_top_margin">0dp</dimen>
+
+    <!-- Size of margin on the right of keyguard's status view -->
+    <dimen name="kg_status_line_font_right_margin">50dp</dimen>
+
+    <!-- Horizontal padding for the widget pager -->
+    <dimen name="kg_widget_pager_horizontal_padding">24dp</dimen>
+
+    <!-- Top padding for the widget pager -->
+    <dimen name="kg_widget_pager_top_padding">24dp</dimen>
+
     <!-- Bottom padding for the widget pager -->
     <dimen name="kg_widget_pager_bottom_padding">16dp</dimen>
 
     <!-- Top margin for the runway lights. We add a negative margin in large
         devices to account for the widget pager padding -->
     <dimen name="kg_runway_lights_top_margin">-10dp</dimen>
-</resources>
 
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_security_view_margin">24dp</dimen>
+</resources>
