@@ -448,6 +448,10 @@ public class AppWidgetManager {
      * and outside of the handler.
      * This method will only work when called from the uid that owns the AppWidget provider.
      *
+     * <p>
+     * This method will be ignored if a widget has not received a full update via
+     * {@link #updateAppWidget(int[], RemoteViews)}.
+     *
      * @param appWidgetIds     The AppWidget instances for which to set the RemoteViews.
      * @param views            The RemoteViews object containing the incremental update / command.
      */
@@ -475,6 +479,10 @@ public class AppWidgetManager {
      * It is okay to call this method both inside an {@link #ACTION_APPWIDGET_UPDATE} broadcast,
      * and outside of the handler.
      * This method will only work when called from the uid that owns the AppWidget provider.
+     *
+     * <p>
+     * This method will be ignored if a widget has not received a full update via
+     * {@link #updateAppWidget(int[], RemoteViews)}.
      *
      * @param appWidgetId      The AppWidget instance for which to set the RemoteViews.
      * @param views            The RemoteViews object containing the incremental update / command.
