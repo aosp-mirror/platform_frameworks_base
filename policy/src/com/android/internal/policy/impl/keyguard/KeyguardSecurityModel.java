@@ -17,6 +17,7 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
@@ -66,7 +67,8 @@ public class KeyguardSecurityModel {
         final boolean backupIsTimedOut = monitor.getFailedUnlockAttempts() >=
                 LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
         return monitor.getMaxBiometricUnlockAttemptsReached() || backupIsTimedOut
-                || !monitor.isAlternateUnlockEnabled();
+                || !monitor.isAlternateUnlockEnabled()
+                || monitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE;
     }
 
     SecurityMode getSecurityMode() {
