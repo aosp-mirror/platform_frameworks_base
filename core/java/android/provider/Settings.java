@@ -386,10 +386,9 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of application
-     * development-related settings.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard
-     * against this.
+     * development-related settings.  As of
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1} this action is
+     * a required part of the platform.
      * <p>
      * Input: Nothing.
      * <p>
