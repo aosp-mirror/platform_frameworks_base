@@ -38,25 +38,25 @@ void genRand(uchar *out) {
  *  1  2  1
  */
 
-int32_t gWidth;
-int32_t gHeight;
+int32_t gWMask;
+int32_t gHMask;
 
 rs_allocation gBlendSource;
 void blend9(uchar *out, uint32_t x, uint32_t y) {
-    uint32_t x1 = min(x+1, (uint32_t)gWidth);
-    uint32_t x2 = max(x-1, (uint32_t)0);
-    uint32_t y1 = min(y+1, (uint32_t)gHeight);
-    uint32_t y2 = max(y-1, (uint32_t)0);
+    uint32_t x1 = (x-1) & gWMask;
+    uint32_t x2 = (x+1) & gWMask;
+    uint32_t y1 = (y-1) & gHMask;
+    uint32_t y2 = (y+1) & gHMask;
 
-    uint p00 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x1, y1))[0];
-    uint p01 = 114 * ((uchar *)rsGetElementAt(gBlendSource, x, y1))[0];
-    uint p02 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x2, y1))[0];
-    uint p10 = 114 * ((uchar *)rsGetElementAt(gBlendSource, x1, y))[0];
-    uint p11 = 230 * ((uchar *)rsGetElementAt(gBlendSource, x, y))[0];
-    uint p12 = 114 * ((uchar *)rsGetElementAt(gBlendSource, x2, y))[0];
-    uint p20 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x1, y2))[0];
-    uint p21 = 114 * ((uchar *)rsGetElementAt(gBlendSource, x, y2))[0];
-    uint p22 = 56 *  ((uchar *)rsGetElementAt(gBlendSource, x2, y2))[0];
+    uint p00 = 56 *  rsGetElementAt_uchar(gBlendSource, x1, y1);
+    uint p01 = 114 * rsGetElementAt_uchar(gBlendSource, x, y1);
+    uint p02 = 56 *  rsGetElementAt_uchar(gBlendSource, x2, y1);
+    uint p10 = 114 * rsGetElementAt_uchar(gBlendSource, x1, y);
+    uint p11 = 230 * rsGetElementAt_uchar(gBlendSource, x, y);
+    uint p12 = 114 * rsGetElementAt_uchar(gBlendSource, x2, y);
+    uint p20 = 56 *  rsGetElementAt_uchar(gBlendSource, x1, y2);
+    uint p21 = 114 * rsGetElementAt_uchar(gBlendSource, x, y2);
+    uint p22 = 56 *  rsGetElementAt_uchar(gBlendSource, x2, y2);
 
     p00 += p01;
     p02 += p10;
@@ -69,7 +69,8 @@ void blend9(uchar *out, uint32_t x, uint32_t y) {
     p20 += p22;
     p20 += p02;
 
-    *out = (uchar)(p20 >> 10);
+    p20 = min(p20 >> 10, (uint)255);
+    *out = (uchar)p20;
 }
 
 float gNoiseStrength;
@@ -77,7 +78,7 @@ float gNoiseStrength;
 rs_allocation gNoise;
 void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
     float4 ip = convert_float4(*in);
-    float pnoise = (float) ((uchar *)rsGetElementAt(gNoise, x, y))[0];
+    float pnoise = (float) rsGetElementAt_uchar(gNoise, x & gWMask, y & gHMask);
 
     float energy_level = ip.r + ip.g + ip.b;
     float energy_mask = (28.f - sqrt(energy_level)) * 0.03571f;
