@@ -215,7 +215,7 @@ void getStrokeVerticesFromPerimeterAA(const Vector<Vertex>& perimeter, float hal
     // alpha value (TODO: support different X/Y scale)
     float maxAlpha = 1.0f;
     if (halfStrokeWidth != 0 && inverseScaleX == inverseScaleY &&
-            halfStrokeWidth * inverseScaleX < 1.0f) {
+            halfStrokeWidth * inverseScaleX < 0.5f) {
         maxAlpha *= (2 * halfStrokeWidth) / inverseScaleX;
         halfStrokeWidth = 0.0f;
     }
