@@ -5789,4 +5789,10 @@
         <attr name="leftToRight" format="boolean" />
     </declare-styleable>
 
+    <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>
+    tags. -->
+    <declare-styleable name="FragmentBreadCrumbs">
+        <attr name="gravity" />
+    </declare-styleable>
+
 </resources>
