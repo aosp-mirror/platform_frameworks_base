@@ -184,8 +184,8 @@ public class SearchPanelView extends FrameLayout implements
 
     private void vibrate() {
         Context context = getContext();
-        if (Settings.System.getInt(context.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1) != 0) {
+        if (Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0) {
             Resources res = context.getResources();
             Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(res.getInteger(R.integer.config_search_panel_view_vibration_duration));
