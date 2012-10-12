@@ -97,9 +97,12 @@ class AccessibilityInjector {
     // Template for JavaScript that performs AndroidVox actions.
     private static final String ACCESSIBILITY_ANDROIDVOX_TEMPLATE =
             "(function() {" +
-                    "  if ((typeof(cvox) != 'undefined')"+
+                    "  if ((typeof(cvox) != 'undefined')" +
+                    "      && (cvox != null)" +
                     "      && (typeof(cvox.ChromeVox) != 'undefined')" +
+                    "      && (cvox.ChromeVox != null)" +
                     "      && (typeof(cvox.AndroidVox) != 'undefined')" +
+                    "      && (cvox.AndroidVox != null)" +
                     "      && cvox.ChromeVox.isActive) {" +
                     "    return cvox.AndroidVox.performAction('%1s');" +
                     "  } else {" +
@@ -110,9 +113,12 @@ class AccessibilityInjector {
     // JS code used to shut down an active AndroidVox instance.
     private static final String TOGGLE_CVOX_TEMPLATE =
             "javascript:(function() {" +
-                    "  if ((typeof(cvox) != 'undefined')"+
+                    "  if ((typeof(cvox) != 'undefined')" +
+                    "      && (cvox != null)" +
                     "      && (typeof(cvox.ChromeVox) != 'undefined')" +
-                    "      && (typeof(cvox.ChromeVox.host) != 'undefined')) {" +
+                    "      && (cvox.ChromeVox != null)" +
+                    "      && (typeof(cvox.ChromeVox.host) != 'undefined')" +
+                    "      && (cvox.ChromeVox.host != null)) {" +
                     "    cvox.ChromeVox.host.activateOrDeactivateChromeVox(%b);" +
                     "  }" +
                     "})();";
@@ -132,31 +138,58 @@ class AccessibilityInjector {
     }
 
     /**
+     * If JavaScript is enabled, pauses or resumes AndroidVox.
+     *
+     * @param enabled Whether feedback should be enabled.
+     */
+    public void toggleAccessibilityFeedback(boolean enabled) {
+        if (!isAccessibilityEnabled() || !isJavaScriptEnabled()) {
+            return;
+        }
+
+        toggleAndroidVox(enabled);
+
+        if (!enabled && (mTextToSpeech != null)) {
+            mTextToSpeech.stop();
+        }
+    }
+
+    /**
      * Attempts to load scripting interfaces for accessibility.
      * <p>
-     * This should be called when the window is attached.
-     * </p>
+     * This should only be called before a page loads.
      */
-    public void addAccessibilityApisIfNecessary() {
+    private void addAccessibilityApisIfNecessary() {
         if (!isAccessibilityEnabled() || !isJavaScriptEnabled()) {
             return;
         }
 
         addTtsApis();
         addCallbackApis();
-        toggleAndroidVox(true);
     }
 
     /**
      * Attempts to unload scripting interfaces for accessibility.
      * <p>
-     * This should be called when the window is detached.
-     * </p>
+     * This should only be called before a page loads.
      */
-    public void removeAccessibilityApisIfNecessary() {
-        toggleAndroidVox(false);
+    private void removeAccessibilityApisIfNecessary() {
         removeTtsApis();
         removeCallbackApis();
+    }
+
+    /**
+     * Destroys this accessibility injector.
+     */
+    public void destroy() {
+        if (mTextToSpeech != null) {
+            mTextToSpeech.shutdown();
+            mTextToSpeech = null;
+        }
+
+        if (mCallback != null) {
+            mCallback = null;
+        }
     }
 
     private void toggleAndroidVox(boolean state) {
@@ -517,7 +550,12 @@ class AccessibilityInjector {
      *         settings.
      */
     private boolean isJavaScriptEnabled() {
-        return mWebView.getSettings().getJavaScriptEnabled();
+        final WebSettings settings = mWebView.getSettings();
+        if (settings == null) {
+            return false;
+        }
+
+        return settings.getJavaScriptEnabled();
     }
 
     /**
@@ -732,7 +770,7 @@ class AccessibilityInjector {
         private final String mInterfaceName;
 
         private boolean mResult = false;
-        private long mResultId = -1;
+        private int mResultId = -1;
 
         private CallbackHandler(String interfaceName) {
             mInterfaceName = interfaceName;
@@ -784,34 +822,46 @@ class AccessibilityInjector {
          * @return Whether the result was received.
          */
         private boolean waitForResultTimedLocked(int resultId) {
-            if (DEBUG)
-                Log.d(TAG, "Waiting for CVOX result...");
-            long waitTimeMillis = RESULT_TIMEOUT;
             final long startTimeMillis = SystemClock.uptimeMillis();
+
+            if (DEBUG)
+                Log.d(TAG, "Waiting for CVOX result with ID " + resultId + "...");
+
             while (true) {
+                // Fail if we received a callback from the future.
+                if (mResultId > resultId) {
+                    if (DEBUG)
+                        Log.w(TAG, "Aborted CVOX result");
+                    return false;
+                }
+
+                final long elapsedTimeMillis = (SystemClock.uptimeMillis() - startTimeMillis);
+
+                // Succeed if we received the callback we were expecting.
+                if (DEBUG)
+                    Log.w(TAG, "Check " + mResultId + " versus expected " + resultId);
+                if (mResultId == resultId) {
+                    if (DEBUG)
+                        Log.w(TAG, "Received CVOX result after " + elapsedTimeMillis + " ms");
+                    return true;
+                }
+
+                final long waitTimeMillis = (RESULT_TIMEOUT - elapsedTimeMillis);
+
+                // Fail if we've already exceeded the timeout.
+                if (waitTimeMillis <= 0) {
+                    if (DEBUG)
+                        Log.w(TAG, "Timed out while waiting for CVOX result");
+                    return false;
+                }
+
                 try {
-                    if (mResultId == resultId) {
-                        if (DEBUG)
-                            Log.w(TAG, "Received CVOX result");
-                        return true;
-                    }
-                    if (mResultId > resultId) {
-                        if (DEBUG)
-                            Log.w(TAG, "Obsolete CVOX result");
-                        return false;
-                    }
-                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    waitTimeMillis = RESULT_TIMEOUT - elapsedTimeMillis;
-                    if (waitTimeMillis <= 0) {
-                        if (DEBUG)
-                            Log.w(TAG, "Timed out while waiting for CVOX result");
-                        return false;
-                    }
+                    if (DEBUG)
+                        Log.w(TAG, "Start waiting...");
                     mResultLock.wait(waitTimeMillis);
                 } catch (InterruptedException ie) {
                     if (DEBUG)
                         Log.w(TAG, "Interrupted while waiting for CVOX result");
-                    /* ignore */
                 }
             }
         }
@@ -827,11 +877,11 @@ class AccessibilityInjector {
         @SuppressWarnings("unused")
         public void onResult(String id, String result) {
             if (DEBUG)
-                Log.w(TAG, "Saw CVOX result of '" + result + "'");
-            final long resultId;
+                Log.w(TAG, "Saw CVOX result of '" + result + "' for ID " + id);
+            final int resultId;
 
             try {
-                resultId = Long.parseLong(id);
+                resultId = Integer.parseInt(id);
             } catch (NumberFormatException e) {
                 return;
             }
@@ -840,6 +890,9 @@ class AccessibilityInjector {
                 if (resultId > mResultId) {
                     mResult = Boolean.parseBoolean(result);
                     mResultId = resultId;
+                } else {
+                    if (DEBUG)
+                        Log.w(TAG, "Result with ID " + resultId + " was stale vesus " + mResultId);
                 }
                 mResultLock.notifyAll();
             }
