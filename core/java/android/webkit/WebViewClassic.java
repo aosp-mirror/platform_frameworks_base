@@ -5185,7 +5185,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (cm.hasPrimaryClip()) {
             Point cursorPoint = new Point(contentToViewX(mSelectCursorBase.x),
                     contentToViewY(mSelectCursorBase.y));
-            Point cursorTop = calculateCaretTop();
+            Point cursorTop = calculateBaseCaretTop();
             cursorTop.set(contentToViewX(cursorTop.x),
                     contentToViewY(cursorTop.y));
 
@@ -5229,17 +5229,22 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return scale;
     }
 
+    private Point calculateBaseCaretTop() {
+        return calculateCaretTop(mSelectCursorBase, mSelectCursorBaseTextQuad);
+    }
+
+    private Point calculateDraggingCaretTop() {
+        return calculateCaretTop(mSelectDraggingCursor, mSelectDraggingTextQuad);
+    }
+
     /**
      * Assuming arbitrary shape of a quadralateral forming text bounds, this
      * calculates the top of a caret.
      */
-    private Point calculateCaretTop() {
-        float scale = scaleAlongSegment(mSelectCursorBase.x, mSelectCursorBase.y,
-                mSelectCursorBaseTextQuad.p4, mSelectCursorBaseTextQuad.p3);
-        int x = Math.round(scaleCoordinate(scale,
-                mSelectCursorBaseTextQuad.p1.x, mSelectCursorBaseTextQuad.p2.x));
-        int y = Math.round(scaleCoordinate(scale,
-                mSelectCursorBaseTextQuad.p1.y, mSelectCursorBaseTextQuad.p2.y));
+    private static Point calculateCaretTop(Point base, QuadF quad) {
+        float scale = scaleAlongSegment(base.x, base.y, quad.p4, quad.p3);
+        int x = Math.round(scaleCoordinate(scale, quad.p1.x, quad.p2.x));
+        int y = Math.round(scaleCoordinate(scale, quad.p1.y, quad.p2.y));
         return new Point(x, y);
     }
 
@@ -5269,12 +5274,20 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return true;
     }
 
-    private void updateWebkitSelection() {
+    private void updateWebkitSelection(boolean isSnapped) {
         int handleId = (mSelectDraggingCursor == mSelectCursorBase)
                 ? HANDLE_ID_BASE : HANDLE_ID_EXTENT;
+        int x = mSelectDraggingCursor.x;
+        int y = mSelectDraggingCursor.y;
+        if (isSnapped) {
+            // "center" the cursor in the snapping quad
+            Point top = calculateDraggingCaretTop();
+            x = Math.round((top.x + x) / 2);
+            y = Math.round((top.y + y) / 2);
+        }
         mWebViewCore.removeMessages(EventHub.SELECT_TEXT);
         mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SELECT_TEXT,
-                mSelectDraggingCursor.x, mSelectDraggingCursor.y, (Integer)handleId);
+                x, y, (Integer)handleId);
     }
 
     private void resetCaretTimer() {
@@ -5616,7 +5629,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 Math.max(0, mEditTextContentBounds.top - buffer),
                 mEditTextContentBounds.right + buffer,
                 mEditTextContentBounds.bottom + buffer);
-        Point caretTop = calculateCaretTop();
+        Point caretTop = calculateBaseCaretTop();
         if (visibleRect.width() < mEditTextContentBounds.width()) {
             // The whole edit won't fit in the width, so use the caret rect
             if (mSelectCursorBase.x < caretTop.x) {
@@ -5947,10 +5960,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         } else {
                             endScrollEdit();
                         }
+                        boolean snapped = false;
                         if (inCursorText || (mIsEditingText && !inEditBounds)) {
                             snapDraggingCursor();
+                            snapped = true;
                         }
-                        updateWebkitSelection();
+                        updateWebkitSelection(snapped);
                         if (!inCursorText && mIsEditingText && inEditBounds) {
                             // Visually snap even if we have moved the handle.
                             snapDraggingCursor();
@@ -6277,7 +6292,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     int oldX = mSelectDraggingCursor.x;
                     int oldY = mSelectDraggingCursor.y;
                     mSelectDraggingCursor.set(selectionX, selectionY);
-                    updateWebkitSelection();
+                    updateWebkitSelection(false);
                     scrollEditText(scrollX, scrollY);
                     mSelectDraggingCursor.set(oldX, oldY);
                 }
