@@ -943,7 +943,10 @@ class AppWidgetServiceImpl {
             ensureStateLoadedLocked();
             for (int i = 0; i < N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
-                updateAppWidgetInstanceLocked(id, views, true);
+                if (id.views != null) {
+                    // Only trigger a partial update for a widget if it has received a full update
+                    updateAppWidgetInstanceLocked(id, views, true);
+                }
             }
         }
     }
@@ -996,7 +999,7 @@ class AppWidgetServiceImpl {
         // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
         if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
 
-            if (!isPartialUpdate || id.views == null) {
+            if (!isPartialUpdate) {
                 // For a full update we replace the RemoteViews completely.
                 id.views = views;
             } else {
