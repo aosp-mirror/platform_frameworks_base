@@ -946,6 +946,9 @@ public class ActionBarView extends AbsActionBarView {
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
 
+            final int layoutDirection = getLayoutDirection();
+            lp.resolveLayoutDirection(layoutDirection);
+
             int horizontalMargin = 0;
             int verticalMargin = 0;
             if (ablp != null) {
@@ -1096,9 +1099,9 @@ public class ActionBarView extends AbsActionBarView {
             customView = mCustomNavView;
         }
         if (customView != null) {
-            final int resolvedLayoutDirection = getLayoutDirection();
             ViewGroup.LayoutParams lp = customView.getLayoutParams();
-            lp.resolveLayoutDirection(resolvedLayoutDirection);
+            final int layoutDirection = getLayoutDirection();
+            lp.resolveLayoutDirection(layoutDirection);
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
             final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
@@ -1139,7 +1142,7 @@ public class ActionBarView extends AbsActionBarView {
             }
 
             int xpos = 0;
-            switch (Gravity.getAbsoluteGravity(hgravity, resolvedLayoutDirection)) {
+            switch (Gravity.getAbsoluteGravity(hgravity, layoutDirection)) {
                 case Gravity.CENTER_HORIZONTAL:
                     xpos = ((mRight - mLeft) - navWidth) / 2;
                     break;
@@ -1336,11 +1339,15 @@ public class ActionBarView extends AbsActionBarView {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             measureChildWithMargins(mUpView, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            // measureChildWithMargins() has triggered layout params resolution, so no need
+            // to do it now
             final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
             mUpWidth = upLp.leftMargin + mUpView.getMeasuredWidth() + upLp.rightMargin;
             int width = mUpView.getVisibility() == GONE ? 0 : mUpWidth;
             int height = upLp.topMargin + mUpView.getMeasuredHeight() + upLp.bottomMargin;
             measureChildWithMargins(mIconView, widthMeasureSpec, width, heightMeasureSpec, 0);
+            // measureChildWithMargins() has triggered layout params resolution, so no need
+            // to do it now
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
             width += iconLp.leftMargin + mIconView.getMeasuredWidth() + iconLp.rightMargin;
             height = Math.max(height,

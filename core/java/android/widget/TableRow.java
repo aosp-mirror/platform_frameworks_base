@@ -192,7 +192,9 @@ public class TableRow extends LinearLayout {
             int widthMeasureSpec, int totalWidth,
             int heightMeasureSpec, int totalHeight) {
         if (mConstrainedColumnWidths != null) {
+            final int layoutDirection = getLayoutDirection();
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            lp.resolveLayoutDirection(layoutDirection);
 
             int measureMode = MeasureSpec.EXACTLY;
             int columnWidth = 0;
@@ -226,7 +228,6 @@ public class TableRow extends LinearLayout {
                 final int childWidth = child.getMeasuredWidth();
                 lp.mOffset[LayoutParams.LOCATION_NEXT] = columnWidth - childWidth;
 
-                final int layoutDirection = getLayoutDirection();
                 final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
@@ -292,11 +293,13 @@ public class TableRow extends LinearLayout {
         }
 
         final int[] columnWidths = mColumnWidths;
+        final int layoutDirection = getLayoutDirection();
 
         for (int i = 0; i < numColumns; i++) {
             final View child = getVirtualChildAt(i);
             if (child != null && child.getVisibility() != GONE) {
                 final LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+                layoutParams.resolveLayoutDirection(layoutDirection);
                 if (layoutParams.span == 1) {
                     int spec;
                     switch (layoutParams.width) {
