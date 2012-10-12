@@ -39,7 +39,8 @@
         android:orientation="horizontal"
         android:paddingLeft="@dimen/kg_widget_pager_horizontal_padding"
         android:paddingRight="@dimen/kg_widget_pager_horizontal_padding"
-        android:layout_marginTop="@dimen/kg_runway_lights_top_margin">
+        android:layout_marginTop="@dimen/kg_runway_lights_top_margin"
+        android:visibility="gone">
         <com.android.internal.policy.impl.keyguard.KeyguardGlowStripView
             android:id="@+id/left_strip"
             android:paddingTop="@dimen/kg_runway_lights_vertical_padding"

@@ -45,8 +45,7 @@
         android:paddingBottom="@dimen/keyguard_security_view_margin"
         android:layout_gravity="center">
 
-        <!-- SelectorView is always used, so add it here. The rest are loaded dynamically -->
-        <include layout="@layout/keyguard_selector_view"/>
+
 
     </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
 

@@ -102,7 +102,7 @@ public class KeyguardUpdateMonitor {
     private int mFailedAttempts = 0;
     private int mFailedBiometricUnlockAttempts = 0;
 
-    private boolean mBiometricUnlockUserSwitched;
+    private boolean mAlternateUnlockEnabled;
 
     private boolean mClockVisible;
 
@@ -195,6 +195,7 @@ public class KeyguardUpdateMonitor {
             }
         }
     };
+    private boolean mIsFirstBoot;
 
     /**
      * When we receive a
@@ -406,7 +407,7 @@ public class KeyguardUpdateMonitor {
                 cb.onUserSwitched(userId);
             }
         }
-        mBiometricUnlockUserSwitched = true;
+        setAlternateUnlockEnabled(false);
         try {
             reply.sendResult(null);
         } catch (RemoteException e) {
@@ -724,12 +725,12 @@ public class KeyguardUpdateMonitor {
         return mFailedBiometricUnlockAttempts >= FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
     }
 
-    public boolean didBiometricUnlockUserSwitch() {
-        return mBiometricUnlockUserSwitched;
+    public boolean isAlternateUnlockEnabled() {
+        return mAlternateUnlockEnabled;
     }
 
-    public void clearBiometricUnlockUserSwitched() {
-        mBiometricUnlockUserSwitched = false;
+    public void setAlternateUnlockEnabled(boolean enabled) {
+        mAlternateUnlockEnabled = enabled;
     }
 
     public boolean isSimLocked() {
@@ -751,5 +752,13 @@ public class KeyguardUpdateMonitor {
         return (simState == IccCardConstants.State.PIN_REQUIRED
                 || simState == IccCardConstants.State.PUK_REQUIRED
                 || simState == IccCardConstants.State.PERM_DISABLED);
+    }
+
+    public void setIsFirstBoot(boolean b) {
+        mIsFirstBoot = b;
+    }
+    
+    public boolean getIsFirstBoot() {
+        return mIsFirstBoot;
     }
 }

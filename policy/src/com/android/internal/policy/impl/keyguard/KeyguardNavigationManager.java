@@ -21,23 +21,13 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 
-public class KeyguardNavigationManager {
+public class KeyguardNavigationManager implements SecurityMessageDisplay {
 
     private TextView mMessageArea;
-    private KeyguardSecurityView mKeyguardSecurityView;
-    private View mClickArea;
 
-    public KeyguardNavigationManager(KeyguardSecurityView view) {
-        mKeyguardSecurityView = view;
-        mMessageArea = (TextView) ((View) view).findViewById(R.id.keyguard_message_area);
+    public KeyguardNavigationManager(TextView messageArea) {
+        mMessageArea = messageArea;
         mMessageArea.setSelected(true); // Make marquee work
-
-        mClickArea = ((View) view).findViewById(R.id.keyguard_click_area);
-        mClickArea.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mKeyguardSecurityView.getCallback().dismiss(false);
-            }
-        });
     }
 
     public void setMessage(CharSequence msg) {

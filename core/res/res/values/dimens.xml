@@ -255,13 +255,13 @@
     <dimen name="kg_widget_view_height">0dp</dimen>
 
     <!-- Size of the clock font in keyguard's status view -->
-    <dimen name="kg_status_clock_font_size">94dp</dimen>
+    <dimen name="kg_status_clock_font_size">75dp</dimen>
 
     <!-- Size of the date font in keyguard's status view  -->
-    <dimen name="kg_status_date_font_size">17dp</dimen>
+    <dimen name="kg_status_date_font_size">15dp</dimen>
 
     <!-- Size of the generic status lines keyguard's status view  -->
-    <dimen name="kg_status_line_font_size">14sp</dimen>
+    <dimen name="kg_status_line_font_size">13dp</dimen>
 
     <!-- Size of margin on the right of keyguard's status view -->
     <dimen name="kg_status_line_font_right_margin">16dp</dimen>
@@ -277,10 +277,6 @@
 
     <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->
     <dimen name="kg_pin_key_height">60dp</dimen>
-
-    <!-- Shift emergency button from the left edge by this amount.  Used by landscape layout on
-         phones -->
-    <dimen name="kg_emergency_button_shift">0dp</dimen>
 
     <!-- Space reserved at the bottom of secure views (pin/pattern/password/SIM pin/SIM puk) -->
     <dimen name="kg_secure_padding_height">46dp</dimen>
@@ -308,5 +304,5 @@
     <dimen name="accessibility_touch_slop">80dip</dimen>
 
     <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">0dp</dimen>
+    <dimen name="keyguard_security_view_margin">8dp</dimen>
 </resources>

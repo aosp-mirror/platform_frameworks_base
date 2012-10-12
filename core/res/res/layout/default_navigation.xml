@@ -16,6 +16,20 @@
 ** limitations under the License.
 */
 -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <include layout="@layout/empty_navigation" />
-</merge>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_click_area"
+    android:gravity="center">
+
+    <!-- message area for security screen -->
+    <TextView
+        android:id="@+id/keyguard_message_area"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:ellipsize="marquee"
+        android:layout_marginEnd="4dip"
+        android:layout_marginStart="4dip"
+        android:textSize="22dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+</LinearLayout>
