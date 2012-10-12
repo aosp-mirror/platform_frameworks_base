@@ -1197,8 +1197,8 @@
     <!-- A coordinate in the Y dimension. -->
     <attr name="y" format="dimension" />
 
-    <!-- Specifies how to place the content of an object, both
-         on the x- and y-axis, within the object itself. -->
+    <!-- Specifies how an object should position its content, on both the X and Y axes,
+         within its own bounds.  -->
     <attr name="gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -1257,8 +1257,8 @@
     <!-- Reference to an array resource that will populate a list/adapter. -->
     <attr name="entries" format="reference" />
 
-    <!-- Standard gravity constant that a child can supply to its parent.
-         Defines how to place the view, both its x- and y-axis, within its parent view group. -->
+    <!-- Standard gravity constant that a child supplies to its parent.
+         Defines how the child view should be positioned, on both the X and Y axes, within its enclosing layout. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
