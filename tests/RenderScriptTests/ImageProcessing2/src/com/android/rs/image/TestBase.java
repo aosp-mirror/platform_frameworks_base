@@ -31,13 +31,17 @@ import android.widget.TextView;
 import android.view.View;
 import android.util.Log;
 import java.lang.Math;
+import android.widget.Spinner;
 
 public class TestBase  {
     protected final String TAG = "Img";
 
     protected RenderScript mRS;
     protected Allocation mInPixelsAllocation;
+    protected Allocation mInPixelsAllocation2;
     protected Allocation mOutPixelsAllocation;
+
+    protected ImageProcessingActivity2 act;
 
     // Override to use UI elements
     public void onBar1Changed(int progress) {
@@ -79,9 +83,18 @@ public class TestBase  {
         return false;
     }
 
-    public final void createBaseTest(ImageProcessingActivity2 act, Bitmap b) {
+    public boolean onSpinner1Setup(Spinner s) {
+        s.setVisibility(View.INVISIBLE);
+        return false;
+    }
+
+    public final void createBaseTest(ImageProcessingActivity2 ipact, Bitmap b, Bitmap b2) {
+        act = ipact;
         mRS = RenderScript.create(act);
         mInPixelsAllocation = Allocation.createFromBitmap(mRS, b,
+                                                          Allocation.MipmapControl.MIPMAP_NONE,
+                                                          Allocation.USAGE_SCRIPT);
+        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2,
                                                           Allocation.MipmapControl.MIPMAP_NONE,
                                                           Allocation.USAGE_SCRIPT);
         mOutPixelsAllocation = Allocation.createFromBitmap(mRS, b,
@@ -101,6 +114,10 @@ public class TestBase  {
 
     public void finish() {
         mRS.finish();
+    }
+
+    public void destroy() {
+        mRS.destroy();
     }
 
     public void updateBitmap(Bitmap b) {
