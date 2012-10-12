@@ -309,8 +309,9 @@ public class KeyguardViewMediator {
                 options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER, true);
                 options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE, true);
                 resetStateLocked(options);
-
                 adjustStatusBarLocked();
+                // Disable face unlock when the user switches.
+                KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
             }
         }
 
@@ -519,6 +520,11 @@ public class KeyguardViewMediator {
             if (DEBUG) Log.d(TAG, "onSystemReady");
             mSystemReady = true;
             mUpdateMonitor.registerCallback(mUpdateCallback);
+            
+            // Disable alternate unlock right after boot until things have settled.
+            mUpdateMonitor.setAlternateUnlockEnabled(false);
+            mUpdateMonitor.setIsFirstBoot(true);
+            
             doKeyguardLocked();
         }
         // Most services aren't available until the system reaches the ready state, so we

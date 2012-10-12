@@ -172,8 +172,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         super.onFinishInflate();
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
-        mFadeView = (View) findViewById(R.id.keyguard_selector_fade_container);
         updateTargets();
+    }
+
+    public void setCarrierArea(View carrierArea) {
+        mFadeView = carrierArea;
     }
 
     public boolean isTargetPresent(int resId) {
@@ -324,4 +327,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         return mCallback;
     }
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+    }
 }

@@ -21,16 +21,17 @@
 <com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_status_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal">
 
     <com.android.internal.policy.impl.keyguard.KeyguardStatusView
+        android:id="@+id/keyguard_status_view_face_palm"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|top"
-        android:contentDescription="@string/keyguard_accessibility_status">
+        android:contentDescription="@*android:string/keyguard_accessibility_status">
 
         <com.android.internal.policy.impl.keyguard.ClockView
             android:id="@+id/clock_view"
@@ -38,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/kg_clock_top_margin"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:layout_gravity="end">
+            android:layout_gravity="right">
 
             <TextView android:id="@+id/clock_text"
                 android:layout_width="wrap_content"
@@ -53,54 +54,7 @@
 
         </com.android.internal.policy.impl.keyguard.ClockView>
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="-16dp"
-            android:layout_marginBottom="24dp"
-            android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/kg_status_date_font_size"
-            />
-
-        <TextView
-            android:id="@+id/alarm_status"
-            android:layout_gravity="end"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/kg_status_line_font_size"
-            android:drawablePadding="4dip"
-            />
-
-        <TextView
-            android:id="@+id/owner_info"
-            android:layout_gravity="end"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/kg_status_line_font_size"
-            />
-
-        <TextView
-            android:id="@+id/status1"
-            android:layout_gravity="end"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/kg_status_line_font_size"
-            />
+        <include layout="@layout/keyguard_status_area" />
 
     </com.android.internal.policy.impl.keyguard.KeyguardStatusView>
-
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>

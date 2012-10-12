@@ -24,6 +24,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:layout_gravity="center_horizontal"
     android:layout_alignParentBottom="true">
 
     <com.android.internal.policy.impl.keyguard.CarrierText
@@ -33,7 +34,6 @@
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
-        android:layout_marginLeft="@dimen/kg_emergency_button_shift"
         android:textColor="?android:attr/textColorSecondary"/>
 
     <com.android.internal.policy.impl.keyguard.EmergencyButton
@@ -46,7 +46,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
         android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginLeft="@dimen/kg_emergency_button_shift"
         android:drawablePadding="8dip" />
 
 </LinearLayout>

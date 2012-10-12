@@ -28,15 +28,9 @@
     android:clipToPadding="false"
     android:orientation="vertical">
 
-    <include layout="@layout/keyguard_widget_region"
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="0.45" />
-
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="0dip"
-        android:layout_weight="0.55"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:clipChildren="false"
         android:clipToPadding="false"
@@ -51,7 +45,6 @@
             android:orientation="vertical"
             android:layout_gravity="bottom|center_horizontal"
             android:gravity="center_horizontal" />
-
     </FrameLayout>
 
 </com.android.internal.policy.impl.keyguard.KeyguardSelectorView>

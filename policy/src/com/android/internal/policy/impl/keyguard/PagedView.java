@@ -90,6 +90,8 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     protected boolean mFirstLayout = true;
 
     protected int mCurrentPage;
+    protected int mChildCountOnLastMeasure;
+
     protected int mNextPage = INVALID_PAGE;
     protected int mMaxScrollX;
     protected Scroller mScroller;
@@ -498,6 +500,11 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
         // ensure that the cache is filled with good values.
         invalidateCachedOffsets();
 
+        if (mChildCountOnLastMeasure != getChildCount()) {
+            setCurrentPage(mCurrentPage);
+        }
+        mChildCountOnLastMeasure = getChildCount();
+
         if (childCount > 0) {
             if (DEBUG) Log.d(TAG, "getRelativeChildOffset(): " + getMeasuredWidth() + ", "
                     + getChildWidth(0));
@@ -595,10 +602,7 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
 
     @Override
     public void onChildViewRemoved(View parent, View child) {
-        invalidate();
-        invalidateCachedOffsets();
-        // This prevents a crash when a child is removed that was the current page.
-        mCurrentPage = Math.min(mCurrentPage, getChildCount() - 1);
+        // TODO Auto-generated method stub
     }
 
     protected void invalidateCachedOffsets() {
@@ -621,6 +625,8 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     }
 
     protected int getChildOffset(int index) {
+        if (index < 0 || index > getChildCount() - 1) return 0;
+
         int[] childOffsets = Float.compare(mLayoutScale, 1f) == 0 ?
                 mChildOffsets : mChildOffsetsWithLayoutScale;
 
@@ -642,6 +648,8 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     }
 
     protected int getRelativeChildOffset(int index) {
+        if (index < 0 || index > getChildCount() - 1) return 0;
+
         if (mChildRelativeOffsets != null && mChildRelativeOffsets[index] != -1) {
             return mChildRelativeOffsets[index];
         } else {
