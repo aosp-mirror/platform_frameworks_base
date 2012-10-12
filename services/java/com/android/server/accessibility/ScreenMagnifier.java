@@ -997,6 +997,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                                 // TODO: Are these all the windows we want to make
                                 //       visible when they appear on the screen?
                                 //       Do we need to take some of them out?
+                                case WindowManager.LayoutParams.TYPE_APPLICATION:
                                 case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                                 case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
                                 case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
