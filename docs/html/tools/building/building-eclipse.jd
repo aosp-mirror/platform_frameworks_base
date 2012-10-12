@@ -84,8 +84,18 @@ parent.link=index.html
     <code>android:debuggable</code> attribute of the <code>&lt;application&gt;</code>
     element to <code>true</code>. As of ADT 8.0, this is done by default when you build in debug mode.</li>
 
-    <li>Enable USB Debugging on your device. You can find the setting on most Android devices by
-    going to <strong>Settings > Applications > Development > USB debugging</strong>.</li>
+    <li>Enable <strong>USB debugging</strong> on your device.
+      <ul>
+        <li>On most devices running Android 3.2 or older, you can find the option under
+          <strong>Settings > Applications > Development</strong>.</li>
+        <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
+          <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
+          options</strong> is hidden by default. To make it available, go
+          to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
+          seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
+        </li>
+      </ul>
+    </li>
 
     <li>Ensure that your development computer can detect your device when connected via USB</li>
   </ul>
