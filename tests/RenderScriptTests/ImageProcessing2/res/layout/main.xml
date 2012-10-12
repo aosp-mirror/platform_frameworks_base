@@ -54,6 +54,10 @@
                 android:id="@+id/filterselection"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"/>
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/slider1Text"
                 android:layout_width="match_parent"
@@ -124,6 +128,11 @@
                 android:layout_marginRight="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/benchmark_all"
+                    android:onClick="benchmark_all"/>
             </LinearLayout>
     </ScrollView>
 </LinearLayout>
