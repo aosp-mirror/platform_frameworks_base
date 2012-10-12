@@ -78,6 +78,7 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
                 });
 
         mBrightness = new BrightnessController(context,
+                (ImageView)findViewById(R.id.brightness_icon),
                 (ToggleSlider)findViewById(R.id.brightness));
         mDoNotDisturb = new DoNotDisturbController(context,
                 (CompoundButton)findViewById(R.id.do_not_disturb_checkbox));
