@@ -2132,6 +2132,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void destroyJava() {
         mCallbackProxy.blockMessages();
+        if (mAccessibilityInjector != null) {
+            mAccessibilityInjector.destroy();
+            mAccessibilityInjector = null;
+        }
         if (mWebViewCore != null) {
             // Tell WebViewCore to destroy itself
             synchronized (this) {
@@ -3967,8 +3971,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // null, and that will be the case
         mWebView.setCertificate(null);
 
-        // reset the flag since we set to true in if need after
-        // loading is see onPageFinished(Url)
         if (isAccessibilityInjectionEnabled()) {
             getAccessibilityInjector().onPageStarted(url);
         }
@@ -5397,7 +5399,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mWebView.hasWindowFocus()) setActive(true);
 
         if (isAccessibilityInjectionEnabled()) {
-            getAccessibilityInjector().addAccessibilityApisIfNecessary();
+            getAccessibilityInjector().toggleAccessibilityFeedback(true);
         }
 
         updateHwAccelerated();
@@ -5410,11 +5412,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mWebView.hasWindowFocus()) setActive(false);
 
         if (isAccessibilityInjectionEnabled()) {
-            getAccessibilityInjector().removeAccessibilityApisIfNecessary();
-        } else {
-            // Ensure the injector is cleared if we're detaching from the window
-            // and accessibility is disabled.
-            mAccessibilityInjector = null;
+            getAccessibilityInjector().toggleAccessibilityFeedback(false);
         }
 
         updateHwAccelerated();
