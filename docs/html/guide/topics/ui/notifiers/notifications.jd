@@ -4,26 +4,43 @@ page.title=Notifications
 <div id="qv-wrapper">
 <div id="qv">
 <h2>In this document</h2>
+<ol>
+  <li><a href="#NotificationUI">Notification Display Elements</a>
     <ol>
-        <li>
-            <a href="#NotificationUI">Notification Display Elements</a>
-        </li>
-        <li>
-        <a href="#CreateNotification">Creating a Notification</a>
-        </li>
-        <li>
-            <a href="#Managing">Managing Notifications</a>
-        </li>
-        <li>
-            <a href="#NotificationResponse">Preserving Navigation when Starting an Activity</a>
-        </li>
-        <li>
-            <a href="#Progress">Displaying Progress in a Notification</a>
-        </li>
-        <li>
-            <a href="#CustomNotification">Custom Notification Layouts</a>
-        </li>
+      <li><a href="#NormalNotify">Normal view</a></li>
+      <li><a href="#BigNotify">Big view</a></li>
     </ol>
+  </li>
+  <li><a href="#CreateNotification">Creating a Notification</a>
+    <ol>
+      <li><a href="#Required">Required notification contents</a></li>
+      <li><a href="#Optional">Optional notification contents and settings</a></li>
+      <li><a href="#Actions">Notification actions</a></li>
+      <li><a href="#SimpleNotification">Creating a simple notification</a></li>
+      <li><a href="#ApplyStyle">Applying a big view style to a notification</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">Managing Notifications</a>
+    <ol>
+      <li><a href="#Updating">Updating notifications</a></li>
+      <li><a href="#Removing">Removing notifications</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">Preserving Navigation when Starting an Activity</a>
+    <ol>
+      <li><a href="#DirectEntry">Setting up a regular activity PendingIntent</a></li>
+      <li><a href="#ExtendedNotification">Setting up a special activity PendingIntent</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">Displaying Progress in a Notification</a>
+    <ol>
+      <li><a href="#FixedProgress">Displaying a fixed-duration progress indicator</a></li>
+      <li><a href="#ActivityIndicator">Displaying a continuing activity indicator</a></li>
+    </ol>
+  </li>
+  <li><a href="#CustomNotification">Custom Notification Layouts</a></li>
+</ol>
+
     <h2>Key classes</h2>
     <ol>
         <li>{@link android.app.NotificationManager}</li>
@@ -54,13 +71,12 @@ page.title=Notifications
 <img
     id="figure1"
     src="{@docRoot}images/ui/notifications/iconic_notification.png"
-    height="32"
-    alt="" />
+    height="120" alt="" />
 <p class="img-caption">
     <strong>Figure 1.</strong> Notifications in the notification area.
 </p>
 <img id="figure2" src="{@docRoot}images/ui/notifications/normal_notification.png"
-    height="240" alt="" />
+     height="293" alt="" />
 <p class="img-caption">
     <strong>Figure 2.</strong> Notifications in the notification drawer.
 </p>
@@ -98,7 +114,7 @@ page.title=Notifications
 <img
     src="{@docRoot}images/ui/notifications/normal_notification_callouts.png"
     alt=""
-    height="204"
+    height="153"
     id="figure3" />
 <p class="img-caption">
   <strong>Figure 3.</strong> Notification in normal view.

@@ -1,17 +1,8 @@
-page.title=Toast Notifications
-parent.title=Notifications
-parent.link=index.html
+page.title=Toasts
 @jd:body
 
 <div id="qv-wrapper">
-  <div id="qv">
-    <h2>Quickview</h2>
-    <ol>
-      <li>A toast is a message that appears on the surface of the screen for a moment, but it
-does not take focus (or pause the current activity), so it cannot accept user input</li>
-      <li>You can customize the toast layout to include images</li>
-    </ol>
-    
+  <div id="qv">    
     <h2>In this document</h2>
     <ol>
       <li><a href="#Basics">The Basics</a></li>
@@ -26,22 +17,17 @@ does not take focus (or pause the current activity), so it cannot accept user in
   </div>
 </div>
 
-<p>A toast notification is a message that pops up on the surface of the window.
-It only fills the amount of space required for the message and the user's current
-activity remains visible and interactive. The notification automatically fades in and 
-out, and does not accept interaction events.</p>
+<p>A toast provides simple feedback about an operation in a small popup.
+It only fills the amount of space required for the message and the current
+activity remains visible and interactive. 
+For example, navigating away from an email before you send it triggers a 
+"Draft saved" toast to let you know that you can continue editing later. 
+Toasts automatically disappear after a timeout.</p>
 
-<p>The screenshot below shows an example toast notification from the Alarm application.
-Once an alarm is turned on, a toast is displayed to assure you that the 
-alarm was set.</p>
 <img src="{@docRoot}images/toast.png" alt="" />
 
-<p>A toast can be created and displayed from an {@link android.app.Activity} or 
-{@link android.app.Service}. If you create a toast notification from a Service, it
-appears in front of the Activity currently in focus.</p>
-
-<p>If user response to the notification is required, consider using a 
-<a href="notifications.html">Status Bar Notification</a>.</p>
+<p>If user response to a status message is required, consider instead using a 
+<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notification</a>.</p>
 
 
 <h2 id="Basics">The Basics</h2>
@@ -90,8 +76,6 @@ To nudge it down, increase the value of the last parameter.
 
 <h2 id="CustomToastView">Creating a Custom Toast View</h2>
 
-<img src="{@docRoot}images/custom_toast.png" alt="" style="float:right" />
-
 <p>If a simple text message isn't enough, you can create a customized layout for your
 toast notification. To create a custom layout, define a View layout,
 in XML or in your application code, and pass the root {@link android.view.View} object
@@ -105,17 +89,17 @@ with the following XML (saved as <em>toast_layout.xml</em>):</p>
               android:orientation="horizontal"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:padding="10dp"
+              android:padding="8dp"
               android:background="#DAAA"
               >
-    &lt;ImageView android:id="@+id/image"
+    &lt;ImageView android:src="@drawable/droid"
                android:layout_width="wrap_content"
-               android:layout_height="fill_parent"
-               android:layout_marginRight="10dp"
+               android:layout_height="wrap_content"
+               android:layout_marginRight="8dp"
                />
     &lt;TextView android:id="@+id/text"
               android:layout_width="wrap_content"
-              android:layout_height="fill_parent"
+              android:layout_height="wrap_content"
               android:textColor="#FFF"
               />
 &lt;/LinearLayout>
@@ -126,13 +110,11 @@ ID to inflate the layout from the XML, as shown here:</p>
 
 <pre>
 LayoutInflater inflater = getLayoutInflater();
-View layout = inflater.inflate(R.layout.toast_layout,
+View layout = inflater.inflate(R.layout.custom_toast,
                                (ViewGroup) findViewById(R.id.toast_layout_root));
 
-ImageView image = (ImageView) layout.findViewById(R.id.image);
-image.setImageResource(R.drawable.android);
 TextView text = (TextView) layout.findViewById(R.id.text);
-text.setText("Hello! This is a custom toast!");
+text.setText("This is a custom toast");
 
 Toast toast = new Toast(getApplicationContext());
 toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
