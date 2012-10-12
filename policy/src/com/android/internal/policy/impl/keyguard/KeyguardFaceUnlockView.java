@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.internal.R;
@@ -29,11 +30,13 @@ import com.android.internal.widget.LockPatternUtils;
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
     private static final String TAG = "KeyguardFaceUnlockView";
+    private static final boolean DEBUG = false;
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;
     private KeyguardNavigationManager mNavigationManager;
     private View mFaceUnlockAreaView;
+    private ImageButton mCancelButton;
 
     public KeyguardFaceUnlockView(Context context) {
         this(context, null);
@@ -70,25 +73,25 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
 
     @Override
     public void onDetachedFromWindow() {
+        if (DEBUG) Log.d(TAG, "onDetachedFromWindow()");
         if (mBiometricUnlock != null) {
-            mBiometricUnlock.hide();
-            mBiometricUnlock.stop();
+            mBiometricUnlock.stopAndShowBackup();
         }
     }
 
     @Override
     public void onPause() {
+        if (DEBUG) Log.d(TAG, "onPause()");
         if (mBiometricUnlock != null) {
-            mBiometricUnlock.hide();
-            mBiometricUnlock.stop();
+            mBiometricUnlock.stopAndShowBackup();
         }
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateCallback);
     }
 
     @Override
     public void onResume() {
+        if (DEBUG) Log.d(TAG, "onResume()");
         maybeStartBiometricUnlock();
-        mBiometricUnlock.show(0);
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
     }
 
@@ -112,6 +115,14 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         mFaceUnlockAreaView = findViewById(R.id.face_unlock_area_view);
         if (mFaceUnlockAreaView != null) {
             mBiometricUnlock = new FaceUnlock(mContext);
+
+            mCancelButton = (ImageButton) findViewById(R.id.face_unlock_cancel_button);
+            mCancelButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mBiometricUnlock.stopAndShowBackup();
+                }
+            });
         } else {
             Log.w(TAG, "Couldn't find biometric unlock view");
         }
@@ -123,17 +134,20 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
      * unlock area.
      */
     private void maybeStartBiometricUnlock() {
+        if (DEBUG) Log.d(TAG, "maybeStartBiometricUnlock()");
         if (mBiometricUnlock != null) {
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             final boolean backupIsTimedOut = (
                     monitor.getFailedUnlockAttempts() >=
                     LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
-            if (monitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+            // TODO: These max attempts checks are also checked in KeyguardSecurityModel so they
+            // might not be necessary here anymore.
+            if (monitor.getPhoneState() != TelephonyManager.CALL_STATE_RINGING
                     && !monitor.getMaxBiometricUnlockAttemptsReached()
                     && !backupIsTimedOut) {
                 mBiometricUnlock.start();
             } else {
-                mBiometricUnlock.hide();
+                mBiometricUnlock.stopAndShowBackup();
             }
         }
     }
@@ -142,14 +156,15 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         // We need to stop the biometric unlock when a phone call comes in
         @Override
         public void onPhoneStateChanged(int phoneState) {
+            if (DEBUG) Log.d(TAG, "onPhoneStateChanged(" + phoneState + ")");
             if (phoneState == TelephonyManager.CALL_STATE_RINGING) {
-                mBiometricUnlock.stop();
-                mBiometricUnlock.hide();
+                mBiometricUnlock.stopAndShowBackup();
             }
         }
 
         @Override
         public void onUserSwitched(int userId) {
+            if (DEBUG) Log.d(TAG, "onUserSwitched(" + userId + ")");
             if (mBiometricUnlock != null) {
                 mBiometricUnlock.stop();
             }
