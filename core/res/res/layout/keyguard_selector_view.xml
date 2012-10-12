@@ -24,6 +24,8 @@
     android:id="@+id/keyguard_selector_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:orientation="vertical">
 
     <include layout="@layout/keyguard_widget_region"
@@ -31,43 +33,26 @@
         android:layout_height="0dip"
         android:layout_weight="0.45" />
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="0dip"
         android:layout_weight="0.55"
         android:layout_gravity="center"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:gravity="center">
 
-        <com.android.internal.widget.multiwaveview.GlowPadView
-            android:id="@+id/glow_pad_view"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:gravity="@integer/kg_selector_gravity"
-
-            prvandroid:targetDrawables="@*android:array/lockscreen_targets_with_camera"
-            prvandroid:targetDescriptions="@*android:array/lockscreen_target_descriptions_with_camera"
-            prvandroid:directionDescriptions="@*android:array/lockscreen_direction_descriptions"
-            prvandroid:handleDrawable="@*android:drawable/ic_lockscreen_handle"
-            prvandroid:outerRingDrawable="@*android:drawable/ic_lockscreen_outerring"
-            prvandroid:outerRadius="@*android:dimen/glowpadview_target_placement_radius"
-            prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"
-            prvandroid:snapMargin="@*android:dimen/glowpadview_snap_margin"
-            prvandroid:feedbackCount="1"
-            prvandroid:vibrationDuration="20"
-            prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
-            prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"/>
+        <include layout="@layout/keyguard_glow_pad_container" />
 
         <include layout="@layout/keyguard_emergency_carrier_area"
             android:id="@+id/keyguard_selector_fade_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_alignParentBottom="true" />
+            android:layout_gravity="bottom|center_horizontal"
+            android:gravity="center_horizontal" />
 
-    </RelativeLayout>
+    </FrameLayout>
 
 </com.android.internal.policy.impl.keyguard.KeyguardSelectorView>
 

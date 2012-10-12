@@ -22,9 +22,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.PagedView.PageSwitchListener;
-
-public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchListener {
+public class KeyguardWidgetRegion extends LinearLayout implements PagedView.PageSwitchListener {
     KeyguardGlowStripView mLeftStrip;
     KeyguardGlowStripView mRightStrip;
     KeyguardWidgetPager mPager;
@@ -63,10 +61,10 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
     }
 
     public void showPagingFeedback() {
-        if (mPage < mPager.getPageCount() - 1) {
+        if (true || (mPage < mPager.getPageCount() - 1)) {
             mLeftStrip.makeEmGo();
         }
-        if (mPage > 0) {
+        if (true || (mPage > 0)) {
             mRightStrip.makeEmGo();
         }
     }
@@ -76,8 +74,7 @@ public class KeyguardWidgetRegion extends LinearLayout implements PageSwitchList
         boolean showingStatusWidget = false;
         if (newPage instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) newPage;
-            View view = vg.getChildAt(0);
-            if (view instanceof KeyguardStatusView) {
+            if (vg.getChildAt(0) instanceof KeyguardStatusView) {
                 showingStatusWidget = true;
             }
         }

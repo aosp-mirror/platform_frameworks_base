@@ -42,6 +42,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,7 +59,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
     private static final int MSG_SET_GENERATION_ID = 104;
     private static final int MAXDIM = 512;
     private static final int DISPLAY_TIMEOUT_MS = 5000; // 5s
-    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG = false;
     protected static final String TAG = "TransportControlView";
 
     private ImageView mAlbumArt;
