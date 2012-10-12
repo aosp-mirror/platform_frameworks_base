@@ -1213,6 +1213,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowState curTarget = mInputMethodTarget;
         if (curTarget != null && w != null
                 && curTarget.isDisplayedLw()
+                && curTarget.isClosing()
                 && (curTarget.mWinAnimator.mAnimLayer > w.mWinAnimator.mAnimLayer)) {
             if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Current target higher, not changing");
             return windows.indexOf(curTarget) + 1;
