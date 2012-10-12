@@ -34,13 +34,27 @@ import android.view.View;
 import android.util.Log;
 import java.lang.Math;
 
+import android.os.Environment;
+import android.app.Instrumentation;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class ImageProcessingActivity2 extends Activity
                                        implements SeekBar.OnSeekBarChangeListener {
     private final String TAG = "Img";
+    private final String RESULT_FILE = "image_processing_result.csv";
+
     Bitmap mBitmapIn;
+    Bitmap mBitmapIn2;
     Bitmap mBitmapOut;
     String mTestNames[];
 
+    private Spinner mSpinner;
     private SeekBar mBar1;
     private SeekBar mBar2;
     private SeekBar mBar3;
@@ -64,6 +78,10 @@ public class ImageProcessingActivity2 extends Activity
 
     private TestBase mTest;
 
+    public void updateDisplay() {
+            mTest.updateBitmap(mBitmapOut);
+            mDisplayView.invalidate();
+    }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
@@ -81,8 +99,7 @@ public class ImageProcessingActivity2 extends Activity
             }
 
             mTest.runTest();
-            mTest.updateBitmap(mBitmapOut);
-            mDisplayView.invalidate();
+            updateDisplay();
         }
     }
 
@@ -93,6 +110,9 @@ public class ImageProcessingActivity2 extends Activity
     }
 
     void setupBars() {
+        mSpinner.setVisibility(View.VISIBLE);
+        mTest.onSpinner1Setup(mSpinner);
+
         mBar1.setVisibility(View.VISIBLE);
         mText1.setVisibility(View.VISIBLE);
         mTest.onBar1Setup(mBar1, mText1);
@@ -116,6 +136,9 @@ public class ImageProcessingActivity2 extends Activity
 
 
     void changeTest(int testID) {
+        if (mTest != null) {
+            mTest.destroy();
+        }
         switch(testID) {
         case 0:
             mTest = new LevelsV4(false, false);
@@ -130,58 +153,122 @@ public class ImageProcessingActivity2 extends Activity
             mTest = new LevelsV4(true, true);
             break;
         case 4:
-            mTest = new Blur25();
+            mTest = new Blur25(false);
             break;
         case 5:
-            mTest = new Greyscale();
+            mTest = new Blur25(true);
             break;
         case 6:
-            mTest = new Grain();
+            mTest = new Greyscale();
             break;
         case 7:
-            mTest = new Fisheye(false);
+            mTest = new Grain();
             break;
         case 8:
-            mTest = new Fisheye(true);
+            mTest = new Fisheye(false, false);
             break;
         case 9:
-            mTest = new Vignette(false);
+            mTest = new Fisheye(false, true);
             break;
         case 10:
-            mTest = new Vignette(true);
+            mTest = new Fisheye(true, false);
             break;
         case 11:
-            mTest = new GroupTest(false);
+            mTest = new Fisheye(true, true);
             break;
         case 12:
+            mTest = new Vignette(false, false);
+            break;
+        case 13:
+            mTest = new Vignette(false, true);
+            break;
+        case 14:
+            mTest = new Vignette(true, false);
+            break;
+        case 15:
+            mTest = new Vignette(true, true);
+            break;
+        case 16:
+            mTest = new GroupTest(false);
+            break;
+        case 17:
             mTest = new GroupTest(true);
+            break;
+        case 18:
+            mTest = new Convolve3x3(false);
+            break;
+        case 19:
+            mTest = new Convolve3x3(true);
+            break;
+        case 20:
+            mTest = new ColorMatrix(false, false);
+            break;
+        case 21:
+            mTest = new ColorMatrix(true, false);
+            break;
+        case 22:
+            mTest = new ColorMatrix(true, true);
+            break;
+        case 23:
+            mTest = new Copy();
+            break;
+        case 24:
+            mTest = new CrossProcess();
+            break;
+        case 25:
+            mTest = new Convolve5x5(false);
+            break;
+        case 26:
+            mTest = new Convolve5x5(true);
+            break;
+        case 27:
+            mTest = new Mandelbrot();
+            break;
+        case 28:
+            mTest = new Blend();
             break;
         }
 
-        mTest.createBaseTest(this, mBitmapIn);
+        mTest.createBaseTest(this, mBitmapIn, mBitmapIn2);
         setupBars();
 
         mTest.runTest();
-        mTest.updateBitmap(mBitmapOut);
-        mDisplayView.invalidate();
+        updateDisplay();
         mBenchmarkResult.setText("Result: not run");
     }
 
     void setupTests() {
-        mTestNames = new String[13];
+        mTestNames = new String[29];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
         mTestNames[3] = "Levels Vec4 Full";
         mTestNames[4] = "Blur radius 25";
-        mTestNames[5] = "Greyscale";
-        mTestNames[6] = "Grain";
-        mTestNames[7] = "Fisheye Full";
-        mTestNames[8] = "Fisheye Relaxed";
-        mTestNames[9] = "Vignette Full";
-        mTestNames[10] = "Vignette Relaxed";
-        mTestNames[11] = "Group Test (emulated)";
-        mTestNames[12] = "Group Test (native)";
+        mTestNames[5] = "Intrinsic Blur radius 25";
+        mTestNames[6] = "Greyscale";
+        mTestNames[7] = "Grain";
+        mTestNames[8] = "Fisheye Full";
+        mTestNames[9] = "Fisheye Relaxed";
+        mTestNames[10] = "Fisheye Approximate Full";
+        mTestNames[11] = "Fisheye Approximate Relaxed";
+        mTestNames[12] = "Vignette Full";
+        mTestNames[13] = "Vignette Relaxed";
+        mTestNames[14] = "Vignette Approximate Full";
+        mTestNames[15] = "Vignette Approximate Relaxed";
+        mTestNames[16] = "Group Test (emulated)";
+        mTestNames[17] = "Group Test (native)";
+        mTestNames[18] = "Convolve 3x3";
+        mTestNames[19] = "Intrinsics Convolve 3x3";
+        mTestNames[20] = "ColorMatrix";
+        mTestNames[21] = "Intrinsics ColorMatrix";
+        mTestNames[22] = "Intrinsics ColorMatrix Grey";
+        mTestNames[23] = "Copy";
+        mTestNames[24] = "CrossProcess (using LUT)";
+        mTestNames[25] = "Convolve 5x5";
+        mTestNames[26] = "Intrinsics Convolve 5x5";
+        mTestNames[27] = "Mandelbrot";
+        mTestNames[28] = "Intrinsics Blend";
+
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
     }
@@ -202,13 +289,16 @@ public class ImageProcessingActivity2 extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBitmapIn = loadBitmap(R.drawable.city);
-        mBitmapOut = loadBitmap(R.drawable.city);
+        mBitmapIn = loadBitmap(R.drawable.img1600x1067);
+        mBitmapIn2 = loadBitmap(R.drawable.img1600x1067b);
+        mBitmapOut = loadBitmap(R.drawable.img1600x1067);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
 
         mDisplayView = (ImageView) findViewById(R.id.display);
         mDisplayView.setImageBitmap(mBitmapOut);
+
+        mSpinner = (Spinner) findViewById(R.id.spinner1);
 
         mBar1 = (SeekBar) findViewById(R.id.slider1);
         mBar2 = (SeekBar) findViewById(R.id.slider2);
@@ -255,37 +345,69 @@ public class ImageProcessingActivity2 extends Activity
 
     // button hook
     public void benchmark(View v) {
-        long t = getBenchmark();
+        float t = getBenchmark();
         //long javaTime = javaFilter();
         //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
         mBenchmarkResult.setText("Result: " + t + " ms");
+        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + t);
+    }
+
+    public void benchmark_all(View v) {
+        // write result into a file
+        File externalStorage = Environment.getExternalStorageDirectory();
+        if (!externalStorage.canWrite()) {
+            Log.v(TAG, "sdcard is not writable");
+            return;
+        }
+        File resultFile = new File(externalStorage, RESULT_FILE);
+        //resultFile.setWritable(true, false);
+        try {
+            BufferedWriter rsWriter = new BufferedWriter(new FileWriter(resultFile));
+            Log.v(TAG, "Saved results in: " + resultFile.getAbsolutePath());
+            for (int i = 0; i < mTestNames.length; i++ ) {
+                changeTest(i);
+                float t = getBenchmark();
+                String s = new String("" + mTestNames[i] + ", " + t);
+                rsWriter.write(s + "\n");
+                Log.v(TAG, "Test " + s + "ms\n");
+            }
+            rsWriter.close();
+        } catch (IOException e) {
+            Log.v(TAG, "Unable to write result file " + e.getMessage());
+        }
+        changeTest(0);
     }
 
     // For benchmark test
-    public long getBenchmark() {
+    public float getBenchmark() {
         mDoingBenchmark = true;
 
         mTest.setupBenchmark();
         long result = 0;
 
-        Log.v(TAG, "Warming");
-        long t = java.lang.System.currentTimeMillis() + 2000;
+        //Log.v(TAG, "Warming");
+        long t = java.lang.System.currentTimeMillis() + 250;
         do {
             mTest.runTest();
             mTest.finish();
         } while (t > java.lang.System.currentTimeMillis());
 
 
-        Log.v(TAG, "Benchmarking");
+        //Log.v(TAG, "Benchmarking");
+        int ct = 0;
         t = java.lang.System.currentTimeMillis();
-        mTest.runTest();
-        mTest.finish();
+        do {
+            mTest.runTest();
+            mTest.finish();
+            ct++;
+        } while ((t+1000) > java.lang.System.currentTimeMillis());
         t = java.lang.System.currentTimeMillis() - t;
+        float ft = (float)t;
+        ft /= ct;
 
-        Log.v(TAG, "getBenchmark: Renderscript frame time core ms " + t);
         mTest.exitBenchmark();
         mDoingBenchmark = false;
 
-        return t;
+        return ft;
     }
 }

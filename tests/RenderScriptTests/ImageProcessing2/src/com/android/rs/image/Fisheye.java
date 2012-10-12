@@ -23,12 +23,16 @@ import android.widget.TextView;
 public class Fisheye extends TestBase {
     private ScriptC_fisheye_full mScript_full = null;
     private ScriptC_fisheye_relaxed mScript_relaxed = null;
+    private ScriptC_fisheye_approx_full mScript_approx_full = null;
+    private ScriptC_fisheye_approx_relaxed mScript_approx_relaxed = null;
+    private final boolean approx;
     private final boolean relaxed;
     private float center_x = 0.5f;
     private float center_y = 0.5f;
     private float scale = 0.5f;
 
-    public Fisheye(boolean relaxed) {
+    public Fisheye(boolean approx, boolean relaxed) {
+        this.approx = approx;
         this.relaxed = relaxed;
     }
 
@@ -65,7 +69,18 @@ public class Fisheye extends TestBase {
     }
 
     private void do_init() {
-        if (relaxed)
+        if (approx) {
+            if (relaxed)
+                mScript_approx_relaxed.invoke_init_filter(
+                        mInPixelsAllocation.getType().getX(),
+                        mInPixelsAllocation.getType().getY(), center_x,
+                        center_y, scale);
+            else
+                mScript_approx_full.invoke_init_filter(
+                        mInPixelsAllocation.getType().getX(),
+                        mInPixelsAllocation.getType().getY(), center_x,
+                        center_y, scale);
+        } else if (relaxed)
             mScript_relaxed.invoke_init_filter(
                     mInPixelsAllocation.getType().getX(),
                     mInPixelsAllocation.getType().getY(), center_x, center_y,
@@ -78,7 +93,19 @@ public class Fisheye extends TestBase {
     }
 
     public void createTest(android.content.res.Resources res) {
-        if (relaxed) {
+        if (approx) {
+            if (relaxed) {
+                mScript_approx_relaxed = new ScriptC_fisheye_approx_relaxed(mRS,
+                        res, R.raw.fisheye_approx_relaxed);
+                mScript_approx_relaxed.set_in_alloc(mInPixelsAllocation);
+                mScript_approx_relaxed.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+            } else {
+                mScript_approx_full = new ScriptC_fisheye_approx_full(mRS, res,
+                        R.raw.fisheye_approx_full);
+                mScript_approx_full.set_in_alloc(mInPixelsAllocation);
+                mScript_approx_full.set_sampler(Sampler.CLAMP_LINEAR(mRS));
+            }
+        } else if (relaxed) {
             mScript_relaxed = new ScriptC_fisheye_relaxed(mRS, res,
                     R.raw.fisheye_relaxed);
             mScript_relaxed.set_in_alloc(mInPixelsAllocation);
@@ -93,7 +120,12 @@ public class Fisheye extends TestBase {
     }
 
     public void runTest() {
-        if (relaxed)
+        if (approx) {
+            if (relaxed)
+                mScript_approx_relaxed.forEach_root(mOutPixelsAllocation);
+            else
+                mScript_approx_full.forEach_root(mOutPixelsAllocation);
+        } else if (relaxed)
             mScript_relaxed.forEach_root(mOutPixelsAllocation);
         else
             mScript_full.forEach_root(mOutPixelsAllocation);

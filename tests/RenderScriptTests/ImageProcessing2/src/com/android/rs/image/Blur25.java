@@ -24,37 +24,38 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 public class Blur25 extends TestBase {
+    private boolean mUseIntrinsic = false;
+    private ScriptIntrinsicBlur mIntrinsic;
+
     private int MAX_RADIUS = 25;
     private ScriptC_threshold mScript;
-    private ScriptC_vertical_blur mScriptVBlur;
-    private ScriptC_horizontal_blur mScriptHBlur;
-    private int mRadius = MAX_RADIUS;
+    private float mRadius = MAX_RADIUS;
     private float mSaturation = 1.0f;
     private Allocation mScratchPixelsAllocation1;
     private Allocation mScratchPixelsAllocation2;
 
+
+    public Blur25(boolean useIntrinsic) {
+        mUseIntrinsic = useIntrinsic;
+    }
 
     public boolean onBar1Setup(SeekBar b, TextView t) {
         t.setText("Radius");
         b.setProgress(100);
         return true;
     }
-    public boolean onBar2Setup(SeekBar b, TextView t) {
-        b.setProgress(50);
-        t.setText("Saturation");
-        return true;
-    }
 
 
     public void onBar1Changed(int progress) {
-        float fRadius = progress / 100.0f;
-        fRadius *= (float)(MAX_RADIUS);
-        mRadius = (int)fRadius;
-        mScript.set_radius(mRadius);
-    }
-    public void onBar2Changed(int progress) {
-        mSaturation = (float)progress / 50.0f;
-        mScriptVBlur.invoke_setSaturation(mSaturation);
+        mRadius = ((float)progress) / 100.0f * MAX_RADIUS;
+        if (mRadius <= 0.10f) {
+            mRadius = 0.10f;
+        }
+        if (mUseIntrinsic) {
+            mIntrinsic.setRadius(mRadius);
+        } else {
+            mScript.invoke_setRadius((int)mRadius);
+        }
     }
 
 
@@ -62,40 +63,52 @@ public class Blur25 extends TestBase {
         int width = mInPixelsAllocation.getType().getX();
         int height = mInPixelsAllocation.getType().getY();
 
-        Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
-        tb.setX(width);
-        tb.setY(height);
-        mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
-        mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
+        if (mUseIntrinsic) {
+            mIntrinsic = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+            mIntrinsic.setRadius(MAX_RADIUS);
+            mIntrinsic.setInput(mInPixelsAllocation);
+        } else {
 
-        mScriptVBlur = new ScriptC_vertical_blur(mRS, res, R.raw.vertical_blur);
-        mScriptHBlur = new ScriptC_horizontal_blur(mRS, res, R.raw.horizontal_blur);
+            Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
+            tb.setX(width);
+            tb.setY(height);
+            mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
+            mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-        mScript = new ScriptC_threshold(mRS, res, R.raw.threshold);
-        mScript.set_width(width);
-        mScript.set_height(height);
-        mScript.set_radius(mRadius);
+            mScript = new ScriptC_threshold(mRS, res, R.raw.threshold);
+            mScript.set_width(width);
+            mScript.set_height(height);
+            mScript.invoke_setRadius(MAX_RADIUS);
 
-        mScriptVBlur.invoke_setSaturation(mSaturation);
-
-        mScript.bind_InPixel(mInPixelsAllocation);
-        mScript.bind_OutPixel(mOutPixelsAllocation);
-        mScript.bind_ScratchPixel1(mScratchPixelsAllocation1);
-        mScript.bind_ScratchPixel2(mScratchPixelsAllocation2);
-
-        mScript.set_vBlurScript(mScriptVBlur);
-        mScript.set_hBlurScript(mScriptHBlur);
+            mScript.set_InPixel(mInPixelsAllocation);
+            mScript.set_ScratchPixel1(mScratchPixelsAllocation1);
+            mScript.set_ScratchPixel2(mScratchPixelsAllocation2);
+        }
     }
 
     public void runTest() {
-        mScript.invoke_filter();
+        if (mUseIntrinsic) {
+            mIntrinsic.forEach(mOutPixelsAllocation);
+        } else {
+            mScript.forEach_copyIn(mInPixelsAllocation, mScratchPixelsAllocation1);
+            mScript.forEach_horz(mScratchPixelsAllocation2);
+            mScript.forEach_vert(mOutPixelsAllocation);
+        }
     }
 
     public void setupBenchmark() {
-        mScript.set_radius(MAX_RADIUS);
+        if (mUseIntrinsic) {
+            mIntrinsic.setRadius(MAX_RADIUS);
+        } else {
+            mScript.invoke_setRadius(MAX_RADIUS);
+        }
     }
 
     public void exitBenchmark() {
-        mScript.set_radius(mRadius);
+        if (mUseIntrinsic) {
+            mIntrinsic.setRadius(mRadius);
+        } else {
+            mScript.invoke_setRadius((int)mRadius);
+        }
     }
 }

@@ -1,26 +1,23 @@
 #pragma version(1)
+#pragma rs java_package_name(com.android.rs.image2)
+#pragma rs_fp_relaxed
 
-#include "ip.rsh"
 
 int height;
 int width;
-int radius;
+static int radius;
 
-uchar4 * InPixel;
-uchar4 * OutPixel;
-float4 * ScratchPixel1;
-float4 * ScratchPixel2;
+rs_allocation InPixel;
+rs_allocation ScratchPixel1;
+rs_allocation ScratchPixel2;
 
-rs_script vBlurScript;
-rs_script hBlurScript;
-
-const int CMD_FINISHED = 1;
+const int MAX_RADIUS = 25;
 
 // Store our coefficients here
 static float gaussian[MAX_RADIUS * 2 + 1];
 
-
-static void computeGaussianWeights() {
+void setRadius(int rad) {
+    radius = rad;
     // Compute gaussian weights for the blur
     // e is the euler's number
     float e = 2.718281828459045f;
@@ -45,8 +42,7 @@ static void computeGaussianWeights() {
 
     float normalizeFactor = 0.0f;
     float floatR = 0.0f;
-    int r;
-    for (r = -radius; r <= radius; r ++) {
+    for (int r = -radius; r <= radius; r ++) {
         floatR = (float)r;
         gaussian[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
         normalizeFactor += gaussian[r + radius];
@@ -54,40 +50,57 @@ static void computeGaussianWeights() {
 
     //Now we need to normalize the weights because all our coefficients need to add up to one
     normalizeFactor = 1.0f / normalizeFactor;
-    for (r = -radius; r <= radius; r ++) {
+    for (int r = -radius; r <= radius; r ++) {
         floatR = (float)r;
         gaussian[r + radius] *= normalizeFactor;
     }
 }
 
-
-static void copyInput() {
-    rs_allocation ain;
-    ain = rsGetAllocation(InPixel);
-    uint32_t dimx = rsAllocationGetDimX(ain);
-    uint32_t dimy = rsAllocationGetDimY(ain);
-    for (uint32_t y = 0; y < dimy; y++) {
-        for (uint32_t x = 0; x < dimx; x++) {
-            ScratchPixel1[x + y * dimx] = convert_float4(InPixel[x + y * dimx]);
-        }
-    }
+void copyIn(const uchar4 *in, float4 *out) {
+    *out = convert_float4(*in);
 }
 
-void filter() {
-    copyInput();
-    computeGaussianWeights();
+void vert(uchar4 *out, uint32_t x, uint32_t y) {
+    float3 blurredPixel = 0;
+    const float *gPtr = gaussian;
+    if ((y > radius) && (y < (height - radius))) {
+        for (int r = -radius; r <= radius; r ++) {
+            const float4 *i = (const float4 *)rsGetElementAt(ScratchPixel2, x, y + r);
+            blurredPixel += i->xyz * gPtr[0];
+            gPtr++;
+        }
+    } else {
+        for (int r = -radius; r <= radius; r ++) {
+            int validH = rsClamp((int)y + r, (int)0, (int)(height - 1));
+            const float4 *i = (const float4 *)rsGetElementAt(ScratchPixel2, x, validH);
+            blurredPixel += i->xyz * gPtr[0];
+            gPtr++;
+        }
+    }
 
-    FilterStruct fs;
-    fs.gaussian = gaussian;
-    fs.width = width;
-    fs.height = height;
-    fs.radius = radius;
+    out->xyz = convert_uchar3(clamp(blurredPixel, 0.f, 255.f));
+    out->w = 0xff;
+}
 
-    fs.ain = rsGetAllocation(ScratchPixel1);
-    rsForEach(hBlurScript, fs.ain, rsGetAllocation(ScratchPixel2), &fs, sizeof(fs));
+void horz(float4 *out, uint32_t x, uint32_t y) {
+    float3 blurredPixel = 0;
+    const float *gPtr = gaussian;
+    if ((x > radius) && (x < (width - radius))) {
+        for (int r = -radius; r <= radius; r ++) {
+            const float4 *i = (const float4 *)rsGetElementAt(ScratchPixel1, x + r, y);
+            blurredPixel += i->xyz * gPtr[0];
+            gPtr++;
+        }
+    } else {
+        for (int r = -radius; r <= radius; r ++) {
+            // Stepping left and right away from the pixel
+            int validX = rsClamp((int)x + r, (int)0, (int)(width - 1));
+            const float4 *i = (const float4 *)rsGetElementAt(ScratchPixel1, validX, y);
+            blurredPixel += i->xyz * gPtr[0];
+            gPtr++;
+        }
+    }
 
-    fs.ain = rsGetAllocation(ScratchPixel2);
-    rsForEach(vBlurScript, fs.ain, rsGetAllocation(OutPixel), &fs, sizeof(fs));
-    //rsSendToClientBlocking(CMD_FINISHED);
+    out->xyz = blurredPixel;
 }
 

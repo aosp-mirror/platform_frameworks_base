@@ -22,8 +22,8 @@ import android.support.v8.renderscript.*;
 import android.util.Log;
 
 public class GroupTest extends TestBase {
-    private ScriptC_convolve3x3 mConvolve;
-    private ScriptC_colormatrix mMatrix;
+    private ScriptIntrinsicConvolve3x3 mConvolve;
+    private ScriptIntrinsicColorMatrix mMatrix;
 
     private Allocation mScratchPixelsAllocation1;
     private ScriptGroup mGroup;
@@ -41,20 +41,20 @@ public class GroupTest extends TestBase {
         mWidth = mInPixelsAllocation.getType().getX();
         mHeight = mInPixelsAllocation.getType().getY();
 
-        mConvolve = new ScriptC_convolve3x3(mRS, res, R.raw.convolve3x3);
-        mMatrix = new ScriptC_colormatrix(mRS, res, R.raw.colormatrix);
+        mConvolve = ScriptIntrinsicConvolve3x3.create(mRS, Element.U8_4(mRS));
+        mMatrix = ScriptIntrinsicColorMatrix.create(mRS, Element.U8_4(mRS));
 
         float f[] = new float[9];
         f[0] =  0.f;    f[1] = -1.f;    f[2] =  0.f;
         f[3] = -1.f;    f[4] =  5.f;    f[5] = -1.f;
         f[6] =  0.f;    f[7] = -1.f;    f[8] =  0.f;
-        mConvolve.set_gCoeffs(f);
+        mConvolve.setCoefficients(f);
 
         Matrix4f m = new Matrix4f();
         m.set(1, 0, 0.2f);
         m.set(1, 1, 0.9f);
         m.set(1, 2, 0.2f);
-        mMatrix.invoke_setMatrix(m);
+        mMatrix.setColorMatrix(m);
 
         Type.Builder tb = new Type.Builder(mRS, Element.U8_4(mRS));
         tb.setX(mWidth);
@@ -63,24 +63,23 @@ public class GroupTest extends TestBase {
 
         if (mUseNative) {
             ScriptGroup.Builder b = new ScriptGroup.Builder(mRS);
-            b.addConnection(connect, mConvolve, mMatrix, null);
+            b.addKernel(mConvolve.getKernelID());
+            b.addKernel(mMatrix.getKernelID());
+            b.addConnection(connect, mConvolve.getKernelID(), mMatrix.getKernelID());
             mGroup = b.create();
-
         } else {
             mScratchPixelsAllocation1 = Allocation.createTyped(mRS, connect);
         }
     }
 
     public void runTest() {
-        mConvolve.set_gIn(mInPixelsAllocation);
-        mConvolve.set_gWidth(mWidth);
-        mConvolve.set_gHeight(mHeight);
+        mConvolve.setInput(mInPixelsAllocation);
         if (mUseNative) {
-            mGroup.setOutput(mMatrix, mOutPixelsAllocation);
+            mGroup.setOutput(mMatrix.getKernelID(), mOutPixelsAllocation);
             mGroup.execute();
         } else {
-            mConvolve.forEach_root(mScratchPixelsAllocation1);
-            mMatrix.forEach_root(mScratchPixelsAllocation1, mOutPixelsAllocation);
+            mConvolve.forEach(mScratchPixelsAllocation1);
+            mMatrix.forEach(mScratchPixelsAllocation1, mOutPixelsAllocation);
         }
     }
 
