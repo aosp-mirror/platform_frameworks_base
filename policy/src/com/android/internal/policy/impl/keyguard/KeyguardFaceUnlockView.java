@@ -144,7 +144,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                     Context.POWER_SERVICE);
             // TODO: Some of these conditions are handled in KeyguardSecurityModel and may not be
             // necessary here.
-            if (monitor.getPhoneState() != TelephonyManager.CALL_STATE_RINGING
+            if (monitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
                     && !monitor.getMaxBiometricUnlockAttemptsReached()
                     && !backupIsTimedOut
                     && powerManager.isScreenOn()) {
