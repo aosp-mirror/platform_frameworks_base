@@ -16,6 +16,7 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -29,7 +30,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecurityView {
 
-    private static final String TAG = "KeyguardFaceUnlockView";
+    private static final String TAG = "FULKeyguardFaceUnlockView";
     private static final boolean DEBUG = false;
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
@@ -139,11 +140,14 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             final boolean backupIsTimedOut = (
                     monitor.getFailedUnlockAttempts() >=
                     LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
-            // TODO: These max attempts checks are also checked in KeyguardSecurityModel so they
-            // might not be necessary here anymore.
+            PowerManager powerManager = (PowerManager) mContext.getSystemService(
+                    Context.POWER_SERVICE);
+            // TODO: Some of these conditions are handled in KeyguardSecurityModel and may not be
+            // necessary here.
             if (monitor.getPhoneState() != TelephonyManager.CALL_STATE_RINGING
                     && !monitor.getMaxBiometricUnlockAttemptsReached()
-                    && !backupIsTimedOut) {
+                    && !backupIsTimedOut
+                    && powerManager.isScreenOn()) {
                 mBiometricUnlock.start();
             } else {
                 mBiometricUnlock.stopAndShowBackup();
