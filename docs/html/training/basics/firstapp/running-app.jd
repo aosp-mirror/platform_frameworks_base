@@ -40,7 +40,7 @@ Android project, it includes a default set of "Hello World" source files that al
 immediately run the app.</p>
 
 <p>How you run your app depends on two things: whether you have a real Android-powered device and
-whether you’re using Eclipse. This lesson shows you how to install and run your app on a
+whether you're using Eclipse. This lesson shows you how to install and run your app on a
 real device and on the Android emulator, and in both cases with either Eclipse or the command line
 tools.</p>
 
@@ -85,12 +85,21 @@ important that you understand how to run your app before you start developing.</
 
 <ol>
   <li>Plug in your device to your development machine with a USB cable.
-If you’re developing on Windows, you might need to install the appropriate USB driver for your
+If you're developing on Windows, you might need to install the appropriate USB driver for your
 device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB
-Drivers</a> document.</li>
-  <li>Ensure that <strong>USB debugging</strong> is enabled in the device Settings (open Settings
-and navitage to <strong>Applications > Development</strong> on most devices, or click
-<strong>Developer options</strong> on Android 4.0 and higher).</li>
+Drivers</a> document.</li>  
+  <li>Enable <strong>USB debugging</strong> on your device.
+    <ul>
+      <li>On most devices running Android 3.2 or older, you can find the option under
+        <strong>Settings > Applications > Development</strong>.</li>
+      <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
+        <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
+        options</strong> is hidden by default. To make it available, go
+        to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
+        seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
+      </li>
+    </ul>
+  </li>
 </ol>
 
 <p>To run the app from Eclipse, open one of your project's files and click
@@ -118,7 +127,7 @@ lesson</a>.</p>
 
 <h2 id="Emulator">Run on the Emulator</h2>
 
-<p>Whether you’re using Eclipse or the command line, to run your app on the emulator you need to
+<p>Whether you're using Eclipse or the command line, to run your app on the emulator you need to
 first create an <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a> (AVD). An
 AVD is a device configuration for the Android emulator that allows you to model different
 devices.</p>
