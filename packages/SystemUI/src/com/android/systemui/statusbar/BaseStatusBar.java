@@ -485,7 +485,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
             if (firstTask == null) {
-                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                        R.anim.recents_launch_from_launcher_enter,
+                        R.anim.recents_launch_from_launcher_exit);
+                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
+                        UserHandle.USER_CURRENT));
             } else {
                 Bitmap first = firstTask.getThumbnail();
                 final Resources res = mContext.getResources();
