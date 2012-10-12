@@ -17,10 +17,7 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- For formatting day of week and date in DateView.  %1$s is DOW, %2$s is date.
-         We show both (DOW on one line, then the date) but this can be overridden for locales as
-         necessary.
-         -->
-    <string name="status_bar_date_formatter">%1$s\n%2$s</string>
+    <!-- Date format for display: should match the lockscreen in /policy.  -->
+    <string name="abbrev_wday_month_day_no_year">@*android:string/abbrev_wday_month_day_no_year</string>
 
 </resources>
