@@ -376,7 +376,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             }
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 clear();
-                final float scale = mMagnificationController.getScale();
+                final float scale = Math.min(Math.max(mMagnificationController.getScale(),
+                        MIN_SCALE), MAX_SCALE);
                 if (scale != getPersistedScale()) {
                     persistScale(scale);
                 }
