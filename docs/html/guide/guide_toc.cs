@@ -191,28 +191,21 @@
       <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
           <span class="en">Menus</span></span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
-           <span class="en">Dialogs</span>
-          </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
            <span class="en">Action Bar</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/ui/settings.html">
             <span class="en">Settings</span>
           </a></li>
-      <li class="nav-section">
-          <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">
-              <span class="en">Notifications</span>
-            </a></div>
-          <ul>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/toasts.html">
-              <span class="en">Toast Notifications</span>
-            </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/notifications.html">
-              <span class="en">Status Notifications</span>
-            </a></li>
-          </ul>
-      </li>
+      <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
+           <span class="en">Dialogs</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/notifications.html">
+          <span class="en">Notifications</span>
+        </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/toasts.html">
+          <span class="en">Toasts</span>
+        </a></li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/search/index.html">
             <span class="en">Search</span>
