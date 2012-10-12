@@ -1418,7 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Padidinti garsumą viršijant saugų lygį?"\n"Ilgai klausantis dideliu garsumu gali sutrikti klausa."</string>
-    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Laikykite palietę dviem pirštais, kad įgalintumėte pritaikymo neįgaliesiems režimą."</string>
+    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
+    <skip />
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pritaikymas neįgaliesiems įgalintas."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pritaikymo neįgaliesiems režimas atšauktas."</string>
     <string name="user_switched" msgid="3768006783166984410">"Dabartinis naudotojas: <xliff:g id="NAME">%1$s</xliff:g>."</string>
