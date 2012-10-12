@@ -96,11 +96,26 @@ class AccessibilityInjector {
 
     // Template for JavaScript that performs AndroidVox actions.
     private static final String ACCESSIBILITY_ANDROIDVOX_TEMPLATE =
-            "cvox.AndroidVox.performAction('%1s')";
+            "(function() {" +
+                    "  if ((typeof(cvox) != 'undefined')"+
+                    "      && (typeof(cvox.ChromeVox) != 'undefined')" +
+                    "      && (typeof(cvox.AndroidVox) != 'undefined')" +
+                    "      && cvox.ChromeVox.isActive) {" +
+                    "    return cvox.AndroidVox.performAction('%1s');" +
+                    "  } else {" +
+                    "    return false;" +
+                    "  }" +
+                    "})()";
 
     // JS code used to shut down an active AndroidVox instance.
     private static final String TOGGLE_CVOX_TEMPLATE =
-            "javascript:(function() { cvox.ChromeVox.host.activateOrDeactivateChromeVox(%b); })();";
+            "javascript:(function() {" +
+                    "  if ((typeof(cvox) != 'undefined')"+
+                    "      && (typeof(cvox.ChromeVox) != 'undefined')" +
+                    "      && (typeof(cvox.ChromeVox.host) != 'undefined')) {" +
+                    "    cvox.ChromeVox.host.activateOrDeactivateChromeVox(%b);" +
+                    "  }" +
+                    "})();";
 
     /**
      * Creates an instance of the AccessibilityInjector based on
@@ -776,20 +791,26 @@ class AccessibilityInjector {
             while (true) {
                 try {
                     if (mResultId == resultId) {
+                        if (DEBUG)
+                            Log.w(TAG, "Received CVOX result");
                         return true;
                     }
                     if (mResultId > resultId) {
+                        if (DEBUG)
+                            Log.w(TAG, "Obsolete CVOX result");
                         return false;
                     }
                     final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                     waitTimeMillis = RESULT_TIMEOUT - elapsedTimeMillis;
                     if (waitTimeMillis <= 0) {
+                        if (DEBUG)
+                            Log.w(TAG, "Timed out while waiting for CVOX result");
                         return false;
                     }
                     mResultLock.wait(waitTimeMillis);
                 } catch (InterruptedException ie) {
                     if (DEBUG)
-                        Log.w(TAG, "Timed out while waiting for CVOX result");
+                        Log.w(TAG, "Interrupted while waiting for CVOX result");
                     /* ignore */
                 }
             }
@@ -805,6 +826,8 @@ class AccessibilityInjector {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void onResult(String id, String result) {
+            if (DEBUG)
+                Log.w(TAG, "Saw CVOX result of '" + result + "'");
             final long resultId;
 
             try {
