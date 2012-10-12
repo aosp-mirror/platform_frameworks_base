@@ -1418,7 +1418,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vols augmentar el volum per sobre del nivell de seguretat?"\n"Escoltar música a un volum alt durant períodes llargs pot perjudicar l\'oïda."</string>
-    <string name="continue_to_enable_accessibility" msgid="2184747411804432885">"Mantén premuts els dos dits per activar l\'accessibilitat."</string>
+    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
+    <skip />
     <string name="accessibility_enabled" msgid="1381972048564547685">"S\'ha activat l\'accessibilitat."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilitat cancel·lada."</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
