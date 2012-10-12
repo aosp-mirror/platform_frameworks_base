@@ -751,16 +751,8 @@ public class MediaRouter {
                 RouteInfo.STATUS_AVAILABLE : RouteInfo.STATUS_CONNECTING);
         newRoute.mEnabled = available;
 
-        newRoute.mName = makeWifiDisplayName(display);
+        newRoute.mName = display.getFriendlyDisplayName();
         return newRoute;
-    }
-
-    static String makeWifiDisplayName(WifiDisplay display) {
-        String name = display.getDeviceAlias();
-        if (TextUtils.isEmpty(name)) {
-            name = display.getDeviceName();
-        }
-        return name;
     }
 
     private static void updateWifiDisplayRoute(RouteInfo route, WifiDisplay display,
@@ -792,8 +784,8 @@ public class MediaRouter {
             }
         }
 
-        final String newName = makeWifiDisplayName(display);
-        if (route.getName().equals(newName)) {
+        final String newName = display.getFriendlyDisplayName();
+        if (!route.getName().equals(newName)) {
             route.mName = newName;
             changed = true;
         }
@@ -814,11 +806,11 @@ public class MediaRouter {
         }
     }
 
-    private static WifiDisplay findMatchingDisplay(WifiDisplay address, WifiDisplay[] displays) {
+    private static WifiDisplay findMatchingDisplay(WifiDisplay d, WifiDisplay[] displays) {
         for (int i = 0; i < displays.length; i++) {
-            final WifiDisplay d = displays[i];
-            if (d.equals(address)) {
-                return d;
+            final WifiDisplay other = displays[i];
+            if (d.getDeviceAddress().equals(other.getDeviceAddress())) {
+                return other;
             }
         }
         return null;
