@@ -82,7 +82,7 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mUserSelector = userSelector;
 
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
-        mUserName = (TextView) findViewById(R.id.keyguard_user_name);        
+        mUserName = (TextView) findViewById(R.id.keyguard_user_name);
 
         mUserImage.setImageDrawable(Drawable.createFromPath(mUserInfo.iconPath));
         mUserName.setText(mUserInfo.name);
