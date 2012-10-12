@@ -355,6 +355,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         private WifiMonitor mWifiMonitor = new WifiMonitor(this, mWifiNative);
 
         private final WifiP2pDeviceList mPeers = new WifiP2pDeviceList();
+        /* During a connection, supplicant can tell us that a device was lost. From a supplicant's
+         * perspective, the discovery stops during connection and it purges device since it does
+         * not get latest updates about the device without being in discovery state.
+         *
+         * From the framework perspective, the device is still there since we are connecting or
+         * connected to it. so we keep these devices in a seperate list, so that they are removed
+         * when connection is cancelled or lost
+         */
+        private final WifiP2pDeviceList mPeersLostDuringConnection = new WifiP2pDeviceList();
         private final WifiP2pGroupList mGroups = new WifiP2pGroupList(null,
                 new GroupDeleteListener() {
             @Override
@@ -746,6 +755,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
+                    loge("Unexpected loss of p2p socket connection");
+                    transitionTo(mP2pDisabledState);
+                    break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
                     //Nothing to do
                     break;
@@ -1066,7 +1079,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         break;
                     }
                     // Do nothing
-                    if (DBG) logd("Retain connecting device " + device);
+                    if (DBG) logd("Add device to lost list " + device);
+                    mPeersLostDuringConnection.update(device);
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     /* Discovery will break negotiation */
@@ -1401,7 +1415,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     device = (WifiP2pDevice) message.obj;
                     //Device loss for a connected device indicates it is not in discovery any more
                     if (mGroup.contains(device)) {
-                        if (DBG) logd("Lost " + device +" , do nothing");
+                        if (DBG) logd("Add device to lost list " + device);
+                        mPeersLostDuringConnection.update(device);
                         return HANDLED;
                     }
                     // Do the regular device lost handling
@@ -1853,7 +1868,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private int connect(WifiP2pConfig config, boolean tryInvocation) {
 
         if (config == null) {
-            loge("invalid argument.");
+            loge("config is null");
             return CONNECT_FAILURE;
         }
 
@@ -1863,7 +1878,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         WifiP2pDevice dev = mPeers.get(config.deviceAddress);
         if (dev == null) {
-            loge("target device is not found.");
+            loge("target device not found " + config.deviceAddress);
             return CONNECT_FAILURE;
         }
 
@@ -2142,6 +2157,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         /* After cancelling group formation, new connections on existing peers can fail
          * at supplicant. Flush and restart discovery */
         mWifiNative.p2pFlush();
+        if (mPeers.remove(mPeersLostDuringConnection)) sendP2pPeersChangedBroadcast();
+        mPeersLostDuringConnection.clear();
         mServiceDiscReqId = null;
         sendMessage(WifiP2pManager.DISCOVER_PEERS);
     }
@@ -2174,6 +2191,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         mGroup = null;
         mWifiNative.p2pFlush();
+        if (mPeers.remove(mPeersLostDuringConnection)) sendP2pPeersChangedBroadcast();
+        mPeersLostDuringConnection.clear();
         mServiceDiscReqId = null;
         if (changed) sendP2pPeersChangedBroadcast();
     }
