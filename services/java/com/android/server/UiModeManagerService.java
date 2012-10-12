@@ -37,11 +37,9 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
+import android.service.dreams.Sandman;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -58,9 +56,6 @@ final class UiModeManagerService extends IUiModeManager.Stub {
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
     private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
-
-    private static final int DEFAULT_SCREENSAVER_ENABLED = 1;
-    private static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
 
     private final Context mContext;
     private final TwilightService mTwilightService;
@@ -496,18 +491,20 @@ final class UiModeManagerService extends IUiModeManager.Stub {
             // activity manager take care of both the start and config
             // change.
             Intent homeIntent = buildHomeIntent(category);
-            try {
-                int result = ActivityManagerNative.getDefault().startActivityWithConfig(
-                        null, homeIntent, null, null, null, 0, 0,
-                        mConfiguration, null, UserHandle.USER_CURRENT);
-                if (result >= ActivityManager.START_SUCCESS) {
-                    dockAppStarted = true;
-                } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {
-                    Slog.e(TAG, "Could not start dock app: " + homeIntent
-                            + ", startActivityWithConfig result " + result);
+            if (Sandman.shouldStartDockApp(mContext, homeIntent)) {
+                try {
+                    int result = ActivityManagerNative.getDefault().startActivityWithConfig(
+                            null, homeIntent, null, null, null, 0, 0,
+                            mConfiguration, null, UserHandle.USER_CURRENT);
+                    if (result >= ActivityManager.START_SUCCESS) {
+                        dockAppStarted = true;
+                    } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {
+                        Slog.e(TAG, "Could not start dock app: " + homeIntent
+                                + ", startActivityWithConfig result " + result);
+                    }
+                } catch (RemoteException ex) {
+                    Slog.e(TAG, "Could not start dock app: " + homeIntent, ex);
                 }
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Could not start dock app: " + homeIntent, ex);
             }
         }
 
@@ -515,39 +512,9 @@ final class UiModeManagerService extends IUiModeManager.Stub {
         sendConfigurationLocked();
 
         // If we did not start a dock app, then start dreaming if supported.
-        if (category != null && !dockAppStarted
-                && isScreenSaverEnabledLocked() && isScreenSaverActivatedOnDockLocked()) {
-            Slog.i(TAG, "Activating dream while docked.");
-            try {
-                IDreamManager dreamManagerService = IDreamManager.Stub.asInterface(
-                        ServiceManager.getService(DreamService.DREAM_SERVICE));
-                if (dreamManagerService != null && !dreamManagerService.isDreaming()) {
-                    // Wake up.
-                    // The power manager will wake up the system when it starts receiving power
-                    // but there is a race between that happening and the UI mode manager
-                    // starting a dream.  We want the system to already be awake
-                    // by the time this happens.  Otherwise the dream may not start.
-                    mPowerManager.wakeUp(SystemClock.uptimeMillis());
-
-                    // Dream.
-                    dreamManagerService.dream();
-                }
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Could not start dream when docked.", ex);
-            }
+        if (category != null && !dockAppStarted) {
+            Sandman.startDreamWhenDockedIfAppropriate(mContext);
         }
-    }
-
-    private boolean isScreenSaverEnabledLocked() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED,
-                UserHandle.USER_CURRENT) != 0;
-    }
-
-    private boolean isScreenSaverActivatedOnDockLocked() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK, UserHandle.USER_CURRENT) != 0;
     }
 
     private void adjustStatusBarCarModeLocked() {
