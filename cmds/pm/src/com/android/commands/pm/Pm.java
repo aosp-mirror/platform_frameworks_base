@@ -43,6 +43,7 @@ import android.os.IUserManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -171,6 +172,11 @@ public final class Pm {
 
         if ("remove-user".equals(op)) {
             runRemoveUser();
+            return;
+        }
+
+        if ("get-max-users".equals(op)) {
+            runGetMaxUsers();
             return;
         }
 
@@ -1017,8 +1023,10 @@ public final class Pm {
             return;
         }
         try {
-            if (!mUm.removeUser(userId)) {
-                System.err.println("Error: couldn't remove user #" + userId + ".");
+            if (mUm.removeUser(userId)) {
+                System.out.println("Success: removed user");
+            } else {
+                System.err.println("Error: couldn't remove user id " + userId);
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -1042,6 +1050,11 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
+
+    public void runGetMaxUsers() {
+        System.out.println("Maximum supported users: " + UserManager.getMaxSupportedUsers());
+    }
+
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
         boolean finished;
         boolean result;
@@ -1451,6 +1464,7 @@ public final class Pm {
         System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
         System.err.println("       pm create-user USER_NAME");
         System.err.println("       pm remove-user USER_ID");
+        System.err.println("       pm get-max-users");
         System.err.println("");
         System.err.println("pm list packages: prints all packages, optionally only");
         System.err.println("  those whose package name contains the text in FILTER.  Options:");
