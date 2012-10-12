@@ -52,25 +52,18 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     private View mFaceUnlockView;
 
     private Handler mHandler;
-    private final int MSG_SHOW_FACE_UNLOCK_VIEW = 0;
-    private final int MSG_HIDE_FACE_UNLOCK_VIEW = 1;
-    private final int MSG_SERVICE_CONNECTED = 2;
-    private final int MSG_SERVICE_DISCONNECTED = 3;
-    private final int MSG_UNLOCK = 4;
-    private final int MSG_CANCEL = 5;
-    private final int MSG_REPORT_FAILED_ATTEMPT = 6;
-    private final int MSG_EXPOSE_FALLBACK = 7;
-    private final int MSG_POKE_WAKELOCK = 8;
+    private final int MSG_SERVICE_CONNECTED = 0;
+    private final int MSG_SERVICE_DISCONNECTED = 1;
+    private final int MSG_UNLOCK = 2;
+    private final int MSG_CANCEL = 3;
+    private final int MSG_REPORT_FAILED_ATTEMPT = 4;
+    private final int MSG_EXPOSE_FALLBACK = 5;
+    private final int MSG_POKE_WAKELOCK = 6;
 
     // TODO: This was added for the purpose of adhering to what the biometric interface expects
     // the isRunning() function to return.  However, it is probably not necessary to have both
     // mRunning and mServiceRunning.  I'd just rather wait to change that logic.
     private volatile boolean mIsRunning = false;
-
-    // Long enough to stay visible while the service starts
-    // Short enough to not have to wait long for backup if service fails to start or crashes
-    // The service can take a couple of seconds to start on the first try after boot
-    private final int SERVICE_STARTUP_VIEW_TIMEOUT = 3000;
 
     // So the user has a consistent amount of time when brought to the backup method from Face
     // Unlock
@@ -110,30 +103,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Sets the Face Unlock view to visible, hiding it after the specified amount of time.  If
-     * timeoutMillis is 0, no hide is performed.  Called on the UI thread.
+     * Dismisses face unlock and goes to the backup lock
      */
-    public void show(long timeoutMillis) {
-        if (DEBUG) Log.d(TAG, "show()");
-        if (mHandler.getLooper() != Looper.myLooper()) {
-            Log.e(TAG, "show() called off of the UI thread");
-        }
-        removeDisplayMessages();
-        if (timeoutMillis > 0) {
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_FACE_UNLOCK_VIEW, timeoutMillis);
-        }
-    }
-
-    /**
-     * Hides the Face Unlock view.
-     */
-    public void hide() {
-        if (DEBUG) Log.d(TAG, "hide()");
-        // Removes any wakelock messages to make sure they don't cause the screen to turn back on.
-        mHandler.removeMessages(MSG_POKE_WAKELOCK);
-        // Remove messages to prevent a delayed show message from undo-ing the hide
-        removeDisplayMessages();
-        mHandler.sendEmptyMessage(MSG_HIDE_FACE_UNLOCK_VIEW);
+    public void stopAndShowBackup() {
+        if (DEBUG) Log.d(TAG, "stopAndShowBackup()");
+        mHandler.sendEmptyMessage(MSG_CANCEL);
     }
 
     /**
@@ -151,10 +125,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             Log.w(TAG, "start() called when already running");
         }
 
-        // Show Face Unlock view, but only for a little bit so lockpattern will become visible if
-        // Face Unlock fails to start or crashes
-        // This must show before bind to guarantee that Face Unlock has a place to display
-        show(SERVICE_STARTUP_VIEW_TIMEOUT);
         if (!mBoundToService) {
             Log.d(TAG, "Binding to Face Unlock service for user="
                     + mLockPatternUtils.getCurrentUser());
@@ -234,12 +204,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_SHOW_FACE_UNLOCK_VIEW:
-                handleShowFaceUnlockView();
-                break;
-            case MSG_HIDE_FACE_UNLOCK_VIEW:
-                handleHideFaceUnlockView();
-                break;
             case MSG_SERVICE_CONNECTED:
                 handleServiceConnected();
                 break;
@@ -266,22 +230,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 return false;
         }
         return true;
-    }
-
-    /**
-     * Sets the Face Unlock view to visible, thus covering the backup lock.
-     */
-    void handleShowFaceUnlockView() {
-        if (DEBUG) Log.d(TAG, "handleShowFaceUnlockView()");
-        // Not required
-    }
-
-    /**
-     * Hide face unlock and show backup
-     */
-    void handleHideFaceUnlockView() {
-        if (DEBUG) Log.d(TAG, "handleHideFaceUnlockView()");
-        mKeyguardScreenCallback.showBackupSecurity();
     }
 
     /**
@@ -347,23 +295,21 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     /**
-     * Stops the Face Unlock service and tells the device to grant access to the user.  Shows the
-     * Face Unlock view to keep the backup lock covered while the device unlocks.
+     * Stops the Face Unlock service and tells the device to grant access to the user.
      */
     void handleUnlock() {
         if (DEBUG) Log.d(TAG, "handleUnlock()");
-        removeDisplayMessages();
         stop();
         mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
         mKeyguardScreenCallback.dismiss(true);
     }
 
     /**
-     * Stops the Face Unlock service and exposes the backup lock.
+     * Stops the Face Unlock service and goes to the backup lock.
      */
     void handleCancel() {
         if (DEBUG) Log.d(TAG, "handleCancel()");
-        mKeyguardScreenCallback.dismiss(false);
+        mKeyguardScreenCallback.showBackupSecurity();
         stop();
         mKeyguardScreenCallback.userActivity(BACKUP_LOCK_TIMEOUT);
     }
@@ -395,15 +341,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
       if (powerManager.isScreenOn()) {
         mKeyguardScreenCallback.userActivity(millis);
       }
-    }
-
-    /**
-     * Removes show and hide messages from the message queue.  Called to prevent delayed show/hide
-     * messages from undoing a new message.
-     */
-    private void removeDisplayMessages() {
-        mHandler.removeMessages(MSG_SHOW_FACE_UNLOCK_VIEW);
-        mHandler.removeMessages(MSG_HIDE_FACE_UNLOCK_VIEW);
     }
 
     /**
@@ -508,7 +445,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
          * Called when the Face Unlock service starts displaying the UI, indicating that the backup
          * unlock can be exposed because the Face Unlock service is now covering the backup with its
          * UI.
-         **/
+         */
         public void exposeFallback() {
             if (DEBUG) Log.d(TAG, "exposeFallback()");
             mHandler.sendEmptyMessage(MSG_EXPOSE_FALLBACK);
