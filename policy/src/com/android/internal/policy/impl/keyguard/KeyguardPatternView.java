@@ -65,7 +65,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private Button mForgotPatternButton;
     private KeyguardSecurityCallback mCallback;
     private boolean mEnableFallback;
-    private KeyguardNavigationManager mNavigationManager;
 
     /**
      * Keeps track of the last time we poked the wake lock during dispatching of the touch event.
@@ -84,6 +83,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
     };
     private Rect mTempRect = new Rect();
+    private SecurityMessageDisplay mSecurityMessageDisplay;
 
     enum FooterMode {
         Normal,
@@ -111,7 +111,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mNavigationManager = new KeyguardNavigationManager(this);
         mLockPatternUtils = mLockPatternUtils == null
                 ? new LockPatternUtils(mContext) : mLockPatternUtils;
 
@@ -183,7 +182,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         } else {
-            mNavigationManager.setMessage(R.string.kg_pattern_instructions);
+            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions);
         }
 
         // the footer depends on how many total attempts the user has failed
@@ -255,7 +254,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                 } else {
-                    mNavigationManager.setMessage(R.string.kg_wrong_pattern);
+                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern);
                     mLockPatternView.postDelayed(mCancelPatternRunnable, PATTERN_CLEAR_TIMEOUT_MS);
                 }
             }
@@ -327,14 +326,14 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mNavigationManager.setMessage(
+                mSecurityMessageDisplay.setMessage(
                         R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
 
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
-                mNavigationManager.setMessage(R.string.kg_pattern_instructions);
+                mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions);
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
@@ -370,6 +369,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         return mCallback;
     }
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;    
+    }
 }
 
 

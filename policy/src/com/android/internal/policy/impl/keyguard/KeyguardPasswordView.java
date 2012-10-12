@@ -61,7 +61,7 @@ public class KeyguardPasswordView extends LinearLayout
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
     private boolean mIsAlpha;
-    private KeyguardNavigationManager mNavigationManager;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -101,7 +101,7 @@ public class KeyguardPasswordView extends LinearLayout
     }
 
     private void resetState() {
-        mNavigationManager.setMessage(
+        mSecurityMessageDisplay.setMessage(
                 mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions);
         mPasswordEntry.setEnabled(true);
         mKeyboardView.setEnabled(true);
@@ -110,8 +110,6 @@ public class KeyguardPasswordView extends LinearLayout
     @Override
     protected void onFinishInflate() {
         mLockPatternUtils = new LockPatternUtils(mContext); // TODO: use common one
-
-        mNavigationManager = new KeyguardNavigationManager(this);
 
         final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
         mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
@@ -288,7 +286,7 @@ public class KeyguardPasswordView extends LinearLayout
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
-            mNavigationManager.setMessage(
+            mSecurityMessageDisplay.setMessage(
                     mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin);
         }
         mPasswordEntry.setText("");
@@ -304,7 +302,7 @@ public class KeyguardPasswordView extends LinearLayout
             @Override
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mNavigationManager.setMessage(
+                mSecurityMessageDisplay.setMessage(
                         R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
             }
 
@@ -367,5 +365,10 @@ public class KeyguardPasswordView extends LinearLayout
     public void afterTextChanged(Editable s) {
     }
 
+
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;    
+    }
 }
 

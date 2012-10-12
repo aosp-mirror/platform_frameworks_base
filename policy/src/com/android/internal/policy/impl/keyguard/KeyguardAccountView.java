@@ -60,7 +60,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     private EditText mPassword;
     private Button mOk;
     public boolean mEnableFallback;
-    private KeyguardNavigationManager mNavigationManager;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
 
     /**
      * Shown while making asynchronous check of password.
@@ -83,7 +83,6 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mNavigationManager = new KeyguardNavigationManager(this);
 
         mLogin = (EditText) findViewById(R.id.login);
         mLogin.setFilters(new InputFilter[] { new LoginFilter.UsernameFilterGeneric() } );
@@ -138,7 +137,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
         mLogin.setText("");
         mPassword.setText("");
         mLogin.requestFocus();
-        mNavigationManager.setMessage(mLockPatternUtils.isPermanentlyLocked() ?
+        mSecurityMessageDisplay.setMessage(mLockPatternUtils.isPermanentlyLocked() ?
                 R.string.kg_login_too_many_attempts : R.string.kg_login_instructions);
     }
 
@@ -179,7 +178,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     // dismiss keyguard
                     mCallback.dismiss(true);
                 } else {
-                    mNavigationManager.setMessage(R.string.kg_login_invalid_input);
+                    mSecurityMessageDisplay.setMessage(R.string.kg_login_invalid_input);
                     mPassword.setText("");
                     mCallback.reportFailedUnlockAttempt();
                 }
@@ -313,5 +312,9 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
         reset();
     }
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;    
+    }
 }
 

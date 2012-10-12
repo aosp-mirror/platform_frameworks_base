@@ -43,11 +43,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.BaseSavedState;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.android.internal.R;
@@ -65,8 +64,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
-    private static final String KEYGUARD_WIDGET_PREFS = "keyguard_widget_prefs";
 
+    // transport control states
     private static final int TRANSPORT_GONE = 0;
     private static final int TRANSPORT_INVISIBLE = 1;
     private static final int TRANSPORT_VISIBLE = 2;
@@ -163,6 +162,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
         updateSecurityViews();
         setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+        
+        if (KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
+            showPrimarySecurityScreen(false);
+        }
     }
 
     private void updateSecurityViews() {
@@ -257,9 +260,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         public void dismiss(boolean authenticated) {
-            // If the biometric unlock was suppressed due to a user switch, it can now be safely
-            // unsuppressed because the user has left the unlock screen.
-            KeyguardUpdateMonitor.getInstance(mContext).clearBiometricUnlockUserSwitched();
             showNextSecurityScreenOrFinish(authenticated);
         }
 
@@ -286,7 +286,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         @Override
         public void showBackupSecurity() {
-            KeyguardHostView.this.showBackupSecurity();
+            KeyguardHostView.this.showBackupSecurityScreen();
         }
 
         @Override
@@ -410,11 +410,27 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     /**
+     * Shows the primary security screen for the user. This will be either the multi-selector
+     * or the user's security method.
+     * @param turningOff true if the device is being turned off
+     */
+    void showPrimarySecurityScreen(boolean turningOff) {
+        SecurityMode securityMode = mSecurityModel.getSecurityMode();
+        if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
+        if (!turningOff && KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()) {
+            // If we're not turning off, then allow biometric alternate.
+            // We'll reload it when the device comes back on.
+            securityMode = mSecurityModel.getAlternateFor(securityMode);
+        }
+        showSecurityScreen(securityMode);
+    }
+    
+    /**
      * Shows the backup security screen for the current security mode.  This could be used for
      * password recovery screens but is currently only used for pattern unlock to show the
      * account unlock screen and biometric unlock to show the user's normal unlock.
      */
-    private void showBackupSecurity() {
+    private void showBackupSecurityScreen() {
         if (DEBUG) Log.d(TAG, "showBackupSecurity()");
         showSecurityScreen(mSecurityModel.getBackupSecurityMode());
     }
@@ -464,14 +480,19 @@ public class KeyguardHostView extends KeyguardViewBase {
                     break;
 
                 default:
-                    showSecurityScreen(SecurityMode.None);
+                    Log.v(TAG, "Bad security screen " + mCurrentSecuritySelection + ", fail safe");
+                    showPrimarySecurityScreen(false);
                     break;
             }
         } else {
-            // Not authenticated but we were asked to dismiss so go back to selector screen.
-            showSecurityScreen(SecurityMode.None);
+            showPrimarySecurityScreen(false);
         }
         if (finish) {
+            // If the alternate unlock was suppressed, it can now be safely
+            // enabled because the user has left keyguard.
+            KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
+            KeyguardUpdateMonitor.getInstance(mContext).setIsFirstBoot(false);
+            
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
             if (mLaunchRunnable != null) {
@@ -519,11 +540,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         };
     };
 
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
+
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
         mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
-        requestFocus();
     }
 
     /**
@@ -544,13 +566,37 @@ public class KeyguardHostView extends KeyguardViewBase {
                 break;
             }
         }
+        boolean simPukFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_full_screen);
         if (view == null) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
             View v = inflater.inflate(getLayoutIdFor(securityMode), this, false);
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
+
             view = (KeyguardSecurityView) v;
+            TextView navigationText = ((TextView) findViewById(R.id.keyguard_message_area));
+
+            // Some devices can fit a navigation area, others cannot. On devices that cannot,
+            // we display the security message in status area.
+            if (navigationText != null) {
+                view.setSecurityMessageDisplay(new KeyguardNavigationManager(navigationText));
+            } else {
+                view.setSecurityMessageDisplay(mKeyguardStatusViewManager);
+            }
         }
+
+        if (securityMode == SecurityMode.SimPin || securityMode == SecurityMode.SimPuk) {
+            if (simPukFullScreen) {
+                mAppWidgetRegion.setVisibility(View.GONE);
+            }
+        }
+
+        if (view instanceof KeyguardSelectorView) {
+            KeyguardSelectorView selectorView = (KeyguardSelectorView) view;
+            View carrierText = selectorView.findViewById(R.id.keyguard_selector_fade_container);
+            selectorView.setCarrierArea(carrierText);
+        }
+        
         return view;
     }
 
@@ -562,6 +608,7 @@ public class KeyguardHostView extends KeyguardViewBase {
      */
     private void showSecurityScreen(SecurityMode securityMode) {
         if (DEBUG) Log.d(TAG, "showSecurityScreen");
+        
         if (securityMode == mCurrentSecuritySelection) return;
 
         KeyguardSecurityView oldView = getSecurityView(mCurrentSecuritySelection);
@@ -607,7 +654,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on");
-        showSecurityScreen(mCurrentSecuritySelection);
+        showPrimarySecurityScreen(false);
         getSecurityView(mCurrentSecuritySelection).onResume();
 
         // This is a an attempt to fix bug 7137389 where the device comes back on but the entire
@@ -619,7 +666,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "screen off");
-        showSecurityScreen(SecurityMode.None);
+        showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
     }
 
@@ -769,6 +816,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 }
             });
         }
+
+        mKeyguardStatusViewManager = ((KeyguardStatusView) 
+                findViewById(R.id.keyguard_status_view_face_palm)).getManager();
+
     }
 
     private void maybePopulateWidgets() {
@@ -920,7 +971,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
                 @Override
                 public void showUnlockHint() {
-                    mKeyguardSelectorView.ping();
+                    if (mKeyguardSelectorView != null) {
+                        mKeyguardSelectorView.ping();
+                    }
                 }
 
             };

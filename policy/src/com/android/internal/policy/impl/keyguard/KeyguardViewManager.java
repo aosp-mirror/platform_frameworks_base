@@ -210,14 +210,13 @@ public class KeyguardViewManager {
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
 
-        if (options != null && options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER)) {
-            mKeyguardView.goToUserSwitcher();
-            mKeyguardView.showNextSecurityScreenIfPresent();
-        }
-
-        if (options != null &&
-                options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE)) {
-            mKeyguardView.showNextSecurityScreenIfPresent();
+        if (options != null) {
+            if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER)) {
+                mKeyguardView.goToUserSwitcher();
+            }
+            if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE)) {
+                mKeyguardView.showNextSecurityScreenIfPresent();
+            }
         }
 
         if (mScreenOn) {
