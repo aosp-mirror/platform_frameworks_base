@@ -204,6 +204,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"無線螢幕分享"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"通知會顯示在這裡"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"系統會在這裡顯示通知"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑動即可隨時存取通知。"\n"再次向下滑動即可使用系統控制項。"</string>
 </resources>
