@@ -58,11 +58,17 @@ the <code>&lt;application></code> element.</p>
     <p class="note"><strong>Note:</strong> If you manually enable debugging in the manifest
  file, be sure to disable it before you build for release (your published application
 should usually <em>not</em> be debuggable).</p></li>
-  <li>Turn on "USB Debugging" on your device.
-    <p>On the device, go to <strong>Settings > Applications > Development</strong> 
-    and enable <strong>USB debugging</strong> 
-    (on an Android 4.0 device, the setting is 
-located in <strong>Settings > Developer options</strong>).</p>
+  <li>Enable <strong>USB debugging</strong> on your device.
+    <ul>
+      <li>On most devices running Android 3.2 or older, you can find the option under
+        <strong>Settings > Applications > Development</strong>.</li>
+      <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
+        <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
+        options</strong> is hidden by default. To make it available, go
+        to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
+        seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
+      </li>
+    </ul>
   </li>
   <li>Set up your system to detect your device.
     <ul>
