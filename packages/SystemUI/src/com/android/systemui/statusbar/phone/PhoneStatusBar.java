@@ -106,6 +106,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public static final boolean DEBUG_CLINGS = false;
 
+    public static final boolean ENABLE_NOTIFICATION_PANEL_CLING = false;
+
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
@@ -344,6 +346,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
+        
 
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
@@ -355,6 +358,15 @@ public class PhoneStatusBar extends BaseStatusBar {
                   View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER |
                   View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS |
                   View.STATUS_BAR_DISABLE_CLOCK);
+
+        // make the header non-responsive to clicks
+        mNotificationPanel.findViewById(R.id.header).setOnTouchListener(
+                new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return true; // e eats everything
+                    }
+                });
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
@@ -410,7 +422,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
         mSettingsButton = mStatusBarWindow.findViewById(R.id.settings_button);
         if (mSettingsButton != null) {
-            mSettingsButton.setOnClickListener(mSettingsButtonListener);
+            if (mStatusBarView.hasFullWidthNotifications()) {
+                mSettingsButton.setOnClickListener(mSettingsButtonListener);
+                mSettingsButton.setVisibility(View.VISIBLE);
+            } else {
+                mSettingsButton.setVisibility(View.GONE);
+            }
         }
         
         mScrollView = (ScrollView)mStatusBarWindow.findViewById(R.id.scroll);
@@ -490,8 +507,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClingShown = ! (DEBUG_CLINGS 
             || !Prefs.read(mContext).getBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, false));
 
-        // robots don't need help
-        if (ActivityManager.isRunningInTestHarness()) {
+        if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
             mClingShown = true;
         }
 
@@ -1900,18 +1916,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
-            // We take this as a good indicator that Setup is running and we shouldn't
-            // allow you to go somewhere else
-            if (!isDeviceProvisioned()) return;
-            try {
-                // Dismiss the lock screen when Settings starts.
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-            }
-            v.getContext().startActivityAsUser(new Intent(Settings.ACTION_SETTINGS)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    new UserHandle(UserHandle.USER_CURRENT));
-            animateCollapsePanels();
+            animateExpandSettingsPanel();
         }
     };
 
