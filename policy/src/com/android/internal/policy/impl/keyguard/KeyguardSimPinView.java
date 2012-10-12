@@ -55,7 +55,7 @@ public class KeyguardSimPinView extends LinearLayout
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
     private LockPatternUtils mLockPatternUtils;
-    private KeyguardNavigationManager mNavigationManager;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
 
     private volatile boolean mSimCheckInProgress;
 
@@ -75,8 +75,6 @@ public class KeyguardSimPinView extends LinearLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        mNavigationManager = new KeyguardNavigationManager(this);
 
         mPinEntry = (EditText) findViewById(R.id.sim_pin_entry);
         mPinEntry.setOnEditorActionListener(this);
@@ -112,7 +110,9 @@ public class KeyguardSimPinView extends LinearLayout
 
     public void reset() {
         // start fresh
-        mNavigationManager.setMessage(R.string.kg_sim_pin_instructions);
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions);
+        }
 
         // make sure that the number of entered digits is consistent when we
         // erase the SIM unlock code, including orientation changes.
@@ -193,7 +193,7 @@ public class KeyguardSimPinView extends LinearLayout
     private void checkPin() {
         if (mPinEntry.getText().length() < 4) {
             // otherwise, display a message to the user, and don't submit.
-            mNavigationManager.setMessage(R.string.kg_invalid_sim_pin_hint);
+            mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint);
             mPinEntry.setText("");
             mCallback.userActivity(0);
             return;
@@ -216,7 +216,7 @@ public class KeyguardSimPinView extends LinearLayout
                                 KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
                                 mCallback.dismiss(true);
                             } else {
-                                mNavigationManager.setMessage(R.string.kg_password_wrong_pin_code);
+                                mSecurityMessageDisplay.setMessage(R.string.kg_password_wrong_pin_code);
                                 mPinEntry.setText("");
                             }
                             mCallback.userActivity(0);
@@ -263,4 +263,9 @@ public class KeyguardSimPinView extends LinearLayout
     public void afterTextChanged(Editable s) {
     }
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;
+        reset();
+    }
 }

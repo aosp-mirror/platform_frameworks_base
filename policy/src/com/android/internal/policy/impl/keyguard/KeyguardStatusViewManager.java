@@ -27,7 +27,10 @@ import libcore.util.MutableInt;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -36,10 +39,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Date;
+
+import libcore.util.MutableInt;
+
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
-class KeyguardStatusViewManager {
+class KeyguardStatusViewManager implements SecurityMessageDisplay {
     private static final boolean DEBUG = false;
     private static final String TAG = "KeyguardStatusView";
 
@@ -55,6 +62,9 @@ class KeyguardStatusViewManager {
     private TextView mStatus1View;
     private TextView mOwnerInfoView;
     private TextView mAlarmStatusView;
+    private TextView mSecurityMessage;
+    private static final int SECURITY_MESSAGE_DURATION = 5000;
+    private static final boolean SECURITY_MESSAGE_TIMES_OUT = false;
 
     // Top-level container view for above views
     private View mContainer;
@@ -65,6 +75,10 @@ class KeyguardStatusViewManager {
     // last known plugged in state
     private boolean mPluggedIn = false;
 
+    // Whether to use the last line as a combined line to either display owner info / charging.
+    // If false, each item will be given a dedicated space.
+    private boolean mShareStatusRegion = false;
+    
     // last known battery level
     private int mBatteryLevel = 100;
 
@@ -78,6 +92,10 @@ class KeyguardStatusViewManager {
     private ClockView mClockView;
     protected boolean mBatteryCharged;
     protected boolean mBatteryIsLow;
+
+    private Handler mHandler;
+    private Runnable mClearSecurityMessageRunnable;
+    private CharSequence mSecurityMessageContents = "";
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -102,8 +120,10 @@ class KeyguardStatusViewManager {
     public KeyguardStatusViewManager(View view) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
-        mDateFormatString = getContext().getResources().getText(
-                com.android.internal.R.string.abbrev_wday_month_day_no_year);
+        Resources res = getContext().getResources();
+        mDateFormatString = 
+                res.getText(com.android.internal.R.string.abbrev_wday_month_day_no_year);
+        mShareStatusRegion = res.getBoolean(R.bool.kg_share_status_area);
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 
@@ -112,6 +132,12 @@ class KeyguardStatusViewManager {
         mAlarmStatusView = (TextView) view.findViewById(R.id.alarm_status);
         mOwnerInfoView = (TextView) view.findViewById(R.id.owner_info);
         mClockView = (ClockView) view.findViewById(R.id.clock_view);
+        mSecurityMessage = (TextView) view.findViewById(R.id.status_security_message);
+
+        // This is required to ensure marquee works
+        if (mSecurityMessage != null) {
+            mSecurityMessage.setSelected(true);
+        }
 
         // Use custom font in mDateView
         mDateView.setTypeface(Typeface.SANS_SERIF, Typeface.BOLD);
@@ -129,9 +155,17 @@ class KeyguardStatusViewManager {
         // Registering this callback immediately updates the battery state, among other things.
         mUpdateMonitor.registerCallback(mInfoCallback);
 
-        resetStatusInfo();
         refreshDate();
-        updateOwnerInfo();
+        resetStatusInfo();
+
+        mHandler = new Handler(Looper.myLooper());
+        mClearSecurityMessageRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mSecurityMessageContents = "";
+                updateStatusLines();
+            }
+        };
     }
 
     public void onPause() {
@@ -154,6 +188,37 @@ class KeyguardStatusViewManager {
         updateStatusLines();
     }
 
+    public void setMessage(CharSequence msg) {
+        mSecurityMessageContents = msg;
+        securityMessageChanged();
+    }
+
+    public void setMessage(int resId) {
+        if (resId != 0) {
+            mSecurityMessageContents = getContext().getResources().getText(resId);
+        } else {
+            mSecurityMessageContents = "";
+        }
+        securityMessageChanged();
+    }
+
+    public void setMessage(int resId, Object... formatArgs) {
+        if (resId != 0) {
+            mSecurityMessageContents = getContext().getString(resId, formatArgs);
+        } else {
+            mSecurityMessageContents = "";
+        }
+        securityMessageChanged();
+    }
+
+    public void securityMessageChanged() {
+        updateStatusLines();
+        if (SECURITY_MESSAGE_TIMES_OUT) {
+            mHandler.removeCallbacks(mClearSecurityMessageRunnable);
+            mHandler.postDelayed(mClearSecurityMessageRunnable, SECURITY_MESSAGE_DURATION);
+        }
+    }
+
     /**
      * Update the status lines based on these rules:
      * AlarmStatus: Alarm state always gets it's own line.
@@ -163,8 +228,21 @@ class KeyguardStatusViewManager {
      */
     void updateStatusLines() {
         updateAlarmInfo();
-        updateOwnerInfo();
-        updateStatus1();
+        boolean statusAreaUsed = updateSecurityMessage();
+        statusAreaUsed = updateStatus1(statusAreaUsed) || statusAreaUsed;
+        updateOwnerInfo(statusAreaUsed);
+    }
+
+    private boolean updateSecurityMessage() {
+        if (mSecurityMessage == null) return false;
+        if (!TextUtils.isEmpty(mSecurityMessageContents)) {
+            mSecurityMessage.setText(mSecurityMessageContents);
+            mSecurityMessage.setVisibility(View.VISIBLE);
+            return true;
+        } else {
+            mSecurityMessage.setVisibility(View.GONE);
+            return false;
+        }
     }
 
     private void updateAlarmInfo() {
@@ -178,30 +256,36 @@ class KeyguardStatusViewManager {
         }
     }
 
-    private void updateOwnerInfo() {
+    private boolean updateStatus1(boolean statusAreaUsed) {
+        MutableInt icon = new MutableInt(0);
+        CharSequence string = getPriorityTextMessage(icon);
+
+        boolean dontShow = statusAreaUsed && mShareStatusRegion;
+        if (!dontShow && !TextUtils.isEmpty(string)) {
+            maybeSetUpperCaseText(mStatus1View, string);
+            mStatus1View.setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
+            mStatus1View.setVisibility(View.VISIBLE);
+            return true;
+        } else {
+            mStatus1View.setVisibility(View.GONE);
+            return false;
+        }
+    }
+
+    private void updateOwnerInfo(boolean statusAreaUsed) {
         final ContentResolver res = getContext().getContentResolver();
         final boolean ownerInfoEnabled = Settings.Secure.getIntForUser(res,
                 Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
         String text = Settings.Secure.getStringForUser(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO,
                 UserHandle.USER_CURRENT);
-        if (ownerInfoEnabled && !TextUtils.isEmpty(text)) {
+
+        boolean dontShow = statusAreaUsed && mShareStatusRegion;
+        if (!dontShow && ownerInfoEnabled && !TextUtils.isEmpty(text)) {
             text = text.trim(); // Remove trailing newlines
             maybeSetUpperCaseText(mOwnerInfoView, text);
             mOwnerInfoView.setVisibility(View.VISIBLE);
         } else {
             mOwnerInfoView.setVisibility(View.GONE);
-        }
-    }
-
-    private void updateStatus1() {
-        MutableInt icon = new MutableInt(0);
-        CharSequence string = getPriorityTextMessage(icon);
-        if (!TextUtils.isEmpty(string)) {
-            maybeSetUpperCaseText(mStatus1View, string);
-            mStatus1View.setCompoundDrawablesWithIntrinsicBounds(icon.value, 0, 0, 0);
-            mStatus1View.setVisibility(View.VISIBLE);
-        } else {
-            mStatus1View.setVisibility(View.GONE);
         }
     }
 

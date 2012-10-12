@@ -44,4 +44,7 @@ public class KeyguardStatusView extends GridLayout {
         mStatusViewManager = new KeyguardStatusViewManager(this);
     }
 
+    KeyguardStatusViewManager getManager() {
+        return mStatusViewManager;
+    }
 }
