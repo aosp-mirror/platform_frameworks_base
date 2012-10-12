@@ -710,7 +710,18 @@ class AccessibilityInjector {
                 "javascript:(function() { %s.onResult(%d, %s); })();";
 
         // Time in milliseconds to wait for a result before failing.
-        private static final long RESULT_TIMEOUT = 5000;
+        // Based on recorded times, we have found that in a complex real-world
+        // web app (such as the desktop version of Gmail), there can be spikes
+        // of ~2600ms in the worst case. These are temporary spikes and are not
+        // repeatable; GMail eventually settles down to around ~60ms. The
+        // longest duration that is consistently repeatable is ~300ms when
+        // loading extremely large plain text documents in WebView.
+        // If this timeout hits, the navigation is considered to have "failed",
+        // meaning there is no content. Since the longer spikes are one-off
+        // events triggered by the page loading and itself running a large
+        // amount of JS, subsequent runs would succeed, so the worst impact
+        // is that the first run will look like it had not loaded yet.
+        private static final long RESULT_TIMEOUT = 1500;
 
         private final AtomicInteger mResultIdCounter = new AtomicInteger();
         private final Object mResultLock = new Object();
