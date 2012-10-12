@@ -98,21 +98,19 @@ class AppWidgetService extends IAppWidgetService.Stub
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
+                if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+                    onUserRemoved(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL));
+                } else if (Intent.ACTION_USER_STOPPING.equals(intent.getAction())) {
+                    onUserStopping(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL));
+                }
             }
         }, userFilter);
-
-        IntentFilter userStopFilter = new IntentFilter();
-        userStopFilter.addAction(Intent.ACTION_USER_STOPPED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onUserStopped(getSendingUserId());
-            }
-        }, UserHandle.ALL, userFilter, null, null);
     }
 
     /**
@@ -203,7 +201,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         synchronized (mAppWidgetServices) {
             AppWidgetServiceImpl impl = mAppWidgetServices.get(userId);
             mAppWidgetServices.remove(userId);
-    
+
             if (impl == null) {
                 AppWidgetServiceImpl.getSettingsFile(userId).delete();
             } else {
@@ -212,7 +210,15 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    public void onUserStopped(int userId) {
+    public void onUserStopping(int userId) {
+        if (userId < 1) return;
+        synchronized (mAppWidgetServices) {
+            AppWidgetServiceImpl impl = mAppWidgetServices.get(userId);
+            if (impl != null) {
+                mAppWidgetServices.remove(userId);
+                impl.onUserStopping();
+            }
+        }
     }
 
     private AppWidgetServiceImpl getImplForUser(int userId) {
@@ -322,11 +328,11 @@ class AppWidgetService extends IAppWidgetService.Stub
             String action = intent.getAction();
             // Slog.d(TAG, "received " + action);
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 if (userId >= 0) {
                     getImplForUser(userId).sendInitialBroadcasts();
                 } else {
-                    Slog.w(TAG, "Not user handle supplied in " + intent);
+                    Slog.w(TAG, "Incorrect user handle supplied in " + intent);
                 }
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 for (int i = 0; i < mAppWidgetServices.size(); i++) {

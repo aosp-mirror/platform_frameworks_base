@@ -1778,13 +1778,16 @@ class AppWidgetServiceImpl {
         return new AtomicFile(settingsFile);
     }
 
-    void onUserRemoved() {
+    void onUserStopping() {
         // prune the ones we don't want to keep
         int N = mInstalledProviders.size();
         for (int i = N - 1; i >= 0; i--) {
             Provider p = mInstalledProviders.get(i);
             cancelBroadcasts(p);
         }
+    }
+
+    void onUserRemoved() {
         getSettingsFile(mUserId).delete();
     }
 

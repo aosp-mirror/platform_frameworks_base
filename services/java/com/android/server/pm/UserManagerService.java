@@ -149,7 +149,7 @@ public class UserManagerService extends IUserManager.Stub {
                         -1, -1);
                 mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
                 readUserListLocked();
-                // Prune out any partially created users.
+                // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
                 for (int i = 0; i < mUsers.size(); i++) {
                     UserInfo ui = mUsers.valueAt(i);
@@ -459,7 +459,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void fallbackToSingleUserLocked() {
         // Create the primary user
         UserInfo primary = new UserInfo(0, "Primary", null,
-                UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+                UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
         mUsers.put(0, primary);
         mNextSerialNumber = MIN_USER_ID;
         updateUserIdsLocked();
@@ -703,6 +703,11 @@ public class UserManagerService extends IUserManager.Stub {
                 return false;
             }
             mRemovingUserIds.add(userHandle);
+            // Set this to a partially created user, so that the user will be purged
+            // on next startup, in case the runtime stops now before stopping and
+            // removing the user completely.
+            user.partial = true;
+            writeUserLocked(user);
         }
 
         int res;
