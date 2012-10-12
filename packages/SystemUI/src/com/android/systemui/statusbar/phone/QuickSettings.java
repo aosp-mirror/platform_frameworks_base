@@ -754,6 +754,7 @@ class QuickSettings {
             mBrightnessDialog.setCanceledOnTouchOutside(true);
 
             mBrightnessController = new BrightnessController(mContext,
+                    (ImageView) mBrightnessDialog.findViewById(R.id.brightness_icon),
                     (ToggleSlider) mBrightnessDialog.findViewById(R.id.brightness_slider));
             mBrightnessController.addStateChangedCallback(mModel);
             mBrightnessDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {

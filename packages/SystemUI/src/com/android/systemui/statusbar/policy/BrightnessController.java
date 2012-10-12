@@ -28,6 +28,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -40,6 +41,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final int mMaximumBacklight;
 
     private final Context mContext;
+    private final ImageView mIcon;
     private final ToggleSlider mControl;
     private final boolean mAutomaticAvailable;
     private final IPowerManager mPower;
@@ -52,8 +54,9 @@ public class BrightnessController implements ToggleSlider.Listener {
         public void onBrightnessLevelChanged();
     }
 
-    public BrightnessController(Context context, ToggleSlider control) {
+    public BrightnessController(Context context, ImageView icon, ToggleSlider control) {
         mContext = context;
+        mIcon = icon;
         mControl = control;
         mUserTracker = new CurrentUserTracker(mContext);
 
@@ -84,8 +87,10 @@ public class BrightnessController implements ToggleSlider.Listener {
                 automatic = 0;
             }
             control.setChecked(automatic != 0);
+            updateIcon(automatic != 0);
         } else {
             control.setChecked(false);
+            updateIcon(false /*automatic*/);
             //control.hideToggle();
         }
         
@@ -105,6 +110,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
         setMode(automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                 : Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        updateIcon(automatic);
         if (!automatic) {
             final int val = value + mMinimumBacklight;
             setBrightness(val);
@@ -135,5 +141,13 @@ public class BrightnessController implements ToggleSlider.Listener {
             mPower.setTemporaryScreenBrightnessSettingOverride(brightness);
         } catch (RemoteException ex) {
         }        
+    }
+
+    private void updateIcon(boolean automatic) {
+        if (mIcon != null) {
+            mIcon.setImageResource(automatic ?
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_on :
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_off);
+        }
     }
 }
