@@ -320,6 +320,8 @@ public class UserManager {
      * @return a value greater than or equal to 1 
      */
     public static int getMaxSupportedUsers() {
+        // Don't allow multiple users on certain builds
+        if (android.os.Build.ID.startsWith("JVP")) return 1;
         return SystemProperties.getInt("fw.max_users",
                 Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
     }
