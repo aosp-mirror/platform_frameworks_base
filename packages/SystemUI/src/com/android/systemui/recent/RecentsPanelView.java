@@ -520,7 +520,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void onWindowAnimationStart() {
         if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
-            final int startDelay = 100;
+            final int startDelay = 150;
             final int duration = 250;
             final ViewHolder holder = mItemToAnimateInWhenWindowAnimationIsFinished;
             final TimeInterpolator cubic = new DecelerateInterpolator(1.5f);

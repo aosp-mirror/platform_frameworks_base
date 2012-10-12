@@ -18,6 +18,7 @@ package com.android.systemui.recent;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
@@ -42,6 +44,7 @@ public class RecentsActivity extends Activity {
     private IntentFilter mIntentFilter;
     private boolean mShowing;
     private boolean mForeground;
+
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -79,6 +82,9 @@ public class RecentsActivity extends Activity {
 
     @Override
     public void onPause() {
+        overridePendingTransition(
+                R.anim.recents_return_to_launcher_enter,
+                R.anim.recents_return_to_launcher_exit);
         mForeground = false;
         super.onPause();
     }
@@ -92,8 +98,23 @@ public class RecentsActivity extends Activity {
         super.onStop();
     }
 
+    private void updateWallpaperVisibility(boolean visible) {
+        int wpflags = visible ? WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER : 0;
+        int curflags = getWindow().getAttributes().flags
+                & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        if (wpflags != curflags) {
+            getWindow().setFlags(wpflags, WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
+        }
+    }
+
     @Override
     public void onStart() {
+        // Hide wallpaper if it's not a static image
+        if (WallpaperManager.getInstance(this).getWallpaperInfo() != null) {
+            updateWallpaperVisibility(false);
+        } else {
+            updateWallpaperVisibility(true);
+        }
         mShowing = true;
         if (mRecentsPanel != null) {
             mRecentsPanel.refreshViews();
