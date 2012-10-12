@@ -34,7 +34,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;
-    private KeyguardNavigationManager mNavigationManager;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
     private View mFaceUnlockAreaView;
     private ImageButton mCancelButton;
 
@@ -49,7 +49,6 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mNavigationManager = new KeyguardNavigationManager(this);
 
         initializeBiometricUnlockView();
     }
@@ -173,4 +172,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         }
     };
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;    
+    }
 }

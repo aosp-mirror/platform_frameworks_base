@@ -48,7 +48,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     private ProgressDialog mSimUnlockProgressDialog = null;
     private KeyguardSecurityCallback mCallback;
 
-    private KeyguardNavigationManager mNavigationManager;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
 
     private PasswordEntryKeyboardView mKeyboardView;
 
@@ -99,7 +99,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             }
             mSimPinEntry.setText(null);
             if (msg != 0) {
-                mNavigationManager.setMessage(msg);
+                mSecurityMessageDisplay.setMessage(msg);
             }
         }
 
@@ -107,7 +107,9 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             mPinText="";
             mPukText="";
             state = ENTER_PUK;
-            mNavigationManager.setMessage(R.string.kg_puk_enter_puk_hint);
+            if (mSecurityMessageDisplay != null) {
+                mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint);
+            }
             mSimPinEntry.requestFocus();
         }
     }
@@ -129,8 +131,6 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        mNavigationManager = new KeyguardNavigationManager(this);
 
         mSimPinEntry = (TextView) findViewById(R.id.sim_pin_entry);
         mSimPinEntry.setOnEditorActionListener(this);
@@ -279,7 +279,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                                 mCallback.dismiss(true);
                             } else {
                                 mStateMachine.reset();
-                                mNavigationManager.setMessage(R.string.kg_invalid_puk);
+                                mSecurityMessageDisplay.setMessage(R.string.kg_invalid_puk);
                             }
                             mCheckInProgress = false;
                         }
@@ -333,4 +333,9 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     public void afterTextChanged(Editable s) {
     }
 
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        mSecurityMessageDisplay = display;
+        reset();
+    }
 }
