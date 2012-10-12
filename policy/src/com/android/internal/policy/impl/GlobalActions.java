@@ -314,7 +314,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // one more thing: optionally add a list of users to switch to
-        if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
+        // temporarily enable this by default
+        if (true || SystemProperties.getBoolean("fw.power_user_switcher", false)) {
             addUsersToMenu(mItems);
         }
 
