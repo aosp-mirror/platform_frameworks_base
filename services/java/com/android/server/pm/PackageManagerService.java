@@ -1835,7 +1835,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps == null) return null;
                 // Note: isEnabledLP() does not apply here - always return info
-                return PackageParser.generateApplicationInfo(p, flags, ps.readUserState(userId));
+                return PackageParser.generateApplicationInfo(
+                        p, flags, ps.readUserState(userId), userId);
             }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
