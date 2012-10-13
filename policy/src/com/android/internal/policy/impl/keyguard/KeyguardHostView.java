@@ -784,17 +784,12 @@ public class KeyguardHostView extends KeyguardViewBase {
                 public void onListenerDetached() {
                     int page = getWidgetPosition(R.id.keyguard_transport_control);
                     if (page != -1) {
-                        if (page == mAppWidgetContainer.getCurrentPage()) {
-                            // Switch back to clock view if music was showing.
-                            mAppWidgetContainer
-                                .setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
-                        }
                         mAppWidgetContainer.removeView(mTransportControl);
-                        // XXX keep view attached to hierarchy so we still get show/hide events
-                        // from AudioManager
+                        // XXX keep view attached so we still get show/hide events from AudioManager
                         KeyguardHostView.this.addView(mTransportControl);
                         mTransportControl.setVisibility(View.GONE);
                         mTransportState = TRANSPORT_GONE;
+                        mTransportControl.post(mSwitchPageRunnable);
                     }
                 }
 
