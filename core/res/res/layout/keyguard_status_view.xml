@@ -33,28 +33,32 @@
         android:gravity="center_horizontal|top"
         android:contentDescription="@*android:string/keyguard_accessibility_status">
 
-        <com.android.internal.policy.impl.keyguard.ClockView
-            android:id="@+id/clock_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/kg_clock_top_margin"
-            android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-            android:layout_gravity="right">
-
-            <TextView android:id="@+id/clock_text"
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:orientation="vertical">
+            <com.android.internal.policy.impl.keyguard.ClockView
+                android:id="@+id/clock_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:textSize="@dimen/kg_status_clock_font_size"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#ffffffff"
-                android:drawablePadding="2dip"
-                />
+                android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
+                android:layout_gravity="right">
 
-        </com.android.internal.policy.impl.keyguard.ClockView>
+                <TextView android:id="@+id/clock_text"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:singleLine="true"
+                          android:ellipsize="none"
+                          android:textSize="@dimen/kg_status_clock_font_size"
+                          android:textAppearance="?android:attr/textAppearanceMedium"
+                          android:textColor="#ffffffff"
+                          android:drawablePadding="2dip"
+                          />
 
-        <include layout="@layout/keyguard_status_area" />
+            </com.android.internal.policy.impl.keyguard.ClockView>
+
+            <include layout="@layout/keyguard_status_area" />
+        </LinearLayout>
 
     </com.android.internal.policy.impl.keyguard.KeyguardStatusView>
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>

@@ -210,6 +210,18 @@ public class KeyguardViewManager {
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
 
+        // HACK
+        // The keyguard view will have set up window flags in onFinishInflate before we set
+        // the view mediator callback. Make sure it knows the correct IME state.
+        if (mViewMediatorCallback != null) {
+            KeyguardPasswordView kpv = (KeyguardPasswordView) mKeyguardView.findViewById(
+                    R.id.keyguard_password_view);
+
+            if (kpv != null) {
+                mViewMediatorCallback.setNeedsInput(kpv.needsInput());
+            }
+        }
+
         if (options != null) {
             if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER)) {
                 mKeyguardView.goToUserSwitcher();
