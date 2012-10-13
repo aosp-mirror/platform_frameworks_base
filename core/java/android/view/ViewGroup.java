@@ -5354,6 +5354,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    public void resolveRtlPropertiesIfNeeded() {
+        super.resolveRtlPropertiesIfNeeded();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resolveRtlPropertiesIfNeeded();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public boolean resolveLayoutDirection() {
         final boolean result = super.resolveLayoutDirection();
         if (result) {
@@ -5408,6 +5423,51 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
+    public void resolvePadding() {
+        super.resolvePadding();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resolvePadding();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void resolveDrawables() {
+        super.resolveDrawables();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resolveDrawables();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resetRtlProperties() {
+        super.resetRtlProperties();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resetRtlProperties();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void resetResolvedLayoutDirection() {
         super.resetResolvedLayoutDirection();
 
@@ -5448,6 +5508,38 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = getChildAt(i);
             if (child.isTextAlignmentInherited()) {
                 child.resetResolvedTextAlignment();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resetResolvedPadding() {
+        super.resetResolvedPadding();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resetResolvedPadding();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void resetResolvedDrawables() {
+        super.resetResolvedDrawables();
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.isLayoutDirectionInherited()) {
+                child.resetResolvedDrawables();
             }
         }
     }

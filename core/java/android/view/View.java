@@ -3666,15 +3666,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Padding from the background drawable is stored at this point in mUserPaddingLeftInitial
             // and mUserPaddingRightInitial) so drawable padding will be used as ultimate default if
             // defined.
-            if (startPaddingDefined) {
-                mUserPaddingLeftInitial = startPadding;
-            } else if (leftPaddingDefined) {
+            if (leftPaddingDefined) {
                 mUserPaddingLeftInitial = leftPadding;
             }
-            if (endPaddingDefined) {
-                mUserPaddingRightInitial = endPadding;
-            }
-            else if (rightPaddingDefined) {
+            if (rightPaddingDefined) {
                 mUserPaddingRightInitial = rightPadding;
             }
         }
@@ -11559,8 +11554,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Resolve all RTL related properties.
+     *
+     * @hide
      */
-    void resolveRtlPropertiesIfNeeded() {
+    public void resolveRtlPropertiesIfNeeded() {
         if (!needRtlPropertiesResolution()) return;
 
         // Order is important here: LayoutDirection MUST be resolved first
@@ -11584,8 +11581,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         onRtlPropertiesChanged(getLayoutDirection());
     }
 
-    // Reset resolution of all RTL related properties.
-    void resetRtlProperties() {
+    /**
+     * Reset resolution of all RTL related properties.
+     *
+     * @hide
+     */
+    public void resetRtlProperties() {
         resetResolvedLayoutDirection();
         resetResolvedTextDirection();
         resetResolvedTextAlignment();
@@ -14215,7 +14216,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void resolveDrawables() {
+    protected void resolveDrawables() {
         if (mBackground != null) {
             mBackground.setLayoutDirection(getLayoutDirection());
         }
@@ -14238,7 +14239,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void onResolveDrawables(int layoutDirection) {
     }
 
-    private void resetResolvedDrawables() {
+    /**
+     * @hide
+     */
+    protected void resetResolvedDrawables() {
         mPrivateFlags2 &= ~PFLAG2_DRAWABLE_RESOLVED;
     }
 
@@ -14828,14 +14832,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isRtlCompatibilityMode()) {
             mPaddingLeft = mUserPaddingLeftInitial;
             mPaddingRight = mUserPaddingRightInitial;
+            return;
+        }
+        if (isLayoutRtl()) {
+            mPaddingLeft = (mUserPaddingEnd >= 0) ? mUserPaddingEnd : mUserPaddingLeftInitial;
+            mPaddingRight = (mUserPaddingStart >= 0) ? mUserPaddingStart : mUserPaddingRightInitial;
         } else {
-            if (isLayoutRtl()) {
-                mPaddingLeft = mUserPaddingRightInitial;
-                mPaddingRight = mUserPaddingLeftInitial;
-            } else {
-                mPaddingLeft = mUserPaddingLeftInitial;
-                mPaddingRight = mUserPaddingRightInitial;
-            }
+            mPaddingLeft = (mUserPaddingStart >= 0) ? mUserPaddingStart : mUserPaddingLeftInitial;
+            mPaddingRight = (mUserPaddingEnd >= 0) ? mUserPaddingEnd : mUserPaddingRightInitial;
         }
     }
 
