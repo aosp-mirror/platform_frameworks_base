@@ -207,12 +207,13 @@ public class KeyguardPasswordView extends LinearLayout
             });
         }
 
-        // If no icon is visible, reset the left margin on the password field so the text is
+        // If no icon is visible, reset the start margin on the password field so the text is
         // still centered.
         if (!imeOrDeleteButtonVisible) {
             android.view.ViewGroup.LayoutParams params = mPasswordEntry.getLayoutParams();
             if (params instanceof MarginLayoutParams) {
-                ((MarginLayoutParams)params).leftMargin = 0;
+                final MarginLayoutParams mlp = (MarginLayoutParams) params;
+                mlp.setMarginStart(0);
                 mPasswordEntry.setLayoutParams(params);
             }
         }
