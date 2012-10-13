@@ -17,9 +17,9 @@
 package com.android.internal.policy.impl.keyguard;
 
 public interface SecurityMessageDisplay {
-    public void setMessage(CharSequence msg);
+    public void setMessage(CharSequence msg, boolean important);
 
-    public void setMessage(int resId);
+    public void setMessage(int resId, boolean important);
 
-    public void setMessage(int resId, Object... formatArgs);
+    public void setMessage(int resId, boolean important, Object... formatArgs);
 }

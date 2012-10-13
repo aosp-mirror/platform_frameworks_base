@@ -182,7 +182,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         } else {
-            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions);
+            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
         }
 
         // the footer depends on how many total attempts the user has failed
@@ -254,7 +254,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                 } else {
-                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern);
+                    mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern, true);
                     mLockPatternView.postDelayed(mCancelPatternRunnable, PATTERN_CLEAR_TIMEOUT_MS);
                 }
             }
@@ -327,13 +327,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) (millisUntilFinished / 1000);
                 mSecurityMessageDisplay.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
+                        R.string.kg_too_many_failed_attempts_countdown, true, secondsRemaining);
             }
 
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
-                mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions);
+                mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {

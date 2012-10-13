@@ -16,10 +16,7 @@
 
 package com.android.internal.policy.impl.keyguard;
 
-import android.view.View;
 import android.widget.TextView;
-
-import com.android.internal.R;
 
 public class KeyguardNavigationManager implements SecurityMessageDisplay {
 
@@ -30,12 +27,12 @@ public class KeyguardNavigationManager implements SecurityMessageDisplay {
         mMessageArea.setSelected(true); // Make marquee work
     }
 
-    public void setMessage(CharSequence msg) {
+    public void setMessage(CharSequence msg, boolean important) {
         mMessageArea.setText(msg);
         mMessageArea.announceForAccessibility(mMessageArea.getText());
     }
 
-    public void setMessage(int resId) {
+    public void setMessage(int resId, boolean important) {
         if (resId != 0) {
             mMessageArea.setText(resId);
             mMessageArea.announceForAccessibility(mMessageArea.getText());
@@ -44,7 +41,7 @@ public class KeyguardNavigationManager implements SecurityMessageDisplay {
         }
     }
 
-    public void setMessage(int resId, Object... formatArgs) {
+    public void setMessage(int resId, boolean important, Object... formatArgs) {
         if (resId != 0) {
             mMessageArea.setText(mMessageArea.getContext().getString(resId, formatArgs));
             mMessageArea.announceForAccessibility(mMessageArea.getText());
