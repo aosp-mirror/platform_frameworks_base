@@ -3930,48 +3930,54 @@ public final class ActivityManagerService extends ActivityManagerNative
             removeDyingProviderLocked(null, providers.get(i), true);
         }
 
-        if (mIntentSenderRecords.size() > 0) {
-            Iterator<WeakReference<PendingIntentRecord>> it
-                    = mIntentSenderRecords.values().iterator();
-            while (it.hasNext()) {
-                WeakReference<PendingIntentRecord> wpir = it.next();
-                if (wpir == null) {
+        if (name == null) {
+            // Remove pending intents.  For now we only do this when force
+            // stopping users, because we have some problems when doing this
+            // for packages -- app widgets are not currently cleaned up for
+            // such packages, so they can be left with bad pending intents.
+            if (mIntentSenderRecords.size() > 0) {
+                Iterator<WeakReference<PendingIntentRecord>> it
+                        = mIntentSenderRecords.values().iterator();
+                while (it.hasNext()) {
+                    WeakReference<PendingIntentRecord> wpir = it.next();
+                    if (wpir == null) {
+                        it.remove();
+                        continue;
+                    }
+                    PendingIntentRecord pir = wpir.get();
+                    if (pir == null) {
+                        it.remove();
+                        continue;
+                    }
+                    if (name == null) {
+                        // Stopping user, remove all objects for the user.
+                        if (pir.key.userId != userId) {
+                            // Not the same user, skip it.
+                            continue;
+                        }
+                    } else {
+                        if (UserHandle.getAppId(pir.uid) != appId) {
+                            // Different app id, skip it.
+                            continue;
+                        }
+                        if (userId != UserHandle.USER_ALL && pir.key.userId != userId) {
+                            // Different user, skip it.
+                            continue;
+                        }
+                        if (!pir.key.packageName.equals(name)) {
+                            // Different package, skip it.
+                            continue;
+                        }
+                    }
+                    if (!doit) {
+                        return true;
+                    }
+                    didSomething = true;
                     it.remove();
-                    continue;
-                }
-                PendingIntentRecord pir = wpir.get();
-                if (pir == null) {
-                    it.remove();
-                    continue;
-                }
-                if (name == null) {
-                    // Stopping user, remove all objects for the user.
-                    if (pir.key.userId != userId) {
-                        // Not the same user, skip it.
-                        continue;
+                    pir.canceled = true;
+                    if (pir.key.activity != null) {
+                        pir.key.activity.pendingResults.remove(pir.ref);
                     }
-                } else {
-                    if (UserHandle.getAppId(pir.uid) != appId) {
-                        // Different app id, skip it.
-                        continue;
-                    }
-                    if (userId != UserHandle.USER_ALL && pir.key.userId != userId) {
-                        // Different user, skip it.
-                        continue;
-                    }
-                    if (!pir.key.packageName.equals(name)) {
-                        // Different package, skip it.
-                        continue;
-                    }
-                }
-                if (!doit) {
-                    return true;
-                }
-                didSomething = true;
-                it.remove();
-                pir.canceled = true;
-                if (pir.key.activity != null) {
-                    pir.key.activity.pendingResults.remove(pir.ref);
                 }
             }
         }
