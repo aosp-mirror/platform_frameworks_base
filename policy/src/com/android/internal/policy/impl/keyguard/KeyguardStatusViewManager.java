@@ -188,12 +188,14 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
         updateStatusLines();
     }
 
-    public void setMessage(CharSequence msg) {
+    public void setMessage(CharSequence msg, boolean important) {
+        if (!important) return;
         mSecurityMessageContents = msg;
         securityMessageChanged();
     }
 
-    public void setMessage(int resId) {
+    public void setMessage(int resId, boolean important) {
+        if (!important) return;
         if (resId != 0) {
             mSecurityMessageContents = getContext().getResources().getText(resId);
         } else {
@@ -202,7 +204,8 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
         securityMessageChanged();
     }
 
-    public void setMessage(int resId, Object... formatArgs) {
+    public void setMessage(int resId, boolean important, Object... formatArgs) {
+        if (!important) return;
         if (resId != 0) {
             mSecurityMessageContents = getContext().getString(resId, formatArgs);
         } else {
