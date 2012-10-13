@@ -291,10 +291,10 @@
     <dimen name="kg_widget_pager_horizontal_padding">16dp</dimen>
 
     <!-- Top padding for the widget pager -->
-    <dimen name="kg_widget_pager_top_padding">16dp</dimen>
+    <dimen name="kg_widget_pager_top_padding">0dp</dimen>
 
     <!-- Bottom padding for the widget pager -->
-    <dimen name="kg_widget_pager_bottom_padding">6dp</dimen>
+    <dimen name="kg_widget_pager_bottom_padding">0dp</dimen>
 
     <!-- Top margin for the runway lights. We add a negative margin in large
         devices to account for the widget pager padding -->
