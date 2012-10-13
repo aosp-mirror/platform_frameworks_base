@@ -77,7 +77,6 @@ public final class ScriptGroup extends BaseObj {
         ArrayList<Script.KernelID> mKernels = new ArrayList<Script.KernelID>();
         ArrayList<ConnectLine> mInputs = new ArrayList<ConnectLine>();
         ArrayList<ConnectLine> mOutputs = new ArrayList<ConnectLine>();
-        boolean mSeen;
         int dagNumber;
 
         Node mNext;
@@ -176,39 +175,24 @@ public final class ScriptGroup extends BaseObj {
             mRS = rs;
         }
 
-        private void validateCycleRecurse(Node n, int depth) {
-            n.mSeen = true;
-
-            //android.util.Log.v("RSR", " validateCycleRecurse outputCount " + n.mOutputs.size());
-            for (int ct=0; ct < n.mOutputs.size(); ct++) {
-                final ConnectLine cl = n.mOutputs.get(ct);
+        // do a DFS from original node, looking for original node
+        // any cycle that could be created must contain original node
+        private void validateCycle(Node target, Node original) {
+            for (int ct = 0; ct < target.mOutputs.size(); ct++) {
+                final ConnectLine cl = target.mOutputs.get(ct);
                 if (cl.mToK != null) {
                     Node tn = findNode(cl.mToK.mScript);
-                    if (tn.mSeen) {
+                    if (tn.equals(original)) {
                         throw new RSInvalidStateException("Loops in group not allowed.");
                     }
-                    validateCycleRecurse(tn, depth + 1);
+                    validateCycle(tn, original);
                 }
                 if (cl.mToF != null) {
                     Node tn = findNode(cl.mToF.mScript);
-                    if (tn.mSeen) {
+                    if (tn.equals(original)) {
                         throw new RSInvalidStateException("Loops in group not allowed.");
                     }
-                    validateCycleRecurse(tn, depth + 1);
-                }
-            }
-        }
-
-        private void validateCycle() {
-            //android.util.Log.v("RSR", "validateCycle");
-
-            for (int ct=0; ct < mNodes.size(); ct++) {
-                for (int ct2=0; ct2 < mNodes.size(); ct2++) {
-                    mNodes.get(ct2).mSeen = false;
-                }
-                Node n = mNodes.get(ct);
-                if (n.mInputs.size() == 0) {
-                    validateCycleRecurse(n, 0);
+                    validateCycle(tn, original);
                 }
             }
         }
@@ -327,7 +311,7 @@ public final class ScriptGroup extends BaseObj {
 
             Node nf = findNode(from);
             if (nf == null) {
-                throw new RSInvalidStateException("From kernel not found.");
+                throw new RSInvalidStateException("From script not found.");
             }
 
             Node nt = findNode(to.mScript);
@@ -341,7 +325,7 @@ public final class ScriptGroup extends BaseObj {
             nf.mOutputs.add(cl);
             nt.mInputs.add(cl);
 
-            validateCycle();
+            validateCycle(nf, nf);
             return this;
         }
 
@@ -362,7 +346,7 @@ public final class ScriptGroup extends BaseObj {
 
             Node nf = findNode(from);
             if (nf == null) {
-                throw new RSInvalidStateException("From kernel not found.");
+                throw new RSInvalidStateException("From script not found.");
             }
 
             Node nt = findNode(to);
@@ -376,7 +360,7 @@ public final class ScriptGroup extends BaseObj {
             nf.mOutputs.add(cl);
             nt.mInputs.add(cl);
 
-            validateCycle();
+            validateCycle(nf, nf);
             return this;
         }
 
