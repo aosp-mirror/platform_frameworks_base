@@ -18,13 +18,21 @@
 #pragma rs java_package_name(com.android.rs.image)
 #pragma rs_fp_relaxed
 
-const static float3 gMonoMult = {0.299f, 0.587f, 0.114f};
 
-void root(const uchar4 *v_in, uchar4 *v_out) {
-    float4 f4 = rsUnpackColor8888(*v_in);
+static rs_matrix4x4 Mat;
 
-    float3 mono = dot(f4.rgb, gMonoMult);
-    *v_out = rsPackColorTo8888(mono);
+void init() {
+    rsMatrixLoadIdentity(&Mat);
 }
 
+void setMatrix(rs_matrix4x4 m) {
+    Mat = m;
+}
+
+uchar4 __attribute__((kernel)) root(uchar4 in) {
+    float4 f = convert_float4(in);
+    f = rsMatrixMultiply(&Mat, f);
+    f = clamp(f, 0.f, 255.f);
+    return convert_uchar4(f);
+}
 
