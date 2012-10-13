@@ -91,7 +91,6 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -114,7 +113,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
-import android.view.IDisplayContentChangeListener;
+import android.view.IDisplayMagnificationMediator;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -126,12 +125,12 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.KeyEvent;
+import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
@@ -423,6 +422,8 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState[] mRebuildTmp = new WindowState[20];
 
     IInputMethodManager mInputMethodManager;
+
+    DisplayMagnificationMediator mMagnificationMediator;
 
     final SurfaceSession mFxSession;
     Watermark mWatermark;
@@ -2374,7 +2375,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.mWinAnimator.applyAnimationLocked(transit, false)) {
                     win.mExiting = true;
                 }
-                scheduleNotifyWindowTranstionIfNeededLocked(win, transit);
+                if (mMagnificationMediator != null) {
+                    mMagnificationMediator.onWindowTransitionLw(win, transit);
+                }
             }
             if (win.mExiting || win.mWinAnimator.isAnimating()) {
                 // The exit animation is running... wait for it!
@@ -2666,49 +2669,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle, boolean immediate) {
         synchronized (mWindowMap) {
-            WindowState window = mWindowMap.get(token);
-            if (window != null) {
-                scheduleNotifyRectangleOnScreenRequestedIfNeededLocked(window, rectangle,
-                        immediate);
-            }
-        }
-    }
-
-    private void scheduleNotifyRectangleOnScreenRequestedIfNeededLocked(WindowState window,
-            Rect rectangle, boolean immediate) {
-        DisplayContent displayContent = window.mDisplayContent;
-        if (displayContent.mDisplayContentChangeListeners != null
-                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
-            mH.obtainMessage(H.NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED, displayContent.getDisplayId(),
-                    immediate? 1 : 0, new Rect(rectangle)).sendToTarget();
-        }
-    }
-
-    private void handleNotifyRectangleOnScreenRequested(int displayId, Rect rectangle,
-            boolean immediate) {
-        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
-        synchronized (mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent == null) {
-                return;
-            }
-            callbacks = displayContent.mDisplayContentChangeListeners;
-            if (callbacks == null) {
-                return;
-            }
-        }
-        final int callbackCount = callbacks.beginBroadcast();
-        try {
-            for (int i = 0; i < callbackCount; i++) {
-                try {
-                    callbacks.getBroadcastItem(i).onRectangleOnScreenRequested(displayId,
-                            rectangle, immediate);
-                } catch (RemoteException re) {
-                    /* ignore */
+            if (mMagnificationMediator != null) {
+                WindowState window = mWindowMap.get(token);
+                if (window != null) {
+                    mMagnificationMediator.onRectangleOnScreenRequestedLw(window, rectangle,
+                            immediate);
                 }
             }
-        } finally {
-            callbacks.finishBroadcast();
         }
     }
 
@@ -2933,7 +2900,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                             winAnimator.destroySurfaceLocked(false);
                         }
-                        scheduleNotifyWindowTranstionIfNeededLocked(win, transit);
+                        if (mMagnificationMediator != null) {
+                            mMagnificationMediator.onWindowTransitionLw(win, transit);
+                        }
                     }
                 }
 
@@ -3072,106 +3041,31 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public float getWindowCompatibilityScale(IBinder windowToken) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "getWindowCompatibilityScale()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
-        }
-        synchronized (mWindowMap) {
-            WindowState windowState = mWindowMap.get(windowToken);
-            return (windowState != null) ? windowState.mGlobalScale : 1.0f;
-        }
-    }
-
-    @Override
-    public WindowInfo getWindowInfo(IBinder token) {
+    public void getWindowFrame(IBinder token, Rect outBounds) {
         if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
                 "getWindowInfo()")) {
             throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
         }
         synchronized (mWindowMap) {
-            WindowState window = mWindowMap.get(token);
-            if (window != null) {
-                return getWindowInfoForWindowStateLocked(window);
+            WindowState windowState = mWindowMap.get(token);
+            if (windowState != null) {
+                outBounds.set(windowState.mFrame);
+            } else {
+                outBounds.setEmpty();
             }
-            return null;
         }
     }
 
     @Override
-    public void getVisibleWindowsForDisplay(int displayId, List<WindowInfo> outInfos) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "getWindowInfos()")) {
+    public IDisplayMagnificationMediator getDisplayMagnificationMediator() {
+        if (!checkCallingPermission(android.Manifest.permission.MAGNIFY_DISPLAY,
+                "getDisplayMagnificationMediator()")) {
             throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission.");
         }
-        synchronized (mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent == null) {
-                return;
-            }
-            WindowList windows = displayContent.getWindowList();
-            final int windowCount = windows.size();
-            for (int i = 0; i < windowCount; i++) {
-                WindowState window = windows.get(i);
-                if (window.isVisibleLw() || window.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
-                    WindowInfo info = getWindowInfoForWindowStateLocked(window);
-                    outInfos.add(info);
-                }
-            }
+        if (mMagnificationMediator == null) {
+            mMagnificationMediator = new DisplayMagnificationMediator(this);
         }
-    }
-
-    @Override
-    public void magnifyDisplay(int displayId, float scale, float offsetX, float offsetY) {
-        if (!checkCallingPermission(
-                android.Manifest.permission.MAGNIFY_DISPLAY, "magnifyDisplay()")) {
-            throw new SecurityException("Requires MAGNIFY_DISPLAY permission");
-        }
-        synchronized (mWindowMap) {
-            MagnificationSpec spec = getDisplayMagnificationSpecLocked(displayId);
-            if (spec != null) {
-                final boolean scaleChanged = spec.mScale != scale;
-                final boolean offsetChanged = spec.mOffsetX != offsetX || spec.mOffsetY != offsetY;
-                if (!scaleChanged && !offsetChanged) {
-                    return;
-                }
-                spec.initialize(scale, offsetX, offsetY);
-                // If the offset has changed we need to re-add the input windows
-                // since the offsets have to be propagated to the input system.
-                if (offsetChanged) {
-                    // TODO(multidisplay): Input only occurs on the default display.
-                    if (displayId == Display.DEFAULT_DISPLAY) {
-                        mInputMonitor.updateInputWindowsLw(true);
-                    }
-                }
-                scheduleAnimationLocked();
-            }
-        }
-    }
-
-    MagnificationSpec getDisplayMagnificationSpecLocked(int displayId) {
-        DisplayContent displayContent = getDisplayContentLocked(displayId);
-        if (displayContent != null) {
-            if (displayContent.mMagnificationSpec == null) {
-                displayContent.mMagnificationSpec = new MagnificationSpec();
-            }
-            return displayContent.mMagnificationSpec;
-        }
-        return null;
-    }
-
-    private WindowInfo getWindowInfoForWindowStateLocked(WindowState window) {
-        WindowInfo info = WindowInfo.obtain();
-        info.token = window.mToken.token;
-        info.frame.set(window.mFrame);
-        info.type = window.mAttrs.type;
-        info.displayId = window.getDisplayId();
-        info.compatibilityScale = window.mGlobalScale;
-        info.visible = window.isVisibleLw() || info.type == TYPE_UNIVERSE_BACKGROUND;
-        info.layer = window.mLayer;
-        window.getTouchableRegion(mTempRegion);
-        mTempRegion.getBounds(info.touchableRegion);
-        return info;
+        return mMagnificationMediator;
     }
 
     private boolean applyAnimationLocked(AppWindowToken atoken,
@@ -3315,8 +3209,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (win.isVisibleNow()) {
                             win.mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT,
                                     false);
-                            scheduleNotifyWindowTranstionIfNeededLocked(win,
-                                    WindowManagerPolicy.TRANSIT_EXIT);
+                            if (mMagnificationMediator != null) {
+                                mMagnificationMediator.onWindowTransitionLw(win,
+                                        WindowManagerPolicy.TRANSIT_EXIT);
+                            }
                             changed = true;
                             win.mDisplayContent.layoutNeeded = true;
                         }
@@ -4071,8 +3967,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     delayed = runningAppAnimation = true;
                 }
                 WindowState window = wtoken.findMainWindow();
-                if (window != null) {
-                    scheduleNotifyWindowTranstionIfNeededLocked(window, transit);
+                if (window != null && mMagnificationMediator != null) {
+                    mMagnificationMediator.onWindowTransitionLw(window, transit);
                 }
                 changed = true;
             }
@@ -4091,8 +3987,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (!runningAppAnimation) {
                             win.mWinAnimator.applyAnimationLocked(
                                     WindowManagerPolicy.TRANSIT_ENTER, true);
-                            scheduleNotifyWindowTranstionIfNeededLocked(win,
-                                    WindowManagerPolicy.TRANSIT_ENTER);
+                            if (mMagnificationMediator != null) {
+                                mMagnificationMediator.onWindowTransitionLw(win,
+                                        WindowManagerPolicy.TRANSIT_ENTER);
+                            }
                         }
                         changed = true;
                         win.mDisplayContent.layoutNeeded = true;
@@ -4101,8 +3999,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (!runningAppAnimation) {
                         win.mWinAnimator.applyAnimationLocked(
                                 WindowManagerPolicy.TRANSIT_EXIT, false);
-                        scheduleNotifyWindowTranstionIfNeededLocked(win,
-                                WindowManagerPolicy.TRANSIT_EXIT);
+                        if (mMagnificationMediator != null) {
+                            mMagnificationMediator.onWindowTransitionLw(win,
+                                    WindowManagerPolicy.TRANSIT_EXIT);
+                        }
                     }
                     changed = true;
                     win.mDisplayContent.layoutNeeded = true;
@@ -5727,7 +5627,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        scheduleNotifyRotationChangedIfNeededLocked(displayContent, rotation);
+        if (mMagnificationMediator != null) {
+            mMagnificationMediator.onRotationChangedLw(Display.DEFAULT_DISPLAY, rotation);
+        }
 
         return true;
     }
@@ -6107,146 +6009,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return success;
-    }
-
-    @Override
-    public void addDisplayContentChangeListener(int displayId,
-            IDisplayContentChangeListener listener) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "addDisplayContentChangeListener()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission");
-        }
-        synchronized(mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                if (displayContent.mDisplayContentChangeListeners == null) {
-                    displayContent.mDisplayContentChangeListeners =
-                            new RemoteCallbackList<IDisplayContentChangeListener>();
-                    displayContent.mDisplayContentChangeListeners.register(listener);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void removeDisplayContentChangeListener(int displayId,
-            IDisplayContentChangeListener listener) {
-        if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
-                "removeDisplayContentChangeListener()")) {
-            throw new SecurityException("Requires RETRIEVE_WINDOW_INFO permission");
-        }
-        synchronized(mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
-                if (displayContent.mDisplayContentChangeListeners != null) {
-                    displayContent.mDisplayContentChangeListeners.unregister(listener);
-                    if (displayContent.mDisplayContentChangeListeners
-                            .getRegisteredCallbackCount() == 0) {
-                        displayContent.mDisplayContentChangeListeners = null;
-                    }
-                }
-            }
-        }
-    }
-
-    void scheduleNotifyWindowTranstionIfNeededLocked(WindowState window, int transition) {
-        DisplayContent displayContent = window.mDisplayContent;
-        if (displayContent.mDisplayContentChangeListeners != null) {
-            WindowInfo info = getWindowInfoForWindowStateLocked(window);
-            mH.obtainMessage(H.NOTIFY_WINDOW_TRANSITION, transition, 0, info).sendToTarget();
-        }
-    }
-
-    private void handleNotifyWindowTranstion(int transition, WindowInfo info) {
-        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
-        synchronized (mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(info.displayId);
-            if (displayContent == null) {
-                return;
-            }
-            callbacks = displayContent.mDisplayContentChangeListeners;
-            if (callbacks == null) {
-                return;
-            }
-        }
-        final int callbackCount = callbacks.beginBroadcast();
-        try {
-            for (int i = 0; i < callbackCount; i++) {
-                try {
-                    callbacks.getBroadcastItem(i).onWindowTransition(info.displayId,
-                            transition, info);
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
-            }
-        } finally {
-            callbacks.finishBroadcast();
-        }
-    }
-
-    private void scheduleNotifyRotationChangedIfNeededLocked(DisplayContent displayContent,
-            int rotation) {
-        if (displayContent.mDisplayContentChangeListeners != null
-                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
-            mH.obtainMessage(H.NOTIFY_ROTATION_CHANGED, displayContent.getDisplayId(),
-                    rotation).sendToTarget();
-        }
-    }
-
-    private void handleNotifyRotationChanged(int displayId, int rotation) {
-        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
-        synchronized (mWindowMap) {
-            DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent == null) {
-                return;
-            }
-            callbacks = displayContent.mDisplayContentChangeListeners;
-            if (callbacks == null) {
-                return;
-            }
-        }
-        try {
-            final int watcherCount = callbacks.beginBroadcast();
-            for (int i = 0; i < watcherCount; i++) {
-                try {
-                    callbacks.getBroadcastItem(i).onRotationChanged(rotation);
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
-            }
-        } finally {
-            callbacks.finishBroadcast();
-        }
-    }
-
-    private void scheduleNotifyWindowLayersChangedIfNeededLocked(DisplayContent displayContent) {
-        if (displayContent.mDisplayContentChangeListeners != null
-                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
-            mH.obtainMessage(H.NOTIFY_WINDOW_LAYERS_CHANGED, displayContent) .sendToTarget();
-        }
-    }
-
-    private void handleNotifyWindowLayersChanged(DisplayContent displayContent) {
-        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
-        synchronized (mWindowMap) {
-            callbacks = displayContent.mDisplayContentChangeListeners;
-            if (callbacks == null) {
-                return;
-            }
-        }
-        try {
-            final int watcherCount = callbacks.beginBroadcast();
-            for (int i = 0; i < watcherCount; i++) {
-                try {
-                    callbacks.getBroadcastItem(i).onWindowLayersChanged(
-                            displayContent.getDisplayId());
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
-            }
-        } finally {
-            callbacks.finishBroadcast();
-        }
     }
 
     public void addWindowChangeListener(WindowChangeListener listener) {
@@ -6892,16 +6654,12 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int UPDATE_ANIM_PARAMETERS = 25;
         public static final int SHOW_STRICT_MODE_VIOLATION = 26;
         public static final int DO_ANIMATION_CALLBACK = 27;
-        public static final int NOTIFY_ROTATION_CHANGED = 28;
-        public static final int NOTIFY_WINDOW_TRANSITION = 29;
-        public static final int NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 30;
-        public static final int NOTIFY_WINDOW_LAYERS_CHANGED = 31;
 
-        public static final int DO_DISPLAY_ADDED = 32;
-        public static final int DO_DISPLAY_REMOVED = 33;
-        public static final int DO_DISPLAY_CHANGED = 34;
+        public static final int DO_DISPLAY_ADDED = 28;
+        public static final int DO_DISPLAY_REMOVED = 29;
+        public static final int DO_DISPLAY_CHANGED = 30;
 
-        public static final int CLIENT_FREEZE_TIMEOUT = 35;
+        public static final int CLIENT_FREEZE_TIMEOUT = 31;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
@@ -7351,34 +7109,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case NOTIFY_ROTATION_CHANGED: {
-                    final int displayId = msg.arg1;
-                    final int rotation = msg.arg2;
-                    handleNotifyRotationChanged(displayId, rotation);
-                    break;
-                }
-
-                case NOTIFY_WINDOW_TRANSITION: {
-                    final int transition = msg.arg1;
-                    WindowInfo info = (WindowInfo) msg.obj;
-                    handleNotifyWindowTranstion(transition, info);
-                    break;
-                }
-
-                case NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED: {
-                    final int displayId = msg.arg1;
-                    final boolean immediate = (msg.arg2 == 1);
-                    Rect rectangle = (Rect) msg.obj;
-                    handleNotifyRectangleOnScreenRequested(displayId, rectangle, immediate);
-                    break;
-                }
-
-                case NOTIFY_WINDOW_LAYERS_CHANGED: {
-                    DisplayContent displayContent = (DisplayContent) msg.obj;
-                    handleNotifyWindowLayersChanged(displayContent);
-                    break;
-                }
-
                 case DO_DISPLAY_ADDED:
                     synchronized (mWindowMap) {
                         handleDisplayAddedLocked(msg.arg1);
@@ -7823,8 +7553,9 @@ public class WindowManagerService extends IWindowManager.Stub
             //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
         }
 
-        if (anyLayerChanged) {
-            scheduleNotifyWindowLayersChangedIfNeededLocked(getDefaultDisplayContentLocked());
+        if (mMagnificationMediator != null && anyLayerChanged) {
+            mMagnificationMediator.onWindowLayersChangedLw(
+                    windows.get(windows.size() - 1).getDisplayId());
         }
     }
 

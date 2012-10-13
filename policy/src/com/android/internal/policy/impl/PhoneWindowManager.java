@@ -4520,19 +4520,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean canMagnifyWindowLw(WindowManager.LayoutParams attrs) {
-        switch (attrs.type) {
-            case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
-            case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
-            case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
-            case WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY: {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
     public void setCurrentUserLw(int newUserId) {
         if (mKeyguardMediator != null) {
             mKeyguardMediator.setCurrentUser(newUserId);
@@ -4550,6 +4537,71 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void showAssistant() {
         mKeyguardMediator.showAssistant();
+    }
+
+    /**
+     * Returns the human readable name of a window transition.
+     *
+     * @param transition The window transition.
+     * @return The transition symbolic name.
+     */
+    public static String windowTransitionToString(int transition) {
+        switch (transition) {
+            case WindowManagerPolicy.TRANSIT_UNSET: {
+                return "TRANSIT_UNSET";
+            }
+            case WindowManagerPolicy.TRANSIT_NONE: {
+                return "TRANSIT_NONE";
+            }
+            case WindowManagerPolicy.TRANSIT_ENTER: {
+                return "TRANSIT_ENTER";
+            }
+            case WindowManagerPolicy.TRANSIT_EXIT: {
+                return "TRANSIT_EXIT";
+            }
+            case WindowManagerPolicy.TRANSIT_SHOW: {
+                return "TRANSIT_SHOW";
+            }
+            case WindowManagerPolicy.TRANSIT_EXIT_MASK: {
+                return "TRANSIT_EXIT_MASK";
+            }
+            case WindowManagerPolicy.TRANSIT_PREVIEW_DONE: {
+                return "TRANSIT_PREVIEW_DONE";
+            }
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN: {
+                return "TRANSIT_ACTIVITY_OPEN";
+            }
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE: {
+                return "TRANSIT_ACTIVITY_CLOSE";
+            }
+            case WindowManagerPolicy.TRANSIT_TASK_OPEN: {
+                return "TRANSIT_TASK_OPEN";
+            }
+            case WindowManagerPolicy.TRANSIT_TASK_CLOSE: {
+                return "TRANSIT_TASK_CLOSE";
+            }
+            case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT: {
+                return "TRANSIT_TASK_TO_FRONT";
+            }
+            case WindowManagerPolicy.TRANSIT_TASK_TO_BACK: {
+                return "TRANSIT_TASK_TO_BACK";
+            }
+            case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE: {
+                return "TRANSIT_WALLPAPER_CLOSE";
+            }
+            case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN: {
+                return "TRANSIT_WALLPAPER_OPEN";
+            }
+            case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN: {
+                return "TRANSIT_WALLPAPER_INTRA_OPEN";
+            }
+            case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE: {
+                return "TRANSIT_WALLPAPER_INTRA_CLOSE";
+            }
+            default: {
+                return "<UNKNOWN>";
+            }
+        }
     }
 
     @Override

@@ -33,4 +33,6 @@ import android.view.accessibility.AccessibilityEvent;
     void onInterrupt();
 
     void onGesture(int gesture);
+
+    void clearAccessibilityNodeInfoCache();
 }

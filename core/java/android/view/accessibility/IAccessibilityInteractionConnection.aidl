@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.os.Bundle;
+import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
@@ -30,23 +31,23 @@ oneway interface IAccessibilityInteractionConnection {
 
     void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void findFocus(long accessibilityNodeId, int focusType, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void focusSearch(long accessibilityNodeId, int direction, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,

@@ -808,6 +808,32 @@ public class Surface implements Parcelable {
     }
 
     /**
+     * Returns a human readable representation of a rotation.
+     *
+     * @param rotation The rotation.
+     * @return The rotation symbolic name.
+     */
+    public static String rotationToString(int rotation) {
+        switch (rotation) {
+            case Surface.ROTATION_0: {
+                return "ROTATION_0";
+            }
+            case Surface.ROTATION_90: {
+                return "ROATATION_90";
+            }
+            case Surface.ROTATION_180: {
+                return "ROATATION_180";
+            }
+            case Surface.ROTATION_270: {
+                return "ROATATION_270";
+            }
+            default: {
+                throw new IllegalArgumentException("Invalid rotation: " + rotation);
+            }
+        }
+    }
+
+    /**
      * A Canvas class that can handle the compatibility mode.
      * This does two things differently.
      * <ul>
