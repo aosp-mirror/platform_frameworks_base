@@ -188,12 +188,13 @@ public class PhoneStatusBar extends BaseStatusBar {
     TextView mNotificationPanelDebugText;
 
     // settings
+    boolean mHasSettingsPanel;
     SettingsPanelView mSettingsPanel;
     int mSettingsPanelGravity;
 
     // top bar
     View mClearButton;
-    View mSettingsButton;
+    ImageView mSettingsButton;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -420,13 +421,25 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClearButton.setVisibility(View.INVISIBLE);
         mClearButton.setEnabled(false);
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
-        mSettingsButton = mStatusBarWindow.findViewById(R.id.settings_button);
+
+        mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
+
+        mSettingsButton = (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
         if (mSettingsButton != null) {
-            if (mStatusBarView.hasFullWidthNotifications()) {
-                mSettingsButton.setOnClickListener(mSettingsButtonListener);
-                mSettingsButton.setVisibility(View.VISIBLE);
+            mSettingsButton.setOnClickListener(mSettingsButtonListener);
+            if (mHasSettingsPanel) {
+                if (mStatusBarView.hasFullWidthNotifications()) {
+                    // the settings panel is hiding behind this button
+                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                    mSettingsButton.setVisibility(View.VISIBLE);
+                } else {
+                    // there is a settings panel, but it's on the other side of the (large) screen
+                    mSettingsButton.setVisibility(View.GONE);
+                }
             } else {
-                mSettingsButton.setVisibility(View.GONE);
+                // no settings panel, go straight to settings
+                mSettingsButton.setVisibility(View.VISIBLE);
+                mSettingsButton.setImageResource(R.drawable.ic_notify_settings);
             }
         }
         
@@ -490,18 +503,31 @@ public class PhoneStatusBar extends BaseStatusBar {
             });
         }
 
-        // Quick Settings (WIP)
-        mSettingsPanel = (SettingsPanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
-        mSettingsPanel.setBar(mStatusBarView);
-        mSettingsPanel.setService(this);
-        mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
-                mLocationController);
-        mSettingsPanel.setSystemUiVisibility(
-                View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
+        // Quick Settings (where available, some restrictions apply)
+        if (mHasSettingsPanel) {
+            final View settings_stub 
+                    = mStatusBarWindow.findViewById(R.id.quick_settings_stub);
 
-        if (!ActivityManager.isHighEndGfx()) {
-            mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
-                    R.color.notification_panel_solid_background)));
+            if (settings_stub != null) {
+                mSettingsPanel = (SettingsPanelView) ((ViewStub)settings_stub).inflate();
+            } else {
+                mSettingsPanel = (SettingsPanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
+            }
+
+            if (mSettingsPanel != null) {
+                mSettingsPanel.setBar(mStatusBarView);
+                mSettingsPanel.setService(this);
+                mSettingsPanel.setup(mNetworkController, mBluetoothController, mBatteryController,
+                        mLocationController);
+                mSettingsPanel.setSystemUiVisibility(
+                          View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
+                        | View.STATUS_BAR_DISABLE_SYSTEM_INFO);
+    
+                if (!ActivityManager.isHighEndGfx()) {
+                    mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
+                            R.color.notification_panel_solid_background)));
+                }
+            }
         }
 
         mClingShown = ! (DEBUG_CLINGS 
@@ -1286,7 +1312,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
 
-        mSettingsPanel.expand();
+        if (mSettingsPanel != null) mSettingsPanel.expand();
 
         if (false) postStartTracing();
     }
@@ -1596,7 +1622,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mCommandQueue.setNavigationIconHints(
                 altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
                         : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
-        mSettingsPanel.setImeWindowStatus(vis > 0);
+        if (mSettingsPanel != null) mSettingsPanel.setImeWindowStatus(vis > 0);
     }
 
     @Override
@@ -1820,10 +1846,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.leftMargin = mNotificationPanelMarginPx;
         mNotificationPanel.setLayoutParams(lp);
 
-        lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
-        lp.gravity = mSettingsPanelGravity;
-        lp.rightMargin = mNotificationPanelMarginPx;
-        mSettingsPanel.setLayoutParams(lp);
+        if (mSettingsPanel != null) {
+            lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
+            lp.gravity = mSettingsPanelGravity;
+            lp.rightMargin = mNotificationPanelMarginPx;
+            mSettingsPanel.setLayoutParams(lp);
+        }
 
         updateCarrierLabelVisibility(false);
     }
@@ -1916,7 +1944,19 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
-            animateExpandSettingsPanel();
+            if (mHasSettingsPanel) {
+                animateExpandSettingsPanel();
+            } else {
+                try {
+                    // Dismiss the lock screen when Settings starts.
+                    ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                } catch (RemoteException e) {
+                }
+                Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                animateCollapsePanels();
+            }
         }
     };
 
@@ -2010,7 +2050,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Update the QuickSettings container
-        mSettingsPanel.updateResources();
+        if (mSettingsPanel != null) mSettingsPanel.updateResources();
 
         loadDimens();
     }
