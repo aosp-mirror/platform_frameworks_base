@@ -123,6 +123,7 @@ public class TestBase  {
 
     public void destroy() {
         mRS.destroy();
+        mRS = null;
     }
 
     public void updateBitmap(Bitmap b) {
