@@ -42,20 +42,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             />
-        <include layout="@layout/quick_settings"
+        <ViewStub android:id="@+id/quick_settings_stub"
+            android:layout="@layout/quick_settings"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             />
     </com.android.systemui.statusbar.phone.PanelHolder>
-
-    <ViewStub
-        android:layout="@layout/status_bar_help"
-        android:id="@+id/status_bar_cling_stub"
-        android:inflatedId="@+id/status_bar_cling"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@*android:dimen/status_bar_height"
-        android:visibility="gone"
-        />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>

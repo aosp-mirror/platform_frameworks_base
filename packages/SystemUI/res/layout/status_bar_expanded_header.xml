@@ -75,14 +75,14 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:scaleType="center"
-        android:src="@drawable/ic_notify_quicksettings"
+        android:src="@drawable/ic_notify_settings"
         android:contentDescription="@string/accessibility_settings_button"
         />
 
     <ImageView android:id="@+id/clear_all_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="18dp"
+        android:layout_marginLeft="12dp"
         android:scaleType="center"
         android:src="@drawable/ic_notify_clear"
         android:contentDescription="@string/accessibility_clear_all"

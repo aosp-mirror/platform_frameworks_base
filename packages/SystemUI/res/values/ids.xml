@@ -19,4 +19,5 @@
     <item type="id" name="expandable_tag" />
     <item type="id" name="user_expanded_tag" />
     <item type="id" name="user_lock_tag" />
+    <item type="id" name="status_bar_cling_stub" />
 </resources>
