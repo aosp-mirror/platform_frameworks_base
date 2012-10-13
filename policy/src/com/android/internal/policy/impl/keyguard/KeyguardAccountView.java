@@ -137,8 +137,9 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
         mLogin.setText("");
         mPassword.setText("");
         mLogin.requestFocus();
-        mSecurityMessageDisplay.setMessage(mLockPatternUtils.isPermanentlyLocked() ?
-                R.string.kg_login_too_many_attempts : R.string.kg_login_instructions);
+        boolean permLocked = mLockPatternUtils.isPermanentlyLocked();
+        mSecurityMessageDisplay.setMessage(permLocked ? R.string.kg_login_too_many_attempts :
+            R.string.kg_login_instructions, permLocked ? true : false);
     }
 
     /** {@inheritDoc} */
@@ -178,7 +179,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     // dismiss keyguard
                     mCallback.dismiss(true);
                 } else {
-                    mSecurityMessageDisplay.setMessage(R.string.kg_login_invalid_input);
+                    mSecurityMessageDisplay.setMessage(R.string.kg_login_invalid_input, true);
                     mPassword.setText("");
                     mCallback.reportFailedUnlockAttempt();
                 }
