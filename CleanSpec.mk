@@ -136,6 +136,7 @@ $(call add-clean-step, rm -f $(PRODUCT_OUT)/system/media/video/Disco*)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ImageProcessing_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ImageProcessing2_intermediates)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ImageProcessing_intermediates)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
