@@ -42,16 +42,7 @@ public class FusionEngine implements LocationListener {
     private static final String NETWORK = LocationManager.NETWORK_PROVIDER;
     private static final String GPS = LocationManager.GPS_PROVIDER;
 
-    // threshold below which a location is considered stale enough
-    // that we shouldn't use its bearing, altitude, speed etc
-    private static final double WEIGHT_THRESHOLD = 0.5;
-    // accuracy in meters at which a Location's weight is halved (compared to 0 accuracy)
-    private static final double ACCURACY_HALFLIFE_M = 20.0;
-    // age in seconds at which a Location's weight is halved (compared to 0 age)
-    private static final double AGE_HALFLIFE_S = 60.0;
-
-    private static final double ACCURACY_DECAY_CONSTANT_M = Math.log(2) / ACCURACY_HALFLIFE_M;
-    private static final double AGE_DECAY_CONSTANT_S = Math.log(2) / AGE_HALFLIFE_S;
+    public static final long SWITCH_ON_FRESHNESS_CLIFF_NS = 11 * 1000000000; // 11 seconds
 
     private final Context mContext;
     private final LocationManager mLocationManager;
@@ -62,8 +53,6 @@ public class FusionEngine implements LocationListener {
     private Location mFusedLocation;
     private Location mGpsLocation;
     private Location mNetworkLocation;
-    private double mNetworkWeight;
-    private double mGpsWeight;
 
     private boolean mEnabled;
     private ProviderRequestUnbundled mRequest;
@@ -102,10 +91,6 @@ public class FusionEngine implements LocationListener {
         Log.i(TAG, "engine stopped (" + mContext.getPackageName() + ")");
     }
 
-    private boolean isAvailable() {
-        return mStats.get(GPS).available || mStats.get(NETWORK).available;
-    }
-
     /** Called on mLooper thread */
     public void enable() {
         mEnabled = true;
@@ -130,7 +115,6 @@ public class FusionEngine implements LocationListener {
         public boolean requested;
         public long requestTime;
         public long minTime;
-        public long lastRequestTtff;
         @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
@@ -171,9 +155,6 @@ public class FusionEngine implements LocationListener {
             return;
         }
 
-        ProviderStats gpsStats = mStats.get(GPS);
-        ProviderStats networkStats = mStats.get(NETWORK);
-
         long networkInterval = Long.MAX_VALUE;
         long gpsInterval = Long.MAX_VALUE;
         for (LocationRequest request : mRequest.getLocationRequests()) {
@@ -209,104 +190,46 @@ public class FusionEngine implements LocationListener {
         }
     }
 
-    private static double weighAccuracy(Location loc) {
-        double accuracy = loc.getAccuracy();
-        return Math.exp(-accuracy * ACCURACY_DECAY_CONSTANT_M);
-    }
+    /**
+     * Test whether one location (a) is better to use than another (b).
+     */
+    private static boolean isBetterThan(Location locationA, Location locationB) {
+      if (locationA == null) {
+        return false;
+      }
+      if (locationB == null) {
+        return true;
+      }
+      // A provider is better if the reading is sufficiently newer.  Heading
+      // underground can cause GPS to stop reporting fixes.  In this case it's
+      // appropriate to revert to cell, even when its accuracy is less.
+      if (locationA.getElapsedRealtimeNanos() > locationB.getElapsedRealtimeNanos() + SWITCH_ON_FRESHNESS_CLIFF_NS) {
+        return true;
+      }
 
-    private static double weighAge(Location loc) {
-        long ageSeconds = SystemClock.elapsedRealtimeNanos() - loc.getElapsedRealtimeNanos();
-        ageSeconds /= 1000000000L;
-        if (ageSeconds < 0) ageSeconds = 0;
-        return Math.exp(-ageSeconds * AGE_DECAY_CONSTANT_S);
-    }
-
-    private double weigh(double gps, double network) {
-        return (gps * mGpsWeight) + (network * mNetworkWeight);
-    }
-
-    private double weigh(double gps, double network, double wrapMin, double wrapMax) {
-        // apply aliasing
-        double wrapWidth = wrapMax - wrapMin;
-        if (gps - network > wrapWidth / 2) network += wrapWidth;
-        else if (network - gps > wrapWidth / 2) gps += wrapWidth;
-
-        double result = weigh(gps, network);
-
-        // remove aliasing
-        if (result > wrapMax) result -= wrapWidth;
-        return result;
+      // A provider is better if it has better accuracy.  Assuming both readings
+      // are fresh (and by that accurate), choose the one with the smaller
+      // accuracy circle.
+      if (!locationA.hasAccuracy()) {
+        return false;
+      }
+      if (!locationB.hasAccuracy()) {
+        return true;
+      }
+      return locationA.getAccuracy() < locationB.getAccuracy();
     }
 
     private void updateFusedLocation() {
-        // naive fusion
-        mNetworkWeight = weighAccuracy(mNetworkLocation) * weighAge(mNetworkLocation);
-        mGpsWeight = weighAccuracy(mGpsLocation) * weighAge(mGpsLocation);
-        // scale mNetworkWeight and mGpsWeight so that they add to 1
-        double totalWeight = mNetworkWeight + mGpsWeight;
-        mNetworkWeight /= totalWeight;
-        mGpsWeight /= totalWeight;
-
-        Location fused = new Location(LocationManager.FUSED_PROVIDER);
-        // fuse lat/long
-        // assumes the two locations are close enough that earth curvature doesn't matter
-        fused.setLatitude(weigh(mGpsLocation.getLatitude(), mNetworkLocation.getLatitude()));
-        fused.setLongitude(weigh(mGpsLocation.getLongitude(), mNetworkLocation.getLongitude(),
-                -180.0, 180.0));
-
-        // fused accuracy
-        //TODO: use some real math instead of this crude fusion
-        // one suggestion is to fuse in a quadratic manner, eg
-        // sqrt(weigh(gpsAcc^2, netAcc^2)).
-        // another direction to explore is to consider the difference in the 2
-        // locations. If the component locations overlap, the fused accuracy is
-        // better than the component accuracies. If they are far apart,
-        // the fused accuracy is much worse.
-        fused.setAccuracy((float)weigh(mGpsLocation.getAccuracy(), mNetworkLocation.getAccuracy()));
-
-        // fused time - now
-        fused.setTime(System.currentTimeMillis());
-        fused.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-
-        // fuse altitude
-        if (mGpsLocation.hasAltitude() && !mNetworkLocation.hasAltitude() &&
-                mGpsWeight > WEIGHT_THRESHOLD) {
-            fused.setAltitude(mGpsLocation.getAltitude());   // use GPS
-        } else if (!mGpsLocation.hasAltitude() && mNetworkLocation.hasAltitude() &&
-                mNetworkWeight > WEIGHT_THRESHOLD) {
-            fused.setAltitude(mNetworkLocation.getAltitude());   // use Network
-        } else if (mGpsLocation.hasAltitude() && mNetworkLocation.hasAltitude()) {
-            fused.setAltitude(weigh(mGpsLocation.getAltitude(), mNetworkLocation.getAltitude()));
+        // may the best location win!
+        if (isBetterThan(mGpsLocation, mNetworkLocation)) {
+            mFusedLocation = new Location(mGpsLocation);
+        } else {
+            mFusedLocation = new Location(mNetworkLocation);
         }
-
-        // fuse speed
-        if (mGpsLocation.hasSpeed() && !mNetworkLocation.hasSpeed() &&
-                mGpsWeight > WEIGHT_THRESHOLD) {
-            fused.setSpeed(mGpsLocation.getSpeed());   // use GPS if its not too old
-        } else if (!mGpsLocation.hasSpeed() && mNetworkLocation.hasSpeed() &&
-                mNetworkWeight > WEIGHT_THRESHOLD) {
-            fused.setSpeed(mNetworkLocation.getSpeed());   // use Network
-        } else if (mGpsLocation.hasSpeed() && mNetworkLocation.hasSpeed()) {
-            fused.setSpeed((float)weigh(mGpsLocation.getSpeed(), mNetworkLocation.getSpeed()));
-        }
-
-        // fuse bearing
-        if (mGpsLocation.hasBearing() && !mNetworkLocation.hasBearing() &&
-                mGpsWeight > WEIGHT_THRESHOLD) {
-            fused.setBearing(mGpsLocation.getBearing());   // use GPS if its not too old
-        } else if (!mGpsLocation.hasBearing() && mNetworkLocation.hasBearing() &&
-                mNetworkWeight > WEIGHT_THRESHOLD) {
-            fused.setBearing(mNetworkLocation.getBearing());   // use Network
-        } else if (mGpsLocation.hasBearing() && mNetworkLocation.hasBearing()) {
-            fused.setBearing((float)weigh(mGpsLocation.getBearing(), mNetworkLocation.getBearing(),
-                    0.0, 360.0));
-        }
-
         if (mNetworkLocation != null) {
-            fused.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
+            mFusedLocation.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
         }
-
-        mFusedLocation = fused;
+        mFusedLocation.setProvider(LocationManager.FUSED_PROVIDER);
 
         mCallback.reportLocation(mFusedLocation);
     }
@@ -349,9 +272,9 @@ public class FusionEngine implements LocationListener {
         StringBuilder s = new StringBuilder();
         s.append("mEnabled=" + mEnabled).append(' ').append(mRequest).append('\n');
         s.append("fused=").append(mFusedLocation).append('\n');
-        s.append(String.format("gps %.3f %s\n", mGpsWeight, mGpsLocation));
+        s.append(String.format("gps %s\n", mGpsLocation));
         s.append("    ").append(mStats.get(GPS)).append('\n');
-        s.append(String.format("net %.3f %s\n", mNetworkWeight, mNetworkLocation));
+        s.append(String.format("net %s\n", mNetworkLocation));
         s.append("    ").append(mStats.get(NETWORK)).append('\n');
         pw.append(s);
     }
