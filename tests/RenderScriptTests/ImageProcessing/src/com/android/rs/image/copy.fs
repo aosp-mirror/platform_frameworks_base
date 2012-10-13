@@ -17,8 +17,8 @@
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.image)
 
-void root(const uchar4 *v_in, uchar4 *v_out) {
-    *v_out = *v_in;
+uchar4 __attribute__((kernel)) root(uchar4 v_in) {
+    return v_in;
 }
 
 
