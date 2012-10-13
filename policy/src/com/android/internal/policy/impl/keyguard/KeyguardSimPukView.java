@@ -99,7 +99,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             }
             mSimPinEntry.setText(null);
             if (msg != 0) {
-                mSecurityMessageDisplay.setMessage(msg);
+                mSecurityMessageDisplay.setMessage(msg, true);
             }
         }
 
@@ -108,7 +108,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             mPukText="";
             state = ENTER_PUK;
             if (mSecurityMessageDisplay != null) {
-                mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint);
+                mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint, true);
             }
             mSimPinEntry.requestFocus();
         }
@@ -279,7 +279,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                                 mCallback.dismiss(true);
                             } else {
                                 mStateMachine.reset();
-                                mSecurityMessageDisplay.setMessage(R.string.kg_invalid_puk);
+                                mSecurityMessageDisplay.setMessage(R.string.kg_invalid_puk, true);
                             }
                             mCheckInProgress = false;
                         }
