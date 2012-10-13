@@ -24,7 +24,7 @@ rs_allocation gIn;
 
 float gCoeffs[9];
 
-void root(uchar4 *out, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
     uint32_t x1 = min((int32_t)x+1, gWidth-1);
     uint32_t x2 = max((int32_t)x-1, 0);
     uint32_t y1 = min((int32_t)y+1, gHeight-1);
@@ -61,7 +61,7 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
     p20 += p02;
 
     p20 = clamp(p20, 0.f, 255.f);
-    *out = convert_uchar4(p20);
+    return convert_uchar4(p20);
 }
 
 
