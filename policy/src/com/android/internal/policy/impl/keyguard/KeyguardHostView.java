@@ -195,7 +195,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
-        maybePopulateWidgets();
+        // TODO: Re-enable when we have layouts that can support a better variety of widgets.
+        // maybePopulateWidgets();
         disableStatusViewInteraction();
         post(mSwitchPageRunnable);
     }
@@ -643,11 +644,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (securityMode == SecurityMode.None) {
             // Discard current runnable if we're switching back to the selector view
             setOnDismissRunnable(null);
-            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-        } else {
-            setSystemUiVisibility(getSystemUiVisibility() & (~View.STATUS_BAR_DISABLE_BACK));
-        }
-
+        } 
         mCurrentSecuritySelection = securityMode;
     }
 
