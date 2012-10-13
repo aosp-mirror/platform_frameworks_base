@@ -57,9 +57,9 @@ public class PanelBar extends FrameLayout {
         mPanelHolder = ph;
         final int N = ph.getChildCount();
         for (int i=0; i<N; i++) {
-            final PanelView v = (PanelView) ph.getChildAt(i);
-            if (v != null) {
-                addPanel(v);
+            final View v = ph.getChildAt(i);
+            if (v != null && v instanceof PanelView) {
+                addPanel((PanelView) v);
             }
         }
     }
