@@ -1209,6 +1209,10 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     uninit();
     mEventCode = START_DOCUMENT;
 
+    if (!data || !size) {
+        return (mError=BAD_TYPE);
+    }
+
     if (copyData) {
         mOwnedData = malloc(size);
         if (mOwnedData == NULL) {
