@@ -111,7 +111,7 @@ public class KeyguardSimPinView extends LinearLayout
     public void reset() {
         // start fresh
         if (mSecurityMessageDisplay != null) {
-            mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions);
+            mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
         }
 
         // make sure that the number of entered digits is consistent when we
@@ -193,7 +193,7 @@ public class KeyguardSimPinView extends LinearLayout
     private void checkPin() {
         if (mPinEntry.getText().length() < 4) {
             // otherwise, display a message to the user, and don't submit.
-            mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint);
+            mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);
             mPinEntry.setText("");
             mCallback.userActivity(0);
             return;
@@ -216,7 +216,8 @@ public class KeyguardSimPinView extends LinearLayout
                                 KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
                                 mCallback.dismiss(true);
                             } else {
-                                mSecurityMessageDisplay.setMessage(R.string.kg_password_wrong_pin_code);
+                                mSecurityMessageDisplay.setMessage
+                                    (R.string.kg_password_wrong_pin_code, true);
                                 mPinEntry.setText("");
                             }
                             mCallback.userActivity(0);

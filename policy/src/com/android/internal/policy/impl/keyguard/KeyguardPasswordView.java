@@ -102,7 +102,7 @@ public class KeyguardPasswordView extends LinearLayout
 
     private void resetState() {
         mSecurityMessageDisplay.setMessage(
-                mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions);
+                mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions, false);
         mPasswordEntry.setEnabled(true);
         mKeyboardView.setEnabled(true);
     }
@@ -288,7 +288,7 @@ public class KeyguardPasswordView extends LinearLayout
                 handleAttemptLockout(deadline);
             }
             mSecurityMessageDisplay.setMessage(
-                    mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin);
+                    mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin, true);
         }
         mPasswordEntry.setText("");
     }
@@ -304,7 +304,7 @@ public class KeyguardPasswordView extends LinearLayout
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) (millisUntilFinished / 1000);
                 mSecurityMessageDisplay.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
+                        R.string.kg_too_many_failed_attempts_countdown, true, secondsRemaining);
             }
 
             @Override
