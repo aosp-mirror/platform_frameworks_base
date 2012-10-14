@@ -162,7 +162,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
         updateSecurityViews();
         setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-        
+
         if (KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
             showPrimarySecurityScreen(false);
         }
@@ -425,7 +425,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         showSecurityScreen(securityMode);
     }
-    
+
     /**
      * Shows the backup security screen for the current security mode.  This could be used for
      * password recovery screens but is currently only used for pattern unlock to show the
@@ -493,7 +493,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             // enabled because the user has left keyguard.
             KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
             KeyguardUpdateMonitor.getInstance(mContext).setIsFirstBoot(false);
-            
+
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
             if (mLaunchRunnable != null) {
@@ -597,7 +597,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             View carrierText = selectorView.findViewById(R.id.keyguard_selector_fade_container);
             selectorView.setCarrierArea(carrierText);
         }
-        
+
         return view;
     }
 
@@ -608,8 +608,8 @@ public class KeyguardHostView extends KeyguardViewBase {
      * @param securityMode
      */
     private void showSecurityScreen(SecurityMode securityMode) {
-        if (DEBUG) Log.d(TAG, "showSecurityScreen");
-        
+        if (DEBUG) Log.d(TAG, "showSecurityScreen(" + securityMode + ")");
+
         if (securityMode == mCurrentSecuritySelection) return;
 
         KeyguardSecurityView oldView = getSecurityView(mCurrentSecuritySelection);
@@ -628,10 +628,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         final int childCount = mSecurityViewContainer.getChildCount();
 
         // Do flip animation to the next screen
-        mSecurityViewContainer.setInAnimation(
-                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_in));
-        mSecurityViewContainer.setOutAnimation(
-                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_out));
+        if (false) {
+            mSecurityViewContainer.setInAnimation(
+                    AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_in));
+            mSecurityViewContainer.setOutAnimation(
+                    AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_out));
+        }
         final int securityViewIdForMode = getSecurityViewIdForMode(securityMode);
         for (int i = 0; i < childCount; i++) {
             if (mSecurityViewContainer.getChildAt(i).getId() == securityViewIdForMode) {
@@ -640,11 +642,10 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-
         if (securityMode == SecurityMode.None) {
             // Discard current runnable if we're switching back to the selector view
             setOnDismissRunnable(null);
-        } 
+        }
         mCurrentSecuritySelection = securityMode;
     }
 
@@ -809,7 +810,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             });
         }
 
-        mKeyguardStatusViewManager = ((KeyguardStatusView) 
+        mKeyguardStatusViewManager = ((KeyguardStatusView)
                 findViewById(R.id.keyguard_status_view_face_palm)).getManager();
 
     }
