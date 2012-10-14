@@ -29,6 +29,9 @@ public class KeyguardWidgetRegion extends LinearLayout implements PagedView.Page
     private int mPage = 0;
     private Callbacks mCallbacks;
 
+    // We are disabling touch interaction of the widget region for factory ROM. 
+    private static final boolean DISABLE_TOUCH_INTERACTION = true;
+
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
 
     public KeyguardWidgetRegion(Context context) {
@@ -52,19 +55,21 @@ public class KeyguardWidgetRegion extends LinearLayout implements PagedView.Page
         mPager.setPageSwitchListener(this);
 
         setSoundEffectsEnabled(false);
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPagingFeedback();
-            }
-        });
+        if (!DISABLE_TOUCH_INTERACTION) {
+            setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showPagingFeedback();
+                }
+            });
+        }
     }
 
     public void showPagingFeedback() {
-        if (true || (mPage < mPager.getPageCount() - 1)) {
+        if ((mPage < mPager.getPageCount() - 1)) {
             mLeftStrip.makeEmGo();
         }
-        if (true || (mPage > 0)) {
+        if ((mPage > 0)) {
             mRightStrip.makeEmGo();
         }
     }
