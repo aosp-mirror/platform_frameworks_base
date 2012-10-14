@@ -77,6 +77,9 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     private static final int MIN_SNAP_VELOCITY = 1500;
     private static final int MIN_FLING_VELOCITY = 250;
 
+    // We are disabling touch interaction of the widget region for factory ROM. 
+    private static final boolean DISABLE_TOUCH_INTERACTION = true;
+
     static final int AUTOMATIC_PAGE_SPACING = -1;
 
     protected int mFlingThresholdVelocity;
@@ -861,6 +864,10 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (DISABLE_TOUCH_INTERACTION) {
+            return false;
+        }
+
         /*
          * This method JUST determines whether we want to intercept the motion.
          * If we return true, onTouchEvent will be called and we do the actual
@@ -1099,6 +1106,10 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (DISABLE_TOUCH_INTERACTION) {
+            return false;
+        }
+
         // Skip touch handling if there are no pages to swipe
         if (getChildCount() <= 0) return super.onTouchEvent(ev);
 
