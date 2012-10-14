@@ -156,7 +156,7 @@ public class ImageWallpaper extends WallpaperService {
                     mBackgroundWidth = mBackgroundHeight = -1;
                     mBackground = null;
                     mRedrawNeeded = true;
-                    drawFrameLocked();
+                    drawFrameLocked(false);
                 }
             }
         }
@@ -234,7 +234,7 @@ public class ImageWallpaper extends WallpaperService {
                         Log.d(TAG, "Visibility changed to visible=" + visible);
                     }
                     mVisible = visible;
-                    drawFrameLocked();
+                    drawFrameLocked(false);
                 }
             }
         }
@@ -263,7 +263,7 @@ public class ImageWallpaper extends WallpaperService {
                     mYOffset = yOffset;
                     mOffsetsChanged = true;
                 }
-                drawFrameLocked();
+                drawFrameLocked(false);
             }
         }
 
@@ -277,7 +277,8 @@ public class ImageWallpaper extends WallpaperService {
 
             synchronized (mLock) {
                 mRedrawNeeded = true;
-                drawFrameLocked();
+                mBackgroundWidth = mBackgroundHeight = -1;
+                drawFrameLocked(true);
             }
         }
 
@@ -290,25 +291,26 @@ public class ImageWallpaper extends WallpaperService {
 
             synchronized (mLock) {
                 mRedrawNeeded = true;
-                drawFrameLocked();
+                drawFrameLocked(false);
             }
         }
 
-        void drawFrameLocked() {
-            if (!mVisible) {
-                if (DEBUG) {
-                    Log.d(TAG, "Suppressed drawFrame since wallpaper is not visible.");
+        void drawFrameLocked(boolean force) {
+            if (!force) {
+                if (!mVisible) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Suppressed drawFrame since wallpaper is not visible.");
+                    }
+                    return;
                 }
-                return;
-            }
-            if (!mRedrawNeeded && !mOffsetsChanged) {
-                if (DEBUG) {
-                    Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
-                            + "and offsets have not changed.");
+                if (!mRedrawNeeded && !mOffsetsChanged) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
+                                + "and offsets have not changed.");
+                    }
+                    return;
                 }
-                return;
             }
-
             // If we don't yet know the size of the wallpaper bitmap,
             // we need to get it now.
             boolean updateWallpaper = mBackgroundWidth < 0 || mBackgroundHeight < 0 ;
@@ -332,7 +334,8 @@ public class ImageWallpaper extends WallpaperService {
             int yPixels = availh < 0 ? (int)(availh * mYOffset + .5f) : (availh / 2);
 
             mOffsetsChanged = false;
-            if (!mRedrawNeeded && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
+            if (!force && !mRedrawNeeded
+                    && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
                 if (DEBUG) {
                     Log.d(TAG, "Suppressed drawFrame since the image has not "
                             + "actually moved an integral number of pixels.");
@@ -343,6 +346,11 @@ public class ImageWallpaper extends WallpaperService {
             mLastXTranslation = xPixels;
             mLastYTranslation = yPixels;
 
+            if (DEBUG) {
+                Log.d(TAG, "drawFrameUnlocked(" + force + "): mBackgroundWxH=" + mBackgroundWidth + "x"
+                        + mBackgroundHeight + " SurfaceFrame=" + frame.toShortString()
+                        + " X,YOffset=" + mXOffset + "," + mYOffset);
+            }
             if (mIsHwAccelerated) {
                 if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
                     drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
