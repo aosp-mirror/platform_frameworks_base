@@ -317,6 +317,7 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
             return;
         }
 
+        mForceScreenScrolled = true;
         mCurrentPage = Math.max(0, Math.min(currentPage, getPageCount() - 1));
         updateCurrentPageScroll();
         updateScrollingIndicator();
