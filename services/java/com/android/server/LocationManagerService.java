@@ -609,10 +609,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     /**
-     * Throw SecurityException if caller has neither COARSE or FINE.
-     * Otherwise, return the best permission.
+     * Returns the best permission available to the caller.
      */
-    private String checkPermission() {
+    private String getBestCallingPermission() {
         if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
             return ACCESS_FINE_LOCATION;
@@ -620,9 +619,20 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 PackageManager.PERMISSION_GRANTED) {
             return ACCESS_COARSE_LOCATION;
         }
+        return null;
+    }
 
-        throw new SecurityException("Location requires either ACCESS_COARSE_LOCATION or" +
-                " ACCESS_FINE_LOCATION permission");
+    /**
+     * Throw SecurityException if caller has neither COARSE or FINE.
+     * Otherwise, return the best permission.
+     */
+    private String checkPermission() {
+        String perm = getBestCallingPermission();
+        if (perm == null) {
+            throw new SecurityException("Location requires either ACCESS_COARSE_LOCATION or" +
+                    " ACCESS_FINE_LOCATION permission");
+        }
+        return perm;
     }
 
     /**
@@ -635,19 +645,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    private boolean isAllowedProviderSafe(String provider) {
+    private String getMinimumPermissionForProvider(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider) ||
                 LocationManager.PASSIVE_PROVIDER.equals(provider)) {
             // gps and passive providers require FINE permission
-            return mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED;
+            return ACCESS_FINE_LOCATION;
         } else if (LocationManager.NETWORK_PROVIDER.equals(provider) ||
                 LocationManager.FUSED_PROVIDER.equals(provider)) {
             // network and fused providers are ok with COARSE or FINE
-            return (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) ||
-                    (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED);
+            return ACCESS_COARSE_LOCATION;
         } else {
             // mock providers
             LocationProviderInterface lp = mMockProviders.get(provider);
@@ -656,20 +662,43 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (properties != null) {
                     if (properties.mRequiresSatellite) {
                         // provider requiring satellites require FINE permission
-                        return mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
-                                == PackageManager.PERMISSION_GRANTED;
+                        return ACCESS_FINE_LOCATION;
                     } else if (properties.mRequiresNetwork || properties.mRequiresCell) {
                         // provider requiring network and or cell require COARSE or FINE
-                        return (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
-                                == PackageManager.PERMISSION_GRANTED) ||
-                                (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
-                                 == PackageManager.PERMISSION_GRANTED);
+                        return ACCESS_COARSE_LOCATION;
                     }
                 }
             }
         }
 
-        return false;
+        return null;
+    }
+
+    private boolean isPermissionSufficient(String perm, String minPerm) {
+        if (ACCESS_FINE_LOCATION.equals(minPerm)) {
+            return ACCESS_FINE_LOCATION.equals(perm);
+        } else if (ACCESS_COARSE_LOCATION.equals(minPerm)) {
+            return ACCESS_FINE_LOCATION.equals(perm) ||
+                    ACCESS_COARSE_LOCATION.equals(perm);
+        } else {
+            return false;
+        }
+    }
+
+    private void checkPermissionForProvider(String perm, String provider) {
+        String minPerm = getMinimumPermissionForProvider(provider);
+        if (!isPermissionSufficient(perm, minPerm)) {
+            if (ACCESS_FINE_LOCATION.equals(minPerm)) {
+                throw new SecurityException("Location provider \"" + provider +
+                        "\" requires ACCESS_FINE_LOCATION permission.");
+            } else if (ACCESS_COARSE_LOCATION.equals(minPerm)) {
+                throw new SecurityException("Location provider \"" + provider +
+                        "\" requires ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission.");                
+            } else {
+                throw new SecurityException("Insufficient permission for location provider \"" +
+                        provider + "\".");
+            }
+        }
     }
 
     /**
@@ -703,6 +732,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     @Override
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         ArrayList<String> out;
+        String perm = getBestCallingPermission();
         int callingUserId = UserHandle.getCallingUserId();
         long identity = Binder.clearCallingIdentity();
         try {
@@ -713,7 +743,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     if (LocationManager.FUSED_PROVIDER.equals(name)) {
                         continue;
                     }
-                    if (isAllowedProviderSafe(name)) {
+                    if (isPermissionSufficient(perm, getMinimumPermissionForProvider(name))) {
                         if (enabledOnly && !isAllowedBySettingsLocked(name, callingUserId)) {
                             continue;
                         }
@@ -980,26 +1010,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return receiver;
     }
 
-    private boolean isProviderAllowedByCoarsePermission(String provider) {
-        if (LocationManager.FUSED_PROVIDER.equals(provider)) {
-            return true;
-        }
-        if (LocationManager.PASSIVE_PROVIDER.equals(provider)) {
-            return true;
-        }
-        if (LocationManager.NETWORK_PROVIDER.equals(provider)) {
-            return true;
-        }
-        return false;
-    }
-
     private String checkPermissionAndRequest(LocationRequest request) {
-        String perm = checkPermission();
+        String perm = getBestCallingPermission();
+        String provider = request.getProvider();
+        checkPermissionForProvider(perm, provider);
 
         if (ACCESS_COARSE_LOCATION.equals(perm)) {
-            if (!isProviderAllowedByCoarsePermission(request.getProvider())) {
-                throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
-            }
             switch (request.getQuality()) {
                 case LocationRequest.ACCURACY_FINE:
                     request.setQuality(LocationRequest.ACCURACY_BLOCK);
@@ -1324,7 +1340,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     @Override
     public ProviderProperties getProviderProperties(String provider) {
-        checkPermission();
+        checkPermissionForProvider(getBestCallingPermission(), provider);
 
         LocationProviderInterface p;
         synchronized (mLock) {
@@ -1337,13 +1353,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public boolean isProviderEnabled(String provider) {
-        String perms = checkPermission();
+        checkPermissionForProvider(getBestCallingPermission(), provider);
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
-        if (ACCESS_COARSE_LOCATION.equals(perms) &&
-                !isProviderAllowedByCoarsePermission(provider)) {
-            throw new SecurityException("The \"" + provider +
-                    "\" provider requires ACCESS_FINE_LOCATION permission");
-        }
 
         long identity = Binder.clearCallingIdentity();
         try {
