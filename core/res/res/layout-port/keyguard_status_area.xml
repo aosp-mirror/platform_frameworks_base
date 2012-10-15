@@ -56,6 +56,8 @@
 
     <TextView
         android:id="@+id/owner_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
@@ -67,6 +69,8 @@
 
     <TextView
         android:id="@+id/status1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
@@ -78,6 +82,8 @@
 
     <TextView
         android:id="@+id/status_security_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
