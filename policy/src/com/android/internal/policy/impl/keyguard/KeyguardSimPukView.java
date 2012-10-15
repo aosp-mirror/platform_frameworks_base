@@ -107,9 +107,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             mPinText="";
             mPukText="";
             state = ENTER_PUK;
-            if (mSecurityMessageDisplay != null) {
-                mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint, true);
-            }
+            mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint, true);
             mSimPinEntry.requestFocus();
         }
     }
@@ -131,6 +129,9 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        // We always set a dummy NavigationManager to avoid null checks
+        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
 
         mSimPinEntry = (TextView) findViewById(R.id.sim_pin_entry);
         mSimPinEntry.setOnEditorActionListener(this);
