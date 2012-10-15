@@ -76,6 +76,9 @@ public class KeyguardSimPinView extends LinearLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        // We always set a dummy NavigationManager to avoid null checks
+        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
+
         mPinEntry = (EditText) findViewById(R.id.sim_pin_entry);
         mPinEntry.setOnEditorActionListener(this);
         mPinEntry.addTextChangedListener(this);
@@ -110,9 +113,7 @@ public class KeyguardSimPinView extends LinearLayout
 
     public void reset() {
         // start fresh
-        if (mSecurityMessageDisplay != null) {
-            mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
-        }
+        mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
 
         // make sure that the number of entered digits is consistent when we
         // erase the SIM unlock code, including orientation changes.

@@ -23,16 +23,20 @@ public class KeyguardNavigationManager implements SecurityMessageDisplay {
     private TextView mMessageArea;
 
     public KeyguardNavigationManager(TextView messageArea) {
-        mMessageArea = messageArea;
-        mMessageArea.setSelected(true); // Make marquee work
+        if (messageArea != null) {
+            mMessageArea = messageArea;
+            mMessageArea.setSelected(true); // Make marquee work
+        }
     }
 
     public void setMessage(CharSequence msg, boolean important) {
+        if (mMessageArea == null) return;
         mMessageArea.setText(msg);
         mMessageArea.announceForAccessibility(mMessageArea.getText());
     }
 
     public void setMessage(int resId, boolean important) {
+        if (mMessageArea == null) return;
         if (resId != 0) {
             mMessageArea.setText(resId);
             mMessageArea.announceForAccessibility(mMessageArea.getText());
@@ -42,6 +46,7 @@ public class KeyguardNavigationManager implements SecurityMessageDisplay {
     }
 
     public void setMessage(int resId, boolean important, Object... formatArgs) {
+        if (mMessageArea == null) return;
         if (resId != 0) {
             mMessageArea.setText(mMessageArea.getContext().getString(resId, formatArgs));
             mMessageArea.announceForAccessibility(mMessageArea.getText());
