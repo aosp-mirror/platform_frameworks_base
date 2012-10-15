@@ -628,6 +628,7 @@ public class Vpn extends BaseNetworkStateTracker {
         private final String[] mDaemons;
         private final String[][] mArguments;
         private final LocalSocket[] mSockets;
+        private final String mOuterInterface;
 
         private long mTimer = -1;
 
@@ -638,10 +639,15 @@ public class Vpn extends BaseNetworkStateTracker {
             // TODO: clear arguments from memory once launched
             mArguments = new String[][] {racoon, mtpd};
             mSockets = new LocalSocket[mDaemons.length];
+
+            // This is the interface which VPN is running on,
+            // mConfig.interfaze will change to point to OUR
+            // internal interface soon. TODO - add inner/outer to mconfig
+            mOuterInterface = mConfig.interfaze;
         }
 
         public void check(String interfaze) {
-            if (interfaze.equals(mConfig.interfaze)) {
+            if (interfaze.equals(mOuterInterface)) {
                 Log.i(TAG, "Legacy VPN is going down with " + interfaze);
                 exit();
             }
