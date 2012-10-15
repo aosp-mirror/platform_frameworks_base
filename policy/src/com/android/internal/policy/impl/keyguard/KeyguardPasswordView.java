@@ -109,6 +109,9 @@ public class KeyguardPasswordView extends LinearLayout
 
     @Override
     protected void onFinishInflate() {
+        // We always set a dummy NavigationManager to avoid null checks
+        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
+
         mLockPatternUtils = new LockPatternUtils(mContext); // TODO: use common one
 
         final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
@@ -366,10 +369,10 @@ public class KeyguardPasswordView extends LinearLayout
     public void afterTextChanged(Editable s) {
     }
 
-
     @Override
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;    
+        mSecurityMessageDisplay = display;
+        reset();
     }
 }
 
