@@ -86,6 +86,13 @@ public class KeyguardPasswordView extends LinearLayout
         mLockPatternUtils = utils;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (hasWindowFocus) {
+            reset();
+        }
+    }
+
     public void reset() {
         // start fresh
         mPasswordEntry.setText("");
@@ -191,7 +198,9 @@ public class KeyguardPasswordView extends LinearLayout
             }
 
             public void afterTextChanged(Editable s) {
-                mCallback.userActivity(0);
+                if (mCallback != null) {
+                    mCallback.userActivity(0);
+                }
             }
         });
 
