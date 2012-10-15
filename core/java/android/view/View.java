@@ -10515,9 +10515,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Causes the Runnable to be added to the message queue.
      * The runnable will be run on the user interface thread.</p>
      *
-     * <p>This method can be invoked from outside of the UI thread
-     * only when this View is attached to a window.</p>
-     *
      * @param action The Runnable that will be executed.
      *
      * @return Returns true if the Runnable was successfully placed in to the
@@ -10541,9 +10538,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Causes the Runnable to be added to the message queue, to be run
      * after the specified amount of time elapses.
      * The runnable will be run on the user interface thread.</p>
-     *
-     * <p>This method can be invoked from outside of the UI thread
-     * only when this View is attached to a window.</p>
      *
      * @param action The Runnable that will be executed.
      * @param delayMillis The delay (in milliseconds) until the Runnable
@@ -10573,9 +10567,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Causes the Runnable to execute on the next animation time step.
      * The runnable will be run on the user interface thread.</p>
      *
-     * <p>This method can be invoked from outside of the UI thread
-     * only when this View is attached to a window.</p>
-     *
      * @param action The Runnable that will be executed.
      *
      * @see #postOnAnimationDelayed
@@ -10597,9 +10588,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * after the specified amount of time elapses.
      * The runnable will be run on the user interface thread.</p>
      *
-     * <p>This method can be invoked from outside of the UI thread
-     * only when this View is attached to a window.</p>
-     *
      * @param action The Runnable that will be executed.
      * @param delayMillis The delay (in milliseconds) until the Runnable
      *        will be executed.
@@ -10620,9 +10608,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * <p>Removes the specified Runnable from the message queue.</p>
-     *
-     * <p>This method can be invoked from outside of the UI thread
-     * only when this View is attached to a window.</p>
      *
      * @param action The Runnable to remove from the message handling queue
      *
