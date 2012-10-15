@@ -1274,6 +1274,7 @@ public class WifiManager {
                     // This will cause all further async API calls on the WifiManager
                     // to fail and throw an exception
                     mAsyncChannel = null;
+                    getLooper().quit();
                     break;
                     /* ActionListeners grouped together */
                 case WifiManager.CONNECT_NETWORK_FAILED:
@@ -1978,5 +1979,13 @@ public class WifiManager {
         try {
             mService.captivePortalCheckComplete();
         } catch (RemoteException e) {}
+    }
+
+    protected void finalize() throws Throwable {
+        try {
+            mHandler.getLooper().quit();
+        } finally {
+            super.finalize();
+        }
     }
 }
