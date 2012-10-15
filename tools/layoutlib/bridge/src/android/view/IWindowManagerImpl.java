@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.view;
 
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -28,7 +28,6 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.Display_Delegate;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IDisplayContentChangeListener;
@@ -45,16 +44,21 @@ import java.util.List;
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and
  * {@link Display_Delegate}) can return a valid instance.
  */
-public class BridgeWindowManager implements IWindowManager {
+public class IWindowManagerImpl implements IWindowManager {
 
     private final Configuration mConfig;
     private final DisplayMetrics mMetrics;
     private final int mRotation;
+    private final boolean mHasSystemNavBar;
+    private final boolean mHasNavigationBar;
 
-    public BridgeWindowManager(Configuration config, DisplayMetrics metrics, int rotation) {
+    public IWindowManagerImpl(Configuration config, DisplayMetrics metrics, int rotation,
+            boolean hasSystemNavBar, boolean hasNavigationBar) {
         mConfig = config;
         mMetrics = metrics;
         mRotation = rotation;
+        mHasSystemNavBar = hasSystemNavBar;
+        mHasNavigationBar = hasNavigationBar;
     }
 
     // custom API.
@@ -70,13 +74,17 @@ public class BridgeWindowManager implements IWindowManager {
         return mRotation;
     }
 
-    // ---- unused implementation of IWindowManager ----
+    @Override
+    public boolean hasNavigationBar() {
+        return mHasNavigationBar;
+    }
 
     @Override
     public boolean hasSystemNavBar() throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
+        return mHasSystemNavBar;
     }
+
+    // ---- unused implementation of IWindowManager ----
 
     @Override
     public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
@@ -432,11 +440,6 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public void dismissKeyguard() {
-    }
-
-    @Override
-    public boolean hasNavigationBar() {
-        return false; // should this return something else?
     }
 
     @Override
