@@ -114,6 +114,15 @@ public class WifiP2pDeviceList implements Parcelable {
         return mDevices.remove(device.deviceAddress) != null;
     }
 
+    /** Returns true if any device the list was removed @hide */
+    public boolean remove(WifiP2pDeviceList list) {
+        boolean ret = false;
+        for (WifiP2pDevice d : list.mDevices.values()) {
+            if (remove(d)) ret = true;
+        }
+        return ret;
+    }
+
     /** Get the list of devices */
     public Collection<WifiP2pDevice> getDeviceList() {
         return Collections.unmodifiableCollection(mDevices.values());
