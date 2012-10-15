@@ -84,6 +84,9 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        // We always set a dummy NavigationManager to avoid null checks
+        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
+
         mLogin = (EditText) findViewById(R.id.login);
         mLogin.setFilters(new InputFilter[] { new LoginFilter.UsernameFilterGeneric() } );
         mLogin.addTextChangedListener(this);
@@ -315,7 +318,8 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;    
+        mSecurityMessageDisplay = display;
+        reset();
     }
 }
 
