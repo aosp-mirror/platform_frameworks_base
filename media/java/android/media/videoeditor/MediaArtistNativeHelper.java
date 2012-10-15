@@ -3831,6 +3831,7 @@ class MediaArtistNativeHelper {
                         outWidth, outHeight, Bitmap.Config.ARGB_8888);
 
                 // Copy int[] to IntBuffer
+                decBuffer.rewind();
                 decBuffer.put(decArray, 0, thumbnailSize);
                 decBuffer.rewind();
 
