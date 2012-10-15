@@ -91,7 +91,7 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
             } else if (state == CONFIRM_PIN) {
                 if (confirmPin()) {
                     state = DONE;
-                    msg = R.string.kg_login_checking_password;
+                    msg = R.string.lockscreen_sim_unlock_progress_dialog_message;
                     updateSim();
                 } else {
                     msg = R.string.kg_invalid_confirm_pin_hint;
