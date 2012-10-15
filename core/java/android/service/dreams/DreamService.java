@@ -612,18 +612,23 @@ public class DreamService extends Service implements Window.Callback {
                     View.SYSTEM_UI_FLAG_LOW_PROFILE);
             getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
         } catch (Throwable t) {
-            Slog.w("Crashed adding window view", t);
+            Slog.w(TAG, "Crashed adding window view", t);
             safelyFinish();
             return;
         }
 
         // start it up
-        try {
-            onDreamingStarted();
-        } catch (Throwable t) {
-            Slog.w("Crashed in onDreamingStarted()", t);
-            safelyFinish();
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    onDreamingStarted();
+                } catch (Throwable t) {
+                    Slog.w(TAG, "Crashed in onDreamingStarted()", t);
+                    safelyFinish();
+                }
+            }
+        });
     }
 
     private void safelyFinish() {
