@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,26 @@ package android.view;
 
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
-
 /**
- * Delegate used to provide new implementation of a select few methods of {@link Display}
+ * Delegate used to provide new implementation of a select few methods of
+ * {@link WindowManagerGlobal}
  *
- * Through the layoutlib_create tool, the original  methods of Display have been replaced
- * by calls to methods of the same name in this delegate class.
+ * Through the layoutlib_create tool, the original  methods of WindowManagerGlobal have been
+ * replaced by calls to methods of the same name in this delegate class.
  *
  */
-public class Display_Delegate {
+public class WindowManagerGlobal_Delegate {
+
+    private static IWindowManager sService;
 
     @LayoutlibDelegate
-    static void updateDisplayInfoLocked(Display theDisplay) {
-        // do nothing
+    public static IWindowManager getWindowManagerService() {
+        return sService;
     }
 
+    // ---- internal implementation stuff ----
+
+    public static void setWindowManagerService(IWindowManager service) {
+        sService = service;
+    }
 }
