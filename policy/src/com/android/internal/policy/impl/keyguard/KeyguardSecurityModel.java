@@ -28,6 +28,7 @@ public class KeyguardSecurityModel {
      * @see com.android.internal.policy.impl.LockPatternKeyguardView#getUnlockMode()
      */
     enum SecurityMode {
+        Invalid, // NULL state
         None, // No security enabled
         Pattern, // Unlock by drawing a pattern.
         Password, // Unlock by entering a password or PIN
@@ -53,7 +54,7 @@ public class KeyguardSecurityModel {
      * Returns true if biometric unlock is installed and selected.  If this returns false there is
      * no need to even construct the biometric unlock.
      */
-    private boolean isBiometricUnlockEnabled() {
+    boolean isBiometricUnlockEnabled() {
         return mLockPatternUtils.usingBiometricWeak()
                 && mLockPatternUtils.isBiometricWeakInstalled();
     }
@@ -128,15 +129,7 @@ public class KeyguardSecurityModel {
      *
      * @return backup method or current security mode
      */
-    SecurityMode getBackupSecurityMode() {
-        SecurityMode mode = getSecurityMode();
-
-        // Note that getAlternateFor() cannot be called here because we want to get the backup for
-        // biometric unlock even if it's suppressed; it just has to be enabled.
-        if (isBiometricUnlockEnabled()
-                && (mode == SecurityMode.Password || mode == SecurityMode.Pattern)) {
-            mode = SecurityMode.Biometric;
-        }
+    SecurityMode getBackupSecurityMode(SecurityMode mode) {
         switch(mode) {
             case Biometric:
                 return getSecurityMode();
