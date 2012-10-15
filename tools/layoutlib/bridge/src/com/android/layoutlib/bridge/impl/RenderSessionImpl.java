@@ -68,11 +68,15 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
+import android.view.IWindowManagerImpl;
+import android.view.IWindowManager;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.WindowManagerGlobal_Delegate;
 import android.widget.AbsListView;
 import android.widget.AbsSpinner;
 import android.widget.AdapterView;
@@ -184,6 +188,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         findStatusBar(resources, metrics);
         findActionBar(resources, metrics);
         findSystemBar(resources, metrics);
+
+        // FIXME: find those out, and possibly add them to the render params
+        boolean hasSystemNavBar = true;
+        boolean hasNavigationBar = true;
+        IWindowManager iwm = new IWindowManagerImpl(getContext().getConfiguration(),
+                metrics, Surface.ROTATION_0,
+                hasSystemNavBar, hasNavigationBar);
+        WindowManagerGlobal_Delegate.setWindowManagerService(iwm);
 
         // build the inflater and parser.
         mInflater = new BridgeInflater(context, params.getProjectCallback());

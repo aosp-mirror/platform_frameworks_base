@@ -66,7 +66,7 @@ public class SystemClock_Delegate {
      * @return elapsed nanoseconds since boot.
      */
     @LayoutlibDelegate
-    /*package*/ static long elapsedRealtimeNano() {
+    /*package*/ static long elapsedRealtimeNanos() {
         return System.nanoTime() - sBootTimeNano;
     }
 

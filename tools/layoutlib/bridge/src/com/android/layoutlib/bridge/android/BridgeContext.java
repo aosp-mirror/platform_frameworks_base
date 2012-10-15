@@ -25,6 +25,7 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.android.view.WindowManagerImpl;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
@@ -68,9 +69,9 @@ import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.CompatibilityInfoHolder;
 import android.view.Display;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.textservice.TextServicesManager;
 
 import java.io.File;
@@ -98,7 +99,7 @@ public final class BridgeContext extends Context {
     private final Configuration mConfig;
     private final ApplicationInfo mApplicationInfo;
     private final IProjectCallback mProjectCallback;
-    private final BridgeWindowManager mIWindowManager;
+    private final WindowManager mWindowManager;
 
     private Resources.Theme mTheme;
 
@@ -139,10 +140,10 @@ public final class BridgeContext extends Context {
         mRenderResources = renderResources;
         mConfig = config;
 
-        mIWindowManager = new BridgeWindowManager(mConfig, metrics, Surface.ROTATION_0);
-
         mApplicationInfo = new ApplicationInfo();
         mApplicationInfo.targetSdkVersion = targetSdkVersion;
+
+        mWindowManager = new WindowManagerImpl(mMetrics);
     }
 
     /**
@@ -198,12 +199,12 @@ public final class BridgeContext extends Context {
         return mRenderResources;
     }
 
-    public BridgeWindowManager getIWindowManager() {
-        return mIWindowManager;
-    }
-
     public Map<String, String> getDefaultPropMap(Object key) {
         return mDefaultPropMaps.get(key);
+    }
+
+    public Configuration getConfiguration() {
+        return mConfig;
     }
 
     /**
@@ -431,10 +432,8 @@ public final class BridgeContext extends Context {
             return TextServicesManager.getInstance();
         }
 
-        // AutoCompleteTextView and MultiAutoCompleteTextView want a window
-        // service. We don't have any but it's not worth an exception.
         if (WINDOW_SERVICE.equals(service)) {
-            return null;
+            return mWindowManager;
         }
 
         // needed by SearchView
