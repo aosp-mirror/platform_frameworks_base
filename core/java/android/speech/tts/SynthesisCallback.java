@@ -22,10 +22,11 @@ package android.speech.tts;
  * {@link #start}, then {@link #audioAvailable} until all audio has been provided, then finally
  * {@link #done}.
  *
- *
  * {@link #error} can be called at any stage in the synthesis process to
  * indicate that an error has occurred, but if the call is made after a call
  * to {@link #done}, it might be discarded.
+ *
+ * After {@link #start} been called, {@link #done} must be called regardless of errors.
  */
 public interface SynthesisCallback {
     /**
@@ -71,6 +72,8 @@ public interface SynthesisCallback {
      *
      * This method should only be called on the synthesis thread,
      * while in {@link TextToSpeechService#onSynthesizeText}.
+     *
+     * This method has to be called if {@link #start} was called.
      *
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
      */
