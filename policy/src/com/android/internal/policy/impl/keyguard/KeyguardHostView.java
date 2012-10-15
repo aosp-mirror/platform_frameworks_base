@@ -567,7 +567,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 break;
             }
         }
-        boolean simPukFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_full_screen);
+        boolean simPukFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
         if (view == null) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
             View v = inflater.inflate(getLayoutIdFor(securityMode), this, false);
@@ -586,7 +586,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-        if (securityMode == SecurityMode.SimPin || securityMode == SecurityMode.SimPuk) {
+        if (securityMode == SecurityMode.SimPin || securityMode == SecurityMode.SimPuk ||
+            securityMode == SecurityMode.Account) {
             if (simPukFullScreen) {
                 mAppWidgetRegion.setVisibility(View.GONE);
             }

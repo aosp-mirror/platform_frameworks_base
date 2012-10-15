@@ -23,7 +23,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/keyguard_navigation"/>
+    <include layout="@layout/keyguard_sim_puk_pin_account_navigation"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -68,5 +68,13 @@
             />
 
     </RelativeLayout>
+
+    <include layout="@layout/keyguard_emergency_carrier_area"
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:gravity="center_horizontal" />
 
 </com.android.internal.policy.impl.keyguard.KeyguardAccountView>
