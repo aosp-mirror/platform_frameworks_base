@@ -178,6 +178,7 @@ public class WifiMonitor {
 
     private static final String P2P_GO_NEG_SUCCESS_STR = "P2P-GO-NEG-SUCCESS";
 
+    /* P2P-GO-NEG-FAILURE status=x */
     private static final String P2P_GO_NEG_FAILURE_STR = "P2P-GO-NEG-FAILURE";
 
     private static final String P2P_GROUP_FORMATION_SUCCESS_STR =
@@ -566,6 +567,26 @@ public class WifiMonitor {
                     WifiManager.ERROR, 0));
         }
 
+        /* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
+        private P2pStatus p2pError(String dataString) {
+            P2pStatus err = P2pStatus.UNKNOWN;
+            String[] tokens = dataString.split(" ");
+            if (tokens.length < 2) return err;
+            String[] nameValue = tokens[1].split("=");
+            if (nameValue.length != 2) return err;
+
+            /* Handle the special case of reason=FREQ+CONFLICT */
+            if (nameValue[1].equals("FREQ_CONFLICT")) {
+                return P2pStatus.NO_COMMON_CHANNEL;
+            }
+            try {
+                err = P2pStatus.valueOf(Integer.parseInt(nameValue[1]));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            return err;
+        }
+
         /**
          * Handle p2p events
          */
@@ -582,11 +603,11 @@ public class WifiMonitor {
             } else if (dataString.startsWith(P2P_GO_NEG_SUCCESS_STR)) {
                 mStateMachine.sendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
             } else if (dataString.startsWith(P2P_GO_NEG_FAILURE_STR)) {
-                mStateMachine.sendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT);
+                mStateMachine.sendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, p2pError(dataString));
             } else if (dataString.startsWith(P2P_GROUP_FORMATION_SUCCESS_STR)) {
                 mStateMachine.sendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
             } else if (dataString.startsWith(P2P_GROUP_FORMATION_FAILURE_STR)) {
-                mStateMachine.sendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT);
+                mStateMachine.sendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, p2pError(dataString));
             } else if (dataString.startsWith(P2P_GROUP_STARTED_STR)) {
                 mStateMachine.sendMessage(P2P_GROUP_STARTED_EVENT, new WifiP2pGroup(dataString));
             } else if (dataString.startsWith(P2P_GROUP_REMOVED_STR)) {
@@ -595,17 +616,7 @@ public class WifiMonitor {
                 mStateMachine.sendMessage(P2P_INVITATION_RECEIVED_EVENT,
                         new WifiP2pGroup(dataString));
             } else if (dataString.startsWith(P2P_INVITATION_RESULT_STR)) {
-                String[] tokens = dataString.split(" ");
-                if (tokens.length != 2) return;
-                String[] nameValue = tokens[1].split("=");
-                if (nameValue.length != 2) return;
-                P2pStatus err = P2pStatus.UNKNOWN;
-                try {
-                    err = P2pStatus.valueOf(Integer.parseInt(nameValue[1]));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-                mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, err);
+                mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, p2pError(dataString));
             } else if (dataString.startsWith(P2P_PROV_DISC_PBC_REQ_STR)) {
                 mStateMachine.sendMessage(P2P_PROV_DISC_PBC_REQ_EVENT,
                         new WifiP2pProvDiscEvent(dataString));
