@@ -38,21 +38,7 @@
             android:orientation="vertical"
             android:layout_gravity="center">
 
-            <LinearLayout
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <include layout="@layout/keyguard_navigation"/>
-
-                <Button android:id="@+id/forgot_password_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/kg_status_line_font_size"
-                    android:visibility="gone"/>
-
-            </LinearLayout>
+            <include layout="@layout/keyguard_navigation"/>
 
             <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
             the pattern view for it to compute its size. This is an unusual case, caused by
@@ -69,7 +55,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center" />
 
-            <include layout="@layout/keyguard_emergency_carrier_area"
+            <include layout="@layout/keyguard_emergency_carrier_area_and_recovery"
                 android:id="@+id/keyguard_selector_fade_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

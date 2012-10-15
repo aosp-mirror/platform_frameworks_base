@@ -284,8 +284,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         private void next() {
             // if we are ready to enable the fallback or if we depleted the list of accounts
             // then finish and get out
-            if (mAccountIndex >= mAccounts.length) {
-                mEnableFallback = true;
+            if (mEnableFallback || mAccountIndex >= mAccounts.length) {
                 return;
             }
 
@@ -322,7 +321,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.clearPattern();
         mLockPatternView.setEnabled(false);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-        updateFooter(FooterMode.ForgotLockPattern);
+        if (mEnableFallback) {
+            updateFooter(FooterMode.ForgotLockPattern);
+        }
 
         mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
 
