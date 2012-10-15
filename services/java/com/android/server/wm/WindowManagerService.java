@@ -6576,6 +6576,36 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void scheduleNotifyWindowLayersChangedIfNeededLocked(DisplayContent displayContent) {
+        if (displayContent.mDisplayContentChangeListeners != null
+                && displayContent.mDisplayContentChangeListeners.getRegisteredCallbackCount() > 0) {
+            mH.obtainMessage(H.NOTIFY_WINDOW_LAYERS_CHANGED, displayContent) .sendToTarget();
+        }
+    }
+
+    private void handleNotifyWindowLayersChanged(DisplayContent displayContent) {
+        RemoteCallbackList<IDisplayContentChangeListener> callbacks = null;
+        synchronized (mWindowMap) {
+            callbacks = displayContent.mDisplayContentChangeListeners;
+            if (callbacks == null) {
+                return;
+            }
+        }
+        try {
+            final int watcherCount = callbacks.beginBroadcast();
+            for (int i = 0; i < watcherCount; i++) {
+                try {
+                    callbacks.getBroadcastItem(i).onWindowLayersChanged(
+                            displayContent.getDisplayId());
+                } catch (RemoteException re) {
+                    /* ignore */
+                }
+            }
+        } finally {
+            callbacks.finishBroadcast();
+        }
+    }
+
     public void addWindowChangeListener(WindowChangeListener listener) {
         synchronized(mWindowMap) {
             mWindowChangeListeners.add(listener);
@@ -7222,12 +7252,13 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_ROTATION_CHANGED = 28;
         public static final int NOTIFY_WINDOW_TRANSITION = 29;
         public static final int NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 30;
+        public static final int NOTIFY_WINDOW_LAYERS_CHANGED = 31;
 
-        public static final int DO_DISPLAY_ADDED = 31;
-        public static final int DO_DISPLAY_REMOVED = 32;
-        public static final int DO_DISPLAY_CHANGED = 33;
+        public static final int DO_DISPLAY_ADDED = 32;
+        public static final int DO_DISPLAY_REMOVED = 33;
+        public static final int DO_DISPLAY_CHANGED = 34;
 
-        public static final int CLIENT_FREEZE_TIMEOUT = 34;
+        public static final int CLIENT_FREEZE_TIMEOUT = 35;
 
         public static final int ANIMATOR_WHAT_OFFSET = 100000;
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
@@ -7699,6 +7730,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
+                case NOTIFY_WINDOW_LAYERS_CHANGED: {
+                    DisplayContent displayContent = (DisplayContent) msg.obj;
+                    handleNotifyWindowLayersChanged(displayContent);
+                    break;
+                }
+
                 case DO_DISPLAY_ADDED:
                     synchronized (mWindowMap) {
                         handleDisplayAddedLocked(msg.arg1);
@@ -8075,6 +8112,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.v(TAG, "Assigning layers", here);
         }
 
+        boolean anyLayerChanged = false;
+
         for (i=0; i<N; i++) {
             final WindowState w = windows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -8090,6 +8129,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (w.mLayer != oldLayer) {
                 layerChanged = true;
+                anyLayerChanged = true;
             }
             oldLayer = winAnimator.mAnimLayer;
             if (w.mTargetAppToken != null) {
@@ -8108,6 +8148,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (winAnimator.mAnimLayer != oldLayer) {
                 layerChanged = true;
+                anyLayerChanged = true;
             }
             if (layerChanged && mAnimator.isDimmingLocked(winAnimator)) {
                 // Force an animation pass just to update the mDimAnimator layer.
@@ -8121,6 +8162,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " =mAnimLayer=" + winAnimator.mAnimLayer);
             //System.out.println(
             //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
+        }
+
+        if (anyLayerChanged) {
+            scheduleNotifyWindowLayersChangedIfNeededLocked(getDefaultDisplayContentLocked());
         }
     }
 
