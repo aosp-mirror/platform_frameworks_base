@@ -304,6 +304,8 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         // Dump the state of all the app widget providers
         synchronized (mAppWidgetServices) {
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
