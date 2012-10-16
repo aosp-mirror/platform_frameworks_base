@@ -2823,16 +2823,9 @@ public class WindowManagerService extends IWindowManager.Stub
                                 "Relayout window turning screen on: " + win);
                         win.mTurnOnScreen = true;
                     }
-                    int diff = 0;
-                    if (win.mConfiguration != mCurConfiguration
-                            && (win.mConfiguration == null
-                                    || (diff=mCurConfiguration.diff(win.mConfiguration)) != 0)) {
-                        win.mConfiguration = mCurConfiguration;
-                        if (DEBUG_CONFIGURATION) {
-                            Slog.i(TAG, "Window " + win + " visible with new config: "
-                                    + win.mConfiguration + " / 0x"
-                                    + Integer.toHexString(diff));
-                        }
+                    if (win.isConfigChanged()) {
+                        if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + win
+                                + " visible with new config: " + win.mConfiguration);
                         outConfig.setTo(mCurConfiguration);
                     }
                 }
@@ -8260,7 +8253,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG, "1ST PASS " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                         + " mLayoutAttached=" + win.mLayoutAttached
-                        + " screen changed=" + win.isConfigDiff(ActivityInfo.CONFIG_SCREEN_SIZE));
+                        + " screen changed=" + win.isConfigChanged());
                 final AppWindowToken atoken = win.mAppToken;
                 if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
@@ -8282,7 +8275,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || win.isConfigDiff(ActivityInfo.CONFIG_SCREEN_SIZE)
+                    || win.isConfigChanged()
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
