@@ -526,6 +526,10 @@ static void nativeCloseTransaction(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient::closeGlobalTransaction();
 }
 
+static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz) {
+    SurfaceComposerClient::setAnimationTransaction();
+}
+
 static void nativeSetLayer(JNIEnv* env, jobject surfaceObj, jint zorder) {
     sp<SurfaceControl> surface(getSurfaceControl(env, surfaceObj));
     if (surface == NULL) return;
@@ -819,6 +823,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeOpenTransaction },
     {"nativeCloseTransaction", "()V",
             (void*)nativeCloseTransaction },
+    {"nativeSetAnimationTransaction", "()V",
+            (void*)nativeSetAnimationTransaction },
     {"nativeSetLayer", "(I)V",
             (void*)nativeSetLayer },
     {"nativeSetPosition", "(FF)V",
