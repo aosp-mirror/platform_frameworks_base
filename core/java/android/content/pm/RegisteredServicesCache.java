@@ -264,7 +264,8 @@ public abstract class RegisteredServicesCache<V> {
             if (user.services == null) {
                 generateServicesMap(userId);
             }
-            return Collections.unmodifiableCollection(user.services.values());
+            return Collections.unmodifiableCollection(
+                    new ArrayList<ServiceInfo<V>>(user.services.values()));
         }
     }
 
