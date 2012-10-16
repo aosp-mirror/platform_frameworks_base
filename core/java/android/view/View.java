@@ -4906,7 +4906,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param outRect The output location
      */
-    private void getBoundsOnScreen(Rect outRect) {
+    void getBoundsOnScreen(Rect outRect) {
         if (mAttachInfo == null) {
             return;
         }
@@ -8661,7 +8661,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Return the visible drawing bounds of your view. Fills in the output
      * rectangle with the values from getScrollX(), getScrollY(),
-     * getWidth(), and getHeight().
+     * getWidth(), and getHeight(). These bounds do not account for any
+     * transformation properties currently set on the view, such as
+     * {@link #setScaleX(float)} or {@link #setRotation(float)}.
      *
      * @param outRect The (scrolled) drawing bounds of the view.
      */
