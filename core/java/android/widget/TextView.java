@@ -6321,7 +6321,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mDeferScroll >= 0) {
             int curs = mDeferScroll;
             mDeferScroll = -1;
-            bringPointIntoView(curs);
+            bringPointIntoView(Math.min(curs, mText.length()));
         }
         if (changed && mEditor != null) mEditor.invalidateTextDisplayList();
     }
