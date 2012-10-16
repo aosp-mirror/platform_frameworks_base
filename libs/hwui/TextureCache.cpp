@@ -228,25 +228,22 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     texture->height = bitmap->height();
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    if (!regenerate) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
-    }
 
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:
-        if (!regenerate) {
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height,
                 GL_UNSIGNED_BYTE, bitmap->getPixels());
         texture->blend = true;
         break;
     case SkBitmap::kRGB_565_Config:
+        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(), texture->height,
                 GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         texture->blend = false;
         break;
     case SkBitmap::kARGB_8888_Config:
+        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height,
                 GL_UNSIGNED_BYTE, bitmap->getPixels());
         // Do this after calling getPixels() to make sure Skia's deferred
@@ -255,6 +252,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         break;
     case SkBitmap::kARGB_4444_Config:
     case SkBitmap::kIndex8_Config:
+        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
         texture->blend = !bitmap->isOpaque();
         break;
