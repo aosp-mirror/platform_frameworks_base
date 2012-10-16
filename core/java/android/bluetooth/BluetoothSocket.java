@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.UUID;
 import android.net.LocalSocket;
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
@@ -140,7 +141,9 @@ public final class BluetoothSocket implements Closeable {
                 throw new IOException("Invalid RFCOMM channel: " + port);
             }
         }
-        mUuid = uuid;
+        if(uuid != null)
+            mUuid = uuid;
+        else mUuid = new ParcelUuid(new UUID(0, 0));
         mType = type;
         mAuth = auth;
         mEncrypt = encrypt;
