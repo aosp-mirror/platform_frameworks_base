@@ -925,8 +925,17 @@ public abstract class HardwareRenderer {
             sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_STENCIL_SIZE, value);
             Log.d(LOG_TAG, "  STENCIL_SIZE = " + value[0]);
 
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SAMPLE_BUFFERS, value);
+            Log.d(LOG_TAG, "  SAMPLE_BUFFERS = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SAMPLES, value);
+            Log.d(LOG_TAG, "  SAMPLES = " + value[0]);
+
             sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SURFACE_TYPE, value);
             Log.d(LOG_TAG, "  SURFACE_TYPE = 0x" + Integer.toHexString(value[0]));
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_CONFIG_CAVEAT, value);
+            Log.d(LOG_TAG, "  CONFIG_CAVEAT = 0x" + Integer.toHexString(value[0]));
         }
 
         GL createEglSurface(Surface surface) throws Surface.OutOfResourcesException {
@@ -1433,6 +1442,7 @@ public abstract class HardwareRenderer {
                     EGL_BLUE_SIZE, 8,
                     EGL_ALPHA_SIZE, 8,
                     EGL_DEPTH_SIZE, 0,
+                    EGL_CONFIG_CAVEAT, EGL_NONE,
                     // TODO: Find a better way to choose the stencil size
                     EGL_STENCIL_SIZE, mShowOverdraw ? GLES20Canvas.getStencilSize() : 0,
                     EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
