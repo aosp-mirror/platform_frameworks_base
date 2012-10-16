@@ -368,6 +368,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mSingleLine;
     private int mDesiredHeightAtMeasure = -1;
     private boolean mIncludePad = true;
+    private int mDeferScroll = -1;
 
     // tmp primitives, so we don't alloc them on each draw
     private Rect mTempRect;
@@ -6314,6 +6315,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        if (mDeferScroll >= 0) {
+            int curs = mDeferScroll;
+            mDeferScroll = -1;
+            bringPointIntoView(curs);
+        }
         if (changed && mEditor != null) mEditor.invalidateTextDisplayList();
     }
 
@@ -6396,6 +6402,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * This has to be called after layout. Returns true if anything changed.
      */
     public boolean bringPointIntoView(int offset) {
+        if (isLayoutRequested()) {
+            mDeferScroll = offset;
+            return false;
+        }
         boolean changed = false;
 
         Layout layout = isShowingHint() ? mHintLayout: mLayout;
@@ -7105,13 +7115,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             registerForPreDraw();
         }
 
+        checkForResize();
+
         if (curs >= 0) {
             mHighlightPathBogus = true;
             if (mEditor != null) mEditor.makeBlink();
             bringPointIntoView(curs);
         }
-
-        checkForResize();
     }
 
     /**
@@ -7158,6 +7168,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (oldStart >= 0 || newStart >= 0) {
                 invalidateCursor(Selection.getSelectionStart(buf), oldStart, newStart);
+                checkForResize();
                 registerForPreDraw();
                 if (mEditor != null) mEditor.makeBlink();
             }
