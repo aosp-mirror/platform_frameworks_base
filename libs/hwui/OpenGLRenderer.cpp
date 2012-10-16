@@ -2427,17 +2427,39 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 }
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
-        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
-
-    if (fabs(sweepAngle) >= 360.0f) {
-        return drawOval(left, top, right, bottom, paint);
+        float startAngle, float sweepAngle, bool useCenter, SkPaint* p) {
+    if (mSnapshot->isIgnored() || quickRejectPreStroke(left, top, right, bottom, p)) {
+        return DrawGlInfo::kStatusDone;
     }
 
-    mCaches.activeTexture(0);
-    const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
-            startAngle, sweepAngle, useCenter, paint);
-    return drawShape(left, top, texture, paint);
+    if (fabs(sweepAngle) >= 360.0f) {
+        return drawOval(left, top, right, bottom, p);
+    }
+
+    // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
+    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || p->getStrokeCap() != SkPaint::kButt_Cap) {
+        mCaches.activeTexture(0);
+        const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
+                startAngle, sweepAngle, useCenter, p);
+        return drawShape(left, top, texture, p);
+    }
+
+    SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
+    if (p->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        rect.outset(p->getStrokeWidth() / 2, p->getStrokeWidth() / 2);
+    }
+
+    SkPath path;
+    if (useCenter) {
+        path.moveTo(rect.centerX(), rect.centerY());
+    }
+    path.arcTo(rect, startAngle, sweepAngle, !useCenter);
+    if (useCenter) {
+        path.close();
+    }
+    drawConvexPath(path, p);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 // See SkPaintDefaults.h
