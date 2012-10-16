@@ -90,10 +90,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static final String WAKELOCK_KEY = TAG;
     private static final String THREAD_NAME = TAG;
 
-    private static final String ACCESS_FINE_LOCATION =
-            android.Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String ACCESS_COARSE_LOCATION =
-            android.Manifest.permission.ACCESS_COARSE_LOCATION;
+    // Location resolution level: no location data whatsoever
+    private static final int RESOLUTION_LEVEL_NONE = 0;
+    // Location resolution level: coarse location data only
+    private static final int RESOLUTION_LEVEL_COARSE = 1;
+    // Location resolution level: fine location data
+    private static final int RESOLUTION_LEVEL_FINE = 2;
+
     private static final String ACCESS_MOCK_LOCATION =
             android.Manifest.permission.ACCESS_MOCK_LOCATION;
     private static final String ACCESS_LOCATION_EXTRA_COMMANDS =
@@ -347,7 +350,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         final int mUid;  // uid of receiver
         final int mPid;  // pid of receiver
         final String mPackageName;  // package name of receiver
-        final String mPermission;  // best permission that receiver has
+        final int mAllowedResolutionLevel;  // resolution level allowed to receiver
 
         final ILocationListener mListener;
         final PendingIntent mPendingIntent;
@@ -366,7 +369,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             } else {
                 mKey = intent;
             }
-            mPermission = checkPermission();
+            mAllowedResolutionLevel = getAllowedResolutionLevel(pid, uid);
             mUid = uid;
             mPid = pid;
             mPackageName = packageName;
@@ -440,7 +443,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, statusChanged, this, mLocationHandler,
-                                mPermission);
+                                getResolutionPermission(mAllowedResolutionLevel));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -474,7 +477,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, locationChanged, this, mLocationHandler,
-                                mPermission);
+                                getResolutionPermission(mAllowedResolutionLevel));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -512,7 +515,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, providerIntent, this, mLocationHandler,
-                                mPermission);
+                                getResolutionPermission(mAllowedResolutionLevel));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -609,51 +612,76 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     /**
-     * Returns the best permission available to the caller.
+     * Returns the permission string associated with the specified resolution level.
+     *
+     * @param resolutionLevel the resolution level
+     * @return the permission string
      */
-    private String getBestCallingPermission() {
-        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
-            return ACCESS_FINE_LOCATION;
-        } else if (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
-            return ACCESS_COARSE_LOCATION;
+    private String getResolutionPermission(int resolutionLevel) {
+        switch (resolutionLevel) {
+            case RESOLUTION_LEVEL_FINE:
+                return android.Manifest.permission.ACCESS_FINE_LOCATION;
+            case RESOLUTION_LEVEL_COARSE:
+                return android.Manifest.permission.ACCESS_COARSE_LOCATION;
+            default:
+                return null;
         }
-        return null;
     }
 
     /**
-     * Throw SecurityException if caller has neither COARSE or FINE.
-     * Otherwise, return the best permission.
+     * Returns the resolution level allowed to the given PID/UID pair.
+     *
+     * @param pid the PID
+     * @param uid the UID
+     * @return resolution level allowed to the pid/uid pair
      */
-    private String checkPermission() {
-        String perm = getBestCallingPermission();
-        if (perm == null) {
-            throw new SecurityException("Location requires either ACCESS_COARSE_LOCATION or" +
-                    " ACCESS_FINE_LOCATION permission");
+    private int getAllowedResolutionLevel(int pid, int uid) {
+        if (mContext.checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION,
+                pid, uid) == PackageManager.PERMISSION_GRANTED) {
+            return RESOLUTION_LEVEL_FINE;
+        } else if (mContext.checkPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                pid, uid) == PackageManager.PERMISSION_GRANTED) {
+            return RESOLUTION_LEVEL_COARSE;
+        } else {
+            return RESOLUTION_LEVEL_NONE;
         }
-        return perm;
     }
 
     /**
-     * Throw SecurityException if caller lacks permission to use Geofences.
+     * Returns the resolution level allowed to the caller
+     *
+     * @return resolution level allowed to caller
      */
-    private void checkGeofencePermission() {
-        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
+    private int getCallerAllowedResolutionLevel() {
+        return getAllowedResolutionLevel(Binder.getCallingPid(), Binder.getCallingUid());
+    }
+
+    /**
+     * Throw SecurityException if specified resolution level is insufficient to use geofences.
+     *
+     * @param allowedResolutionLevel resolution level allowed to caller
+     */
+    private void checkResolutionLevelIsSufficientForGeofenceUse(int allowedResolutionLevel) {
+        if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
             throw new SecurityException("Geofence usage requires ACCESS_FINE_LOCATION permission");
         }
     }
 
-    private String getMinimumPermissionForProvider(String provider) {
+    /**
+     * Return the minimum resolution level required to use the specified location provider.
+     *
+     * @param provider the name of the location provider
+     * @return minimum resolution level required for provider
+     */
+    private int getMinimumResolutionLevelForProviderUse(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider) ||
                 LocationManager.PASSIVE_PROVIDER.equals(provider)) {
             // gps and passive providers require FINE permission
-            return ACCESS_FINE_LOCATION;
+            return RESOLUTION_LEVEL_FINE;
         } else if (LocationManager.NETWORK_PROVIDER.equals(provider) ||
                 LocationManager.FUSED_PROVIDER.equals(provider)) {
             // network and fused providers are ok with COARSE or FINE
-            return ACCESS_COARSE_LOCATION;
+            return RESOLUTION_LEVEL_COARSE;
         } else {
             // mock providers
             LocationProviderInterface lp = mMockProviders.get(provider);
@@ -662,41 +690,38 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (properties != null) {
                     if (properties.mRequiresSatellite) {
                         // provider requiring satellites require FINE permission
-                        return ACCESS_FINE_LOCATION;
+                        return RESOLUTION_LEVEL_FINE;
                     } else if (properties.mRequiresNetwork || properties.mRequiresCell) {
                         // provider requiring network and or cell require COARSE or FINE
-                        return ACCESS_COARSE_LOCATION;
+                        return RESOLUTION_LEVEL_COARSE;
                     }
                 }
             }
         }
-
-        return null;
+        return RESOLUTION_LEVEL_FINE; // if in doubt, require FINE
     }
 
-    private boolean isPermissionSufficient(String perm, String minPerm) {
-        if (ACCESS_FINE_LOCATION.equals(minPerm)) {
-            return ACCESS_FINE_LOCATION.equals(perm);
-        } else if (ACCESS_COARSE_LOCATION.equals(minPerm)) {
-            return ACCESS_FINE_LOCATION.equals(perm) ||
-                    ACCESS_COARSE_LOCATION.equals(perm);
-        } else {
-            return false;
-        }
-    }
-
-    private void checkPermissionForProvider(String perm, String provider) {
-        String minPerm = getMinimumPermissionForProvider(provider);
-        if (!isPermissionSufficient(perm, minPerm)) {
-            if (ACCESS_FINE_LOCATION.equals(minPerm)) {
-                throw new SecurityException("Location provider \"" + provider +
-                        "\" requires ACCESS_FINE_LOCATION permission.");
-            } else if (ACCESS_COARSE_LOCATION.equals(minPerm)) {
-                throw new SecurityException("Location provider \"" + provider +
-                        "\" requires ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission.");                
-            } else {
-                throw new SecurityException("Insufficient permission for location provider \"" +
-                        provider + "\".");
+    /**
+     * Throw SecurityException if specified resolution level is insufficient to use the named
+     * location provider.
+     *
+     * @param allowedResolutionLevel resolution level allowed to caller
+     * @param providerName the name of the location provider
+     */
+    private void checkResolutionLevelIsSufficientForProviderUse(int allowedResolutionLevel,
+            String providerName) {
+        int requiredResolutionLevel = getMinimumResolutionLevelForProviderUse(providerName);
+        if (allowedResolutionLevel < requiredResolutionLevel) {
+            switch (requiredResolutionLevel) {
+                case RESOLUTION_LEVEL_FINE:
+                    throw new SecurityException("\"" + providerName + "\" location provider " +
+                            "requires ACCESS_FINE_LOCATION permission.");
+                case RESOLUTION_LEVEL_COARSE:
+                    throw new SecurityException("\"" + providerName + "\" location provider " +
+                            "requires ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission.");
+                default:
+                    throw new SecurityException("Insufficient permission for \"" + providerName +
+                            "\" location provider.");
             }
         }
     }
@@ -731,8 +756,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     @Override
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         ArrayList<String> out;
-        String perm = getBestCallingPermission();
         int callingUserId = UserHandle.getCallingUserId();
         long identity = Binder.clearCallingIdentity();
         try {
@@ -743,7 +768,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     if (LocationManager.FUSED_PROVIDER.equals(name)) {
                         continue;
                     }
-                    if (isPermissionSufficient(perm, getMinimumPermissionForProvider(name))) {
+                    if (allowedResolutionLevel >= getMinimumResolutionLevelForProviderUse(name)) {
                         if (enabledOnly && !isAllowedBySettingsLocked(name, callingUserId)) {
                             continue;
                         }
@@ -803,8 +828,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public boolean providerMeetsCriteria(String provider, Criteria criteria) {
-        checkPermission();
-
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) {
             throw new IllegalArgumentException("provider=" + provider);
@@ -1010,33 +1033,41 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         return receiver;
     }
 
-    private String checkPermissionAndRequest(LocationRequest request) {
-        String perm = getBestCallingPermission();
-        String provider = request.getProvider();
-        checkPermissionForProvider(perm, provider);
-
-        if (ACCESS_COARSE_LOCATION.equals(perm)) {
-            switch (request.getQuality()) {
+    /**
+     * Creates a LocationRequest based upon the supplied LocationRequest that to meets resolution
+     * and consistency requirements.
+     *
+     * @param request the LocationRequest from which to create a sanitized version
+     * @param shouldBeCoarse whether the sanitized version should be held to coarse resolution
+     * constraints
+     * @param fastestCoarseIntervalMS minimum interval allowed for coarse resolution
+     * @return a version of request that meets the given resolution and consistency requirements
+     * @hide
+     */
+    private LocationRequest createSanitizedRequest(LocationRequest request, int resolutionLevel) {
+        LocationRequest sanitizedRequest = new LocationRequest(request);
+        if (resolutionLevel < RESOLUTION_LEVEL_FINE) {
+            switch (sanitizedRequest.getQuality()) {
                 case LocationRequest.ACCURACY_FINE:
-                    request.setQuality(LocationRequest.ACCURACY_BLOCK);
+                    sanitizedRequest.setQuality(LocationRequest.ACCURACY_BLOCK);
                     break;
                 case LocationRequest.POWER_HIGH:
-                    request.setQuality(LocationRequest.POWER_LOW);
+                    sanitizedRequest.setQuality(LocationRequest.POWER_LOW);
                     break;
             }
             // throttle
-            if (request.getInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
-                request.setInterval(LocationFudger.FASTEST_INTERVAL_MS);
+            if (sanitizedRequest.getInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                sanitizedRequest.setInterval(LocationFudger.FASTEST_INTERVAL_MS);
             }
-            if (request.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
-                request.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
+            if (sanitizedRequest.getFastestInterval() < LocationFudger.FASTEST_INTERVAL_MS) {
+                sanitizedRequest.setFastestInterval(LocationFudger.FASTEST_INTERVAL_MS);
             }
         }
         // make getFastestInterval() the minimum of interval and fastest interval
-        if (request.getFastestInterval() > request.getInterval()) {
+        if (sanitizedRequest.getFastestInterval() > sanitizedRequest.getInterval()) {
             request.setFastestInterval(request.getInterval());
         }
-        return perm;
+        return sanitizedRequest;
     }
 
     private void checkPackageName(String packageName) {
@@ -1079,7 +1110,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             PendingIntent intent, String packageName) {
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
         checkPackageName(packageName);
-        checkPermissionAndRequest(request);
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
+                request.getProvider());
+        LocationRequest sanitizedRequest = createSanitizedRequest(request, allowedResolutionLevel);
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -1089,7 +1123,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestLocationUpdatesLocked(request, recevier, pid, uid, packageName);
+                requestLocationUpdatesLocked(sanitizedRequest, recevier, pid, uid, packageName);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1132,7 +1166,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public void removeUpdates(ILocationListener listener, PendingIntent intent,
             String packageName) {
         checkPackageName(packageName);
-        checkPermission();
+
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         Receiver receiver = checkListenerOrIntent(listener, intent, pid, uid, packageName);
@@ -1188,8 +1222,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public Location getLastLocation(LocationRequest request, String packageName) {
         if (D) Log.d(TAG, "getLastLocation: " + request);
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
-        String perm = checkPermissionAndRequest(request);
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         checkPackageName(packageName);
+        checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
+                request.getProvider());
+        // no need to sanitize this request, as only the provider name is used
 
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1213,13 +1250,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (location == null) {
                     return null;
                 }
-                if (ACCESS_FINE_LOCATION.equals(perm)) {
-                    return location;
-                } else {
+                if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
                     Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
                     if (noGPSLocation != null) {
                         return mLocationFudger.getOrCreate(noGPSLocation);
                     }
+                } else {
+                    return location;
                 }
             }
             return null;
@@ -1232,18 +1269,21 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
             String packageName) {
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
-        checkGeofencePermission();
-        checkPermissionAndRequest(request);
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForGeofenceUse(allowedResolutionLevel);
         checkPendingIntent(intent);
         checkPackageName(packageName);
+        checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
+                request.getProvider());
+        LocationRequest sanitizedRequest = createSanitizedRequest(request, allowedResolutionLevel);
 
-        if (D) Log.d(TAG, "requestGeofence: " + request + " " + geofence + " " + intent);
+        if (D) Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
 
         // geo-fence manager uses the public location API, need to clear identity
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mGeofenceManager.addFence(request, geofence, intent, uid, packageName);
+            mGeofenceManager.addFence(sanitizedRequest, geofence, intent, uid, packageName);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1251,7 +1291,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public void removeGeofence(Geofence geofence, PendingIntent intent, String packageName) {
-        checkGeofencePermission();
+        checkResolutionLevelIsSufficientForGeofenceUse(getCallerAllowedResolutionLevel());
         checkPendingIntent(intent);
         checkPackageName(packageName);
 
@@ -1272,10 +1312,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (mGpsStatusProvider == null) {
             return false;
         }
-        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
-        }
+        checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
+                LocationManager.GPS_PROVIDER);
 
         try {
             mGpsStatusProvider.addGpsStatusListener(listener);
@@ -1303,8 +1341,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // throw NullPointerException to remain compatible with previous implementation
             throw new NullPointerException();
         }
+        checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
+                provider);
 
-        checkPermission();
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
         if ((mContext.checkCallingOrSelfPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
                 != PackageManager.PERMISSION_GRANTED)) {
@@ -1344,7 +1383,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
           return null;
         }
 
-        checkPermissionForProvider(getBestCallingPermission(), provider);
+        checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
+                provider);
 
         LocationProviderInterface p;
         synchronized (mLock) {
@@ -1357,7 +1397,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     @Override
     public boolean isProviderEnabled(String provider) {
-        checkPermissionForProvider(getBestCallingPermission(), provider);
+        checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
+                provider);
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
 
         long identity = Binder.clearCallingIdentity();
@@ -1522,10 +1563,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
 
             Location notifyLocation = null;
-            if (ACCESS_FINE_LOCATION.equals(receiver.mPermission)) {
-                notifyLocation = lastLocation;  // use fine location
+            if (receiver.mAllowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
+                notifyLocation = coarseLocation;  // use coarse location
             } else {
-                notifyLocation = coarseLocation;  // use coarse location if available
+                notifyLocation = lastLocation;  // use fine location
             }
             if (notifyLocation != null) {
                 Location lastLoc = r.mLastFixBroadcast;
