@@ -68,8 +68,15 @@ public class BitmapMeshActivity extends Activity {
             super.onDraw(canvas);
 
             canvas.drawARGB(255, 255, 255, 255);
+
             canvas.translate(100, 100);
             canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, null, 0, null);
+
+            canvas.save();
+            canvas.translate(0, 400);
+            canvas.clipRect(0.0f, 0.0f, 80.0f, 80.0f);
+            canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, null, 0, null);
+            canvas.restore();
 
             canvas.translate(400, 0);
             canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, mColors, 0, null);
