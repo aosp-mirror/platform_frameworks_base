@@ -916,7 +916,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         //     behalf of the download manager without affecting other apps.
         if (!pkg.equals("com.android.providers.downloads")
                 || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
-            EventLog.writeEvent(EventLogTags.NOTIFICATION_ENQUEUE, pkg, id, tag,
+            EventLog.writeEvent(EventLogTags.NOTIFICATION_ENQUEUE, pkg, id, tag, userId,
                     notification.toString());
         }
 
@@ -1207,7 +1207,7 @@ public class NotificationManagerService extends INotificationManager.Stub
      */
     private void cancelNotification(String pkg, String tag, int id, int mustHaveFlags,
             int mustNotHaveFlags, boolean sendDelete, int userId) {
-        EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL, pkg, id, tag,
+        EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL, pkg, id, tag, userId,
                 mustHaveFlags, mustNotHaveFlags);
 
         synchronized (mNotificationList) {
@@ -1231,20 +1231,34 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     /**
+     * Determine whether the userId applies to the notification in question, either because
+     * they match exactly, or one of them is USER_ALL (which is treated as a wildcard).
+     */
+    private boolean notificationMatchesUserId(NotificationRecord r, int userId) {
+        return
+                // looking for USER_ALL notifications? match everything
+                   userId == UserHandle.USER_ALL
+                // a notification sent to USER_ALL matches any query
+                || r.userId == UserHandle.USER_ALL
+                // an exact user match
+                || r.userId == userId;
+    }
+
+    /**
      * Cancels all notifications from a given package that have all of the
      * {@code mustHaveFlags}.
      */
     boolean cancelAllNotificationsInt(String pkg, int mustHaveFlags,
             int mustNotHaveFlags, boolean doit, int userId) {
-        EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL_ALL, pkg, mustHaveFlags,
-                mustNotHaveFlags);
+        EventLog.writeEvent(EventLogTags.NOTIFICATION_CANCEL_ALL, pkg, userId,
+                mustHaveFlags, mustNotHaveFlags);
 
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             boolean canceledSomething = false;
             for (int i = N-1; i >= 0; --i) {
                 NotificationRecord r = mNotificationList.get(i);
-                if (userId != UserHandle.USER_ALL && r.userId != userId) {
+                if (!notificationMatchesUserId(r, userId)) {
                     continue;
                 }
                 if ((r.notification.flags & mustHaveFlags) != mustHaveFlags) {
@@ -1322,7 +1336,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             for (int i=N-1; i>=0; i--) {
                 NotificationRecord r = mNotificationList.get(i);
 
-                if (r.userId != userId) {
+                if (!notificationMatchesUserId(r, userId)) {
                     continue;
                 }
 
@@ -1376,7 +1390,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int len = list.size();
         for (int i=0; i<len; i++) {
             NotificationRecord r = list.get(i);
-            if (r.userId != userId || r.id != id) {
+            if (!notificationMatchesUserId(r, userId) || r.id != id) {
                 continue;
             }
             if (tag == null) {
