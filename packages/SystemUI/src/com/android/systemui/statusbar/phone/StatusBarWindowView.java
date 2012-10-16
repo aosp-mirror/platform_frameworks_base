@@ -42,6 +42,7 @@ public class StatusBarWindowView extends FrameLayout
     private ExpandHelper mExpandHelper;
     private NotificationRowLayout latestItems;
     private NotificationPanelView mNotificationPanel;
+    private ScrollView mScrollView;
 
     PhoneStatusBar mService;
 
@@ -55,13 +56,13 @@ public class StatusBarWindowView extends FrameLayout
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
         latestItems = (NotificationRowLayout) findViewById(R.id.latestItems);
-        ScrollView scroller = (ScrollView) findViewById(R.id.scroll);
+        mScrollView = (ScrollView) findViewById(R.id.scroll);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
-        mExpandHelper.setScrollView(scroller);
+        mExpandHelper.setScrollView(mScrollView);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class StatusBarWindowView extends FrameLayout
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
-        if (mNotificationPanel.isFullyExpanded()) {
+        if (mNotificationPanel.isFullyExpanded() && mScrollView.getVisibility() == View.VISIBLE) {
             intercept = mExpandHelper.onInterceptTouchEvent(ev);
         }
         if (!intercept) {
