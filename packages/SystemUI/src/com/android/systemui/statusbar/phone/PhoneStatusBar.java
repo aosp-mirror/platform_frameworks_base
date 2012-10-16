@@ -541,8 +541,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
 
                 if (mSettingsPanel != null) {
-                    mSettingsPanel.setBar(mStatusBarView);
-                    
                     if (!ActivityManager.isHighEndGfx()) {
                         mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                                 R.color.notification_panel_solid_background)));
@@ -563,6 +561,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     mSettingsPanel.setQuickSettings(mQS);
                 }
                 mQS.setService(this);
+                mQS.setBar(mStatusBarView);
                 mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
                         mLocationController);
             } else {
