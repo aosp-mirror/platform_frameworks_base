@@ -29,12 +29,14 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -2319,24 +2321,14 @@ public final class ViewRootImpl implements ViewParent,
             mAccessibilityFocusedHost.getAccessibilityNodeProvider();
         Rect bounds = mView.mAttachInfo.mTmpInvalRect;
         if (provider == null) {
-            mAccessibilityFocusedHost.getDrawingRect(bounds);
-            if (mView instanceof ViewGroup) {
-                ViewGroup viewGroup = (ViewGroup) mView;
-                try {
-                    viewGroup.offsetDescendantRectToMyCoords(mAccessibilityFocusedHost, bounds);
-                } catch (IllegalArgumentException iae) {
-                    Log.e(TAG, "Temporary detached view that was neither removed not reattached: "
-                            + mAccessibilityFocusedHost);
-                    return;
-                }
-            }
+            mAccessibilityFocusedHost.getBoundsOnScreen(bounds);
         } else {
             if (mAccessibilityFocusedVirtualView == null) {
                 return;
             }
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
-            bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         }
+        bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
         drawable.setBounds(bounds);
         drawable.draw(canvas);
     }
