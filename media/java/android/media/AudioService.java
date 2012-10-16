@@ -153,11 +153,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_SET_A2DP_CONNECTION_STATE = 22;
     // end of messages handled under wakelock
     private static final int MSG_SET_RSX_CONNECTION_STATE = 23; // change remote submix connection
-    private static final int MSG_SET_FORCE_RSX_USE = 24;        // force remote submix audio routing
-    private static final int MSG_CHECK_MUSIC_ACTIVE = 25;
-    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 26;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 27;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 28;
+    private static final int MSG_CHECK_MUSIC_ACTIVE = 24;
+    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 25;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 26;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 27;
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -2221,13 +2220,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 on ? 1 : 0 /*arg1*/,
                 address /*arg2*/,
                 null/*obj*/, 0/*delay*/);
-
-        // Note that we are  currently forcing use of remote submix as soon as corresponding device
-        //   is made available
-        sendMsg(mAudioHandler, MSG_SET_FORCE_RSX_USE, SENDMSG_REPLACE,
-                AudioSystem.FOR_MEDIA,
-                on ? AudioSystem.FORCE_REMOTE_SUBMIX : AudioSystem.FORCE_NONE,
-                null/*obj*/, 0/*delay*/);
     }
 
     private void onSetRsxConnectionState(int available, int address) {
@@ -3320,7 +3312,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
                 case MSG_SET_FORCE_USE:
                 case MSG_SET_FORCE_BT_A2DP_USE:
-                case MSG_SET_FORCE_RSX_USE:
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
