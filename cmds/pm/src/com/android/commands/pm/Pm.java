@@ -1131,6 +1131,19 @@ public final class Pm {
     }
 
     private void runClear() {
+        int userId = 0;
+        String option = nextOption();
+        if (option != null && option.equals("--user")) {
+            String optionData = nextOptionData();
+            if (optionData == null || !isNumber(optionData)) {
+                System.err.println("Error: no USER_ID specified");
+                showUsage();
+                return;
+            } else {
+                userId = Integer.parseInt(optionData);
+            }
+        }
+
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
@@ -1140,8 +1153,7 @@ public final class Pm {
 
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            // XXX TO DO: add user arg
-            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, 0)) {
+            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs, userId)) {
                 System.err.println("Failed");
             }
 
@@ -1179,7 +1191,7 @@ public final class Pm {
         return "unknown";
     }
 
-    private boolean isNumber(String s) {
+    private static boolean isNumber(String s) {
         try {
             Integer.parseInt(s);
         } catch (NumberFormatException nfe) {
@@ -1452,7 +1464,7 @@ public final class Pm {
         System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
         System.err.println("                  [--originating-uri <URI>] [--referrer <URI>] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
-        System.err.println("       pm clear PACKAGE");
+        System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
