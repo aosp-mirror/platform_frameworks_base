@@ -71,10 +71,8 @@ public:
             const mat4 *transform, VertexBuffer& vertexBuffer);
 
 private:
-    static void convexPathPerimeterVertices(
-        const SkPath &path,
-        float sqrInvScaleX, float sqrInvScaleY,
-        Vector<Vertex> &outputVertices);
+    static bool convexPathPerimeterVertices(const SkPath &path, bool forceClose,
+        float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex> &outputVertices);
 
 /*
   endpoints a & b,
