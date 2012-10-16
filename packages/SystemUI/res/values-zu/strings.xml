@@ -105,7 +105,7 @@
     <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Ibha elilodwa le-WiFi."</string>
     <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Amabha amabili we-WiFi."</string>
     <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Amabha amathathu we-WiFi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Isignali ye-WiFi igcwele."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Isiginali ye-WiFi igcwele."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ayikho i-WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Ibha eyodwa ye-WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Amabha amabili we-WiMAX."</string>
@@ -117,7 +117,7 @@
     <string name="accessibility_one_bar" msgid="1685730113192081895">"Ibha elilodwa."</string>
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Amabha amabili."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Amabha amathathu."</string>
-    <string name="accessibility_signal_full" msgid="9122922886519676839">"Isignali egcwele."</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Isiginali egcwele."</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Vula."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Vala."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Ixhunyiwe."</string>
@@ -147,13 +147,12 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Isaziso sichithiwe."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Umthunzi wesaziso."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Izilingiselelo ezisheshayo."</string>
-    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Izinhlelo zokusebenza zakamuva"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Umsebenzisi <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Iselula <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Ibhethri <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"I-Airplane Mode <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Imodi yendiza <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"I-Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"I-alamu isethiwe ngo-<xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"idatha ye-2G-3G ivimbelwe"</string>
