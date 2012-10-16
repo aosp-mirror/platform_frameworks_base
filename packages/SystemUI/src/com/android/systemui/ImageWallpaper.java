@@ -31,8 +31,10 @@ import android.os.SystemProperties;
 import android.renderscript.Matrix4f;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.WindowManager;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -108,6 +110,7 @@ public class ImageWallpaper extends WallpaperService {
 
         Bitmap mBackground;
         int mBackgroundWidth = -1, mBackgroundHeight = -1;
+        int mLastRotation = -1;
         float mXOffset;
         float mYOffset;
 
@@ -156,7 +159,7 @@ public class ImageWallpaper extends WallpaperService {
                     mBackgroundWidth = mBackgroundHeight = -1;
                     mBackground = null;
                     mRedrawNeeded = true;
-                    drawFrameLocked(false);
+                    drawFrameLocked();
                 }
             }
         }
@@ -225,7 +228,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             if (DEBUG) {
-                Log.d(TAG, "onVisibilityChanged: visible=" + visible);
+                Log.d(TAG, "onVisibilityChanged: mVisible, visible=" + mVisible + ", " + visible);
             }
 
             synchronized (mLock) {
@@ -234,7 +237,7 @@ public class ImageWallpaper extends WallpaperService {
                         Log.d(TAG, "Visibility changed to visible=" + visible);
                     }
                     mVisible = visible;
-                    drawFrameLocked(false);
+                    drawFrameLocked();
                 }
             }
         }
@@ -263,7 +266,7 @@ public class ImageWallpaper extends WallpaperService {
                     mYOffset = yOffset;
                     mOffsetsChanged = true;
                 }
-                drawFrameLocked(false);
+                drawFrameLocked();
             }
         }
 
@@ -276,80 +279,81 @@ public class ImageWallpaper extends WallpaperService {
             super.onSurfaceChanged(holder, format, width, height);
 
             synchronized (mLock) {
-                mRedrawNeeded = true;
-                mBackgroundWidth = mBackgroundHeight = -1;
-                drawFrameLocked(true);
+                drawFrameLocked();
             }
+        }
+
+        @Override
+        public void onSurfaceDestroyed(SurfaceHolder holder) {
+            super.onSurfaceDestroyed(holder);
+            mBackgroundWidth = mBackgroundHeight = -1;
+        }
+
+        @Override
+        public void onSurfaceCreated(SurfaceHolder holder) {
+            super.onSurfaceCreated(holder);
+            mBackgroundWidth = mBackgroundHeight = -1;
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             if (DEBUG) {
-                Log.d(TAG, "onSurfaceRedrawNeeded:");
+                Log.d(TAG, "onSurfaceRedrawNeeded");
             }
             super.onSurfaceRedrawNeeded(holder);
 
             synchronized (mLock) {
-                mRedrawNeeded = true;
-                drawFrameLocked(false);
+                drawFrameLocked();
             }
         }
 
-        void drawFrameLocked(boolean force) {
-            if (!force) {
-                if (!mVisible) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Suppressed drawFrame since wallpaper is not visible.");
-                    }
-                    return;
-                }
-                if (!mRedrawNeeded && !mOffsetsChanged) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
-                                + "and offsets have not changed.");
-                    }
-                    return;
-                }
-            }
-            // If we don't yet know the size of the wallpaper bitmap,
-            // we need to get it now.
-            boolean updateWallpaper = mBackgroundWidth < 0 || mBackgroundHeight < 0 ;
-
-            // If we somehow got to this point after we have last flushed
-            // the wallpaper, well we really need it to draw again.  So
-            // seems like we need to reload it.  Ouch.
-            updateWallpaper = updateWallpaper || mBackground == null;
-
-            if (updateWallpaper) {
-                updateWallpaperLocked();
-            }
-
+        void drawFrameLocked() {
             SurfaceHolder sh = getSurfaceHolder();
             final Rect frame = sh.getSurfaceFrame();
             final int dw = frame.width();
             final int dh = frame.height();
+            int newRotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).
+                    getDefaultDisplay().getRotation();
+
+            boolean redrawNeeded = dw != mBackgroundWidth || dh != mBackgroundHeight ||
+                    newRotation != mLastRotation;
+            if (!redrawNeeded && !mOffsetsChanged) {
+                if (DEBUG) {
+                    Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
+                            + "and offsets have not changed.");
+                }
+                return;
+            }
+            mLastRotation = newRotation;
+
+            // Load bitmap if it is not yet loaded or if it was loaded at a different size
+            if (mBackground == null || dw != mBackgroundWidth || dw != mBackgroundHeight) {
+                if (DEBUG) {
+                    Log.d(TAG, "Reloading bitmap");
+                }
+                mWallpaperManager.forgetLoadedWallpaper();
+                updateWallpaperLocked();
+            }
+
             final int availw = dw - mBackgroundWidth;
             final int availh = dh - mBackgroundHeight;
             int xPixels = availw < 0 ? (int)(availw * mXOffset + .5f) : (availw / 2);
             int yPixels = availh < 0 ? (int)(availh * mYOffset + .5f) : (availh / 2);
 
             mOffsetsChanged = false;
-            if (!force && !mRedrawNeeded
-                    && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
+            mRedrawNeeded = false;
+            mLastXTranslation = xPixels;
+            mLastYTranslation = yPixels;
+            if (!redrawNeeded && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
                 if (DEBUG) {
                     Log.d(TAG, "Suppressed drawFrame since the image has not "
                             + "actually moved an integral number of pixels.");
                 }
                 return;
             }
-            mRedrawNeeded = false;
-            mLastXTranslation = xPixels;
-            mLastYTranslation = yPixels;
 
             if (DEBUG) {
-                Log.d(TAG, "drawFrameUnlocked(" + force + "): mBackgroundWxH=" + mBackgroundWidth + "x"
-                        + mBackgroundHeight + " SurfaceFrame=" + frame.toShortString()
-                        + " X,YOffset=" + mXOffset + "," + mYOffset);
+                Log.d(TAG, "Redrawing wallpaper");
             }
             if (mIsHwAccelerated) {
                 if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
@@ -429,7 +433,6 @@ public class ImageWallpaper extends WallpaperService {
             final float bottom = top + mBackgroundHeight;
 
             final Rect frame = sh.getSurfaceFrame();
-
             final Matrix4f ortho = new Matrix4f();
             ortho.loadOrtho(0.0f, frame.width(), frame.height(), 0.0f, -1.0f, 1.0f);
 
@@ -437,7 +440,7 @@ public class ImageWallpaper extends WallpaperService {
 
             final int texture = loadTexture(mBackground);
             final int program = buildProgram(sSimpleVS, sSimpleFS);
-    
+
             final int attribPosition = glGetAttribLocation(program, "position");
             final int attribTexCoords = glGetAttribLocation(program, "texCoords");
             final int uniformTexture = glGetUniformLocation(program, "texture");
@@ -460,7 +463,7 @@ public class ImageWallpaper extends WallpaperService {
                 glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
             }
-    
+
             // drawQuad
             triangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
             glVertexAttribPointer(attribPosition, 3, GL_FLOAT, false,
@@ -471,12 +474,12 @@ public class ImageWallpaper extends WallpaperService {
                     TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
+
             if (!mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
                 throw new RuntimeException("Cannot swap buffers");
             }
             checkEglError();
-    
+
             finishGL();
 
             return true;
