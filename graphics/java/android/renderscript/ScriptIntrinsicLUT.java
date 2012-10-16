@@ -41,7 +41,7 @@ public final class ScriptIntrinsicLUT extends ScriptIntrinsic {
             mCache[ct + 512] = (byte)ct;
             mCache[ct + 768] = (byte)ct;
         }
-        bindAllocation(mTables, 0);
+        setVar(0, mTables);
     }
 
     /**
