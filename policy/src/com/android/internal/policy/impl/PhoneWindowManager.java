@@ -1473,16 +1473,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation);
     }
 
+    @Override
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD;
     }
 
+    @Override
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs) {
-        return attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
-                && attrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER
-                && attrs.type != WindowManager.LayoutParams.TYPE_DREAM
-                && attrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
+        switch (attrs.type) {
+            case TYPE_STATUS_BAR:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_WALLPAPER:
+            case TYPE_DREAM:
+            case TYPE_UNIVERSE_BACKGROUND:
+            case TYPE_KEYGUARD:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /** {@inheritDoc} */
