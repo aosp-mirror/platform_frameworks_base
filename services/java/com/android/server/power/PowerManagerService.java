@@ -162,6 +162,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Poll interval in milliseconds for watching boot animation finished.
     private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
+    // If the battery level drops by this percentage and the user activity timeout
+    // has expired, then assume the device is receiving insufficient current to charge
+    // effectively and terminate the dream.
+    private static final int DREAM_BATTERY_LEVEL_DRAIN_CUTOFF = 5;
+
     private Context mContext;
     private LightsService mLightsService;
     private BatteryService mBatteryService;
@@ -255,6 +260,14 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // The current plug type, such as BatteryManager.BATTERY_PLUGGED_WIRELESS.
     private int mPlugType;
+
+    // The current battery level percentage.
+    private int mBatteryLevel;
+
+    // The battery level percentage at the time the dream started.
+    // This is used to terminate a dream and go to sleep if the battery is
+    // draining faster than it is charging and the user activity timeout has expired.
+    private int mBatteryLevelWhenDreamStarted;
 
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
@@ -1067,12 +1080,14 @@ public final class PowerManagerService extends IPowerManager.Stub
             final int oldPlugType = mPlugType;
             mIsPowered = mBatteryService.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
             mPlugType = mBatteryService.getPlugType();
+            mBatteryLevel = mBatteryService.getBatteryLevel();
 
             if (DEBUG) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
                         + ", mIsPowered=" + mIsPowered
                         + ", oldPlugType=" + oldPlugType
-                        + ", mPlugType=" + mPlugType);
+                        + ", mPlugType=" + mPlugType
+                        + ", mBatteryLevel=" + mBatteryLevel);
             }
 
             if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
@@ -1126,8 +1141,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
         if (!wasPowered && mIsPowered
                 && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
-                && mBatteryService.getBatteryLevel() >=
-                        WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
+                && mBatteryLevel >= WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
             return false;
         }
 
@@ -1403,7 +1417,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             mSandmanScheduled = false;
             boolean canDream = canDreamLocked();
             if (DEBUG_SPEW) {
-                Log.d(TAG, "handleSandman: canDream=" + canDream
+                Slog.d(TAG, "handleSandman: canDream=" + canDream
                         + ", mWakefulness=" + wakefulnessToString(mWakefulness));
             }
 
@@ -1431,10 +1445,24 @@ public final class PowerManagerService extends IPowerManager.Stub
                 if (mWakefulness == WAKEFULNESS_NAPPING) {
                     mWakefulness = WAKEFULNESS_DREAMING;
                     mDirty |= DIRTY_WAKEFULNESS;
+                    mBatteryLevelWhenDreamStarted = mBatteryLevel;
                     updatePowerStateLocked();
                     continueDreaming = true;
                 } else if (mWakefulness == WAKEFULNESS_DREAMING) {
-                    continueDreaming = true;
+                    if (!isBeingKeptAwakeLocked()
+                            && mBatteryLevel < mBatteryLevelWhenDreamStarted
+                                    - DREAM_BATTERY_LEVEL_DRAIN_CUTOFF) {
+                        // If the user activity timeout expired and the battery appears
+                        // to be draining faster than it is charging then stop dreaming
+                        // and go to sleep.
+                        Slog.i(TAG, "Stopping dream because the battery appears to "
+                                + "be draining faster than it is charging.  "
+                                + "Battery level when dream started: "
+                                + mBatteryLevelWhenDreamStarted + "%.  "
+                                + "Battery level now: " + mBatteryLevel + "%.");
+                    } else {
+                        continueDreaming = true;
+                    }
                 }
             }
             if (!continueDreaming) {
@@ -2094,6 +2122,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mWakefulness=" + wakefulnessToString(mWakefulness));
             pw.println("  mIsPowered=" + mIsPowered);
             pw.println("  mPlugType=" + mPlugType);
+            pw.println("  mBatteryLevel=" + mBatteryLevel);
+            pw.println("  mBatteryLevelWhenDreamStarted=" + mBatteryLevelWhenDreamStarted);
             pw.println("  mStayOn=" + mStayOn);
             pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
