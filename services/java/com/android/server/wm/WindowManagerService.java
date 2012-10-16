@@ -265,7 +265,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
-    static final int WINDOW_FREEZE_TIMEOUT_DURATION = 3000;
+    static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
     /**
      * If true, the window manager will do its own custom freezing and general
