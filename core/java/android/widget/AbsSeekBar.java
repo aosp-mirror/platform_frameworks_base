@@ -241,6 +241,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
         updateThumbPos(w, h);
     }
 
@@ -554,5 +555,24 @@ public abstract class AbsSeekBar extends ProgressBar {
             }
         }
         return false;
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        int max = getMax();
+        float scale = max > 0 ? (float) getProgress() / (float) max : 0;
+
+        Drawable thumb = mThumb;
+        if (thumb != null) {
+            setThumbPos(getWidth(), thumb, scale, Integer.MIN_VALUE);
+            /*
+             * Since we draw translated, the drawable's bounds that it signals
+             * for invalidation won't be the actual bounds we want invalidated,
+             * so just invalidate this whole view.
+             */
+            invalidate();
+        }
     }
 }
