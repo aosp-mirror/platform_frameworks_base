@@ -97,7 +97,10 @@
 
     <integer name="blinds_pop_duration_ms">10</integer>
 
-    <!-- Disable quick settings by default -->
-    <bool name="config_hasSettingsPanel">false</bool>
+    <!-- Disable the separate quick settings panel -->
+    <bool name="config_hasSettingsPanel">true</bool>
+
+    <!-- Enable the "flip settings" panel -->
+    <bool name="config_hasFlipSettingsPanel">true</bool>
 </resources>
 
