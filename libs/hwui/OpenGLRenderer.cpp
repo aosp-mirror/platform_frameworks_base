@@ -1730,35 +1730,22 @@ status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
 
 status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
         float* vertices, int* colors, SkPaint* paint) {
-    // TODO: Do a quickReject
     if (!vertices || mSnapshot->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
 
-    mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.get(bitmap);
-    if (!texture) return DrawGlInfo::kStatusDone;
-    const AutoTexture autoCleanup(texture);
-
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(FILTER(paint), true);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    const uint32_t count = meshWidth * meshHeight * 6;
-
+    // TODO: We should compute the bounding box when recording the display list
     float left = FLT_MAX;
     float top = FLT_MAX;
     float right = FLT_MIN;
     float bottom = FLT_MIN;
 
-    const bool hasActiveLayer = hasLayer();
+    const uint32_t count = meshWidth * meshHeight * 6;
 
     // TODO: Support the colors array
     TextureVertex mesh[count];
     TextureVertex* vertex = mesh;
+
     for (int32_t y = 0; y < meshHeight; y++) {
         for (int32_t x = 0; x < meshWidth; x++) {
             uint32_t i = (y * (meshWidth + 1) + x) * 2;
@@ -1785,17 +1772,31 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
             TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
             TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
 
-            if (hasActiveLayer) {
-                // TODO: This could be optimized to avoid unnecessary ops
-                left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
-                top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
-                right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
-                bottom = fmaxf(bottom, fmaxf(vertices[ay], fmaxf(vertices[by], vertices[cy])));
-            }
+            // TODO: This could be optimized to avoid unnecessary ops
+            left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
+            top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
+            right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
+            bottom = fmaxf(bottom, fmaxf(vertices[ay], fmaxf(vertices[by], vertices[cy])));
         }
     }
 
-    if (hasActiveLayer) {
+    if (quickReject(left, top, right, bottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
+
+    mCaches.activeTexture(0);
+    Texture* texture = mCaches.textureCache.get(bitmap);
+    if (!texture) return DrawGlInfo::kStatusDone;
+    const AutoTexture autoCleanup(texture);
+
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(FILTER(paint), true);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    if (hasLayer()) {
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
 
