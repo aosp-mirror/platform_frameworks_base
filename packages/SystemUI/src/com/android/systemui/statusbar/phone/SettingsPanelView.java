@@ -53,7 +53,6 @@ public class SettingsPanelView extends PanelView {
         super.onFinishInflate();
 
         mQSContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
-        mQS = new QuickSettings(getContext(), mQSContainer);
 
         Resources resources = getContext().getResources();
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
@@ -61,6 +60,10 @@ public class SettingsPanelView extends PanelView {
         mHandleView = findViewById(R.id.handle);
 
         setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
+    }
+    
+    public void setQuickSettings(QuickSettings qs) {
+        mQS = qs;
     }
 
     @Override
