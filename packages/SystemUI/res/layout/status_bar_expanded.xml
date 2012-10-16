@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
         android:orientation="vertical"
-	    android:animateLayoutChanges="true"
+        android:animateLayoutChanges="false"
         >
 
         <include layout="@layout/status_bar_expanded_header"
@@ -68,19 +68,30 @@
             android:visibility="gone"
             />
 
-        <ScrollView
-            android:id="@+id/scroll"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fadingEdge="none"
-            android:overScrollMode="ifContentScrolls"
             >
-            <com.android.systemui.statusbar.policy.NotificationRowLayout
-                android:id="@+id/latestItems"
+            <ViewStub android:id="@+id/flip_settings_stub"
+                android:layout="@layout/flip_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                systemui:rowHeight="@dimen/notification_row_min_height"
                 />
-        </ScrollView>
+    
+            <ScrollView
+                android:id="@+id/scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fadingEdge="none"
+                android:overScrollMode="ifContentScrolls"
+                >
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
+                    android:id="@+id/latestItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    systemui:rowHeight="@dimen/notification_row_min_height"
+                    />
+            </ScrollView>
+        </FrameLayout>
     </LinearLayout>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

@@ -88,7 +88,7 @@ class QuickSettings {
     private Context mContext;
     private PanelBar mBar;
     private QuickSettingsModel mModel;
-    private QuickSettingsContainerView mContainerView;
+    private ViewGroup mContainerView;
 
     private DisplayManager mDisplayManager;
     private WifiDisplayStatus mWifiDisplayStatus;
@@ -717,6 +717,7 @@ class QuickSettings {
         for (QuickSettingsTileView v : mDynamicSpannedTiles) {
             v.setColumnSpan(span);
         }
+        ((QuickSettingsContainerView)mContainerView).updateResources();
         mContainerView.requestLayout();
 
         // Reset the dialog
