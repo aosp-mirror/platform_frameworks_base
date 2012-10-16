@@ -1983,7 +1983,9 @@ public class WifiManager {
 
     protected void finalize() throws Throwable {
         try {
-            mHandler.getLooper().quit();
+            if (mHandler != null && mHandler.getLooper() != null) {
+                mHandler.getLooper().quit();
+            }
         } finally {
             super.finalize();
         }
