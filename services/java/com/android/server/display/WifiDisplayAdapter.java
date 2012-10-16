@@ -198,6 +198,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             updateRememberedDisplaysLocked();
             scheduleStatusChangedBroadcastLocked();
         }
+
+        if (mActiveDisplay != null && mActiveDisplay.getDeviceAddress().equals(address)
+                && mDisplayDevice != null) {
+            mDisplayDevice.setNameLocked(mActiveDisplay.getFriendlyDisplayName());
+            sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_CHANGED);
+        }
     }
 
     public void requestForgetLocked(String address) {
@@ -397,7 +403,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     };
 
     private final class WifiDisplayDevice extends DisplayDevice {
-        private final String mName;
+        private String mName;
         private final int mWidth;
         private final int mHeight;
         private final float mRefreshRate;
@@ -421,6 +427,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public void clearSurfaceLocked() {
             mSurface = null;
             sendTraversalRequestLocked();
+        }
+
+        public void setNameLocked(String name) {
+            mName = name;
+            mInfo = null;
         }
 
         @Override
