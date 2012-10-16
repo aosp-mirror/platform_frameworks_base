@@ -221,6 +221,7 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
             mHandler.removeCallbacks(mClearSecurityMessageRunnable);
             mHandler.postDelayed(mClearSecurityMessageRunnable, SECURITY_MESSAGE_DURATION);
         }
+        mSecurityMessage.announceForAccessibility(mSecurityMessage.getText());
     }
 
     /**
