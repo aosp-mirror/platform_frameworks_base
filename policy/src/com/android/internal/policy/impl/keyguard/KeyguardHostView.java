@@ -79,7 +79,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private boolean mEnableMenuKey;
     private boolean mIsVerifyUnlockOnly;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
-    private SecurityMode mCurrentSecuritySelection = SecurityMode.None;
+    private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
 
     protected Runnable mLaunchRunnable;
 
@@ -433,7 +433,8 @@ public class KeyguardHostView extends KeyguardViewBase {
      */
     private void showBackupSecurityScreen() {
         if (DEBUG) Log.d(TAG, "showBackupSecurity()");
-        showSecurityScreen(mSecurityModel.getBackupSecurityMode());
+        SecurityMode backup = mSecurityModel.getBackupSecurityMode(mCurrentSecuritySelection);
+        showSecurityScreen(backup);
     }
 
     public boolean showNextSecurityScreenIfPresent() {
@@ -543,6 +544,45 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
+    // Used to ignore callbacks from methods that are no longer current (e.g. face unlock).
+    // This avoids unwanted asynchronous events from messing with the state.
+    private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
+
+        @Override
+        public void userActivity(long timeout) {
+        }
+
+        @Override
+        public void showBackupSecurity() {
+        }
+
+        @Override
+        public void setOnDismissRunnable(Runnable runnable) {
+        }
+
+        @Override
+        public void reportSuccessfulUnlockAttempt() {
+        }
+
+        @Override
+        public void reportFailedUnlockAttempt() {
+        }
+
+        @Override
+        public boolean isVerifyUnlockOnly() {
+            return false;
+        }
+
+        @Override
+        public int getFailedAttempts() {
+            return 0;
+        }
+
+        @Override
+        public void dismiss(boolean securityVerified) {
+        }
+    };
+
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
@@ -568,9 +608,10 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         boolean simPukFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
-        if (view == null) {
+        int layoutId = getLayoutIdFor(securityMode);
+        if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
-            View v = inflater.inflate(getLayoutIdFor(securityMode), this, false);
+            View v = inflater.inflate(layoutId, this, false);
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
 
@@ -617,8 +658,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         KeyguardSecurityView newView = getSecurityView(securityMode);
 
         // Emulate Activity life cycle
-        oldView.onPause();
+        if (oldView != null) {
+            oldView.onPause();
+            oldView.setKeyguardCallback(mNullCallback); // ignore requests from old view
+        }
         newView.onResume();
+        newView.setKeyguardCallback(mCallback);
 
         final boolean needsInput = newView.needsInput();
         if (mViewMediatorCallback != null) {
@@ -749,7 +794,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
             default:
-                throw new RuntimeException("No layout for securityMode " + securityMode);
+                return 0;
         }
     }
 
