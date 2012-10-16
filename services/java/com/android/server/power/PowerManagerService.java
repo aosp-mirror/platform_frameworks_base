@@ -1704,8 +1704,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     /**
-     * Reboot the device, passing 'reason' (may be null)
-     * to the underlying __reboot system call.  Should not return.
+     * Reboots the device.
+     *
+     * @param confirm If true, shows a reboot confirmation dialog.
+     * @param reason The reason for the reboot, or null if none.
+     * @param wait If true, this call waits for the reboot to complete and does not return.
      */
     @Override // Binder call
     public void reboot(boolean confirm, String reason, boolean wait) {
@@ -1713,15 +1716,17 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            rebootInternal(false, confirm, reason, wait);
+            shutdownOrRebootInternal(false, confirm, reason, wait);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     /**
-     * Shutdown the devic, passing 'reason' (may be null)
-     * to the underlying __reboot system call.  Should not return.
+     * Shuts down the device.
+     *
+     * @param confirm If true, shows a shutdown confirmation dialog.
+     * @param wait If true, this call waits for the shutdown to complete and does not return.
      */
     @Override // Binder call
     public void shutdown(boolean confirm, boolean wait) {
@@ -1729,19 +1734,20 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            rebootInternal(true, confirm, null, wait);
+            shutdownOrRebootInternal(true, confirm, null, wait);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void rebootInternal(final boolean shutdown, final boolean confirm,
+    private void shutdownOrRebootInternal(final boolean shutdown, final boolean confirm,
             final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
-            throw new IllegalStateException("Too early to call reboot()");
+            throw new IllegalStateException("Too early to call shutdown() or reboot()");
         }
 
         Runnable runnable = new Runnable() {
+            @Override
             public void run() {
                 synchronized (this) {
                     if (shutdown) {
@@ -1789,6 +1795,7 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private void crashInternal(final String message) {
         Thread t = new Thread("PowerManagerService.crash()") {
+            @Override
             public void run() {
                 throw new RuntimeException(message);
             }
