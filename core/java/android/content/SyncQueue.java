@@ -27,11 +27,14 @@ import android.util.Pair;
 import com.google.android.collect.Maps;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * Queue of pending sync operations. Not inherently thread safe, external
+ * callers are responsible for locking.
  *
  * @hide
  */
@@ -43,7 +46,7 @@ public class SyncQueue {
 
     // A Map of SyncOperations operationKey -> SyncOperation that is designed for
     // quick lookup of an enqueued SyncOperation.
-    public final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
+    private final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
 
     public SyncQueue(SyncStorageEngine syncStorageEngine, final SyncAdaptersCache syncAdapters) {
         mSyncStorageEngine = syncStorageEngine;
@@ -196,6 +199,10 @@ public class SyncQueue {
                 Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
             }
         }
+    }
+
+    public Collection<SyncOperation> getOperations() {
+        return mOperationsMap.values();
     }
 
     public void dump(StringBuilder sb) {

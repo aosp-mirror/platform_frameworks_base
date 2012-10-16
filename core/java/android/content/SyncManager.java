@@ -21,7 +21,6 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerService;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -154,7 +153,9 @@ public class SyncManager {
     private AlarmManager mAlarmService = null;
 
     private SyncStorageEngine mSyncStorageEngine;
-    final public SyncQueue mSyncQueue;
+
+    // @GuardedBy("mSyncQueue")
+    private final SyncQueue mSyncQueue;
 
     protected final ArrayList<ActiveSyncContext> mActiveSyncContexts = Lists.newArrayList();
 
@@ -902,7 +903,9 @@ public class SyncManager {
 
         updateRunningAccounts();
 
-        mSyncQueue.addPendingOperations(userId);
+        synchronized (mSyncQueue) {
+            mSyncQueue.addPendingOperations(userId);
+        }
 
         // Schedule sync for any accounts under started user
         final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
@@ -1957,10 +1960,10 @@ public class SyncManager {
             synchronized (mSyncQueue) {
                 if (isLoggable) {
                     Log.v(TAG, "build the operation array, syncQueue size is "
-                        + mSyncQueue.mOperationsMap.size());
+                        + mSyncQueue.getOperations().size());
                 }
-                Iterator<SyncOperation> operationIterator =
-                        mSyncQueue.mOperationsMap.values().iterator();
+                final Iterator<SyncOperation> operationIterator = mSyncQueue.getOperations()
+                        .iterator();
 
                 final ActivityManager activityManager
                         = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -2153,7 +2156,7 @@ public class SyncManager {
                     runSyncFinishedOrCanceledLocked(null, toReschedule);
                     scheduleSyncOperation(toReschedule.mSyncOperation);
                 }
-                synchronized (mSyncQueue){
+                synchronized (mSyncQueue) {
                     mSyncQueue.remove(candidate);
                 }
                 dispatchSyncOperation(candidate);
