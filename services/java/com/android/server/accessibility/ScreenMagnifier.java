@@ -850,6 +850,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         private static final int MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 3;
         private static final int MESSAGE_ON_WINDOW_TRANSITION = 4;
         private static final int MESSAGE_ON_ROTATION_CHANGED = 5;
+        private static final int MESSAGE_ON_WINDOW_LAYERS_CHANGED = 6;
 
         private final Handler mHandler = new MyHandler();
 
@@ -880,24 +881,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mDisplayContentChangeListener = new IDisplayContentChangeListener.Stub() {
                 @Override
                 public void onWindowTransition(int displayId, int transition, WindowInfo info) {
-                    Message message = mHandler.obtainMessage(MESSAGE_ON_WINDOW_TRANSITION,
-                            transition, 0, WindowInfo.obtain(info));
-                    // TODO: This makes me quite unhappy but for the time being the
-                    //       least risky fix for cases where the keyguard is removed but
-                    //       the windows it force hides are not made visible yet. Hence,
-                    //       we would compute the magnified frame before we have a stable
-                    //       state. One more reason to move the magnified frame computation
-                    //       in the window manager!
-                    if (info.type == WindowManager.LayoutParams.TYPE_KEYGUARD
-                                || info.type == WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
-                            && (transition == WindowManagerPolicy.TRANSIT_EXIT
-                                || transition == WindowManagerPolicy.TRANSIT_HIDE)) {
-                        final long delay = (long) (2 * mLongAnimationDuration
-                                * mWindowAnimationScale);
-                        mHandler.sendMessageDelayed(message, delay);
-                    } else {
-                        message.sendToTarget();
-                    }
+                    mHandler.obtainMessage(MESSAGE_ON_WINDOW_TRANSITION,
+                            transition, 0, WindowInfo.obtain(info)).sendToTarget();
                 }
 
                 @Override
@@ -916,6 +901,11 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                 public void onRotationChanged(int rotation) throws RemoteException {
                     mHandler.obtainMessage(MESSAGE_ON_ROTATION_CHANGED, rotation, 0)
                             .sendToTarget();
+                }
+
+                @Override
+                public void onWindowLayersChanged(int displayId) throws RemoteException {
+                    mHandler.sendEmptyMessage(MESSAGE_ON_WINDOW_LAYERS_CHANGED);
                 }
             };
 
@@ -1191,6 +1181,9 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                     case MESSAGE_ON_ROTATION_CHANGED: {
                         final int rotation = message.arg1;
                         handleOnRotationChanged(rotation);
+                    } break;
+                    case MESSAGE_ON_WINDOW_LAYERS_CHANGED: {
+                        mViewport.recomputeBounds(mMagnificationController.isMagnifying());
                     } break;
                     default: {
                         throw new IllegalArgumentException("Unknown message: " + action);

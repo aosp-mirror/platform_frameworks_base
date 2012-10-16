@@ -28,5 +28,6 @@ import android.graphics.Rect;
 oneway interface IDisplayContentChangeListener {
     void onWindowTransition(int displayId, int transition, in WindowInfo info);
     void onRectangleOnScreenRequested(int displayId, in Rect rectangle, boolean immediate);
+    void onWindowLayersChanged(int displayId);
     void onRotationChanged(int rotation);
 }
