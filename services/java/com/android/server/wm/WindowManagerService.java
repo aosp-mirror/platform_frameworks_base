@@ -8117,8 +8117,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean mInLayout = false;
     private final void performLayoutAndPlaceSurfacesLocked() {
+        do {
+            mTraversalScheduled = false;
+            performLayoutAndPlaceSurfacesLockedLoop();
+            mH.removeMessages(H.DO_TRAVERSAL);
+        } while (mTraversalScheduled);
+    }
+
+    private boolean mInLayout = false;
+    private final void performLayoutAndPlaceSurfacesLockedLoop() {
         if (mInLayout) {
             if (DEBUG) {
                 throw new RuntimeException("Recursive call!");
