@@ -61,7 +61,7 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
      */
     public void setInput(Allocation ain) {
         mInput = ain;
-        bindAllocation(ain, 1);
+        setVar(1, ain);
     }
 
     /**
