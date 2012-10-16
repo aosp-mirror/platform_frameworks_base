@@ -56,7 +56,7 @@ public final class ScriptIntrinsicYuvToRGB extends ScriptIntrinsic {
      */
     public void setInput(Allocation ain) {
         mInput = ain;
-        bindAllocation(ain, 0);
+        setVar(0, ain);
     }
 
     /**
