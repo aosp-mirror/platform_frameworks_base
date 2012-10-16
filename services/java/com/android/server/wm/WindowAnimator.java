@@ -618,6 +618,7 @@ public class WindowAnimator {
         if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
                 TAG, ">>> OPEN TRANSACTION animateLocked");
         Surface.openTransaction();
+        Surface.setAnimationTransaction();
         try {
             updateAppWindowsLocked();
 

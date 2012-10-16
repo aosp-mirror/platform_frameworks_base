@@ -245,6 +245,7 @@ public class Surface implements Parcelable {
 
     private static native void nativeOpenTransaction();
     private static native void nativeCloseTransaction();
+    private static native void nativeSetAnimationTransaction();
 
     private native void nativeSetLayer(int zorder);
     private native void nativeSetPosition(float x, float y);
@@ -523,6 +524,11 @@ public class Surface implements Parcelable {
     /** end a transaction @hide */
     public static void closeTransaction() {
         nativeCloseTransaction();
+    }
+
+    /** flag the transaction as an animation @hide */
+    public static void setAnimationTransaction() {
+        nativeSetAnimationTransaction();
     }
 
     /** @hide */
