@@ -665,6 +665,7 @@ public class ImageWallpaper extends WallpaperService {
                     EGL_ALPHA_SIZE, 0,
                     EGL_DEPTH_SIZE, 0,
                     EGL_STENCIL_SIZE, 0,
+                    EGL_CONFIG_CAVEAT, EGL_NONE,
                     EGL_NONE
             };
         }
