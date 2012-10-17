@@ -399,9 +399,20 @@ bool Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
     if (scissorEnabled && (x != mScissorX || y != mScissorY ||
             width != mScissorWidth || height != mScissorHeight)) {
 
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-
+        if (x < 0) {
+            width += x;
+            x = 0;
+        }
+        if (y < 0) {
+            height += y;
+            y = 0;
+        }
+        if (width < 0) {
+            width = 0;
+        }
+        if (height < 0) {
+            height = 0;
+        }
         glScissor(x, y, width, height);
 
         mScissorX = x;
