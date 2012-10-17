@@ -611,6 +611,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         int layoutId = getLayoutIdFor(securityMode);
         if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
+            if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
             View v = inflater.inflate(layoutId, this, false);
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
