@@ -21,6 +21,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Slog;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -31,9 +33,16 @@ public class NotificationPanelView extends PanelView {
     Drawable mHandleBar;
     float mHandleBarHeight;
     View mHandleView;
+    int mFingers;
+    PhoneStatusBar mStatusBar;
+    private boolean mFlipped;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public void setStatusBar(PhoneStatusBar bar) {
+        mStatusBar = bar;
     }
 
     @Override
@@ -78,5 +87,36 @@ public class NotificationPanelView extends PanelView {
         mHandleBar.setState(mHandleView.getDrawableState());
         mHandleBar.draw(canvas);
         canvas.translate(0, -off);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mFlipped = false;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    if (!mFlipped) {
+                        float miny = event.getY(0);
+                        float maxy = miny;
+                        for (int i=1; i<event.getPointerCount(); i++) {
+                            final float y = event.getY(i);
+                            if (y < miny) miny = y;
+                            if (y > maxy) maxy = y;
+                        }
+                        if (maxy - miny < mHandleBarHeight) {
+                            if (getMeasuredHeight() < mHandleBarHeight) {
+                                mStatusBar.switchToSettings();
+                            } else {
+                                mStatusBar.flipToSettings();
+                            }
+                            mFlipped = true;
+                        }
+                    }
+                    break;
+            }
+        }
+        return mHandleView.dispatchTouchEvent(event);
     }
 }
