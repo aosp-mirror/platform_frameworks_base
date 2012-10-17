@@ -305,6 +305,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                     DisplayDevice device = mDisplayDevices.get(i);
                     device.blankLocked();
                 }
+
+                scheduleTraversalLocked(false);
             }
         }
     }
@@ -322,6 +324,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                     DisplayDevice device = mDisplayDevices.get(i);
                     device.unblankLocked();
                 }
+
+                scheduleTraversalLocked(false);
             }
         }
     }
@@ -755,7 +759,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                     + device.getDisplayDeviceInfoLocked());
             return;
         } else {
-            display.configureDisplayInTransactionLocked(device);
+            boolean isBlanked = (mAllDisplayBlankStateFromPowerManager
+                    == DISPLAY_BLANK_STATE_BLANKED);
+            display.configureDisplayInTransactionLocked(device, isBlanked);
         }
 
         // Update the viewports if needed.
