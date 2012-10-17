@@ -93,6 +93,7 @@
         <!-- Numeric keyboard -->
         <com.android.internal.widget.PasswordEntryKeyboardView android:id="@+id/keyboard"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginStart="4dip"
             android:layout_marginEnd="4dip"
             android:paddingTop="4dip"
