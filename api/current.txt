@@ -8263,6 +8263,7 @@ package android.graphics {
     method public int getScaledWidth(int);
     method public final int getWidth();
     method public final boolean hasAlpha();
+    method public final boolean hasMipMap();
     method public final boolean isMutable();
     method public final boolean isPremultiplied();
     method public final boolean isRecycled();
@@ -8271,6 +8272,7 @@ package android.graphics {
     method public boolean sameAs(android.graphics.Bitmap);
     method public void setDensity(int);
     method public void setHasAlpha(boolean);
+    method public final void setHasMipMap(boolean);
     method public void setPixel(int, int, int);
     method public void setPixels(int[], int, int, int, int, int, int);
     method public void writeToParcel(android.os.Parcel, int);

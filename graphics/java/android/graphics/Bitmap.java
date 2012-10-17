@@ -1030,6 +1030,51 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Indicates whether the renderer responsible for drawing this
+     * bitmap should attempt to use mipmaps when this bitmap is drawn
+     * scaled down.
+     * 
+     * If you know that you are going to draw this bitmap at less than
+     * 50% of its original size, you may be able to obtain a higher
+     * quality
+     * 
+     * This property is only a suggestion that can be ignored by the
+     * renderer. It is not guaranteed to have any effect.
+     * 
+     * @return true if the renderer should attempt to use mipmaps,
+     *         false otherwise
+     * 
+     * @see #setHasMipMap(boolean)
+     */
+    public final boolean hasMipMap() {
+        return nativeHasMipMap(mNativeBitmap);
+    }
+
+    /**
+     * Set a hint for the renderer responsible for drawing this bitmap
+     * indicating that it should attempt to use mipmaps when this bitmap
+     * is drawn scaled down.
+     *
+     * If you know that you are going to draw this bitmap at less than
+     * 50% of its original size, you may be able to obtain a higher
+     * quality by turning this property on.
+     * 
+     * Note that if the renderer respects this hint it might have to
+     * allocate extra memory to hold the mipmap levels for this bitmap.
+     *
+     * This property is only a suggestion that can be ignored by the
+     * renderer. It is not guaranteed to have any effect.
+     *
+     * @param hasMipMap indicates whether the renderer should attempt
+     *                  to use mipmaps
+     *
+     * @see #hasMipMap()
+     */
+    public final void setHasMipMap(boolean hasMipMap) {
+        nativeSetHasMipMap(mNativeBitmap, hasMipMap);
+    }
+
+    /**
      * Fills the bitmap's pixels with the specified {@link Color}.
      *
      * @throws IllegalStateException if the bitmap is not mutable.
@@ -1356,7 +1401,6 @@ public final class Bitmap implements Parcelable {
     private static native int nativeHeight(int nativeBitmap);
     private static native int nativeRowBytes(int nativeBitmap);
     private static native int nativeConfig(int nativeBitmap);
-    private static native boolean nativeHasAlpha(int nativeBitmap);
 
     private static native int nativeGetPixel(int nativeBitmap, int x, int y);
     private static native void nativeGetPixels(int nativeBitmap, int[] pixels,
@@ -1385,7 +1429,10 @@ public final class Bitmap implements Parcelable {
                                                     int[] offsetXY);
 
     private static native void nativePrepareToDraw(int nativeBitmap);
+    private static native boolean nativeHasAlpha(int nativeBitmap);
     private static native void nativeSetHasAlpha(int nBitmap, boolean hasAlpha);
+    private static native boolean nativeHasMipMap(int nativeBitmap);
+    private static native void nativeSetHasMipMap(int nBitmap, boolean hasMipMap);
     private static native boolean nativeSameAs(int nb0, int nb1);
     
     /* package */ final int ni() {
