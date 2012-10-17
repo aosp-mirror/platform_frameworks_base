@@ -149,9 +149,28 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int PEER_CONNECTION_USER_ACCEPT    =   BASE + 2;
     /* User rejected a peer request */
     private static final int PEER_CONNECTION_USER_REJECT    =   BASE + 3;
+    /* User wants to disconnect wifi in favour of p2p */
+    private static final int DROP_WIFI_USER_ACCEPT          =   BASE + 4;
+    /* User wants to keep his wifi connection and drop p2p */
+    private static final int DROP_WIFI_USER_REJECT          =   BASE + 5;
+
 
     /* Commands to the WifiStateMachine */
-    public static final int P2P_CONNECTION_CHANGED         =   BASE + 11;
+    public static final int P2P_CONNECTION_CHANGED          =   BASE + 11;
+
+    /* These commands are used to tempoarily disconnect wifi when we detect
+     * a frequency conflict which would make it impossible to have with p2p
+     * and wifi active at the same time.
+     *
+     * If the user chooses to disable wifi tempoarily, we keep wifi disconnected
+     * until the p2p connection is done and terminated at which point we will
+     * bring back wifi up
+     *
+     * DISCONNECT_WIFI_REQUEST
+     *      msg.arg1 = 1 enables temporary disconnect and 0 disables it.
+     */
+    public static final int DISCONNECT_WIFI_REQUEST         =   BASE + 12;
+    public static final int DISCONNECT_WIFI_RESPONSE        =   BASE + 13;
 
     private final boolean mP2pSupported;
 
@@ -171,6 +190,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private boolean mDiscoveryStarted;
 
     private NetworkInfo mNetworkInfo;
+
+    private boolean mTempoarilyDisconnectedWifi = false;
 
     /* The transaction Id of service discovery request */
     private byte mServiceTransactionId = 0;
@@ -222,7 +243,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         PREVIOUS_PROTOCOL_ERROR,
 
         /* There is no common channels the both devices can use. */
-        NO_COMMON_CHANNE,
+        NO_COMMON_CHANNEL,
 
         /* Unknown p2p group. For example, Device A tries to invoke the previous persistent group,
          *  but device B has removed the specified credential already. */
@@ -257,7 +278,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             case 6:
                 return PREVIOUS_PROTOCOL_ERROR;
             case 7:
-                return NO_COMMON_CHANNE;
+                return NO_COMMON_CHANNEL;
             case 8:
                 return UNKNOWN_P2P_GROUP;
             case 9:
@@ -346,6 +367,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 = new UserAuthorizingInvitationState();
         private ProvisionDiscoveryState mProvisionDiscoveryState = new ProvisionDiscoveryState();
         private GroupNegotiationState mGroupNegotiationState = new GroupNegotiationState();
+        private FrequencyConflictState mFrequencyConflictState =new FrequencyConflictState();
 
         private GroupCreatedState mGroupCreatedState = new GroupCreatedState();
         private UserAuthorizingJoinState mUserAuthorizingJoinState = new UserAuthorizingJoinState();
@@ -400,6 +422,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         addState(mUserAuthorizingInvitationState, mGroupCreatingState);
                         addState(mProvisionDiscoveryState, mGroupCreatingState);
                         addState(mGroupNegotiationState, mGroupCreatingState);
+                        addState(mFrequencyConflictState, mGroupCreatingState);
                     addState(mGroupCreatedState, mP2pEnabledState);
                         addState(mUserAuthorizingJoinState, mGroupCreatedState);
                         addState(mOngoingGroupRemovalState, mGroupCreatedState);
@@ -555,6 +578,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiStateMachine.CMD_DISABLE_P2P:
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
+                case DISCONNECT_WIFI_RESPONSE:
+                case DROP_WIFI_USER_ACCEPT:
+                case DROP_WIFI_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
@@ -1027,20 +1053,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                        // remain at this state.
                    }
                    break;
-                case WifiMonitor.P2P_GROUP_STARTED_EVENT:
-                    mGroup = (WifiP2pGroup) message.obj;
-                    if (DBG) logd(getName() + " group started");
-
-                    if (mGroup.getNetworkId() == WifiP2pGroup.PERSISTENT_NET_ID) {
-                        // This is an invocation case.
-                        mAutonomousGroup = false;
-                        deferMessage(message);
-                        transitionTo(mGroupNegotiationState);
-                    } else {
-                        return NOT_HANDLED;
-                    }
-                    break;
-               default:
+              default:
                    return NOT_HANDLED;
             }
             return HANDLED;
@@ -1074,6 +1087,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     // mSavedPeerConfig can be empty
                     if (mSavedPeerConfig != null &&
                             !mSavedPeerConfig.deviceAddress.equals(device.deviceAddress)) {
+                        if (DBG) {
+                            logd("mSavedPeerConfig " + mSavedPeerConfig.deviceAddress +
+                                "device " + device.deviceAddress);
+                        }
                         // Do the regular device lost handling
                         ret = NOT_HANDLED;
                         break;
@@ -1269,6 +1286,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mGroupCreatedState);
                     break;
                 case WifiMonitor.P2P_GO_NEGOTIATION_FAILURE_EVENT:
+                    P2pStatus status = (P2pStatus) message.obj;
+                    if (status == P2pStatus.NO_COMMON_CHANNEL) {
+                        transitionTo(mFrequencyConflictState);
+                        break;
+                    }
+                    /* continue with group removal handling */
                 case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
                     if (DBG) logd(getName() + " go failure");
                     handleGroupCreationFailure();
@@ -1278,9 +1301,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 // a group removed event. Flushing things at group formation
                 // failure causes supplicant issues. Ignore right now.
                 case WifiMonitor.P2P_GROUP_FORMATION_FAILURE_EVENT:
+                    status = (P2pStatus) message.obj;
+                    if (status == P2pStatus.NO_COMMON_CHANNEL) {
+                        transitionTo(mFrequencyConflictState);
+                        break;
+                    }
                     break;
                 case WifiMonitor.P2P_INVITATION_RESULT_EVENT:
-                    P2pStatus status = (P2pStatus)message.obj;
+                    status = (P2pStatus)message.obj;
                     if (status == P2pStatus.SUCCESS) {
                         // invocation was succeeded.
                         // wait P2P_GROUP_STARTED_EVENT.
@@ -1300,6 +1328,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             handleGroupCreationFailure();
                             transitionTo(mInactiveState);
                         }
+                    } else if (status == P2pStatus.NO_COMMON_CHANNEL) {
+                        transitionTo(mFrequencyConflictState);
                     } else {
                         handleGroupCreationFailure();
                         transitionTo(mInactiveState);
@@ -1312,7 +1342,90 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
     }
 
+    class FrequencyConflictState extends State {
+        private AlertDialog mFrequencyConflictDialog;
+        @Override
+        public void enter() {
+            if (DBG) logd(getName());
+            notifyFrequencyConflict();
+        }
 
+        private void notifyFrequencyConflict() {
+            logd("Notify frequency conflict");
+            Resources r = Resources.getSystem();
+
+            AlertDialog dialog = new AlertDialog.Builder(mContext)
+                .setMessage(r.getString(R.string.wifi_p2p_frequency_conflict_message,
+                        getDeviceName(mSavedPeerConfig.deviceAddress)))
+                .setPositiveButton(r.getString(R.string.dlg_ok), new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sendMessage(DROP_WIFI_USER_ACCEPT);
+                        }
+                    })
+                .setNegativeButton(r.getString(R.string.decline), new OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sendMessage(DROP_WIFI_USER_REJECT);
+                        }
+                    })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface arg0) {
+                            sendMessage(DROP_WIFI_USER_REJECT);
+                        }
+                    })
+                .create();
+
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.show();
+            mFrequencyConflictDialog = dialog;
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) logd(getName() + message.toString());
+            switch (message.what) {
+                case WifiMonitor.P2P_GO_NEGOTIATION_SUCCESS_EVENT:
+                case WifiMonitor.P2P_GROUP_FORMATION_SUCCESS_EVENT:
+                    loge(getName() + "group sucess during freq conflict!");
+                    break;
+                case WifiMonitor.P2P_GROUP_STARTED_EVENT:
+                    loge(getName() + "group started after freq conflict, handle anyway");
+                    deferMessage(message);
+                    transitionTo(mGroupNegotiationState);
+                    break;
+                case WifiMonitor.P2P_GO_NEGOTIATION_FAILURE_EVENT:
+                case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
+                case WifiMonitor.P2P_GROUP_FORMATION_FAILURE_EVENT:
+                    // Ignore failures since we retry again
+                    break;
+                case DROP_WIFI_USER_REJECT:
+                    // User rejected dropping wifi in favour of p2p
+                    handleGroupCreationFailure();
+                    transitionTo(mInactiveState);
+                    break;
+                case DROP_WIFI_USER_ACCEPT:
+                    // User accepted dropping wifi in favour of p2p
+                    mWifiChannel.sendMessage(WifiP2pService.DISCONNECT_WIFI_REQUEST, 1);
+                    mTempoarilyDisconnectedWifi = true;
+                    break;
+                case DISCONNECT_WIFI_RESPONSE:
+                    // Got a response from wifistatemachine, retry p2p
+                    if (DBG) logd(getName() + "Wifi disconnected, retry p2p");
+                    transitionTo(mInactiveState);
+                    sendMessage(WifiP2pManager.CONNECT, mSavedPeerConfig);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+
+        public void exit() {
+            if (mFrequencyConflictDialog != null) mFrequencyConflictDialog.dismiss();
+        }
+    }
 
     class GroupCreatedState extends State {
         @Override
@@ -2195,6 +2308,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mPeersLostDuringConnection.clear();
         mServiceDiscReqId = null;
         if (changed) sendP2pPeersChangedBroadcast();
+
+        if (mTempoarilyDisconnectedWifi) {
+            mWifiChannel.sendMessage(WifiP2pService.DISCONNECT_WIFI_REQUEST, 0);
+            mTempoarilyDisconnectedWifi = false;
+        }
     }
 
     //State machine initiated requests can have replyTo set to null indicating
