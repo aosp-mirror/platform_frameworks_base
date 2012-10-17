@@ -74,8 +74,6 @@ void TextureCache::init() {
     INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
-
-    mHasNPot = false; //Caches::getInstance().extensions.hasNPot();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,11 +217,15 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         return;
     }
 
+    // We could also enable mipmapping if both bitmap dimensions are powers
+    // of 2 but we'd have to deal with size changes. Let's keep this simple
+    const bool canMipMap = Caches::getInstance().extensions.hasNPot();
+
     // If the texture had mipmap enabled but not anymore,
     // force a glTexImage2D to discard the mipmap levels
     const bool resize = !regenerate || bitmap->width() != int(texture->width) ||
             bitmap->height() != int(texture->height) ||
-            (regenerate && mHasNPot && texture->mipMap && !bitmap->hasHardwareMipMap());
+            (regenerate && canMipMap && texture->mipMap && !bitmap->hasHardwareMipMap());
 
     if (!regenerate) {
         glGenTextures(1, &texture->id);
@@ -267,7 +269,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         break;
     }
 
-    if (mHasNPot) {
+    if (canMipMap) {
         texture->mipMap = bitmap->hasHardwareMipMap();
         if (texture->mipMap) {
             glGenerateMipmap(GL_TEXTURE_2D);
