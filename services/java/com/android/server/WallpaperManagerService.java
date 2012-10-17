@@ -458,15 +458,21 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                    onRemoveUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL));
+                } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
+                    onStoppingUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL));
                 }
             }
         }, userFilter);
+
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
                     new IUserSwitchObserver.Stub() {
@@ -491,13 +497,24 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    void removeUser(int userId) {
+    void onStoppingUser(int userId) {
+        if (userId < 1) return;
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(userId);
             if (wallpaper != null) {
-                wallpaper.wallpaperObserver.stopWatching();
+                if (wallpaper.wallpaperObserver != null) {
+                    wallpaper.wallpaperObserver.stopWatching();
+                    wallpaper.wallpaperObserver = null;
+                }
                 mWallpaperMap.remove(userId);
             }
+        }
+    }
+
+    void onRemoveUser(int userId) {
+        if (userId < 1) return;
+        synchronized (mLock) {
+            onStoppingUser(userId);
             File wallpaperFile = new File(getWallpaperDir(userId), WALLPAPER);
             wallpaperFile.delete();
             File wallpaperInfoFile = new File(getWallpaperDir(userId), WALLPAPER_INFO);
