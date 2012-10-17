@@ -47,4 +47,8 @@
 
     <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
     <item type="dimen" name="notification_panel_min_height_frac">40%</item>
+
+    <!-- How far to slide the panel out when you touch it -->
+    <!-- On tablets this is just the close_handle_height -->
+    <dimen name="peek_height">@dimen/close_handle_height</dimen>
 </resources>

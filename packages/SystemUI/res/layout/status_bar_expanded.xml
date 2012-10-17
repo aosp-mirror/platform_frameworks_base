@@ -63,7 +63,7 @@
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:paddingBottom="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:visibility="gone"
             />
