@@ -1340,6 +1340,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
      */
     @Override
     public ProviderProperties getProviderProperties(String provider) {
+        if (mProvidersByName.get(provider) == null) {
+          return null;
+        }
+
         checkPermissionForProvider(getBestCallingPermission(), provider);
 
         LocationProviderInterface p;
