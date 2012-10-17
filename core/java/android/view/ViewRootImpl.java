@@ -1184,6 +1184,7 @@ public final class ViewRootImpl implements ViewParent,
             viewVisibilityChanged = false;
             mLastConfiguration.setTo(host.getResources().getConfiguration());
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
+            host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
             host.dispatchAttachedToWindow(attachInfo, 0);
             mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
             host.fitSystemWindows(mFitSystemWindowsInsets);
@@ -2676,7 +2677,12 @@ public final class ViewRootImpl implements ViewParent,
             // the one in them which may be newer.
             config = mView.getResources().getConfiguration();
             if (force || mLastConfiguration.diff(config) != 0) {
+                final int lastLayoutDirection = mLastConfiguration.getLayoutDirection();
+                final int currentLayoutDirection = config.getLayoutDirection();
                 mLastConfiguration.setTo(config);
+                if (lastLayoutDirection != currentLayoutDirection) {
+                    mView.setLayoutDirection(currentLayoutDirection);
+                }
                 mView.dispatchConfigurationChanged(config);
             }
         }
