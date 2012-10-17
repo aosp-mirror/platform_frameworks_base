@@ -206,6 +206,20 @@ public class PhoneStatusBarView extends PanelBar {
             }
         }
 
+        // fade out the panel as it gets buried into the status bar to avoid overdrawing the
+        // status bar on the last frame of a close animation
+        final int H = mBar.getStatusBarHeight();
+        final float ph = panel.getExpandedHeight() + panel.getPaddingBottom();
+        float alpha = 1f;
+        if (ph < 2*H) {
+            if (ph < H) alpha = 0f;
+            else alpha = (ph - H) / H;
+            alpha = alpha * alpha; // get there faster
+        }
+        if (panel.getAlpha() != alpha) {
+            panel.setAlpha(alpha);
+        }
+
         mBar.updateCarrierLabelVisibility(false);
     }
 }
