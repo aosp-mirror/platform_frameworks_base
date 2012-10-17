@@ -21,6 +21,7 @@ import com.android.resources.Density;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class FakeActionBar extends CustomBar {
@@ -29,7 +30,7 @@ public class FakeActionBar extends CustomBar {
 
     public FakeActionBar(Context context, Density density, String label, String icon)
             throws XmlPullParserException {
-        super(context, density, "/bars/action_bar.xml", "action_bar.xml");
+        super(context, density, LinearLayout.HORIZONTAL, "/bars/action_bar.xml", "action_bar.xml");
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
