@@ -75,7 +75,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     public void onDetachedFromWindow() {
         if (DEBUG) Log.d(TAG, "onDetachedFromWindow()");
         if (mBiometricUnlock != null) {
-            mBiometricUnlock.stopAndShowBackup();
+            mBiometricUnlock.stop();
         }
     }
 
