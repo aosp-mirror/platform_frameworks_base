@@ -250,6 +250,7 @@ public class PanelView extends FrameLayout {
                         case MotionEvent.ACTION_DOWN:
                             mTracking = true;
                             mHandleView.setPressed(true);
+                            postInvalidate(); // catch the press state change
                             mInitialTouchY = y;
                             mVelocityTracker = VelocityTracker.obtain();
                             trackMovement(event);
@@ -283,6 +284,7 @@ public class PanelView extends FrameLayout {
                             mFinalTouchY = y;
                             mTracking = false;
                             mHandleView.setPressed(false);
+                            postInvalidate(); // catch the press state change
                             mBar.onTrackingStopped(PanelView.this);
                             trackMovement(event);
 
