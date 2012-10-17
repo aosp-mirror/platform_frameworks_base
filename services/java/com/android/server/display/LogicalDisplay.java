@@ -55,6 +55,10 @@ import libcore.util.Objects;
 final class LogicalDisplay {
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
+    // The layer stack we use when the display has been blanked to prevent any
+    // of its content from appearing.
+    private static final int BLANK_LAYER_STACK = -1;
+
     private final int mDisplayId;
     private final int mLayerStack;
     private DisplayInfo mOverrideDisplayInfo; // set by the window manager
@@ -217,13 +221,15 @@ final class LogicalDisplay {
      * where the display is being mirrored.
      *
      * @param device The display device to modify.
+     * @param isBlanked True if the device is being blanked.
      */
-    public void configureDisplayInTransactionLocked(DisplayDevice device) {
+    public void configureDisplayInTransactionLocked(DisplayDevice device,
+            boolean isBlanked) {
         final DisplayInfo displayInfo = getDisplayInfoLocked();
         final DisplayDeviceInfo displayDeviceInfo = device.getDisplayDeviceInfoLocked();
 
         // Set the layer stack.
-        device.setLayerStackInTransactionLocked(mLayerStack);
+        device.setLayerStackInTransactionLocked(isBlanked ? BLANK_LAYER_STACK : mLayerStack);
 
         // Set the viewport.
         // This is the area of the logical display that we intend to show on the
