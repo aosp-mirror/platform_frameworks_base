@@ -1084,8 +1084,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (mHasFlipSettings 
                 && mFlipSettingsView != null 
-                && mFlipSettingsView.getVisibility() == View.VISIBLE) {
-            // the flip settings panel is showing; we should not be shown
+                && mFlipSettingsView.getVisibility() == View.VISIBLE
+                && mScrollView.getVisibility() != View.VISIBLE) {
+            // the flip settings panel is unequivocally showing; we should not be shown
             mClearButton.setVisibility(View.INVISIBLE);
         } else if (mClearButton.isShown()) {
             if (clearable != (mClearButton.getAlpha() == 1.0f)) {
