@@ -51,8 +51,6 @@ public class SyncQueue {
     public SyncQueue(SyncStorageEngine syncStorageEngine, final SyncAdaptersCache syncAdapters) {
         mSyncStorageEngine = syncStorageEngine;
         mSyncAdapters = syncAdapters;
-
-        addPendingOperations(UserHandle.USER_OWNER);
     }
 
     public void addPendingOperations(int userId) {
