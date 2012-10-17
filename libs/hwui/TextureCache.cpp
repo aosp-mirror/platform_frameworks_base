@@ -75,7 +75,7 @@ void TextureCache::init() {
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
 
-    mHasNPot = Caches::getInstance().extensions.hasNPot();
+    mHasNPot = false; //Caches::getInstance().extensions.hasNPot();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
