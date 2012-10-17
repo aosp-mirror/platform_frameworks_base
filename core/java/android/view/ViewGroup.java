@@ -5611,19 +5611,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
-         * Extracts the <code>width</code> and <code>height</code> layout parameters
-         * from the supplied TypedArray, <code>a</code>, and assigns them
-         * to the appropriate fields. If, <code>a</code>, does not contain an
-         * entry for either attribute, the value, {@link ViewGroup.LayoutParams#WRAP_CONTENT},
-         * is used as a default.
+         * Extracts the layout parameters from the supplied attributes.
          *
          * @param a the style attributes to extract the parameters from
          * @param widthAttr the identifier of the width attribute
          * @param heightAttr the identifier of the height attribute
          */
         protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
-            width = a.getLayoutDimension(widthAttr, WRAP_CONTENT);
-            height = a.getLayoutDimension(heightAttr, WRAP_CONTENT);
+            width = a.getLayoutDimension(widthAttr, "layout_width");
+            height = a.getLayoutDimension(heightAttr, "layout_height");
         }
 
         /**
