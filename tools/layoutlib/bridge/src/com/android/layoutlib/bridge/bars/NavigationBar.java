@@ -24,25 +24,31 @@ import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class FakeActionBar extends CustomBar {
+public class NavigationBar extends CustomBar {
 
-    private TextView mTextView;
+    public NavigationBar(Context context, Density density, int orientation) throws XmlPullParserException {
+        super(context, density, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml");
 
-    public FakeActionBar(Context context, Density density, String label, String icon)
-            throws XmlPullParserException {
-        super(context, density, LinearLayout.HORIZONTAL, "/bars/action_bar.xml", "action_bar.xml");
+        setBackgroundColor(0xFF000000);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
-        loadIconById(android.R.id.home, icon);
-        mTextView = setText(1, label);
+        // 0 is a spacer.
+        int back = 1;
+        int recent = 3;
+        if (orientation == LinearLayout.VERTICAL) {
+            back = 3;
+            recent = 1;
+        }
 
-        setStyle("actionBarStyle");
+        loadIcon(back,   "ic_sysbar_back.png", density);
+        loadIcon(2,      "ic_sysbar_home.png", density);
+        loadIcon(recent, "ic_sysbar_recent.png", density);
     }
 
     @Override
     protected TextView getStyleableTextView() {
-        return mTextView;
+        return null;
     }
 }
