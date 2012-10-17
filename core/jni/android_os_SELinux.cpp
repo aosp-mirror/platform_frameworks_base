@@ -20,10 +20,8 @@
 #include "JNIHelp.h"
 #include "jni.h"
 #include "android_runtime/AndroidRuntime.h"
-#ifdef HAVE_SELINUX
 #include "selinux/selinux.h"
 #include "selinux/android.h"
-#endif
 #include <errno.h>
 
 namespace android {
@@ -56,11 +54,7 @@ namespace android {
    * Exceptions: none
    */
   static jboolean isSELinuxEnforced(JNIEnv *env, jobject clazz) {
-#ifdef HAVE_SELINUX
     return (security_getenforce() == 1) ? true : false;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -71,16 +65,12 @@ namespace android {
    * Exceptions: none
    */
   static jboolean setSELinuxEnforce(JNIEnv *env, jobject clazz, jboolean value) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return false;
 
     int enforce = (value) ? 1 : 0;
 
     return (security_setenforce(enforce) != -1) ? true : false;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -92,7 +82,6 @@ namespace android {
    * Exceptions: NullPointerException if fileDescriptor object is NULL
    */
   static jstring getPeerCon(JNIEnv *env, jobject clazz, jobject fileDescriptor) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return NULL;
 
@@ -123,9 +112,6 @@ namespace android {
       freecon(context);
 
     return securityString;
-#else
-    return NULL;
-#endif
   }
 
   /*
@@ -138,7 +124,6 @@ namespace android {
    * Exception: none
    */
   static jboolean setFSCreateCon(JNIEnv *env, jobject clazz, jstring context) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return false;
 
@@ -163,9 +148,6 @@ namespace android {
       env->ReleaseStringUTFChars(context, constant_securityContext);
 
     return (ret == 0) ? true : false;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -178,7 +160,6 @@ namespace android {
    * Exception: NullPointerException is thrown if either path or context strign are NULL
    */
   static jboolean setFileCon(JNIEnv *env, jobject clazz, jstring path, jstring con) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return false;
 
@@ -208,9 +189,6 @@ namespace android {
     env->ReleaseStringUTFChars(path, objectPath);
     env->ReleaseStringUTFChars(con, constant_con);
     return (ret == 0) ? true : false;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -224,7 +202,6 @@ namespace android {
    * Exceptions: NullPointerException if the path object is null
    */
   static jstring getFileCon(JNIEnv *env, jobject clazz, jstring path) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return NULL;
 
@@ -252,9 +229,6 @@ namespace android {
     env->ReleaseStringUTFChars(path, objectPath);
 
     return securityString;
-#else
-    return NULL;
-#endif
   }
 
   /*
@@ -266,7 +240,6 @@ namespace android {
    * Exceptions: none
    */
   static jstring getCon(JNIEnv *env, jobject clazz) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return NULL;
 
@@ -285,9 +258,6 @@ namespace android {
       freecon(context);
 
     return securityString;
-#else
-    return NULL;
-#endif
   }
 
   /*
@@ -300,7 +270,6 @@ namespace android {
    * Exceptions: none
    */
   static jstring getPidCon(JNIEnv *env, jobject clazz, jint pid) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return NULL;
 
@@ -321,9 +290,6 @@ namespace android {
       freecon(context);
 
     return securityString;
-#else
-    return NULL;
-#endif
   }
 
   /*
@@ -335,7 +301,6 @@ namespace android {
    * Exceptions: None
    */
   static jobjectArray getBooleanNames(JNIEnv *env, JNIEnv clazz) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return NULL;
 
@@ -359,9 +324,6 @@ namespace android {
     free(list);
 
     return stringArray;
-#else
-    return NULL;
-#endif
   }
 
   /*
@@ -373,7 +335,6 @@ namespace android {
    * Exceptions: None
    */
   static jboolean getBooleanValue(JNIEnv *env, jobject clazz, jstring name) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return false;
 
@@ -386,9 +347,6 @@ namespace android {
     ret = security_get_boolean_active(boolean_name);
     env->ReleaseStringUTFChars(name, boolean_name);
     return (ret == 1) ? true : false;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -401,7 +359,6 @@ namespace android {
    * Exceptions: None
    */
   static jboolean setBooleanValue(JNIEnv *env, jobject clazz, jstring name, jboolean value) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return false;
 
@@ -420,9 +377,6 @@ namespace android {
       return false;
 
     return true;
-#else
-    return false;
-#endif
   }
 
   /*
@@ -436,7 +390,6 @@ namespace android {
    * Exceptions: None
    */
   static jboolean checkSELinuxAccess(JNIEnv *env, jobject clazz, jstring scon, jstring tcon, jstring tclass, jstring perm) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return true;
 
@@ -468,10 +421,6 @@ namespace android {
 
   bail:
     return (accessGranted == 0) ? true : false;
-
-#else
-    return true;
-#endif
   }
 
   /*
@@ -482,7 +431,6 @@ namespace android {
    * Exceptions: none
    */
   static jboolean native_restorecon(JNIEnv *env, jobject clazz, jstring pathname) {
-#ifdef HAVE_SELINUX
     if (isSELinuxDisabled)
       return true;
 
@@ -490,9 +438,6 @@ namespace android {
     int ret = selinux_android_restorecon(file);
     env->ReleaseStringUTFChars(pathname, file);
     return (ret == 0);
-#else
-    return true;
-#endif
   }
 
   /*
@@ -526,14 +471,12 @@ namespace android {
   }
 
   int register_android_os_SELinux(JNIEnv *env) {
-#ifdef HAVE_SELINUX
     union selinux_callback cb;
     cb.func_log = log_callback;
     selinux_set_callback(SELINUX_CB_LOG, cb);
 
     isSELinuxDisabled = (is_selinux_enabled() != 1) ? true : false;
 
-#endif
     return AndroidRuntime::registerNativeMethods(
          env, "android/os/SELinux",
          method_table, NELEM(method_table));
