@@ -321,7 +321,31 @@ class QuickSettings {
         parent.addView(userTile);
         mDynamicSpannedTiles.add(userTile);
 
+        // Brightness
+        QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        brightnessTile.setContent(R.layout.quick_settings_tile_brightness, inflater);
+        brightnessTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBar.collapseAllPanels(true);
+                showBrightnessDialog();
+            }
+        });
+        mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView view, State state) {
+                TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
+                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                tv.setText(state.label);
+                dismissBrightnessDialog(mBrightnessDialogShortTimeout);
+            }
+        });
+        parent.addView(brightnessTile);
+        mDynamicSpannedTiles.add(brightnessTile);
+
         // Time tile
+        /*
         QuickSettingsTileView timeTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
         timeTile.setContent(R.layout.quick_settings_tile_time, inflater);
@@ -338,6 +362,7 @@ class QuickSettings {
         });
         parent.addView(timeTile);
         mDynamicSpannedTiles.add(timeTile);
+        */
 
         // Settings tile
         QuickSettingsTileView settingsTile = (QuickSettingsTileView)
@@ -549,27 +574,6 @@ class QuickSettings {
             parent.addView(bluetoothTile);
         }
 
-        // Brightness
-        QuickSettingsTileView brightnessTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        brightnessTile.setContent(R.layout.quick_settings_tile_brightness, inflater);
-        brightnessTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBar.collapseAllPanels(true);
-                showBrightnessDialog();
-            }
-        });
-        mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                tv.setText(state.label);
-                dismissBrightnessDialog(mBrightnessDialogShortTimeout);
-            }
-        });
-        parent.addView(brightnessTile);
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {

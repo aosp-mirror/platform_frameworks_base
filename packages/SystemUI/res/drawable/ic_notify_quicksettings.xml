@@ -16,7 +16,7 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-         android:drawable="@drawable/ic_notify_quicksettings_pressed" />
+         android:drawable="@drawable/ic_notify_quicksettings_normal" />
     <item
          android:drawable="@drawable/ic_notify_quicksettings_normal" />
 </selector>
