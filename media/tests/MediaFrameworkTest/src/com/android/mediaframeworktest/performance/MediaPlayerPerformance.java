@@ -117,6 +117,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         }
         mMemWriter = new BufferedWriter(new FileWriter
                 (new File(MEDIA_MEMORY_OUTPUT), true));
+        mMemWriter.write(this.getName() + "\n");
     }
 
     @Override
