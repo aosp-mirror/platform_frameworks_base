@@ -1418,8 +1418,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"A biztonságos szint fölé emeli a hangerőt?"\n"Ha hosszú ideig hangosan hallgatja a zenét, az károsíthatja a hallását."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
