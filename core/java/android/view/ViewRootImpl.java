@@ -888,9 +888,10 @@ public final class ViewRootImpl implements ViewParent,
         // updates that lie outside of the visible region
         final float appScale = mAttachInfo.mApplicationScale;
         if (localDirty.intersect(0, 0,
-                (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f)) &&
-                !mWillDrawSoon) {
-            scheduleTraversals();
+                (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f))) {
+            if (!mWillDrawSoon) {
+                scheduleTraversals();
+            }
         } else {
             localDirty.setEmpty();
         }
