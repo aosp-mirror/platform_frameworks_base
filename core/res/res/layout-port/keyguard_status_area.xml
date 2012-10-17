@@ -45,6 +45,8 @@
 
         <TextView
             android:id="@+id/alarm_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
             android:singleLine="true"
             android:ellipsize="marquee"

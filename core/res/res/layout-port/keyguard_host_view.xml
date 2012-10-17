@@ -33,7 +33,8 @@
 
     <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
         android:id="@+id/view_flipper"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:layout_weight="1"
