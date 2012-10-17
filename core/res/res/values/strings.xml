@@ -3821,6 +3821,13 @@
     <!-- Title text to show within the overlay.  [CHAR LIMIT=50] -->
     <string name="display_manager_overlay_display_title"><xliff:g id="name">%1$s</xliff:g>: <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g>, <xliff:g id="dpi">%4$d</xliff:g> dpi</string>
 
+    <!-- Title of the notification to indicate an active wifi display connection.  [CHAR LIMIT=50] -->
+    <string name="wifi_display_notification_title">Wireless display is connected</string>
+    <!-- Message of the notification to indicate an active wifi display connection.  [CHAR LIMIT=80] -->
+    <string name="wifi_display_notification_message">This screen is showing on another device</string>
+    <!-- Label of a button to disconnect an active wifi display connection.  [CHAR LIMIT=25] -->
+    <string name="wifi_display_notification_disconnect">Disconnect</string>
+
     <!-- Keyguard strings -->
     <!-- Label shown on emergency call button in keyguard -->
     <string name="kg_emergency_call_label">Emergency call</string>
