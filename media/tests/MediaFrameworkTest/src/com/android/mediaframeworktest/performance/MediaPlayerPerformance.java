@@ -114,10 +114,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
             mProcMemWriter = new BufferedWriter(new FileWriter
                     (new File(MEDIA_PROCMEM_OUTPUT), true));
             mProcMemWriter.write(this.getName() + "\n");
-            mMemWriter = new BufferedWriter(new FileWriter
-                    (new File(MEDIA_MEMORY_OUTPUT), true));
         }
-
+        mMemWriter = new BufferedWriter(new FileWriter
+                (new File(MEDIA_MEMORY_OUTPUT), true));
     }
 
     @Override
@@ -126,10 +125,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
             MediaTestUtil.getNativeHeapDump(this.getName() + "_after");
 
         if (MediaFrameworkPerfTestRunner.mGetProcmem) {
-            mMemWriter.write("\n");
             mProcMemWriter.close();
-            mMemWriter.close();
         }
+        mMemWriter.write("\n");
+        mMemWriter.close();
         super.tearDown();
     }
 
