@@ -102,7 +102,7 @@ public class PanelBar extends FrameLayout {
             startOpeningPanel(panel);
         }
         final boolean result = mTouchingPanel != null
-                ? mTouchingPanel.getHandle().dispatchTouchEvent(event)
+                ? mTouchingPanel.onTouchEvent(event)
                 : true;
         return result;
     }
