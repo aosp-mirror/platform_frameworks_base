@@ -556,8 +556,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             mLinkProperties = (LinkProperties) intent.getParcelableExtra(
                                     WifiManager.EXTRA_LINK_PROPERTIES);
                             if (mPoorNetworkDetectionEnabled) {
-                                if (mWifiInfo == null) {
-                                    if (DBG) logd("Ignoring link verification, mWifiInfo is NULL");
+                                if (mWifiInfo == null || mCurrentBssid == null) {
+                                    loge("Ignore, wifiinfo " + mWifiInfo +" bssid " + mCurrentBssid);
                                     sendLinkStatusNotification(true);
                                 } else {
                                     transitionTo(mVerifyingLinkState);
@@ -726,7 +726,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
 
         private void handleRssiChange() {
-            if (mCurrentSignalLevel <= LINK_MONITOR_LEVEL_THRESHOLD) {
+            if (mCurrentSignalLevel <= LINK_MONITOR_LEVEL_THRESHOLD && mCurrentBssid != null) {
                 transitionTo(mLinkMonitoringState);
             } else {
                 // stay here
@@ -920,11 +920,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
         if (DBG) logd("########################################");
         if (isGood) {
             mWsmChannel.sendMessage(GOOD_LINK_DETECTED);
-            mCurrentBssid.mLastTimeGood = SystemClock.elapsedRealtime();
-            logd("Good link notification is sent");
+            if (mCurrentBssid != null) {
+                mCurrentBssid.mLastTimeGood = SystemClock.elapsedRealtime();
+            }
+            if (DBG) logd("Good link notification is sent");
         } else {
             mWsmChannel.sendMessage(POOR_LINK_DETECTED);
-            mCurrentBssid.mLastTimePoor = SystemClock.elapsedRealtime();
+            if (mCurrentBssid != null) {
+                mCurrentBssid.mLastTimePoor = SystemClock.elapsedRealtime();
+            }
             logd("Poor link notification is sent");
         }
     }
