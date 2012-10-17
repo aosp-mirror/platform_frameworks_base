@@ -1418,8 +1418,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Želite povečati glasnost nad varno raven?"\n"Dolgotrajna izpostavljenost glasnim tonom lahko poškoduje sluh."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Če želite omogočiti pripomočke za ljudi s posebnimi potrebami, na zaslonu pridržite z dvema prstoma."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pripomočki za ljudi s posebnimi potrebami so omogočeni."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Omogočanje pripomočkov za ljudi s posebnimi potrebami preklicano."</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
