@@ -114,6 +114,7 @@ public class WifiStateMachine extends StateMachine {
 
     private final boolean mP2pSupported;
     private final AtomicBoolean mP2pConnected = new AtomicBoolean(false);
+    private boolean mTemporarilyDisconnectWifi = false;
     private final String mPrimaryDeviceType;
 
     /* Scan results handling */
@@ -2017,6 +2018,10 @@ public class WifiStateMachine extends StateMachine {
                     NetworkInfo info = (NetworkInfo) message.obj;
                     mP2pConnected.set(info.isConnected());
                     break;
+                case WifiP2pService.DISCONNECT_WIFI_REQUEST:
+                    mTemporarilyDisconnectWifi = (message.arg1 == 1);
+                    replyToMessage(message, WifiP2pService.DISCONNECT_WIFI_RESPONSE);
+                    break;
                 default:
                     loge("Error! unhandled message" + message);
                     break;
@@ -3030,6 +3035,15 @@ public class WifiStateMachine extends StateMachine {
                         transitionTo(mDisconnectedState);
                     }
                     break;
+                case WifiP2pService.DISCONNECT_WIFI_REQUEST:
+                    if (message.arg1 == 1) {
+                        mWifiNative.disconnect();
+                        mTemporarilyDisconnectWifi = true;
+                    } else {
+                        mWifiNative.reconnect();
+                        mTemporarilyDisconnectWifi = false;
+                    }
+                    break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
                     mWifiNative.disconnect();
@@ -3158,6 +3172,13 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DISCONNECT:
                     mWifiNative.disconnect();
                     transitionTo(mDisconnectingState);
+                    break;
+                case WifiP2pService.DISCONNECT_WIFI_REQUEST:
+                    if (message.arg1 == 1) {
+                        mWifiNative.disconnect();
+                        mTemporarilyDisconnectWifi = true;
+                        transitionTo(mDisconnectingState);
+                    }
                     break;
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
@@ -3465,6 +3486,13 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
+            // We dont scan frequently if this is a temporary disconnect
+            // due to p2p
+            if (mTemporarilyDisconnectWifi) {
+                mWifiP2pChannel.sendMessage(WifiP2pService.DISCONNECT_WIFI_RESPONSE);
+                return;
+            }
+
             mFrameworkScanIntervalMs = Settings.Global.getLong(mContext.getContentResolver(),
                     Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
                     mDefaultFrameworkScanIntervalMs);
@@ -3579,6 +3607,12 @@ public class WifiStateMachine extends StateMachine {
                         sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
                                     ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
                     }
+                case CMD_RECONNECT:
+                case CMD_REASSOCIATE:
+                    // Drop a third party reconnect/reassociate if we are
+                    // tempoarily disconnected for p2p
+                    if (mTemporarilyDisconnectWifi) ret = NOT_HANDLED;
+                    break;
                 default:
                     ret = NOT_HANDLED;
             }
