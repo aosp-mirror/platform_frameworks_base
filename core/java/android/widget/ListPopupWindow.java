@@ -1021,8 +1021,6 @@ public class ListPopupWindow {
                 mDropDownList.setOnItemSelectedListener(mItemSelectedListener);
             }
 
-            mDropDownList.setLayoutDirection(mLayoutDirection);
-
             dropDownView = mDropDownList;
 
             View hintView = mPromptView;
@@ -1129,21 +1127,6 @@ public class ListPopupWindow {
         if (listContent > 0) otherHeights += padding;
 
         return listContent + otherHeights;
-    }
-
-    /**
-     * Set the layout direction for this popup. Should be a resolved direction as the
-     * popup as no capacity to do the resolution on his own.
-     *
-     * @param layoutDirection One of {@link View#LAYOUT_DIRECTION_LTR},
-     *   {@link View#LAYOUT_DIRECTION_RTL},
-     *
-     */
-    public void setLayoutDirection(int layoutDirection) {
-        mLayoutDirection = layoutDirection;
-        if (mDropDownList != null) {
-            mDropDownList.setLayoutDirection(mLayoutDirection);
-        }
     }
 
     /**
