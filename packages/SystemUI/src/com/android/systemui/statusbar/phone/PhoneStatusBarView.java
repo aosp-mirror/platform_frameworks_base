@@ -191,11 +191,17 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
             if (mShouldFade) {
                 frac = mPanelExpandedFractionSum; // don't judge me
-                // woo, special effects
-                final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2.2f))));
-                // attenuate background color alpha by k
-                final int color = (int) ((mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
-                mBar.mStatusBarWindow.setBackgroundColor(color);
+                // let's start this 20% of the way down the screen
+                frac = frac * 1.2f - 0.2f;
+                if (frac <= 0) {
+                    mBar.mStatusBarWindow.setBackgroundColor(0);
+                } else {
+                    // woo, special effects
+                    final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2f))));
+                    // attenuate background color alpha by k
+                    final int color = (int) ((mScrimColor >>> 24) * k) << 24 | (mScrimColor & 0xFFFFFF);
+                    mBar.mStatusBarWindow.setBackgroundColor(color);
+                }
             }
         }
 

@@ -20,37 +20,40 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/header"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/notification_panel_header_height"
     android:background="@drawable/notification_header_bg"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:baselineAligned="false"
     >
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/datetime"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:background="@drawable/ic_notify_button_bg"
+        android:enabled="false"
         >
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-            android:gravity="bottom"
+            android:layout_centerVertical="true"
             />
 
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-            android:gravity="bottom"
+            android:layout_toRightOf="@id/clock"
+            android:layout_alignBaseline="@id/clock"
             />
-    </LinearLayout>
+    </RelativeLayout>
 
     <Space
         android:layout_width="0dp"
