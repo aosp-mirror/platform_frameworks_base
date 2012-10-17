@@ -1038,18 +1038,26 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isHiddenFromUserLocked() {
-        // Save some cycles by not calling getDisplayInfo unless it is an application
-        // window intended for all users.
-        if (mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
-                && mAppToken != null && mAppToken.showWhenLocked) {
-            final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-            if (isFullscreen(displayInfo.appWidth, displayInfo.appHeight)) {
+        // Attached windows are evaluated based on the window that they are attached to.
+        WindowState win = this;
+        while (win.mAttachedWindow != null) {
+            win = win.mAttachedWindow;
+        }
+        if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+                && win.mAppToken != null && win.mAppToken.showWhenLocked) {
+            // Save some cycles by not calling getDisplayInfo unless it is an application
+            // window intended for all users.
+            final DisplayInfo displayInfo = win.mDisplayContent.getDisplayInfo();
+            if (win.mFrame.left <= 0 && win.mFrame.top <= 0
+                    && win.mFrame.right >= displayInfo.appWidth
+                    && win.mFrame.bottom >= displayInfo.appHeight) {
                 // Is a fullscreen window, like the clock alarm. Show to everyone.
                 return false;
             }
         }
 
-        return mShowToOwnerOnly && UserHandle.getUserId(mOwnerUid) != mService.mCurrentUserId;
+        return win.mShowToOwnerOnly
+                && UserHandle.getUserId(win.mOwnerUid) != mService.mCurrentUserId;
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
