@@ -1079,7 +1079,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + " any=" + any + " clearable=" + clearable);
         }
 
-        if (mClearButton.isShown()) {
+        if (mHasFlipSettings 
+                && mFlipSettingsView != null 
+                && mFlipSettingsView.getVisibility() == View.VISIBLE) {
+            // the flip settings panel is showing; we should not be shown
+            mClearButton.setVisibility(View.INVISIBLE);
+        } else if (mClearButton.isShown()) {
             if (clearable != (mClearButton.getAlpha() == 1.0f)) {
                 ObjectAnimator clearAnimation = ObjectAnimator.ofFloat(
                         mClearButton, "alpha", clearable ? 1.0f : 0.0f).setDuration(250);
@@ -1520,6 +1525,10 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void animateCollapseQuickSettings() {
         mStatusBarView.collapseAllPanels(true);
+    }
+
+    void makeExpandedInvisibleSoon() {
+        mHandler.postDelayed(new Runnable() { public void run() { makeExpandedInvisible(); }}, 50);
     }
 
     void makeExpandedInvisible() {
