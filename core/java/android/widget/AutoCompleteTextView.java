@@ -1093,7 +1093,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             mPopup.setInputMethodMode(ListPopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setListItemExpandMax(EXPAND_MAX);
         }
-        mPopup.setLayoutDirection(getLayoutDirection());
         mPopup.show();
         mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }

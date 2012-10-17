@@ -2867,8 +2867,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecor = generateDecor();
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
-            mDecor.setLayoutDirection(
-                    getContext().getResources().getConfiguration().getLayoutDirection());
             if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
                 mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
             }
