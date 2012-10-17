@@ -353,6 +353,15 @@ static void Bitmap_setHasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap,
     bitmap->setIsOpaque(!hasAlpha);
 }
 
+static jboolean Bitmap_hasMipMap(JNIEnv* env, jobject, SkBitmap* bitmap) {
+    return bitmap->hasHardwareMipMap();
+}
+
+static void Bitmap_setHasMipMap(JNIEnv* env, jobject, SkBitmap* bitmap,
+                                jboolean hasMipMap) {
+    bitmap->setHasHardwareMipMap(hasMipMap);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
@@ -666,6 +675,8 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeConfig",             "(I)I", (void*)Bitmap_config },
     {   "nativeHasAlpha",           "(I)Z", (void*)Bitmap_hasAlpha },
     {   "nativeSetHasAlpha",        "(IZ)V", (void*)Bitmap_setHasAlpha },
+    {   "nativeHasMipMap",          "(I)Z", (void*)Bitmap_hasMipMap },
+    {   "nativeSetHasMipMap",       "(IZ)V", (void*)Bitmap_setHasMipMap },
     {   "nativeCreateFromParcel",
         "(Landroid/os/Parcel;)Landroid/graphics/Bitmap;",
         (void*)Bitmap_createFromParcel },

@@ -49,7 +49,7 @@ namespace uirenderer {
 
 #define ALPHA_THRESHOLD 0
 
-#define FILTER(paint) (paint && paint->isFilterBitmap() ? GL_LINEAR : GL_NEAREST)
+#define FILTER(paint) (!paint || paint->isFilterBitmap() ? GL_LINEAR : GL_NEAREST)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
