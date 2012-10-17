@@ -290,7 +290,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                                     }
                                 });
                         AlertDialog dialog = builder.create();
-                        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+                        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
                         dialog.show();
                     }
 
@@ -339,7 +339,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         return mAdapter.getItem(position).onLongPress();
                     }
         });
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
 
         dialog.setOnDismissListener(this);
 
@@ -390,11 +390,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
-        if (mKeyguardShowing) {
-            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        } else {
-            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        }
+        mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         if (SHOW_SILENT_TOGGLE) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
