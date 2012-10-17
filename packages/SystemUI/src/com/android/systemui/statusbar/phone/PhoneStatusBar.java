@@ -110,6 +110,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public static final boolean ENABLE_NOTIFICATION_PANEL_CLING = false;
 
+    public static final boolean SETTINGS_DRAG_SHORTCUT = true;
+
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
@@ -180,7 +182,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     View mMoreIcon;
 
     // expanded notifications
-    PanelView mNotificationPanel; // the sliding/resizing panel within the notification window
+    NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     ScrollView mScrollView;
     View mExpandedContents;
     int mNotificationPanelGravity;
@@ -363,7 +365,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
 
-        mNotificationPanel = (PanelView) mStatusBarWindow.findViewById(R.id.notification_panel);
+        mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(R.id.notification_panel);
+        mNotificationPanel.setStatusBar(this);
         mNotificationPanelIsFullScreenWidth =
             (mNotificationPanel.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -1285,6 +1288,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    public Handler getHandler() {
+        return mHandler;
+    }
+
     View.OnFocusChangeListener mFocusChangeListener = new View.OnFocusChangeListener() {
         public void onFocusChange(View v, boolean hasFocus) {
             // Because 'v' is a ViewGroup, all its children will be (un)selected
@@ -1297,18 +1304,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (SPEW) Slog.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (mExpandedVisible) {
             return;
-        }
-
-        if (mHasFlipSettings && !mExpandedVisible) {
-            // reset things to their proper state
-            mScrollView.setScaleX(1f);
-            mScrollView.setVisibility(View.VISIBLE);
-            mSettingsButton.setAlpha(1f);
-            mSettingsButton.setVisibility(View.VISIBLE);
-            mNotificationPanel.setVisibility(View.GONE);
-            mFlipSettingsView.setVisibility(View.GONE);
-            mNotificationButton.setVisibility(View.GONE);
-            setAreThereNotifications(); // show the clear button
         }
 
         mExpandedVisible = true;
@@ -1420,49 +1415,51 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mNotificationPanel.expand();
-        if (mHasFlipSettings) {
-            if (mScrollView.getVisibility() != View.VISIBLE) {
-                if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
-                if (mScrollViewAnim != null) mScrollViewAnim.cancel();
-                if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
-                if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
-                if (mClearButtonAnim != null) mClearButtonAnim.cancel();
-
-                mScrollView.setVisibility(View.VISIBLE);
-                mScrollViewAnim = start(
-                    startDelay(FLIP_DURATION_OUT,
-                        interpolator(mDecelerateInterpolator,
-                            ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0f, 1f)
-                                .setDuration(FLIP_DURATION_IN)
-                            )));
-                mFlipSettingsViewAnim = start(
-                    setVisibilityWhenDone(
-                        interpolator(mAccelerateInterpolator,
-                                ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 1f, 0f)
-                                )
-                            .setDuration(FLIP_DURATION_OUT),
-                        mFlipSettingsView, View.INVISIBLE));
-                mNotificationButtonAnim = start(
-                    setVisibilityWhenDone(
-                        ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 0f)
-                            .setDuration(FLIP_DURATION),
-                        mNotificationButton, View.INVISIBLE));
-                mSettingsButton.setVisibility(View.VISIBLE);
-                mSettingsButtonAnim = start(
-                    ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1f)
-                        .setDuration(FLIP_DURATION));
-                mClearButton.setVisibility(View.VISIBLE);
-                mClearButton.setAlpha(0f);
-                setAreThereNotifications(); // this will show/hide the button as necessary
-                mNotificationPanel.postDelayed(new Runnable() {
-                    public void run() {
-                        updateCarrierLabelVisibility(false);
-                    }
-                }, FLIP_DURATION - 150);
-            }
+        if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
+            flipToNotifications();
         }
 
         if (false) postStartTracing();
+    }
+
+    public void flipToNotifications() {
+        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+        if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+        if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
+        if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
+        mScrollView.setVisibility(View.VISIBLE);
+        mScrollViewAnim = start(
+            startDelay(FLIP_DURATION_OUT,
+                interpolator(mDecelerateInterpolator,
+                    ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 0f, 1f)
+                        .setDuration(FLIP_DURATION_IN)
+                    )));
+        mFlipSettingsViewAnim = start(
+            setVisibilityWhenDone(
+                interpolator(mAccelerateInterpolator,
+                        ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 1f, 0f)
+                        )
+                    .setDuration(FLIP_DURATION_OUT),
+                mFlipSettingsView, View.INVISIBLE));
+        mNotificationButtonAnim = start(
+            setVisibilityWhenDone(
+                ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 0f)
+                    .setDuration(FLIP_DURATION),
+                mNotificationButton, View.INVISIBLE));
+        mSettingsButton.setVisibility(View.VISIBLE);
+        mSettingsButtonAnim = start(
+            ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1f)
+                .setDuration(FLIP_DURATION));
+        mClearButton.setVisibility(View.VISIBLE);
+        mClearButton.setAlpha(0f);
+        setAreThereNotifications(); // this will show/hide the button as necessary
+        mNotificationPanel.postDelayed(new Runnable() {
+            public void run() {
+                updateCarrierLabelVisibility(false);
+            }
+        }, FLIP_DURATION - 150);
     }
 
     @Override
@@ -1475,52 +1472,76 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mHasFlipSettings) {
             mNotificationPanel.expand();
             if (mFlipSettingsView.getVisibility() != View.VISIBLE) {
-                if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
-                if (mScrollViewAnim != null) mScrollViewAnim.cancel();
-                if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
-                if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
-                if (mClearButtonAnim != null) mClearButtonAnim.cancel();
-
-                mFlipSettingsView.setVisibility(View.VISIBLE);
-                mFlipSettingsView.setScaleX(0f);
-                mFlipSettingsViewAnim = start(
-                    startDelay(FLIP_DURATION_OUT,
-                        interpolator(mDecelerateInterpolator,
-                            ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f, 1f)
-                                .setDuration(FLIP_DURATION_IN)
-                            )));
-                mScrollViewAnim = start(
-                    setVisibilityWhenDone(
-                        interpolator(mAccelerateInterpolator,
-                                ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1f, 0f)
-                                )
-                            .setDuration(FLIP_DURATION_OUT), 
-                        mScrollView, View.INVISIBLE));
-                mSettingsButtonAnim = start(
-                    setVisibilityWhenDone(
-                        ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
-                            .setDuration(FLIP_DURATION),
-                            mScrollView, View.INVISIBLE));
-                mNotificationButton.setVisibility(View.VISIBLE);
-                mNotificationButtonAnim = start(
-                    ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
-                        .setDuration(FLIP_DURATION));
-                mClearButtonAnim = start(
-                    setVisibilityWhenDone(
-                        ObjectAnimator.ofFloat(mClearButton, View.ALPHA, 0f)
-                        .setDuration(FLIP_DURATION),
-                        mClearButton, View.INVISIBLE));
-                mNotificationPanel.postDelayed(new Runnable() {
-                    public void run() {
-                        updateCarrierLabelVisibility(false);
-                    }
-                }, FLIP_DURATION - 150);
+                flipToSettings();
             }
         } else if (mSettingsPanel != null) {
             mSettingsPanel.expand();
         }
 
         if (false) postStartTracing();
+    }
+
+    public void switchToSettings() {
+        mFlipSettingsView.setScaleX(1f);
+        mFlipSettingsView.setVisibility(View.VISIBLE);
+        mSettingsButton.setVisibility(View.GONE);
+        mScrollView.setVisibility(View.GONE);
+        mNotificationButton.setVisibility(View.VISIBLE);
+        mNotificationButton.setAlpha(1f);
+        mClearButton.setVisibility(View.GONE);
+    }
+
+    public void flipToSettings() {
+        if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+        if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+        if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
+        if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
+        mFlipSettingsView.setVisibility(View.VISIBLE);
+        mFlipSettingsView.setScaleX(0f);
+        mFlipSettingsViewAnim = start(
+            startDelay(FLIP_DURATION_OUT,
+                interpolator(mDecelerateInterpolator,
+                    ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f, 1f)
+                        .setDuration(FLIP_DURATION_IN)
+                    )));
+        mScrollViewAnim = start(
+            setVisibilityWhenDone(
+                interpolator(mAccelerateInterpolator,
+                        ObjectAnimator.ofFloat(mScrollView, View.SCALE_X, 1f, 0f)
+                        )
+                    .setDuration(FLIP_DURATION_OUT), 
+                mScrollView, View.INVISIBLE));
+        mSettingsButtonAnim = start(
+            setVisibilityWhenDone(
+                ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
+                    .setDuration(FLIP_DURATION),
+                    mScrollView, View.INVISIBLE));
+        mNotificationButton.setVisibility(View.VISIBLE);
+        mNotificationButtonAnim = start(
+            ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
+                .setDuration(FLIP_DURATION));
+        mClearButtonAnim = start(
+            setVisibilityWhenDone(
+                ObjectAnimator.ofFloat(mClearButton, View.ALPHA, 0f)
+                .setDuration(FLIP_DURATION),
+                mClearButton, View.INVISIBLE));
+        mNotificationPanel.postDelayed(new Runnable() {
+            public void run() {
+                updateCarrierLabelVisibility(false);
+            }
+        }, FLIP_DURATION - 150);
+    }
+
+    public void flipPanels() {
+        if (mHasFlipSettings) {
+            if (mFlipSettingsView.getVisibility() != View.VISIBLE) {
+                flipToSettings();
+            } else {
+                flipToNotifications();
+            }
+        }
     }
 
     public void animateCollapseQuickSettings() {
@@ -1541,6 +1562,18 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
         mStatusBarView.collapseAllPanels(/*animate=*/ false);
+
+        if (mHasFlipSettings) {
+            // reset things to their proper state
+            mScrollView.setScaleX(1f);
+            mScrollView.setVisibility(View.VISIBLE);
+            mSettingsButton.setAlpha(1f);
+            mSettingsButton.setVisibility(View.VISIBLE);
+            mNotificationPanel.setVisibility(View.GONE);
+            mFlipSettingsView.setVisibility(View.GONE);
+            mNotificationButton.setVisibility(View.GONE);
+            setAreThereNotifications(); // show the clear button
+        }
 
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
