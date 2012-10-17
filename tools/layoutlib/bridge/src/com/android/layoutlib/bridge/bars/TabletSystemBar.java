@@ -24,21 +24,23 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class TabletSystemBar extends CustomBar {
 
     public TabletSystemBar(Context context, Density density) throws XmlPullParserException {
-        super(context, density, "/bars/tablet_system_bar.xml", "tablet_system_bar.xml");
+        super(context, density, LinearLayout.HORIZONTAL,
+                "/bars/tablet_system_bar.xml", "tablet_system_bar.xml");
 
         setBackgroundColor(0xFF000000);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
-        loadIcon(0, "ic_sysbar_back_default.png", density);
-        loadIcon(1, "ic_sysbar_home_default.png", density);
-        loadIcon(2, "ic_sysbar_recent_default.png", density);
+        loadIcon(0, "ic_sysbar_back.png", density);
+        loadIcon(1, "ic_sysbar_home.png", density);
+        loadIcon(2, "ic_sysbar_recent.png", density);
         // 3 is the spacer
         loadIcon(4, "stat_sys_wifi_signal_4_fully.png", density);
         Drawable drawable = loadIcon(5, ResourceType.DRAWABLE, "stat_sys_battery_charge");
