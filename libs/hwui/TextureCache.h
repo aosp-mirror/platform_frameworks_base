@@ -138,7 +138,6 @@ private:
 
     float mFlushRate;
 
-    bool mHasNPot;
     bool mDebugEnabled;
 
     Vector<SkBitmap*> mGarbage;
