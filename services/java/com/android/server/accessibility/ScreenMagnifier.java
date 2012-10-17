@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Property;
 import android.util.Slog;
@@ -662,10 +663,31 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             while (mDelayedEventQueue != null) {
                 MotionEventInfo info = mDelayedEventQueue;
                 mDelayedEventQueue = info.mNext;
-                ScreenMagnifier.this.onMotionEvent(info.mEvent, info.mRawEvent,
-                        info.mPolicyFlags);
+                final long offset = SystemClock.uptimeMillis() - info.mCachedTimeMillis;
+                MotionEvent event = obtainEventWithOffsetTimeAndDownTime(info.mEvent, offset);
+                MotionEvent rawEvent = obtainEventWithOffsetTimeAndDownTime(info.mRawEvent, offset);
+                ScreenMagnifier.this.onMotionEvent(event, rawEvent, info.mPolicyFlags);
+                event.recycle();
+                rawEvent.recycle();
                 info.recycle();
             }
+        }
+
+        private MotionEvent obtainEventWithOffsetTimeAndDownTime(MotionEvent event, long offset) {
+            final int pointerCount = event.getPointerCount();
+            PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
+            PointerProperties[] properties = getTempPointerPropertiesWithMinSize(pointerCount);
+            for (int i = 0; i < pointerCount; i++) {
+                event.getPointerCoords(i, coords[i]);
+                event.getPointerProperties(i, properties[i]);
+            }
+            final long downTime = event.getDownTime() + offset;
+            final long eventTime = event.getEventTime() + offset;
+            return MotionEvent.obtain(downTime, eventTime,
+                    event.getAction(), pointerCount, properties, coords,
+                    event.getMetaState(), event.getButtonState(),
+                    1.0f, 1.0f, event.getDeviceId(), event.getEdgeFlags(),
+                    event.getSource(), event.getFlags());
         }
 
         private void clearDelayedMotionEvents() {
@@ -746,6 +768,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
         public MotionEvent mEvent;
         public MotionEvent mRawEvent;
         public int mPolicyFlags;
+        public long mCachedTimeMillis;
 
         public static MotionEventInfo obtain(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
@@ -770,6 +793,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mEvent = MotionEvent.obtain(event);
             mRawEvent = MotionEvent.obtain(rawEvent);
             mPolicyFlags = policyFlags;
+            mCachedTimeMillis = SystemClock.uptimeMillis();
         }
 
         public void recycle() {
@@ -793,6 +817,7 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             mRawEvent.recycle();
             mRawEvent = null;
             mPolicyFlags = 0;
+            mCachedTimeMillis = 0;
         }
     }
 
