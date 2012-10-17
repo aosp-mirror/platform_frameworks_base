@@ -154,7 +154,8 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
-        mBar.makeExpandedInvisible();
+        // give animations time to settle
+        mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
         mLastFullyOpenedPanel = null;
     }
