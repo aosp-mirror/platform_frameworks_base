@@ -22,6 +22,7 @@
 
 #include <utils/threads.h>
 
+#include "Caches.h"
 #include "TextureCache.h"
 #include "Properties.h"
 
@@ -73,6 +74,8 @@ void TextureCache::init() {
     INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
+
+    mHasNPot = Caches::getInstance().extensions.hasNPot();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,8 +219,11 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         return;
     }
 
+    // If the texture had mipmap enabled but not anymore,
+    // force a glTexImage2D to discard the mipmap levels
     const bool resize = !regenerate || bitmap->width() != int(texture->width) ||
-            bitmap->height() != int(texture->height);
+            bitmap->height() != int(texture->height) ||
+            (regenerate && mHasNPot && texture->mipMap && !bitmap->hasHardwareMipMap());
 
     if (!regenerate) {
         glGenTextures(1, &texture->id);
@@ -259,6 +265,13 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     default:
         ALOGW("Unsupported bitmap config: %d", bitmap->getConfig());
         break;
+    }
+
+    if (mHasNPot) {
+        texture->mipMap = bitmap->hasHardwareMipMap();
+        if (texture->mipMap) {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
     }
 
     if (!regenerate) {

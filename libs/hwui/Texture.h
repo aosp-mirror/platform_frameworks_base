@@ -36,6 +36,8 @@ struct Texture {
         minFilter = GL_NEAREST;
         magFilter = GL_NEAREST;
 
+        mipMap = false;
+
         firstFilter = true;
         firstWrap = true;
 
@@ -83,6 +85,8 @@ struct Texture {
                 glBindTexture(renderTarget, id);
             }
 
+            if (mipMap && min == GL_LINEAR) min = GL_LINEAR_MIPMAP_LINEAR;
+
             glTexParameteri(renderTarget, GL_TEXTURE_MIN_FILTER, min);
             glTexParameteri(renderTarget, GL_TEXTURE_MAG_FILTER, mag);
         }
@@ -116,7 +120,12 @@ struct Texture {
      * Optional, size of the original bitmap.
      */
     uint32_t bitmapSize;
+    /**
+     * Indicates whether this texture will use trilinear filtering.
+     */
+    bool mipMap;
 
+private:
     /**
      * Last wrap modes set on this texture. Defaults to GL_CLAMP_TO_EDGE.
      */
@@ -129,7 +138,6 @@ struct Texture {
     GLenum minFilter;
     GLenum magFilter;
 
-private:
     bool firstFilter;
     bool firstWrap;
 }; // struct Texture
