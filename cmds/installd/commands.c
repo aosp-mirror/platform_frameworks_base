@@ -71,8 +71,8 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         return -1;
     }
 
-    if (selinux_android_setfilecon(libdir, pkgname, uid) < 0) {
-        ALOGE("cannot setfilecon dir '%s': %s\n", libdir, strerror(errno));
+    if (selinux_android_setfilecon(libsymlink, pkgname, uid) < 0) {
+        ALOGE("cannot setfilecon dir '%s': %s\n", libsymlink, strerror(errno));
         unlink(libsymlink);
         unlink(pkgdir);
         return -1;
