@@ -327,7 +327,7 @@ public class ImageWallpaper extends WallpaperService {
             mLastRotation = newRotation;
 
             // Load bitmap if it is not yet loaded or if it was loaded at a different size
-            if (mBackground == null || dw != mBackgroundWidth || dw != mBackgroundHeight) {
+            if (mBackground == null || dw != mBackgroundWidth || dh != mBackgroundHeight) {
                 if (DEBUG) {
                     Log.d(TAG, "Reloading bitmap");
                 }
