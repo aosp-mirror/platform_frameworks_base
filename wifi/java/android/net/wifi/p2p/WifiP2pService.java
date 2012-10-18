@@ -134,6 +134,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int GROUP_CREATING_WAIT_TIME_MS = 120 * 1000;
     private static int mGroupCreatingTimeoutIndex = 0;
 
+    private static final int DISABLE_P2P_WAIT_TIME_MS = 5 * 1000;
+    private static int mDisableP2pTimeoutIndex = 0;
+
     /* Set a two minute discover timeout to avoid STA scans from being blocked */
     private static final int DISCOVER_TIMEOUT_S = 120;
 
@@ -153,6 +156,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final int DROP_WIFI_USER_ACCEPT          =   BASE + 4;
     /* User wants to keep his wifi connection and drop p2p */
     private static final int DROP_WIFI_USER_REJECT          =   BASE + 5;
+    /* Delayed message to timeout p2p disable */
+    public static final int DISABLE_P2P_TIMED_OUT           =   BASE + 6;
 
 
     /* Commands to the WifiStateMachine */
@@ -574,18 +579,24 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
                 case WifiMonitor.P2P_FIND_STOPPED_EVENT:
                 case WifiMonitor.P2P_SERV_DISC_RESP_EVENT:
-                case WifiStateMachine.CMD_ENABLE_P2P:
-                case WifiStateMachine.CMD_DISABLE_P2P:
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
                 case DISCONNECT_WIFI_RESPONSE:
                 case DROP_WIFI_USER_ACCEPT:
                 case DROP_WIFI_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
+                case DISABLE_P2P_TIMED_OUT:
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                 case DhcpStateMachine.CMD_ON_QUIT:
                 case WifiMonitor.P2P_PROV_DISC_FAILURE_EVENT:
+                    break;
+                case WifiStateMachine.CMD_ENABLE_P2P:
+                    // Enable is lazy and has no response
+                    break;
+                case WifiStateMachine.CMD_DISABLE_P2P_REQ:
+                    // If we end up handling in default, p2p is not enabled
+                    mWifiChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P_RSP);
                     break;
                     /* unexpected group created, remove */
                 case WifiMonitor.P2P_GROUP_STARTED_EVENT:
@@ -689,6 +700,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     class P2pDisablingState extends State {
         @Override
+        public void enter() {
+            if (DBG) logd(getName());
+            sendMessageDelayed(obtainMessage(DISABLE_P2P_TIMED_OUT,
+                    ++mDisableP2pTimeoutIndex, 0), DISABLE_P2P_WAIT_TIME_MS);
+        }
+
+        @Override
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
@@ -697,13 +715,24 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mP2pDisabledState);
                     break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
-                case WifiStateMachine.CMD_DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P_REQ:
                     deferMessage(message);
+                    break;
+                case DISABLE_P2P_TIMED_OUT:
+                    if (mGroupCreatingTimeoutIndex == message.arg1) {
+                        loge("P2p disable timed out");
+                        transitionTo(mP2pDisabledState);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
             }
             return HANDLED;
+        }
+
+        @Override
+        public void exit() {
+            mWifiChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P_RSP);
         }
     }
 
@@ -727,9 +756,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     mWifiMonitor.startMonitoring();
                     transitionTo(mP2pEnablingState);
-                    break;
-                case WifiStateMachine.CMD_DISABLE_P2P:
-                    //Nothing to do
                     break;
                 default:
                     return NOT_HANDLED;
@@ -757,7 +783,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mP2pDisabledState);
                     break;
                 case WifiStateMachine.CMD_ENABLE_P2P:
-                case WifiStateMachine.CMD_DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P_REQ:
                     deferMessage(message);
                     break;
                 default:
@@ -788,7 +814,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiStateMachine.CMD_ENABLE_P2P:
                     //Nothing to do
                     break;
-                case WifiStateMachine.CMD_DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P_REQ:
                     if (mPeers.clear()) sendP2pPeersChangedBroadcast();
                     if (mGroups.clear()) sendP2pPersistentGroupsChangedBroadcast();
 
@@ -1534,7 +1560,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     // Do the regular device lost handling
                     return NOT_HANDLED;
-                case WifiStateMachine.CMD_DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P_REQ:
                     sendMessage(WifiP2pManager.REMOVE_GROUP);
                     deferMessage(message);
                     break;
