@@ -359,8 +359,12 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_RESET_SUPPLICANT_STATE           = BASE + 111;
 
     /* P2p commands */
+    /* We are ok with no response here since we wont do much with it anyway */
     public static final int CMD_ENABLE_P2P                = BASE + 131;
-    public static final int CMD_DISABLE_P2P               = BASE + 132;
+    /* In order to shut down supplicant cleanly, we wait till p2p has
+     * been disabled */
+    public static final int CMD_DISABLE_P2P_REQ           = BASE + 132;
+    public static final int CMD_DISABLE_P2P_RSP           = BASE + 133;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -458,6 +462,11 @@ public class WifiStateMachine extends StateMachine {
     private State mDriverStartingState = new DriverStartingState();
     /* Driver started */
     private State mDriverStartedState = new DriverStartedState();
+    /* Wait until p2p is disabled
+     * This is a special state which is entered right after we exit out of DriverStartedState
+     * before transitioning to another state.
+     */
+    private State mWaitForP2pDisableState = new WaitForP2pDisableState();
     /* Driver stopping */
     private State mDriverStoppingState = new DriverStoppingState();
     /* Driver stopped */
@@ -699,6 +708,7 @@ public class WifiStateMachine extends StateMachine {
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
                         addState(mWpsRunningState, mConnectModeState);
+                addState(mWaitForP2pDisableState, mSupplicantStartedState);
                 addState(mDriverStoppingState, mSupplicantStartedState);
                 addState(mDriverStoppedState, mSupplicantStartedState);
             addState(mSupplicantStoppingState, mDefaultState);
@@ -2433,7 +2443,11 @@ public class WifiStateMachine extends StateMachine {
             WifiConfiguration config;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
-                    transitionTo(mSupplicantStoppingState);
+                    if (mP2pSupported) {
+                        transitionTo(mWaitForP2pDisableState);
+                    } else {
+                        transitionTo(mSupplicantStoppingState);
+                    }
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
                     loge("Connection lost, restart supplicant");
@@ -2443,7 +2457,11 @@ public class WifiStateMachine extends StateMachine {
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
-                    transitionTo(mDriverLoadedState);
+                    if (mP2pSupported) {
+                        transitionTo(mWaitForP2pDisableState);
+                    } else {
+                        transitionTo(mDriverLoadedState);
+                    }
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
@@ -2838,8 +2856,12 @@ public class WifiStateMachine extends StateMachine {
                     }
                     mWakeLock.acquire();
                     mWifiNative.stopDriver();
-                    transitionTo(mDriverStoppingState);
                     mWakeLock.release();
+                    if (mP2pSupported) {
+                        transitionTo(mWaitForP2pDisableState);
+                    } else {
+                        transitionTo(mDriverStoppingState);
+                    }
                     break;
                 case CMD_START_PACKET_FILTERING:
                     if (message.arg1 == MULTICAST_V6) {
@@ -2885,8 +2907,63 @@ public class WifiStateMachine extends StateMachine {
             mIsRunning = false;
             updateBatteryWorkSource(null);
             mScanResults = new ArrayList<ScanResult>();
+        }
+    }
 
-            if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P);
+    class WaitForP2pDisableState extends State {
+        private State mTransitionToState;
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            switch (getCurrentMessage().what) {
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
+                    mTransitionToState = mDriverLoadedState;
+                    break;
+                case CMD_DELAYED_STOP_DRIVER:
+                    mTransitionToState = mDriverStoppingState;
+                    break;
+                case CMD_STOP_SUPPLICANT:
+                    mTransitionToState = mSupplicantStoppingState;
+                    break;
+                default:
+                    mTransitionToState = mDriverStoppingState;
+                    break;
+            }
+            mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P_REQ);
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch(message.what) {
+                case WifiStateMachine.CMD_DISABLE_P2P_RSP:
+                    transitionTo(mTransitionToState);
+                    break;
+                /* Defer wifi start/shut and driver commands */
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                case CMD_START_SCAN:
+                case CMD_DISCONNECT:
+                case CMD_REASSOCIATE:
+                case CMD_RECONNECT:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
         }
     }
 
