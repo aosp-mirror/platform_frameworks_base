@@ -62,7 +62,7 @@ page.title=GCM Demo Application
 <p>For the Android application:</p>
 <ul>
   <li>Emulator (or device) running Android 2.2 with Google APIs.</li>
-  <li>The Google API project ID of the account registered to use GCM.</li>
+  <li>The Google API project number of the account registered to use GCM.</li>
 </ul>
 <h2 id="gcm-setup">Setting Up GCM</h2>
 <p>Before proceeding with the server and client setup, it's necessary to register a Google account with the Google API Console, enable Google Cloud Messaging in GCM, and obtain an API key from the <a href="https://code.google.com/apis/console">Google API Console</a>.</p>
@@ -175,7 +175,7 @@ runserver:
 <pre class="prettyprint pretty-java">
 static final String SERVER_URL = &quot;http://192.168.1.10:8080/gcm-demo&quot;;
 static final String SENDER_ID = &quot;4815162342&quot;;</pre>
-<p>Note that the <code>SERVER_URL</code> is the URL for the server and the application's context (or just server, if you are using App Engine), and it does not include the forward slash (<code>/</code>). Also note that <code>SENDER_ID</code> is the Google API project ID you obtained in the server setup steps above.</p>
+<p>Note that the <code>SERVER_URL</code> is the URL for the server and the application's context (or just server, if you are using App Engine), and it does not include the forward slash (<code>/</code>). Also note that <code>SENDER_ID</code> is the Google API project number you obtained in the server setup steps above.</p>
 
   <li>In a shell window, go to the <code>gcm-demo-client</code> directory.</li>
   <li>Use the SDK's <code>android</code> tool to generate the <code>ant</code> build files:</li>

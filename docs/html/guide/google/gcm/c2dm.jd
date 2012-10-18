@@ -55,7 +55,7 @@ page.title=Migration
 <dd>To use the GCM service, you need to obtain a Simple API Key from Google APIs console page. For more information, see <a href="gs.html">Getting Started</a>. Note that GCM <em>only</em> accepts Simple API Key&mdash;using ClientLogin or OAuth2 tokens will not work.
 </dd>
 <dt><strong>Sender ID</strong></dt>
-<dd>In C2DM, the Sender ID is an email address. In GCM, the Sender ID is a project ID that you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. </dd>
+<dd>In C2DM, the Sender ID is an email address. In GCM, the Sender ID is a project number that you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. </dd>
 
 <dt><strong>JSON format</strong></dt>
 <dd>GCM HTTP requests support JSON format in addition to plain text. For more information, see the <a href="gcm.html#send-msg">Architectural Overview</a>.</dd>
@@ -82,12 +82,12 @@ page.title=Migration
 <p>C2DM and GCM are not interoperable. For example, you cannot post notifications from GCM to C2DM registration IDs, nor can you use C2DM registration IDs as GCM registration IDs. From your server-side application, you must keep keep track of whether a registration ID is from C2DM or GCM and use the proper endpoint. </p>
 
 <p>As you transition from C2DM to GCM, your server needs to be aware of whether a given registration ID
-contains an old C2DM sender or a new GCM project ID. This is the approach we recommend: have the new app version (the one that uses GCM) send a bit along with the registration ID. This bit tells your server that this registration ID is for GCM. If you don't get the extra bit, you mark the registration ID as C2DM. Once no more valid registration IDs are marked as C2DM, you can complete the migration.</p>
+contains an old C2DM sender or a new GCM project number. This is the approach we recommend: have the new app version (the one that uses GCM) send a bit along with the registration ID. This bit tells your server that this registration ID is for GCM. If you don't get the extra bit, you mark the registration ID as C2DM. Once no more valid registration IDs are marked as C2DM, you can complete the migration.</p>
 
 <h2 id="migrating">Migrating Your Apps</h2>
 <p>This section describes how to move existing C2DM apps to GCM.</p>
 <h3 id="client">Client changes</h3>
-<p>Migration is simple! The only change required in the application is replacing the email account passed in the sender parameter of the registration intent with the project ID generated when signing up for the new service. For example:</p>
+<p>Migration is simple! The only change required in the application is replacing the email account passed in the sender parameter of the registration intent with the project number generated when signing up for the new service. For example:</p>
 <pre class="prettyprint pretty-java">Intent registrationIntent = new Intent(&quot;com.google.android.c2dm.intent.REGISTER&quot;);
 // sets the app name in the intent
 registrationIntent.putExtra(&quot;app&quot;, PendingIntent.getBroadcast(this, 0, new Intent(), 0));
