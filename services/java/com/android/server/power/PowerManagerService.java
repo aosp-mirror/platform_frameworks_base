@@ -107,6 +107,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int DIRTY_PROXIMITY_POSITIVE = 1 << 9;
     // Dirty bit: screen on blocker state became held or unheld
     private static final int DIRTY_SCREEN_ON_BLOCKER_RELEASED = 1 << 10;
+    // Dirty bit: dock state changed
+    private static final int DIRTY_DOCK_STATE = 1 << 11;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
@@ -269,6 +271,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // draining faster than it is charging and the user activity timeout has expired.
     private int mBatteryLevelWhenDreamStarted;
 
+    // The current dock state.
+    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
@@ -280,6 +285,9 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // True if dreams should be activated on sleep.
     private boolean mDreamsActivateOnSleepSetting;
+
+    // True if dreams should be activated on dock.
+    private boolean mDreamsActivateOnDockSetting;
 
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
@@ -440,6 +448,10 @@ public final class PowerManagerService extends IPowerManager.Stub
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             mContext.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
 
+            filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_DOCK_EVENT);
+            mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
+
             // Register for settings changes.
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -447,6 +459,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                     false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK),
                     false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT),
@@ -486,6 +501,9 @@ public final class PowerManagerService extends IPowerManager.Stub
                 UserHandle.USER_CURRENT) != 0);
         mDreamsActivateOnSleepSetting = (Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0,
+                UserHandle.USER_CURRENT) != 0);
+        mDreamsActivateOnDockSetting = (Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, 0,
                 UserHandle.USER_CURRENT) != 0);
         mScreenOffTimeoutSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,
@@ -1339,13 +1357,14 @@ public final class PowerManagerService extends IPowerManager.Stub
     private boolean updateWakefulnessLocked(int dirty) {
         boolean changed = false;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_BOOT_COMPLETED
-                | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE)) != 0) {
+                | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE
+                | DIRTY_DOCK_STATE)) != 0) {
             if (mWakefulness == WAKEFULNESS_AWAKE && isItBedTimeYetLocked()) {
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateWakefulnessLocked: Bed time...");
                 }
                 final long time = SystemClock.uptimeMillis();
-                if (mDreamsActivateOnSleepSetting) {
+                if (shouldNapAtBedTimeLocked()) {
                     changed = napNoUpdateLocked(time);
                 } else {
                     changed = goToSleepNoUpdateLocked(time,
@@ -1354,6 +1373,16 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
         return changed;
+    }
+
+    /**
+     * Returns true if the device should automatically nap and start dreaming when the user
+     * activity timeout has expired and it's bedtime.
+     */
+    private boolean shouldNapAtBedTimeLocked() {
+        return mDreamsActivateOnSleepSetting
+                || (mDreamsActivateOnDockSetting
+                        && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED);
     }
 
     /**
@@ -2124,6 +2153,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mPlugType=" + mPlugType);
             pw.println("  mBatteryLevel=" + mBatteryLevel);
             pw.println("  mBatteryLevelWhenDreamStarted=" + mBatteryLevelWhenDreamStarted);
+            pw.println("  mDockState=" + mDockState);
             pw.println("  mStayOn=" + mStayOn);
             pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
@@ -2149,6 +2179,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
+            pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
             pw.println("  mScreenOffTimeoutSetting=" + mScreenOffTimeoutSetting);
             pw.println("  mMaximumScreenOffTimeoutFromDeviceAdmin="
                     + mMaximumScreenOffTimeoutFromDeviceAdmin + " (enforced="
@@ -2263,6 +2294,21 @@ public final class PowerManagerService extends IPowerManager.Stub
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
                 handleSettingsChangedLocked();
+            }
+        }
+    }
+
+    private final class DockReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                if (mDockState != dockState) {
+                    mDockState = dockState;
+                    mDirty |= DIRTY_DOCK_STATE;
+                    updatePowerStateLocked();
+                }
             }
         }
     }
