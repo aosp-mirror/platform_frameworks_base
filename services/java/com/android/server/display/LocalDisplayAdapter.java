@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.SparseArray;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
@@ -135,7 +136,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                            | DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION;
+                            | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
                     mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
                     mInfo.xDpi = mPhys.xDpi;
                     mInfo.yDpi = mPhys.yDpi;
@@ -145,6 +146,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                     mInfo.setAssumedDensityForExternalDisplay(mPhys.width, mPhys.height);
+
+                    // For demonstration purposes, allow rotation of the external display.
+                    // In the future we might allow the user to configure this directly.
+                    if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
+                        mInfo.rotation = Surface.ROTATION_270;
+                    }
                 }
             }
             return mInfo;
