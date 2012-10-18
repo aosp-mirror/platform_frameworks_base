@@ -119,7 +119,7 @@ onCreateDialog()} callback method.</p>
 a {@link android.support.v4.app.DialogFragment}:</p>
 
 <pre>
-public class FireMissilesDialog extends DialogFragment {
+public class FireMissilesDialogFragment extends DialogFragment {
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
@@ -469,7 +469,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
            })
            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                public void onClick(DialogInterface dialog, int id) {
-                   NoticeDialog.this.getDialog().cancel();
+                   LoginDialogFragment.this.getDialog().cancel();
                }
            });      
     return builder.create();
@@ -497,15 +497,15 @@ in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
 <p>When the user touches one of the dialog's action buttons or selects an item from its list,
 your {@link android.support.v4.app.DialogFragment} might perform the necessary
 action itself, but often you'll want to deliver the event to the activity or fragment that
-opened the dialog. To do this, define an interface with a method for each type of click event,
-then implement that interface in the host component that will
+opened the dialog. To do this, define an interface with a method for each type of click event.
+Then implement that interface in the host component that will
 receive the action events from the dialog.</p>
 
 <p>For example, here's a {@link android.support.v4.app.DialogFragment} that defines an
 interface through which it delivers the events back to the host activity:</p>
 
 <pre>
-public class NoticeDialog extends DialogFragment {
+public class NoticeDialogFragment extends DialogFragment {
     
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
@@ -516,48 +516,44 @@ public class NoticeDialog extends DialogFragment {
     }
     
     // Use this instance of the interface to deliver action events
-    static NoticeDialogListener mListener;
-        
-    /* Call this to instantiate a new NoticeDialog.
-     * @param activity  The activity hosting the dialog, which must implement the
-     *                  NoticeDialogListener to receive event callbacks.
-     * @returns A new instance of NoticeDialog.
-     * @throws  ClassCastException if the host activity does not
-     *          implement NoticeDialogListener
-     */
-    public static NoticeDialog newInstance(Activity activity) {
+    NoticeDialogListener mListener;
+    
+    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         // Verify that the host activity implements the callback interface
         try {
-            // Instantiate the NoticeDialogListener so we can send events with it
+            // Instantiate the NoticeDialogListener so we can send events to the host
             mListener = (NoticeDialogListener) activity;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(activity.toString()
                     + " must implement NoticeDialogListener");
         }
-        NoticeDialog frag = new NoticeDialog();
-        return frag;
     }
-    
     ...
 }
 </pre>
 
-<p>The activity hosting the dialog creates and shows an instance of the dialog
-by calling {@code NoticeDialog.newInstance()} and receives the dialog's
+<p>The activity hosting the dialog creates an instance of the dialog
+with the dialog fragment's constructor and receives the dialog's
 events through an implementation of the {@code NoticeDialogListener} interface:</p>
 
 <pre>
 public class MainActivity extends FragmentActivity
-                          implements NoticeDialog.NoticeDialogListener{
+                          implements NoticeDialogFragment.NoticeDialogListener{
     ...
     
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
-        DialogFragment dialog = NoticeDialog.newInstance(this);
-        dialog.show(getSupportFragmentManager(), "NoticeDialog");
+        DialogFragment dialog = new NoticeDialogFragment();
+        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
     }
 
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
     &#64;Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button
@@ -573,11 +569,12 @@ public class MainActivity extends FragmentActivity
 </pre>
 
 <p>Because the host activity implements the {@code NoticeDialogListener}&mdash;which is
-enforced by the {@code newInstance()} method shown above&mdash;the dialog fragment can use the
+enforced by the {@link android.support.v4.app.Fragment#onAttach onAttach()}
+callback method shown above&mdash;the dialog fragment can use the
 interface callback methods to deliver click events to the activity:</p>
 
 <pre>
-public class NoticeDialog extends DialogFragment {
+public class NoticeDialogFragment extends DialogFragment {
     ...
 
     &#64;Override
@@ -588,21 +585,19 @@ public class NoticeDialog extends DialogFragment {
                .setPositiveButton(R.string.fire, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                        // Send the positive button event back to the host activity
-                       mListener.onDialogPositiveClick(NoticeDialog.this);
+                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
                    }
                })
                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                        // Send the negative button event back to the host activity
-                       mListener.onDialogPositiveClick(NoticeDialog.this);
+                       mListener.onDialogPositiveClick(NoticeDialogFragment.this);
                    }
                });
         return builder.create();
     }
 }
 </pre>
-
-
 
 
 
@@ -621,7 +616,7 @@ android.support.v4.app.Fragment}. For example:</p>
 
 <pre>
 public void confirmFireMissiles() {
-    DialogFragment newFragment = FireMissilesDialog.newInstance(this);
+    DialogFragment newFragment = new FireMissilesDialogFragment();
     newFragment.show(getSupportFragmentManager(), "missiles");
 }
 </pre>
@@ -653,7 +648,7 @@ onCreateView()} callback.</p>
 dialog or an embeddable fragment (using a layout named <code>purchase_items.xml</code>):</p>
 
 <pre>
-public class CustomLayoutDialog extends DialogFragment {
+public class CustomDialogFragment extends DialogFragment {
     /** The system calls this to get the DialogFragment's layout, regardless
         of whether it's being displayed as a dialog or an embedded fragment. */
     &#64;Override
@@ -683,7 +678,7 @@ or a fullscreen UI, based on the screen size:</p>
 <pre>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
-    CustomLayoutDialog newFragment = new CustomLayoutDialog();
+    CustomDialogFragment newFragment = new CustomDialogFragment();
     
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
