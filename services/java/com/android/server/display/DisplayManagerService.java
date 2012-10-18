@@ -127,6 +127,13 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // services should be started.  This option may disable certain display adapters.
     public boolean mOnlyCore;
 
+    // True if the display manager service should pretend there is only one display
+    // and only tell applications about the existence of the default logical display.
+    // The display manager can still mirror content to secondary displays but applications
+    // cannot present unique content on those displays.
+    // Used for demonstration purposes only.
+    private final boolean mSingleDisplayDemoMode;
+
     // All callback records indexed by calling process id.
     public final SparseArray<CallbackRecord> mCallbacks =
             new SparseArray<CallbackRecord>();
@@ -182,6 +189,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         mHandler = new DisplayManagerHandler(mainHandler.getLooper());
         mUiHandler = uiHandler;
         mDisplayAdapterListener = new DisplayAdapterListener();
+        mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
 
         mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTER);
     }
@@ -631,6 +639,12 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             isDefault = false;
         }
 
+        if (!isDefault && mSingleDisplayDemoMode) {
+            Slog.i(TAG, "Not creating a logical display for a secondary display "
+                    + " because single display demo mode is enabled: " + deviceInfo);
+            return;
+        }
+
         final int displayId = assignDisplayIdLocked(isDefault);
         final int layerStack = assignLayerStackLocked(displayId);
 
@@ -857,6 +871,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
             pw.println("  mDefaultViewport=" + mDefaultViewport);
             pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
+            pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
 
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
             ipw.increaseIndent();
