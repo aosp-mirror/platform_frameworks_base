@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge.impl;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 
 import com.android.ide.common.rendering.api.DrawableParams;
+import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
@@ -59,6 +60,7 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
         try {
             // get the drawable resource value
             DrawableParams params = getParams();
+            HardwareConfig hardwareConfig = params.getHardwareConfig();
             ResourceValue drawableResource = params.getDrawable();
 
             // resolve it
@@ -75,15 +77,15 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
 
             // get the actual Drawable object to draw
             Drawable d = ResourceHelper.getDrawable(drawableResource, context);
-            content.setBackgroundDrawable(d);
+            content.setBackground(d);
 
             // set the AttachInfo on the root view.
             AttachInfo_Accessor.setAttachInfo(content);
 
 
             // measure
-            int w = params.getScreenWidth();
-            int h = params.getScreenHeight();
+            int w = hardwareConfig.getScreenWidth();
+            int h = hardwareConfig.getScreenHeight();
             int w_spec = MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY);
             int h_spec = MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY);
             content.measure(w_spec, h_spec);
@@ -99,11 +101,11 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
 
             // create an Android bitmap around the BufferedImage
             Bitmap bitmap = Bitmap_Delegate.createBitmap(image,
-                    true /*isMutable*/, params.getDensity());
+                    true /*isMutable*/, hardwareConfig.getDensity());
 
             // create a Canvas around the Android bitmap
             Canvas canvas = new Canvas(bitmap);
-            canvas.setDensity(params.getDensity().getDpiValue());
+            canvas.setDensity(hardwareConfig.getDensity().getDpiValue());
 
             // and draw
             content.draw(canvas);
