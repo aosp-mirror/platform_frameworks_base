@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.util.DisplayMetrics;
+import android.view.Surface;
 
 import libcore.util.Objects;
 
@@ -31,11 +32,21 @@ final class DisplayDeviceInfo {
     public static final int FLAG_DEFAULT_DISPLAY = 1 << 0;
 
     /**
-     * Flag: Indicates that this display device can rotate to show contents in a
-     * different orientation.  Otherwise the rotation is assumed to be fixed in the
-     * natural orientation and the display manager should transform the content to fit.
+     * Flag: Indicates that the orientation of this display device is coupled to the
+     * rotation of its associated logical display.
+     * <p>
+     * This flag should be applied to the default display to indicate that the user
+     * physically rotates the display when content is presented in a different orientation.
+     * The display manager will apply a coordinate transformation assuming that the
+     * physical orientation of the display matches the logical orientation of its content.
+     * </p><p>
+     * The flag should not be set when the display device is mounted in a fixed orientation
+     * such as on a desk.  The display manager will apply a coordinate transformation
+     * such as a scale and translation to letterbox or pillarbox format under the
+     * assumption that the physical orientation of the display is invariant.
+     * </p>
      */
-    public static final int FLAG_SUPPORTS_ROTATION = 1 << 1;
+    public static final int FLAG_ROTATES_WITH_CONTENT = 1 << 1;
 
     /**
      * Flag: Indicates that this display device has secure video output, such as HDCP.
@@ -116,6 +127,17 @@ final class DisplayDeviceInfo {
      */
     public int touch;
 
+    /**
+     * The additional rotation to apply to all content presented on the display device
+     * relative to its physical coordinate system.  Default is {@link Surface#ROTATION_0}.
+     * <p>
+     * This field can be used to compensate for the fact that the display has been
+     * physically rotated relative to its natural orientation such as an HDMI monitor
+     * that has been mounted sideways to appear to be portrait rather than landscape.
+     * </p>
+     */
+    public int rotation = Surface.ROTATION_0;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -139,7 +161,8 @@ final class DisplayDeviceInfo {
                 && xDpi == other.xDpi
                 && yDpi == other.yDpi
                 && flags == other.flags
-                && touch == other.touch;
+                && touch == other.touch
+                && rotation == other.rotation;
     }
 
     @Override
@@ -157,14 +180,18 @@ final class DisplayDeviceInfo {
         yDpi = other.yDpi;
         flags = other.flags;
         touch = other.touch;
+        rotation = other.rotation;
     }
 
     // For debugging purposes
     @Override
     public String toString() {
-        return "DisplayDeviceInfo{\"" + name + "\": " + width + " x " + height + ", " + refreshRate + " fps, "
+        return "DisplayDeviceInfo{\"" + name + "\": " + width + " x " + height + ", "
+                + refreshRate + " fps, "
                 + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
-                + ", touch " + touchToString(touch) + flagsToString(flags) + "}";
+                + ", touch " + touchToString(touch) + flagsToString(flags)
+                + ", rotation " + rotation
+                + "}";
     }
 
     private static String touchToString(int touch) {
@@ -185,8 +212,8 @@ final class DisplayDeviceInfo {
         if ((flags & FLAG_DEFAULT_DISPLAY) != 0) {
             msg.append(", FLAG_DEFAULT_DISPLAY");
         }
-        if ((flags & FLAG_SUPPORTS_ROTATION) != 0) {
-            msg.append(", FLAG_SUPPORTS_ROTATION");
+        if ((flags & FLAG_ROTATES_WITH_CONTENT) != 0) {
+            msg.append(", FLAG_ROTATES_WITH_CONTENT");
         }
         if ((flags & FLAG_SECURE) != 0) {
             msg.append(", FLAG_SECURE");

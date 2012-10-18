@@ -241,9 +241,12 @@ final class LogicalDisplay {
         // is rotated when the contents of the logical display are rendered.
         int orientation = Surface.ROTATION_0;
         if (device == mPrimaryDisplayDevice
-                && (displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_ROTATION) != 0) {
+                && (displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
             orientation = displayInfo.rotation;
         }
+
+        // Apply the physical rotation of the display device itself.
+        orientation = (orientation + displayDeviceInfo.rotation) % 4;
 
         // Set the frame.
         // The frame specifies the rotated physical coordinates into which the viewport
