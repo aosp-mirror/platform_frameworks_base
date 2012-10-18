@@ -221,6 +221,18 @@ public final class LocationRequest implements Parcelable {
     /** @hide */
     public LocationRequest() { }
 
+    /** @hide */
+    public LocationRequest(LocationRequest src) {
+        mQuality = src.mQuality;
+        mInterval = src.mInterval;
+        mFastestInterval = src.mFastestInterval;
+        mExplicitFastestInterval = src.mExplicitFastestInterval;
+        mExpireAt = src.mExpireAt;
+        mNumUpdates = src.mNumUpdates;
+        mSmallestDisplacement = src.mSmallestDisplacement;
+        mProvider = src.mProvider;
+    }
+
     /**
      * Set the quality of the request.
      *
