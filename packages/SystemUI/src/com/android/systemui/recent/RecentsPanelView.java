@@ -185,6 +185,16 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 final Activity activity = (Activity) RecentsPanelView.this.getContext();
                 final SystemUIApplication app = (SystemUIApplication) activity.getApplication();
                 if (app.isWaitingForWindowAnimationStart()) {
+                    if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
+                        for (View v :
+                            new View[] { holder.iconView, holder.labelView, holder.calloutLine }) {
+                            if (v != null) {
+                                v.setAlpha(1f);
+                                v.setTranslationX(0f);
+                                v.setTranslationY(0f);
+                            }
+                        }
+                    }
                     mItemToAnimateInWhenWindowAnimationIsFinished = holder;
                     final int translation = -getResources().getDimensionPixelSize(
                             R.dimen.status_bar_recents_app_icon_translate_distance);
