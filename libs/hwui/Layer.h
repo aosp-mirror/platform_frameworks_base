@@ -209,6 +209,9 @@ struct Layer {
     }
 
     inline void allocateTexture(GLenum format, GLenum storage) {
+#if DEBUG_LAYERS
+        ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
+#endif
         glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0, format, storage, NULL);
     }
 
