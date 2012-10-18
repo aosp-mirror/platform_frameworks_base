@@ -23,8 +23,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.location.Address;
@@ -249,6 +252,74 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         updateProvidersLocked();
     }
 
+    private void ensureFallbackFusedProviderPresentLocked(ArrayList<String> pkgs) {
+        PackageManager pm = mContext.getPackageManager();
+        String systemPackageName = mContext.getPackageName();
+        ArrayList<HashSet<Signature>> sigSets = ServiceWatcher.getSignatureSets(mContext, pkgs);
+
+        List<ResolveInfo> rInfos = pm.queryIntentServicesAsUser(
+                new Intent(FUSED_LOCATION_SERVICE_ACTION),
+                PackageManager.GET_META_DATA, mCurrentUserId);
+        for (ResolveInfo rInfo : rInfos) {
+            String packageName = rInfo.serviceInfo.packageName;
+
+            // Check that the signature is in the list of supported sigs. If it's not in
+            // this list the standard provider binding logic won't bind to it.
+            try {
+                PackageInfo pInfo;
+                pInfo = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+                if (!ServiceWatcher.isSignatureMatch(pInfo.signatures, sigSets)) {
+                    Log.w(TAG, packageName + " resolves service " + FUSED_LOCATION_SERVICE_ACTION +
+                            ", but has wrong signature, ignoring");
+                    continue;
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "missing package: " + packageName);
+                continue;
+            }
+
+            // Get the version info
+            if (rInfo.serviceInfo.metaData == null) {
+                Log.w(TAG, "Found fused provider without metadata: " + packageName);
+                continue;
+            }
+
+            int version = rInfo.serviceInfo.metaData.getInt(
+                    ServiceWatcher.EXTRA_SERVICE_VERSION, -1);
+            if (version == 0) {
+                // This should be the fallback fused location provider.
+
+                // Make sure it's in the system partition.
+                if ((rInfo.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    if (D) Log.d(TAG, "Fallback candidate not in /system: " + packageName);
+                    continue;
+                }
+
+                // Check that the fallback is signed the same as the OS
+                // as a proxy for coreApp="true"
+                if (pm.checkSignatures(systemPackageName, packageName)
+                        != PackageManager.SIGNATURE_MATCH) {
+                    if (D) Log.d(TAG, "Fallback candidate not signed the same as system: "
+                            + packageName);
+                    continue;
+                }
+
+                // Found a valid fallback.
+                if (D) Log.d(TAG, "Found fallback provider: " + packageName);
+                return;
+            } else {
+                if (D) Log.d(TAG, "Fallback candidate not version 0: " + packageName);
+            }
+        }
+
+        throw new IllegalStateException("Unable to find a fused location provider that is in the "
+                + "system partition with version 0 and signed with the platform certificate. "
+                + "Such a package is needed to provide a default fused location provider in the "
+                + "event that no other fused location provider has been installed or is currently "
+                + "available. For example, coreOnly boot mode when decrypting the data "
+                + "partition. The fallback must also be marked coreApp=\"true\" in the manifest");
+    }
+
     private void loadProvidersLocked() {
         // create a passive location provider, which is always enabled
         PassiveProvider passiveProvider = new PassiveProvider(this);
@@ -278,14 +349,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         */
         Resources resources = mContext.getResources();
         ArrayList<String> providerPackageNames = new ArrayList<String>();
-        String[] pkgs1 = resources.getStringArray(
+        String[] pkgs = resources.getStringArray(
                 com.android.internal.R.array.config_locationProviderPackageNames);
-        String[] pkgs2 = resources.getStringArray(
-                com.android.internal.R.array.config_overlay_locationProviderPackageNames);
-        if (D) Log.d(TAG, "built-in location providers: " + Arrays.toString(pkgs1));
-        if (D) Log.d(TAG, "overlay location providers: " + Arrays.toString(pkgs2));
-        if (pkgs1 != null) providerPackageNames.addAll(Arrays.asList(pkgs1));
-        if (pkgs2 != null) providerPackageNames.addAll(Arrays.asList(pkgs2));
+        if (D) Log.d(TAG, "certificates for location providers pulled from: " +
+                Arrays.toString(pkgs));
+        if (pkgs != null) providerPackageNames.addAll(Arrays.asList(pkgs));
+
+        ensureFallbackFusedProviderPresentLocked(providerPackageNames);
 
         // bind to network provider
         LocationProviderProxy networkProvider = LocationProviderProxy.createAndBind(
