@@ -35,7 +35,7 @@ public class NotificationPanelView extends PanelView {
     View mHandleView;
     int mFingers;
     PhoneStatusBar mStatusBar;
-    private boolean mFlipped;
+    boolean mOkToFlip;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -94,10 +94,10 @@ public class NotificationPanelView extends PanelView {
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    mFlipped = false;
+                    mOkToFlip = getExpandedHeight() == 0;
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
-                    if (!mFlipped) {
+                    if (mOkToFlip) {
                         float miny = event.getY(0);
                         float maxy = miny;
                         for (int i=1; i<event.getPointerCount(); i++) {
@@ -111,7 +111,7 @@ public class NotificationPanelView extends PanelView {
                             } else {
                                 mStatusBar.flipToSettings();
                             }
-                            mFlipped = true;
+                            mOkToFlip = false;
                         }
                     }
                     break;
