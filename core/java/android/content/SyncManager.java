@@ -55,6 +55,7 @@ import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.util.IndentingPrintWriter;
@@ -311,13 +312,10 @@ public class SyncManager {
             if (userId == UserHandle.USER_NULL) return;
 
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                Log.i(TAG, "User removed: u" + userId);
                 onUserRemoved(userId);
             } else if (Intent.ACTION_USER_STARTING.equals(action)) {
-                Log.i(TAG, "User starting: u" + userId);
                 onUserStarting(userId);
             } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
-                Log.i(TAG, "User stopping: u" + userId);
                 onUserStopping(userId);
             }
         }
@@ -338,6 +336,10 @@ public class SyncManager {
         }
     }
 
+    /**
+     * Should only be created after {@link ContentService#systemReady()} so that
+     * {@link PackageManager} is ready to query.
+     */
     public SyncManager(Context context, boolean factoryTest) {
         // Initialize the SyncStorageEngine first, before registering observers
         // and creating threads and so on; it may fail if the disk is full.
@@ -441,9 +443,6 @@ public class SyncManager {
                     UserHandle.ALL,
                     new IntentFilter(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION),
                     null, null);
-
-            // do this synchronously to ensure we have the accounts before this call returns
-            onUserStarting(UserHandle.USER_OWNER);
         }
 
         // Pick a random second in a day to seed all periodic syncs
