@@ -247,7 +247,6 @@ public class AccountManagerService
     }
 
     public void systemReady() {
-        initUser(UserHandle.USER_OWNER);
     }
 
     private UserManager getUserManager() {
