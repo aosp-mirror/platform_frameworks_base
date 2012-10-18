@@ -2420,6 +2420,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = win.getWindowList();
         windows.remove(win);
         mPendingRemove.remove(win);
+        mResizingWindows.remove(win);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Final remove of window: " + win);
 
