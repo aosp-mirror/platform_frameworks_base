@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Property;
 import android.util.Slog;
 import android.view.Display;
@@ -71,6 +72,7 @@ import com.android.internal.os.SomeArgs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * This class handles the screen magnification when accessibility is enabled.
@@ -1000,45 +1002,44 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                             mViewport.recomputeBounds(mMagnificationController.isMagnifying());
                         } break;
                     }
-                } else {
-                    switch (transition) {
-                        case WindowManagerPolicy.TRANSIT_ENTER:
-                        case WindowManagerPolicy.TRANSIT_SHOW: {
-                            if (!magnifying || !isScreenMagnificationAutoUpdateEnabled(mContext)) {
-                                break;
-                            }
-                            final int type = info.type;
-                            switch (type) {
-                                // TODO: Are these all the windows we want to make
-                                //       visible when they appear on the screen?
-                                //       Do we need to take some of them out?
-                                case WindowManager.LayoutParams.TYPE_APPLICATION:
-                                case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
-                                case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
-                                case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
-                                case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
-                                case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
-                                case WindowManager.LayoutParams.TYPE_PHONE:
-                                case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
-                                case WindowManager.LayoutParams.TYPE_TOAST:
-                                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
-                                case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
-                                case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
-                                case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
-                                case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
-                                case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
-                                case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
-                                case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY: {
-                                    Rect magnifiedRegionBounds = mMagnificationController
-                                            .getMagnifiedRegionBounds();
-                                    Rect touchableRegion = info.touchableRegion;
-                                    if (!magnifiedRegionBounds.intersect(touchableRegion)) {
-                                        ensureRectangleInMagnifiedRegionBounds(
-                                                magnifiedRegionBounds, touchableRegion);
-                                    }
-                                } break;
-                            } break;
+                }
+                switch (transition) {
+                    case WindowManagerPolicy.TRANSIT_ENTER:
+                    case WindowManagerPolicy.TRANSIT_SHOW: {
+                        if (!magnifying || !isScreenMagnificationAutoUpdateEnabled(mContext)) {
+                            break;
                         }
+                        final int type = info.type;
+                        switch (type) {
+                            // TODO: Are these all the windows we want to make
+                            //       visible when they appear on the screen?
+                            //       Do we need to take some of them out?
+                            case WindowManager.LayoutParams.TYPE_APPLICATION:
+                            case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
+                            case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
+                            case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                            case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
+                            case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
+                            case WindowManager.LayoutParams.TYPE_PHONE:
+                            case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
+                            case WindowManager.LayoutParams.TYPE_TOAST:
+                            case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
+                            case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
+                            case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
+                            case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
+                            case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
+                            case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
+                            case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
+                            case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY: {
+                                Rect magnifiedRegionBounds = mMagnificationController
+                                        .getMagnifiedRegionBounds();
+                                Rect touchableRegion = info.touchableRegion;
+                                if (!magnifiedRegionBounds.intersect(touchableRegion)) {
+                                    ensureRectangleInMagnifiedRegionBounds(
+                                            magnifiedRegionBounds, touchableRegion);
+                                }
+                            } break;
+                        } break;
                     }
                 }
             } finally {
@@ -1067,7 +1068,12 @@ public final class ScreenMagnifier implements EventStreamTransformation {
             final float scrollX;
             final float scrollY;
             if (rectangle.width() > magnifiedRegionBounds.width()) {
-                scrollX = rectangle.left - magnifiedRegionBounds.left;
+                final int direction = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault());
+                if (direction == View.LAYOUT_DIRECTION_LTR) {
+                    scrollX = rectangle.left - magnifiedRegionBounds.left;
+                } else {
+                    scrollX = rectangle.right - magnifiedRegionBounds.right;
+                }
             } else if (rectangle.left < magnifiedRegionBounds.left) {
                 scrollX = rectangle.left - magnifiedRegionBounds.left;
             } else if (rectangle.right > magnifiedRegionBounds.right) {
