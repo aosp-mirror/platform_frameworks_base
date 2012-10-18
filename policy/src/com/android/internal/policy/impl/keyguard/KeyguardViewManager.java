@@ -43,7 +43,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard.  Calls back
- * via {@link com.android.internal.policy.impl.KeyguardViewCallback} to poke
+ * via {@link KeyguardViewMediator.ViewMediatorCallback} to poke
  * the wake lock and report that the keyguard is done, which is in turn,
  * reported to this class by the current {@link KeyguardViewBase}.
  */
@@ -233,6 +233,7 @@ public class KeyguardViewManager {
 
         if (mScreenOn) {
             mKeyguardView.show();
+            mKeyguardView.requestFocus();
         }
     }
 
@@ -314,22 +315,25 @@ public class KeyguardViewManager {
 
             // Caller should wait for this window to be shown before turning
             // on the screen.
-            if (mKeyguardHost.getVisibility() == View.VISIBLE) {
-                // Keyguard may be in the process of being shown, but not yet
-                // updated with the window manager...  give it a chance to do so.
-                mKeyguardHost.post(new Runnable() {
-                    public void run() {
-                        if (mKeyguardHost.getVisibility() == View.VISIBLE) {
-                            showListener.onShown(mKeyguardHost.getWindowToken());
-                        } else {
-                            showListener.onShown(null);
+            if (showListener != null) {
+                if (mKeyguardHost.getVisibility() == View.VISIBLE) {
+                    // Keyguard may be in the process of being shown, but not yet
+                    // updated with the window manager...  give it a chance to do so.
+                    mKeyguardHost.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mKeyguardHost.getVisibility() == View.VISIBLE) {
+                                showListener.onShown(mKeyguardHost.getWindowToken());
+                            } else {
+                                showListener.onShown(null);
+                            }
                         }
-                    }
-                });
-            } else {
-                showListener.onShown(null);
+                    });
+                } else {
+                    showListener.onShown(null);
+                }
             }
-        } else {
+        } else if (showListener != null) {
             showListener.onShown(null);
         }
     }
@@ -356,10 +360,9 @@ public class KeyguardViewManager {
         if (mKeyguardView != null) {
             mKeyguardView.wakeWhenReadyTq(keyCode);
             return true;
-        } else {
-            Log.w(TAG, "mKeyguardView is null in wakeWhenReadyTq");
-            return false;
         }
+        Log.w(TAG, "mKeyguardView is null in wakeWhenReadyTq");
+        return false;
     }
 
     /**
@@ -382,6 +385,7 @@ public class KeyguardViewManager {
                 final KeyguardViewBase lastView = mKeyguardView;
                 mKeyguardView = null;
                 mKeyguardHost.postDelayed(new Runnable() {
+                    @Override
                     public void run() {
                         synchronized (KeyguardViewManager.this) {
                             lastView.cleanUp();
