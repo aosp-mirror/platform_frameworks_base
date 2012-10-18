@@ -895,12 +895,6 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     float alpha = layer->getAlpha() / 255.0f;
 
-    mat4& transform = layer->getTransform();
-    if (!transform.isIdentity()) {
-        save(0);
-        mSnapshot->transform->multiply(transform);
-    }
-
     setupDraw();
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
         setupDrawWithTexture();
@@ -937,10 +931,6 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 
     finishDrawTexture();
-
-    if (!transform.isIdentity()) {
-        restore();
-    }
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
@@ -2792,12 +2782,24 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         return DrawGlInfo::kStatusDone;
     }
 
+    mat4* transform = NULL;
+    if (layer->isTextureLayer()) {
+        transform = &layer->getTransform();
+        if (!transform->isIdentity()) {
+            save(0);
+            mSnapshot->transform->multiply(*transform);
+        }
+    }
+
     Rect transformed;
     Rect clip;
     const bool rejected = quickRejectNoScissor(x, y,
             x + layer->layer.getWidth(), y + layer->layer.getHeight(), transformed, clip);
 
     if (rejected) {
+        if (transform && !transform->isIdentity()) {
+            restore();
+        }
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2856,6 +2858,10 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
             drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(),
                     0x7f00ff00, SkXfermode::kSrcOver_Mode);
         }
+    }
+
+    if (transform && !transform->isIdentity()) {
+        restore();
     }
 
     return DrawGlInfo::kStatusDrew;
