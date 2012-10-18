@@ -162,6 +162,14 @@ struct Layer {
         this->cacheable = cacheable;
     }
 
+    inline bool isDirty() {
+        return dirty;
+    }
+
+    inline void setDirty(bool dirty) {
+        this->dirty = dirty;
+    }
+
     inline bool isTextureLayer() {
         return textureLayer;
     }
@@ -285,6 +293,12 @@ private:
      * layer.
      */
     bool textureLayer;
+
+    /**
+     * When set to true, this layer is dirty and should be cleared
+     * before any rendering occurs.
+     */
+    bool dirty;
 
     /**
      * Indicates the render target.
