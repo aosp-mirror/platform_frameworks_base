@@ -29,6 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
@@ -2395,12 +2396,31 @@ public final class ActivityThread {
     private void handleCreateBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleCreateBackupAgent: " + data);
 
+        // Sanity check the requested target package's uid against ours
+        try {
+            PackageInfo requestedPackage = getPackageManager().getPackageInfo(
+                    data.appInfo.packageName, 0, UserHandle.myUserId());
+            if (requestedPackage.applicationInfo.uid != Process.myUid()) {
+                Slog.w(TAG, "Asked to instantiate non-matching package "
+                        + data.appInfo.packageName);
+                return;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Can't reach package manager", e);
+            return;
+        }
+
         // no longer idle; we have backup work to do
         unscheduleGcIdler();
 
         // instantiate the BackupAgent class named in the manifest
         LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
         String packageName = packageInfo.mPackageName;
+        if (packageName == null) {
+            Slog.d(TAG, "Asked to create backup agent for nonexistent package");
+            return;
+        }
+
         if (mBackupAgents.get(packageName) != null) {
             Slog.d(TAG, "BackupAgent " + "  for " + packageName
                     + " already exists");
