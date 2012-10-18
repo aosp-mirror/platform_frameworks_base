@@ -10002,8 +10002,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Resolve the layout parameters depending on the resolved layout direction
+     *
+     * @hide
      */
-    private void resolveLayoutParams() {
+    public void resolveLayoutParams() {
         if (mLayoutParams != null) {
             mLayoutParams.resolveLayoutDirection(getLayoutDirection());
         }
