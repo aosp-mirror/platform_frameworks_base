@@ -2809,6 +2809,15 @@ class ActivityManagerProxy implements IActivityManager
         return success;
     }
 
+    public void clearPendingBackup() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(CLEAR_PENDING_BACKUP_TRANSACTION, data, reply, 0);
+        reply.recycle();
+        data.recycle();
+    }
+
     public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
