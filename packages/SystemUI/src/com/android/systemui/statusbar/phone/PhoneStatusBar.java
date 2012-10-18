@@ -1487,6 +1487,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mFlipSettingsView.setVisibility(View.VISIBLE);
         mSettingsButton.setVisibility(View.GONE);
         mScrollView.setVisibility(View.GONE);
+        mScrollView.setScaleX(0f);
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButton.setAlpha(1f);
         mClearButton.setVisibility(View.GONE);
