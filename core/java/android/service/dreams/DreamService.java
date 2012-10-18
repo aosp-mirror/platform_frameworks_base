@@ -51,12 +51,17 @@ import com.android.internal.policy.PolicyManager;
  * an exhibition/lean-back experience.</p>
  *
  * <p>The Dream lifecycle is as follows:</p>
- * <ul>
- *   <li>onAttachedToWindow</li>
- *   <li>onDreamingStarted</li>
- *   <li>onDreamingStopped</li>
- *   <li>onDetachedFromWindow</li>
- * </ul>
+ * <ol>
+ *   <li>{@link #onAttachedToWindow}
+ *     <p>Use this for initial setup, such as calling {@link #setContentView setContentView()}.</li>
+ *   <li>{@link #onDreamingStarted}
+ *     <p>Your dream has started, so you should begin animations or other behaviors here.</li>
+ *   <li>{@link #onDreamingStopped}
+ *     <p>Use this to stop the things you started in {@link #onDreamingStarted}.</li>
+ *   <li>{@link #onDetachedFromWindow}
+ *     <p>Use this to dismantle resources your dream set up. For example, detach from handlers
+ *        and listeners.</li>
+ * </ol>
  *
  * <p>In addition, onCreate and onDestroy (from the Service interface) will also be called, but
  * initialization and teardown should be done by overriding the hooks above.</p>
@@ -80,13 +85,39 @@ import com.android.internal.policy.PolicyManager;
  *         android:resource="@xml/my_dream" />
  * &lt;/service>
  * </pre>
- * <p>If specified, additional information for the dream is defined using the
- * <code>&lt;{@link android.R.styleable#Dream dream}&gt;</code> element.  For example:</p>
- * <pre>
- * (in res/xml/my_dream.xml)
  *
+ * <p>If specified with the {@code &lt;meta-data&gt;} element,
+ * additional information for the dream is defined using the
+ * {@link android.R.styleable#Dream &lt;dream&gt;} element in a separate XML file.
+ * Currently, the only addtional
+ * information you can provide is for a settings activity that allows the user to configure
+ * the dream behavior. For example:</p>
+ * <p class="code-caption">res/xml/my_dream.xml</p>
+ * <pre>
  * &lt;dream xmlns:android="http://schemas.android.com/apk/res/android"
  *     android:settingsActivity="com.example.app/.MyDreamSettingsActivity" />
+ * </pre>
+ * <p>This makes a Settings button available alongside your dream's listing in the
+ * system settings, which when pressed opens the specified activity.</p>
+ *
+ *
+ * <p>To specify your dream layout, call {@link #setContentView}, typically during the
+ * {@link #onAttachedToWindow} callback. For example:</p>
+ * <pre>
+ * public class MyDream extends DreamService {
+ *
+ *     &#64;Override
+ *     public void onAttachedToWindow() {
+ *         super.onAttachedToWindow();
+ *
+ *         // Exit dream upon user touch
+ *         setInteractive(false);
+ *         // Hide system UI
+ *         setFullscreen(true);
+ *         // Set the dream layout
+ *         setContentView(R.layout.dream);
+ *     }
+ * }
  * </pre>
  */
 public class DreamService extends Service implements Window.Callback {
@@ -323,11 +354,12 @@ public class DreamService extends Service implements Window.Callback {
 
     /**
      * Sets a view to be the content view for this Dream.
-     * Behaves similarly to {@link android.app.Activity#setContentView(android.view.View)},
+     * Behaves similarly to {@link android.app.Activity#setContentView(android.view.View)} in an activity,
      * including using {@link ViewGroup.LayoutParams#MATCH_PARENT} as the layout height and width of the view.
      *
-     * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
-     * @param view The desired content to display.
+     * <p>Note: This requires a window, so you should usually call it during
+     * {@link #onAttachedToWindow()} and never earlier (you <strong>cannot</strong> call it
+     * during {@link #onCreate}).</p>
      *
      * @see #setContentView(int)
      * @see #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)
@@ -339,9 +371,12 @@ public class DreamService extends Service implements Window.Callback {
     /**
      * Sets a view to be the content view for this Dream.
      * Behaves similarly to
-     * {@link android.app.Activity#setContentView(android.view.View, android.view.ViewGroup.LayoutParams)}.
+     * {@link android.app.Activity#setContentView(android.view.View, android.view.ViewGroup.LayoutParams)}
+     * in an activity.
      *
-     * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
+     * <p>Note: This requires a window, so you should usually call it during
+     * {@link #onAttachedToWindow()} and never earlier (you <strong>cannot</strong> call it
+     * during {@link #onCreate}).</p>
      *
      * @param view The desired content to display.
      * @param params Layout parameters for the view.
