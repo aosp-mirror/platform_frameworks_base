@@ -36,6 +36,7 @@ static void do_package_statement(const char* importText);
 identifier  [_a-zA-Z][_a-zA-Z0-9\.]*
 whitespace  ([ \t\n\r]+)
 brackets    \[{whitespace}?\]
+idvalue     (0|[1-9][0-9]*)
 
 %%
 
@@ -77,6 +78,7 @@ brackets    \[{whitespace}?\]
 \(              { SET_BUFFER('('); return '('; }
 \)              { SET_BUFFER(')'); return ')'; }
 ,               { SET_BUFFER(','); return ','; }
+=               { SET_BUFFER('='); return '='; }
 
     /* keywords */
 parcelable      { SET_BUFFER(PARCELABLE); return PARCELABLE; }
@@ -89,7 +91,7 @@ inout           { SET_BUFFER(INOUT); return INOUT; }
 oneway          { SET_BUFFER(ONEWAY); return ONEWAY; }
 
 {brackets}+     { SET_BUFFER(ARRAY); return ARRAY; }
-
+{idvalue}       { SET_BUFFER(IDVALUE); return IDVALUE; }
 {identifier}                                        { SET_BUFFER(IDENTIFIER); return IDENTIFIER; }
 {identifier}\<{whitespace}*{identifier}({whitespace}*,{whitespace}*{identifier})*{whitespace}*\>    {
                                                       SET_BUFFER(GENERIC); return GENERIC; }
