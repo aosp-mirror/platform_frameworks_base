@@ -17,34 +17,34 @@
 package com.android.layoutlib.bridge.bars;
 
 import com.android.resources.Density;
-import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LevelListDrawable;
-import android.view.Gravity;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class PhoneSystemBar extends CustomBar {
+public class NavigationBar extends CustomBar {
 
-    public PhoneSystemBar(Context context, Density density) throws XmlPullParserException {
-        super(context, density, "/bars/phone_system_bar.xml", "phone_system_bar.xml");
+    public NavigationBar(Context context, Density density, int orientation) throws XmlPullParserException {
+        super(context, density, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml");
 
-        // FIXME: use FILL_H?
-        setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
         setBackgroundColor(0xFF000000);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
-        // 0 is the spacer
-        loadIcon(1, "stat_sys_wifi_signal_4_fully.png", density);
-        Drawable drawable = loadIcon(2, ResourceType.DRAWABLE, "stat_sys_battery_charge");
-        if (drawable instanceof LevelListDrawable) {
-            ((LevelListDrawable) drawable).setLevel(100);
+        // 0 is a spacer.
+        int back = 1;
+        int recent = 3;
+        if (orientation == LinearLayout.VERTICAL) {
+            back = 3;
+            recent = 1;
         }
+
+        loadIcon(back,   "ic_sysbar_back.png", density);
+        loadIcon(2,      "ic_sysbar_home.png", density);
+        loadIcon(recent, "ic_sysbar_recent.png", density);
     }
 
     @Override

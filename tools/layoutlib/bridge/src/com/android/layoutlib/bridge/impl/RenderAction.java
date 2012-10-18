@@ -20,11 +20,12 @@ import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTE
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
+import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderResources;
-import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.RenderResources.FrameworkResourceIdProvider;
+import com.android.ide.common.rendering.api.Result;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
@@ -98,19 +99,22 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             return result;
         }
 
+        HardwareConfig hardwareConfig = mParams.getHardwareConfig();
+
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
-        metrics.densityDpi = metrics.noncompatDensityDpi = mParams.getDensity().getDpiValue();
+        metrics.densityDpi = metrics.noncompatDensityDpi =
+                hardwareConfig.getDensity().getDpiValue();
 
         metrics.density = metrics.noncompatDensity =
                 metrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
 
         metrics.scaledDensity = metrics.noncompatScaledDensity = metrics.density;
 
-        metrics.widthPixels = metrics.noncompatWidthPixels = mParams.getScreenWidth();
-        metrics.heightPixels = metrics.noncompatHeightPixels = mParams.getScreenHeight();
-        metrics.xdpi = metrics.noncompatXdpi = mParams.getXdpi();
-        metrics.ydpi = metrics.noncompatYdpi = mParams.getYdpi();
+        metrics.widthPixels = metrics.noncompatWidthPixels = hardwareConfig.getScreenWidth();
+        metrics.heightPixels = metrics.noncompatHeightPixels = hardwareConfig.getScreenHeight();
+        metrics.xdpi = metrics.noncompatXdpi = hardwareConfig.getXdpi();
+        metrics.ydpi = metrics.noncompatYdpi = hardwareConfig.getYdpi();
 
         RenderResources resources = mParams.getResources();
 
@@ -305,7 +309,9 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
     private Configuration getConfiguration() {
         Configuration config = new Configuration();
 
-        ScreenSize screenSize = mParams.getConfigScreenSize();
+        HardwareConfig hardwareConfig = mParams.getHardwareConfig();
+
+        ScreenSize screenSize = hardwareConfig.getScreenSize();
         if (screenSize != null) {
             switch (screenSize) {
                 case SMALL:
@@ -323,13 +329,13 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             }
         }
 
-        Density density = mParams.getDensity();
+        Density density = hardwareConfig.getDensity();
         if (density == null) {
             density = Density.MEDIUM;
         }
 
-        config.screenWidthDp = mParams.getScreenWidth() / density.getDpiValue();
-        config.screenHeightDp = mParams.getScreenHeight() / density.getDpiValue();
+        config.screenWidthDp = hardwareConfig.getScreenWidth() / density.getDpiValue();
+        config.screenHeightDp = hardwareConfig.getScreenHeight() / density.getDpiValue();
         if (config.screenHeightDp < config.screenWidthDp) {
             config.smallestScreenWidthDp = config.screenHeightDp;
         } else {
