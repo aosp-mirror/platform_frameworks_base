@@ -5449,6 +5449,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
     public void resolveLayoutParams() {
         super.resolveLayoutParams();

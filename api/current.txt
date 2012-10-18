@@ -25665,7 +25665,6 @@ package android.view {
     method public void requestDisallowInterceptTouchEvent(boolean);
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
-    method public void resolveLayoutParams();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
