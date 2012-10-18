@@ -62,6 +62,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final String LOG_TAG = "UserManagerService";
 
+    private static final boolean DBG = false;
+
     private static final String TAG_NAME = "name";
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_ICON_PATH = "icon";
@@ -97,6 +99,9 @@ public class UserManagerService extends IUserManager.Stub {
     private int[] mUserIds;
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
+    // This resets on a reboot. Otherwise it keeps incrementing so that user ids are
+    // not reused in quick succession
+    private int mNextUserId = MIN_USER_ID;
 
     private static UserManagerService sInstance;
 
@@ -199,7 +204,8 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private UserInfo getUserInfoLocked(int userId) {
         UserInfo ui = mUsers.get(userId);
-        if (ui != null && ui.partial) {
+        // If it is partial and not in the process of being removed, return as unknown user.
+        if (ui != null && ui.partial && !mRemovingUserIds.contains(userId)) {
             Slog.w(LOG_TAG, "getUserInfo: unknown user #" + userId);
             return null;
         }
@@ -668,6 +674,7 @@ public class UserManagerService extends IUserManager.Stub {
                     long now = System.currentTimeMillis();
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
                     userInfo.partial = true;
+                    Environment.getUserSystemDirectory(userInfo.id).mkdirs();
                     mUsers.put(userId, userInfo);
                     writeUserListLocked();
                     writeUserLocked(userInfo);
@@ -709,7 +716,7 @@ public class UserManagerService extends IUserManager.Stub {
             user.partial = true;
             writeUserLocked(user);
         }
-
+        if (DBG) Slog.i(LOG_TAG, "Stopping user " + userHandle);
         int res;
         try {
             res = ActivityManagerNative.getDefault().stopUser(userHandle,
@@ -730,12 +737,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     void finishRemoveUser(int userHandle) {
+        if (DBG) Slog.i(LOG_TAG, "finishRemoveUser " + userHandle);
         synchronized (mInstallLock) {
             synchronized (mPackagesLock) {
                 removeUserStateLocked(userHandle);
             }
         }
-
+        if (DBG) Slog.i(LOG_TAG, "Removed user " + userHandle + ", sending broadcast");
         // Let other services shutdown any activity
         long ident = Binder.clearCallingIdentity();
         try {
@@ -804,10 +812,11 @@ public class UserManagerService extends IUserManager.Stub {
                 num++;
             }
         }
-        int[] newUsers = new int[num];
+        final int[] newUsers = new int[num];
+        int n = 0;
         for (int i = 0; i < mUsers.size(); i++) {
             if (!mUsers.valueAt(i).partial) {
-                newUsers[i] = mUsers.keyAt(i);
+                newUsers[n++] = mUsers.keyAt(i);
             }
         }
         mUserIds = newUsers;
@@ -840,13 +849,14 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private int getNextAvailableIdLocked() {
         synchronized (mPackagesLock) {
-            int i = MIN_USER_ID;
+            int i = mNextUserId;
             while (i < Integer.MAX_VALUE) {
                 if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.contains(i)) {
                     break;
                 }
                 i++;
             }
+            mNextUserId = i + 1;
             return i;
         }
     }
