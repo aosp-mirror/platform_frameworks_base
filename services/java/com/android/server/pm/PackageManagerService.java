@@ -4088,39 +4088,42 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "removed obsolete native libraries for system package "
                                 + path);
                     }
-                } else if (!isForwardLocked(pkg) && !isExternal(pkg)) {
-                    // Update native library dir if it starts with /data/data
-                    if (nativeLibraryDir.getPath().startsWith(dataPathString)) {
-                        setInternalAppNativeLibraryPath(pkg, pkgSetting);
-                        nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                    }
+                } else {
+                    if (!isForwardLocked(pkg) && !isExternal(pkg)) {
+                        /*
+                         * Update native library dir if it starts with
+                         * /data/data
+                         */
+                        if (nativeLibraryDir.getPath().startsWith(dataPathString)) {
+                            setInternalAppNativeLibraryPath(pkg, pkgSetting);
+                            nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                        }
 
-                    try {
-                        if (copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir) != PackageManager.INSTALL_SUCCEEDED) {
-                            Slog.e(TAG, "Unable to copy native libraries");
+                        try {
+                            if (copyNativeLibrariesForInternalApp(scanFile, nativeLibraryDir) != PackageManager.INSTALL_SUCCEEDED) {
+                                Slog.e(TAG, "Unable to copy native libraries");
+                                mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                                return null;
+                            }
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Unable to copy native libraries", e);
                             mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
                             return null;
                         }
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Unable to copy native libraries", e);
-                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                        return null;
                     }
 
-                    if (mInstaller.linkNativeLibraryDirectory(dataPathString,
-                            pkg.applicationInfo.nativeLibraryDir) == -1) {
-                        Slog.e(TAG, "Unable to link native library directory");
-                        mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                        return null;
-                    }
-                } else {
                     Slog.i(TAG, "Linking native library dir for " + path);
-                    int ret = mInstaller.linkNativeLibraryDirectory(dataPathString,
-                            pkg.applicationInfo.nativeLibraryDir);
-                    if (ret < 0) {
-                        Slog.w(TAG, "Failed linking native library dir for " + path);
-                        mLastScanError = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                        return null;
+                    final int[] userIds = sUserManager.getUserIds();
+                    synchronized (mInstallLock) {
+                        for (int userId : userIds) {
+                            if (mInstaller.linkNativeLibraryDirectory(pkg.packageName,
+                                    pkg.applicationInfo.nativeLibraryDir, userId) < 0) {
+                                Slog.w(TAG, "Failed linking native library dir (user=" + userId
+                                        + ")");
+                                mLastScanError = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                                return null;
+                            }
+                        }
                     }
                 }
             } catch (IOException ioe) {
@@ -6350,12 +6353,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ret = PackageManager.INSTALL_FAILED_INVALID_URI;
                 } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
                     ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
-                    ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
                 } else {
                     // Override with defaults if needed.
                     loc = installLocationPolicy(pkgLite, flags);
-                    if (!onSd && !onInt) {
+                    if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
+                        ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                    } else if (!onSd && !onInt) {
                         // Override install location with flags
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
                             // Set the flag to install on external media.
@@ -9959,20 +9962,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     final File newNativeDir = new File(newNativePath);
 
                                     if (!isForwardLocked(pkg) && !isExternal(pkg)) {
-                                        synchronized (mInstallLock) {
-                                            if (mInstaller.linkNativeLibraryDirectory(
-                                                    pkg.applicationInfo.dataDir, newNativePath) < 0) {
-                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                            }
-                                        }
-                                        NativeLibraryHelper.copyNativeBinariesIfNeededLI(new File(
-                                                newCodePath), newNativeDir);
-                                    } else {
-                                        synchronized (mInstallLock) {
-                                            if (mInstaller.linkNativeLibraryDirectory(
-                                                    pkg.applicationInfo.dataDir, newNativePath) < 0) {
-                                                returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                            }
+                                        NativeLibraryHelper.copyNativeBinariesIfNeededLI(
+                                                new File(newCodePath), newNativeDir);
+                                    }
+                                    final int[] users = sUserManager.getUserIds();
+                                    for (int user : users) {
+                                        if (mInstaller.linkNativeLibraryDirectory(pkg.packageName,
+                                                newNativePath, user) < 0) {
+                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                         }
                                     }
 
