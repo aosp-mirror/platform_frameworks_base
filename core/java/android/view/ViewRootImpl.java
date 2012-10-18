@@ -317,6 +317,8 @@ public final class ViewRootImpl implements ViewParent,
     private final int mDensity;
     private final int mNoncompatDensity;
 
+    private int mViewLayoutDirectionInitial;
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -465,6 +467,7 @@ public final class ViewRootImpl implements ViewParent,
         synchronized (this) {
             if (mView == null) {
                 mView = view;
+                mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
@@ -1184,7 +1187,10 @@ public final class ViewRootImpl implements ViewParent,
             viewVisibilityChanged = false;
             mLastConfiguration.setTo(host.getResources().getConfiguration());
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
-            host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
+            // Set the layout direction if it has not been set before (inherit is the default)
+            if (mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
+                host.setLayoutDirection(mLastConfiguration.getLayoutDirection());
+            }
             host.dispatchAttachedToWindow(attachInfo, 0);
             mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
             host.fitSystemWindows(mFitSystemWindowsInsets);
@@ -2680,7 +2686,8 @@ public final class ViewRootImpl implements ViewParent,
                 final int lastLayoutDirection = mLastConfiguration.getLayoutDirection();
                 final int currentLayoutDirection = config.getLayoutDirection();
                 mLastConfiguration.setTo(config);
-                if (lastLayoutDirection != currentLayoutDirection) {
+                if (lastLayoutDirection != currentLayoutDirection &&
+                        mViewLayoutDirectionInitial == View.LAYOUT_DIRECTION_INHERIT) {
                     mView.setLayoutDirection(currentLayoutDirection);
                 }
                 mView.dispatchConfigurationChanged(config);
