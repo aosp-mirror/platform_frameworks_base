@@ -629,9 +629,7 @@ public class KeyguardViewMediator {
             mScreenOn = true;
             cancelDoKeyguardLaterLocked();
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            if (showListener != null) {
-                notifyScreenOnLocked(showListener);
-            }
+            notifyScreenOnLocked(showListener);
         }
         maybeSendUserPresentBroadcast();
     }
@@ -1365,7 +1363,7 @@ public class KeyguardViewMediator {
 
     /**
      * Handle message sent by {@link #verifyUnlock}
-     * @see #RESET
+     * @see #VERIFY_UNLOCK
      */
     private void handleVerifyUnlock() {
         synchronized (KeyguardViewMediator.this) {
