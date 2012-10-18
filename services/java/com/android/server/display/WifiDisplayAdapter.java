@@ -16,17 +16,28 @@
 
 package com.android.server.display;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.RemoteDisplay;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -52,8 +63,18 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private static final boolean DEBUG = false;
 
+    private static final int MSG_SEND_STATUS_CHANGE_BROADCAST = 1;
+    private static final int MSG_UPDATE_NOTIFICATION = 2;
+
+    private static final String ACTION_DISCONNECT = "android.server.display.wfd.DISCONNECT";
+
+    private final WifiDisplayHandler mHandler;
     private final PersistentDataStore mPersistentDataStore;
     private final boolean mSupportsProtectedBuffers;
+    private final NotificationManager mNotificationManager;
+
+    private final PendingIntent mSettingsPendingIntent;
+    private final PendingIntent mDisconnectPendingIntent;
 
     private WifiDisplayController mDisplayController;
     private WifiDisplayDevice mDisplayDevice;
@@ -67,14 +88,32 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private WifiDisplay[] mRememberedDisplays = WifiDisplay.EMPTY_ARRAY;
 
     private boolean mPendingStatusChangeBroadcast;
+    private boolean mPendingNotificationUpdate;
 
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
             PersistentDataStore persistentDataStore) {
         super(syncRoot, context, handler, listener, TAG);
+        mHandler = new WifiDisplayHandler(handler.getLooper());
         mPersistentDataStore = persistentDataStore;
         mSupportsProtectedBuffers = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_wifiDisplaySupportsProtectedBuffers);
+        mNotificationManager = (NotificationManager)context.getSystemService(
+                Context.NOTIFICATION_SERVICE);
+
+        Intent settingsIntent = new Intent(Settings.ACTION_WIFI_DISPLAY_SETTINGS);
+        settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        mSettingsPendingIntent = PendingIntent.getActivityAsUser(
+                context, 0, settingsIntent, 0, null, UserHandle.CURRENT);
+
+        Intent disconnectIntent = new Intent(ACTION_DISCONNECT);
+        mDisconnectPendingIntent = PendingIntent.getBroadcastAsUser(
+                context, 0, disconnectIntent, 0, UserHandle.CURRENT);
+
+        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
+                new IntentFilter(ACTION_DISCONNECT), null, mHandler);
     }
 
     @Override
@@ -89,6 +128,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         pw.println("mAvailableDisplays=" + Arrays.toString(mAvailableDisplays));
         pw.println("mRememberedDisplays=" + Arrays.toString(mRememberedDisplays));
         pw.println("mPendingStatusChangeBroadcast=" + mPendingStatusChangeBroadcast);
+        pw.println("mPendingNotificationUpdate=" + mPendingNotificationUpdate);
         pw.println("mSupportsProtectedBuffers=" + mSupportsProtectedBuffers);
 
         // Try to dump the controller state.
@@ -266,6 +306,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
+
+        scheduleUpdateNotificationLocked();
     }
 
     private void handleDisconnectLocked() {
@@ -273,6 +315,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mDisplayDevice.clearSurfaceLocked();
             sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_REMOVED);
             mDisplayDevice = null;
+
+            scheduleUpdateNotificationLocked();
         }
     }
 
@@ -280,28 +324,81 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         mCurrentStatus = null;
         if (!mPendingStatusChangeBroadcast) {
             mPendingStatusChangeBroadcast = true;
-            getHandler().post(mStatusChangeBroadcast);
+            mHandler.sendEmptyMessage(MSG_SEND_STATUS_CHANGE_BROADCAST);
         }
     }
 
-    private final Runnable mStatusChangeBroadcast = new Runnable() {
-        @Override
-        public void run() {
-            final Intent intent;
-            synchronized (getSyncRoot()) {
-                if (!mPendingStatusChangeBroadcast) {
-                    return;
-                }
+    private void scheduleUpdateNotificationLocked() {
+        if (!mPendingNotificationUpdate) {
+            mPendingNotificationUpdate = true;
+            mHandler.sendEmptyMessage(MSG_UPDATE_NOTIFICATION);
+        }
+    }
 
-                mPendingStatusChangeBroadcast = false;
-                intent = new Intent(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(DisplayManager.EXTRA_WIFI_DISPLAY_STATUS,
-                        getWifiDisplayStatusLocked());
+    // Runs on the handler.
+    private void handleSendStatusChangeBroadcast() {
+        final Intent intent;
+        synchronized (getSyncRoot()) {
+            if (!mPendingStatusChangeBroadcast) {
+                return;
             }
 
-            // Send protected broadcast about wifi display status to registered receivers.
-            getContext().sendBroadcast(intent);
+            mPendingStatusChangeBroadcast = false;
+            intent = new Intent(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            intent.putExtra(DisplayManager.EXTRA_WIFI_DISPLAY_STATUS,
+                    getWifiDisplayStatusLocked());
+        }
+
+        // Send protected broadcast about wifi display status to registered receivers.
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    // Runs on the handler.
+    private void handleUpdateNotification() {
+        final boolean isConnected;
+        synchronized (getSyncRoot()) {
+            if (!mPendingNotificationUpdate) {
+                return;
+            }
+
+            mPendingNotificationUpdate = false;
+            isConnected = (mDisplayDevice != null);
+        }
+
+        mNotificationManager.cancelAsUser(null,
+                R.string.wifi_display_notification_title, UserHandle.ALL);
+
+        if (isConnected) {
+            Context context = getContext();
+
+            Resources r = context.getResources();
+            Notification notification = new Notification.Builder(context)
+                    .setContentTitle(r.getString(
+                            R.string.wifi_display_notification_title))
+                    .setContentText(r.getString(
+                            R.string.wifi_display_notification_message))
+                    .setContentIntent(mSettingsPendingIntent)
+                    .setSmallIcon(R.drawable.ic_notify_wifidisplay)
+                    .setOngoing(true)
+                    .addAction(android.R.drawable.ic_menu_close_clear_cancel,
+                            r.getString(R.string.wifi_display_notification_disconnect),
+                            mDisconnectPendingIntent)
+                    .build();
+            mNotificationManager.notifyAsUser(null,
+                    R.string.wifi_display_notification_title,
+                    notification, UserHandle.ALL);
+        }
+    }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_DISCONNECT)) {
+                synchronized (getSyncRoot()) {
+                    requestDisconnectLocked();
+                }
+            }
         }
     };
 
@@ -452,6 +549,25 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
             }
             return mInfo;
+        }
+    }
+
+    private final class WifiDisplayHandler extends Handler {
+        public WifiDisplayHandler(Looper looper) {
+            super(looper, null, true /*async*/);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SEND_STATUS_CHANGE_BROADCAST:
+                    handleSendStatusChangeBroadcast();
+                    break;
+
+                case MSG_UPDATE_NOTIFICATION:
+                    handleUpdateNotification();
+                    break;
+            }
         }
     }
 }
