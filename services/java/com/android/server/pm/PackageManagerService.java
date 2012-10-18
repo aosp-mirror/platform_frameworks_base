@@ -2575,7 +2575,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return Collections.emptyList();
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "query intent activities");
         ComponentName comp = intent.getComponent();
         if (comp == null) {
@@ -2615,7 +2615,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return Collections.emptyList();
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false,
                 "query intent activity options");
         final String resultsAction = intent.getAction();
@@ -2787,7 +2787,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public List<ResolveInfo> queryIntentReceivers(Intent intent, String resolvedType, int flags,
             int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return Collections.emptyList();
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -2838,7 +2838,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public List<ResolveInfo> queryIntentServices(Intent intent, String resolvedType, int flags,
             int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return Collections.emptyList();
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {

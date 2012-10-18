@@ -2430,7 +2430,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has
      * the userHandle of the user.  It is sent to all running users except the
-     * one that has been removed.  You must hold
+     * one that has been removed. The user will not be completely removed until all receivers have
+     * handled the broadcast. You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
