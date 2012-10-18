@@ -6330,8 +6330,23 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if (packageFile != null) {
                         // Remote call to find out default install location
-                        pkgLite = mContainerService.getMinimalPackageInfo(
-                                packageFile.getAbsolutePath(), flags, lowThreshold);
+                        final String packageFilePath = packageFile.getAbsolutePath();
+                        pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath, flags,
+                                lowThreshold);
+
+                        /*
+                         * If we have too little free space, try to free cache
+                         * before giving up.
+                         */
+                        if (pkgLite.recommendedInstallLocation
+                                == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                            final long size = mContainerService.calculateInstalledSize(
+                                    packageFilePath, isForwardLocked());
+                            if (mInstaller.freeCache(size + lowThreshold) >= 0) {
+                                pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath,
+                                        flags, lowThreshold);
+                            }
+                        }
                     }
                 } finally {
                     mContext.revokeUriPermission(mPackageURI,
