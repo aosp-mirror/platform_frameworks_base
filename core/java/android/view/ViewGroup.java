@@ -5449,6 +5449,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    public void resolveLayoutParams() {
+        super.resolveLayoutParams();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            child.resolveLayoutParams();
+        }
+    }
+
     /**
      * @hide
      */
@@ -6072,6 +6082,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         @Override
         public void resolveLayoutDirection(int layoutDirection) {
+            // No need to resolve if it is the same layout direction as before
+            if (this.layoutDirection == layoutDirection) {
+                return;
+            }
+
             setLayoutDirection(layoutDirection);
 
             if (!isMarginRelative()) return;
