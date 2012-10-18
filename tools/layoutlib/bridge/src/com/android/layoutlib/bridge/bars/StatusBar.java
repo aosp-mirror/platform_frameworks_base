@@ -25,12 +25,13 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.view.Gravity;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class PhoneSystemBar extends CustomBar {
+public class StatusBar extends CustomBar {
 
-    public PhoneSystemBar(Context context, Density density) throws XmlPullParserException {
-        super(context, density, "/bars/phone_system_bar.xml", "phone_system_bar.xml");
+    public StatusBar(Context context, Density density) throws XmlPullParserException {
+        super(context, density, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml");
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
