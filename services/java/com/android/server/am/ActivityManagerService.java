@@ -11121,8 +11121,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(ApplicationInfo app, int backupMode) {
-        if (DEBUG_BACKUP) Slog.v(TAG, "startBackupAgent: app=" + app + " mode=" + backupMode);
-        enforceCallingPermission("android.permission.BACKUP", "startBackupAgent");
+        if (DEBUG_BACKUP) Slog.v(TAG, "bindBackupAgent: app=" + app + " mode=" + backupMode);
+        enforceCallingPermission("android.permission.BACKUP", "bindBackupAgent");
 
         synchronized(this) {
             // !!! TODO: currently no check here that we're already bound
@@ -11183,6 +11183,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         return true;
     }
 
+    @Override
+    public void clearPendingBackup() {
+        if (DEBUG_BACKUP) Slog.v(TAG, "clearPendingBackup");
+        enforceCallingPermission("android.permission.BACKUP", "clearPendingBackup");
+
+        synchronized (this) {
+            mBackupTarget = null;
+            mBackupAppName = null;
+        }
+    }
+
     // A backup agent has just come up                    
     public void backupAgentCreated(String agentPackageName, IBinder agent) {
         if (DEBUG_BACKUP) Slog.v(TAG, "backupAgentCreated: " + agentPackageName
@@ -11219,32 +11230,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         synchronized(this) {
-            if (mBackupAppName == null) {
-                Slog.w(TAG, "Unbinding backup agent with no active backup");
-                return;
-            }
-
-            if (!mBackupAppName.equals(appInfo.packageName)) {
-                Slog.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
-                return;
-            }
-
-            ProcessRecord proc = mBackupTarget.app;
-            mBackupTarget = null;
-            mBackupAppName = null;
-
-            // Not backing this app up any more; reset its OOM adjustment
-            updateOomAdjLocked(proc);
-
-            // If the app crashed during backup, 'thread' will be null here
-            if (proc.thread != null) {
-                try {
-                    proc.thread.scheduleDestroyBackupAgent(appInfo,
-                            compatibilityInfoForPackageLocked(appInfo));
-                } catch (Exception e) {
-                    Slog.e(TAG, "Exception when unbinding backup agent:");
-                    e.printStackTrace();
+            try {
+                if (mBackupAppName == null) {
+                    Slog.w(TAG, "Unbinding backup agent with no active backup");
+                    return;
                 }
+
+                if (!mBackupAppName.equals(appInfo.packageName)) {
+                    Slog.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
+                    return;
+                }
+
+                // Not backing this app up any more; reset its OOM adjustment
+                final ProcessRecord proc = mBackupTarget.app;
+                updateOomAdjLocked(proc);
+
+                // If the app crashed during backup, 'thread' will be null here
+                if (proc.thread != null) {
+                    try {
+                        proc.thread.scheduleDestroyBackupAgent(appInfo,
+                                compatibilityInfoForPackageLocked(appInfo));
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Exception when unbinding backup agent:");
+                        e.printStackTrace();
+                    }
+                }
+            } finally {
+                mBackupTarget = null;
+                mBackupAppName = null;
             }
         }
     }

@@ -1474,6 +1474,7 @@ class BackupManagerService extends IBackupManager.Stub {
             if (MORE_DEBUG) Slog.v(TAG, "  removing participant " + packageName);
             removeEverBackedUp(packageName);
             set.remove(packageName);
+            mPendingBackups.remove(packageName);
         }
     }
 
@@ -1625,6 +1626,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         } catch (InterruptedException e) {
                             // just bail
                             if (DEBUG) Slog.w(TAG, "Interrupted: " + e);
+                            mActivityManager.clearPendingBackup();
                             return null;
                         }
                     }
@@ -1632,6 +1634,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // if we timed out with no connect, abort and move on
                     if (mConnecting == true) {
                         Slog.w(TAG, "Timeout waiting for agent " + app);
+                        mActivityManager.clearPendingBackup();
                         return null;
                     }
                     if (DEBUG) Slog.i(TAG, "got agent " + mConnectedAgent);
