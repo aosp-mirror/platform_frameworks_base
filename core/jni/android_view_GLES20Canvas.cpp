@@ -829,7 +829,6 @@ static void android_view_GLES20Canvas_clearLayerTexture(JNIEnv* env, jobject cla
 
 static void android_view_GLES20Canvas_setTextureLayerTransform(JNIEnv* env, jobject clazz,
         Layer* layer, SkMatrix* matrix) {
-
     layer->getTransform().load(*matrix);
 }
 
