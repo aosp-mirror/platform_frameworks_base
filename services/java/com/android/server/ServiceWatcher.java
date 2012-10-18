@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class ServiceWatcher implements ServiceConnection {
     private static final boolean D = false;
-    private static final String EXTRA_VERSION = "version";
+    public static final String EXTRA_SERVICE_VERSION = "serviceVersion";
 
     private final String mTag;
     private final Context mContext;
@@ -58,8 +58,26 @@ public class ServiceWatcher implements ServiceConnection {
     // all fields below synchronized on mLock
     private IBinder mBinder;   // connected service
     private String mPackageName;  // current best package
-    private int mVersion;  // current best version
+    private int mVersion = Integer.MIN_VALUE;  // current best version
     private int mCurrentUserId;
+
+    public static ArrayList<HashSet<Signature>> getSignatureSets(Context context,
+            List<String> initialPackageNames) {
+        PackageManager pm = context.getPackageManager();
+        ArrayList<HashSet<Signature>> sigSets = new ArrayList<HashSet<Signature>>();
+        for (int i = 0, size = initialPackageNames.size(); i < size; i++) {
+            String pkg = initialPackageNames.get(i);
+            try {
+                HashSet<Signature> set = new HashSet<Signature>();
+                Signature[] sigs = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES).signatures;
+                set.addAll(Arrays.asList(sigs));
+                sigSets.add(set);
+            } catch (NameNotFoundException e) {
+                Log.w("ServiceWatcher", pkg + " not found");
+            }
+        }
+        return sigSets;
+    }
 
     public ServiceWatcher(Context context, String logTag, String action,
             List<String> initialPackageNames, Runnable newServiceWork, Handler handler, int userId) {
@@ -71,20 +89,7 @@ public class ServiceWatcher implements ServiceConnection {
         mHandler = handler;
         mCurrentUserId = userId;
 
-        mSignatureSets = new ArrayList<HashSet<Signature>>();
-        for (int i=0; i < initialPackageNames.size(); i++) {
-            String pkg = initialPackageNames.get(i);
-            HashSet<Signature> set = new HashSet<Signature>();
-            try {
-                Signature[] sigs =
-                        mPm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES).signatures;
-                set.addAll(Arrays.asList(sigs));
-                mSignatureSets.add(set);
-            } catch (NameNotFoundException e) {
-                Log.w(logTag, pkg + " not found");
-            }
-        }
-
+        mSignatureSets = getSignatureSets(context, initialPackageNames);
     }
 
     public boolean start() {
@@ -132,15 +137,16 @@ public class ServiceWatcher implements ServiceConnection {
             // check version
             int version = 0;
             if (rInfo.serviceInfo.metaData != null) {
-                version = rInfo.serviceInfo.metaData.getInt(EXTRA_VERSION, 0);
+                version = rInfo.serviceInfo.metaData.getInt(EXTRA_SERVICE_VERSION, 0);
             }
+
             if (version > mVersion) {
                 bestVersion = version;
                 bestPackage = packageName;
             }
         }
 
-        if (D) Log.d(mTag, String.format("bindBestPackage %s found %d, %s",
+        if (D) Log.d(mTag, String.format("bindBestPackage for %s : %s found %d, %s", mAction,
                 (justCheckThisPackage == null ? "" : "(" + justCheckThisPackage + ") "),
                 rInfos.size(),
                 (bestPackage == null ? "no new best package" : "new best packge: " + bestPackage)));
@@ -174,7 +180,8 @@ public class ServiceWatcher implements ServiceConnection {
                 | Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_NOT_VISIBLE, mCurrentUserId);
     }
 
-    private boolean isSignatureMatch(Signature[] signatures) {
+    public static boolean isSignatureMatch(Signature[] signatures,
+            List<HashSet<Signature>> sigSets) {
         if (signatures == null) return false;
 
         // build hashset of input to test against
@@ -184,12 +191,16 @@ public class ServiceWatcher implements ServiceConnection {
         }
 
         // test input against each of the signature sets
-        for (HashSet<Signature> referenceSet : mSignatureSets) {
+        for (HashSet<Signature> referenceSet : sigSets) {
             if (referenceSet.equals(inputSet)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean isSignatureMatch(Signature[] signatures) {
+        return isSignatureMatch(signatures, mSignatureSets);
     }
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
