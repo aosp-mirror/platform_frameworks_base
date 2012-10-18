@@ -21,9 +21,12 @@ import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -38,14 +41,21 @@ public class ParserFactory {
 
     public static XmlPullParser create(File f)
             throws XmlPullParserException, FileNotFoundException {
-        KXmlParser parser = instantiateParser(f.getName());
-        parser.setInput(new FileInputStream(f), ENCODING);
-        return parser;
+        InputStream stream = new FileInputStream(f);
+        return create(stream, f.getName(), f.length());
     }
 
     public static XmlPullParser create(InputStream stream, String name)
+        throws XmlPullParserException {
+        return create(stream, name, -1);
+    }
+
+    private static XmlPullParser create(InputStream stream, String name, long size)
             throws XmlPullParserException {
         KXmlParser parser = instantiateParser(name);
+
+        stream = readAndClose(stream, name, size);
+
         parser.setInput(stream, ENCODING);
         return parser;
     }
@@ -59,6 +69,61 @@ public class ParserFactory {
         }
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
         return parser;
+    }
+
+    private static InputStream readAndClose(InputStream stream, String name, long size)
+            throws XmlPullParserException {
+        // just a sanity check. It's doubtful we'll have such big files!
+        if (size > Integer.MAX_VALUE) {
+            throw new XmlPullParserException("File " + name + " is too big to be parsed");
+        }
+        int intSize = (int) size;
+
+        // create a buffered reader to facilitate reading.
+        BufferedInputStream bufferedStream = new BufferedInputStream(stream);
+        try {
+            int avail;
+            if (intSize != -1) {
+                avail = intSize;
+            } else {
+                // get the size to read.
+                avail = bufferedStream.available();
+            }
+
+            // create the initial buffer and read it.
+            byte[] buffer = new byte[avail];
+            int read = stream.read(buffer);
+
+            // this is the easy case.
+            if (read == intSize) {
+                return new ByteArrayInputStream(buffer);
+            }
+
+            // check if there is more to read (read() does not necessarily read all that
+            // available() returned!)
+            while ((avail = bufferedStream.available()) > 0) {
+                if (read + avail > buffer.length) {
+                    // just allocate what is needed. We're mostly reading small files
+                    // so it shouldn't be too problematic.
+                    byte[] moreBuffer = new byte[read + avail];
+                    System.arraycopy(buffer, 0, moreBuffer, 0, read);
+                    buffer = moreBuffer;
+                }
+
+                read += stream.read(buffer, read, avail);
+            }
+
+            // return a new stream encapsulating this buffer.
+            return new ByteArrayInputStream(buffer);
+
+        } catch (IOException e) {
+            throw new XmlPullParserException("Failed to read " + name, null, e);
+        } finally {
+            try {
+                bufferedStream.close();
+            } catch (IOException e) {
+            }
+        }
     }
 
     private static class CustomParser extends KXmlParser {
