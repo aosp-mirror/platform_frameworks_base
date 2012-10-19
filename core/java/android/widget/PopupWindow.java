@@ -142,6 +142,8 @@ public class PopupWindow {
         };
     private int mAnchorXoff, mAnchorYoff;
 
+    private boolean mPopupViewInitialLayoutDirectionInherited;
+
     /**
      * <p>Create a new empty, non focusable popup window of dimension (0,0).</p>
      *
@@ -968,6 +970,8 @@ public class PopupWindow {
         } else {
             mPopupView = mContentView;
         }
+        mPopupViewInitialLayoutDirectionInherited =
+                (mPopupView.getRawLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT);
         mPopupWidth = p.width;
         mPopupHeight = p.height;
     }
@@ -985,7 +989,17 @@ public class PopupWindow {
             p.packageName = mContext.getPackageName();
         }
         mPopupView.setFitsSystemWindows(mLayoutInsetDecor);
+        setLayoutDirectionFromAnchor();
         mWindowManager.addView(mPopupView, p);
+    }
+
+    private void setLayoutDirectionFromAnchor() {
+        if (mAnchor != null) {
+            View anchor = mAnchor.get();
+            if (anchor != null && mPopupViewInitialLayoutDirectionInherited) {
+                mPopupView.setLayoutDirection(anchor.getLayoutDirection());
+            }
+        }
     }
 
     /**
@@ -1304,8 +1318,9 @@ public class PopupWindow {
             p.flags = newFlags;
             update = true;
         }
-        
+
         if (update) {
+            setLayoutDirectionFromAnchor();
             mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
@@ -1406,6 +1421,7 @@ public class PopupWindow {
         }
 
         if (update) {
+            setLayoutDirectionFromAnchor();
             mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
@@ -1482,7 +1498,7 @@ public class PopupWindow {
         } else {
             updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff));            
         }
-        
+
         update(p.x, p.y, width, height, x != p.x || y != p.y);
     }
 
