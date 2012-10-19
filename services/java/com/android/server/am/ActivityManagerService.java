@@ -7251,11 +7251,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         // care about.
         if (persistent) {
             final ContentResolver resolver = mContext.getContentResolver();
-            Settings.System.putString(
-                resolver, Settings.System.DEBUG_APP,
+            Settings.Global.putString(
+                resolver, Settings.Global.DEBUG_APP,
                 packageName);
-            Settings.System.putInt(
-                resolver, Settings.System.WAIT_FOR_DEBUGGER,
+            Settings.Global.putInt(
+                resolver, Settings.Global.WAIT_FOR_DEBUGGER,
                 waitForDebugger ? 1 : 0);
         }
 
@@ -7317,9 +7317,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
                 "setAlwaysFinish()");
 
-        Settings.System.putInt(
+        Settings.Global.putInt(
                 mContext.getContentResolver(),
-                Settings.System.ALWAYS_FINISH_ACTIVITIES, enabled ? 1 : 0);
+                Settings.Global.ALWAYS_FINISH_ACTIVITIES, enabled ? 1 : 0);
         
         synchronized (this) {
             mAlwaysFinishActivities = enabled;
@@ -7596,12 +7596,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private void retrieveSettings() {
         final ContentResolver resolver = mContext.getContentResolver();
-        String debugApp = Settings.System.getString(
-            resolver, Settings.System.DEBUG_APP);
-        boolean waitForDebugger = Settings.System.getInt(
-            resolver, Settings.System.WAIT_FOR_DEBUGGER, 0) != 0;
-        boolean alwaysFinishActivities = Settings.System.getInt(
-            resolver, Settings.System.ALWAYS_FINISH_ACTIVITIES, 0) != 0;
+        String debugApp = Settings.Global.getString(
+            resolver, Settings.Global.DEBUG_APP);
+        boolean waitForDebugger = Settings.Global.getInt(
+            resolver, Settings.Global.WAIT_FOR_DEBUGGER, 0) != 0;
+        boolean alwaysFinishActivities = Settings.Global.getInt(
+            resolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0;
 
         Configuration configuration = new Configuration();
         Settings.System.getConfiguration(resolver, configuration);
