@@ -42,6 +42,7 @@ abstract class DisplayAdapter {
     public static final int DISPLAY_DEVICE_EVENT_CHANGED = 2;
     public static final int DISPLAY_DEVICE_EVENT_REMOVED = 3;
 
+    // Called with SyncRoot lock held.
     public DisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener, String name) {
         mSyncRoot = syncRoot;

@@ -44,21 +44,21 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final SparseArray<LocalDisplayDevice> mDevices =
             new SparseArray<LocalDisplayDevice>();
-    private final HotplugDisplayEventReceiver mHotplugReceiver;
+    private HotplugDisplayEventReceiver mHotplugReceiver;
 
     private final PhysicalDisplayInfo mTempPhys = new PhysicalDisplayInfo();
 
+    // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
         super(syncRoot, context, handler, listener, TAG);
-        mHotplugReceiver = new HotplugDisplayEventReceiver(handler.getLooper());
     }
 
     @Override
     public void registerLocked() {
-        // TODO: listen for notifications from Surface Flinger about
-        // built-in displays being added or removed and rescan as needed.
         super.registerLocked();
+
+        mHotplugReceiver = new HotplugDisplayEventReceiver(getHandler().getLooper());
         scanDisplaysLocked();
     }
 
