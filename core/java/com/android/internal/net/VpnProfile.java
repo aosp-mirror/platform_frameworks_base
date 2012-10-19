@@ -70,6 +70,47 @@ public class VpnProfile implements Cloneable, Parcelable {
         this.key = key;
     }
 
+    public VpnProfile(Parcel in) {
+        key = in.readString();
+        name = in.readString();
+        type = in.readInt();
+        server = in.readString();
+        username = in.readString();
+        password = in.readString();
+        dnsServers = in.readString();
+        searchDomains = in.readString();
+        routes = in.readString();
+        mppe = in.readInt() != 0;
+        l2tpSecret = in.readString();
+        ipsecIdentifier = in.readString();
+        ipsecSecret = in.readString();
+        ipsecUserCert = in.readString();
+        ipsecCaCert = in.readString();
+        ipsecServerCert = in.readString();
+        saveLogin = in.readInt() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(key);
+        out.writeString(name);
+        out.writeInt(type);
+        out.writeString(server);
+        out.writeString(username);
+        out.writeString(password);
+        out.writeString(dnsServers);
+        out.writeString(searchDomains);
+        out.writeString(routes);
+        out.writeInt(mppe ? 1 : 0);
+        out.writeString(l2tpSecret);
+        out.writeString(ipsecIdentifier);
+        out.writeString(ipsecSecret);
+        out.writeString(ipsecUserCert);
+        out.writeString(ipsecCaCert);
+        out.writeString(ipsecServerCert);
+        out.writeInt(saveLogin ? 1 : 0);
+    }
+
     public static VpnProfile decode(String key, byte[] value) {
         try {
             if (key == null) {
@@ -155,17 +196,10 @@ public class VpnProfile implements Cloneable, Parcelable {
         }
     }
 
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(key);
-        out.writeByteArray(encode());
-    }
-
     public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
         @Override
         public VpnProfile createFromParcel(Parcel in) {
-            final String key = in.readString();
-            return decode(key, in.createByteArray());
+            return new VpnProfile(in);
         }
 
         @Override
