@@ -677,6 +677,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void showSearchPanel() {
         super.showSearchPanel();
+
+        // we want to freeze the sysui state wherever it is
+        mSearchPanelView.setSystemUiVisibility(mSystemUiVisibility);
+
         WindowManager.LayoutParams lp =
             (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -723,7 +727,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (!shouldDisableNavbarGestures() && !inKeyguardRestrictedInputMode()) {
+                if (!shouldDisableNavbarGestures()) {
                     mHandler.removeCallbacks(mShowSearchPanel);
                     mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
                 }
@@ -1179,6 +1183,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         flagdbg.append(((diff  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
         flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
+        flagdbg.append(((state & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
+        flagdbg.append(((diff  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
         flagdbg.append(">");
         Slog.d(TAG, flagdbg.toString());
 
@@ -1216,7 +1222,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if ((diff & (StatusBarManager.DISABLE_HOME
                         | StatusBarManager.DISABLE_RECENT
-                        | StatusBarManager.DISABLE_BACK)) != 0) {
+                        | StatusBarManager.DISABLE_BACK
+                        | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
 
@@ -2416,7 +2423,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     protected boolean shouldDisableNavbarGestures() {
-        return mExpandedVisible || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
+        return !isDeviceProvisioned()
+                || mExpandedVisible
+                || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
     private static class FastColorDrawable extends Drawable {
