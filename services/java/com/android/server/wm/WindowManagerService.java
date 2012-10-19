@@ -2244,6 +2244,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     adjustWallpaperWindowsLocked();
                 } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     adjustWallpaperWindowsLocked();
+                } else if (mWallpaperTarget != null
+                        && mWallpaperTarget.mLayer >= win.mBaseLayer) {
+                    // If there is currently a wallpaper being shown, and
+                    // the base layer of the new window is below the current
+                    // layer of the target window, then adjust the wallpaper.
+                    // This is to avoid a new window being placed between the
+                    // wallpaper and its target.
+                    adjustWallpaperWindowsLocked();
                 }
             }
 
@@ -8201,11 +8209,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private final void performLayoutAndPlaceSurfacesLocked() {
+        int loopCount = 6;
         do {
             mTraversalScheduled = false;
             performLayoutAndPlaceSurfacesLockedLoop();
             mH.removeMessages(H.DO_TRAVERSAL);
-        } while (mTraversalScheduled);
+            loopCount--;
+        } while (mTraversalScheduled && loopCount > 0);
     }
 
     private boolean mInLayout = false;
@@ -9165,6 +9175,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         final boolean committed =
                                 winAnimator.commitFinishDrawingLocked(currentTime);
                         if (isDefaultDisplay && committed) {
+                            if (w.mAttrs.type == TYPE_DREAM) {
+                                // HACK: When a dream is shown, it may at that
+                                // point hide the lock screen.  So we need to
+                                // redo the layout to let the phone window manager
+                                // make this happen.
+                                displayContent.pendingLayoutChanges |=
+                                        WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
+                                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                                    debugLayoutRepeats(
+                                        "dream and commitFinishDrawingLocked true",
+                                        displayContent.pendingLayoutChanges);
+                                }
+                            }
                             if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                                         "First draw done in potential wallpaper target " + w);
