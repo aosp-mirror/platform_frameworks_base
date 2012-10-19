@@ -3385,8 +3385,15 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             // Exiting app
             if (scaleUp) {
-                // noop animation
-                a = new AlphaAnimation(1, 0);
+                if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN) {
+                    // Fade out while bringing up selected activity. This keeps the
+                    // current activity from showing through a launching wallpaper
+                    // activity.
+                    a = new AlphaAnimation(1, 0);
+                } else {
+                    // noop animation
+                    a = new AlphaAnimation(1, 1);
+                }
                 a.setDuration(duration);
             } else {
                 float scaleW = thumbWidth / displayInfo.appWidth;
