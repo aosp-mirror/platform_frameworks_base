@@ -280,6 +280,15 @@ public final class PowerManagerService extends IPowerManager.Stub
     // True if dreams are supported on this device.
     private boolean mDreamsSupportedConfig;
 
+    // Default value for dreams enabled
+    private boolean mDreamsEnabledByDefaultConfig;
+
+    // Default value for dreams activate-on-sleep
+    private boolean mDreamsActivatedOnSleepByDefaultConfig;
+
+    // Default value for dreams activate-on-dock
+    private boolean mDreamsActivatedOnDockByDefaultConfig;
+
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
 
@@ -490,20 +499,29 @@ public final class PowerManagerService extends IPowerManager.Stub
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
         mDreamsSupportedConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_enableDreams);
+                com.android.internal.R.bool.config_dreamsSupported);
+        mDreamsEnabledByDefaultConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsEnabledByDefault);
+        mDreamsActivatedOnSleepByDefaultConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
+        mDreamsActivatedOnDockByDefaultConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
     }
 
     private void updateSettingsLocked() {
         final ContentResolver resolver = mContext.getContentResolver();
 
         mDreamsEnabledSetting = (Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.SCREENSAVER_ENABLED, 0,
+                Settings.Secure.SCREENSAVER_ENABLED,
+                mDreamsEnabledByDefaultConfig ? 1 : 0,
                 UserHandle.USER_CURRENT) != 0);
         mDreamsActivateOnSleepSetting = (Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 0,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                mDreamsActivatedOnSleepByDefaultConfig ? 1 : 0,
                 UserHandle.USER_CURRENT) != 0);
         mDreamsActivateOnDockSetting = (Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, 0,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                mDreamsActivatedOnDockByDefaultConfig ? 1 : 0,
                 UserHandle.USER_CURRENT) != 0);
         mScreenOffTimeoutSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,

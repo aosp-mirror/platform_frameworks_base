@@ -737,7 +737,7 @@ class ServerThread extends Thread {
             }
             
             if (context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_enableDreams)) {
+                    com.android.internal.R.bool.config_dreamsSupported)) {
                 try {
                     Slog.i(TAG, "Dreams Service");
                     // Dreams (interactive idle-time views, a/k/a screen savers)
