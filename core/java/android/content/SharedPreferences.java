@@ -25,7 +25,8 @@ import java.util.Set;
  * there is a single instance of this class that all clients share.
  * Modifications to the preferences must go through an {@link Editor} object
  * to ensure the preference values remain in a consistent state and control
- * when they are committed to storage.
+ * when they are committed to storage.  Objects that are returned from the
+ * various <code>get</code> methods must be treated as immutable by the application.
  *
  * <p><em>Note: currently this class does not support use across multiple
  * processes.  This will be added later.</em>
@@ -226,6 +227,10 @@ public interface SharedPreferences {
     /**
      * Retrieve all values from the preferences.
      *
+     * <p>Note that you <em>must not</em> modify the collection returned
+     * by this method, or alter any of its contents.  The consistency of your
+     * stored data is not guaranteed if you do.
+     *
      * @return Returns a map containing a list of pairs key/value representing
      * the preferences.
      *
@@ -250,6 +255,10 @@ public interface SharedPreferences {
     /**
      * Retrieve a set of String values from the preferences.
      * 
+     * <p>Note that you <em>must not</em> modify the set instance returned
+     * by this call.  The consistency of the stored data is not guaranteed
+     * if you do, nor is your ability to modify the instance at all.
+     *
      * @param key The name of the preference to retrieve.
      * @param defValues Values to return if this preference does not exist.
      * 
