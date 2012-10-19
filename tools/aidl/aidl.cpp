@@ -23,6 +23,12 @@
 #  define O_BINARY  0
 #endif
 
+// The following are gotten as the offset from the allowable id's between
+// android.os.IBinder.FIRST_CALL_TRANSACTION=1 and
+// android.os.IBinder.LAST_CALL_TRANSACTION=16777215
+#define MIN_USER_SET_METHOD_ID                0
+#define MAX_USER_SET_METHOD_ID                16777214
+
 using namespace std;
 
 static void
@@ -847,6 +853,72 @@ parse_preprocessed_file(const string& filename)
     return 0;
 }
 
+static int
+check_and_assign_method_ids(const char * filename, interface_item_type* first_item)
+{
+    // Check whether there are any methods with manually assigned id's and any that are not.
+    // Either all method id's must be manually assigned or all of them must not.
+    // Also, check for duplicates of user set id's and that the id's are within the proper bounds.
+    set<int> usedIds;
+    interface_item_type* item = first_item;
+    bool hasUnassignedIds = false;
+    bool hasAssignedIds = false;
+    while (item != NULL) {
+        if (item->item_type == METHOD_TYPE) {
+            method_type* method_item = (method_type*)item;
+            if (method_item->hasId) {
+                hasAssignedIds = true;
+                method_item->assigned_id = atoi(method_item->id.data);
+                // Ensure that the user set id is not duplicated.
+                if (usedIds.find(method_item->assigned_id) != usedIds.end()) {
+                    // We found a duplicate id, so throw an error.
+                    fprintf(stderr,
+                            "%s:%d Found duplicate method id (%d) for method: %s\n",
+                            filename, method_item->id.lineno,
+                            method_item->assigned_id, method_item->name.data);
+                    return 1;
+                }
+                // Ensure that the user set id is within the appropriate limits
+                if (method_item->assigned_id < MIN_USER_SET_METHOD_ID ||
+                        method_item->assigned_id > MAX_USER_SET_METHOD_ID) {
+                    fprintf(stderr, "%s:%d Found out of bounds id (%d) for method: %s\n",
+                            filename, method_item->id.lineno,
+                            method_item->assigned_id, method_item->name.data);
+                    fprintf(stderr, "    Value for id must be between %d and %d inclusive.\n",
+                            MIN_USER_SET_METHOD_ID, MAX_USER_SET_METHOD_ID);
+                    return 1;
+                }
+                usedIds.insert(method_item->assigned_id);
+            } else {
+                hasUnassignedIds = true;
+            }
+            if (hasAssignedIds && hasUnassignedIds) {
+                fprintf(stderr,
+                        "%s: You must either assign id's to all methods or to none of them.\n",
+                        filename);
+                return 1;
+            }
+        }
+        item = item->next;
+    }
+
+    // In the case that all methods have unassigned id's, set a unique id for them.
+    if (hasUnassignedIds) {
+        int newId = 0;
+        item = first_item;
+        while (item != NULL) {
+            if (item->item_type == METHOD_TYPE) {
+                method_type* method_item = (method_type*)item;
+                method_item->assigned_id = newId++;
+            }
+            item = item->next;
+        }
+    }
+
+    // success
+    return 0;
+}
+
 // ==========================================================
 static int
 compile_aidl(Options& options)
@@ -936,6 +1008,12 @@ compile_aidl(Options& options)
     // needs to be an interface.
     bool onlyParcelable = false;
     err |= exactly_one_interface(options.inputFileName.c_str(), mainDoc, options, &onlyParcelable);
+
+    // If this includes an interface definition, then assign method ids and validate.
+    if (!onlyParcelable) {
+        err |= check_and_assign_method_ids(options.inputFileName.c_str(),
+                ((interface_type*)mainDoc)->interface_items);
+    }
 
     // after this, there shouldn't be any more errors because of the
     // input.

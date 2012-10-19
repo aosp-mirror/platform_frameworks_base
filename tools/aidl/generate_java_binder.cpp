@@ -260,7 +260,7 @@ generate_method(const method_type* method, Class* interface,
     string transactCodeName = "TRANSACTION_";
     transactCodeName += method->name.data;
 
-    char transactCodeValue[50];
+    char transactCodeValue[60];
     sprintf(transactCodeValue, "(android.os.IBinder.FIRST_CALL_TRANSACTION + %d)", index);
 
     Field* transactCode = new Field(STATIC | FINAL,
@@ -548,7 +548,8 @@ generate_binder_interface_class(const interface_type* iface)
     interface_item_type* item = iface->interface_items;
     while (item != NULL) {
         if (item->item_type == METHOD_TYPE) {
-            generate_method((method_type*)item, interface, stub, proxy, index);
+            method_type * method_item = (method_type*) item;
+            generate_method(method_item, interface, stub, proxy, method_item->assigned_id);
         }
         item = item->next;
         index++;

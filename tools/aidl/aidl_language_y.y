@@ -15,6 +15,7 @@ static int count_brackets(const char*);
 %token IMPORT
 %token PACKAGE
 %token IDENTIFIER
+%token IDVALUE
 %token GENERIC
 %token ARRAY
 %token PARCELABLE
@@ -211,13 +212,16 @@ method_decl:
                                                         method_type *method = (method_type*)malloc(sizeof(method_type));
                                                         method->interface_item.item_type = METHOD_TYPE;
                                                         method->interface_item.next = NULL;
-                                                        method->type = $1.type;
                                                         method->oneway = false;
+                                                        method->type = $1.type;
                                                         memset(&method->oneway_token, 0, sizeof(buffer_type));
                                                         method->name = $2.buffer;
                                                         method->open_paren_token = $3.buffer;
                                                         method->args = $4.arg;
                                                         method->close_paren_token = $5.buffer;
+                                                        method->hasId = false;
+                                                        memset(&method->equals_token, 0, sizeof(buffer_type));
+                                                        memset(&method->id, 0, sizeof(buffer_type));
                                                         method->semicolon_token = $6.buffer;
                                                         method->comments_token = &method->type.type;
                                                         $$.method = method;
@@ -233,7 +237,46 @@ method_decl:
                                                         method->open_paren_token = $4.buffer;
                                                         method->args = $5.arg;
                                                         method->close_paren_token = $6.buffer;
+                                                        method->hasId = false;
+                                                        memset(&method->equals_token, 0, sizeof(buffer_type));
+                                                        memset(&method->id, 0, sizeof(buffer_type));
                                                         method->semicolon_token = $7.buffer;
+                                                        method->comments_token = &method->oneway_token;
+                                                        $$.method = method;
+                                                    }
+    |    type IDENTIFIER '(' arg_list ')' '=' IDVALUE ';'  {
+                                                        method_type *method = (method_type*)malloc(sizeof(method_type));
+                                                        method->interface_item.item_type = METHOD_TYPE;
+                                                        method->interface_item.next = NULL;
+                                                        method->oneway = false;
+                                                        memset(&method->oneway_token, 0, sizeof(buffer_type));
+                                                        method->type = $1.type;
+                                                        method->name = $2.buffer;
+                                                        method->open_paren_token = $3.buffer;
+                                                        method->args = $4.arg;
+                                                        method->close_paren_token = $5.buffer;
+                                                        method->hasId = true;
+                                                        method->equals_token = $6.buffer;
+                                                        method->id = $7.buffer;
+                                                        method->semicolon_token = $8.buffer;
+                                                        method->comments_token = &method->type.type;
+                                                        $$.method = method;
+                                                    }
+    |   ONEWAY type IDENTIFIER '(' arg_list ')' '=' IDVALUE ';'  {
+                                                        method_type *method = (method_type*)malloc(sizeof(method_type));
+                                                        method->interface_item.item_type = METHOD_TYPE;
+                                                        method->interface_item.next = NULL;
+                                                        method->oneway = true;
+                                                        method->oneway_token = $1.buffer;
+                                                        method->type = $2.type;
+                                                        method->name = $3.buffer;
+                                                        method->open_paren_token = $4.buffer;
+                                                        method->args = $5.arg;
+                                                        method->close_paren_token = $6.buffer;
+                                                        method->hasId = true;
+                                                        method->equals_token = $7.buffer;
+                                                        method->id = $8.buffer;
+                                                        method->semicolon_token = $9.buffer;
                                                         method->comments_token = &method->oneway_token;
                                                         $$.method = method;
                                                     }
