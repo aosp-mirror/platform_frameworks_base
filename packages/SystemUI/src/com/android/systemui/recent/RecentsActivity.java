@@ -113,10 +113,14 @@ public class RecentsActivity extends Activity {
         }
     }
 
+    public static boolean forceOpaqueBackground(Context context) {
+        return WallpaperManager.getInstance(context).getWallpaperInfo() != null;
+    }
+
     @Override
     public void onStart() {
         // Hide wallpaper if it's not a static image
-        if (WallpaperManager.getInstance(this).getWallpaperInfo() != null) {
+        if (forceOpaqueBackground(this)) {
             updateWallpaperVisibility(false);
         } else {
             updateWallpaperVisibility(true);
