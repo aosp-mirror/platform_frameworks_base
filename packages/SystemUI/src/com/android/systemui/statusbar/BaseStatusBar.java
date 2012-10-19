@@ -36,7 +36,6 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -81,7 +80,6 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -481,9 +479,18 @@ public abstract class BaseStatusBar extends SystemUI implements
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
             if (firstTask == null) {
-                // The correct window animation will be applied via the activity's style
-                mContext.startActivityAsUser(intent, new UserHandle(
-                        UserHandle.USER_CURRENT));
+                if (RecentsActivity.forceOpaqueBackground(mContext)) {
+                    ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                            R.anim.recents_launch_from_launcher_enter,
+                            R.anim.recents_launch_from_launcher_exit);
+                    mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
+                            UserHandle.USER_CURRENT));
+                } else {
+                    // The correct window animation will be applied via the activity's style
+                    mContext.startActivityAsUser(intent, new UserHandle(
+                            UserHandle.USER_CURRENT));
+                }
+
             } else {
                 Bitmap first = firstTask.getThumbnail();
                 final Resources res = mContext.getResources();
