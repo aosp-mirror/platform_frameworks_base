@@ -36,9 +36,6 @@ import android.util.Slog;
 public final class Sandman {
     private static final String TAG = "Sandman";
 
-    private static final int DEFAULT_SCREENSAVER_ENABLED = 1;
-    private static final int DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK = 1;
-
     // The component name of a special dock app that merely launches a dream.
     // We don't want to launch this app when docked because it causes an unnecessary
     // activity transition.  We just want to start the dream.
@@ -109,14 +106,18 @@ public final class Sandman {
     }
 
     private static boolean isScreenSaverEnabled(Context context) {
+        int def = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsEnabledByDefault) ? 1 : 0;
         return Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ENABLED, DEFAULT_SCREENSAVER_ENABLED,
+                Settings.Secure.SCREENSAVER_ENABLED, def,
                 UserHandle.USER_CURRENT) != 0;
     }
 
     private static boolean isScreenSaverActivatedOnDock(Context context) {
+        int def = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault) ? 1 : 0;
         return Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                DEFAULT_SCREENSAVER_ACTIVATED_ON_DOCK, UserHandle.USER_CURRENT) != 0;
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, def,
+                UserHandle.USER_CURRENT) != 0;
     }
 }
