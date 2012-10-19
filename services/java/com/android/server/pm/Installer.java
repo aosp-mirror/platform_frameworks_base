@@ -369,7 +369,7 @@ public final class Installer {
      * @param nativeLibPath target native library path
      * @return -1 on error
      */
-    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath) {
+    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath, int userId) {
         if (dataPath == null) {
             Slog.e(TAG, "linkNativeLibraryDirectory dataPath is null");
             return -1;
@@ -382,6 +382,8 @@ public final class Installer {
         builder.append(dataPath);
         builder.append(' ');
         builder.append(nativeLibPath);
+        builder.append(' ');
+        builder.append(userId);
 
         return execute(builder.toString());
     }
