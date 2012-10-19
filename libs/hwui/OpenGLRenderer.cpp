@@ -165,11 +165,12 @@ void OpenGLRenderer::initViewport(int width, int height) {
     mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
-int OpenGLRenderer::prepare(bool opaque) {
+status_t OpenGLRenderer::prepare(bool opaque) {
     return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
 }
 
-int OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
+status_t OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom,
+        bool opaque) {
     mCaches.clearGarbage();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
@@ -203,15 +204,18 @@ int OpenGLRenderer::prepareDirty(float left, float top, float right, float botto
 
     debugOverdraw(true, true);
 
+    return clear(left, top, right, bottom, opaque);
+}
+
+status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (!opaque) {
         mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         return DrawGlInfo::kStatusDrew;
-    } else {
-        mCaches.resetScissor();
     }
 
+    mCaches.resetScissor();
     return DrawGlInfo::kStatusDone;
 }
 
@@ -743,6 +747,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
     layer->setColorFilter(mColorFilter);
     layer->setBlend(true);
+    layer->setDirty(false);
 
     // Save the layer in the snapshot
     mSnapshot->flags |= Snapshot::kFlagIsLayer;

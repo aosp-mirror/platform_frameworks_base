@@ -94,7 +94,7 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared
      */
-    ANDROID_API int prepare(bool opaque);
+    ANDROID_API status_t prepare(bool opaque);
 
     /**
      * Prepares the renderer to draw a frame. This method must be invoked
@@ -110,7 +110,7 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared in the specified dirty rectangle
      */
-    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Indicates the end of a frame. This method must be invoked whenever
@@ -270,6 +270,11 @@ protected:
     void initViewport(int width, int height);
 
     /**
+     * Clears the underlying surface if needed.
+     */
+    virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
+
+    /**
      * Call this method after updating a layer during a drawing pass.
      */
     void resumeAfterLayer();
@@ -353,6 +358,10 @@ protected:
      */
     virtual bool suppressErrorChecks() {
         return false;
+    }
+
+    Caches& getCaches() {
+        return mCaches;
     }
 
 private:
