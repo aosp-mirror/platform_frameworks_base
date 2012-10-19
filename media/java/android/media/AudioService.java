@@ -634,7 +634,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         final ContentResolver cr = mContentResolver;
 
         int ringerModeFromSettings =
-                Settings.Global.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+                Settings.Global.getInt(
+                        cr, Settings.Global.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
         int ringerMode = ringerModeFromSettings;
         // sanity check in case the settings are restored from a device with incompatible
         // ringer modes
@@ -645,7 +646,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
         if (ringerMode != ringerModeFromSettings) {
-            Settings.Global.putInt(cr, System.MODE_RINGER, ringerMode);
+            Settings.Global.putInt(cr, Settings.Global.MODE_RINGER, ringerMode);
         }
         synchronized(mSettingsLock) {
             mRingerMode = ringerMode;
@@ -3118,7 +3119,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         private void persistRingerMode(int ringerMode) {
-            Settings.Global.putInt(mContentResolver, System.MODE_RINGER, ringerMode);
+            Settings.Global.putInt(mContentResolver, Settings.Global.MODE_RINGER, ringerMode);
         }
 
         private void playSoundEffect(int effectType, int volume) {
