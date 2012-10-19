@@ -895,8 +895,16 @@
     <!-- Name of the wimax state tracker clas -->
     <string name="config_wimaxStateTrackerClassname" translatable="false"></string>
 
-    <!-- enable screen saver feature -->
-    <bool name="config_enableDreams">true</bool>
+    <!-- Is the dreams feature supported? -->
+    <bool name="config_dreamsSupported">true</bool>
+    <!-- If supported, are dreams enabled? (by default) -->
+    <bool name="config_dreamsEnabledByDefault">true</bool>
+    <!-- If supported and enabled, are dreams activated when docked? (by default) -->
+    <bool name="config_dreamsActivatedOnDockByDefault">true</bool>
+    <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
+    <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
+    <!-- ComponentName of the default dream (Settings.Secure.SCREENSAVER_COMPONENT) -->
+    <string name="config_dreamsDefaultComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->

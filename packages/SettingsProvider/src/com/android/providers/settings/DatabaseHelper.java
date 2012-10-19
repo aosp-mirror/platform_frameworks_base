@@ -1166,15 +1166,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
                         + " VALUES(?,?);");
                 loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ENABLED,
-                        R.bool.def_screensaver_enabled);
+                        com.android.internal.R.bool.config_dreamsEnabledByDefault);
                 loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                        R.bool.def_screensaver_activate_on_dock);
+                        com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
                 loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                        R.bool.def_screensaver_activate_on_sleep);
-                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
-                        R.string.def_screensaver_component);
+                        com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
                 loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
-                        R.string.def_screensaver_component);
+                        com.android.internal.R.string.config_dreamsDefaultComponent);
+                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
+                        com.android.internal.R.string.config_dreamsDefaultComponent);
 
                 db.setTransactionSuccessful();
             } finally {
@@ -2027,15 +2027,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
             loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ENABLED,
-                    R.bool.def_screensaver_enabled);
+                    com.android.internal.R.bool.config_dreamsEnabledByDefault);
             loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                    R.bool.def_screensaver_activate_on_dock);
+                    com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
             loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                    R.bool.def_screensaver_activate_on_sleep);
+                    com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
             loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
-                    R.string.def_screensaver_component);
+                    com.android.internal.R.string.config_dreamsDefaultComponent);
             loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
-                    R.string.def_screensaver_component);
+                    com.android.internal.R.string.config_dreamsDefaultComponent);
 
             loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
                     R.bool.def_accessibility_display_magnification_enabled);
