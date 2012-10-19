@@ -237,9 +237,9 @@ public class PowerUI extends SystemUI {
         }
 
         final ContentResolver cr = mContext.getContentResolver();
-        if (Settings.System.getInt(cr, Settings.System.POWER_SOUNDS_ENABLED, 1) == 1) {
-            final String soundPath = Settings.System.getString(cr,
-                    Settings.System.LOW_BATTERY_SOUND);
+        if (Settings.Global.getInt(cr, Settings.Global.POWER_SOUNDS_ENABLED, 1) == 1) {
+            final String soundPath = Settings.Global.getString(cr,
+                    Settings.Global.LOW_BATTERY_SOUND);
             if (soundPath != null) {
                 final Uri soundUri = Uri.parse("file://" + soundPath);
                 if (soundUri != null) {
