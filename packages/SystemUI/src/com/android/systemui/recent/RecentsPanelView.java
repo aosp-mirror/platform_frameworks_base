@@ -59,7 +59,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
@@ -68,7 +67,7 @@ import com.android.systemui.statusbar.tablet.TabletStatusBar;
 import java.util.ArrayList;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
-        StatusBarPanel, Animator.AnimatorListener, RecentsActivity.WindowAnimationStartListener {
+        StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
@@ -81,6 +80,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mWaitingToShow;
     private int mNumItemsWaitingForThumbnailsAndIcons;
     private ViewHolder mItemToAnimateInWhenWindowAnimationIsFinished;
+    private boolean mWaitingForWindowAnimation;
 
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
@@ -147,13 +147,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     (ImageView) convertView.findViewById(R.id.app_thumbnail_image);
             // If we set the default thumbnail now, we avoid an onLayout when we update
             // the thumbnail later (if they both have the same dimensions)
-            if (mRecentTasksLoader != null) {
-                updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
-            }
+            updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
             holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
-            if (mRecentTasksLoader != null) {
-                holder.iconView.setImageBitmap(mRecentTasksLoader.getDefaultIcon());
-            }
+            holder.iconView.setImageBitmap(mRecentTasksLoader.getDefaultIcon());
             holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
             holder.calloutLine = convertView.findViewById(R.id.recents_callout_line);
             holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
@@ -183,8 +179,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
             if (index == 0) {
                 final Activity activity = (Activity) RecentsPanelView.this.getContext();
-                final SystemUIApplication app = (SystemUIApplication) activity.getApplication();
-                if (app.isWaitingForWindowAnimationStart()) {
+                if (mWaitingForWindowAnimation) {
                     if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
                         for (View v :
                             new View[] { holder.iconView, holder.labelView, holder.calloutLine }) {
@@ -247,6 +242,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 defStyle, 0);
 
         mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
+        mRecentTasksLoader = RecentTasksLoader.getInstance(context);
         a.recycle();
     }
 
@@ -280,11 +276,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void show(boolean show) {
-        show(show, null, false);
+        show(show, null, false, false);
     }
 
     public void show(boolean show, ArrayList<TaskDescription> recentTaskDescriptions,
-            boolean firstScreenful) {
+            boolean firstScreenful, boolean waitingForWindowAnimation) {
+        mWaitingForWindowAnimation = waitingForWindowAnimation;
         if (show) {
             mWaitingToShow = true;
             refreshRecentTasksList(recentTaskDescriptions, firstScreenful);
@@ -542,6 +539,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
             }
             mItemToAnimateInWhenWindowAnimationIsFinished = null;
+            mWaitingForWindowAnimation = false;
         }
     }
 
