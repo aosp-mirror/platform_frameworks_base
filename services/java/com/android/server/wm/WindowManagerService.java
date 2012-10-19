@@ -2092,6 +2092,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
+            final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent == null) {
+                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+            }
+
             if (mWindowMap.containsKey(client.asBinder())) {
                 Slog.w(TAG, "Window " + client + " is already added");
                 return WindowManagerGlobal.ADD_DUPLICATE_ADD;
@@ -2174,7 +2179,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            final DisplayContent displayContent = getDisplayContentLocked(displayId);
             win = new WindowState(this, session, client, token,
                     attachedWindow, seq, attrs, viewVisibility, displayContent);
             if (win.mDeathRecipient == null) {
@@ -5712,6 +5716,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param width the width of the target bitmap
      * @param height the height of the target bitmap
      */
+    @Override
     public Bitmap screenshotApplications(IBinder appToken, int displayId, int width, int height) {
         if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
@@ -5731,6 +5736,9 @@ public class WindowManagerService extends IWindowManager.Stub
             long ident = Binder.clearCallingIdentity();
 
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent == null) {
+                return null;
+            }
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             dw = displayInfo.logicalWidth;
             dh = displayInfo.logicalHeight;
@@ -6473,6 +6481,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return success;
     }
 
+    @Override
     public void addDisplayContentChangeListener(int displayId,
             IDisplayContentChangeListener listener) {
         if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
@@ -6481,14 +6490,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         synchronized(mWindowMap) {
             DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent.mDisplayContentChangeListeners == null) {
-                displayContent.mDisplayContentChangeListeners =
-                        new RemoteCallbackList<IDisplayContentChangeListener>();
-            displayContent.mDisplayContentChangeListeners.register(listener);
+            if (displayContent != null) {
+                if (displayContent.mDisplayContentChangeListeners == null) {
+                    displayContent.mDisplayContentChangeListeners =
+                            new RemoteCallbackList<IDisplayContentChangeListener>();
+                    displayContent.mDisplayContentChangeListeners.register(listener);
+                }
             }
         }
     }
 
+    @Override
     public void removeDisplayContentChangeListener(int displayId,
             IDisplayContentChangeListener listener) {
         if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
@@ -6497,11 +6509,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         synchronized(mWindowMap) {
             DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent.mDisplayContentChangeListeners != null) {
-                displayContent.mDisplayContentChangeListeners.unregister(listener);
-                if (displayContent.mDisplayContentChangeListeners
-                        .getRegisteredCallbackCount() == 0) {
-                    displayContent.mDisplayContentChangeListeners = null;
+            if (displayContent != null) {
+                if (displayContent.mDisplayContentChangeListeners != null) {
+                    displayContent.mDisplayContentChangeListeners.unregister(listener);
+                    if (displayContent.mDisplayContentChangeListeners
+                            .getRegisteredCallbackCount() == 0) {
+                        displayContent.mDisplayContentChangeListeners = null;
+                    }
                 }
             }
         }
@@ -7157,7 +7171,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final Display display = displayContent.getDisplay();
             readForcedDisplaySizeAndDensityLocked(displayContent);
 
             mDisplayReady = true;
@@ -7181,24 +7194,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void displayReady(int displayId) {
+    private void displayReady(int displayId) {
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            final DisplayInfo displayInfo;
-            mAnimator.addDisplayLocked(displayId);
-            synchronized(displayContent.mDisplaySizeLock) {
-                // Bootstrap the default logical display from the display manager.
-                displayInfo = displayContent.getDisplayInfo();
-                DisplayInfo newDisplayInfo = mDisplayManagerService.getDisplayInfo(displayId);
-                if (newDisplayInfo != null) {
-                    displayInfo.copyFrom(newDisplayInfo);
+            if (displayContent != null) {
+                mAnimator.addDisplayLocked(displayId);
+                synchronized(displayContent.mDisplaySizeLock) {
+                    // Bootstrap the default logical display from the display manager.
+                    final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                    DisplayInfo newDisplayInfo = mDisplayManagerService.getDisplayInfo(displayId);
+                    if (newDisplayInfo != null) {
+                        displayInfo.copyFrom(newDisplayInfo);
+                    }
+                    displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
+                    displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
+                    displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
+                    displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
+                    displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
+                    displayContent.mBaseDisplayDensity = displayContent.mInitialDisplayDensity;
                 }
-                displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
-                displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
-                displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
-                displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
-                displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
-                displayContent.mBaseDisplayDensity = displayContent.mInitialDisplayDensity;
             }
         }
     }
@@ -7839,12 +7853,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO(cmautner): Access to DisplayContent should be locked on mWindowMap. Doing that
         //  could lead to deadlock since this is called from ActivityManager.
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
-        synchronized(displayContent.mDisplaySizeLock) {
-            size.x = displayContent.mInitialDisplayWidth;
-            size.y = displayContent.mInitialDisplayHeight;
+        if (displayContent != null) {
+            synchronized(displayContent.mDisplaySizeLock) {
+                size.x = displayContent.mInitialDisplayWidth;
+                size.y = displayContent.mInitialDisplayHeight;
+            }
         }
     }
 
+    @Override
     public void setForcedDisplaySize(int displayId, int width, int height) {
         synchronized(mWindowMap) {
             // Set some sort of reasonable bounds on the size of the display that we
@@ -7853,14 +7870,15 @@ public class WindowManagerService extends IWindowManager.Stub
             final int MIN_HEIGHT = 200;
             final int MAX_SCALE = 2;
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-
-            width = Math.min(Math.max(width, MIN_WIDTH),
-                    displayContent.mInitialDisplayWidth * MAX_SCALE);
-            height = Math.min(Math.max(height, MIN_HEIGHT),
-                    displayContent.mInitialDisplayHeight * MAX_SCALE);
-            setForcedDisplaySizeLocked(displayContent, width, height);
-            Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+            if (displayContent != null) {
+                width = Math.min(Math.max(width, MIN_WIDTH),
+                        displayContent.mInitialDisplayWidth * MAX_SCALE);
+                height = Math.min(Math.max(height, MIN_HEIGHT),
+                        displayContent.mInitialDisplayHeight * MAX_SCALE);
+                setForcedDisplaySizeLocked(displayContent, width, height);
+                Settings.Global.putString(mContext.getContentResolver(),
+                        Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+            }
         }
     }
 
@@ -7903,6 +7921,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // displayContent must not be null
     private void setForcedDisplaySizeLocked(DisplayContent displayContent, int width, int height) {
         Slog.i(TAG, "Using new display size: " + width + "x" + height);
 
@@ -7913,25 +7932,32 @@ public class WindowManagerService extends IWindowManager.Stub
         reconfigureDisplayLocked(displayContent);
     }
 
+    @Override
     public void clearForcedDisplaySize(int displayId) {
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
-                    displayContent.mInitialDisplayHeight);
-            Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.DISPLAY_SIZE_FORCED, "");
+            if (displayContent != null) {
+                setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
+                        displayContent.mInitialDisplayHeight);
+                Settings.Global.putString(mContext.getContentResolver(),
+                        Settings.Global.DISPLAY_SIZE_FORCED, "");
+            }
         }
     }
 
+    @Override
     public void setForcedDisplayDensity(int displayId, int density) {
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            setForcedDisplayDensityLocked(displayContent, density);
-            Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+            if (displayContent != null) {
+                setForcedDisplayDensityLocked(displayContent, density);
+                Settings.Global.putString(mContext.getContentResolver(),
+                        Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+            }
         }
     }
 
+    // displayContent must not be null
     private void setForcedDisplayDensityLocked(DisplayContent displayContent, int density) {
         Slog.i(TAG, "Using new display density: " + density);
 
@@ -7941,15 +7967,19 @@ public class WindowManagerService extends IWindowManager.Stub
         reconfigureDisplayLocked(displayContent);
     }
 
+    @Override
     public void clearForcedDisplayDensity(int displayId) {
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
-            Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.DISPLAY_DENSITY_FORCED, "");
+            if (displayContent != null) {
+                setForcedDisplayDensityLocked(displayContent, displayContent.mInitialDisplayDensity);
+                Settings.Global.putString(mContext.getContentResolver(),
+                        Settings.Global.DISPLAY_DENSITY_FORCED, "");
+            }
         }
     }
 
+    // displayContent must not be null
     private void reconfigureDisplayLocked(DisplayContent displayContent) {
         // TODO: Multidisplay: for now only use with default display.
         mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
@@ -9719,7 +9749,9 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent =
                         getDisplayContentLocked(pendingLayouts.keyAt(i));
-                displayContent.pendingLayoutChanges |= pendingLayouts.valueAt(i);
+                if (displayContent != null) {
+                    displayContent.pendingLayoutChanges |= pendingLayouts.valueAt(i);
+                }
             }
 
             mWindowDetachedWallpaper = animToLayout.mWindowDetachedWallpaper;
@@ -10845,11 +10877,20 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayContents.put(display.getDisplayId(), displayContent);
     }
 
+    /**
+     * Retrieve the DisplayContent for the specified displayId. Will create a new DisplayContent if
+     * there is a Display for the displayId.
+     * @param displayId The display the caller is interested in.
+     * @return The DisplayContent associated with displayId or null if there is no Display for it.
+     */
     public DisplayContent getDisplayContentLocked(final int displayId) {
         DisplayContent displayContent = mDisplayContents.get(displayId);
         if (displayContent == null) {
-            displayContent = new DisplayContent(mDisplayManager.getDisplay(displayId));
-            mDisplayContents.put(displayId, displayContent);
+            final Display display = mDisplayManager.getDisplay(displayId);
+            if (display != null) {
+                displayContent = new DisplayContent(display);
+                mDisplayContents.put(displayId, displayContent);
+            }
         }
         return displayContent;
     }
@@ -10935,6 +10976,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // There is an inherent assumption that this will never return null.
     public DisplayContent getDefaultDisplayContentLocked() {
         return getDisplayContentLocked(Display.DEFAULT_DISPLAY);
     }
@@ -10947,8 +10989,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return getDefaultDisplayContentLocked().getDisplayInfo();
     }
 
+    /**
+     * Return the list of WindowStates associated on the passed display.
+     * @param display The screen to return windows from.
+     * @return The list of WindowStates on the screen, or null if the there is no screen.
+     */
     public WindowList getWindowListLocked(final Display display) {
-        return getDisplayContentLocked(display.getDisplayId()).getWindowList();
+        final DisplayContent displayContent = getDisplayContentLocked(display.getDisplayId());
+        return displayContent != null ? displayContent.getWindowList() : null;
     }
 
     @Override
@@ -10957,8 +11005,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void handleDisplayAddedLocked(int displayId) {
-        createDisplayContentLocked(mDisplayManager.getDisplay(displayId));
-        displayReady(displayId);
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display != null) {
+            createDisplayContentLocked(display);
+            displayReady(displayId);
+        }
     }
 
     @Override
@@ -10968,11 +11019,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void handleDisplayRemovedLocked(int displayId) {
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
-        mDisplayContents.delete(displayId);
-        WindowList windows = displayContent.getWindowList();
-        while (!windows.isEmpty()) {
-            final WindowState win = windows.get(windows.size() - 1);
-            removeWindowLocked(win.mSession, win);
+        if (displayContent != null) {
+            mDisplayContents.delete(displayId);
+            WindowList windows = displayContent.getWindowList();
+            while (!windows.isEmpty()) {
+                final WindowState win = windows.get(windows.size() - 1);
+                removeWindowLocked(win.mSession, win);
+            }
         }
         mAnimator.removeDisplayLocked(displayId);
     }
