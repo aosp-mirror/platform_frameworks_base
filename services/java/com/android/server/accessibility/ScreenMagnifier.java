@@ -176,6 +176,8 @@ public final class ScreenMagnifier implements EventStreamTransformation {
     private PointerCoords[] mTempPointerCoords;
     private PointerProperties[] mTempPointerProperties;
 
+    private long mDelegatingStateDownTime;
+
     public ScreenMagnifier(Context context) {
         mContext = context;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -265,10 +267,15 @@ public final class ScreenMagnifier implements EventStreamTransformation {
 
     private void handleMotionEventStateDelegating(MotionEvent event,
             MotionEvent rawEvent, int policyFlags) {
-        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            if (mDetectingStateHandler.mDelayedEventQueue == null) {
-                transitionToState(STATE_DETECTING);
-            }
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN: {
+                mDelegatingStateDownTime = event.getDownTime();
+            } break;
+            case MotionEvent.ACTION_UP: {
+                if (mDetectingStateHandler.mDelayedEventQueue == null) {
+                    transitionToState(STATE_DETECTING);
+                }
+            } break;
         }
         if (mNext != null) {
             // If the event is within the magnified portion of the screen we have
@@ -295,6 +302,13 @@ public final class ScreenMagnifier implements EventStreamTransformation {
                         coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0, event.getSource(),
                         event.getFlags());
             }
+            // We cache some events to see if the user wants to trigger magnification.
+            // If no magnification is triggered we inject these events with adjusted
+            // time and down time to prevent subsequent transformations being confused
+            // by stale events. After the cached events, which always have a down, are
+            // injected we need to also update the down time of all subsequent non cached
+            // events. All delegated events cached and non-cached are delivered here.
+            event.setDownTime(mDelegatingStateDownTime);
             mNext.onMotionEvent(event, rawEvent, policyFlags);
         }
     }
