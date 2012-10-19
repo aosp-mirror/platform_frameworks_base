@@ -108,7 +108,7 @@
 
         <activity android:name=".recent.RecentsActivity"
                 android:label="@string/accessibility_desc_recent_apps"
-                android:theme="@android:style/Theme.Holo.Wallpaper.NoTitleBar"
+                android:theme="@style/RecentsStyle"
                 android:excludeFromRecents="true"
                 android:launchMode="singleInstance"
                 android:exported="true">
