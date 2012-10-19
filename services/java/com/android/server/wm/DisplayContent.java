@@ -66,14 +66,17 @@ class DisplayContent {
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
     int mBaseDisplayDensity = 0;
-    final DisplayInfo mDisplayInfo = new DisplayInfo();
-    final Display mDisplay;
+    private final DisplayInfo mDisplayInfo = new DisplayInfo();
+    private final Display mDisplay;
 
     // Accessed directly by all users.
     boolean layoutNeeded;
     int pendingLayoutChanges;
     final boolean isDefaultDisplay;
 
+    /**
+     * @param display May not be null.
+     */
     DisplayContent(Display display) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();

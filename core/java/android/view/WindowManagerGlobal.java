@@ -99,6 +99,7 @@ public final class WindowManagerGlobal {
     public static final int ADD_STARTING_NOT_NEEDED = -6;
     public static final int ADD_MULTIPLE_SINGLETON = -7;
     public static final int ADD_PERMISSION_DENIED = -8;
+    public static final int ADD_INVALID_DISPLAY = -9;
 
     private static WindowManagerGlobal sDefaultWindowManager;
     private static IWindowManager sWindowManagerService;

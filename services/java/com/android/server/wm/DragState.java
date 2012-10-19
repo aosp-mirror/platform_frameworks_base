@@ -190,9 +190,11 @@ class DragState {
         }
 
         final WindowList windows = mService.getWindowListLocked(mDisplay);
-        final int N = windows.size();
-        for (int i = 0; i < N; i++) {
-            sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
+        if (windows != null) {
+            final int N = windows.size();
+            for (int i = 0; i < N; i++) {
+                sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
+            }
         }
     }
 
@@ -393,6 +395,9 @@ class DragState {
         final int y = (int) yf;
 
         final WindowList windows = mService.getWindowListLocked(mDisplay);
+        if (windows == null) {
+            return null;
+        }
         final int N = windows.size();
         for (int i = N - 1; i >= 0; i--) {
             WindowState child = windows.get(i);
