@@ -1467,6 +1467,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (mGroup.isGroupOwner()) {
                 setWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
             }
+
+            // In case of a negotiation group, connection changed is sent
+            // after a client joins. For autonomous, send now
+            if (mAutonomousGroup) {
+                sendP2pConnectionChangedBroadcast();
+            }
         }
 
         @Override
@@ -1481,7 +1487,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 deviceAddress.equals(mSavedProvDiscDevice.deviceAddress)) {
                             mSavedProvDiscDevice = null;
                         }
-                        mGroup.addClient(mPeers.get(deviceAddress));
+                        if (mPeers.get(deviceAddress) != null) {
+                            mGroup.addClient(mPeers.get(deviceAddress));
+                        } else {
+                            mGroup.addClient(deviceAddress);
+                        }
                         mPeers.updateStatus(deviceAddress, WifiP2pDevice.CONNECTED);
                         if (DBG) logd(getName() + " ap sta connected");
                         sendP2pPeersChangedBroadcast();
