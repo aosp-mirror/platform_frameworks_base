@@ -1200,7 +1200,12 @@ public abstract class HardwareRenderer {
                             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                         }
 
-                        status = onPreDraw(dirty);
+                        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "prepareFrame");
+                        try {
+                            status = onPreDraw(dirty);
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                        }
                         saveCount = canvas.save();
                         callbacks.onHardwarePreDraw(canvas);
 

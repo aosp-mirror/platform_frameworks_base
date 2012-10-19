@@ -31,6 +31,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     meshIndices = NULL;
     meshElementCount = 0;
     cacheable = true;
+    dirty = false;
     textureLayer = false;
     renderTarget = GL_TEXTURE_2D;
     texture.width = layerWidth;
