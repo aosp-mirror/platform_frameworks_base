@@ -1912,15 +1912,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Intent service = new Intent();
                     service.setClassName(mContext, "com.android.server.LoadAverageService");
                     ContentResolver res = mContext.getContentResolver();
-                    boolean shown = Settings.System.getInt(
-                            res, Settings.System.SHOW_PROCESSES, 0) != 0;
+                    boolean shown = Settings.Global.getInt(
+                            res, Settings.Global.SHOW_PROCESSES, 0) != 0;
                     if (!shown) {
                         mContext.startService(service);
                     } else {
                         mContext.stopService(service);
                     }
-                    Settings.System.putInt(
-                            res, Settings.System.SHOW_PROCESSES, shown ? 0 : 1);
+                    Settings.Global.putInt(
+                            res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
                     return -1;
                 }
             }
