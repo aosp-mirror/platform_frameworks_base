@@ -25,7 +25,6 @@ import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
@@ -72,9 +71,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManagerGlobal;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -82,6 +81,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -428,10 +428,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 
-    protected RecentTasksLoader getRecentTasksLoader() {
-        final SystemUIApplication app = (SystemUIApplication) ((Service) mContext).getApplication();
-        return app.getRecentTasksLoader();
-    }
 
     protected void updateSearchPanel() {
         // Search Panel
@@ -475,8 +471,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void toggleRecentsActivity() {
         try {
-            final RecentTasksLoader recentTasksLoader = getRecentTasksLoader();
-            TaskDescription firstTask = recentTasksLoader.getFirstTask();
+
+            TaskDescription firstTask = RecentTasksLoader.getInstance(mContext).getFirstTask();
 
             Intent intent = new Intent(RecentsActivity.TOGGLE_RECENTS_INTENT);
             intent.setClassName("com.android.systemui",
@@ -576,17 +572,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                             + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
                 }
 
-                final SystemUIApplication app =
-                        (SystemUIApplication) ((Service) mContext).getApplication();
-                app.setWaitingForWinAnimStart(true);
                 ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
                         getStatusBarView(),
                         first, x, y,
                         new ActivityOptions.OnAnimationStartedListener() {
                             public void onAnimationStarted() {
-                                app.onWindowAnimationStart();
+                                Intent intent = new Intent(RecentsActivity.WINDOW_ANIMATION_START_INTENT);
+                                intent.setPackage("com.android.systemui");
+                                mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
                             }
                         });
+                intent.putExtra(RecentsActivity.WAITING_FOR_WINDOW_ANIMATION_PARAM, true);
                 mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
                         UserHandle.USER_CURRENT));
             }
@@ -596,8 +592,49 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
+        // additional optimization when we have software system buttons - start loading the recent
+        // tasks on touch down
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            int action = event.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_DOWN) {
+                preloadRecentTasksList();
+            } else if (action == MotionEvent.ACTION_CANCEL) {
+                cancelPreloadingRecentTasksList();
+            } else if (action == MotionEvent.ACTION_UP) {
+                if (!v.isPressed()) {
+                    cancelPreloadingRecentTasksList();
+                }
+
+            }
+            return false;
+        }
+    };
+
+    protected void preloadRecentTasksList() {
+        if (DEBUG) Slog.d(TAG, "preloading recents");
+        Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
+        intent.setClassName("com.android.systemui",
+                "com.android.systemui.recent.RecentsPreloadReceiver");
+        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+
+        RecentTasksLoader.getInstance(mContext).preloadFirstTask();
+    }
+
+    protected void cancelPreloadingRecentTasksList() {
+        if (DEBUG) Slog.d(TAG, "cancel preloading recents");
+        Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
+        intent.setClassName("com.android.systemui",
+                "com.android.systemui.recent.RecentsPreloadReceiver");
+        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+
+        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+    }
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
+            Intent intent;
             switch (m.what) {
              case MSG_TOGGLE_RECENTS_PANEL:
                  if (DEBUG) Slog.d(TAG, "toggle recents panel");
@@ -605,17 +642,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                  break;
              case MSG_CLOSE_RECENTS_PANEL:
                  if (DEBUG) Slog.d(TAG, "closing recents panel");
-                 Intent intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
+                 intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
                  intent.setPackage("com.android.systemui");
                  mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
                  break;
              case MSG_PRELOAD_RECENT_APPS:
-                  if (DEBUG) Slog.d(TAG, "preloading recents");
-                  getRecentTasksLoader().preloadRecentTasksList();
+                  preloadRecentTasksList();
                   break;
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
-                  if (DEBUG) Slog.d(TAG, "cancel preloading recents");
-                  getRecentTasksLoader().cancelPreloadingRecentTasksList();
+                  cancelPreloadingRecentTasksList();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Slog.d(TAG, "opening search panel");

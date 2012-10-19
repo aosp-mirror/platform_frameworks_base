@@ -30,14 +30,18 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import java.util.List;
 
 public class RecentsActivity extends Activity {
-    public static final String TOGGLE_RECENTS_INTENT = "com.android.systemui.TOGGLE_RECENTS";
-    public static final String CLOSE_RECENTS_INTENT = "com.android.systemui.CLOSE_RECENTS";
+    public static final String TOGGLE_RECENTS_INTENT = "com.android.systemui.recent.action.TOGGLE_RECENTS";
+    public static final String PRELOAD_INTENT = "com.android.systemui.recent.action.PRELOAD";
+    public static final String CANCEL_PRELOAD_INTENT = "com.android.systemui.recent.CANCEL_PRELOAD";
+    public static final String CLOSE_RECENTS_INTENT = "com.android.systemui.recent.action.CLOSE";
+    public static final String WINDOW_ANIMATION_START_INTENT = "com.android.systemui.recent.action.WINDOW_ANIMATION_START";
+    public static final String PRELOAD_PERMISSION = "com.android.systemui.recent.permission.PRELOAD";
+    public static final String WAITING_FOR_WINDOW_ANIMATION_PARAM = "com.android.systemui.recent.WAITING_FOR_WINDOW_ANIMATION";
     private static final String WAS_SHOWING = "was_showing";
 
     private RecentsPanelView mRecentsPanel;
@@ -48,18 +52,20 @@ public class RecentsActivity extends Activity {
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                if (mShowing && !mForeground) {
-                    // Captures the case right before we transition to another activity
-                    mRecentsPanel.show(false);
+            if (CLOSE_RECENTS_INTENT.equals(intent.getAction())) {
+                if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+                    if (mShowing && !mForeground) {
+                        // Captures the case right before we transition to another activity
+                        mRecentsPanel.show(false);
+                    }
+                }
+            } else if (WINDOW_ANIMATION_START_INTENT.equals(intent.getAction())) {
+                if (mRecentsPanel != null) {
+                    mRecentsPanel.onWindowAnimationStart();
                 }
             }
         }
     };
-
-    public static interface WindowAnimationStartListener {
-        void onWindowAnimationStart();
-    }
 
     public class TouchOutsideListener implements View.OnTouchListener {
         private StatusBarPanel mPanel;
@@ -164,25 +170,23 @@ public class RecentsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final SystemUIApplication app = (SystemUIApplication) getApplication();
-        final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
-
         setContentView(R.layout.status_bar_recent_panel);
         mRecentsPanel = (RecentsPanelView) findViewById(R.id.recents_root);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(mRecentsPanel));
-        mRecentsPanel.setRecentTasksLoader(recentTasksLoader);
+
+        final RecentTasksLoader recentTasksLoader = RecentTasksLoader.getInstance(this);
         recentTasksLoader.setRecentsPanel(mRecentsPanel, mRecentsPanel);
         mRecentsPanel.setMinSwipeAlpha(
                 getResources().getInteger(R.integer.config_recent_item_min_alpha) / 100f);
 
         if (savedInstanceState == null ||
                 savedInstanceState.getBoolean(WAS_SHOWING)) {
-            handleIntent(getIntent());
+            handleIntent(getIntent(), (savedInstanceState == null));
         }
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
+        mIntentFilter.addAction(WINDOW_ANIMATION_START_INTENT);
         registerReceiver(mIntentReceiver, mIntentFilter);
-        app.setWindowAnimationStartListener(mRecentsPanel);
         super.onCreate(savedInstanceState);
     }
 
@@ -193,20 +197,17 @@ public class RecentsActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        final SystemUIApplication app = (SystemUIApplication) getApplication();
-        final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
-        recentTasksLoader.setRecentsPanel(null, mRecentsPanel);
+        RecentTasksLoader.getInstance(this).setRecentsPanel(null, mRecentsPanel);
         unregisterReceiver(mIntentReceiver);
-        app.setWindowAnimationStartListener(null);
         super.onDestroy();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        handleIntent(intent);
+        handleIntent(intent, true);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent, boolean checkWaitingForAnimationParam) {
         super.onNewIntent(intent);
 
         if (TOGGLE_RECENTS_INTENT.equals(intent.getAction())) {
@@ -214,10 +215,11 @@ public class RecentsActivity extends Activity {
                 if (mRecentsPanel.isShowing()) {
                     dismissAndGoBack();
                 } else {
-                    final SystemUIApplication app = (SystemUIApplication) getApplication();
-                    final RecentTasksLoader recentTasksLoader = app.getRecentTasksLoader();
+                    final RecentTasksLoader recentTasksLoader = RecentTasksLoader.getInstance(this);
+                    boolean waitingForWindowAnimation = checkWaitingForAnimationParam &&
+                            intent.getBooleanExtra(WAITING_FOR_WINDOW_ANIMATION_PARAM, false);
                     mRecentsPanel.show(true, recentTasksLoader.getLoadedTasks(),
-                            recentTasksLoader.isFirstScreenful());
+                            recentTasksLoader.isFirstScreenful(), waitingForWindowAnimation);
                 }
             }
         }
