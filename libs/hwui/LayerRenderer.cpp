@@ -18,6 +18,8 @@
 
 #include <ui/Rect.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include "LayerCache.h"
 #include "LayerRenderer.h"
 #include "Matrix.h"
@@ -41,7 +43,8 @@ void LayerRenderer::setViewport(int width, int height) {
     initViewport(width, height);
 }
 
-int LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
+status_t LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
+        bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->getFbo());
@@ -61,6 +64,20 @@ int LayerRenderer::prepareDirty(float left, float top, float right, float bottom
     }
 
     return OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+}
+
+status_t LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
+    if (mLayer->isDirty()) {
+        getCaches().disableScissor();
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        getCaches().resetScissor();
+        mLayer->setDirty(false);
+
+        return DrawGlInfo::kStatusDone;
+    }
+
+    return OpenGLRenderer::clear(left, top, right, bottom, opaque);
 }
 
 void LayerRenderer::finish() {
@@ -201,6 +218,7 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);
     layer->setBlend(!isOpaque);
     layer->setColorFilter(NULL);
+    layer->setDirty(true);
     layer->region.clear();
 
     GLuint previousFbo;
@@ -228,9 +246,6 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
-
-    caches.disableScissor();
-    glClear(GL_COLOR_BUFFER_BIT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 

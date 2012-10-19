@@ -48,7 +48,8 @@ public:
     virtual ~LayerRenderer();
 
     virtual void setViewport(int width, int height);
-    virtual int prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
     ANDROID_API static Layer* createTextureLayer(bool isOpaque);
