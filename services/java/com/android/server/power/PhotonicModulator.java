@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import android.util.Slog;
+
 import com.android.server.LightsService;
 
 import java.util.concurrent.Executor;
@@ -27,6 +29,9 @@ import java.util.concurrent.Executor;
  * setting the backlight brightness is especially slow.
  */
 final class PhotonicModulator {
+    private static final String TAG = "PhotonicModulator";
+    private static final boolean DEBUG = false;
+
     private static final int UNKNOWN_LIGHT_VALUE = -1;
 
     private final Object mLock = new Object();
@@ -58,6 +63,9 @@ final class PhotonicModulator {
         synchronized (mLock) {
             if (lightValue != mPendingLightValue) {
                 mPendingLightValue = lightValue;
+                if (DEBUG) {
+                    Slog.d(TAG, "Enqueuing request to change brightness to " + lightValue);
+                }
                 if (!mPendingChange) {
                     mPendingChange = true;
                     mSuspendBlocker.acquire();
@@ -90,6 +98,9 @@ final class PhotonicModulator {
                         return;
                     }
                     mActualLightValue = newLightValue;
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, "Setting brightness to " + newLightValue);
                 }
                 mLight.setBrightness(newLightValue);
             }
