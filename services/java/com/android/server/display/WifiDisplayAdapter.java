@@ -73,8 +73,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private final boolean mSupportsProtectedBuffers;
     private final NotificationManager mNotificationManager;
 
-    private final PendingIntent mSettingsPendingIntent;
-    private final PendingIntent mDisconnectPendingIntent;
+    private PendingIntent mSettingsPendingIntent;
+    private PendingIntent mDisconnectPendingIntent;
 
     private WifiDisplayController mDisplayController;
     private WifiDisplayDevice mDisplayDevice;
@@ -90,6 +90,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     private boolean mPendingStatusChangeBroadcast;
     private boolean mPendingNotificationUpdate;
 
+    // Called with SyncRoot lock held.
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
             PersistentDataStore persistentDataStore) {
@@ -100,20 +101,6 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 com.android.internal.R.bool.config_wifiDisplaySupportsProtectedBuffers);
         mNotificationManager = (NotificationManager)context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
-
-        Intent settingsIntent = new Intent(Settings.ACTION_WIFI_DISPLAY_SETTINGS);
-        settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mSettingsPendingIntent = PendingIntent.getActivityAsUser(
-                context, 0, settingsIntent, 0, null, UserHandle.CURRENT);
-
-        Intent disconnectIntent = new Intent(ACTION_DISCONNECT);
-        mDisconnectPendingIntent = PendingIntent.getBroadcastAsUser(
-                context, 0, disconnectIntent, 0, UserHandle.CURRENT);
-
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                new IntentFilter(ACTION_DISCONNECT), null, mHandler);
     }
 
     @Override
@@ -153,6 +140,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             public void run() {
                 mDisplayController = new WifiDisplayController(
                         getContext(), getHandler(), mWifiDisplayListener);
+
+                getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
+                        new IntentFilter(ACTION_DISCONNECT), null, mHandler);
             }
         });
     }
@@ -366,12 +356,31 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             isConnected = (mDisplayDevice != null);
         }
 
+        // Cancel the old notification if there is one.
         mNotificationManager.cancelAsUser(null,
                 R.string.wifi_display_notification_title, UserHandle.ALL);
 
         if (isConnected) {
             Context context = getContext();
 
+            // Initialize pending intents for the notification outside of the lock because
+            // creating a pending intent requires a call into the activity manager.
+            if (mSettingsPendingIntent == null) {
+                Intent settingsIntent = new Intent(Settings.ACTION_WIFI_DISPLAY_SETTINGS);
+                settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mSettingsPendingIntent = PendingIntent.getActivityAsUser(
+                        context, 0, settingsIntent, 0, null, UserHandle.CURRENT);
+            }
+
+            if (mDisconnectPendingIntent == null) {
+                Intent disconnectIntent = new Intent(ACTION_DISCONNECT);
+                mDisconnectPendingIntent = PendingIntent.getBroadcastAsUser(
+                        context, 0, disconnectIntent, 0, UserHandle.CURRENT);
+            }
+
+            // Post the notification.
             Resources r = context.getResources();
             Notification notification = new Notification.Builder(context)
                     .setContentTitle(r.getString(
