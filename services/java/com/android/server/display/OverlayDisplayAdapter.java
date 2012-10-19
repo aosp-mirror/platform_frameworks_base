@@ -64,6 +64,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             new ArrayList<OverlayDisplayHandle>();
     private String mCurrentOverlaySetting = "";
 
+    // Called with SyncRoot lock held.
     public OverlayDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener, Handler uiHandler) {
         super(syncRoot, context, handler, listener, TAG);
