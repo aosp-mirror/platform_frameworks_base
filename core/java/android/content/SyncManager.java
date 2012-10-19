@@ -64,6 +64,7 @@ import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,7 +201,9 @@ public class SyncManager {
     private BroadcastReceiver mBackgroundDataSettingChanged = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (getConnectivityManager().getBackgroundDataSetting()) {
-                scheduleSync(null /* account */, UserHandle.USER_ALL, null /* authority */,
+                scheduleSync(null /* account */, UserHandle.USER_ALL,
+                        SyncOperation.REASON_BACKGROUND_DATA_SETTINGS_CHANGED,
+                        null /* authority */,
                         new Bundle(), 0 /* delay */,
                         false /* onlyThoseWithUnknownSyncableState */);
             }
@@ -212,7 +215,8 @@ public class SyncManager {
             updateRunningAccounts();
 
             // Kick off sync for everyone, since this was a radical account change
-            scheduleSync(null, UserHandle.USER_ALL, null, null, 0 /* no delay */, false);
+            scheduleSync(null, UserHandle.USER_ALL, SyncOperation.REASON_ACCOUNTS_UPDATED, null,
+                    null, 0 /* no delay */, false);
         }
     };
 
@@ -348,14 +352,14 @@ public class SyncManager {
         SyncStorageEngine.init(context);
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
-            public void onSyncRequest(Account account, int userId, String authority,
+            public void onSyncRequest(Account account, int userId, int reason, String authority,
                     Bundle extras) {
-                scheduleSync(account, userId, authority, extras, 0, false);
+                scheduleSync(account, userId, reason, authority, extras, 0, false);
             }
         });
 
         mSyncAdapters = new SyncAdaptersCache(mContext);
-        mSyncQueue = new SyncQueue(mSyncStorageEngine, mSyncAdapters);
+        mSyncQueue = new SyncQueue(mContext.getPackageManager(), mSyncStorageEngine, mSyncAdapters);
 
         HandlerThread syncThread = new HandlerThread("SyncHandlerThread",
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -366,7 +370,9 @@ public class SyncManager {
             @Override
             public void onServiceChanged(SyncAdapterType type, int userId, boolean removed) {
                 if (!removed) {
-                    scheduleSync(null, UserHandle.USER_ALL, type.authority, null, 0 /* no delay */,
+                    scheduleSync(null, UserHandle.USER_ALL,
+                            SyncOperation.REASON_SERVICE_CHANGED,
+                            type.authority, null, 0 /* no delay */,
                             false /* onlyThoseWithUnkownSyncableState */);
                 }
             }
@@ -495,6 +501,17 @@ public class SyncManager {
      * @param requestedAccount the account to sync, may be null to signify all accounts
      * @param userId the id of the user whose accounts are to be synced. If userId is USER_ALL,
      *          then all users' accounts are considered.
+     * @param reason for sync request. If this is a positive integer, it is the Linux uid
+     * assigned to the process that requested the sync. If it's negative, the sync was requested by
+     * the SyncManager itself and could be one of the following:
+     *      {@link SyncOperation#REASON_BACKGROUND_DATA_SETTINGS_CHANGED}
+     *      {@link SyncOperation#REASON_ACCOUNTS_UPDATED}
+     *      {@link SyncOperation#REASON_SERVICE_CHANGED}
+     *      {@link SyncOperation#REASON_PERIODIC}
+     *      {@link SyncOperation#REASON_IS_SYNCABLE}
+     *      {@link SyncOperation#REASON_SYNC_AUTO}
+     *      {@link SyncOperation#REASON_MASTER_SYNC_AUTO}
+     *      {@link SyncOperation#REASON_USER_START}
      * @param requestedAuthority the authority to sync, may be null to indicate all authorities
      * @param extras a Map of SyncAdapter-specific information to control
      *          syncs of a specific provider. Can be null. Is ignored
@@ -502,8 +519,9 @@ public class SyncManager {
      * @param delay how many milliseconds in the future to wait before performing this
      * @param onlyThoseWithUnkownSyncableState
      */
-    public void scheduleSync(Account requestedAccount, int userId, String requestedAuthority,
-            Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
+    public void scheduleSync(Account requestedAccount, int userId, int reason,
+            String requestedAuthority, Bundle extras, long delay,
+            boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
         final boolean backgroundDataUsageAllowed = !mBootCompleted ||
@@ -629,8 +647,9 @@ public class SyncManager {
                                 + ", extras " + newExtras);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account.account, account.userId, source, authority,
-                                    newExtras, 0, backoffTime, delayUntil, allowParallelSyncs));
+                            new SyncOperation(account.account, account.userId, reason, source,
+                                    authority, newExtras, 0, backoffTime, delayUntil,
+                                    allowParallelSyncs));
                 }
                 if (!onlyThoseWithUnkownSyncableState) {
                     if (isLoggable) {
@@ -642,17 +661,18 @@ public class SyncManager {
                                 + ", extras " + extras);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account.account, account.userId, source, authority,
-                                    extras, delay, backoffTime, delayUntil, allowParallelSyncs));
+                            new SyncOperation(account.account, account.userId, reason, source,
+                                    authority, extras, delay, backoffTime, delayUntil,
+                                    allowParallelSyncs));
                 }
             }
         }
     }
 
-    public void scheduleLocalSync(Account account, int userId, String authority) {
+    public void scheduleLocalSync(Account account, int userId, int reason, String authority) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
-        scheduleSync(account, userId, authority, extras, LOCAL_SYNC_DELAY,
+        scheduleSync(account, userId, reason, authority, extras, LOCAL_SYNC_DELAY,
                 false /* onlyThoseWithUnkownSyncableState */);
     }
 
@@ -878,6 +898,7 @@ public class SyncManager {
                         + "sync in progress: " + operation);
             }
             scheduleSyncOperation(new SyncOperation(operation.account, operation.userId,
+                    operation.reason,
                     operation.syncSource,
                     operation.authority, operation.extras,
                     DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS * 1000,
@@ -909,8 +930,8 @@ public class SyncManager {
         // Schedule sync for any accounts under started user
         final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
         for (Account account : accounts) {
-            scheduleSync(account, userId, null, null, 0 /* no delay */,
-                    true /* onlyThoseWithUnknownSyncableState */);
+            scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
+                    0 /* no delay */, true /* onlyThoseWithUnknownSyncableState */);
         }
 
         sendCheckAlarmsMessage();
@@ -1124,12 +1145,13 @@ public class SyncManager {
 
         pw.println();
         pw.println("Active Syncs: " + mActiveSyncContexts.size());
+        final PackageManager pm = mContext.getPackageManager();
         for (SyncManager.ActiveSyncContext activeSyncContext : mActiveSyncContexts) {
             final long durationInSeconds = (now - activeSyncContext.mStartTime) / 1000;
             pw.print("  ");
             pw.print(DateUtils.formatElapsedTime(durationInSeconds));
             pw.print(" - ");
-            pw.print(activeSyncContext.mSyncOperation.dump(false));
+            pw.print(activeSyncContext.mSyncOperation.dump(pm, false));
             pw.println();
         }
 
@@ -1144,78 +1166,96 @@ public class SyncManager {
         pw.println();
         pw.println("Sync Status");
         for (AccountAndUser account : accounts) {
-            pw.print("  Account "); pw.print(account.account.name);
-                    pw.print(" u"); pw.print(account.userId);
-                    pw.print(" "); pw.print(account.account.type);
-                    pw.println(":");
-            for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterType :
-                    mSyncAdapters.getAllServices(account.userId)) {
+            pw.printf("Account %s u%d %s\n",
+                    account.account.name, account.userId, account.account.type);
+
+            pw.println("=======================================================================");
+            final PrintTable table = new PrintTable(13);
+            table.set(0, 0,
+                    "Authority", // 0
+                    "Syncable",  // 1
+                    "Enabled",   // 2
+                    "Delay",     // 3
+                    "Loc",       // 4
+                    "Poll",      // 5
+                    "Per",       // 6
+                    "Serv",      // 7
+                    "User",      // 8
+                    "Tot",       // 9
+                    "Time",      // 10
+                    "Last Sync", // 11
+                    "Periodic"   // 12
+            );
+
+            final List<RegisteredServicesCache.ServiceInfo<SyncAdapterType>> sorted =
+                    Lists.newArrayList();
+            sorted.addAll(mSyncAdapters.getAllServices(account.userId));
+            Collections.sort(sorted,
+                    new Comparator<RegisteredServicesCache.ServiceInfo<SyncAdapterType>>() {
+                @Override
+                public int compare(RegisteredServicesCache.ServiceInfo<SyncAdapterType> lhs,
+                        RegisteredServicesCache.ServiceInfo<SyncAdapterType> rhs) {
+                    return lhs.type.authority.compareTo(rhs.type.authority);
+                }
+            });
+            for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterType : sorted) {
                 if (!syncAdapterType.type.accountType.equals(account.account.type)) {
                     continue;
                 }
-
+                int row = table.getNumRows();
                 SyncStorageEngine.AuthorityInfo settings =
                         mSyncStorageEngine.getOrCreateAuthority(
                                 account.account, account.userId, syncAdapterType.type.authority);
                 SyncStatusInfo status = mSyncStorageEngine.getOrCreateSyncStatus(settings);
-                pw.print("    "); pw.print(settings.authority);
-                pw.println(":");
-                pw.print("      settings:");
-                pw.print(" " + (settings.syncable > 0
-                        ? "syncable"
-                        : (settings.syncable == 0 ? "not syncable" : "not initialized")));
-                pw.print(", " + (settings.enabled ? "enabled" : "disabled"));
+
+                String authority = settings.authority;
+                if (authority.length() > 50) {
+                    authority = authority.substring(authority.length() - 50);
+                }
+                table.set(row, 0, authority, settings.syncable, settings.enabled);
+                table.set(row, 4,
+                        status.numSourceLocal,
+                        status.numSourcePoll,
+                        status.numSourcePeriodic,
+                        status.numSourceServer,
+                        status.numSourceUser,
+                        status.numSyncs,
+                        DateUtils.formatElapsedTime(status.totalElapsedTime / 1000));
+
+
+                for (int i = 0; i < settings.periodicSyncs.size(); i++) {
+                    final Pair<Bundle, Long> pair = settings.periodicSyncs.get(0);
+                    final String period = String.valueOf(pair.second);
+                    final String extras = pair.first.size() > 0 ? pair.first.toString() : "";
+                    final String next = formatTime(status.getPeriodicSyncTime(0)
+                            + pair.second * 1000);
+                    table.set(row + i * 2, 12, period + extras);
+                    table.set(row + i * 2 + 1, 12, next);
+                }
+
+                int row1 = row;
                 if (settings.delayUntil > now) {
-                    pw.print(", delay for "
-                            + ((settings.delayUntil - now) / 1000) + " sec");
+                    table.set(row1++, 12, "D: " + (settings.delayUntil - now) / 1000);
+                    if (settings.backoffTime > now) {
+                        table.set(row1++, 12, "B: " + (settings.backoffTime - now) / 1000);
+                        table.set(row1++, 12, settings.backoffDelay / 1000);
+                    }
                 }
-                if (settings.backoffTime > now) {
-                    pw.print(", backoff for "
-                            + ((settings.backoffTime - now) / 1000) + " sec");
-                }
-                if (settings.backoffDelay > 0) {
-                    pw.print(", the backoff increment is " + settings.backoffDelay / 1000
-                                + " sec");
-                }
-                pw.println();
-                for (int periodicIndex = 0;
-                        periodicIndex < settings.periodicSyncs.size();
-                        periodicIndex++) {
-                    Pair<Bundle, Long> info = settings.periodicSyncs.get(periodicIndex);
-                    long lastPeriodicTime = status.getPeriodicSyncTime(periodicIndex);
-                    long nextPeriodicTime = lastPeriodicTime + info.second * 1000;
-                    pw.println("      periodic period=" + info.second
-                            + ", extras=" + info.first
-                            + ", next=" + formatTime(nextPeriodicTime));
-                }
-                pw.print("      count: local="); pw.print(status.numSourceLocal);
-                pw.print(" poll="); pw.print(status.numSourcePoll);
-                pw.print(" periodic="); pw.print(status.numSourcePeriodic);
-                pw.print(" server="); pw.print(status.numSourceServer);
-                pw.print(" user="); pw.print(status.numSourceUser);
-                pw.print(" total="); pw.print(status.numSyncs);
-                pw.println();
-                pw.print("      total duration: ");
-                pw.println(DateUtils.formatElapsedTime(status.totalElapsedTime/1000));
+
                 if (status.lastSuccessTime != 0) {
-                    pw.print("      SUCCESS: source=");
-                    pw.print(SyncStorageEngine.SOURCES[status.lastSuccessSource]);
-                    pw.print(" time=");
-                    pw.println(formatTime(status.lastSuccessTime));
+                    table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastSuccessSource]
+                            + " " + "SUCCESS");
+                    table.set(row1++, 11, formatTime(status.lastSuccessTime));
                 }
                 if (status.lastFailureTime != 0) {
-                    pw.print("      FAILURE: source=");
-                    pw.print(SyncStorageEngine.SOURCES[
-                            status.lastFailureSource]);
-                    pw.print(" initialTime=");
-                    pw.print(formatTime(status.initialFailureTime));
-                    pw.print(" lastTime=");
-                    pw.println(formatTime(status.lastFailureTime));
-                    int errCode = status.getLastFailureMesgAsInt(0);
-                    pw.print("      message: "); pw.println(
-                            getLastFailureMessage(errCode) + " (" + errCode + ")");
+                    table.set(row1++, 11, SyncStorageEngine.SOURCES[status.lastFailureSource]
+                            + " " + "FAILURE");
+                    table.set(row1++, 11, formatTime(status.lastFailureTime));
+                    //noinspection UnusedAssignment
+                    table.set(row1++, 11, status.lastFailureMesg);
                 }
             }
+            table.writeTo(pw);
         }
     }
 
@@ -1409,9 +1449,9 @@ public class SyncManager {
 
             pw.println();
             pw.println("Recent Sync History");
-            final String format = "  %-" + maxAccount + "s  %s\n";
+            final String format = "  %-" + maxAccount + "s  %-" + maxAuthority + "s %s\n";
             final Map<String, Long> lastTimeMap = Maps.newHashMap();
-
+            final PackageManager pm = mContext.getPackageManager();
             for (int i = 0; i < N; i++) {
                 SyncStorageEngine.SyncHistoryItem item = items.get(i);
                 SyncStorageEngine.AuthorityInfo authority
@@ -1456,7 +1496,8 @@ public class SyncManager {
                         SyncStorageEngine.SOURCES[item.source],
                         ((float) elapsedTime) / 1000,
                         diffString);
-                pw.printf(format, accountKey, authorityName);
+                pw.printf(format, accountKey, authorityName,
+                        SyncOperation.reasonToString(pm, item.reason));
 
                 if (item.event != SyncStorageEngine.EVENT_STOP
                         || item.upstreamActivity != 0
@@ -1470,6 +1511,37 @@ public class SyncManager {
                         && !SyncStorageEngine.MESG_SUCCESS.equals(item.mesg)) {
                     pw.printf("    mesg=%s\n", item.mesg);
                 }
+            }
+            pw.println();
+            pw.println("Recent Sync History Extras");
+            for (int i = 0; i < N; i++) {
+                final SyncStorageEngine.SyncHistoryItem item = items.get(i);
+                final Bundle extras = item.extras;
+                if (extras == null || extras.size() == 0) {
+                    continue;
+                }
+                final SyncStorageEngine.AuthorityInfo authority
+                        = mSyncStorageEngine.getAuthority(item.authorityId);
+                final String authorityName;
+                final String accountKey;
+                if (authority != null) {
+                    authorityName = authority.authority;
+                    accountKey = authority.account.name + "/" + authority.account.type
+                            + " u" + authority.userId;
+                } else {
+                    authorityName = "Unknown";
+                    accountKey = "Unknown";
+                }
+                final Time time = new Time();
+                final long eventTime = item.eventTime;
+                time.set(eventTime);
+
+                pw.printf("  #%-3d: %s %8s ",
+                        i + 1,
+                        formatTime(eventTime),
+                        SyncStorageEngine.SOURCES[item.source]);
+
+                pw.printf(format, accountKey, authorityName, extras);
             }
         }
     }
@@ -1885,6 +1957,7 @@ public class SyncManager {
                         }
                         scheduleSyncOperation(
                                 new SyncOperation(info.account, info.userId,
+                                        SyncOperation.REASON_PERIODIC,
                                         SyncStorageEngine.SOURCE_PERIODIC,
                                         info.authority, extras, 0 /* delay */,
                                         backoff != null ? backoff.first : 0,
@@ -2286,7 +2359,8 @@ public class SyncManager {
                     }
                     // reschedule the sync if so indicated by the syncResult
                     maybeRescheduleSync(syncResult, syncOperation);
-                    historyMessage = Integer.toString(syncResultToErrorNumber(syncResult));
+                    historyMessage = ContentResolver.syncErrorToString(
+                            syncResultToErrorNumber(syncResult));
                     // TODO: set these correctly when the SyncResult is extended to include it
                     downstreamActivity = 0;
                     upstreamActivity = 0;
@@ -2324,6 +2398,7 @@ public class SyncManager {
 
             if (syncResult != null && syncResult.fullSyncRequested) {
                 scheduleSyncOperation(new SyncOperation(syncOperation.account, syncOperation.userId,
+                        syncOperation.reason,
                         syncOperation.syncSource, syncOperation.authority, new Bundle(), 0,
                         syncOperation.backoff, syncOperation.delayUntil,
                         syncOperation.allowParallelSyncs));
@@ -2603,8 +2678,10 @@ public class SyncManager {
                                 syncOperation.account.name.hashCode());
 
             return mSyncStorageEngine.insertStartSyncEvent(
-                    syncOperation.account, syncOperation.userId, syncOperation.authority,
-                    now, source, syncOperation.isInitialization());
+                    syncOperation.account, syncOperation.userId, syncOperation.reason,
+                    syncOperation.authority,
+                    now, source, syncOperation.isInitialization(), syncOperation.extras
+            );
         }
 
         public void stopSyncEvent(long rowId, SyncOperation syncOperation, String resultMessage,
@@ -2625,5 +2702,67 @@ public class SyncManager {
             }
         }
         return false;
+    }
+
+    static class PrintTable {
+        private ArrayList<Object[]> mTable = Lists.newArrayList();
+        private final int mCols;
+
+        PrintTable(int cols) {
+            mCols = cols;
+        }
+
+        void set(int row, int col, Object... values) {
+            if (col + values.length > mCols) {
+                throw new IndexOutOfBoundsException("Table only has " + mCols +
+                        " columns. can't set " + values.length + " at column " + col);
+            }
+            for (int i = mTable.size(); i <= row; i++) {
+                final Object[] list = new Object[mCols];
+                mTable.add(list);
+                for (int j = 0; j < mCols; j++) {
+                    list[j] = "";
+                }
+            }
+            System.arraycopy(values, 0, mTable.get(row), col, values.length);
+        }
+
+        void writeTo(PrintWriter out) {
+            final String[] formats = new String[mCols];
+            int totalLength = 0;
+            for (int col = 0; col < mCols; ++col) {
+                int maxLength = 0;
+                for (Object[] row : mTable) {
+                    final int length = row[col].toString().length();
+                    if (length > maxLength) {
+                        maxLength = length;
+                    }
+                }
+                totalLength += maxLength;
+                formats[col] = String.format("%%-%ds", maxLength);
+            }
+            printRow(out, formats, mTable.get(0));
+            totalLength += (mCols - 1) * 2;
+            for (int i = 0; i < totalLength; ++i) {
+                out.print("-");
+            }
+            out.println();
+            for (int i = 1, mTableSize = mTable.size(); i < mTableSize; i++) {
+                Object[] row = mTable.get(i);
+                printRow(out, formats, row);
+            }
+        }
+
+        private void printRow(PrintWriter out, String[] formats, Object[] row) {
+            for (int j = 0, rowLength = row.length; j < rowLength; j++) {
+                out.printf(String.format(formats[j], row[j].toString()));
+                out.print("  ");
+            }
+            out.println();
+        }
+
+        public int getNumRows() {
+            return mTable.size();
+        }
     }
 }

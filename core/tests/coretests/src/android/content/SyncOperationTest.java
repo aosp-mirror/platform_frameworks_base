@@ -43,6 +43,7 @@ public class SyncOperationTest extends AndroidTestCase {
 
         SyncOperation op1 = new SyncOperation(account1, 0,
                 1,
+                SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
                 100,
@@ -53,6 +54,7 @@ public class SyncOperationTest extends AndroidTestCase {
         // Same as op1 but different time infos
         SyncOperation op2 = new SyncOperation(account1, 0,
                 1,
+                SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
                 200,
@@ -63,6 +65,7 @@ public class SyncOperationTest extends AndroidTestCase {
         // Same as op1 but different authority
         SyncOperation op3 = new SyncOperation(account1, 0,
                 1,
+                SyncOperation.REASON_PERIODIC,
                 "authority2",
                 b1,
                 100,
@@ -73,6 +76,7 @@ public class SyncOperationTest extends AndroidTestCase {
         // Same as op1 but different account
         SyncOperation op4 = new SyncOperation(account2, 0,
                 1,
+                SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
                 100,
@@ -83,6 +87,7 @@ public class SyncOperationTest extends AndroidTestCase {
         // Same as op1 but different bundle
         SyncOperation op5 = new SyncOperation(account1, 0,
                 1,
+                SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b2,
                 100,

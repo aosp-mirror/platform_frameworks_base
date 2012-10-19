@@ -169,6 +169,25 @@ public abstract class ContentResolver {
     /** @hide */
     public static final int SYNC_ERROR_INTERNAL = 8;
 
+    private static final String[] SYNC_ERROR_NAMES = new String[] {
+          "already-in-progress",
+          "authentication-error",
+          "io-error",
+          "parse-error",
+          "conflict",
+          "too-many-deletions",
+          "too-many-retries",
+          "internal-error",
+    };
+
+    /** @hide */
+    static String syncErrorToString(int error) {
+        if (error < 1 || error > SYNC_ERROR_NAMES.length) {
+            return String.valueOf(error);
+        }
+        return SYNC_ERROR_NAMES[error - 1];
+    }
+
     public static final int SYNC_OBSERVER_TYPE_SETTINGS = 1<<0;
     public static final int SYNC_OBSERVER_TYPE_PENDING = 1<<1;
     public static final int SYNC_OBSERVER_TYPE_ACTIVE = 1<<2;

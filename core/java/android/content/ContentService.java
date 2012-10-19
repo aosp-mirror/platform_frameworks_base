@@ -226,6 +226,7 @@ public final class ContentService extends IContentService.Stub {
             }
         }
 
+        final int uid = Binder.getCallingUid();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -264,7 +265,7 @@ public final class ContentService extends IContentService.Stub {
             if (syncToNetwork) {
                 SyncManager syncManager = getSyncManager();
                 if (syncManager != null) {
-                    syncManager.scheduleLocalSync(null /* all accounts */, callingUserHandle,
+                    syncManager.scheduleLocalSync(null /* all accounts */, callingUserHandle, uid,
                             uri.getAuthority());
                 }
             }
@@ -300,6 +301,7 @@ public final class ContentService extends IContentService.Stub {
     public void requestSync(Account account, String authority, Bundle extras) {
         ContentResolver.validateSyncExtrasBundle(extras);
         int userId = UserHandle.getCallingUserId();
+        int uId = Binder.getCallingUid();
 
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
@@ -307,7 +309,7 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.scheduleSync(account, userId, authority, extras, 0 /* no delay */,
+                syncManager.scheduleSync(account, userId, uId, authority, extras, 0 /* no delay */,
                         false /* onlyThoseWithUnkownSyncableState */);
             }
         } finally {

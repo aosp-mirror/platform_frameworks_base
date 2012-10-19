@@ -25,7 +25,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -145,6 +144,7 @@ public class SyncStorageEngine extends Handler {
     public static class PendingOperation {
         final Account account;
         final int userId;
+        final int reason;
         final int syncSource;
         final String authority;
         final Bundle extras;        // note: read-only.
@@ -153,11 +153,12 @@ public class SyncStorageEngine extends Handler {
         int authorityId;
         byte[] flatExtras;
 
-        PendingOperation(Account account, int userId, int source,
+        PendingOperation(Account account, int userId, int reason,int source,
                 String authority, Bundle extras, boolean expedited) {
             this.account = account;
             this.userId = userId;
             this.syncSource = source;
+            this.reason = reason;
             this.authority = authority;
             this.extras = extras != null ? new Bundle(extras) : extras;
             this.expedited = expedited;
@@ -167,6 +168,7 @@ public class SyncStorageEngine extends Handler {
         PendingOperation(PendingOperation other) {
             this.account = other.account;
             this.userId = other.userId;
+            this.reason = other.reason;
             this.syncSource = other.syncSource;
             this.authority = other.authority;
             this.extras = other.extras;
@@ -245,6 +247,8 @@ public class SyncStorageEngine extends Handler {
         long downstreamActivity;
         String mesg;
         boolean initialization;
+        Bundle extras;
+        int reason;
     }
 
     public static class DayStats {
@@ -264,10 +268,12 @@ public class SyncStorageEngine extends Handler {
          * Called when a sync is needed on an account(s) due to some change in state.
          * @param account
          * @param userId
+         * @param reason
          * @param authority
          * @param extras
          */
-        public void onSyncRequest(Account account, int userId, String authority, Bundle extras);
+        public void onSyncRequest(Account account, int userId, int reason, String authority,
+                Bundle extras);
     }
 
     // Primary list of all syncable authorities.  Also our global lock.
@@ -497,7 +503,8 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (sync) {
-            requestSync(account, userId, providerName, new Bundle());
+            requestSync(account, userId, SyncOperation.REASON_SYNC_AUTO, providerName,
+                    new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
@@ -545,7 +552,8 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (syncable > 0) {
-            requestSync(account, userId, providerName, new Bundle());
+            requestSync(account, userId, SyncOperation.REASON_IS_SYNCABLE,  providerName,
+                    new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
@@ -778,7 +786,8 @@ public class SyncStorageEngine extends Handler {
             writeAccountInfoLocked();
         }
         if (flag) {
-            requestSync(null, userId, null, new Bundle());
+            requestSync(null, userId, SyncOperation.REASON_MASTER_SYNC_AUTO, null,
+                    new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(SYNC_CONNECTION_SETTING_CHANGED_INTENT);
@@ -1041,8 +1050,8 @@ public class SyncStorageEngine extends Handler {
     /**
      * Note that sync has started for the given account and authority.
      */
-    public long insertStartSyncEvent(Account accountName, int userId, String authorityName,
-                                     long now, int source, boolean initialization) {
+    public long insertStartSyncEvent(Account accountName, int userId, int reason,
+            String authorityName, long now, int source, boolean initialization, Bundle extras) {
         long id;
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -1061,6 +1070,8 @@ public class SyncStorageEngine extends Handler {
             if (mNextHistoryId < 0) mNextHistoryId = 0;
             item.eventTime = now;
             item.source = source;
+            item.reason = reason;
+            item.extras = extras;
             item.event = EVENT_START;
             mSyncHistory.add(0, item);
             while (mSyncHistory.size() > MAX_HISTORY) {
@@ -2036,7 +2047,7 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public static final int PENDING_OPERATION_VERSION = 2;
+    public static final int PENDING_OPERATION_VERSION = 3;
 
     /**
      * Read all pending operations back in to the initial engine state.
@@ -2065,6 +2076,7 @@ public class SyncStorageEngine extends Handler {
                 } else {
                     expedited = false;
                 }
+                int reason = in.readInt();
                 AuthorityInfo authority = mAuthorities.get(authorityId);
                 if (authority != null) {
                     Bundle extras;
@@ -2076,13 +2088,14 @@ public class SyncStorageEngine extends Handler {
                         extras = new Bundle();
                     }
                     PendingOperation op = new PendingOperation(
-                            authority.account, authority.userId, syncSource,
+                            authority.account, authority.userId, reason, syncSource,
                             authority.authority, extras, expedited);
                     op.authorityId = authorityId;
                     op.flatExtras = flatExtras;
                     if (DEBUG_FILE) Log.v(TAG, "Adding pending op: account=" + op.account
                             + " auth=" + op.authority
                             + " src=" + op.syncSource
+                            + " reason=" + op.reason
                             + " expedited=" + op.expedited
                             + " extras=" + op.extras);
                     mPendingOperations.add(op);
@@ -2102,6 +2115,7 @@ public class SyncStorageEngine extends Handler {
         }
         out.writeByteArray(op.flatExtras);
         out.writeInt(op.expedited ? 1 : 0);
+        out.writeInt(op.reason);
     }
 
     /**
@@ -2196,14 +2210,15 @@ public class SyncStorageEngine extends Handler {
         return bundle;
     }
 
-    private void requestSync(Account account, int userId, String authority, Bundle extras) {
+    private void requestSync(Account account, int userId, int reason, String authority,
+            Bundle extras) {
         // If this is happening in the system process, then call the syncrequest listener
         // to make a request back to the SyncManager directly.
         // If this is probably a test instance, then call back through the ContentResolver
         // which will know which userId to apply based on the Binder id.
         if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID
                 && mSyncRequestListener != null) {
-            mSyncRequestListener.onSyncRequest(account, userId, authority, extras);
+            mSyncRequestListener.onSyncRequest(account, userId, reason, authority, extras);
         } else {
             ContentResolver.requestSync(account, authority, extras);
         }

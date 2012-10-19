@@ -17,6 +17,8 @@
 package android.content;
 
 import android.accounts.Account;
+import android.content.pm.PackageManager;
+import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -40,15 +42,17 @@ import java.util.Map;
  */
 public class SyncQueue {
     private static final String TAG = "SyncManager";
-
     private final SyncStorageEngine mSyncStorageEngine;
     private final SyncAdaptersCache mSyncAdapters;
+    private final PackageManager mPackageManager;
 
     // A Map of SyncOperations operationKey -> SyncOperation that is designed for
     // quick lookup of an enqueued SyncOperation.
     private final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
 
-    public SyncQueue(SyncStorageEngine syncStorageEngine, final SyncAdaptersCache syncAdapters) {
+    public SyncQueue(PackageManager packageManager, SyncStorageEngine syncStorageEngine,
+            final SyncAdaptersCache syncAdapters) {
+        mPackageManager = packageManager;
         mSyncStorageEngine = syncStorageEngine;
         mSyncAdapters = syncAdapters;
     }
@@ -67,8 +71,8 @@ public class SyncQueue {
                 continue;
             }
             SyncOperation syncOperation = new SyncOperation(
-                    op.account, op.userId, op.syncSource, op.authority, op.extras, 0 /* delay */,
-                    backoff != null ? backoff.first : 0,
+                    op.account, op.userId, op.reason, op.syncSource, op.authority, op.extras,
+                    0 /* delay */, backoff != null ? backoff.first : 0,
                     mSyncStorageEngine.getDelayUntilTime(op.account, op.userId, op.authority),
                     syncAdapterInfo.type.allowParallelSyncs());
             syncOperation.expedited = op.expedited;
@@ -112,7 +116,7 @@ public class SyncQueue {
         operation.pendingOperation = pop;
         if (operation.pendingOperation == null) {
             pop = new SyncStorageEngine.PendingOperation(
-                    operation.account, operation.userId, operation.syncSource,
+                    operation.account, operation.userId, operation.reason, operation.syncSource,
                     operation.authority, operation.extras, operation.expedited);
             pop = mSyncStorageEngine.insertIntoPending(pop);
             if (pop == null) {
@@ -214,7 +218,7 @@ public class SyncQueue {
                 sb.append(DateUtils.formatElapsedTime((operation.effectiveRunTime - now) / 1000));
             }
             sb.append(" - ");
-            sb.append(operation.dump(false)).append("\n");
+            sb.append(operation.dump(mPackageManager, false)).append("\n");
         }
     }
 }
