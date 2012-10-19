@@ -296,7 +296,8 @@ public class ImageProcessingActivity extends Activity
 
         mBitmapIn = loadBitmap(R.drawable.img1600x1067);
         mBitmapIn2 = loadBitmap(R.drawable.img1600x1067b);
-        mBitmapOut = loadBitmap(R.drawable.img1600x1067);
+        mBitmapOut = Bitmap.createBitmap(mBitmapIn.getWidth(), mBitmapIn.getHeight(),
+                                         mBitmapIn.getConfig());
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
 
@@ -337,15 +338,7 @@ public class ImageProcessingActivity extends Activity
     private Bitmap loadBitmap(int resource) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        return copyBitmap(BitmapFactory.decodeResource(getResources(), resource, options));
-    }
-
-    private static Bitmap copyBitmap(Bitmap source) {
-        Bitmap b = Bitmap.createBitmap(source.getWidth(), source.getHeight(), source.getConfig());
-        Canvas c = new Canvas(b);
-        c.drawBitmap(source, 0, 0, null);
-        source.recycle();
-        return b;
+        return BitmapFactory.decodeResource(getResources(), resource, options);
     }
 
     // button hook
