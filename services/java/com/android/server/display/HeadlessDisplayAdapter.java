@@ -29,6 +29,7 @@ import android.util.DisplayMetrics;
 final class HeadlessDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "HeadlessDisplayAdapter";
 
+    // Called with SyncRoot lock held.
     public HeadlessDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
         super(syncRoot, context, handler, listener, TAG);
