@@ -2032,7 +2032,7 @@
     <permission android:name="android.permission.SERIAL_PORT"
         android:label="@string/permlab_serialPort"
         android:description="@string/permdesc_serialPort"
-        android:protectionLevel="normal" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allows the holder to access content providers from outside an ApplicationThread.
          This permission is enforced by the ActivityManagerService on the corresponding APIs,
