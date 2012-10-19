@@ -63,7 +63,6 @@
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
 
     <application
-        android:name="com.android.systemui.SystemUIApplication"
         android:persistent="true"
         android:allowClearUserData="false"
         android:allowBackup="false"
@@ -117,6 +116,15 @@
             <action android:name="com.android.systemui.TOGGLE_RECENTS" />
           </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".recent.RecentsPreloadReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.recent.action.PRELOAD" />
+                <action android:name="com.android.systemui.recent.action.CANCEL_PRELOAD" />
+            </intent-filter>
+        </receiver>
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"

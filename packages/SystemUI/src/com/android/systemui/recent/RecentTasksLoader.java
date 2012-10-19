@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,6 +53,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
     private Context mContext;
     private RecentsPanelView mRecentsPanel;
+
+    private Object mFirstTaskLock = new Object();
     private TaskDescription mFirstTask;
     private boolean mFirstTaskLoaded;
 
@@ -70,23 +73,16 @@ public class RecentTasksLoader implements View.OnTouchListener {
     private enum State { LOADING, LOADED, CANCELLED };
     private State mState = State.CANCELLED;
 
-    public TaskDescription getFirstTask() {
-        while (!mFirstTaskLoaded) {
-            if (mState == State.CANCELLED) {
-                loadTasksInBackground();
-            }
-            try {
-                if (mState == State.LOADED) {
-                    break;
-                }
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-            }
+
+    private static RecentTasksLoader sInstance;
+    public static RecentTasksLoader getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new RecentTasksLoader(context);
         }
-        return mFirstTask;
+        return sInstance;
     }
 
-    public RecentTasksLoader(Context context) {
+    private RecentTasksLoader(Context context) {
         mContext = context;
         mHandler = new Handler();
 
@@ -295,13 +291,105 @@ public class RecentTasksLoader implements View.OnTouchListener {
             mThumbnailLoader = null;
         }
         mLoadedTasks = null;
-        mFirstTask = null;
-        mFirstTaskLoaded = false;
         if (mRecentsPanel != null) {
             mRecentsPanel.onTaskLoadingCancelled();
         }
         mFirstScreenful = false;
         mState = State.CANCELLED;
+    }
+
+    private void clearFirstTask() {
+        synchronized (mFirstTaskLock) {
+            mFirstTask = null;
+            mFirstTaskLoaded = false;
+        }
+    }
+
+    public void preloadFirstTask() {
+        Thread bgLoad = new Thread() {
+            public void run() {
+                TaskDescription first = loadFirstTask();
+                synchronized(mFirstTaskLock) {
+                    if (mCancelPreloadingFirstTask) {
+                        clearFirstTask();
+                    } else {
+                        mFirstTask = first;
+                        mFirstTaskLoaded = true;
+                    }
+                    mPreloadingFirstTask = false;
+                }
+            }
+        };
+        synchronized(mFirstTaskLock) {
+            if (!mPreloadingFirstTask) {
+                clearFirstTask();
+                mPreloadingFirstTask = true;
+                bgLoad.start();
+            }
+        }
+    }
+
+    public void cancelPreloadingFirstTask() {
+        synchronized(mFirstTaskLock) {
+            if (mPreloadingFirstTask) {
+                mCancelPreloadingFirstTask = true;
+            } else {
+                clearFirstTask();
+            }
+        }
+    }
+
+    boolean mPreloadingFirstTask;
+    boolean mCancelPreloadingFirstTask;
+    public TaskDescription getFirstTask() {
+        while(true) {
+            synchronized(mFirstTaskLock) {
+                if (mFirstTaskLoaded) {
+                    return mFirstTask;
+                } else if (!mFirstTaskLoaded && !mPreloadingFirstTask) {
+                    mFirstTask = loadFirstTask();
+                    mFirstTaskLoaded = true;
+                    return mFirstTask;
+                }
+            }
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
+    public TaskDescription loadFirstTask() {
+        final ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+
+        final List<ActivityManager.RecentTaskInfo> recentTasks = am.getRecentTasksForUser(
+                1, ActivityManager.RECENT_IGNORE_UNAVAILABLE, UserHandle.CURRENT.getIdentifier());
+        TaskDescription item = null;
+        if (recentTasks.size() > 0) {
+            ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(0);
+
+            Intent intent = new Intent(recentInfo.baseIntent);
+            if (recentInfo.origActivity != null) {
+                intent.setComponent(recentInfo.origActivity);
+            }
+
+            // Don't load the current home activity.
+            if (isCurrentHomeActivity(intent.getComponent(), null)) {
+                return null;
+            }
+
+            // Don't load ourselves
+            if (intent.getComponent().getPackageName().equals(mContext.getPackageName())) {
+                return null;
+            }
+
+            item = createTaskDescription(recentInfo.id,
+                    recentInfo.persistentId, recentInfo.baseIntent,
+                    recentInfo.origActivity, recentInfo.description);
+            loadThumbnailAndIcon(item);
+            return item;
+        }
+        return null;
     }
 
     public void loadTasksInBackground() {
@@ -367,9 +455,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                     // Don't load the current home activity.
                     if (isCurrentHomeActivity(intent.getComponent(), homeInfo)) {
-                        if (index == 0) {
-                            mFirstTaskLoaded = true;
-                        }
                         continue;
                     }
 
@@ -466,10 +551,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
                     }
                     loadThumbnailAndIcon(td);
 
-                    if (!mFirstTaskLoaded) {
-                        mFirstTask = td;
-                        mFirstTaskLoaded = true;
-                    }
                     publishProgress(td);
                 }
 
@@ -477,8 +558,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
                 return null;
             }
         };
-        mFirstTask = null;
-        mFirstTaskLoaded = false;
         mThumbnailLoader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }
