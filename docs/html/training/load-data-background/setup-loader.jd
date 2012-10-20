@@ -1,0 +1,90 @@
+page.title=Setting Up the Loader
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+  <div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li>
+        <a href="#AddExtensions">Extend an Activity</a>
+    </li>
+    <li>
+        <a href="#GetLoader">Retrieve a LoaderManager</a>
+    </li>
+    <li>
+        <a href="#InitializeLoader">Initialize the Loader Framework</a>
+    </li>
+</ol>
+  </div>
+</div>
+<p>
+    You create a {@link android.support.v4.content.CursorLoader} within a
+    <b>loader framework</b>. To set up the framework, you implement the
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks LoaderCallbacks&lt;Cursor&gt;}
+    as part of an {@link android.app.Activity}. In addition, to provide compatibility
+    compatible with platform versions starting with Android 1.6, you must extend the
+    {@link android.app.Activity} with the {@link android.support.v4.app.FragmentActivity} class.
+</p>
+<p class="note">
+    <strong>Note:</strong> A {@link android.support.v4.app.Fragment} is not a prerequisite for
+    {@link android.support.v4.content.CursorLoader}. As a convenience, the support library class
+    {@link android.support.v4.app.FragmentActivity} contains the fragment and the loader frameworks,
+    but they are completely independent of each other.
+</p>
+<p>
+    Before you can use the loader framework, you need to initialize it. To do this, retrieve
+    a {@link android.support.v4.app.LoaderManager} object and call its
+    {@link android.support.v4.app.LoaderManager#initLoader initLoader()} method.
+</p>
+<p>
+    If you do use one or more {@link android.support.v4.app.Fragment} objects in an
+    {@link android.app.Activity}, the {@link android.support.v4.app.LoaderManager} you retrieve is
+    available to all of them.
+</p>
+<h2 id="AddExtensions">Extend an Activity</h2>
+<p>
+    To set up an {@link android.app.Activity} subclass to contain a
+    {@link android.support.v4.content.CursorLoader}, extend the subclass with
+    must extend {@link android.support.v4.app.FragmentActivity}, which provides the loader
+    framework, and implement the {@link android.support.v4.app.LoaderManager.LoaderCallbacks
+    LoaderCallbacks&lt;Cursor&gt;} interface, which specifies method signatures that the loader
+    framework uses to interact with the {@link android.app.Activity}.
+</p>
+<p>
+    For example:
+</p>
+<pre>
+public class DisplayActivity extends FragmentActivity
+        implements LoaderManager.LoaderCallbacks&lt;Cursor&gt;
+</pre>
+<h2 id="GetLoader">Retrieve a LoaderManager</h2>
+<p>
+    To get an instance {@link android.support.v4.app.LoaderManager} for use in your
+    {@link android.app.Activity}, call
+    {@link android.support.v4.app.FragmentActivity#getSupportLoaderManager
+    FragmentActivity.getSupportLoaderManager()} at the beginning of the
+    {@link android.app.Activity#onCreate onCreate()} method. For example:
+</p>
+<pre>
+private LoaderManager mLoaderManager;
+public void onCreate() {
+...
+mLoaderManager = this.getSupportLoaderManager();
+</pre>
+<h2 id="InitializeLoader">Initialize the Loader Framework</h2>
+<p>
+    Once you have the {@link android.support.v4.app.LoaderManager} object, initialize
+    it by calling {@link android.support.v4.app.LoaderManager#initLoader initLoader()}. For
+    example:
+</p>
+<pre>
+// CursorLoader instance identifier
+public static final int URL_LOADER = 0;
+...
+// Initializes the CursorLoader
+getSupportLoaderManager().initLoader(URL_LOADER, null, this);
+</pre>
