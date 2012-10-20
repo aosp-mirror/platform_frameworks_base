@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.server.search.SearchManagerService;
 import android.service.dreams.DreamService;
 import android.util.DisplayMetrics;
@@ -1005,7 +1006,7 @@ class ServerThread extends Thread {
         intent.setComponent(new ComponentName("com.android.systemui",
                     "com.android.systemui.SystemUIService"));
         Slog.d(TAG, "Starting service: " + intent);
-        context.startService(intent);
+        context.startServiceAsUser(intent, UserHandle.OWNER);
     }
 }
 
