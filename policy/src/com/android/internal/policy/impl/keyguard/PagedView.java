@@ -78,7 +78,7 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     private static final int MIN_FLING_VELOCITY = 250;
 
     // We are disabling touch interaction of the widget region for factory ROM. 
-    private static final boolean DISABLE_TOUCH_INTERACTION = true;
+    private static final boolean DISABLE_TOUCH_INTERACTION = false;
 
     static final int AUTOMATIC_PAGE_SPACING = -1;
 
