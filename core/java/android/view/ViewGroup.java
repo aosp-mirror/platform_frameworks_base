@@ -5990,11 +5990,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          */
         @Override
         public void resolveLayoutDirection(int layoutDirection) {
-            // No need to resolve if it is the same layout direction as before
-            if (this.layoutDirection == layoutDirection) {
-                return;
-            }
-
             setLayoutDirection(layoutDirection);
 
             if (!isMarginRelative()) return;
