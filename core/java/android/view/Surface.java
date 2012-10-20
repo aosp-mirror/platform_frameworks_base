@@ -258,7 +258,7 @@ public class Surface implements Parcelable {
     private native void nativeSetLayerStack(int layerStack);
 
     private static native IBinder nativeGetBuiltInDisplay(int physicalDisplayId);
-    private static native IBinder nativeCreateDisplay(String name);
+    private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeSetDisplaySurface(
             IBinder displayToken, Surface surface);
     private static native void nativeSetDisplayLayerStack(
@@ -597,11 +597,11 @@ public class Surface implements Parcelable {
     }
 
     /** @hide */
-    public static IBinder createDisplay(String name) {
+    public static IBinder createDisplay(String name, boolean secure) {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
         }
-        return nativeCreateDisplay(name);
+        return nativeCreateDisplay(name, secure);
     }
 
     /** @hide */

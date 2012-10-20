@@ -282,7 +282,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         @Override
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = Surface.createDisplay(mName);
+                IBinder displayToken = Surface.createDisplay(mName, false);
                 mDevice = new OverlayDisplayDevice(displayToken, mName,
                         mWidth, mHeight, refreshRate, mDensityDpi, surfaceTexture);
 
