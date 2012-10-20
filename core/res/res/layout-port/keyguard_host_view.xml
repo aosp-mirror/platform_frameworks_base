@@ -27,22 +27,45 @@
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
-    <include layout="@layout/keyguard_widget_region"
+    <include layout="@layout/keyguard_widget_pager"
         android:layout_width="match_parent"
-        android:layout_height="153dp" />
+        android:layout_height="match_parent" />
 
-    <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
-        android:id="@+id/view_flipper"
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:layout_weight="1"
-        android:paddingLeft="@dimen/keyguard_security_view_margin"
-        android:paddingTop="@dimen/keyguard_security_view_margin"
-        android:paddingRight="@dimen/keyguard_security_view_margin"
-        android:paddingBottom="@dimen/keyguard_security_view_margin"
-        android:gravity="center">
-    </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
+    <SlidingDrawer
+        android:id="@+id/drawer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:handle="@+id/handle"
+        android:content="@+id/keyguard_security_container">
+
+    <ImageView
+        android:id="@id/handle"
+        android:layout_width="88dip"
+        android:layout_height="44dip" 
+        android:src="@drawable/security_handle" />
+
+    <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
+        android:id="@id/keyguard_security_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|center_horizontal"
+        android:background="@drawable/security_frame">
+        <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
+            android:id="@+id/view_flipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingLeft="@dimen/keyguard_security_view_margin"
+            android:paddingTop="@dimen/keyguard_security_view_margin"
+            android:paddingRight="@dimen/keyguard_security_view_margin"
+            android:paddingBottom="@dimen/keyguard_security_view_margin"
+            android:gravity="center">
+        </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
+    </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>
+
+ </SlidingDrawer>
+
 </com.android.internal.policy.impl.keyguard.KeyguardHostView>
 

@@ -73,8 +73,8 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         super(context, attrs, defStyle);
 
         Resources res = mContext.getResources();
-        mActiveTextColor = res.getColor(R.color.kg_multi_user_text_active);
-        mInactiveTextColor = res.getColor(R.color.kg_multi_user_text_inactive);
+        mActiveTextColor = res.getColor(com.android.internal.R.color.kg_multi_user_text_active);
+        mInactiveTextColor = res.getColor(com.android.internal.R.color.kg_multi_user_text_inactive);
     }
 
     public void init(UserInfo user, KeyguardMultiUserSelectorView userSelector) {
