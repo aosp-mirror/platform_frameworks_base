@@ -981,19 +981,22 @@ public class PackageManagerTests extends AndroidTestCase {
         try {
             DeleteObserver observer = new DeleteObserver(pkgName);
 
-            getPm().deletePackage(pkgName, observer, flags);
+            getPm().deletePackage(pkgName, observer, flags | PackageManager.DELETE_ALL_USERS);
             observer.waitForCompletion(MAX_WAIT_TIME);
 
             assertUninstalled(info);
 
             // Verify we received the broadcast
-            long waitTime = 0;
-            while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                receiver.wait(WAIT_TIME_INCR);
-                waitTime += WAIT_TIME_INCR;
-            }
-            if (!receiver.isDone()) {
-                throw new Exception("Timed out waiting for PACKAGE_REMOVED notification");
+            // TODO replace this with a CountDownLatch
+            synchronized (receiver) {
+                long waitTime = 0;
+                while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
+                    receiver.wait(WAIT_TIME_INCR);
+                    waitTime += WAIT_TIME_INCR;
+                }
+                if (!receiver.isDone()) {
+                    throw new Exception("Timed out waiting for PACKAGE_REMOVED notification");
+                }
             }
             return receiver.received;
         } finally {
@@ -1331,7 +1334,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
 
         DeleteObserver observer = new DeleteObserver(packageName);
-        getPm().deletePackage(packageName, observer, 0);
+        getPm().deletePackage(packageName, observer, PackageManager.DELETE_ALL_USERS);
         observer.waitForCompletion(MAX_WAIT_TIME);
 
         try {
@@ -1357,7 +1360,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
             if (info != null) {
                 DeleteObserver observer = new DeleteObserver(pkgName);
-                getPm().deletePackage(pkgName, observer, 0);
+                getPm().deletePackage(pkgName, observer, PackageManager.DELETE_ALL_USERS);
                 observer.waitForCompletion(MAX_WAIT_TIME);
                 assertUninstalled(info);
             }
@@ -3126,7 +3129,7 @@ public class PackageManagerTests extends AndroidTestCase {
             int rawResId = apk2;
             Uri packageURI = getInstallablePackage(rawResId, outFile);
             PackageParser.Package pkg = parsePackage(packageURI);
-            getPm().deletePackage(pkg.packageName, null, 0);
+            getPm().deletePackage(pkg.packageName, null, PackageManager.DELETE_ALL_USERS);
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
                     ip1.pkg.packageName, pkg.packageName);
@@ -3265,7 +3268,7 @@ public class PackageManagerTests extends AndroidTestCase {
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
             PackageParser.Package pkg = getParsedPackage(apk2Name, apk2);
-            getPm().deletePackage(pkg.packageName, null, 0);
+            getPm().deletePackage(pkg.packageName, null, PackageManager.DELETE_ALL_USERS);
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
                     ip1.pkg.packageName, pkg.packageName);
