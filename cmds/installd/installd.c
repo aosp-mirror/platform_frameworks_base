@@ -123,7 +123,7 @@ static int do_movefiles(char **arg, char reply[REPLY_MAX])
 
 static int do_linklib(char **arg, char reply[REPLY_MAX])
 {
-    return linklib(arg[0], arg[1]);
+    return linklib(arg[0], arg[1], atoi(arg[2]));
 }
 
 struct cmdinfo {
@@ -146,7 +146,7 @@ struct cmdinfo cmds[] = {
     { "getsize",              5, do_get_size },
     { "rmuserdata",           2, do_rm_user_data },
     { "movefiles",            0, do_movefiles },
-    { "linklib",              2, do_linklib },
+    { "linklib",              3, do_linklib },
     { "mkuserdata",           3, do_mk_user_data },
     { "rmuser",               1, do_rm_user },
     { "cloneuserdata",        3, do_clone_user_data },
