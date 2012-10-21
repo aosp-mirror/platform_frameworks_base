@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -249,7 +250,10 @@ public abstract class KeyguardViewBase extends FrameLayout {
     @Override
     public void dispatchSystemUiVisibilityChanged(int visibility) {
         super.dispatchSystemUiVisibilityChanged(visibility);
-        setSystemUiVisibility(STATUS_BAR_DISABLE_BACK);
+
+        if (!(mContext instanceof Activity)) {
+            setSystemUiVisibility(STATUS_BAR_DISABLE_BACK);
+        }
     }
 
     public void setViewMediatorCallback(

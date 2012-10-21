@@ -86,6 +86,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private LockPatternUtils mLockPatternUtils;
 
     private KeyguardSecurityModel mSecurityModel;
+    private KeyguardViewStateManager mViewStateManager;
 
     private Rect mTempRect = new Rect();
     private int mTransportState = TRANSPORT_GONE;
@@ -150,16 +151,33 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
+        // Grab instances of and make any necessary changes to the main layouts. Create
+        // view state manager and wire up necessary listeners / callbacks.
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
+        mAppWidgetContainer.setMinScale(0.5f);
+
+        addDefaultWidgets();
+        maybePopulateWidgets();
+
+        mViewStateManager = new KeyguardViewStateManager();
+        SlidingChallengeLayout challengeLayout =
+                (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+        challengeLayout.setOnChallengeScrolledListener(mViewStateManager);
+        mAppWidgetContainer.setViewStateManager(mViewStateManager);
+
+        mViewStateManager.setPagedView(mAppWidgetContainer);
+        mViewStateManager.setSlidingChallenge(challengeLayout);
 
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
 
-        addDefaultWidgets();
+
         updateSecurityViews();
-        setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+        if (!(mContext instanceof Activity)) {
+            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
+        }
 
         if (KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
             showPrimarySecurityScreen(false);
@@ -193,8 +211,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
-        // TODO: Re-enable when we have layouts that can support a better variety of widgets.
-        maybePopulateWidgets();
         disableStatusViewInteraction();
         post(mSwitchPageRunnable);
     }
@@ -219,8 +235,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         return mAppWidgetHost;
     }
 
-    void addWidget(AppWidgetHostView view) {
-        mAppWidgetContainer.addWidget(view);
+    void addWidget(AppWidgetHostView view, int pageIndex) {
+        mAppWidgetContainer.addWidget(view, pageIndex);
     }
 
     private KeyguardWidgetPager.Callbacks mWidgetCallbacks
@@ -798,12 +814,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private void addWidget(int appId) {
+    private void addWidget(int appId, int pageIndex) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
         AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(appId);
         if (appWidgetInfo != null) {
             AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
-            addWidget(view);
+            addWidget(view, pageIndex);
         } else {
             Log.w(TAG, "AppWidgetInfo was null; not adding widget id " + appId);
         }
@@ -813,9 +829,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
 
-        inflater.inflate(R.layout.keyguard_add_widget, mAppWidgetContainer, true);
-        inflater.inflate(R.layout.keyguard_status_view, mAppWidgetContainer, true);
-        inflater.inflate(R.layout.keyguard_camera_widget, mAppWidgetContainer, true);
+        View addWidget = inflater.inflate(R.layout.keyguard_add_widget, null, true);
+        mAppWidgetContainer.addWidget(addWidget);
+        View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
+        mAppWidgetContainer.addWidget(statusWidget);
+        View cameraWidget = inflater.inflate(R.layout.keyguard_camera_widget, null, true);
+        mAppWidgetContainer.addWidget(cameraWidget);
 
         inflateAndAddUserSelectorWidgetIfNecessary();
         initializeTransportControl();
@@ -876,29 +895,21 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-        // Replace status widget if selected by user in Settings
-        int statusWidgetId = mLockPatternUtils.getStatusWidget();
-        if (statusWidgetId != -1) {
-            addWidget(statusWidgetId);
-            View newStatusWidget = mAppWidgetContainer.getChildAt(
-                    mAppWidgetContainer.getChildCount() - 1);
-
-            int oldStatusWidgetPosition = getWidgetPosition(R.id.keyguard_status_view);
-            mAppWidgetContainer.removeViewAt(oldStatusWidgetPosition);
-
-            // Re-add new status widget at position of old one
-            mAppWidgetContainer.removeView(newStatusWidget);
-            newStatusWidget.setId(R.id.keyguard_status_view);
-            mAppWidgetContainer.addView(newStatusWidget, oldStatusWidgetPosition);
+        View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
+        int addPageIndex = mAppWidgetContainer.indexOfChild(addWidget);
+        // This shouldn't happen, but just to be safe!
+        if (addPageIndex < 0) {
+            addPageIndex = 0;
         }
 
         // Add user-selected widget
         final int[] widgets = mLockPatternUtils.getUserDefinedWidgets();
-        System.out.println("Num widgets: " + widgets.length);
-        for (int i = 0; i < widgets.length; i++) {
-            System.out.println("   widget: " + widgets[i]);
+        for (int i = widgets.length -1; i >= 0; i--) {
             if (widgets[i] != -1) {
-                addWidget(widgets[i]);
+                // We add the widgets from left to right, starting after the first page after
+                // the add page. We count down, since the order will be persisted from right
+                // to left, starting after camera.
+                addWidget(widgets[i], addPageIndex + 1);
             }
         }
     }
