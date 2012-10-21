@@ -19,9 +19,11 @@ package com.android.server.pm;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IStopUserCallback;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -736,21 +738,38 @@ public class UserManagerService extends IUserManager.Stub {
         return res == ActivityManager.USER_OP_SUCCESS;
     }
 
-    void finishRemoveUser(int userHandle) {
+    void finishRemoveUser(final int userHandle) {
         if (DBG) Slog.i(LOG_TAG, "finishRemoveUser " + userHandle);
-        synchronized (mInstallLock) {
-            synchronized (mPackagesLock) {
-                removeUserStateLocked(userHandle);
-            }
-        }
-        if (DBG) Slog.i(LOG_TAG, "Removed user " + userHandle + ", sending broadcast");
-        // Let other services shutdown any activity
+        // Let other services shutdown any activity and clean up their state before completely
+        // wiping the user's system directory and removing from the user list
         long ident = Binder.clearCallingIdentity();
         try {
             Intent addedIntent = new Intent(Intent.ACTION_USER_REMOVED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
-            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
-                    android.Manifest.permission.MANAGE_USERS);
+            mContext.sendOrderedBroadcastAsUser(addedIntent, UserHandle.ALL,
+                    android.Manifest.permission.MANAGE_USERS,
+
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            if (DBG) {
+                                Slog.i(LOG_TAG,
+                                        "USER_REMOVED broadcast sent, cleaning up user data "
+                                        + userHandle);
+                            }
+                            new Thread() {
+                                public void run() {
+                                    synchronized (mInstallLock) {
+                                        synchronized (mPackagesLock) {
+                                            removeUserStateLocked(userHandle);
+                                        }
+                                    }
+                                }
+                            }.start();
+                        }
+                    },
+
+                    null, Activity.RESULT_OK, null, null);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
