@@ -269,7 +269,9 @@ public class SyncManager {
     }
 
     private void doDatabaseCleanup() {
-        for (UserInfo user : mUserManager.getUsers()) {
+        for (UserInfo user : mUserManager.getUsers(true)) {
+            // Skip any partially created/removed users
+            if (user.partial) continue;
             Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(user.id);
             mSyncStorageEngine.doDatabaseCleanup(accountsForUser, user.id);
         }
