@@ -8243,6 +8243,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case MotionEvent.ACTION_CANCEL:
                     setPressed(false);
                     removeTapCallback();
+                    removeLongPressCallback();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
