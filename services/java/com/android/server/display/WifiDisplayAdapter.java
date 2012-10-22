@@ -292,7 +292,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         float refreshRate = 60.0f; // TODO: get this for real
 
         String name = display.getFriendlyDisplayName();
-        IBinder displayToken = Surface.createDisplay(name);
+        IBinder displayToken = Surface.createDisplay(name, false);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
