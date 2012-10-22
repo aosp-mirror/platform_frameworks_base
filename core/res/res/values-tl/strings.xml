@@ -1381,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI Screen"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Nakakonekta ang wireless na display"</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Lumalabas ang screen na ito sa isa pang device"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Alisin sa pagkakakonekta"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Emergency na tawag"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nakalimutan ang Pattern"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Maling Pattern"</string>
@@ -1418,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>

@@ -1381,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI екран"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Постављени елемент бр. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>×<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Бежични екран је повезан"</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Овај екран се приказује на другом уређају"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Прекини везу"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитни позив"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Заборављени шаблон"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешан шаблон"</string>
@@ -1418,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Желите да појачате звук изнад безбедног нивоа?"\n"Ако дуже време слушате гласну музику, може доћи до оштећења слуха."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Држите са два прста да бисте омогућили приступачност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>

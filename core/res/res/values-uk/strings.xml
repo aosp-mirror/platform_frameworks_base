@@ -1381,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Екран HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Бездротовий екран під’єднано"</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Цей екран відображається на іншому пристрої"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Від’єднати"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Екстрений виклик"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
@@ -1418,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати планшетний ПК за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Збільшити гучність понад безпечний рівень?"\n"Надто гучне прослуховування впродовж тривалого періоду може пошкодити слух."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утримуйте двома пальцями, щоб увімкнути доступність."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Доступність увімкнено."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Доступність скасовано."</string>
     <string name="user_switched" msgid="3768006783166984410">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>

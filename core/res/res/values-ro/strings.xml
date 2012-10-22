@@ -1381,6 +1381,12 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Ecran HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Suprapunerea <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_message (4498802012464170685) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_disconnect (6183754463561153372) -->
+    <skip />
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Apel de urgenţă"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Model uitat"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Model greşit"</string>
@@ -1418,8 +1424,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail."\n\n" Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ridicaţi volumul mai sus de nivelul sigur?"\n"Ascultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Menţineţi două degete pe ecran pentru a activa accesibilitatea."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>

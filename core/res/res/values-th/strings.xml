@@ -1381,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"หน้าจอ HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"การวางซ้อน #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"เชื่อมต่อการแสดงผลแบบไร้สายอยู่"</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"หน้าจอนี้กำลังแสดงบนอุปกรณ์อื่น"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"หยุดเชื่อมต่อ"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"หมายเลขฉุกเฉิน"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ลืมรูปแบบใช่หรือไม่"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"รูปแบบไม่ถูกต้อง"</string>
@@ -1418,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล"\n\n" โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล"\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"เพิ่มระดับเสียงจนเกินระดับที่ปลอดภัยหรือไม่"\n"การฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ใช้สองนิ้วแตะค้างไว้เพื่อเปิดใช้งานการเข้าถึง"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
