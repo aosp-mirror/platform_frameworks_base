@@ -653,9 +653,11 @@ static jobject nativeGetBuiltInDisplay(JNIEnv* env, jclass clazz, jint id) {
     return javaObjectForIBinder(env, token);
 }
 
-static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj) {
+static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj,
+        jboolean secure) {
     ScopedUtfChars name(env, nameObj);
-    sp<IBinder> token(SurfaceComposerClient::createDisplay(String8(name.c_str())));
+    sp<IBinder> token(SurfaceComposerClient::createDisplay(
+            String8(name.c_str()), bool(secure)));
     return javaObjectForIBinder(env, token);
 }
 
@@ -845,7 +847,7 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeSetLayerStack },
     {"nativeGetBuiltInDisplay", "(I)Landroid/os/IBinder;",
             (void*)nativeGetBuiltInDisplay },
-    {"nativeCreateDisplay", "(Ljava/lang/String;)Landroid/os/IBinder;",
+    {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
     {"nativeSetDisplaySurface", "(Landroid/os/IBinder;Landroid/view/Surface;)V",
             (void*)nativeSetDisplaySurface },
