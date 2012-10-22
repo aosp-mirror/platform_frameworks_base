@@ -16,6 +16,10 @@
 
 package com.android.server.power;
 
+import com.android.server.LightsService;
+
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.FloatProperty;
@@ -26,47 +30,55 @@ import android.view.Choreographer;
 import java.io.PrintWriter;
 
 /**
- * Represents the current display power state and realizes it.
- *
+ * Controls the display power state.
+ * <p>
  * This component is similar in nature to a {@link View} except that it describes
  * the properties of a display.  When properties are changed, the component
- * invalidates itself and posts a callback to the {@link Choreographer} to
- * apply the changes.  This mechanism enables the display power state to be
- * animated smoothly by the animation framework.
- *
+ * invalidates itself and posts a callback to apply the changes in a consistent order.
+ * This mechanism enables multiple properties of the display power state to be animated
+ * together smoothly by the animation framework.  Some of the work to blank or unblank
+ * the display is done on a separate thread to avoid blocking the looper.
+ * </p><p>
  * This component must only be created or accessed by the {@link Looper} thread
  * that belongs to the {@link DisplayPowerController}.
- *
+ * </p><p>
  * We don't need to worry about holding a suspend blocker here because the
- * {@link DisplayPowerController} does that for us whenever there is a pending invalidate.
+ * {@link PowerManagerService} does that for us whenever there is a change
+ * in progress.
+ * </p>
  */
 final class DisplayPowerState {
     private static final String TAG = "DisplayPowerState";
 
     private static boolean DEBUG = false;
 
-    private static final int DIRTY_SCREEN_ON = 1 << 0;
-    private static final int DIRTY_ELECTRON_BEAM = 1 << 1;
-    private static final int DIRTY_BRIGHTNESS = 1 << 2;
-
+    private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final ElectronBeam mElectronBeam;
-    private final PhotonicModulator mPhotonicModulator;
     private final DisplayBlanker mDisplayBlanker;
+    private final LightsService.Light mBacklight;
+    private final PhotonicModulator mPhotonicModulator;
 
-    private int mDirty;
     private boolean mScreenOn;
-    private float mElectronBeamLevel;
     private int mScreenBrightness;
+    private boolean mScreenReady;
+    private boolean mScreenUpdatePending;
+
+    private boolean mElectronBeamPrepared;
+    private float mElectronBeamLevel;
+    private boolean mElectronBeamReady;
+    private boolean mElectronBeamDrawPending;
 
     private Runnable mCleanListener;
 
     public DisplayPowerState(ElectronBeam electronBean,
-            PhotonicModulator photonicModulator, DisplayBlanker displayBlanker) {
+            DisplayBlanker displayBlanker, LightsService.Light backlight) {
+        mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mElectronBeam = electronBean;
-        mPhotonicModulator = photonicModulator;
         mDisplayBlanker = displayBlanker;
+        mBacklight = backlight;
+        mPhotonicModulator = new PhotonicModulator();
 
         // At boot time, we know that the screen is on and the electron beam
         // animation is not playing.  We don't know the screen's brightness though,
@@ -75,9 +87,12 @@ final class DisplayPowerState {
         // will reset the brightness to a new level immediately before the changes
         // actually have a chance to be applied.
         mScreenOn = true;
-        mElectronBeamLevel = 1.0f;
         mScreenBrightness = PowerManager.BRIGHTNESS_ON;
-        invalidate(DIRTY_BRIGHTNESS);
+        scheduleScreenUpdate();
+
+        mElectronBeamPrepared = false;
+        mElectronBeamLevel = 1.0f;
+        mElectronBeamReady = true;
     }
 
     public static final FloatProperty<DisplayPowerState> ELECTRON_BEAM_LEVEL =
@@ -116,7 +131,8 @@ final class DisplayPowerState {
             }
 
             mScreenOn = on;
-            invalidate(DIRTY_SCREEN_ON);
+            mScreenReady = false;
+            scheduleScreenUpdate();
         }
     }
 
@@ -128,6 +144,32 @@ final class DisplayPowerState {
     }
 
     /**
+     * Sets the display brightness.
+     *
+     * @param brightness The brightness, ranges from 0 (minimum / off) to 255 (brightest).
+     */
+    public void setScreenBrightness(int brightness) {
+        if (mScreenBrightness != brightness) {
+            if (DEBUG) {
+                Slog.d(TAG, "setScreenBrightness: brightness=" + brightness);
+            }
+
+            mScreenBrightness = brightness;
+            if (mScreenOn) {
+                mScreenReady = false;
+                scheduleScreenUpdate();
+            }
+        }
+    }
+
+    /**
+     * Gets the screen brightness.
+     */
+    public int getScreenBrightness() {
+        return mScreenBrightness;
+    }
+
+    /**
      * Prepares the electron beam to turn on or off.
      * This method should be called before starting an animation because it
      * can take a fair amount of time to prepare the electron beam surface.
@@ -136,8 +178,16 @@ final class DisplayPowerState {
      * @return True if the electron beam was prepared.
      */
     public boolean prepareElectronBeam(int mode) {
-        invalidate(DIRTY_ELECTRON_BEAM);
-        return mElectronBeam.prepare(mode);
+        if (!mElectronBeam.prepare(mode)) {
+            mElectronBeamPrepared = false;
+            mElectronBeamReady = true;
+            return false;
+        }
+
+        mElectronBeamPrepared = true;
+        mElectronBeamReady = false;
+        scheduleElectronBeamDraw();
+        return true;
     }
 
     /**
@@ -145,6 +195,8 @@ final class DisplayPowerState {
      */
     public void dismissElectronBeam() {
         mElectronBeam.dismiss();
+        mElectronBeamPrepared = false;
+        mElectronBeamReady = true;
     }
 
     /**
@@ -167,7 +219,14 @@ final class DisplayPowerState {
             }
 
             mElectronBeamLevel = level;
-            invalidate(DIRTY_ELECTRON_BEAM);
+            if (mScreenOn) {
+                mScreenReady = false;
+                scheduleScreenUpdate(); // update backlight brightness
+            }
+            if (mElectronBeamPrepared) {
+                mElectronBeamReady = false;
+                scheduleElectronBeamDraw();
+            }
         }
     }
 
@@ -179,36 +238,13 @@ final class DisplayPowerState {
     }
 
     /**
-     * Sets the display brightness.
-     *
-     * @param brightness The brightness, ranges from 0 (minimum / off) to 255 (brightest).
-     */
-    public void setScreenBrightness(int brightness) {
-        if (mScreenBrightness != brightness) {
-            if (DEBUG) {
-                Slog.d(TAG, "setScreenBrightness: brightness=" + brightness);
-            }
-
-            mScreenBrightness = brightness;
-            invalidate(DIRTY_BRIGHTNESS);
-        }
-    }
-
-    /**
-     * Gets the screen brightness.
-     */
-    public int getScreenBrightness() {
-        return mScreenBrightness;
-    }
-
-    /**
      * Returns true if no properties have been invalidated.
      * Otherwise, returns false and promises to invoke the specified listener
      * when the properties have all been applied.
      * The listener always overrides any previously set listener.
      */
     public boolean waitUntilClean(Runnable listener) {
-        if (mDirty != 0) {
+        if (!mScreenReady || !mElectronBeamReady) {
             mCleanListener = listener;
             return false;
         } else {
@@ -220,58 +256,159 @@ final class DisplayPowerState {
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Display Power State:");
-        pw.println("  mDirty=" + Integer.toHexString(mDirty));
         pw.println("  mScreenOn=" + mScreenOn);
         pw.println("  mScreenBrightness=" + mScreenBrightness);
+        pw.println("  mScreenReady=" + mScreenReady);
+        pw.println("  mScreenUpdatePending=" + mScreenUpdatePending);
+        pw.println("  mElectronBeamPrepared=" + mElectronBeamPrepared);
         pw.println("  mElectronBeamLevel=" + mElectronBeamLevel);
+        pw.println("  mElectronBeamReady=" + mElectronBeamReady);
+        pw.println("  mElectronBeamDrawPending=" + mElectronBeamDrawPending);
 
+        mPhotonicModulator.dump(pw);
         mElectronBeam.dump(pw);
     }
 
-    private void invalidate(int dirty) {
-        if (mDirty == 0) {
+    private void scheduleScreenUpdate() {
+        if (!mScreenUpdatePending) {
+            mScreenUpdatePending = true;
+            postScreenUpdateThreadSafe();
+        }
+    }
+
+    private void postScreenUpdateThreadSafe() {
+        mHandler.removeCallbacks(mScreenUpdateRunnable);
+        mHandler.post(mScreenUpdateRunnable);
+    }
+
+    private void scheduleElectronBeamDraw() {
+        if (!mElectronBeamDrawPending) {
+            mElectronBeamDrawPending = true;
             mChoreographer.postCallback(Choreographer.CALLBACK_TRAVERSAL,
-                    mTraversalRunnable, null);
-        }
-
-        mDirty |= dirty;
-    }
-
-    private void apply() {
-        if (mDirty != 0) {
-            if ((mDirty & DIRTY_SCREEN_ON) != 0 && !mScreenOn) {
-                mPhotonicModulator.setBrightness(0, true /*sync*/);
-                mDisplayBlanker.blankAllDisplays();
-            }
-
-            if ((mDirty & DIRTY_ELECTRON_BEAM) != 0) {
-                mElectronBeam.draw(mElectronBeamLevel);
-            }
-
-            if ((mDirty & DIRTY_SCREEN_ON) != 0 && mScreenOn) {
-                mDisplayBlanker.unblankAllDisplays();
-            }
-
-            if ((mDirty & (DIRTY_BRIGHTNESS | DIRTY_SCREEN_ON | DIRTY_ELECTRON_BEAM)) != 0
-                    && mScreenOn) {
-                mPhotonicModulator.setBrightness(
-                        (int)(mScreenBrightness * mElectronBeamLevel), false /*sync*/);
-            }
-
-            mDirty = 0;
-
-            if (mCleanListener != null) {
-                mCleanListener.run();
-            }
+                    mElectronBeamDrawRunnable, null);
         }
     }
 
-    private final Runnable mTraversalRunnable = new Runnable() {
+    private void invokeCleanListenerIfNeeded() {
+        final Runnable listener = mCleanListener;
+        if (listener != null && mScreenReady && mElectronBeamReady) {
+            mCleanListener = null;
+            listener.run();
+        }
+    }
+
+    private final Runnable mScreenUpdateRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mDirty != 0) {
-                apply();
+            mScreenUpdatePending = false;
+
+            if (mPhotonicModulator.setState(mScreenOn,
+                    mScreenOn ? (int)(mScreenBrightness * mElectronBeamLevel) : 0)) {
+                mScreenReady = true;
+                invokeCleanListenerIfNeeded();
             }
         }
     };
+
+    private final Runnable mElectronBeamDrawRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mElectronBeamDrawPending = false;
+
+            if (mElectronBeamPrepared) {
+                mElectronBeam.draw(mElectronBeamLevel);
+            }
+
+            mElectronBeamReady = true;
+            invokeCleanListenerIfNeeded();
+        }
+    };
+
+    /**
+     * Updates the state of the screen and backlight asynchronously on a separate thread.
+     */
+    private final class PhotonicModulator {
+        private static final boolean INITIAL_SCREEN_ON = false; // unknown, assume off
+        private static final int INITIAL_BACKLIGHT = -1; // unknown
+
+        private final Object mLock = new Object();
+
+        private boolean mPendingOn = INITIAL_SCREEN_ON;
+        private int mPendingBacklight = INITIAL_BACKLIGHT;
+        private boolean mActualOn = INITIAL_SCREEN_ON;
+        private int mActualBacklight = INITIAL_BACKLIGHT;
+        private boolean mChangeInProgress;
+
+        public boolean setState(boolean on, int backlight) {
+            synchronized (mLock) {
+                if (on != mPendingOn || backlight != mPendingBacklight) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Requesting new screen state: on=" + on
+                                + ", backlight=" + backlight);
+                    }
+
+                    mPendingOn = on;
+                    mPendingBacklight = backlight;
+
+                    if (!mChangeInProgress) {
+                        mChangeInProgress = true;
+                        AsyncTask.THREAD_POOL_EXECUTOR.execute(mTask);
+                    }
+                }
+                return mChangeInProgress;
+            }
+        }
+
+        public void dump(PrintWriter pw) {
+            pw.println();
+            pw.println("Photonic Modulator State:");
+            pw.println("  mPendingOn=" + mPendingOn);
+            pw.println("  mPendingBacklight=" + mPendingBacklight);
+            pw.println("  mActualOn=" + mActualOn);
+            pw.println("  mActualBacklight=" + mActualBacklight);
+            pw.println("  mChangeInProgress=" + mChangeInProgress);
+        }
+
+        private final Runnable mTask = new Runnable() {
+            @Override
+            public void run() {
+                // Apply pending changes until done.
+                for (;;) {
+                    final boolean on;
+                    final boolean onChanged;
+                    final int backlight;
+                    final boolean backlightChanged;
+                    synchronized (mLock) {
+                        on = mPendingOn;
+                        onChanged = (on != mActualOn);
+                        backlight = mPendingBacklight;
+                        backlightChanged = (backlight != mActualBacklight);
+                        if (!onChanged && !backlightChanged) {
+                            mChangeInProgress = false;
+                            break;
+                        }
+                        mActualOn = on;
+                        mActualBacklight = backlight;
+                    }
+
+                    if (DEBUG) {
+                        Slog.d(TAG, "Updating screen state: on=" + on
+                                + ", backlight=" + backlight);
+                    }
+                    if (onChanged && on) {
+                        mDisplayBlanker.unblankAllDisplays();
+                    }
+                    if (backlightChanged) {
+                        mBacklight.setBrightness(backlight);
+                    }
+                    if (onChanged && !on) {
+                        mDisplayBlanker.blankAllDisplays();
+                    }
+                }
+
+                // Let the outer class know that all changes have been applied.
+                postScreenUpdateThreadSafe();
+            }
+        };
+    }
 }
