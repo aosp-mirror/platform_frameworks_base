@@ -94,7 +94,7 @@
             android:scaleType="center"
             android:src="@drawable/ic_notify_settings"
             android:background="@drawable/ic_notify_button_bg"
-            android:contentDescription="@string/accessibility_settings_button"
+            android:contentDescription="@string/accessibility_desc_quick_settings"
             />
         <ImageView android:id="@+id/notification_button"
             android:layout_width="50dp"
