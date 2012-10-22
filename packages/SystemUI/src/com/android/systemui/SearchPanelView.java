@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import android.animation.LayoutTransition;
+import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -24,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -71,12 +73,21 @@ public class SearchPanelView extends FrameLayout implements
     }
 
     private void startAssistActivity() {
+        if (!mBar.isDeviceProvisioned()) return;
+
         // Close Recent Apps if needed
         mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
         // Launch Assist
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, UserHandle.USER_CURRENT);
         if (intent == null) return;
+
+        // Dismiss the keyguard if possible. XXX: TODO: invoke bouncer.
+        try {
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+        } catch (RemoteException e) {
+        }
+
         try {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.search_launch_enter, R.anim.search_launch_exit,
