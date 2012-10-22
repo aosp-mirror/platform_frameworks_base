@@ -1381,6 +1381,12 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-képernyő"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. fedvény"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> képpont"</string>
+    <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_message (4498802012464170685) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_disconnect (6183754463561153372) -->
+    <skip />
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Segélyhívás"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Helytelen minta"</string>
@@ -1418,8 +1424,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"A biztonságos szint fölé emeli a hangerőt?"\n"Ha hosszú ideig hangosan hallgatja a zenét, az károsíthatja a hallását."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>

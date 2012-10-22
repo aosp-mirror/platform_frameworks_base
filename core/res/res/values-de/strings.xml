@@ -1381,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"WLAN-Anzeige ist aktiv."</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Dieser Bildschirm wird auf einem anderen Gerät angezeigt."</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Verbindung trennen"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Notruf"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Muster vergessen"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Falsches Muster"</string>
@@ -1418,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren."\n\n" Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lautstärke höher als Schwellenwert stellen?"\n"Wenn Sie über längere Zeiträume hinweg Musik in hoher Lautstärke hören, kann dies Ihr Gehör schädigen."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Drücken Sie mit zwei Fingern, um die Bedienungshilfen zu aktivieren."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Bedienungshilfen aktiviert"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Bedienungshilfen abgebrochen"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>

@@ -777,7 +777,7 @@
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"“暂停”按钮"</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"“播放”按钮"</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"“停止”按钮"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"只能使用紧急呼救"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"只能拨打紧急呼救电话"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
@@ -1381,6 +1381,12 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 屏幕"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"叠加视图 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_message (4498802012464170685) -->
+    <skip />
+    <!-- no translation found for wifi_display_notification_disconnect (6183754463561153372) -->
+    <skip />
     <string name="kg_emergency_call_label" msgid="684946192523830531">"紧急呼救"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
@@ -1418,8 +1424,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"将音量调高到安全级别以上？"\n"长时间聆听高音量可能会损伤听力。"</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
