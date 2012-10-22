@@ -1374,6 +1374,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 화면"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"무선 디스플레이가 연결되었습니다."</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"이 화면은 다른 기기에서 표시되고 있습니다."</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"연결 해제"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"긴급 통화"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
