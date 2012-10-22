@@ -99,8 +99,8 @@ public:
     void destructorLocked(SkiaShader* resource);
     void destructorLocked(SkiaColorFilter* resource);
 
-    void recycle(SkBitmap* resource);
-    void recycleLocked(SkBitmap* resource);
+    bool recycle(SkBitmap* resource);
+    bool recycleLocked(SkBitmap* resource);
 
 private:
     void deleteResourceReferenceLocked(void* resource, ResourceReference* ref);
