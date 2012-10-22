@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.graphics.Typeface;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -172,7 +173,7 @@ public class ClockView extends RelativeLayout {
             filter.addAction(Intent.ACTION_TIME_TICK);
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-            mContext.registerReceiver(mIntentReceiver, filter);
+            mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.OWNER, filter, null, null );
         }
 
         /* monitor 12/24-hour display preference */

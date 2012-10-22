@@ -2605,7 +2605,7 @@ public class SyncManager {
             syncStateIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             syncStateIntent.putExtra("active", mNeedSyncActiveNotification);
             syncStateIntent.putExtra("failing", false);
-            mContext.sendBroadcast(syncStateIntent);
+            mContext.sendBroadcastAsUser(syncStateIntent, UserHandle.OWNER);
         }
 
         private void installHandleTooManyDeletesNotification(Account account, String authority,
