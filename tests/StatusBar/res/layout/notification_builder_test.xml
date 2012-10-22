@@ -371,6 +371,12 @@
                         android:tag="Oh my goodness.  SOMETHING HAPPENED!!!!"
                         />
                 <RadioButton
+                        android:id="@+id/text_emoji"
+                        style="@style/FieldContents"
+                        android:text="emoji"
+                        android:tag="_ Cactus _ Cactus _"
+                        />
+                <RadioButton
                         android:id="@+id/text_haiku"
                         style="@style/FieldContents"
                         android:text="haiku"
@@ -570,6 +576,12 @@
                         style="@style/FieldContents"
                         android:text="haiku"
                         android:tag="sholes final approach\nlanding gear punted to flan\nrunway foam glistens"
+                        />
+                <RadioButton
+                        android:id="@+id/ticker_emoji"
+                        style="@style/FieldContents"
+                        android:text="emoji"
+                        android:tag="_ Cactus _ Cactus _"
                         />
                 <RadioButton
                         android:id="@+id/ticker_custom"
