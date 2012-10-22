@@ -243,14 +243,14 @@ public final class Installer {
         return execute(builder.toString());
     }
 
-    public int fixUid(String name, int uid, int gid) {
+    public int fixUid(String name, int uid, int userId) {
         StringBuilder builder = new StringBuilder("fixuid");
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
         builder.append(uid);
         builder.append(' ');
-        builder.append(gid);
+        builder.append(userId);
         return execute(builder.toString());
     }
 
