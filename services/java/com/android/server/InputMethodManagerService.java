@@ -1561,7 +1561,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, span.hashCode());
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
                 return true;
             }
         }
@@ -1649,7 +1649,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra("input_method_id", id);
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
             unbindCurrentClientLocked();
         } finally {

@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.os.UserHandle;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
@@ -83,8 +84,8 @@ final class DreamController {
     public void startDream(Binder token, ComponentName name, boolean isTest, int userId) {
         stopDream();
 
-        // Close the notification shade
-        mContext.sendBroadcast(mCloseNotificationShadeIntent);
+        // Close the notification shade. Don't need to send to all, but better to be explicit.
+        mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
 
         Slog.i(TAG, "Starting dream: name=" + name + ", isTest=" + isTest + ", userId=" + userId);
 
@@ -128,7 +129,7 @@ final class DreamController {
                 + ", isTest=" + oldDream.mIsTest + ", userId=" + oldDream.mUserId);
 
         if (oldDream.mSentStartBroadcast) {
-            mContext.sendBroadcast(mDreamingStoppedIntent);
+            mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
         }
 
         if (oldDream.mService != null) {
@@ -180,7 +181,7 @@ final class DreamController {
         mCurrentDream.mService = service;
 
         if (!mCurrentDream.mIsTest) {
-            mContext.sendBroadcast(mDreamingStartedIntent);
+            mContext.sendBroadcastAsUser(mDreamingStartedIntent, UserHandle.ALL);
             mCurrentDream.mSentStartBroadcast = true;
         }
     }
