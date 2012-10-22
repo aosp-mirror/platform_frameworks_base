@@ -261,14 +261,14 @@ static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
     delete bitmap;
 }
 
-static void Bitmap_recycle(JNIEnv* env, jobject, SkBitmap* bitmap) {
+static jboolean Bitmap_recycle(JNIEnv* env, jobject, SkBitmap* bitmap) {
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().resourceCache.recycle(bitmap);
-        return;
+        return android::uirenderer::Caches::getInstance().resourceCache.recycle(bitmap);
     }
 #endif // USE_OPENGL_RENDERER
     bitmap->setPixels(NULL, NULL);
+    return true;
 }
 
 // These must match the int values in Bitmap.java
@@ -665,7 +665,7 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeCopy",               "(IIZ)Landroid/graphics/Bitmap;",
         (void*)Bitmap_copy },
     {   "nativeDestructor",         "(I)V", (void*)Bitmap_destructor },
-    {   "nativeRecycle",            "(I)V", (void*)Bitmap_recycle },
+    {   "nativeRecycle",            "(I)Z", (void*)Bitmap_recycle },
     {   "nativeCompress",           "(IIILjava/io/OutputStream;[B)Z",
         (void*)Bitmap_compress },
     {   "nativeErase",              "(II)V", (void*)Bitmap_erase },
