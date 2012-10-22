@@ -765,8 +765,7 @@
     <string name="lockscreen_charged" msgid="4938930459620989972">"Зараджаны."</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Падлучыце зарадную прыладу."</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (5099439277819215399) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Няма SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Няма SIM-карты ў планшэце."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"У тэлефоне няма SIM-карты."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Усталюйце SIM-карту."</string>
@@ -1382,6 +1381,9 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Экран HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Оверлей # <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> кр. на цалю"</string>
+    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Падключаны бесправадны дысплей"</string>
+    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Гэты экран паказваецца на іншай прыладзе"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Адключыць"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Экстранны выклік"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забылі ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільна ключ"</string>
