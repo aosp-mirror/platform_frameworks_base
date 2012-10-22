@@ -19,7 +19,6 @@ package com.android.systemui.recent;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.TimeInterpolator;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -178,16 +177,18 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 mNumItemsWaitingForThumbnailsAndIcons--;
             }
             if (index == 0) {
-                final Activity activity = (Activity) RecentsPanelView.this.getContext();
                 if (mWaitingForWindowAnimation) {
                     if (mItemToAnimateInWhenWindowAnimationIsFinished != null) {
-                        for (View v :
-                            new View[] { holder.iconView, holder.labelView, holder.calloutLine }) {
-                            if (v != null) {
-                                v.setAlpha(1f);
-                                v.setTranslationX(0f);
-                                v.setTranslationY(0f);
-                            }
+                        holder.iconView.setAlpha(1f);
+                        holder.iconView.setTranslationX(0f);
+                        holder.iconView.setTranslationY(0f);
+                        holder.labelView.setAlpha(1f);
+                        holder.labelView.setTranslationX(0f);
+                        holder.labelView.setTranslationY(0f);
+                        if (holder.calloutLine != null) {
+                            holder.calloutLine.setAlpha(1f);
+                            holder.calloutLine.setTranslationX(0f);
+                            holder.calloutLine.setTranslationY(0f);
                         }
                     }
                     mItemToAnimateInWhenWindowAnimationIsFinished = holder;
@@ -195,13 +196,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                             R.dimen.status_bar_recents_app_icon_translate_distance);
                     final Configuration config = getResources().getConfiguration();
                     if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        for (View v :
-                            new View[] { holder.iconView, holder.labelView, holder.calloutLine }) {
-                            if (v != null) {
-                                v.setAlpha(0f);
-                                v.setTranslationX(translation);
-                            }
-                        }
+                        holder.iconView.setAlpha(0f);
+                        holder.iconView.setTranslationX(translation);
+                        holder.labelView.setAlpha(0f);
+                        holder.labelView.setTranslationX(translation);
+                        holder.calloutLine.setAlpha(0f);
+                        holder.calloutLine.setTranslationX(translation);
                     } else {
                         holder.iconView.setAlpha(0f);
                         holder.iconView.setTranslationY(translation);
@@ -225,6 +225,17 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             holder.thumbnailView.setTag(null);
             holder.thumbnailView.setOnLongClickListener(null);
             holder.thumbnailView.setVisibility(INVISIBLE);
+            holder.iconView.setAlpha(1f);
+            holder.iconView.setTranslationX(0f);
+            holder.iconView.setTranslationY(0f);
+            holder.labelView.setAlpha(1f);
+            holder.labelView.setTranslationX(0f);
+            holder.labelView.setTranslationY(0f);
+            if (holder.calloutLine != null) {
+                holder.calloutLine.setAlpha(1f);
+                holder.calloutLine.setTranslationX(0f);
+                holder.calloutLine.setTranslationY(0f);
+            }
             holder.taskDescription = null;
             holder.loadedThumbnailAndIcon = false;
         }
