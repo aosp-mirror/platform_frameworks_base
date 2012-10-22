@@ -265,27 +265,38 @@ void ResourceCache::destructorLocked(SkiaColorFilter* resource) {
     }
 }
 
-void ResourceCache::recycle(SkBitmap* resource) {
+/**
+ * Return value indicates whether resource was actually recycled, which happens when RefCnt
+ * reaches 0.
+ */
+bool ResourceCache::recycle(SkBitmap* resource) {
     Mutex::Autolock _l(mLock);
-    recycleLocked(resource);
+    return recycleLocked(resource);
 }
 
-void ResourceCache::recycleLocked(SkBitmap* resource) {
+/**
+ * Return value indicates whether resource was actually recycled, which happens when RefCnt
+ * reaches 0.
+ */
+bool ResourceCache::recycleLocked(SkBitmap* resource) {
     ssize_t index = mCache->indexOfKey(resource);
     if (index < 0) {
         // not tracking this resource; just recycle the pixel data
         resource->setPixels(NULL, NULL);
-        return;
+        return true;
     }
     ResourceReference* ref = mCache->valueAt(index);
     if (ref == NULL) {
         // Should not get here - shouldn't get a call to recycle if we're not yet tracking it
-        return;
+        return true;
     }
     ref->recycled = true;
     if (ref->refCount == 0) {
         deleteResourceReferenceLocked(resource, ref);
+        return true;
     }
+    // Still referring to resource, don't recycle yet
+    return false;
 }
 
 /**
