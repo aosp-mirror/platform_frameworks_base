@@ -77,16 +77,16 @@
     <ImageView android:id="@+id/clear_all_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginRight="12dp"
         android:scaleType="center"
         android:src="@drawable/ic_notify_clear"
         android:background="@drawable/ic_notify_button_bg"
         android:contentDescription="@string/accessibility_clear_all"
         />     
 
-    <FrameLayout
+    <FrameLayout android:id="@+id/settings_button_holder"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:layout_marginLeft="12dp"
         >
         <ImageView android:id="@+id/settings_button"
             android:layout_width="50dp"
