@@ -53,6 +53,16 @@ public abstract class Ticker {
     private TextSwitcher mTextSwitcher;
     private float mIconScale;
 
+    public static boolean isGraphicOrEmoji(char c) {
+        int gc = Character.getType(c);
+        return     gc != Character.CONTROL
+                && gc != Character.FORMAT
+                && gc != Character.UNASSIGNED
+                && gc != Character.LINE_SEPARATOR
+                && gc != Character.PARAGRAPH_SEPARATOR
+                && gc != Character.SPACE_SEPARATOR;
+    }
+
     private final class Segment {
         StatusBarNotification notification;
         Drawable icon;
@@ -68,7 +78,7 @@ public abstract class Ticker {
         }
 
         CharSequence rtrim(CharSequence substr, int start, int end) {
-            while (end > start && !TextUtils.isGraphic(substr.charAt(end-1))) {
+            while (end > start && !isGraphicOrEmoji(substr.charAt(end-1))) {
                 end--;
             }
             if (end > start) {
@@ -101,7 +111,7 @@ public abstract class Ticker {
             this.first = false;
             int index = this.next;
             final int len = this.text.length();
-            while (index < len && !TextUtils.isGraphic(this.text.charAt(index))) {
+            while (index < len && !isGraphicOrEmoji(this.text.charAt(index))) {
                 index++;
             }
             if (index >= len) {
@@ -136,7 +146,7 @@ public abstract class Ticker {
             this.text = text;
             int index = 0;
             final int len = text.length();
-            while (index < len && !TextUtils.isGraphic(text.charAt(index))) {
+            while (index < len && !isGraphicOrEmoji(text.charAt(index))) {
                 index++;
             }
             this.current = index;
@@ -194,7 +204,8 @@ public abstract class Ticker {
         final Drawable icon = StatusBarIconView.getIcon(mContext,
                 new StatusBarIcon(n.pkg, n.user, n.notification.icon, n.notification.iconLevel, 0,
                         n.notification.tickerText));
-        final Segment newSegment = new Segment(n, icon, n.notification.tickerText);
+        final CharSequence text = n.notification.tickerText;
+        final Segment newSegment = new Segment(n, icon, text);
 
         // If there's already a notification schedule for this package and id, remove it.
         for (int i=0; i<mSegments.size(); i++) {
