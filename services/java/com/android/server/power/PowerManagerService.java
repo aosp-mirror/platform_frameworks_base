@@ -433,7 +433,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             // own handler thread.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
                     mContext, mNotifier, mLightsService, twilight,
-                    createSuspendBlockerLocked("PowerManagerService.Display"),
                     mDisplayBlanker, mDisplayPowerControllerCallbacks, mHandler);
 
             mSettingsObserver = new SettingsObserver(mHandler);

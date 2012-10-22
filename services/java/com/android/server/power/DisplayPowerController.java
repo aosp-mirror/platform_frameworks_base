@@ -30,7 +30,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManager;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -44,7 +43,6 @@ import android.util.TimeUtils;
 import android.view.Display;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 
 /**
  * Controls the power state of the display.
@@ -160,9 +158,6 @@ final class DisplayPowerController {
 
     // Notifier for sending asynchronous notifications.
     private final Notifier mNotifier;
-
-    // A suspend blocker.
-    private final SuspendBlocker mSuspendBlocker;
 
     // The display blanker.
     private final DisplayBlanker mDisplayBlanker;
@@ -339,12 +334,11 @@ final class DisplayPowerController {
      * Creates the display power controller.
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
-            LightsService lights, TwilightService twilight, SuspendBlocker suspendBlocker,
+            LightsService lights, TwilightService twilight,
             DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
         mHandler = new DisplayControllerHandler(looper);
         mNotifier = notifier;
-        mSuspendBlocker = suspendBlocker;
         mDisplayBlanker = displayBlanker;
         mCallbacks = callbacks;
         mCallbackHandler = callbackHandler;
@@ -513,14 +507,10 @@ final class DisplayPowerController {
     }
 
     private void initialize() {
-        final Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
         Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         mPowerState = new DisplayPowerState(
-                new ElectronBeam(display),
-                new PhotonicModulator(executor,
-                        mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT),
-                        mSuspendBlocker),
-                mDisplayBlanker);
+                new ElectronBeam(display), mDisplayBlanker,
+                mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
                 mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 0.0f, 1.0f);
