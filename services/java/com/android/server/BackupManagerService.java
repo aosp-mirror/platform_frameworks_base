@@ -836,7 +836,8 @@ class BackupManagerService extends IBackupManager.Stub {
             if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 if (DEBUG) Slog.v(TAG, "Binding to Google transport");
                 Intent intent = new Intent().setComponent(transportComponent);
-                context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE);
+                context.bindService(intent, mGoogleConnection, Context.BIND_AUTO_CREATE,
+                        UserHandle.USER_OWNER);
             } else {
                 Slog.w(TAG, "Possible Google transport spoof: ignoring " + info);
             }
