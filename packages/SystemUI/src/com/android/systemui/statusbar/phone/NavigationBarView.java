@@ -142,6 +142,11 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.home);
     }
 
+    // for when home is disabled, but search isn't
+    public View getSearchLight() {
+        return mCurrentView.findViewById(R.id.search_light);
+    }
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -222,12 +227,15 @@ public class NavigationBarView extends LinearLayout {
         final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
         final boolean disableRecent = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
+        final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
 
         setSlippery(disableHome && disableRecent && disableBack);
 
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
+
+        getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
     }
 
     public void setSlippery(boolean newSlippery) {
