@@ -413,7 +413,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBarFromKeyguard;
     boolean mHideLockScreen;
     boolean mDismissKeyguard;
-    boolean mNoDreamEnterAnim;
+    boolean mShowingLockscreen;
+    boolean mShowingDream;
+    boolean mDreamingLockscreen;
     boolean mHomePressed;
     boolean mHomeLongPressed;
     Intent mHomeIntent;
@@ -1726,7 +1728,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (PRINT_ANIM) Log.i(TAG, "**** STARTING EXIT");
                 return com.android.internal.R.anim.app_starting_exit;
             }
-        } else if (win.getAttrs().type == TYPE_DREAM && mNoDreamEnterAnim
+        } else if (win.getAttrs().type == TYPE_DREAM && mDreamingLockscreen
                 && transit == TRANSIT_ENTER) {
             // Special case: we are animating in a dream, while the keyguard
             // is shown.  We don't want an animation on the dream, because
@@ -2927,7 +2929,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHideLockScreen = false;
         mAllowLockscreenWhenOn = false;
         mDismissKeyguard = false;
-        mNoDreamEnterAnim = false;
+        mShowingLockscreen = false;
+        mShowingDream = false;
     }
 
     /** {@inheritDoc} */
@@ -2945,18 +2948,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             if (attrs.type == TYPE_KEYGUARD) {
-                mNoDreamEnterAnim = true;
+                mShowingLockscreen = true;
             }
-            if (((attrs.type >= FIRST_APPLICATION_WINDOW && attrs.type <= LAST_APPLICATION_WINDOW)
-                        || (attrs.type == TYPE_DREAM && win.isVisibleLw()))
+            boolean applyWindow = attrs.type >= FIRST_APPLICATION_WINDOW
+                    && attrs.type <= LAST_APPLICATION_WINDOW;
+            if (attrs.type == TYPE_DREAM) {
+                mShowingDream = true;
+                if (!mDreamingLockscreen) {
+                    applyWindow = true;
+                } else if (win.isVisibleLw() && win.hasDrawnLw()) {
+                    applyWindow = true;
+                }
+            }
+            if (applyWindow
                     && attrs.x == 0 && attrs.y == 0
                     && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
                     && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
-                if (attrs.type == TYPE_DREAM) {
-                    mForceStatusBarFromKeyguard = true;
-                }
                 if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
                     mHideLockScreen = true;
@@ -2982,6 +2991,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final WindowManager.LayoutParams lp = (mTopFullscreenOpaqueWindowState != null)
                 ? mTopFullscreenOpaqueWindowState.getAttrs()
                 : null;
+
+        // If we are not currently showing a dream, then update the lockscreen
+        // state that will apply if a dream is shown next time.
+        if (!mShowingDream) {
+            mDreamingLockscreen = mShowingLockscreen;
+        }
 
         if (mStatusBar != null) {
             if (DEBUG_LAYOUT) Log.i(TAG, "force=" + mForceStatusBar
@@ -4523,9 +4538,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(","); pw.print(mDockBottom); pw.println(")");
         pw.print(prefix); pw.print("mDockLayer="); pw.print(mDockLayer);
                 pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
+        pw.print(prefix); pw.print("mShowingLockscreen="); pw.print(mShowingLockscreen);
+                pw.print(" mShowingDream="); pw.print(mShowingDream);
+                pw.print(" mDreamingLockscreen="); pw.println(mDreamingLockscreen);
         pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
                 pw.println(mTopFullscreenOpaqueWindowState);
-            pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
+        pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
                 pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
                 pw.print(" mForceStatusBarFromKeyguard=");
