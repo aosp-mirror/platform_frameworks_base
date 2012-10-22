@@ -274,6 +274,10 @@ public class Environment {
      * built-in storage in a device that is distinct from the protected
      * internal storage and can be mounted as a filesystem on a computer.</em></p>
      *
+     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated external storage. Applications only
+     * have access to the external storage for the user they're running as.</p>
+     *
      * <p>In devices with multiple "external" storage directories (such as
      * both secure app storage and mountable shared storage), this directory
      * represents the "primary" external storage that the user will interact
@@ -286,7 +290,16 @@ public class Environment {
      * Context.getExternalFilesDir}, which the system will take care of deleting
      * if the application is uninstalled.  Other shared files should be placed
      * in one of the directories returned by
-     * {@link #getExternalStoragePublicDirectory}.
+     * {@link #getExternalStoragePublicDirectory}.</p>
+     *
+     * <p>Writing to this path requires the
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission. In
+     * a future platform release, access to this path will require the
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
+     * which is automatically granted if you hold the write permission.</p>
+     *
+     * <p>This path may change between platform versions, so applications
+     * should only persist relative paths.</p>
      * 
      * <p>Here is an example of typical code to monitor the state of
      * external storage:</p>
@@ -423,6 +436,10 @@ public class Environment {
      * to ensure you don't erase their files or get in the way of their own
      * organization.
      * 
+     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated external storage. Applications only
+     * have access to the external storage for the user they're running as.</p>
+     *
      * <p>Here is an example of typical code to manipulate a picture on
      * the public external storage:</p>
      * 
@@ -500,7 +517,10 @@ public class Environment {
     }
     
     /**
-     * Gets the Android Download/Cache content directory.
+     * Gets the Android download/cache content directory.
+     * <p>
+     * Access to this path requires the
+     * {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM} permission.
      */
     public static File getDownloadCacheDirectory() {
         return DOWNLOAD_CACHE_DIRECTORY;
@@ -563,7 +583,7 @@ public class Environment {
     /**
      * Gets the current state of the primary "external" storage device.
      * 
-     * <p>See {@link #getExternalStorageDirectory()} for more information.
+     * @see #getExternalStorageDirectory()
      */
     public static String getExternalStorageState() {
         try {
