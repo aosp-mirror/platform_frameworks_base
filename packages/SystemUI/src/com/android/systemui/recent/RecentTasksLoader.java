@@ -386,7 +386,9 @@ public class RecentTasksLoader implements View.OnTouchListener {
             item = createTaskDescription(recentInfo.id,
                     recentInfo.persistentId, recentInfo.baseIntent,
                     recentInfo.origActivity, recentInfo.description);
-            loadThumbnailAndIcon(item);
+            if (item != null) {
+                loadThumbnailAndIcon(item);
+            }
             return item;
         }
         return null;
