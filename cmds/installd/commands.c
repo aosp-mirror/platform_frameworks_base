@@ -187,8 +187,8 @@ int delete_user_data(const char *pkgname, uid_t persona)
     if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, persona))
         return -1;
 
-    /* delete contents AND directory, no exceptions */
-    return delete_dir_contents(pkgdir, 1, NULL);
+    /* delete contents, excluding "lib", but not the directory itself */
+    return delete_dir_contents(pkgdir, 0, "lib");
 }
 
 int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
