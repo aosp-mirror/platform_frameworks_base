@@ -201,9 +201,14 @@ public final class Bitmap implements Parcelable {
      */
     public void recycle() {
         if (!mRecycled) {
-            mBuffer = null;
-            nativeRecycle(mNativeBitmap);
-            mNinePatchChunk = null;
+            if (nativeRecycle(mNativeBitmap)) {
+                // return value indicates whether native pixel object was actually recycled.
+                // false indicates that it is still in use at the native level and these
+                // objects should not be collected now. They will be collected later when the
+                // Bitmap itself is collected.
+                mBuffer = null;
+                mNinePatchChunk = null;
+            }
             mRecycled = true;
         }
     }
@@ -1391,7 +1396,7 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCopy(int srcBitmap, int nativeConfig,
                                             boolean isMutable);
     private static native void nativeDestructor(int nativeBitmap);
-    private static native void nativeRecycle(int nativeBitmap);
+    private static native boolean nativeRecycle(int nativeBitmap);
 
     private static native boolean nativeCompress(int nativeBitmap, int format,
                                             int quality, OutputStream stream,
