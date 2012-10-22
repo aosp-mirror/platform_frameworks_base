@@ -452,7 +452,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                     mSettingsButton.setVisibility(View.VISIBLE);
                 } else {
                     // there is a settings panel, but it's on the other side of the (large) screen
-                    mSettingsButton.setVisibility(View.GONE);
+                    final View buttonHolder = mStatusBarWindow.findViewById(
+                            R.id.settings_button_holder);
+                    if (buttonHolder != null) {
+                        buttonHolder.setVisibility(View.GONE);
+                    }
                 }
             } else {
                 // no settings panel, go straight to settings
