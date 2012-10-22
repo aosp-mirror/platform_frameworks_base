@@ -35,7 +35,9 @@ import android.graphics.Rect;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -518,6 +520,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (mViewMediatorCallback != null) {
                 mViewMediatorCallback.keyguardDone(true);
             }
+        } else {
+            mViewStateManager.showBouncer(true);
         }
     }
 
@@ -835,6 +839,28 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.addWidget(statusWidget);
         View cameraWidget = inflater.inflate(R.layout.keyguard_camera_widget, null, true);
         mAppWidgetContainer.addWidget(cameraWidget);
+
+        View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
+        addWidgetButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.setOnDismissRunnable(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                        intent.addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                        mContext.startActivityAsUser(intent,
+                                new UserHandle(UserHandle.USER_CURRENT));
+                    }
+                });
+                mCallback.dismiss(false);
+            }
+        });
 
         inflateAndAddUserSelectorWidgetIfNecessary();
         initializeTransportControl();
