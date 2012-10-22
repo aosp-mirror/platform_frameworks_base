@@ -1570,6 +1570,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (mHasFlipSettings) {
             // reset things to their proper state
+            if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
+            if (mScrollViewAnim != null) mScrollViewAnim.cancel();
+            if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
+            if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+            if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
             mScrollView.setScaleX(1f);
             mScrollView.setVisibility(View.VISIBLE);
             mSettingsButton.setAlpha(1f);
