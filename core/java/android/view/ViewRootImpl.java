@@ -865,7 +865,7 @@ public final class ViewRootImpl implements ViewParent,
         if (dirty == null) {
             invalidate();
             return null;
-        } else if (dirty.isEmpty()) {
+        } else if (dirty.isEmpty() && !mIsAnimating) {
             return null;
         }
 
@@ -894,13 +894,13 @@ public final class ViewRootImpl implements ViewParent,
         // Intersect with the bounds of the window to skip
         // updates that lie outside of the visible region
         final float appScale = mAttachInfo.mApplicationScale;
-        if (localDirty.intersect(0, 0,
-                (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f))) {
-            if (!mWillDrawSoon) {
-                scheduleTraversals();
-            }
-        } else {
+        final boolean intersected = localDirty.intersect(0, 0,
+                (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
+        if (!intersected) {
             localDirty.setEmpty();
+        }
+        if (!mWillDrawSoon && (intersected || mIsAnimating)) {
+            scheduleTraversals();
         }
 
         return null;
