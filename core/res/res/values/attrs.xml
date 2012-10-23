@@ -5788,4 +5788,9 @@
         <attr name="gravity" />
     </declare-styleable>
 
+    <!-- Keyguard PIN entry -->
+    <declare-styleable name="NumPadKey">
+        <attr name="digit" format="integer" />
+        <attr name="textView" format="reference" />
+    </declare-styleable>
 </resources>

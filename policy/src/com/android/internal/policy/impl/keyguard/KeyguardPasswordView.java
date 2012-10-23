@@ -53,22 +53,12 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
  * an unlock password
  */
 
-public class KeyguardPasswordView extends LinearLayout
+public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
-    private KeyguardSecurityCallback mCallback;
-    private EditText mPasswordEntry;
-    private LockPatternUtils mLockPatternUtils;
+
     private PasswordEntryKeyboardView mKeyboardView;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
     private boolean mIsAlpha;
-    private SecurityMessageDisplay mSecurityMessageDisplay;
-
-    // To avoid accidental lockout due to events while the device in in the pocket, ignore
-    // any passwords with length less than or equal to this length.
-    private static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
-
-    // Enable this if we want to hide the on-screen PIN keyboard when a physical one is showing
-    private static final boolean ENABLE_HIDE_KEYBOARD = false;
 
     public KeyguardPasswordView(Context context) {
         super(context);
@@ -78,36 +68,7 @@ public class KeyguardPasswordView extends LinearLayout
         super(context, attrs);
     }
 
-    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
-        mCallback = callback;
-    }
-
-    public void setLockPatternUtils(LockPatternUtils utils) {
-        mLockPatternUtils = utils;
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (hasWindowFocus) {
-            reset();
-        }
-    }
-
-    public void reset() {
-        // start fresh
-        mPasswordEntry.setText("");
-        mPasswordEntry.requestFocus();
-
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
-        if (deadline != 0) {
-            handleAttemptLockout(deadline);
-        } else {
-            resetState();
-        }
-    }
-
-    private void resetState() {
+    protected void resetState() {
         mSecurityMessageDisplay.setMessage(
                 mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions, false);
         mPasswordEntry.setEnabled(true);
@@ -116,10 +77,7 @@ public class KeyguardPasswordView extends LinearLayout
 
     @Override
     protected void onFinishInflate() {
-        // We always set a dummy NavigationManager to avoid null checks
-        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
-
-        mLockPatternUtils = new LockPatternUtils(mContext); // TODO: use common one
+        super.onFinishInflate();
 
         final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
         mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
@@ -127,9 +85,6 @@ public class KeyguardPasswordView extends LinearLayout
                 || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
 
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
-        mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
-        mPasswordEntry.setOnEditorActionListener(this);
-        mPasswordEntry.addTextChangedListener(this);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
                 new int[] {
@@ -170,8 +125,6 @@ public class KeyguardPasswordView extends LinearLayout
             }
         }
 
-        mPasswordEntry.requestFocus();
-
         // This allows keyboards with overlapping qwerty/numeric keys to choose just numeric keys.
         if (mIsAlpha) {
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
@@ -203,6 +156,8 @@ public class KeyguardPasswordView extends LinearLayout
                 }
             }
         });
+
+        mPasswordEntry.requestFocus();
 
         // If there's more than one IME, enable the IME switcher button
         View switchImeButton = findViewById(R.id.switch_ime_button);
@@ -277,111 +232,6 @@ public class KeyguardPasswordView extends LinearLayout
         // imm.getEnabledInputMethodSubtypeList(null, false) will return the current IME's enabled
         // input method subtype (The current IME should be LatinIME.)
                 || imm.getEnabledInputMethodSubtypeList(null, false).size() > 1;
-    }
-
-    @Override
-    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
-        // send focus to the password field
-        return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
-    }
-
-    private void verifyPasswordAndUnlock() {
-        String entry = mPasswordEntry.getText().toString();
-        if (mLockPatternUtils.checkPassword(entry)) {
-            mCallback.reportSuccessfulUnlockAttempt();
-            mCallback.dismiss(true);
-        } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
-            // to avoid accidental lockout, only count attempts that are long enough to be a
-            // real password. This may require some tweaking.
-            mCallback.reportFailedUnlockAttempt();
-            if (0 == (mCallback.getFailedAttempts()
-                    % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-                long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
-                handleAttemptLockout(deadline);
-            }
-            mSecurityMessageDisplay.setMessage(
-                    mIsAlpha ? R.string.kg_wrong_password : R.string.kg_wrong_pin, true);
-        }
-        mPasswordEntry.setText("");
-    }
-
-    // Prevent user from using the PIN/Password entry until scheduled deadline.
-    private void handleAttemptLockout(long elapsedRealtimeDeadline) {
-        mPasswordEntry.setEnabled(false);
-        mKeyboardView.setEnabled(false);
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-        new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mSecurityMessageDisplay.setMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, true, secondsRemaining);
-            }
-
-            @Override
-            public void onFinish() {
-                resetState();
-            }
-        }.start();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        mCallback.userActivity(0);
-        return false;
-    }
-
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        // Check if this was the result of hitting the enter key
-        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
-                || actionId == EditorInfo.IME_ACTION_NEXT) {
-            verifyPasswordAndUnlock();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean needsInput() {
-        return mIsAlpha;
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onResume() {
-        reset();
-    }
-
-    @Override
-    public KeyguardSecurityCallback getCallback() {
-        return mCallback;
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        if (mCallback != null) {
-            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
-        }
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-    }
-
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-        reset();
     }
 }
 
