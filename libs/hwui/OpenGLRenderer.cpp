@@ -179,7 +179,7 @@ status_t OpenGLRenderer::prepareDirty(float left, float top, float right, float 
     mSaveCount = 1;
 
     mSnapshot->setClip(left, top, right, bottom);
-    mDirtyClip = opaque;
+    mDirtyClip = true;
 
     updateLayers();
 
