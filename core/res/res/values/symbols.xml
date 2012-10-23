@@ -1311,6 +1311,7 @@
   <java-symbol type="id" name="sliding_layout" />
   <java-symbol type="id" name="keyguard_add_widget" />
   <java-symbol type="id" name="sliding_layout" />
+  <java-symbol type="id" name="keyguard_add_widget_view" />
 
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
