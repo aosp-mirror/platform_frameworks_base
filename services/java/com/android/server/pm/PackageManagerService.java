@@ -2522,7 +2522,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (pa.mPref.mMatch != match) {
                         continue;
                     }
-                    final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent, flags, userId);
+                    final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
+                            flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
                     if (DEBUG_PREFERRED) {
                         Log.v(TAG, "Got preferred activity:");
                         if (ai != null) {
