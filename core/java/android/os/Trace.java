@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.Log;
+
 /**
  * Writes trace events to the kernel trace buffer.  These trace events can be
  * collected using the "atrace" program for offline analysis.
@@ -27,6 +29,8 @@ package android.os;
  * @hide
  */
 public final class Trace {
+    private static final String TAG = "Trace";
+
     // These tags must be kept in sync with frameworks/native/include/utils/Trace.h.
     public static final long TRACE_TAG_NEVER = 0;
     public static final long TRACE_TAG_ALWAYS = 1L << 0;
@@ -49,7 +53,11 @@ public final class Trace {
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
 
-    private static long sEnabledTags = nativeGetEnabledTags();
+    // This works as a "not ready" flag because TRACE_TAG_ALWAYS is always set.
+    private static final long TRACE_FLAGS_NOT_READY = 0;
+
+    // Must be volatile to avoid word tearing.
+    private static volatile long sEnabledTags = TRACE_FLAGS_NOT_READY;
 
     private static native long nativeGetEnabledTags();
     private static native void nativeTraceCounter(long tag, String name, int value);
@@ -57,14 +65,46 @@ public final class Trace {
     private static native void nativeTraceEnd(long tag);
 
     static {
+        // We configure two separate change callbacks, one in Trace.cpp and one here.  The
+        // native callback reads the tags from the system property, and this callback
+        // reads the value that the native code retrieved.  It's essential that the native
+        // callback executes first.
+        //
+        // The system provides ordering through a priority level.  Callbacks made through
+        // SystemProperties.addChangeCallback currently have a negative priority, while
+        // our native code is using a priority of zero.
         SystemProperties.addChangeCallback(new Runnable() {
             @Override public void run() {
-                sEnabledTags = nativeGetEnabledTags();
+                cacheEnabledTags();
             }
         });
     }
 
     private Trace() {
+    }
+
+    /**
+     * Caches a copy of the enabled-tag bits.  The "master" copy is held by the native code,
+     * and comes from the PROPERTY_TRACE_TAG_ENABLEFLAGS property.
+     * <p>
+     * If the native code hasn't yet read the property, we will cause it to do one-time
+     * initialization.  We don't want to do this during class init, because this class is
+     * preloaded, so all apps would be stuck with whatever the zygote saw.  (The zygote
+     * doesn't see the system-property update broadcasts.)
+     * <p>
+     * We want to defer initialization until the first use by an app, post-zygote.
+     * <p>
+     * We're okay if multiple threads call here simultaneously -- the native state is
+     * synchronized, and sEnabledTags is volatile (prevents word tearing).
+     */
+    private static long cacheEnabledTags() {
+        long tags = nativeGetEnabledTags();
+        if (tags == TRACE_FLAGS_NOT_READY) {
+            Log.w(TAG, "Unexpected value from nativeGetEnabledTags: " + tags);
+            // keep going
+        }
+        sEnabledTags = tags;
+        return tags;
     }
 
     /**
@@ -74,7 +114,11 @@ public final class Trace {
      * @return True if the trace tag is valid.
      */
     public static boolean isTagEnabled(long traceTag) {
-        return (sEnabledTags & traceTag) != 0;
+        long tags = sEnabledTags;
+        if (tags == TRACE_FLAGS_NOT_READY) {
+            tags = cacheEnabledTags();
+        }
+        return (tags & traceTag) != 0;
     }
 
     /**
@@ -85,7 +129,7 @@ public final class Trace {
      * @param counterValue The counter value.
      */
     public static void traceCounter(long traceTag, String counterName, int counterValue) {
-        if ((sEnabledTags & traceTag) != 0) {
+        if (isTagEnabled(traceTag)) {
             nativeTraceCounter(traceTag, counterName, counterValue);
         }
     }
@@ -98,7 +142,7 @@ public final class Trace {
      * @param methodName The method name to appear in the trace.
      */
     public static void traceBegin(long traceTag, String methodName) {
-        if ((sEnabledTags & traceTag) != 0) {
+        if (isTagEnabled(traceTag)) {
             nativeTraceBegin(traceTag, methodName);
         }
     }
@@ -110,7 +154,7 @@ public final class Trace {
      * @param traceTag The trace tag.
      */
     public static void traceEnd(long traceTag) {
-        if ((sEnabledTags & traceTag) != 0) {
+        if (isTagEnabled(traceTag)) {
             nativeTraceEnd(traceTag);
         }
     }
