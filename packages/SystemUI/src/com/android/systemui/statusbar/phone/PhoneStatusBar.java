@@ -783,6 +783,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         mWindowManager.updateViewLayout(mNavigationBarView, getNavigationBarLayoutParams());
     }
 
+    private void notifyNavigationBarScreenOn(boolean screenOn) {
+        if (mNavigationBarView == null) return;
+        mNavigationBarView.notifyScreenOn(screenOn);
+    }
+
     private WindowManager.LayoutParams getNavigationBarLayoutParams() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
@@ -2256,6 +2261,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 // no waiting!
                 makeExpandedInvisible();
+                notifyNavigationBarScreenOn(false);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DEBUG) {
@@ -2271,6 +2277,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
+                notifyNavigationBarScreenOn(true);
             }
         }
     };
