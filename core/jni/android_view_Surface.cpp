@@ -89,6 +89,7 @@ static struct {
     jfieldID density;
     jfieldID xDpi;
     jfieldID yDpi;
+    jfieldID secure;
 } gPhysicalDisplayInfoClassInfo;
 
 
@@ -714,6 +715,7 @@ static jboolean nativeGetDisplayInfo(JNIEnv* env, jclass clazz,
     env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.density, info.density);
     env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.xDpi, info.xdpi);
     env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.yDpi, info.ydpi);
+    env->SetBooleanField(infoObj, gPhysicalDisplayInfoClassInfo.secure, info.secure);
     return JNI_TRUE;
 }
 
@@ -907,6 +909,7 @@ int register_android_view_Surface(JNIEnv* env)
     gPhysicalDisplayInfoClassInfo.density = env->GetFieldID(clazz, "density", "F");
     gPhysicalDisplayInfoClassInfo.xDpi = env->GetFieldID(clazz, "xDpi", "F");
     gPhysicalDisplayInfoClassInfo.yDpi = env->GetFieldID(clazz, "yDpi", "F");
+    gPhysicalDisplayInfoClassInfo.secure = env->GetFieldID(clazz, "secure", "Z");
     return err;
 }
 
