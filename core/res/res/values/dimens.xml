@@ -308,4 +308,26 @@
 
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_margin">8dp</dimen>
+
+    <!-- Stroke width of the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_stroke_width">3dp</dimen>
+
+    <!-- Shadow radius under the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_shadow_radius">3dp</dimen>
+
+    <!-- Shadow horizontal offset under the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_shadow_dx">1dp</dimen>
+
+    <!-- Shadow vertical offset under the frame for the circular avatars. -->
+    <dimen name="keyguard_avatar_frame_shadow_dy">1dp</dimen>
+
+    <!-- Size of the avator on hte multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_height">44dp</dimen>
+
+    <!-- Size of the avator on hte multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_padding">11dp</dimen>
+
+    <!-- The height of the avator plus twice the padding. -->
+    <dimen name="keyguard_avatar_width">66dp</dimen>
+
 </resources>
