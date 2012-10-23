@@ -1373,6 +1373,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
         }
 
+        mStatusBarWindow.cancelExpandHelper();
         mStatusBarView.collapseAllPanels(true);
     }
 
