@@ -1426,8 +1426,6 @@ public final class ViewRootImpl implements ViewParent,
                             layerCanvas.setViewport(mWidth, mHeight);
                             layerCanvas.onPreDraw(null);
                             final int restoreCount = layerCanvas.save();
-                            
-                            layerCanvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
 
                             int yoff;
                             final boolean scrolling = mScroller != null
