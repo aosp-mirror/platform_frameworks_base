@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.LayoutTransition;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -34,6 +35,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Surface;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +64,7 @@ public class NavigationBarView extends LinearLayout {
 
     int mBarSize;
     boolean mVertical;
+    boolean mScreenOn;
 
     boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
@@ -169,6 +172,11 @@ public class NavigationBarView extends LinearLayout {
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
     }
 
+    public void notifyScreenOn(boolean screenOn) {
+        mScreenOn = screenOn;
+        setDisabledFlags(mDisabledFlags, true);
+    }
+
     View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent ev) {
@@ -230,6 +238,16 @@ public class NavigationBarView extends LinearLayout {
         final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
 
         setSlippery(disableHome && disableRecent && disableBack);
+
+        if (!mScreenOn && mCurrentView != null) {
+            ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
+            LayoutTransition lt = navButtons == null ? null : navButtons.getLayoutTransition();
+            if (lt != null) {
+                lt.disableTransitionType(
+                        LayoutTransition.CHANGE_APPEARING | LayoutTransition.CHANGE_DISAPPEARING |
+                        LayoutTransition.APPEARING | LayoutTransition.DISAPPEARING);
+            }
+        }
 
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
