@@ -763,16 +763,17 @@ void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
         }
     }
     if (mAlpha < 1 && !mCaching) {
-        // TODO: should be able to store the size of a DL at record time and not
-        // have to pass it into this call. In fact, this information might be in the
-        // location/size info that we store with the new native transform data.
-        int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-        if (mClipChildren) {
-            flags |= SkCanvas::kClipToLayer_SaveFlag;
+        if (!mHasOverlappingRendering) {
+            ALOGD("%s%s %.2f", indent, "SetAlpha", mAlpha);
+        } else {
+            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            if (mClipChildren) {
+                flags |= SkCanvas::kClipToLayer_SaveFlag;
+            }
+            ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                    mMultipliedAlpha, flags);
         }
-        ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                mMultipliedAlpha, flags);
     }
     if (mClipChildren) {
         ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
