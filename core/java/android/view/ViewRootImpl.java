@@ -556,7 +556,6 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingVisibleInsets.set(0, 0, 0, 0);
                 if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
-                    mView = null;
                     mAttachInfo.mRootView = null;
                     mAdded = false;
                     mFallbackEventHandler.setView(null);
@@ -592,6 +591,10 @@ public final class ViewRootImpl implements ViewParent,
                             throw new WindowManager.BadTokenException(
                                 "Unable to add window " + mWindow +
                                 " -- permission denied for this window type");
+                        case WindowManagerGlobal.ADD_INVALID_DISPLAY:
+                            throw new WindowManager.InvalidDisplayException(
+                                "Unable to add window " + mWindow +
+                                " -- the specified display can not be found");
                     }
                     throw new RuntimeException(
                         "Unable to add window -- unknown error code " + res);
@@ -808,27 +811,21 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void requestFitSystemWindows() {
         checkThread();
         mFitSystemWindowsRequested = true;
         scheduleTraversals();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void requestLayout() {
         checkThread();
         mLayoutRequested = true;
         scheduleTraversals();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean isLayoutRequested() {
         return mLayoutRequested;
     }
@@ -848,6 +845,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    @Override
     public void invalidateChild(View child, Rect dirty) {
         invalidateChildInParent(null, dirty);
     }
