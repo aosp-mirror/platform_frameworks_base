@@ -22,6 +22,7 @@ import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.listview.ListWithEditTextHeader;
@@ -62,5 +63,23 @@ public class ListWithEditTextHeaderTest extends ActivityInstrumentationTestCase2
         TouchUtils.clickView(this, mListView.getChildAt(0));
         assertTrue("header does not have focus", mListView.getChildAt(0).isFocused());
         assertEquals("something is selected", AbsListView.INVALID_POSITION, mListView.getSelectedItemPosition());
+    }
+
+    @LargeTest
+    public void testScrollingDoesNotDetachHeaderViewFromWindow() {
+        View header = mListView.getChildAt(0);
+        assertNotNull("header is not attached to a window (?!)", header.getWindowToken());
+
+        // Scroll header off the screen and back onto the screen
+        int numItemsOnScreen = mListView.getChildCount();
+        for (int i = 0; i < numItemsOnScreen; i++) {
+            sendKeys(KeyEvent.KEYCODE_DPAD_DOWN);
+        }
+        for (int i = 0; i < numItemsOnScreen; i++) {
+            sendKeys(KeyEvent.KEYCODE_DPAD_UP);
+        }
+
+        // Make sure the header was not accidentally left detached from its window
+        assertNotNull("header has lost its window", header.getWindowToken());
     }
 }
