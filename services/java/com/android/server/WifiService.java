@@ -1534,7 +1534,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         int uid = Binder.getCallingUid();
-        Long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.noteWifiMulticastEnabled(uid);
         } catch (RemoteException e) {
@@ -1570,7 +1570,7 @@ public class WifiService extends IWifiManager.Stub {
             mWifiStateMachine.startFilteringMulticastV4Packets();
         }
 
-        Long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.noteWifiMulticastDisabled(uid);
         } catch (RemoteException e) {
