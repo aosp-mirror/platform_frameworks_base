@@ -2940,6 +2940,7 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mTransitionToState);
                     break;
                 /* Defer wifi start/shut and driver commands */
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
                 case CMD_START_SUPPLICANT:
