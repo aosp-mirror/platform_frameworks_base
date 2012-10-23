@@ -1079,7 +1079,21 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                        // remain at this state.
                    }
                    break;
-              default:
+                case WifiMonitor.P2P_GROUP_STARTED_EVENT:
+                   mGroup = (WifiP2pGroup) message.obj;
+                   if (DBG) logd(getName() + " group started");
+
+                    // We hit this scenario when a persistent group is reinvoked
+                   if (mGroup.getNetworkId() == WifiP2pGroup.PERSISTENT_NET_ID) {
+                       mAutonomousGroup = false;
+                       deferMessage(message);
+                       transitionTo(mGroupNegotiationState);
+                   } else {
+                       loge("Unexpected group creation, remove " + mGroup);
+                       mWifiNative.p2pGroupRemove(mGroup.getInterface());
+                   }
+                   break;
+                default:
                    return NOT_HANDLED;
             }
             return HANDLED;
@@ -2338,6 +2352,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
         NetworkUtils.resetConnections(mGroup.getInterface(), NetworkUtils.RESET_ALL_ADDRESSES);
 
+        // Clear any timeout that was set. This is essential for devices
+        // that reuse the main p2p interface for a created group.
+        mWifiNative.setP2pGroupIdle(mGroup.getInterface(), 0);
+
         mGroup = null;
         mWifiNative.p2pFlush();
         if (mPeers.remove(mPeersLostDuringConnection)) sendP2pPeersChangedBroadcast();
@@ -2349,7 +2367,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             mWifiChannel.sendMessage(WifiP2pService.DISCONNECT_WIFI_REQUEST, 0);
             mTempoarilyDisconnectedWifi = false;
         }
-    }
+   }
 
     //State machine initiated requests can have replyTo set to null indicating
     //there are no recipients, we ignore those reply actions
