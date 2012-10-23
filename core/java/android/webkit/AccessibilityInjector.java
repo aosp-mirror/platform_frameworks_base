@@ -514,6 +514,8 @@ class AccessibilityInjector {
             }
         } catch (URISyntaxException e) {
             // Do nothing.
+        } catch (IllegalArgumentException e) {
+            // Catch badly-formed URLs.
         }
 
         return ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED;
