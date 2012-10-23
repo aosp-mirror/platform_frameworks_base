@@ -771,6 +771,7 @@ public class KeyguardViewMediator {
      */
     public void setHidden(boolean isHidden) {
         if (DEBUG) Log.d(TAG, "setHidden " + isHidden);
+        mUpdateMonitor.sendKeyguardVisibilityChanged(!isHidden);
         mHandler.removeMessages(SET_HIDDEN);
         Message msg = mHandler.obtainMessage(SET_HIDDEN, (isHidden ? 1 : 0), 0);
         mHandler.sendMessage(msg);
