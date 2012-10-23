@@ -80,6 +80,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHED = 310;
     private static final int MSG_USER_REMOVED = 311;
+    private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -147,6 +148,10 @@ public class KeyguardUpdateMonitor {
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
                     break;
+                case MSG_KEYGUARD_VISIBILITY_CHANGED:
+                    handleKeyguardVisibilityChanged(msg.arg1);
+                    break;
+
             }
         }
     };
@@ -557,6 +562,19 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    /**
+     * Handle {@link #MSG_KEYGUARD_VISIBILITY_CHANGED}
+     */
+    private void handleKeyguardVisibilityChanged(int showing) {
+        if (DEBUG) Log.d(TAG, "handleKeyguardVisibilityChanged(" + showing + ")");
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onKeyguardVisibilityChanged(showing == 1);
+            }
+        }
+    }
+
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();
@@ -657,6 +675,13 @@ public class KeyguardUpdateMonitor {
         callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         callback.onClockVisibilityChanged();
         callback.onSimStateChanged(mSimState);
+    }
+
+    public void sendKeyguardVisibilityChanged(boolean showing) {
+        if (DEBUG) Log.d(TAG, "sendKeyguardVisibilityChanged(" + showing + ")");
+        Message message = mHandler.obtainMessage(MSG_KEYGUARD_VISIBILITY_CHANGED);
+        message.arg1 = showing ? 1 : 0;
+        message.sendToTarget();
     }
 
     public void reportClockVisible(boolean visible) {

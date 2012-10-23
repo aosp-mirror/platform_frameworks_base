@@ -62,6 +62,12 @@ class KeyguardUpdateMonitorCallback {
     void onPhoneStateChanged(int phoneState) { }
 
     /**
+     * Called when the visibility of the keyguard changes.
+     * @param showing Indicates if the keyguard is now visible.
+     */
+    void onKeyguardVisibilityChanged(boolean showing) { }
+
+    /**
      * Called when visibility of lockscreen clock changes, such as when
      * obscured by a widget.
      */
