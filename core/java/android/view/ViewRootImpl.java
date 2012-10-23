@@ -29,14 +29,12 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -1440,7 +1438,13 @@ public final class ViewRootImpl implements ViewParent,
                                 mTranslator.translateCanvas(layerCanvas);
                             }
 
-                            mView.draw(layerCanvas);
+                            DisplayList displayList = mView.mDisplayList;
+                            if (displayList != null) {
+                                layerCanvas.drawDisplayList(displayList, null,
+                                        DisplayList.FLAG_CLIP_CHILDREN);
+                            } else {
+                                mView.draw(layerCanvas);
+                            }
 
                             drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
 
