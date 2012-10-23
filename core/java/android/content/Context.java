@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AttributeSet;
 import android.view.CompatibilityInfoHolder;
 import android.view.Display;
@@ -587,6 +588,10 @@ public abstract class Context {
      * can read and write files placed here.
      * </ul>
      *
+     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated external storage. Applications only
+     * have access to the external storage for the user they're running as.</p>
+     *
      * <p>Here is an example of typical code to manipulate a file in
      * an application's private storage:</p>
      *
@@ -616,6 +621,9 @@ public abstract class Context {
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_picture}
      *
+     * <p>Writing to this path requires the
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
+     *
      * @param type The type of files directory to return.  May be null for
      * the root of the files directory or one of
      * the following Environment constants for a subdirectory:
@@ -641,6 +649,11 @@ public abstract class Context {
      * Return the directory where this application's OBB files (if there
      * are any) can be found.  Note if the application does not have any OBB
      * files, this directory may not exist.
+     *
+     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * multiple users may share the same OBB storage location. Applications
+     * should ensure that multiple instances running under different users
+     * don't interfere with each other.</p>
      */
     public abstract File getObbDir();
 
@@ -688,6 +701,13 @@ public abstract class Context {
      * <li>There is no security enforced with these files.  All applications
      * can read and write files placed here.
      * </ul>
+     *
+     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated external storage. Applications only
+     * have access to the external storage for the user they're running as.</p>
+     *
+     * <p>Writing to this path requires the
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
      *
      * @return Returns the path of the directory holding application cache files
      * on external storage.  Returns null if external storage is not currently
