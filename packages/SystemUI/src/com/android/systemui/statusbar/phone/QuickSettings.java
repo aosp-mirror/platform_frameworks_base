@@ -55,6 +55,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -85,6 +86,8 @@ class QuickSettings {
     private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
 
+    public static final boolean LONG_PRESS_TOGGLES = true;
+
     private Context mContext;
     private PanelBar mBar;
     private QuickSettingsModel mModel;
@@ -94,6 +97,8 @@ class QuickSettings {
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
     private BluetoothState mBluetoothState;
+    private BluetoothAdapter mBluetoothAdapter;
+    private WifiManager mWifiManager;
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
@@ -131,6 +136,9 @@ class QuickSettings {
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
         mBluetoothState = new QuickSettingsModel.BluetoothState();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
         mHandler = new Handler();
 
         Resources r = mContext.getResources();
@@ -391,7 +399,7 @@ class QuickSettings {
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        QuickSettingsTileView wifiTile = (QuickSettingsTileView)
+        final QuickSettingsTileView wifiTile = (QuickSettingsTileView)
                 inflater.inflate(R.layout.quick_settings_tile, parent, false);
         wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
         wifiTile.setOnClickListener(new View.OnClickListener() {
@@ -400,6 +408,30 @@ class QuickSettings {
                 startSettingsActivity(android.provider.Settings.ACTION_WIFI_SETTINGS);
             }
         });
+        if (LONG_PRESS_TOGGLES) {
+            wifiTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    final boolean enable =
+                            (mWifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED);
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... args) {
+                            // Disable tethering if enabling Wifi
+                            final int wifiApState = mWifiManager.getWifiApState();
+                            if (enable && ((wifiApState == WifiManager.WIFI_AP_STATE_ENABLING) ||
+                                           (wifiApState == WifiManager.WIFI_AP_STATE_ENABLED))) {
+                                mWifiManager.setWifiApEnabled(null, false);
+                            }
+
+                            mWifiManager.setWifiEnabled(enable);
+                            return null;
+                        }
+                    }.execute();
+                    wifiTile.setPressed(false);
+                    return true;
+                }} );
+        }
         mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
@@ -538,7 +570,7 @@ class QuickSettings {
 
         // Bluetooth
         if (mModel.deviceSupportsBluetooth()) {
-            QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
+            final QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
             bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
             bluetoothTile.setOnClickListener(new View.OnClickListener() {
@@ -547,6 +579,19 @@ class QuickSettings {
                     startSettingsActivity(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
                 }
             });
+            if (LONG_PRESS_TOGGLES) {
+                bluetoothTile.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if (mBluetoothAdapter.isEnabled()) {
+                            mBluetoothAdapter.disable();
+                        } else {
+                            mBluetoothAdapter.enable();
+                        }
+                        bluetoothTile.setPressed(false);
+                        return true;
+                    }});
+            }
             mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
