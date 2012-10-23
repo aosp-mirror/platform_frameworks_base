@@ -758,6 +758,7 @@ public class Surface implements Parcelable {
         public float density;
         public float xDpi;
         public float yDpi;
+        public boolean secure;
 
         public PhysicalDisplayInfo() {
         }
@@ -778,7 +779,8 @@ public class Surface implements Parcelable {
                     && refreshRate == other.refreshRate
                     && density == other.density
                     && xDpi == other.xDpi
-                    && yDpi == other.yDpi;
+                    && yDpi == other.yDpi
+                    && secure == other.secure;
         }
 
         @Override
@@ -793,13 +795,15 @@ public class Surface implements Parcelable {
             density = other.density;
             xDpi = other.xDpi;
             yDpi = other.yDpi;
+            secure = other.secure;
         }
 
         // For debugging purposes
         @Override
         public String toString() {
             return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
-                    + "density " + density + ", " + xDpi + " x " + yDpi + " dpi}";
+                    + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
+                    + "}";
         }
     }
 
