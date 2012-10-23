@@ -1721,7 +1721,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_sdcardRead" product="default">test access to protected storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to test a permission for USB storage that will be availabe on future devices. </string>
+    <string name="permdesc_sdcardRead" product="nosdcard">Allows the app to test a permission for USB storage that will be available on future devices. </string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sdcardRead" product="default">Allows the app to test a permission for the SD card that will be available on future devices.</string>
 
@@ -3950,5 +3950,7 @@
     <string name="enable_accessibility_canceled">Accessibility canceled.</string>
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
+    <!-- Default name of the owner user [CHAR LIMIT=20] -->
+    <string name="owner_name" msgid="3879126011135546571">Owner</string>
 
 </resources>
