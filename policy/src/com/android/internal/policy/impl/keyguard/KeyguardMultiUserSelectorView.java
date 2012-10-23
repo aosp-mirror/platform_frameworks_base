@@ -114,22 +114,23 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             return;
         } else {
             // Reset the previously active user to appear inactive
-            avatar.lockPressedState();
             mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
             mActiveUserAvatar.setActive(false, true, new Runnable() {
                 @Override
                 public void run() {
-                    if (!this.getClass().getName().contains("internal")) {
-                        mActiveUserAvatar = avatar;
-                        mActiveUserAvatar.setActive(true, true, null);
-                        mActiveUserAvatar.releasePressedState();
-                    } else {
-                        try {
-                            ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
-                        } catch (RemoteException re) {
-                            Log.e(TAG, "Couldn't switch user " + re);
+                    mActiveUserAvatar = avatar;
+                    mActiveUserAvatar.setActive(true, true, new Runnable() {
+                        @Override
+                        public void run() {
+                            if (this.getClass().getName().contains("internal")) {
+                                try {
+                                    ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
+                                } catch (RemoteException re) {
+                                    Log.e(TAG, "Couldn't switch user " + re);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             });
         }

@@ -191,9 +191,9 @@
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 
     <!-- Keyguard colors -->
-    <color name="keyguard_avatar_matte_color">#ff424242</color>
-    <color name="keyguard_avatar_frame_color">#ffcccccc</color>
-    <color name="keyguard_avatar_frame_shadow_color">#ff000000</color>
-
+    <color name="keyguard_avatar_frame_color">#ffffffff</color>
+    <color name="keyguard_avatar_frame_shadow_color">#80000000</color>
+    <color name="keyguard_avatar_nick_color">#ffffffff</color>
+    <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 </resources>
 
