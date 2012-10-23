@@ -119,5 +119,9 @@ public class StatusBarWindowView extends FrameLayout
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), pt);
         }
     }
+
+    public void cancelExpandHelper() {
+        mExpandHelper.cancel();
+    }
 }
 
