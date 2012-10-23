@@ -62,6 +62,19 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * Exception that is thrown when calling {@link #addView} to a secondary display that cannot
+     * be found. See {@link android.app.Presentation} for more information on secondary displays.
+     */
+    public static class InvalidDisplayException extends RuntimeException {
+        public InvalidDisplayException() {
+        }
+
+        public InvalidDisplayException(String name) {
+            super(name);
+        }
+    }
+
+    /**
      * Returns the {@link Display} upon which this {@link WindowManager} instance
      * will create new windows.
      * <p>

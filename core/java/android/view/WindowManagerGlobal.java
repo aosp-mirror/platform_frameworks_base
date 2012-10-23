@@ -186,8 +186,8 @@ public final class WindowManagerGlobal {
                 mSystemPropertyUpdater = new Runnable() {
                     @Override public void run() {
                         synchronized (mLock) {
-                            for (ViewRootImpl root : mRoots) {
-                                root.loadSystemProperties();
+                            for (ViewRootImpl viewRoot : mRoots) {
+                                viewRoot.loadSystemProperties();
                             }
                         }
                     }
@@ -242,7 +242,18 @@ public final class WindowManagerGlobal {
         }
 
         // do this last because it fires off messages to start doing things
-        root.setView(view, wparams, panelParentView);
+        try {
+            root.setView(view, wparams, panelParentView);
+        } catch (RuntimeException e) {
+            // BadTokenException or InvalidDisplayException, clean up.
+            synchronized (mLock) {
+                final int index = findViewLocked(view, false);
+                if (index >= 0) {
+                    removeViewLocked(index, true);
+                }
+            }
+            throw e;
+        }
     }
 
     public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
@@ -360,20 +371,18 @@ public final class WindowManagerGlobal {
     }
 
     private int findViewLocked(View view, boolean required) {
-        synchronized (mLock) {
-            if (mViews != null) {
-                final int count = mViews.length;
-                for (int i = 0; i < count; i++) {
-                    if (mViews[i] == view) {
-                        return i;
-                    }
+        if (mViews != null) {
+            final int count = mViews.length;
+            for (int i = 0; i < count; i++) {
+                if (mViews[i] == view) {
+                    return i;
                 }
             }
-            if (required) {
-                throw new IllegalArgumentException("View not attached to window manager");
-            }
-            return -1;
         }
+        if (required) {
+            throw new IllegalArgumentException("View not attached to window manager");
+        }
+        return -1;
     }
 
     public void startTrimMemory(int level) {

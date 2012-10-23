@@ -141,6 +141,16 @@ public class Presentation extends Dialog {
     }
 
     /**
+     * Inherited from {@link Dialog#show}. Will throw
+     * {@link android.view.WindowManager.InvalidDisplayException} if the specified secondary
+     * {@link Display} can't be found.
+     */
+    @Override
+    public void show() {
+        super.show();
+    }
+
+    /**
      * Called by the system when the {@link Display} to which the presentation
      * is attached has been removed.
      *
