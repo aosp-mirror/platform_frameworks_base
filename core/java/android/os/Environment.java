@@ -518,9 +518,6 @@ public class Environment {
     
     /**
      * Gets the Android download/cache content directory.
-     * <p>
-     * Access to this path requires the
-     * {@link android.Manifest.permission#ACCESS_CACHE_FILESYSTEM} permission.
      */
     public static File getDownloadCacheDirectory() {
         return DOWNLOAD_CACHE_DIRECTORY;
