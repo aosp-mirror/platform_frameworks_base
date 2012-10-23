@@ -121,7 +121,9 @@ public class StatusBarWindowView extends FrameLayout
     }
 
     public void cancelExpandHelper() {
-        mExpandHelper.cancel();
+        if (mExpandHelper != null) {
+            mExpandHelper.cancel();
+        }
     }
 }
 
