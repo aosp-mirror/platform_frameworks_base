@@ -1963,6 +1963,8 @@ final class ActivityStack {
         int taskTopI = -1;
         int replyChainEnd = -1;
         int lastReparentPos = -1;
+        ActivityOptions topOptions = null;
+        boolean canMoveOptions = true;
         for (int i=mHistory.size()-1; i>=-1; i--) {
             ActivityRecord below = i >= 0 ? mHistory.get(i) : null;
             
@@ -2048,6 +2050,7 @@ final class ActivityStack {
                         }
                         int dstPos = 0;
                         ThumbnailHolder curThumbHolder = target.thumbHolder;
+                        boolean gotOptions = !canMoveOptions;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                             p = mHistory.get(srcPos);
                             if (p.finishing) {
@@ -2057,6 +2060,13 @@ final class ActivityStack {
                                     + " out to target's task " + target.task);
                             p.setTask(target.task, curThumbHolder, false);
                             curThumbHolder = p.thumbHolder;
+                            canMoveOptions = false;
+                            if (!gotOptions && topOptions == null) {
+                                topOptions = p.takeOptionsLocked();
+                                if (topOptions != null) {
+                                    gotOptions = true;
+                                }
+                            }
                             if (DEBUG_ADD_REMOVE) {
                                 RuntimeException here = new RuntimeException("here");
                                 here.fillInStackTrace();
@@ -2101,10 +2111,18 @@ final class ActivityStack {
                             replyChainEnd = targetI;
                         }
                         ActivityRecord p = null;
+                        boolean gotOptions = !canMoveOptions;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                             p = mHistory.get(srcPos);
                             if (p.finishing) {
                                 continue;
+                            }
+                            canMoveOptions = false;
+                            if (!gotOptions && topOptions == null) {
+                                topOptions = p.takeOptionsLocked();
+                                if (topOptions != null) {
+                                    gotOptions = true;
+                                }
                             }
                             if (finishActivityLocked(p, srcPos,
                                     Activity.RESULT_CANCELED, null, "reset", false)) {
@@ -2245,7 +2263,17 @@ final class ActivityStack {
             target = below;
             targetI = i;
         }
-        
+
+        if (topOptions != null) {
+            // If we got some ActivityOptions from an activity on top that
+            // was removed from the task, propagate them to the new real top.
+            if (taskTop != null) {
+                taskTop.updateOptionsLocked(topOptions);
+            } else {
+                topOptions.abort();
+            }
+        }
+
         return taskTop;
     }
     
@@ -2295,6 +2323,10 @@ final class ActivityStack {
                     }
                     if (r.finishing) {
                         continue;
+                    }
+                    ActivityOptions opts = r.takeOptionsLocked();
+                    if (opts != null) {
+                        ret.updateOptionsLocked(opts);
                     }
                     if (finishActivityLocked(r, i, Activity.RESULT_CANCELED,
                             null, "clear", false)) {
