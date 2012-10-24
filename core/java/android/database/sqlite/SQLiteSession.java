@@ -926,7 +926,7 @@ public final class SQLiteSession {
     }
 
     private void throwIfNestedTransaction() {
-        if (mTransactionStack == null && mTransactionStack.mParent != null) {
+        if (hasNestedTransaction()) {
             throw new IllegalStateException("Cannot perform this operation because "
                     + "a nested transaction is in progress.");
         }
