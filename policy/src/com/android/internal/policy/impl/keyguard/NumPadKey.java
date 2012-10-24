@@ -79,7 +79,7 @@ public class NumPadKey extends Button {
             if (extraLen > 0) {
                 builder.append(extra);
                 builder.setSpan(
-                        new TextAppearanceSpan(context, R.style.TextAppearance_NumPadKey_Klondike),
+                        new TextAppearanceSpan(context, R.style.PINButtonKlondikeText),
                         builder.length()-extraLen, builder.length(), 0);
             }
         }

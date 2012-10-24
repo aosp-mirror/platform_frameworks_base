@@ -1320,7 +1320,9 @@
   <java-symbol type="id" name="keyguard_add_widget" />
   <java-symbol type="id" name="keyguard_add_widget_view" />
   <java-symbol type="id" name="sliding_layout" />
-  <java-symbol type="id" name="key_enter" />
+  <java-symbol type="id" name="multi_pane_challenge" />
+  <java-symbol type="id" name="keyguard_user_selector" />
+  <java-symbol type="id" name="keyOK" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
@@ -1415,8 +1417,7 @@
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
-  <java-symbol type="style" name="Widget.Button.NumPadKey" />
-  <java-symbol type="style" name="TextAppearance.NumPadKey.Klondike" />
+  <java-symbol type="style" name="PINButtonKlondikeText" />
   <java-symbol type="string" name="kg_emergency_call_label" />
   <java-symbol type="string" name="kg_forgot_pattern_button_text" />
   <java-symbol type="string" name="kg_wrong_pattern" />
