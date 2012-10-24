@@ -143,54 +143,39 @@ int renamepkg(const char *oldpkgname, const char *newpkgname)
     return 0;
 }
 
-int fix_uid(const char *pkgname, uid_t uid, uid_t userId)
+int fix_uid(const char *pkgname, uid_t uid, gid_t gid)
 {
     char pkgdir[PKG_PATH_MAX];
     struct stat s;
     int rc = 0;
 
-    if (uid < AID_SYSTEM) {
-        ALOGE("invalid uid: %d\n", uid);
+    if ((uid < AID_SYSTEM) || (gid < AID_SYSTEM)) {
+        ALOGE("invalid uid/gid: %d %d\n", uid, gid);
         return -1;
     }
 
-    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, userId)) {
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0)) {
         ALOGE("cannot create package path\n");
         return -1;
     }
 
     if (stat(pkgdir, &s) < 0) return -1;
 
-    if (((s.st_uid != 0) && (s.st_uid != AID_INSTALL))
-            || ((s.st_gid != 0) && (s.st_gid != AID_INSTALL))) {
-        ALOGE("fixing uid of pkg not owned by install or root: %s %lu %lu\n", pkgdir, s.st_uid,
-                s.st_gid);
-        return -1;
-    }
-
-    if (chown(pkgdir, AID_INSTALL, AID_INSTALL) < 0) {
-        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(pkgdir);
+    if (s.st_uid != 0 || s.st_gid != 0) {
+        ALOGE("fixing uid of non-root pkg: %s %lu %lu\n", pkgdir, s.st_uid, s.st_gid);
         return -1;
     }
 
     if (chmod(pkgdir, 0751) < 0) {
         ALOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
-        return -1;
+        return -errno;
     }
-    if (chown(pkgdir, uid, uid) < 0) {
+    if (chown(pkgdir, uid, gid) < 0) {
         ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
-        return -1;
+        return -errno;
     }
-#ifdef HAVE_SELINUX
-    if (selinux_android_setfilecon(pkgdir, pkgname, uid) < 0) {
-        ALOGE("cannot setfilecon dir '%s': %s\n", pkgdir, strerror(errno));
-        unlink(pkgdir);
-        return -1;
-    }
-#endif
 
     return 0;
 }

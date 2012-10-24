@@ -1008,8 +1008,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mHandler = new PackageHandler(mHandlerThread.getLooper());
 
             File dataDir = Environment.getDataDirectory();
-            mAppInstallDir = new File(dataDir, "app");
-            mAppLibInstallDir = new File(dataDir, "app-lib");
             mAppDataDir = new File(dataDir, "data");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
@@ -1220,6 +1218,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            mAppInstallDir = new File(dataDir, "app");
+            mAppLibInstallDir = new File(dataDir, "app-lib");
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
             //clean up list
@@ -3577,22 +3577,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private int createDataDirForUserLI(String packageName, int uid, int userId) {
-        if (userId == 0) {
-            return mInstaller.install(packageName, uid, uid);
-        } else {
-            return mInstaller.createUserData(packageName, UserHandle.getUid(userId, uid), userId);
-        }
-    }
-
     private int createDataDirsLI(String packageName, int uid) {
-        for (int userId : sUserManager.getUserIds()) {
-            int res = createDataDirForUserLI(packageName, uid, userId);
-            if (res < 0) {
-                return res;
+        int[] users = sUserManager.getUserIds();
+        int res = mInstaller.install(packageName, uid, uid);
+        if (res < 0) {
+            return res;
+        }
+        for (int user : users) {
+            if (user != 0) {
+                res = mInstaller.createUserData(packageName,
+                        UserHandle.getUid(user, uid), user);
+                if (res < 0) {
+                    return res;
+                }
             }
         }
-        return 0;
+        return res;
     }
 
     private int removeDataDirsLI(String packageName) {
@@ -3931,49 +3931,134 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.dataDir = dataPath.getPath();
         } else {
             // This is a normal package, need to make its data directory.
-            dataPath = getDataPathForPackage(pkg.packageName, UserHandle.USER_OWNER);
+            dataPath = getDataPathForPackage(pkg.packageName, 0);
 
-            if (!ensureDataDirExistsForAllUsers(pkg.packageName, pkg.applicationInfo.uid)) {
-                if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0) {
-                        Log.v(TAG, "Want this data dir: " + dataPath);
-                    }
+            boolean uidError = false;
+
+            if (dataPath.exists()) {
+                int currentUid = 0;
+                try {
+                    StructStat stat = Libcore.os.stat(dataPath.getPath());
+                    currentUid = stat.st_uid;
+                } catch (ErrnoException e) {
+                    Slog.e(TAG, "Couldn't stat path " + dataPath.getPath(), e);
                 }
 
-                // Error from installer
-                mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                return null;
-            } else {
+                // If we have mismatched owners for the data path, we have a problem.
+                if (currentUid != pkg.applicationInfo.uid) {
+                    boolean recovered = false;
+                    if (currentUid == 0) {
+                        // The directory somehow became owned by root.  Wow.
+                        // This is probably because the system was stopped while
+                        // installd was in the middle of messing with its libs
+                        // directory.  Ask installd to fix that.
+                        int ret = mInstaller.fixUid(pkgName, pkg.applicationInfo.uid,
+                                pkg.applicationInfo.uid);
+                        if (ret >= 0) {
+                            recovered = true;
+                            String msg = "Package " + pkg.packageName
+                                    + " unexpectedly changed to uid 0; recovered to " +
+                                    + pkg.applicationInfo.uid;
+                            reportSettingsProblem(Log.WARN, msg);
+                        }
+                    }
+                    if (!recovered && ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
+                            || (scanMode&SCAN_BOOTING) != 0)) {
+                        // If this is a system app, we can at least delete its
+                        // current data so the application will still work.
+                        int ret = removeDataDirsLI(pkgName);
+                        if (ret >= 0) {
+                            // TODO: Kill the processes first
+                            // Old data gone!
+                            String prefix = (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
+                                    ? "System package " : "Third party package ";
+                            String msg = prefix + pkg.packageName
+                                    + " has changed from uid: "
+                                    + currentUid + " to "
+                                    + pkg.applicationInfo.uid + "; old data erased";
+                            reportSettingsProblem(Log.WARN, msg);
+                            recovered = true;
+
+                            // And now re-install the app.
+                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
+                            if (ret == -1) {
+                                // Ack should not happen!
+                                msg = prefix + pkg.packageName
+                                        + " could not have data directory re-created after delete.";
+                                reportSettingsProblem(Log.WARN, msg);
+                                mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                                return null;
+                            }
+                        }
+                        if (!recovered) {
+                            mHasSystemUidErrors = true;
+                        }
+                    } else if (!recovered) {
+                        // If we allow this install to proceed, we will be broken.
+                        // Abort, abort!
+                        mLastScanError = PackageManager.INSTALL_FAILED_UID_CHANGED;
+                        return null;
+                    }
+                    if (!recovered) {
+                        pkg.applicationInfo.dataDir = "/mismatched_uid/settings_"
+                            + pkg.applicationInfo.uid + "/fs_"
+                            + currentUid;
+                        pkg.applicationInfo.nativeLibraryDir = pkg.applicationInfo.dataDir;
+                        String msg = "Package " + pkg.packageName
+                                + " has mismatched uid: "
+                                + currentUid + " on disk, "
+                                + pkg.applicationInfo.uid + " in settings";
+                        // writer
+                        synchronized (mPackages) {
+                            mSettings.mReadMessages.append(msg);
+                            mSettings.mReadMessages.append('\n');
+                            uidError = true;
+                            if (!pkgSetting.uidError) {
+                                reportSettingsProblem(Log.ERROR, msg);
+                            }
+                        }
+                    }
+                }
                 pkg.applicationInfo.dataDir = dataPath.getPath();
+            } else {
+                if (DEBUG_PACKAGE_SCANNING) {
+                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                        Log.v(TAG, "Want this data dir: " + dataPath);
+                }
+                //invoke installer to do the actual installation
+                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
+                if (ret < 0) {
+                    // Error from installer
+                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                    return null;
+                }
+
+                if (dataPath.exists()) {
+                    pkg.applicationInfo.dataDir = dataPath.getPath();
+                } else {
+                    Slog.w(TAG, "Unable to create data directory: " + dataPath);
+                    pkg.applicationInfo.dataDir = null;
+                }
             }
-
-            final boolean isSystemApp = (parseFlags & PackageParser.PARSE_IS_SYSTEM) != 0;
-            final boolean isBootScan = (scanMode & SCAN_BOOTING) != 0;
-
-            final boolean uidCorrect = ensureDataDirUidIsCorrectForAllUsers(pkg.packageName,
-                    pkg.applicationInfo.uid, isSystemApp, isBootScan);
-            if (!uidCorrect) {
-                pkg.applicationInfo.dataDir = "/mismatched_uid/settings_" + pkg.applicationInfo.uid
-                        + "/fs_mismatched";
-                pkg.applicationInfo.nativeLibraryDir = pkg.applicationInfo.dataDir;
-            }
-
-            pkgSetting.uidError = !uidCorrect;
 
             /*
-             * Set the native library dir to the default if we got here without
-             * anyone telling us different (e.g., apps stored on SD card have
-             * their native libraries stored in the ASEC container with the
-             * APK). This happens during an upgrade from a package settings file
-             * that doesn't have a native library path attribute at all.
+             * Set the data dir to the default "/data/data/<package name>/lib"
+             * if we got here without anyone telling us different (e.g., apps
+             * stored on SD card have their native libraries stored in the ASEC
+             * container with the APK).
+             *
+             * This happens during an upgrade from a package settings file that
+             * doesn't have a native library path attribute at all.
              */
-            if (pkg.applicationInfo.nativeLibraryDir == null) {
+            if (pkg.applicationInfo.nativeLibraryDir == null && pkg.applicationInfo.dataDir != null) {
                 if (pkgSetting.nativeLibraryPathString == null) {
                     setInternalAppNativeLibraryPath(pkg, pkgSetting);
                 } else {
                     pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
                 }
             }
+
+            pkgSetting.uidError = uidError;
         }
 
         String path = scanFile.getPath();
@@ -4360,100 +4445,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return pkg;
-    }
-
-    /**
-     * Checks to see whether a package data directory is owned by the correct
-     * user. If it isn't, it will attempt to fix it if it's a system application
-     * or if this is the boot scan.
-     *
-     * @return {@code true} if successful, {@code false} if recovery failed
-     */
-    private boolean ensureDataDirUidIsCorrectForAllUsers(String packageName, int appUid,
-            boolean isSystemApp, boolean isBootScan) {
-        boolean mismatch = false;
-
-        for (int userId : sUserManager.getUserIds()) {
-            final File dataPath = getDataPathForPackage(packageName, userId);
-
-            int currentUid = 0;
-            try {
-                final StructStat stat = Libcore.os.stat(dataPath.getPath());
-                currentUid = stat.st_uid;
-            } catch (ErrnoException e) {
-                Slog.e(TAG, "Couldn't stat path " + dataPath.getPath(), e);
-            }
-
-            final int expectedUid = UserHandle.getUid(userId, appUid);
-
-            // If we have mismatched owners for the data path, we have a
-            // problem.
-            if (currentUid != expectedUid) {
-                if (currentUid == 0) {
-                    // The directory somehow became owned by root. Wow.
-                    // This is probably because the system was stopped while
-                    // installd was in the middle of messing with its libs
-                    // directory. Ask installd to fix that.
-                    final int ret;
-                    synchronized (mInstaller) {
-                        ret = mInstaller.fixUid(packageName, expectedUid, userId);
-                    }
-                    if (ret >= 0) {
-                        String msg = "Package " + packageName
-                                + " unexpectedly changed to uid 0; recovered to " + expectedUid;
-                        reportSettingsProblem(Log.WARN, msg);
-                    } else {
-                        mismatch = true;
-                        String prefix = isSystemApp ? "System package " : "Third party package ";
-                        String msg = prefix + packageName + " has changed from uid: " + currentUid
-                                + " to " + expectedUid;
-                        reportSettingsProblem(Log.WARN, msg);
-                    }
-                }
-            }
-        }
-
-        if (mismatch) {
-            if (isSystemApp || isBootScan) {
-                // If this is a system app, we can at least delete its
-                // current data so the application will still work.
-                int ret;
-                synchronized (mInstallLock) {
-                    ret = removeDataDirsLI(packageName);
-                }
-                if (ret >= 0) {
-                    // TODO: Kill the processes first
-                    // Old data gone!
-                    String prefix = isSystemApp
-                            ? "System package " : "Third party package ";
-                    String msg = prefix + packageName + " old data erased";
-                    reportSettingsProblem(Log.WARN, msg);
-
-                    // And now re-install the app.
-                    synchronized (mInstallLock) {
-                        ret = createDataDirsLI(packageName, appUid);
-                    }
-                    if (ret == -1) {
-                        // Ack should not happen!
-                        msg = prefix + packageName
-                                + " could not have data directory re-created after delete.";
-                        reportSettingsProblem(Log.WARN, msg);
-                        mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                        return false;
-                    }
-                } else {
-                    mHasSystemUidErrors = true;
-                    return false;
-                }
-            } else {
-                // If we allow this install to proceed, we will be broken.
-                // Abort, abort!
-                mLastScanError = PackageManager.INSTALL_FAILED_UID_CHANGED;
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private void setInternalAppNativeLibraryPath(PackageParser.Package pkg,
@@ -7512,22 +7503,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageRemovedInfo removedInfo;
     }
 
-    private boolean ensureDataDirExistsForAllUsers(String packageName, int uid) {
-        boolean exists = true;
-        for (int userId : sUserManager.getUserIds()) {
-            final File dataPath = getDataPathForPackage(packageName, userId);
-            if (!dataPath.exists()) {
-                synchronized (mInstallLock) {
-                    if (createDataDirForUserLI(packageName, uid, userId) < 0) {
-                        Slog.e(TAG, "Couldn't create data path " + dataPath.getPath());
-                    }
-                }
-                exists &= dataPath.exists();
-            }
-        }
-        return exists;
-    }
-
     /*
      * Install a non-existing package.
      */
@@ -7537,8 +7512,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
-        boolean dataDirExists = ensureDataDirExistsForAllUsers(pkg.packageName,
-                pkg.applicationInfo.uid);
+        boolean dataDirExists = getDataPathForPackage(pkg.packageName, 0).exists();
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
                 // A package with the same name is already installed, though
