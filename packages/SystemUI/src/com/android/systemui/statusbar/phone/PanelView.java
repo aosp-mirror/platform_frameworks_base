@@ -336,7 +336,7 @@ public class PanelView extends FrameLayout {
                             final float deltaY = Math.abs(mFinalTouchY - mInitialTouchY);
                             if (deltaY < mFlingGestureMinDistPx
                                     || vel < mFlingExpandMinVelocityPx
-                                    || mJustPeeked) {
+                                    ) {
                                 vel = 0;
                             }
 
@@ -344,10 +344,8 @@ public class PanelView extends FrameLayout {
                                 vel = -vel;
                             }
 
-                            if (DEBUG) LOG("gesture: dy=%f vraw=(%f,%f) vnorm=(%f,%f) vlinear=%f",
+                            if (DEBUG) LOG("gesture: dy=%f vel=(%f,%f) vlinear=%f",
                                     deltaY,
-                                    mVelocityTracker.getXVelocity(),
-                                    mVelocityTracker.getYVelocity(),
                                     xVel, yVel,
                                     vel);
 
