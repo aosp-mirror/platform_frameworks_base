@@ -8291,7 +8291,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         removePackageDataLI(ps, outInfo, flags, writeSettings);
 
         // Delete application code and resources
-        if (deleteCodeAndResources) {
+        if (deleteCodeAndResources && (outInfo != null)) {
             outInfo.args = createInstallArgs(packageFlagsToInstallFlags(ps), ps.codePathString,
                     ps.resourcePathString, ps.nativeLibraryPathString);
         }
