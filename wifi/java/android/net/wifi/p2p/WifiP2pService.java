@@ -1568,9 +1568,17 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 WifiP2pManager.ERROR);
                     }
                     break;
-                /* The supplicant misses the group removed event at times and just
-                 * sends a network disconnect event */
-                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
+                /* We do not listen to NETWORK_DISCONNECTION_EVENT for group removal
+                 * handling since supplicant actually tries to reconnect after a temporary
+                 * disconnect until group idle time out. Eventually, a group removal event
+                 * will come when group has been removed.
+                 *
+                 * When there are connectivity issues during temporary disconnect, the application
+                 * will also just remove the group.
+                 *
+                 * Treating network disconnection as group removal causes race conditions since
+                 * supplicant would still maintain the group at that stage.
+                 */
                 case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
                     if (DBG) logd(getName() + " group removed");
                     handleGroupRemoved();
