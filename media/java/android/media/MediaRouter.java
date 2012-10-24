@@ -239,6 +239,9 @@ public class MediaRouter {
         if ((types & ROUTE_TYPE_LIVE_AUDIO) != 0) {
             result.append("ROUTE_TYPE_LIVE_AUDIO ");
         }
+        if ((types & ROUTE_TYPE_LIVE_VIDEO) != 0) {
+            result.append("ROUTE_TYPE_LIVE_VIDEO ");
+        }
         if ((types & ROUTE_TYPE_USER) != 0) {
             result.append("ROUTE_TYPE_USER ");
         }
