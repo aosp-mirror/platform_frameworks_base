@@ -950,13 +950,17 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         // Add user-selected widget
-        final int[] widgets = mLockPatternUtils.getUserDefinedWidgets();
-        for (int i = widgets.length -1; i >= 0; i--) {
-            if (widgets[i] != -1) {
-                // We add the widgets from left to right, starting after the first page after
-                // the add page. We count down, since the order will be persisted from right
-                // to left, starting after camera.
-                addWidget(widgets[i], addPageIndex + 1);
+        final int[] widgets = mLockPatternUtils.getAppWidgets();
+        if (widgets == null) {
+            Log.d(TAG, "Problem reading widgets");
+        } else {
+            for (int i = widgets.length -1; i >= 0; i--) {
+                if (widgets[i] != -1) {
+                    // We add the widgets from left to right, starting after the first page after
+                    // the add page. We count down, since the order will be persisted from right
+                    // to left, starting after camera.
+                    addWidget(widgets[i], addPageIndex + 1);
+                }
             }
         }
     }
