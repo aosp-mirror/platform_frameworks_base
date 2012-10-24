@@ -38,6 +38,7 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -55,6 +56,16 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
 
 public class KeyguardPasswordView extends LinearLayout
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
+    /** Delay in ms between updates to the "too many attempts" count down. */
+    private static final long LOCKOUT_INTERVAL = 1000;
+
+    /**
+     * Delay in ms between updates to the "too many attempts" count down used
+     * when accessibility is turned on. Less annoying than the shorter default
+     * {@link #LOCKOUT_INTERVAL}.
+     */
+    private static final long ACCESSIBILITY_LOCKOUT_INTERVAL = 10000;
+
     private KeyguardSecurityCallback mCallback;
     private EditText mPasswordEntry;
     private LockPatternUtils mLockPatternUtils;
@@ -310,7 +321,12 @@ public class KeyguardPasswordView extends LinearLayout
         mPasswordEntry.setEnabled(false);
         mKeyboardView.setEnabled(false);
         long elapsedRealtime = SystemClock.elapsedRealtime();
-        new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
+        final AccessibilityManager accessManager =
+                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        // Use a longer update interval when accessibility is turned on.
+        final long interval = accessManager.isEnabled() ? ACCESSIBILITY_LOCKOUT_INTERVAL
+                : LOCKOUT_INTERVAL;
+        new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, interval) {
 
             @Override
             public void onTick(long millisUntilFinished) {
