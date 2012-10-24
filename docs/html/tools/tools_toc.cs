@@ -143,6 +143,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/etc1tool.html">etc1tool</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">Hierarchy Viewer</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/jobb.html">jobb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
