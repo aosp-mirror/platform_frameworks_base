@@ -10561,7 +10561,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(": "); pw.println(pair.second);
             }
         }
-        pw.println("  DisplayContents");
+        pw.println();
+        pw.println("  DisplayContents:");
         if (mDisplayReady) {
             DisplayContentsIterator dCIterator = new DisplayContentsIterator();
             while (dCIterator.hasNext()) {
