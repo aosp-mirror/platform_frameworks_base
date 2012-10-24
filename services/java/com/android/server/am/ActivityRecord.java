@@ -602,6 +602,15 @@ final class ActivityRecord {
         }
     }
 
+    void updateOptionsLocked(ActivityOptions options) {
+        if (options != null) {
+            if (pendingOptions != null) {
+                pendingOptions.abort();
+            }
+            pendingOptions = options;
+        }
+    }
+
     void applyOptionsLocked() {
         if (pendingOptions != null) {
             final int animationType = pendingOptions.getAnimationType();
@@ -651,6 +660,12 @@ final class ActivityRecord {
             pendingOptions.abort();
             pendingOptions = null;
         }
+    }
+
+    ActivityOptions takeOptionsLocked() {
+        ActivityOptions opts = pendingOptions;
+        pendingOptions = null;
+        return opts;
     }
 
     void removeUriPermissionsLocked() {
