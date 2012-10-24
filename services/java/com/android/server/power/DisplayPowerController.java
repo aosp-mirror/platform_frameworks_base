@@ -648,10 +648,10 @@ final class DisplayPowerController {
                 mUsingScreenAutoBrightness = false;
             }
             if (mPowerRequest.screenState == DisplayPowerRequest.SCREEN_STATE_DIM) {
-                // Dim slowly by at least some minimum amount.
+                // Dim quickly by at least some minimum amount.
                 target = Math.min(target - SCREEN_DIM_MINIMUM_REDUCTION,
                         mScreenBrightnessDimConfig);
-                slow = true;
+                slow = false;
             } else if (wasDim) {
                 // Brighten quickly.
                 slow = false;
