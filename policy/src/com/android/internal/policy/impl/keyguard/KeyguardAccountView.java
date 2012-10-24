@@ -321,5 +321,9 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
         mSecurityMessageDisplay = display;
         reset();
     }
+
+    @Override
+    public void showUsabilityHint() {
+    }
 }
 

@@ -218,4 +218,8 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
         mSecurityMessageDisplay = display;
     }
+
+    @Override
+    public void showUsabilityHint() {
+    }
 }

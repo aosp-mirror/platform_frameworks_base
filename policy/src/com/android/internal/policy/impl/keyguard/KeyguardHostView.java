@@ -74,7 +74,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
-    private ViewFlipper mSecurityViewContainer;
+    private KeyguardSecurityViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
     private KeyguardTransportControlView mTransportControl;
     private boolean mEnableMenuKey;
@@ -175,10 +175,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         mViewStateManager.setPagedView(mAppWidgetContainer);
         mViewStateManager.setChallengeLayout(slider != null ? slider :
                 (ChallengeLayout) findViewById(R.id.multi_pane_challenge));
-
-        mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
+        mSecurityViewContainer = (KeyguardSecurityViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
+        mViewStateManager.setSecurityViewContainer(mSecurityViewContainer);
 
+        mViewStateManager.showUsabilityHints();
 
         updateSecurityViews();
         if (!(mContext instanceof Activity)) {
@@ -717,6 +718,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         // layout is blank but forcing a layout causes it to reappear (e.g. with with
         // hierarchyviewer).
         requestLayout();
+
+        if (mViewStateManager != null) {
+            mViewStateManager.showUsabilityHints();
+        }
     }
 
     @Override
@@ -1068,7 +1073,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 @Override
                 public void showUnlockHint() {
                     if (mKeyguardSelectorView != null) {
-                        mKeyguardSelectorView.ping();
+                        mKeyguardSelectorView.showUsabilityHint();
                     }
                 }
 
