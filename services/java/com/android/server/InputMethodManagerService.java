@@ -1561,7 +1561,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, span.hashCode());
-                mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
                 return true;
             }
         }
