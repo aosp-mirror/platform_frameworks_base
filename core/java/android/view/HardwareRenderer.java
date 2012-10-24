@@ -1526,30 +1526,6 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void destroyLayers(View view) {
-            if (view != null && isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) {
-                if (mCanvas != null) {
-                    mCanvas.clearLayerUpdates();
-                }
-                destroyHardwareLayer(view);
-                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
-            }
-        }
-
-        private static void destroyHardwareLayer(View view) {
-            view.destroyLayer(true);
-
-            if (view instanceof ViewGroup) {
-                ViewGroup group = (ViewGroup) view;
-
-                int count = group.getChildCount();
-                for (int i = 0; i < count; i++) {
-                    destroyHardwareLayer(group.getChildAt(i));
-                }
-            }
-        }
-
-        @Override
         boolean safelyRun(Runnable action) {
             boolean needsContext = true;
             if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
@@ -1571,6 +1547,35 @@ public abstract class HardwareRenderer {
             }
 
             return true;
+        }
+
+        @Override
+        void destroyLayers(final View view) {
+            if (view != null) {
+                safelyRun(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mCanvas != null) {
+                            mCanvas.clearLayerUpdates();
+                        }
+                        destroyHardwareLayer(view);
+                        GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+                    }
+                });
+            }
+        }
+
+        private static void destroyHardwareLayer(View view) {
+            view.destroyLayer(true);
+
+            if (view instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) view;
+
+                int count = group.getChildCount();
+                for (int i = 0; i < count; i++) {
+                    destroyHardwareLayer(group.getChildAt(i));
+                }
+            }
         }
 
         @Override
