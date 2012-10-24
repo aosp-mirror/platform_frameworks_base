@@ -23,8 +23,6 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
     <a class="close" onclick="$('#player-wrapper').hide()">close video</a>
   </div>
 </div>
-
-
 <div class="wrap">
    <!-- Slideshow -->
    <div class="slideshow-container slideshow-develop col-16">
@@ -32,6 +30,45 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
        <a href="" class="slideshow-next">Next</a>
        <div class="frame">
            <ul>
+              <li class="item carousel-home">
+                 <div class="col-8">
+                   <img
+src="http://4.bp.blogspot.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <h2>Building Great Apps for Tablets</h2>
+                  <p>Tablets are a growing part of the Android installed base and they offer new opportunities for user engagement and monetization. If you are targeting tablets, check out the <strong>Tablet App Quality Checklist</strong> for tips and techniques on how to deliver a great app experience for tablet users.  </p>
+                  <p><a
+href="/distribute/googleplay/quality/tablet.html" class="button">Read
+more</a></p>
+                </div>            
+              </li>
+               <li class="item carousel-home">
+                   <div class="col-8">
+                     <img
+src="http://1.bp.blogspot.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/google-play-subscriptions.png" class="play"></div>
+                   <div class="content-right col-6">
+                   <h2>In-app Subscriptions with Trials</h2>
+                   <p>You can now set up a <strong>free trial period</strong> for any Google Play in-app subscription, making it easy for users try your subscriber content before automatically converting to a full subscription. Free trials give you a new way to bring users into your products and engage them effectively. </p>
+                   <p><a class="button"
+href="http://dirkbd.mtv:8809/guide/google/play/billing/billing_subscriptions.html#trials">Read
+more</a></p>
+                   </div>                
+                </li>
+               <li class="item carousel-home">
+                   <div class="col-8">
+                     <img
+src="http://2.bp.blogspot.com/-MgN5DnoO5XU/UHYGYzTcAOI/AAAAAAAABs4/jTS7sKkfBcM/s1600/pubsites.png" class="play"></div>
+                   <div class="content-right col-6">
+                   <p class="title-intro">From the blog:</p>
+                   <h2>New Google Play Developer Console</h2>
+                   <p>All developers can now try the <strong>new Google Play Developer Console</strong>. With a streamlined publishing flow, new language options, and new user ratings statistics, you’ll have better tools for delivering great Android apps that delight users.</p>
+                  <p><a
+href="http://android-developers.blogspot.com/2012/10/new-google-play-developer-console.html" class="button">Read
+more</a></p>
+                   </div>                
+                </li>
                <li class="item carousel-home">
                  <div class="col-8">
                    <img
@@ -42,60 +79,14 @@ class="play no-shadow no-transform" />
                   <p class="title-intro">From the blog:</p>
                   <h2>Getting Your App Ready for Jelly Bean and Nexus 7</h2>
                   <p>For many people, their first taste of Jelly Bean will be on the beautiful 
-                    Nexus 7. While most applications will run just fine on Nexus 7, who wants 
-                    their app to be just fine? Here are some tips for optimizing your application 
+                    <strong>Nexus 7 tablet</strong>. Most applications will run just fine on Nexus 7, but who wants 
+                    their app to be just fine? Here are some tips for optimizing your app 
                     to make the most of this device.</p>
                   <p><a
 href="http://android-developers.blogspot.com/2012/07/getting-your-app-ready-for-jelly-bean.html" class="button">Read
 more</a></p>
                 </div>            
               </li>
-               <li class="item carousel-home">
-                 <div class="col-8">
-                   <img
-src="http://1.bp.blogspot.com/-6qyjPxTuzv0/T6lde-Oq_fI/AAAAAAAABXc/zle7OFEGP44/s400/fddns%2Bcopy.png"
-class="play no-shadow no-transform" />
-                 </div>
-                <div class="content-right col-6">
-                  <p class="title-intro">From the blog:</p>
-                  <h2>Using DialogFragments</h2>
-                  <p>In this post, I'll show how to use DialogFragments with the <a
-href="http://developer.android.com/reference/android/support/v4/app/DialogFragment.html">v4 support
-library</a> (for backward compatibility on pre-Honeycomb devices) to show a simple edit dialog and
-return a result to the calling Activity using an interface.</p>
-                  <p><a
-href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html" class="button">Read
-more</a></p>
-                </div>            
-              </li>
-               <li class="item carousel-home">
-                   <div class="col-8">
-                     <img
-src="http://1.bp.blogspot.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/google-play-subscriptions.png" class="play"></div>
-                   <div class="content-right col-6">
-                   <p class="title-intro">From the blog:</p>
-                   <h2>In-app Subscriptions in Google Play</h2>
-                   <p>Starting today, developers can use In-app Billing to sell monthly or annual
-subscriptions from inside of their apps. All subscriptions are auto-renewing, for every app and game
-and every type of subscription product.</p>
-                   <p><a class="button"
-href="http://android-developers.blogspot.com/2012/05/in-app-subscriptions-in-google-play.html">Read
-more</a></p>
-                   </div>                
-                </li>
-               <li class="item carousel-home">
-                   <div class="col-8">
-                     <img
-src="{@docRoot}images/home/developers_live.png" class="play"></div>
-                   <div class="content-right col-6">
-                   <h2>Learn what great apps are made of</h2>
-                   <p>Every week we host a live broadcast in which we review a collection of apps and games
-                     nominated by the creators. It's no-holds-barred and we tell you exactly what is flawed or
-                     fantastic in each app and how to make improvements.</p>
-                   <p><a href="" class="button" onclick="$('ul#DevelopersLive li:first
-a').click();return false;">Watch the latest review</a></p>
-                   </div>                
-                </li>
            </ul>
        </div>
    </div>
@@ -111,53 +102,47 @@ a').click();return false;">Watch the latest review</a></p>
 		<div class="feed-container">
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
-				<ul>
-					<li><a href="http://android-developers.blogspot.com/2012/06/android-sdk-tools-revision-20.html">
-                                          <div class="feed-image" style="background:url('http://1.bp.blogspot.com/-Kp1qE5du6l8/T-xurIjfPgI/AAAAAAAABAM/kuWQwPgi0rw/s640/newactivity+(1).png') no-repeat 0 0">
-                                          </div>
-                                          <h4>Android SDK Tools, Revision 20</h4>
-                                          <p>Along with the preview of the Android 4.1 (Jelly Bean) platform, we launched Android SDK Tools R20 and ADT 20.0.0. Here are a few things...</p>
-					</a></li>
-					<li><a href="http://android-developers.blogspot.com/2012/04/faster-emulator-with-better-hardware.html">
-                                          <div class="feed-image" style="background:url('../images/emulator-wvga800l.png') no-repeat 0 0">
-                                          </div>
-                                          <h4>A Faster Emulator with Better...</h4>
-                                          <p>Today we’re thrilled to announce several significant improvements to the emulator, including a dramatic...</p>
-					</a></li>
-					<li><a href="http://android-developers.blogspot.com/2012/04/android-c2dm-client-login-key.html">
-                                          <div class="feed-image" style="background:url('../images/develop/auth-code.png') no-repeat 0 0">
-                                          </div>
-                                          <h4>Android C2DM — Client Login key...</h4>
-                                          <p>In the upcoming weeks, some of the older Client
-					Login authentication keys will expire. If you generated the token you’re...</p>
-					</a></li>
-					<li><a href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
-                                          <div class="feed-image">
-                                          </div>
-                                          <h4>Accessibility</h4>
-                                          <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
-					</a></li>
-                                      
-				</ul>
+          <ul>
+            <li><a href="http://android-developers.blogspot.com/2012/10/google-play-seller-support-in-india.html">
+              <div class="feed-image" style="background:url('http://4.bp.blogspot.com/-ekT-9XQi0YY/UH7WT2XjSdI/AAAAAAAABwc/fI5QaPi7QEk/s320/india-apps1.png') no-repeat 0 0"></div>
+              <h4>Google Play Seller Support in India</h4>
+              <p>Developers in India can sell paid applications, in-app products, and subscriptions in Google Play, with monthly payouts to their local bank accounts...</p>
+              </a></li>
+            <li><a href="http://android-developers.blogspot.com/2012/09/google-play-services-and-oauth-identity.html">
+              <div class="feed-image" style="background:url('https://lh4.ggpht.com/7z4NItEg-X21zvFGAarKonk-VaysBYthJ30u1JjaQ0-5fjyHNawnmoNeG--4FCACog=w124') no-repeat 0 0"></div>
+              <h4>Google Play services and OAuth Tools</h4>
+              <p>The rollout of Google Play services to all Android 2.2+ devices worldwide is now complete, and all of those devices now have new tools for working with OAuth 2.0 tokens...</p>
+              </a></li>
+            <li><a href="http://android-developers.blogspot.com/2012/08/creating-your-own-spelling-checker.html">
+              <div class="feed-image" style="background:url('http://2.bp.blogspot.com/-QKlztEdM1aA/UC1bH6Kv4UI/AAAAAAAAADo/fQS8-EfBYIQ/s320/spell-check-framed-new.png') no-repeat 0 0"></div>
+              <h4>Creating A Spelling Checker Service</h4>
+              <p>If you are an IME developer, the Spelling Checker framework gives you a great way to provide an even better experience for your users...</p>
+              </a></li>
+            <li><a href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
+              <div class="feed-image"></div>
+              <h4>Accessibility</h4>
+              <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
+              </a></li>                         
+          </ul>
                                 <!-- FEATURED DOCS -->
-				<ul>
-					<li><a href="{@docRoot}guide/google/play/billing/index.html">
-						<h4>Google Play In-app Billing</h4>
-						<p>In-app Billing is a Google Play service that lets you sell digital content from inside your applications. You can sell products as standard in-app products (one-time purchase) or with subscriptions (recurring...</p>
-					</a></li>
-					<li><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
-						<h4>Contacts Provider</h4>
-						<p>The Contacts Provider is a powerful and flexible Android component that manages the device's central repository of data about people. You can use it to build powerful social features...</p>
-					</a></li>
-					<li><a href="{@docRoot}training/efficient-downloads/index.html">
-						<h4>Transferring Data Without Draining the Battery</h4>
-						<p>This training class demonstrates the best practices for scheduling and executing downloads using techniques such as caching, polling, and prefetching.</p>
-					</a></li>
-					<li><a href="{@docRoot}training/backward-compatible-ui/index.html">
-						<h4>Creating Backward-Compatible UIs</h4>
-						<p>This training class demonstrates how to use UI components and APIs available in newer versions of Android in a backward-compatible way, ensuring that your application still runs on previous versions...</p>
-					</a></li>
-				</ul>
+          <ul>
+            <li><a href="{@docRoot}distribute/googleplay/spotlight/tablets.html">
+              <h4>Tablet Stories</h4>
+              <p>More developers are investing in a full tablet experience for their apps. Here are some stories from developers who are seeing real results as they expand their offering to include Android tablets. </p>
+              </a></li>
+            <li><a href="{@docRoot}distribute/googleplay/quality/core.html">
+              <h4>Core App Quality Guidelines</h4>
+              <p>This document helps you assess basic aspects of quality in your app through a compact set of core app quality criteria and associated tests. All Android apps should meet these criteria.</p>
+              </a></li>
+            <li><a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">
+              <h4>Updated Notifications API Guide</h4>
+              <p>The Notifications API Guide is updated to include information about building Jelly Bean rich notifications using the Support Library APIs for backwards-compatibility.</p>
+              </a></li>
+            <li><a href="{@docRoot}guide/topics/ui/dialogs.html">
+              <h4>Updated Dialogs API Guide</h4>
+              <p>The Dialogs API Guide now shows to use DialogFragment class, a simpler way to manage your dialogs and embed them in alternative layouts.</p>
+              </a></li>                                      
+          </ul>
 			</div>
 		</div>
 	</div>	<!-- /news and feature feed -->
@@ -169,10 +154,10 @@ a').click();return false;">Watch the latest review</a></p>
 		</ul>
 		<div class="feed-container">
 			<div class="feed-frame">
-				<ul id="DevelopersLive">
-				</ul>
-				<ul id="VideoPlaylists">
-				</ul>
+              <ul id="DevelopersLive">
+              </ul>
+              <ul id="VideoPlaylists">
+              </ul>
 			</div>
 		</div>
 	</div>
