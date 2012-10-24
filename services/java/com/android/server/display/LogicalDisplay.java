@@ -186,6 +186,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_SUPPORTS_PROTECTED_BUFFERS;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SECURE) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_SECURE;
+            }
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.appWidth = deviceInfo.width;
             mBaseDisplayInfo.appHeight = deviceInfo.height;

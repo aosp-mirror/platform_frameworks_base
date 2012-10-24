@@ -281,18 +281,19 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             scheduleStatusChangedBroadcastLocked();
         }
 
+        boolean secure = (flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0;
         int deviceFlags = 0;
-        if ((flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0) {
+        if (secure) {
             deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
-        }
-        if (mSupportsProtectedBuffers) {
-            deviceFlags |= DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
+            if (mSupportsProtectedBuffers) {
+                deviceFlags |= DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
+            }
         }
 
         float refreshRate = 60.0f; // TODO: get this for real
 
         String name = display.getFriendlyDisplayName();
-        IBinder displayToken = Surface.createDisplay(name, false);
+        IBinder displayToken = Surface.createDisplay(name, secure);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
                 refreshRate, deviceFlags, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);

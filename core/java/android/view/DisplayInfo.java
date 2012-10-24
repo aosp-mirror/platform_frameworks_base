@@ -299,6 +299,9 @@ public final class DisplayInfo implements Parcelable {
 
     private static String flagsToString(int flags) {
         StringBuilder result = new StringBuilder();
+        if ((flags & Display.FLAG_SECURE) != 0) {
+            result.append(", FLAG_SECURE");
+        }
         if ((flags & Display.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
             result.append(", FLAG_SUPPORTS_PROTECTED_BUFFERS");
         }
