@@ -628,8 +628,13 @@ public interface WindowManager extends ViewManager {
         @Deprecated
         public static final int FLAG_DITHER             = 0x00001000;
         
-        /** Window flag: don't allow screen shots while this window is
-         * displayed. Maps to Surface.SECURE. */
+        /** Window flag: Treat the content of the window as secure, preventing
+         * it from appearing in screenshots or from being viewed on non-secure
+         * displays.
+         *
+         * <p>See {@link android.view.Display#FLAG_SECURE} for more details about
+         * secure surfaces and secure displays.
+         */
         public static final int FLAG_SECURE             = 0x00002000;
         
         /** Window flag: a special mode where the layout parameters are used
