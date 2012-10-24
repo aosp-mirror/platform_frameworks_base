@@ -31,7 +31,7 @@ class WebViewFactory {
     // TODO: When the Chromium powered WebView is ready, it should be the default factory class.
     private static final String DEFAULT_WEBVIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
     private static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webviewchromium.WebViewChromiumFactoryProvider";
+            "com.android.webview.chromium.WebViewChromiumFactoryProvider";
     private static final String CHROMIUM_WEBVIEW_JAR = "/system/framework/webviewchromium.jar";
 
     private static final String LOGTAG = "WebViewFactory";
