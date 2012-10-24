@@ -127,10 +127,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.height = mPhys.height;
                 mInfo.refreshRate = mPhys.refreshRate;
 
-                // Assume that all built-in displays have secure output (eg. HDCP) and
+                // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.
-                mInfo.flags = DisplayDeviceInfo.FLAG_SECURE
-                        | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
+                if (mPhys.secure) {
+                    mInfo.flags = DisplayDeviceInfo.FLAG_SECURE
+                            | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
+                }
 
                 if (mBuiltInDisplayId == Surface.BUILT_IN_DISPLAY_ID_MAIN) {
                     mInfo.name = getContext().getResources().getString(

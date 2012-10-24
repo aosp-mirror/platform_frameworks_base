@@ -385,7 +385,27 @@ public class SurfaceView extends View {
             mLayout.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
     }
-    
+
+    /**
+     * Control whether the surface view's content should be treated as secure,
+     * preventing it from appearing in screenshots or from being viewed on
+     * non-secure displays.
+     *
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     *
+     * <p>See {@link android.view.Display#FLAG_SECURE} for details.
+     *
+     * @param isSecure True if the surface view is secure.
+     */
+    public void setSecure(boolean isSecure) {
+        if (isSecure) {
+            mLayout.flags |= WindowManager.LayoutParams.FLAG_SECURE;
+        } else {
+            mLayout.flags &= ~WindowManager.LayoutParams.FLAG_SECURE;
+        }
+    }
+
     /**
      * Hack to allow special layering of windows.  The type is one of the
      * types in WindowManager.LayoutParams.  This is a hack so:

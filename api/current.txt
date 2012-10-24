@@ -23763,6 +23763,7 @@ package android.view {
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
+    field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
   }
 
@@ -24809,6 +24810,7 @@ package android.view {
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int);
     method public boolean gatherTransparentRegion(android.graphics.Region);
     method public android.view.SurfaceHolder getHolder();
+    method public void setSecure(boolean);
     method public void setZOrderMediaOverlay(boolean);
     method public void setZOrderOnTop(boolean);
   }

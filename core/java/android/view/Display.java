@@ -82,20 +82,63 @@ public final class Display {
      * Display flag: Indicates that the display supports compositing content
      * that is stored in protected graphics buffers.
      * <p>
+     * If this flag is set then the display device supports compositing protected buffers.
+     * </p><p>
+     * If this flag is not set then the display device may not support compositing
+     * protected buffers; the user may see a blank region on the screen instead of
+     * the protected content.
+     * </p><p>
      * Secure (DRM) video decoders may allocate protected graphics buffers to request that
      * a hardware-protected path be provided between the video decoder and the external
      * display sink.  If a hardware-protected path is not available, then content stored
      * in protected graphics buffers may not be composited.
      * </p><p>
-     * If this flag is not set, then the display device does not support compositing
-     * protected buffers; the user may see a blank region on the screen instead of
-     * the protected content.  An application can use this flag as a hint that it should
-     * select an alternate content stream or adopt a different strategy for decoding
-     * content that does not rely on protected buffers so as to ensure that the user
-     * can view the content on the display as expected.
+     * An application can use the absence of this flag as a hint that it should not use protected
+     * buffers for this display because the content may not be visible.  For example,
+     * if the flag is not set then the application may choose not to show content on this
+     * display, show an informative error message, select an alternate content stream
+     * or adopt a different strategy for decoding content that does not rely on
+     * protected buffers.
      * </p>
+     *
+     * @see #getFlags
      */
     public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1 << 0;
+
+    /**
+     * Display flag: Indicates that the display has a secure video output and
+     * supports compositing secure surfaces.
+     * <p>
+     * If this flag is set then the display device has a secure video output
+     * and is capable of showing secure surfaces.  It may also be capable of
+     * showing {@link #FLAG_SUPPORTS_PROTECTED_BUFFERS protected buffers}.
+     * </p><p>
+     * If this flag is not set then the display device may not have a secure video
+     * output; the user may see a blank region on the screen instead of
+     * the contents of secure surfaces or protected buffers.
+     * </p><p>
+     * Secure surfaces are used to prevent content rendered into those surfaces
+     * by applications from appearing in screenshots or from being viewed
+     * on non-secure displays.  Protected buffers are used by secure video decoders
+     * for a similar purpose.
+     * </p><p>
+     * An application creates a window with a secure surface by specifying the
+     * {@link WindowManager.LayoutParams#FLAG_SECURE} window flag.
+     * Likewise, an application creates a {@link SurfaceView} with a secure surface
+     * by calling {@link SurfaceView#setSecure} before attaching the secure view to
+     * its containing window.
+     * </p><p>
+     * An application can use the absence of this flag as a hint that it should not create
+     * secure surfaces or protected buffers on this display because the content may
+     * not be visible.  For example, if the flag is not set then the application may
+     * choose not to show content on this display, show an informative error message,
+     * select an alternate content stream or adopt a different strategy for decoding
+     * content that does not rely on secure surfaces or protected buffers.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_SECURE = 1 << 1;
 
     /**
      * Internal method to create a display.
@@ -182,6 +225,7 @@ public final class Display {
      * @return The display flags.
      *
      * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
+     * @see #FLAG_SECURE
      */
     public int getFlags() {
         synchronized (this) {
