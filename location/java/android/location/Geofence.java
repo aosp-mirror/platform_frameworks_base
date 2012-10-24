@@ -22,9 +22,7 @@ import android.os.Parcelable;
 /**
  * Represents a geographical boundary, also known as a geofence.
  *
- * <p>Currently only circular geofences are supported, but this object
- * is opaque so could be used in the future to represent polygons or other
- * shapes.
+ * <p>Currently only circular geofences are supported.
  */
 public final class Geofence implements Parcelable {
     /** @hide */
