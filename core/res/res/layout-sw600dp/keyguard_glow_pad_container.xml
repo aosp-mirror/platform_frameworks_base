@@ -18,7 +18,7 @@
 -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
     <include layout="@layout/keyguard_glow_pad_view"
-        android:layout_width="@dimen/kg_glow_pad_size"
-        android:layout_height="@dimen/kg_glow_pad_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center" />
 </merge>
