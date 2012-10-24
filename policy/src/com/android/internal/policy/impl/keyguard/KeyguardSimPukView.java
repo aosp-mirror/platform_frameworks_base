@@ -170,6 +170,10 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
         reset();
     }
 
+    @Override
+    public void showUsabilityHint() {
+    }
+
     /** {@inheritDoc} */
     public void cleanUp() {
         // dismiss the dialog.
