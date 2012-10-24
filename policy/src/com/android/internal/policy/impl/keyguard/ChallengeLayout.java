@@ -45,4 +45,16 @@ public interface ChallengeLayout {
      * Show the bouncer challenge. This may block access to other child views.
      */
     void showBouncer();
+
+    /**
+     * Hide the bouncer challenge if it is currently showing.
+     * This may restore previously blocked access to other child views.
+     */
+    void hideBouncer();
+
+    /**
+     * Returns true if the challenge is currently in bouncer mode,
+     * potentially blocking access to other child views.
+     */
+    boolean isBouncing();
 }
