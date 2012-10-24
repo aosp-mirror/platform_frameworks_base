@@ -1047,13 +1047,14 @@ public class KeyguardHostView extends KeyguardViewBase {
     private void enableUserSelectorIfNecessary() {
         // if there are multiple users, we need to add the multi-user switcher widget to the
         // keyguard.
-        KeyguardMultiUserSelectorView multiUser =
-                (KeyguardMultiUserSelectorView) findViewById(R.id.keyguard_user_selector);
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> users = mUm.getUsers(true);
 
         if (users.size() > 1) {
+            KeyguardMultiUserSelectorView multiUser =
+                    (KeyguardMultiUserSelectorView) findViewById(R.id.keyguard_user_selector);
             multiUser.setVisibility(View.VISIBLE);
+            multiUser.addUsers(mUm.getUsers(true));
             UserSwitcherCallback callback = new UserSwitcherCallback() {
                 @Override
                 public void hideSecurityView(int duration) {

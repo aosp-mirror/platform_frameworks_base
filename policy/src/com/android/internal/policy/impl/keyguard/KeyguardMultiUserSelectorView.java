@@ -31,6 +31,7 @@ import android.widget.FrameLayout;
 import com.android.internal.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -55,19 +56,18 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
     }
 
     protected void onFinishInflate () {
-        init();
+        mUsersGrid = (ViewGroup) findViewById(R.id.keyguard_users_grid);
+        mUsersGrid.removeAllViews();
+        setClipChildren(false);
+        setClipToPadding(false);
+
     }
 
     public void setCallback(KeyguardHostView.UserSwitcherCallback callback) {
         mCallback = callback;
     }
 
-    public void init() {
-        mUsersGrid = (ViewGroup) findViewById(R.id.keyguard_users_grid);
-        mUsersGrid.removeAllViews();
-        setClipChildren(false);
-        setClipToPadding(false);
-
+    public void addUsers(Collection<UserInfo> userList) {
         UserInfo activeUser;
         try {
             activeUser = ActivityManagerNative.getDefault().getCurrentUser();
@@ -75,8 +75,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             activeUser = null;
         }
 
-        UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUm.getUsers(true));
+        ArrayList<UserInfo> users = new ArrayList<UserInfo>(userList);
         Collections.sort(users, mOrderAddedComparator);
 
         for (UserInfo user: users) {
