@@ -1434,12 +1434,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 set.add(pkg.packageName);
                 if (MORE_DEBUG) Slog.v(TAG, "Agent found; added");
 
-                // If we've never seen this app before, schedule a backup for it
-                if (!mEverStoredApps.contains(pkg.packageName)) {
-                    if (DEBUG) Slog.i(TAG, "New app " + pkg.packageName
-                            + " never backed up; scheduling");
-                    dataChangedImpl(pkg.packageName);
-                }
+                // Schedule a backup for it on general principles
+                if (DEBUG) Slog.i(TAG, "Scheduling backup for new app " + pkg.packageName);
+                dataChangedImpl(pkg.packageName);
             }
         }
     }
@@ -1472,8 +1469,10 @@ class BackupManagerService extends IBackupManager.Stub {
             // Found it.  Remove this one package from the bookkeeping, and
             // if it's the last participating app under this uid we drop the
             // (now-empty) set as well.
+            // Note that we deliberately leave it 'known' in the "ever backed up"
+            // bookkeeping so that its current-dataset data will be retrieved
+            // if the app is subsequently reinstalled
             if (MORE_DEBUG) Slog.v(TAG, "  removing participant " + packageName);
-            removeEverBackedUp(packageName);
             set.remove(packageName);
             mPendingBackups.remove(packageName);
         }
@@ -5441,7 +5440,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
         long restoreSet = getAvailableRestoreToken(packageName);
         if (DEBUG) Slog.v(TAG, "restoreAtInstall pkg=" + packageName
-                + " token=" + Integer.toHexString(token));
+                + " token=" + Integer.toHexString(token)
+                + " restoreSet=" + Long.toHexString(restoreSet));
 
         if (mAutoRestore && mProvisioned && restoreSet != 0) {
             // okay, we're going to attempt a restore of this package from this restore set.
