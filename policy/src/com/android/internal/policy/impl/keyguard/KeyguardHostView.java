@@ -834,8 +834,32 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.addWidget(addWidget);
         View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
         mAppWidgetContainer.addWidget(statusWidget);
-        View cameraWidget = inflater.inflate(R.layout.keyguard_camera_widget, null, true);
-        mAppWidgetContainer.addWidget(cameraWidget);
+        if (mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
+            View cameraWidget = new CameraWidgetFrame(mContext, new CameraWidgetFrame.Callbacks() {
+
+                private SlidingChallengeLayout locateSlider() {
+                    return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+                }
+
+                @Override
+                public void onLaunchingCamera() {
+                    SlidingChallengeLayout slider = locateSlider();
+                    if (slider != null) {
+                        slider.showHandle(false);
+                    }
+                }
+
+                @Override
+                public void onCameraLaunched() {
+                    SlidingChallengeLayout slider = locateSlider();
+                    if (slider != null) {
+                        slider.showHandle(true);
+                    }
+                    mAppWidgetContainer.scrollLeft();
+                }
+            });
+            mAppWidgetContainer.addWidget(cameraWidget);
+        }
 
         View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
         addWidgetButton.setOnClickListener(new OnClickListener() {
