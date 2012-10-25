@@ -1,0 +1,208 @@
+page.title=Crossfading Two Views
+trainingnavtop=true
+
+
+@jd:body
+
+    <div id="tb-wrapper">
+      <div id="tb">
+        <h2>
+          This lesson teaches you to:
+        </h2>
+        <ol>
+          <li>
+            <a href="#views">Create the Views</a>
+          </li>
+          <li>
+            <a href="#setup">Set up the Animation</a>
+          </li>
+          <li>
+            <a href="#animate">Crossfade the Views</a>
+          </li>
+        </ol>
+    </div>
+    </div>
+
+    <p>
+      Crossfade animations (also know as dissolve) gradually fade out one UI component while simultaneously fading in
+      another. This animation is useful for situations where you want to switch content or views
+      in your app. Crossfades are very subtle and short but offer a fluid transition from one screen to the
+      next. When you don't use them, however, transitions often feel abrupt or hurried.
+    </p>
+    <p>Here's an example of a crossfade from a progress indicator to some text content.
+    </p>
+
+<div class="framed-galaxynexus-land-span-8">
+  <video class="play-on-hover" autoplay>
+    <source src="anim_crossfade.mp4" type="video/mp4">
+    <source src="anim_crossfade.webm" type="video/webm">
+    <source src="anim_crossfade.ogv" type="video/ogg">
+  </video>
+</div>
+<div class="figure-caption">
+Crossfade animation
+  <div class="video-instructions">&nbsp;</div>
+</div>
+
+    <p>
+      If you want to jump ahead and see a full working example,
+      <a href="{@docRoot}shareables/training/Animations.zip">download</a>
+      and run the sample app and select the Crossfade example.
+      See the following files for the code implementation:
+    </p>
+    <ul>
+      <li>
+        <code>src/CrossfadeActivity.java</code>
+      </li>
+      <li>
+        <code>layout/activity_crossfade.xml</code>
+      </li>
+      <li>
+        <code>menu/activity_crossfade.xml</code>
+      </li>
+    </ul>
+    <h2 id="views">
+      Create the Views
+    </h2>
+    <p>
+      Create the two views that you want to crossfade. The following example creates a progress
+      indicator and a scrollable text view:
+    </p>
+    <pre>
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"&gt;
+
+        &lt;TextView style="?android:textAppearanceMedium"
+            android:lineSpacingMultiplier="1.2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/lorem_ipsum"
+            android:padding="16dp" /&gt;
+
+    &lt;/ScrollView&gt;
+
+    &lt;ProgressBar android:id="@+id/loading_spinner"
+        style="?android:progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" /&gt;
+
+&lt;/FrameLayout&gt;
+</pre>
+    <h2 id="setup">
+      Set up the Animation
+    </h2>
+    <p>
+      To set up the animation:
+    </p>
+    <ol>
+      <li>Create member variables for the views that you want to crossfade. You need
+      these references later when modifying the views during the animation.
+      </li>
+      <li>For the view that is being faded in, set its visibility to {@link
+      android.view.View#GONE}. This prevents the view from taking up layout space and omits it
+      from layout calculations, speeding up processing.
+      </li>
+      <li>Cache the <code>{@link android.R.integer#config_shortAnimTime}</code>
+      system property in a member variable. This property defines a standard
+      "short" duration for the animation. This duration is ideal for subtle animations or
+      animations that occur very frequently. {@link android.R.integer#config_longAnimTime} and
+      {@link android.R.integer#config_mediumAnimTime} are also available if you wish to use them.
+      </li>
+    </ol>
+    <p>
+      Here's an example using the layout from the previous code snippet as the activity content
+      view:
+    </p>
+    <pre>
+public class CrossfadeActivity extends Activity {
+
+    private View mContentView;
+    private View mLoadingView;
+    private int mShortAnimationDuration;
+
+    ...
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_crossfade);
+
+        mContentView = findViewById(R.id.content);
+        mLoadingView = findViewById(R.id.loading_spinner);
+
+        // Initially hide the content view.
+        mContentView.setVisibility(View.GONE);
+
+        // Retrieve and cache the system's default "short" animation time.
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+    }
+
+</pre>
+    <h2 id="animate">
+      Crossfade the Views
+    </h2>
+    <p>
+      Now that the views are properly set up, crossfade them by doing the following:
+    </p>
+    <ol>
+      <li>For the view that is fading in, set the alpha value to <code>0</code> and the visibility
+      to {@link android.view.View#VISIBLE}. (Remember that it was initially set to {@link
+      android.view.View#GONE}.) This makes the view visible but completely transparent.
+      </li>
+      <li>For the view that is fading in, animate its alpha value from <code>0</code> to
+      <code>1</code>. At the same time, for the view that is fading out, animate the alpha value
+      from <code>1</code> to <code>0</code>.
+      </li>
+      <li>Using {@link android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()}
+      in an {@link android.animation.Animator.AnimatorListener}, set the visibility of the view
+      that was fading out to {@link android.view.View#GONE}. Even though the alpha value is <code>0</code>,
+      setting the view's visibility to {@link android.view.View#GONE} prevents the view from taking
+      up layout space and omits it from layout calculations, speeding up processing.
+      </li>
+    </ol>
+    <p>
+      The following method shows an example of how to do this:
+    </p>
+    <pre>
+private View mContentView;
+private View mLoadingView;
+private int mShortAnimationDuration;
+
+...
+
+private void crossfade() {
+
+    // Set the content view to 0% opacity but visible, so that it is visible
+    // (but fully transparent) during the animation.
+    mContentView.setAlpha(0f);
+    mContentView.setVisibility(View.VISIBLE);
+
+    // Animate the content view to 100% opacity, and clear any animation
+    // listener set on the view.
+    mContentView.animate()
+            .alpha(1f)
+            .setDuration(mShortAnimationDuration)
+            .setListener(null);
+
+    // Animate the loading view to 0% opacity. After the animation ends,
+    // set its visibility to GONE as an optimization step (it won't
+    // participate in layout passes, etc.)
+    mHideView.animate()
+            .alpha(0f)
+            .setDuration(mShortAnimationDuration)
+            .setListener(new AnimatorListenerAdapter() {
+                &#64;Override
+                public void onAnimationEnd(Animator animation) {
+                    mHideView.setVisibility(View.GONE);
+                }
+            });
+}
+</pre>

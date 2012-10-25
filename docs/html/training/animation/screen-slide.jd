@@ -1,0 +1,185 @@
+page.title=Using ViewPager for Screen Slides
+trainingnavtop=true
+
+@jd:body
+
+  <div id="tb-wrapper">
+    <div id="tb">
+      <h2>This lesson teaches you to</h2>
+         <ol>
+            <li><a href="#views">Create the Views</a></li>
+            <li><a href="#fragment">Create the Fragment</a></li>
+            <li><a href="#viewpager">Animate the Screen Slide</a></li>
+        </ol>
+    </div>
+  </div>
+  <p>
+      Screen slides are transitions between one entire screen to another and are common with UIs
+      like setup wizards or slideshows. This lesson shows you how to do screen slides with
+      a {@link android.support.v4.view.ViewPager} provided by the <a href=
+      "{@docRoot}/tools/extras/support-library.html">support library</a>.
+      {@link android.support.v4.view.ViewPager}s can animate screen slides
+      automatically. Here's what a screen slide looks like that transitions from
+      one screen of content to the next:
+    </p>
+
+    <div class="framed-galaxynexus-land-span-8">
+      <video class="play-on-hover" autoplay>
+        <source src="anim_screenslide.mp4" type="video/mp4">
+        <source src="anim_screenslide.webm" type="video/webm">
+        <source src="anim_screenslide.ogv" type="video/ogg">
+      </video>
+    </div>
+
+    <div class="figure-caption">
+      Screen slide animation
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+<p>If you want to jump ahead and see a full working example,
+<a href="{@docRoot}shareables/training/Animations.zip">download</a>
+and run the sample app and select the Screen Slide example. See the
+following files for the code implementation:</p>
+<ul>
+  <li><code>src/ScreenSlidePageFragment.java</code></li>
+  <li><code>src/ScreenSlideActivity.java</code></li>
+  <li><code>layout/activity_screen_slide.xml</code></li>
+  <li><code>layout/fragment_screen_slide_page.xml</code></li>
+</ul>
+
+<h2 id="views">Create the Views</h2>
+  <p>Create a layout file that you'll later use for the content of a fragment. The following example
+    contains a text view to display some text:
+
+<pre>
+&lt;com.example.android.animationsdemo.ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+        &lt;TextView style="?android:textAppearanceMedium"
+            android:padding="16dp"
+            android:lineSpacingMultiplier="1.2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/lorem_ipsum" /&gt;
+
+&lt;/com.example.android.animationsdemo.ScrollView&gt;
+</pre>
+
+<h2 id="fragment">Create the Fragment</h2>
+<p>Create a {@link android.support.v4.app.Fragment} class that returns the layout
+that you just created in the {@link android.app.Fragment#onCreateView onCreateView()}
+  method. You can then create instances of this fragment in the parent activity whenever you need a new page to
+  display to the user:</p>
+
+
+<pre>
+public class ScreenSlidePageFragment extends Fragment {
+
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(
+                R.layout.fragment_screen_slide_page, container, false);
+
+        return rootView;
+    }
+}
+</pre>
+
+<h2 id="viewpager">Screen Slides with ViewPager</h2>
+
+<p>{@link android.support.v4.view.ViewPager}s have built-in swipe gestures to transition
+  through pages, and they display screen slide animations by default, so you don't need to create any. {@link android.support.v4.view.ViewPager}s use
+{@link android.support.v4.view.PagerAdapter}s as a supply for new pages to display, so the {@link android.support.v4.view.PagerAdapter} will use the
+fragment class that you created earlier.
+  </p>
+
+<p>To begin, create a layout that contains a {@link android.support.v4.view.ViewPager}:</p>
+
+<pre>
+&lt;android.support.v4.view.ViewPager
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" /&gt;
+</pre>
+
+<p>Create an activity that does the following things:
+</p>
+
+<ul>
+  <li>Sets the content view to be the layout with the {@link android.support.v4.view.ViewPager}.</li>
+  <li>Create a class that extends the {@link android.support.v13.app.FragmentStatePagerAdapter} abstract class. Implement
+  the {@link android.support.v4.app.FragmentStatePagerAdapter#getItem getItem()} method to supply
+    instances of <code>ScreenSlidePageFragment</code> as new pages. The pager adapter also requires that you implement the
+    {@link android.support.v4.view.PagerAdapter#getCount getCount()} method, which returns the amount of pages the adapter will create (five in the example).
+  <li>Hooks up the {@link android.support.v4.view.PagerAdapter} to the {@link android.support.v4.view.ViewPager}</code>.</li>
+  <li>Handle's the device's back button by moving backwards in the virtual stack of fragments.
+    If the user is already on the first page, go back on the activity back stack.</li>
+</ul>
+
+<pre>
+public class ScreenSlidePagerActivity extends FragmentActivity {
+    /**
+     * The number of pages (wizard steps) to show in this demo.
+     */
+    private static final int NUM_PAGES = 5;
+
+    /**
+     * The pager widget, which handles animation and allows swiping horizontally to access previous
+     * and next wizard steps.
+     */
+    private ViewPager mPager;
+
+    /**
+     * The pager adapter, which provides the pages to the view pager widget.
+     */
+    private PagerAdapter mPagerAdapter;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_screen_slide_pager);
+
+        // Instantiate a ViewPager and a PagerAdapter.
+        mPager = (ViewPager) findViewById(R.id.pager);
+        mPagerAdapter = new ScreenSlidePagerAdapter(getFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
+    }
+
+    &#64;Override
+    public void onBackPressed() {
+        if (mPager.getCurrentItem() == 0) {
+            // If the user is currently looking at the first step, allow the system to handle the
+            // Back button. This calls finish() on this activity and pops the back stack.
+            super.onBackPressed();
+        } else {
+            // Otherwise, select the previous step.
+            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+        }
+    }
+
+    /**
+     * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
+     * sequence.
+     */
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        &#64;Override
+        public Fragment getItem(int position) {
+            return new ScreenSlidePageFragment();
+        }
+
+        &#64;Override
+        public int getCount() {
+            return NUM_PAGES;
+        }
+    }
+}
+</pre>
