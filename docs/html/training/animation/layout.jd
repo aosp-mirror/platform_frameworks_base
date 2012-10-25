@@ -1,0 +1,77 @@
+page.title=Animating Layout Changes
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to:</h2>
+  <ol>
+    <li><a href="#views">Create the Layout</a></li>
+    <li><a href="#add">Add, Update, or Remove Items from the Layout</a></li>
+  </ol>
+
+</div>
+</div>
+
+  <p>A layout animation is a pre-loaded animation that the system runs each time you make a change
+  to the layout configuration. All you need to do is set an attribute in the layout to tell the
+  Android system to animate these layout changes, and system-default animations are carried out for you.
+  </p>
+<p class="note"><strong>Tip</strong>: If you want to supply custom layout animations,
+create a {@link android.animation.LayoutTransition} object and supply it to
+the layout with the {@link android.view.ViewGroup#setLayoutTransition setLayoutTransition()}
+method.
+</p>
+  Here's what a default layout animation looks like when adding items to a list:
+</p>
+
+    <div class="framed-galaxynexus-land-span-8">
+      <video class="play-on-hover" autoplay>
+        <source src="anim_layout_changes.mp4" type="video/mp4">
+        <source src="anim_layout_changes.webm" type="video/webm">
+        <source src="anim_layout_changes.ogv" type="video/ogg">
+      </video>
+    </div>
+    <div class="figure-caption">
+      Layout animation
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+<p>If you want to jump ahead and see a full working example,
+<a href="{@docRoot}shareables/training/Animations.zip">download</a> and
+run the sample app and select the Crossfade example. See the following files for the
+code implementation:</p>
+<ol>
+  <li><code>src/LayoutChangesActivity.java</code></li>
+  <li><code>layout/activity_layout_changes.xml</code></li>
+  <li><code>menu/activity_layout_changes.xml</code></li>
+</ol>
+
+<h2 id="views">Create the Layout</h2>
+<p>In your activity's layout XML file, set the <code>android:animateLayoutChanges</code>
+    attribute to <code>true</code> for the layout that you want to enable animations for.
+    For instance:</p>
+
+<pre>
+&lt;LinearLayout android:id="@+id/container"
+    android:animateLayoutChanges="true"
+    ...
+/&gt;
+</pre>
+
+<h2 id="activity">Add, Update, or Remove Items from the Layout</h2>
+<p>
+Now, all you need to do is add, remove, or update items in the layout
+and the items are animated automatically:
+</p>
+<pre>
+private ViewGroup mContainerView;
+...
+private void addItem() {
+    View newView;
+    ...
+    mContainerView.addView(newView, 0);
+}
+</pre>
