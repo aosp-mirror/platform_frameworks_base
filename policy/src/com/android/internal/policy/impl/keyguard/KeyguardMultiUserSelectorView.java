@@ -20,14 +20,13 @@ import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
+
 import com.android.internal.R;
 
 import java.util.ArrayList;

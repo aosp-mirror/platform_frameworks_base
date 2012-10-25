@@ -161,7 +161,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setMinScale(0.5f);
 
         addDefaultWidgets();
-        maybePopulateWidgets();
+        addWidgetsFromSettings();
 
         mViewStateManager = new KeyguardViewStateManager();
         SlidingChallengeLayout slider =
@@ -170,6 +170,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             slider.setOnChallengeScrolledListener(mViewStateManager);
         }
         mAppWidgetContainer.setViewStateManager(mViewStateManager);
+        mAppWidgetContainer.setLockPatternUtils(mLockPatternUtils);
 
         mViewStateManager.setPagedView(mAppWidgetContainer);
         mViewStateManager.setChallengeLayout(slider != null ? slider :
@@ -635,7 +636,9 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (navigationText != null) {
                 view.setSecurityMessageDisplay(new KeyguardNavigationManager(navigationText));
             } else {
-                view.setSecurityMessageDisplay(mKeyguardStatusViewManager);
+                if (mKeyguardStatusViewManager != null) {
+                    view.setSecurityMessageDisplay(mKeyguardStatusViewManager);
+                }
             }
         }
 
@@ -826,7 +829,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
             addWidget(view, pageIndex);
         } else {
-            Log.w(TAG, "AppWidgetInfo was null; not adding widget id " + appId);
+            Log.w(TAG, "AppWidgetInfo for app widget id " + appId + " was null, deleting");
+            mLockPatternUtils.removeAppWidget(appId);
         }
     }
 
@@ -876,8 +880,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         View addWidget = inflater.inflate(R.layout.keyguard_add_widget, null, true);
         mAppWidgetContainer.addWidget(addWidget);
-        View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
-        mAppWidgetContainer.addWidget(statusWidget);
         if (mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
             View cameraWidget =
                     CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
@@ -950,12 +952,15 @@ public class KeyguardHostView extends KeyguardViewBase {
             });
         }
 
-        mKeyguardStatusViewManager = ((KeyguardStatusView)
-                findViewById(R.id.keyguard_status_view_face_palm)).getManager();
+        KeyguardStatusView ksv = (KeyguardStatusView)
+                findViewById(R.id.keyguard_status_view_face_palm);
+        if (ksv != null) {
+            mKeyguardStatusViewManager = ksv.getManager();
+        }
 
     }
 
-    private void maybePopulateWidgets() {
+    private void addWidgetsFromSettings() {
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         if (dpm != null) {
@@ -980,7 +985,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             Log.d(TAG, "Problem reading widgets");
         } else {
             for (int i = widgets.length -1; i >= 0; i--) {
-                if (widgets[i] != -1) {
+                if (widgets[i] == LockPatternUtils.ID_DEFAULT_STATUS_WIDGET) {
+                    LayoutInflater inflater = LayoutInflater.from(mContext);
+                    View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
+                    mAppWidgetContainer.addWidget(statusWidget, addPageIndex + 1);
+                } else {
                     // We add the widgets from left to right, starting after the first page after
                     // the add page. We count down, since the order will be persisted from right
                     // to left, starting after camera.
@@ -1064,7 +1073,17 @@ public class KeyguardHostView extends KeyguardViewBase {
                 pageToShow = multiUserPosition;
             } else {
                 final View statusView = findViewById(R.id.keyguard_status_view);
-                pageToShow = mAppWidgetContainer.indexOfChild(statusView);
+                int statusViewIndex = mAppWidgetContainer.indexOfChild(statusView);
+                if (statusViewIndex == -1) {
+                    // TEMP code for default page
+                    if (mAppWidgetContainer.getChildCount() > 2) {
+                        pageToShow = mAppWidgetContainer.getChildCount() - 2;
+                    } else {
+                        pageToShow = 0;
+                    }
+                } else {
+                    pageToShow = mAppWidgetContainer.indexOfChild(statusView);
+                }
             }
             if (mTransportState == TRANSPORT_VISIBLE) {
                 mTransportState = TRANSPORT_INVISIBLE;

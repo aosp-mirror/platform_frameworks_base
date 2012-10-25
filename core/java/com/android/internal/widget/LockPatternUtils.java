@@ -16,10 +16,6 @@
 
 package com.android.internal.widget;
 
-import com.android.internal.R;
-import com.android.internal.telephony.ITelephony;
-import com.google.android.collect.Lists;
-
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
@@ -42,12 +38,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import org.apache.harmony.kernel.vm.StringUtils;
+import com.android.internal.R;
+import com.android.internal.telephony.ITelephony;
+import com.google.android.collect.Lists;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -126,6 +123,11 @@ public class LockPatternUtils {
      * be used
      */
     public static final int FLAG_BIOMETRIC_WEAK_LIVELINESS = 0x1;
+
+    /**
+     * Pseudo-appwidget id we use to represent the default clock status widget
+     */
+    public static final int ID_DEFAULT_STATUS_WIDGET = -2;
 
     protected final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     protected final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
@@ -1052,7 +1054,7 @@ public class LockPatternUtils {
                 mContentResolver, Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
                 UserHandle.USER_CURRENT);
         String delims = ",";
-        if (appWidgetIdString != null) {
+        if (appWidgetIdString != null && appWidgetIdString.length() > 0) {
             String[] appWidgetStringIds = appWidgetIdString.split(delims);
             int[] appWidgetIds = new int[appWidgetStringIds.length];
             for (int i = 0; i < appWidgetStringIds.length; i++) {
@@ -1060,12 +1062,17 @@ public class LockPatternUtils {
                 try {
                     appWidgetIds[i] = Integer.decode(appWidget);
                 } catch (NumberFormatException e) {
+                    Log.d(TAG, "Error when parsing widget id " + appWidget);
                     return null;
                 }
             }
             return appWidgetIds;
         }
-        return new int[0];
+        if (appWidgetIdString == null) {
+            return new int[] { LockPatternUtils.ID_DEFAULT_STATUS_WIDGET };
+        } else {
+            return new int[0];
+        }
     }
 
     private static String combineStrings(int[] list, String separator) {
@@ -1111,8 +1118,15 @@ public class LockPatternUtils {
                         UserHandle.USER_CURRENT);
     }
 
-    public void addAppWidget(int widgetId, int index) {
+    // TODO: log an error if this returns false
+    public boolean addAppWidget(int widgetId, int index) {
         int[] widgets = getAppWidgets();
+        if (widgets == null) {
+            return false;
+        }
+        if (index < 0 || index >= widgets.length) {
+            return false;
+        }
         int[] newWidgets = new int[widgets.length + 1];
         for (int i = 0, j = 0; i < newWidgets.length; i++) {
             if (index == i) {
@@ -1125,17 +1139,19 @@ public class LockPatternUtils {
             }
         }
         writeAppWidgets(newWidgets);
+        return true;
     }
 
-    public boolean removeAppWidget(int widgetId, int index) {
+    public boolean removeAppWidget(int widgetId) {
         int[] widgets = getAppWidgets();
+
         int[] newWidgets = new int[widgets.length - 1];
         for (int i = 0, j = 0; i < widgets.length; i++) {
-            if (index == i) {
-                if (widgets[i] != widgetId) {
-                    return false;
-                }
+            if (widgets[i] == widgetId) {
                 // continue...
+            } else if (j >= newWidgets.length) {
+                // we couldn't find the widget
+                return false;
             } else {
                 newWidgets[j] = widgets[i];
                 j++;

@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -26,8 +27,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.os.PowerManager;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -167,6 +166,15 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     public View getContent() {
         return getChildAt(0);
+    }
+
+    public int getContentAppWidgetId() {
+        View content = getContent();
+        if (content instanceof AppWidgetHostView) {
+            return ((AppWidgetHostView) content).getAppWidgetId();
+        } else {
+            return ((KeyguardStatusView) content).getAppWidgetId();
+        }
     }
 
     private void drawGradientOverlay(Canvas c) {

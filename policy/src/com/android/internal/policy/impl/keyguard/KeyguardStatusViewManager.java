@@ -16,15 +16,6 @@
 
 package com.android.internal.policy.impl.keyguard;
 
-import com.android.internal.R;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.widget.DigitalClock;
-import com.android.internal.widget.LockPatternUtils;
-
-import java.util.Date;
-
-import libcore.util.MutableInt;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -38,6 +29,10 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.android.internal.R;
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.util.Date;
 
