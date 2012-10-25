@@ -18,6 +18,7 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.ViewParent;
 
@@ -61,6 +62,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected TextView mPasswordEntry;
     protected LockPatternUtils mLockPatternUtils;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
+    protected boolean mEnableHaptics;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -80,6 +82,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
+        mEnableHaptics = mLockPatternUtils.isTactileFeedbackEnabled();
     }
 
     @Override
@@ -110,7 +113,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         // We always set a dummy NavigationManager to avoid null checks
         mSecurityMessageDisplay = new KeyguardNavigationManager(null);
 
-        mLockPatternUtils = new LockPatternUtils(mContext); // TODO: use common one
+        mLockPatternUtils = new LockPatternUtils(mContext);
 
         mPasswordEntry = (TextView) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
@@ -239,6 +242,15 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
         mSecurityMessageDisplay = display;
         reset();
+    }
+
+    // Cause a VIRTUAL_KEY vibration
+    public void doHapticKeyClick() {
+        if (mEnableHaptics) {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        }
     }
 }
 

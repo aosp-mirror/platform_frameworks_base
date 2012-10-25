@@ -103,6 +103,14 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
                     if (str.length() > 0) {
                         mPasswordEntry.setText(str.subSequence(0, str.length()-1));
                     }
+                    doHapticKeyClick();
+                }
+            });
+            pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    mPasswordEntry.setText("");
+                    doHapticKeyClick();
+                    return true;
                 }
             });
         }
@@ -118,4 +126,3 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     public void showUsabilityHint() {
     }
 }
-
