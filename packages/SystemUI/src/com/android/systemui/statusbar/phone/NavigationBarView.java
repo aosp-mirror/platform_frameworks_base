@@ -55,6 +55,9 @@ public class NavigationBarView extends LinearLayout {
 
     final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
 
+    // slippery nav bar when everything is disabled, e.g. during setup
+    final static boolean SLIPPERY_WHEN_DISABLED= true;
+
     final static boolean ANIMATE_HIDE_TRANSITION = false; // turned off because it introduces unsightly delay when videos goes to full screen
 
     protected IStatusBarService mBarService;
@@ -237,7 +240,9 @@ public class NavigationBarView extends LinearLayout {
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0);
         final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
 
-        setSlippery(disableHome && disableRecent && disableBack);
+        if (SLIPPERY_WHEN_DISABLED) {
+            setSlippery(disableHome && disableRecent && disableBack && disableSearch);
+        }
 
         if (!mScreenOn && mCurrentView != null) {
             ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
