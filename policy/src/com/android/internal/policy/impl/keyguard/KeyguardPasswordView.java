@@ -49,16 +49,14 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.widget.PasswordEntryKeyboardHelper;
 /**
- * Displays a dialer-like interface or alphanumeric (latin-1) key entry for the user to enter
+ * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
  */
 
 public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
-    private PasswordEntryKeyboardView mKeyboardView;
-    private PasswordEntryKeyboardHelper mKeyboardHelper;
-    private boolean mIsAlpha;
+    InputMethodManager mImm;
 
     public KeyguardPasswordView(Context context) {
         super(context);
@@ -69,10 +67,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     protected void resetState() {
-        mSecurityMessageDisplay.setMessage(
-                mIsAlpha ? R.string.kg_password_instructions : R.string.kg_pin_instructions, false);
+        mSecurityMessageDisplay.setMessage(R.string.kg_password_instructions, false);
         mPasswordEntry.setEnabled(true);
-        mKeyboardView.setEnabled(true);
     }
 
     @Override
@@ -81,65 +77,29 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mImm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mImm.hideSoftInputFromWindow(getWindowToken(), 0);
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        final int quality = mLockPatternUtils.getKeyguardStoredPasswordQuality();
-        mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
-                || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
-                || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
-
-        mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
-
-        mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
-                new int[] {
-                    R.xml.kg_password_kbd_numeric,
-                    com.android.internal.R.xml.password_kbd_qwerty,
-                    com.android.internal.R.xml.password_kbd_qwerty_shifted,
-                    com.android.internal.R.xml.password_kbd_symbols,
-                    com.android.internal.R.xml.password_kbd_symbols_shift
-                    }
-        );
-        mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
-
         boolean imeOrDeleteButtonVisible = false;
-        if (mIsAlpha) {
-            // We always use the system IME for alpha keyboard, so hide lockscreen's soft keyboard
-            mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
-            mKeyboardView.setVisibility(View.GONE);
-        } else {
-            mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
 
-            // Use lockscreen's numeric keyboard if the physical keyboard isn't showing
-            boolean hardKeyboardVisible = getResources().getConfiguration().hardKeyboardHidden
-                    == Configuration.HARDKEYBOARDHIDDEN_NO;
-            mKeyboardView.setVisibility(
-                    (ENABLE_HIDE_KEYBOARD && hardKeyboardVisible) ? View.INVISIBLE : View.VISIBLE);
+        mImm = (InputMethodManager) getContext().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
 
-            // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
-            // not a separate view
-            View pinDelete = findViewById(R.id.delete_button);
-            if (pinDelete != null) {
-                pinDelete.setVisibility(View.VISIBLE);
-                imeOrDeleteButtonVisible = true;
-                pinDelete.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        mKeyboardHelper.handleBackspace();
-                    }
-                });
-            }
-        }
-
-        // This allows keyboards with overlapping qwerty/numeric keys to choose just numeric keys.
-        if (mIsAlpha) {
-            mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
-            mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
-                    | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        } else {
-            mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-            mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
-                    | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        }
+        mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
+        mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
@@ -166,15 +126,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
         // If there's more than one IME, enable the IME switcher button
         View switchImeButton = findViewById(R.id.switch_ime_button);
-        final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        if (mIsAlpha && switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(imm, false)) {
+        if (switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(mImm, false)) {
             switchImeButton.setVisibility(View.VISIBLE);
             imeOrDeleteButtonVisible = true;
             switchImeButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     mCallback.userActivity(0); // Leave the screen on a bit longer
-                    imm.showInputMethodPicker();
+                    mImm.showInputMethodPicker();
                 }
             });
         }
@@ -243,4 +201,3 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     public void showUsabilityHint() {
     }
 }
-

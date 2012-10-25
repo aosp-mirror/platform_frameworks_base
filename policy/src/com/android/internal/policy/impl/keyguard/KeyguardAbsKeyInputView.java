@@ -66,9 +66,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     // any passwords with length less than or equal to this length.
     protected static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
 
-    // Enable this if we want to hide the on-screen PIN keyboard when a physical one is showing
-    protected static final boolean ENABLE_HIDE_KEYBOARD = false;
-
     public KeyguardAbsKeyInputView(Context context) {
         this(context, null);
     }
