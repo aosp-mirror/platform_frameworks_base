@@ -401,6 +401,7 @@ public class ImageWallpaper extends WallpaperService {
             Throwable exception = null;
             try {
                 mWallpaperManager.forgetLoadedWallpaper(); // force reload
+                mBackground = null;
                 mBackground = mWallpaperManager.getBitmap();
             } catch (RuntimeException e) {
                 exception = e;
