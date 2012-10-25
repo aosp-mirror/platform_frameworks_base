@@ -1,0 +1,365 @@
+page.title=Displaying Card Flip Animations
+trainingnavtop=true
+
+@jd:body
+    <div id="tb-wrapper">
+      <div id="tb">
+        <h2>
+          This lesson teaches you to
+        </h2>
+        <ol>
+          <li>
+            <a href="#animators">Create the Animators</a>
+          </li>
+          <li>
+            <a href="#views">Create the Views</a>
+          </li>
+          <li>
+            <a href="#fragment">Create the Fragment</a>
+          </li>
+          <li>
+            <a href="#animate">Animate the Card Flip</a>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <p> This lesson shows you how to do a card flip
+      animation with custom fragment animations.
+      Card flips animate between views of content by showing an animation that emulates
+      a card flipping over. 
+    </p>
+    <p>Here's what a card flip looks like:
+    </p>
+
+    <div class="framed-galaxynexus-land-span-8">
+      <video class="play-on-hover" autoplay>
+        <source src="anim_card_flip.mp4" type="video/mp4">
+        <source src="anim_card_flip.webm" type="video/webm">
+        <source src="anim_card_flip.ogv" type="video/ogg">
+      </video>
+    </div>
+    <div class="figure-caption">
+      Card flip animation
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+    <p>
+      If you want to jump ahead and see a full working example,
+      <a href="{@docRoot}shareables/training/Animations.zip">download</a> and
+      run the sample app and select the Card Flip example. See the following
+      files for the code implementation:
+    </p>
+    <ul>
+      <li>
+        <code>src/CardFlipActivity.java</code>
+      </li>
+      <li>
+        <code>animator/card_flip_right_in.xml</code>
+      </li>
+      <li>
+        <code>animator/card_flip_right_out.xml</code>
+      </li>
+      <li>
+        <code>animator/card_flip_right_in.xml</code>
+      </li>
+      <li>
+        <code>animator/card_flip_left_out.xml</code>
+      </li>
+      <li>
+        <code>layout/fragment_card_back.xml</code>
+      </li>
+      <li>
+        <code>layout/fragment_card_front.xml</code>
+      </li>
+    </ul>
+
+    <h2 id="animate">
+      Create the Animators
+    </h2>
+    <p>
+      Create the animations for the card flips. You'll need two animators for when the front
+      of the card animates out and to the left and in and from the left. You'll also need two animators
+      for when the back of the card animates in and from the right and out and to the right.
+    </p>
+    <h4>
+      card_flip_left_in.xml
+    </h4>
+<pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- Before rotating, immediately set the alpha to 0. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="1.0"
+        android:valueTo="0.0"
+        android:propertyName="alpha"
+        android:duration="0" /&gt;
+
+    &lt;!-- Rotate. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="-180"
+        android:valueTo="0"
+        android:propertyName="rotationY"
+        android:interpolator="@android:interpolator/accelerate_decelerate"
+        android:duration="@integer/card_flip_time_full" /&gt;
+
+    &lt;!-- Half-way through the rotation (see startOffset), set the alpha to 1. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="0.0"
+        android:valueTo="1.0"
+        android:propertyName="alpha"
+        android:startOffset="@integer/card_flip_time_half"
+        android:duration="1" /&gt;
+&lt;/set&gt;
+</pre>
+    <h4>
+      card_flip_left_out.xml
+    </h4>
+    <pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- Rotate. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="0"
+        android:valueTo="180"
+        android:propertyName="rotationY"
+        android:interpolator="@android:interpolator/accelerate_decelerate"
+        android:duration="@integer/card_flip_time_full" /&gt;
+
+    &lt;!-- Half-way through the rotation (see startOffset), set the alpha to 0. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="1.0"
+        android:valueTo="0.0"
+        android:propertyName="alpha"
+        android:startOffset="@integer/card_flip_time_half"
+        android:duration="1" /&gt;
+&lt;/set&gt;
+    </pre>
+    <h4>
+      card_flip_right_in.xml
+    </h4>
+    <pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- Before rotating, immediately set the alpha to 0. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="1.0"
+        android:valueTo="0.0"
+        android:propertyName="alpha"
+        android:duration="0" /&gt;
+
+    &lt;!-- Rotate. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="180"
+        android:valueTo="0"
+        android:propertyName="rotationY"
+        android:interpolator="@android:interpolator/accelerate_decelerate"
+        android:duration="@integer/card_flip_time_full" /&gt;
+
+    &lt;!-- Half-way through the rotation (see startOffset), set the alpha to 1. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="0.0"
+        android:valueTo="1.0"
+        android:propertyName="alpha"
+        android:startOffset="@integer/card_flip_time_half"
+        android:duration="1" /&gt;
+</set>
+
+</pre>
+    <h4>
+      card_flip_right_out.xml
+    </h4>
+    <pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- Rotate. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="0"
+        android:valueTo="-180"
+        android:propertyName="rotationY"
+        android:interpolator="@android:interpolator/accelerate_decelerate"
+        android:duration="@integer/card_flip_time_full" /&gt;
+
+    &lt;!-- Half-way through the rotation (see startOffset), set the alpha to 0. --&gt;
+    &lt;objectAnimator
+        android:valueFrom="1.0"
+        android:valueTo="0.0"
+        android:propertyName="alpha"
+        android:startOffset="@integer/card_flip_time_half"
+        android:duration="1" /&gt;
+&lt;/set&gt;
+</pre>
+    <h2 id="views">
+      Create the Views
+    </h2>
+    <p>
+      Each side of the "card" is a separate layout that can contain any content you want,
+      such as two screens of text, two images, or any combination of views to flip between. You'll then
+      use the two layouts in the fragments that you'll later animate. The following layouts
+      create one side of a card that shows text:
+    </p>
+
+    <pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#a6c"
+    android:padding="16dp"
+    android:gravity="bottom"&gt;
+
+    &lt;TextView android:id="@android:id/text1"
+        style="?android:textAppearanceLarge"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/card_back_title" /&gt;
+
+    &lt;TextView style="?android:textAppearanceSmall"
+        android:textAllCaps="true"
+        android:textColor="#80ffffff"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/card_back_description" /&gt;
+
+&lt;/LinearLayout&gt;
+</pre>
+<p>
+and the other side of the card that displays an {@link android.widget.ImageView}:
+</p>
+<pre>
+&lt;ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:src="@drawable/image1"
+    android:scaleType="centerCrop"
+    android:contentDescription="@string/description_image_1" /&gt;
+</pre>
+    <h2 id="fragment">
+      Create the Fragment
+    </h2>
+    <p>
+      Create fragment classes for the front and back of the card. These classes return the layouts
+      that you created previously in the {@link android.app.Fragment#onCreateView onCreateView()} method
+      of each fragment. You can then create instances of this fragment in the parent activity
+      where you want to show the card. The following example shows nested fragment classes inside
+      of the parent activity that uses them:
+    </p>
+    <pre>
+public class CardFlipActivity extends Activity {
+    ...
+    /**
+     * A fragment representing the front of the card.
+     */
+    public class CardFrontFragment extends Fragment {
+        &#64;Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fragment_card_front, container, false);
+        }
+    }
+
+    /**
+     * A fragment representing the back of the card.
+     */
+    public class CardBackFragment extends Fragment {
+        &#64;Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fragment_card_back, container, false);
+        }
+    }
+}
+</pre>
+    <h2 id="animate">
+      Animate the Card Flip
+    </h2>
+
+    <p> Now, you'll need to display the fragments inside of a parent activity.
+    To do this, first create the layout for your activity. The following example creates a
+    {@link android.widget.FrameLayout} that you
+    can add fragments to at runtime:</p>
+
+    <pre>
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" /&gt;
+</pre>
+
+    <p>In the activity code, set the content view to be the layout that you just created. It's also
+      good idea to show a default fragment when the activity is created, so the following example
+      activity shows you how to display the front of the card by default:
+    </p>
+
+
+
+<pre>
+public class CardFlipActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_activity_card_flip);
+
+        if (savedInstanceState == null) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.container, new CardFrontFragment())
+                    .commit();
+        }
+    }
+    ...
+}
+</pre>
+    <p>
+      Now that you have the front of the card showing, you can show the back of the card
+      with the flip animation at an appropriate time. Create a method to show the other
+      side of the card that does the following things:
+    </p>
+    <ul>
+      <li>Sets the custom animations that you created earlier for the fragment transitions.
+      </li>
+      <li>Replaces the currently displayed fragment with a new fragment and animates this event
+      with the custom animations that you created.
+      </li>
+      <li>Adds the previously displayed fragment to the fragment back stack
+      so when the user presses the <em>Back</em> button, the card flips back over.
+      </li>
+    </ul>
+    <pre>
+private void flipCard() {
+    if (mShowingBack) {
+        getFragmentManager().popBackStack();
+        return;
+    }
+
+    // Flip to the back.
+
+    mShowingBack = true;
+
+    // Create and commit a new fragment transaction that adds the fragment for the back of
+    // the card, uses custom animations, and is part of the fragment manager's back stack.
+
+    getFragmentManager()
+            .beginTransaction()
+
+            // Replace the default fragment animations with animator resources representing
+            // rotations when switching to the back of the card, as well as animator
+            // resources representing rotations when flipping back to the front (e.g. when
+            // the system Back button is pressed).
+            .setCustomAnimations(
+                    R.animator.card_flip_right_in, R.animator.card_flip_right_out,
+                    R.animator.card_flip_left_in, R.animator.card_flip_left_out)
+
+            // Replace any fragments currently in the container view with a fragment
+            // representing the next page (indicated by the just-incremented currentPage
+            // variable).
+            .replace(R.id.container, new CardBackFragment())
+
+            // Add this transaction to the back stack, allowing users to press Back
+            // to get to the front of the card.
+            .addToBackStack(null)
+
+            // Commit the transaction.
+            .commit();
+}
+</pre>
