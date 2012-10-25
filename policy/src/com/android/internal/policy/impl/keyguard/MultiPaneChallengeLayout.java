@@ -40,6 +40,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     private View mChallengeView;
     private View mUserSwitcherView;
     private View mScrimView;
+    private OnBouncerStateChangedListener mBouncerListener;
 
     private final Rect mTempRect = new Rect();
 
@@ -89,6 +90,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
         }
+        if (mBouncerListener != null) {
+            mBouncerListener.onBouncerStateChanged(true);
+        }
     }
 
     @Override
@@ -98,11 +102,29 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
         }
+        if (mBouncerListener != null) {
+            mBouncerListener.onBouncerStateChanged(false);
+        }
     }
 
     @Override
     public boolean isBouncing() {
         return mIsBouncing;
+    }
+
+    @Override
+    public void setOnBouncerStateChangedListener(OnBouncerStateChangedListener listener) {
+        mBouncerListener = listener;
+    }
+
+    @Override
+    public void requestChildFocus(View child, View focused) {
+        if (mIsBouncing && child != mChallengeView) {
+            // Clear out of the bouncer if the user tries to move focus outside of
+            // the security challenge view.
+            hideBouncer();
+        }
+        super.requestChildFocus(child, focused);
     }
 
     void setScrimView(View scrim) {
