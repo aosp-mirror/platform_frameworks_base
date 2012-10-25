@@ -558,8 +558,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             // Automation service is not bound, so pretend it died to perform clean up.
-            if (mUiAutomationService != null
-                    && mUiAutomationService.mServiceInterface == serviceClient) {
+            if (mUiAutomationService != null && mUiAutomationService.mServiceInterface != null
+                    && serviceClient != null && mUiAutomationService.mServiceInterface
+                            .asBinder() == serviceClient.asBinder()) {
                 mUiAutomationService.binderDied();
             }
         }
