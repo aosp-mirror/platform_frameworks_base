@@ -1045,7 +1045,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             mHdmiRotation = mLandscapeRotation;
         }
-        mHdmiRotationLock = SystemProperties.getBoolean("persist.demo.hdmirotationlock", true);
+        mHdmiRotationLock = SystemProperties.getBoolean("persist.demo.hdmirotationlock", false);
     }
 
     public void updateSettings() {
