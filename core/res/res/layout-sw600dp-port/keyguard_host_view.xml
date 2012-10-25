@@ -35,12 +35,13 @@
         android:orientation="vertical">
 
         <include layout="@layout/keyguard_widget_pager"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
-                 androidprv:layout_centerWithinArea="0.55"
-                 androidprv:layout_childType="widget"
-                 androidprv:layout_maxWidth="480dp"
-                 androidprv:layout_maxHeight="480dp" />
+            android:id="@+id/app_widget_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            androidprv:layout_centerWithinArea="0.55"
+            androidprv:layout_childType="widget"
+            androidprv:layout_maxWidth="480dp"
+            androidprv:layout_maxHeight="480dp" />
 
         <include layout="@layout/keyguard_multi_user_selector"/>
 

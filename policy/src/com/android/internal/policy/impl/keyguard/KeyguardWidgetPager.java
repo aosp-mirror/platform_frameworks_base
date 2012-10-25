@@ -37,12 +37,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
     private static float CAMERA_DISTANCE = 10000;
-    private static float TRANSITION_SCALE_FACTOR = 0.74f;
-    private static float TRANSITION_PIVOT = 0.65f;
     private static float TRANSITION_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
-    private AccelerateInterpolator mAlphaInterpolator = new AccelerateInterpolator(0.9f);
-    private DecelerateInterpolator mLeftScreenAlphaInterpolator = new DecelerateInterpolator(4);
+
     private KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
 
@@ -56,7 +53,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private float mSidePagesAlpha = 1f;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
-    private static final boolean CAFETERIA_TRAY = false;
 
     private int mPage = 0;
     private Callbacks mCallbacks;
@@ -317,7 +313,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     float backgroundAlphaInterpolator(float r) {
-        return r;
+        return Math.min(1f, r);
     }
 
     private void updatePageAlphaValues(int screenCenter) {
@@ -327,7 +323,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 KeyguardWidgetFrame child = getWidgetPageAt(i);
                 if (child != null) {
                     float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    // TODO: Set content alpha
                     if (!isReordering(false)) {
                         child.setBackgroundAlphaMultiplier(
                                 backgroundAlphaInterpolator(Math.abs(scrollProgress)));
@@ -339,72 +334,36 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
-    // In apps customize, we have a scrolling effect which emulates pulling cards off of a stack.
     @Override
     protected void screenScrolled(int screenCenter) {
-        super.screenScrolled(screenCenter);
         updatePageAlphaValues(screenCenter);
         for (int i = 0; i < getChildCount(); i++) {
             KeyguardWidgetFrame v = getWidgetPageAt(i);
             if (v == mDragView) continue;
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenCenter, v, i);
-                float interpolatedProgress = 
-                        mZInterpolator.getInterpolation(Math.abs(Math.min(scrollProgress, 0)));
 
-                float scale = 1.0f;
-                float translationX = 0;
                 float alpha = 1.0f;
 
-                if (CAFETERIA_TRAY) {
-                    scale = (1 - interpolatedProgress) +
-                            interpolatedProgress * TRANSITION_SCALE_FACTOR;
-                    translationX = Math.min(0, scrollProgress) * v.getMeasuredWidth();
-
-                    if (scrollProgress < 0) {
-                        alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
-                            1 - Math.abs(scrollProgress)) : 1.0f;
-                    } else {
-                        // On large screens we need to fade the page as it nears its leftmost position
-                        alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
-                    }
-                }
-
                 v.setCameraDistance(mDensity * CAMERA_DISTANCE);
-                int pageWidth = v.getMeasuredWidth();
-                int pageHeight = v.getMeasuredHeight();
 
                 if (PERFORM_OVERSCROLL_ROTATION) {
                     if (i == 0 && scrollProgress < 0) {
-                        // Overscroll to the left
-                        v.setPivotX(TRANSITION_PIVOT * pageWidth);
+                        // Over scroll to the left
                         v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
                         v.setOverScrollAmount(Math.abs(scrollProgress), true);
-                        scale = 1.0f;
                         alpha = 1.0f;
                         // On the first page, we don't want the page to have any lateral motion
-                        translationX = 0;
                     } else if (i == getChildCount() - 1 && scrollProgress > 0) {
-                        // Overscroll to the right
-                        v.setPivotX((1 - TRANSITION_PIVOT) * pageWidth);
+                        // Over scroll to the right
                         v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
-                        scale = 1.0f;
                         alpha = 1.0f;
                         v.setOverScrollAmount(Math.abs(scrollProgress), false);
                         // On the last page, we don't want the page to have any lateral motion.
-                        translationX = 0;
                     } else {
-                        v.setPivotY(pageHeight / 2.0f);
-                        v.setPivotX(pageWidth / 2.0f);
                         v.setRotationY(0f);
                         v.setOverScrollAmount(0, false);
                     }
-                }
-
-                if (CAFETERIA_TRAY) {
-                    v.setTranslationX(translationX);
-                    v.setScaleX(scale);
-                    v.setScaleY(scale);
                 }
                 v.setAlpha(alpha);
 
@@ -418,7 +377,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             }
         }
     }
-
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
