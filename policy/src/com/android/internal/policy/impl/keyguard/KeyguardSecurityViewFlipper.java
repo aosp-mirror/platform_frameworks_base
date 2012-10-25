@@ -68,36 +68,62 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
 
     @Override
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.setKeyguardCallback(callback);
+        }
     }
 
     @Override
     public void setLockPatternUtils(LockPatternUtils utils) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.setLockPatternUtils(utils);
+        }
     }
 
     @Override
     public void reset() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.reset();
+        }
     }
 
     @Override
     public void onPause() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.onPause();
+        }
     }
 
     @Override
     public void onResume() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.onResume();
+        }
     }
 
     @Override
     public boolean needsInput() {
-        return false;
+        KeyguardSecurityView ksv = getSecurityView();
+        return (ksv != null) ? ksv.needsInput() : false;
     }
 
     @Override
     public KeyguardSecurityCallback getCallback() {
-        return null;
+        KeyguardSecurityView ksv = getSecurityView();
+        return (ksv != null) ? ksv.getCallback() : null;
     }
 
     @Override
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.setSecurityMessageDisplay(display);
+        }
     }
 
     @Override
