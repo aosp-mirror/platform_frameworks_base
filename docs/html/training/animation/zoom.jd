@@ -1,0 +1,320 @@
+page.title=Zooming a View
+trainingnavtop=true
+
+@jd:body
+
+    <div id="tb-wrapper">
+      <div id="tb">
+        <h2>
+          This lesson teaches you to:
+        </h2>
+        <ol>
+          <li>
+            <a href="#views">Create the Views</a>
+          </li>
+          <li>
+            <a href="#setup">Set up the Zoom Animation</a>
+          </li>
+          <li>
+            <a href="#animate">Zoom the View</a>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <p>
+      This lesson demonstrates how to do a touch-to-zoom animation, which is useful for apps such as photo
+      galleries to animate a view from a thumbnail to a full-size image that fills the screen.
+    </p>
+    <p>Here's what a touch-to-zoom animation looks like that
+      expands an image thumbnail to fill the screen:
+    </p>
+
+    <div class="framed-galaxynexus-land-span-8">
+      <video class="play-on-hover" autoplay>
+        <source src="anim_zoom.mp4" type="video/mp4">
+        <source src="anim_zoom.webm" type="video/webm">
+        <source src="anim_zoom.ogv" type="video/ogg">
+      </video>
+    </div>
+    <div class="figure-caption">
+      Zoom animation
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+    <p>
+      If you want to jump ahead and see a full working example,
+      <a href="{@docRoot}shareables/training/Animations.zip">download</a> and
+      run the sample app and select the
+      Zoom example. See the following files for the code implementation:
+    </p>
+    <ul>
+      <li>
+        <code>src/TouchHighlightImageButton.java</code> (a simple helper class that shows a blue
+        touch highlight when the image button is pressed)
+      </li>
+      <li>
+        <code>src/ZoomActivity.java</code>
+      </li>
+      <li>
+        <code>layout/activity_zoom.xml</code>
+      </li>
+    </ul>
+    <h2 id="views">
+      Create the Views
+    </h2>
+    <p>
+      Create a layout file that contains the small and large version of the content that you want
+      to zoom. The following example creates an {@link android.widget.ImageButton} for clickable image thumbnail
+      and an {@link android.widget.ImageView} that displays the enlarged view of the image:
+    </p>
+    <pre>
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"&gt;
+
+        &lt;ImageButton
+            android:id="@+id/thumb_button_1"
+            android:layout_width="100dp"
+            android:layout_height="75dp"
+            android:layout_marginRight="1dp"
+            android:src="@drawable/thumb1"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/description_image_1" /&gt;
+
+    &lt;/LinearLayout&gt;
+
+    &lt;!-- This initially-hidden ImageView will hold the expanded/zoomed version of
+         the images above. Without transformations applied, it takes up the entire
+         screen. To achieve the "zoom" animation, this view's bounds are animated
+         from the bounds of the thumbnail button above, to its final laid-out
+         bounds.
+         --&gt;
+
+    &lt;ImageView
+        android:id="@+id/expanded_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:contentDescription="@string/description_zoom_touch_close" /&gt;
+
+&lt;/FrameLayout&gt;
+</pre>
+    <h2 id="setup">
+      Set up the Zoom Animation
+    </h2>
+    <p>
+      Once you apply your layout, set up the event handlers that trigger the zoom animation.
+      The following example adds a {@link android.view.View.OnClickListener} to the {@link
+      android.widget.ImageButton} to execute the zoom animation when the user
+      clicks the image button:
+    </p>
+    <pre>
+public class ZoomActivity extends FragmentActivity {
+    // Hold a reference to the current animator,
+    // so that it can be canceled mid-way.
+    private Animator mCurrentAnimator;
+
+    // The system "short" animation time duration, in milliseconds. This
+    // duration is ideal for subtle animations or animations that occur
+    // very frequently.
+    private int mShortAnimationDuration;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_zoom);
+
+        // Hook up clicks on the thumbnail views.
+
+        final View thumb1View = findViewById(R.id.thumb_button_1);
+        thumb1View.setOnClickListener(new View.OnClickListener() {
+            &#64;Override
+            public void onClick(View view) {
+                zoomImageFromThumb(thumb1View, R.drawable.image1);
+            }
+        });
+
+        // Retrieve and cache the system's default "short" animation time.
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+    }
+    ...
+}
+</pre>
+    <h2 id="animate">
+      Zoom the View
+    </h2>
+    <p>
+      You'll now need to animate from the normal sized view to the zoomed view
+      when appropriate. In general, you need to animate from the bounds of the normal-sized view to the
+      bounds of the larger-sized view. The following method shows you how to implement a zoom animation that
+      zooms from an image thumbnail to an enlarged view by doing the following things:
+    </p>
+    <ol>
+      <li>Assign the high-res image to the hidden "zoomed-in" (enlarged) {@link
+      android.widget.ImageView}. The following example loads a large image resource on the UI
+      thread for simplicity. You will want to do this loading in a separate thread to prevent
+      blocking on the UI thread and then set the bitmap on the UI thread. Ideally, the bitmap
+      should not be larger than the screen size.
+      </li>
+      <li>Calculate the starting and ending bounds for the {@link android.widget.ImageView}.
+      </li>
+      <li>Animate each of the four positioning and sizing properties <code>{@link
+      android.view.View#X}</code>, <code>{@link android.view.View#Y}</code>, ({@link
+      android.view.View#SCALE_X}, and <code>{@link android.view.View#SCALE_Y}</code>)
+      simultaneously, from the starting bounds to the ending bounds. These four animations are
+      added to an {@link android.animation.AnimatorSet} so that they can be started at the same
+      time.
+      </li>
+      <li>Zoom back out by running a similar animation but in reverse when the user touches the
+      screen when the image is zoomed in. You can do this by adding a {@link
+      android.view.View.OnClickListener} to the {@link android.widget.ImageView}. When clicked, the
+      {@link android.widget.ImageView} minimizes back down to the size of the image thumbnail and
+      sets its visibility to {@link android.view.View#GONE} to hide it.
+      </li>
+    </ol>
+    <pre>
+private void zoomImageFromThumb(final View thumbView, int imageResId) {
+    // If there's an animation in progress, cancel it
+    // immediately and proceed with this one.
+    if (mCurrentAnimator != null) {
+        mCurrentAnimator.cancel();
+    }
+
+    // Load the high-resolution "zoomed-in" image.
+    final ImageView expandedImageView = (ImageView) findViewById(
+            R.id.expanded_image);
+    expandedImageView.setImageResource(imageResId);
+
+    // Calculate the starting and ending bounds for the zoomed-in image.
+    // This step involves lots of math. Yay, math.
+    final Rect startBounds = new Rect();
+    final Rect finalBounds = new Rect();
+    final Point globalOffset = new Point();
+
+    // The start bounds are the global visible rectangle of the thumbnail,
+    // and the final bounds are the global visible rectangle of the container
+    // view. Also set the container view's offset as the origin for the
+    // bounds, since that's the origin for the positioning animation
+    // properties (X, Y).
+    thumbView.getGlobalVisibleRect(startBounds);
+    findViewById(R.id.container)
+            .getGlobalVisibleRect(finalBounds, globalOffset);
+    startBounds.offset(-globalOffset.x, -globalOffset.y);
+    finalBounds.offset(-globalOffset.x, -globalOffset.y);
+
+    // Adjust the start bounds to be the same aspect ratio as the final
+    // bounds using the "center crop" technique. This prevents undesirable
+    // stretching during the animation. Also calculate the start scaling
+    // factor (the end scaling factor is always 1.0).
+    float startScale;
+    if ((float) finalBounds.width() / finalBounds.height()
+            &gt; (float) startBounds.width() / startBounds.height()) {
+        // Extend start bounds horizontally
+        startScale = (float) startBounds.height() / finalBounds.height();
+        float startWidth = startScale * finalBounds.width();
+        float deltaWidth = (startWidth - startBounds.width()) / 2;
+        startBounds.left -= deltaWidth;
+        startBounds.right += deltaWidth;
+    } else {
+        // Extend start bounds vertically
+        startScale = (float) startBounds.width() / finalBounds.width();
+        float startHeight = startScale * finalBounds.height();
+        float deltaHeight = (startHeight - startBounds.height()) / 2;
+        startBounds.top -= deltaHeight;
+        startBounds.bottom += deltaHeight;
+    }
+
+    // Hide the thumbnail and show the zoomed-in view. When the animation
+    // begins, it will position the zoomed-in view in the place of the
+    // thumbnail.
+    thumbView.setAlpha(0f);
+    expandedImageView.setVisibility(View.VISIBLE);
+
+    // Set the pivot point for SCALE_X and SCALE_Y transformations
+    // to the top-left corner of the zoomed-in view (the default
+    // is the center of the view).
+    expandedImageView.setPivotX(0f);
+    expandedImageView.setPivotY(0f);
+
+    // Construct and run the parallel animation of the four translation and
+    // scale properties (X, Y, SCALE_X, and SCALE_Y).
+    AnimatorSet set = new AnimatorSet();
+    set
+            .play(ObjectAnimator.ofFloat(expandedImageView, View.X,
+                    startBounds.left, finalBounds.left))
+            .with(ObjectAnimator.ofFloat(expandedImageView, View.Y,
+                    startBounds.top, finalBounds.top))
+            .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X,
+            startScale, 1f)).with(ObjectAnimator.ofFloat(expandedImageView,
+                    View.SCALE_Y, startScale, 1f));
+    set.setDuration(mShortAnimationDuration);
+    set.setInterpolator(new DecelerateInterpolator());
+    set.addListener(new AnimatorListenerAdapter() {
+        &#64;Override
+        public void onAnimationEnd(Animator animation) {
+            mCurrentAnimator = null;
+        }
+
+        &#64;Override
+        public void onAnimationCancel(Animator animation) {
+            mCurrentAnimator = null;
+        }
+    });
+    set.start();
+    mCurrentAnimator = set;
+
+    // Upon clicking the zoomed-in image, it should zoom back down
+    // to the original bounds and show the thumbnail instead of
+    // the expanded image.
+    final float startScaleFinal = startScale;
+    expandedImageView.setOnClickListener(new View.OnClickListener() {
+        &#64;Override
+        public void onClick(View view) {
+            if (mCurrentAnimator != null) {
+                mCurrentAnimator.cancel();
+            }
+
+            // Animate the four positioning/sizing properties in parallel,
+            // back to their original values.
+            AnimatorSet set = new AnimatorSet();
+            set.play(ObjectAnimator
+                        .ofFloat(expandedImageView, View.X, startBounds.left))
+                        .with(ObjectAnimator
+                                .ofFloat(expandedImageView, 
+                                        View.Y,startBounds.top))
+                        .with(ObjectAnimator
+                                .ofFloat(expandedImageView, 
+                                        View.SCALE_X, startScaleFinal))
+                        .with(ObjectAnimator
+                                .ofFloat(expandedImageView, 
+                                        View.SCALE_Y, startScaleFinal));
+            set.setDuration(mShortAnimationDuration);
+            set.setInterpolator(new DecelerateInterpolator());
+            set.addListener(new AnimatorListenerAdapter() {
+                &#64;Override
+                public void onAnimationEnd(Animator animation) {
+                    thumbView.setAlpha(1f);
+                    expandedImageView.setVisibility(View.GONE);
+                    mCurrentAnimator = null;
+                }
+
+                &#64;Override
+                public void onAnimationCancel(Animator animation) {
+                    thumbView.setAlpha(1f);
+                    expandedImageView.setVisibility(View.GONE);
+                    mCurrentAnimator = null;
+                }
+            });
+            set.start();
+            mCurrentAnimator = set;
+        }
+    });
+}
+</pre>

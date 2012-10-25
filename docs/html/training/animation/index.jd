@@ -1,0 +1,86 @@
+page.title=Adding Animations
+trainingnavtop=true
+startpage=true
+
+@jd:body
+    <div id="tb-wrapper">
+      <div id="tb">
+        <h2>
+          Dependencies and prerequisites
+        </h2>
+        <ul>
+          <li>Android 4.0 or later
+          </li>
+          <li>Experience building an Android <a href="{@docRoot}guide/topics/ui/index.html">User
+          Interface</a>
+          </li>
+        </ul>
+        <h2>
+          You should also read
+        </h2>
+        <ul>
+          <li>
+            <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a>
+          </li>
+        </ul>
+        <h2>
+          Try it out
+        </h2>
+        <div class="download-box">
+          <a href="{@docRoot}shareables/training/Animations.zip" class=
+          "button">Download the sample app</a>
+          <p class="filename">
+            Animations.zip
+          </p>
+        </div>
+      </div>
+    </div>
+    <p>
+      Animations can add subtle visual cues that notify users about what's going on in your app and
+      improve their mental model of your app's interface. Animations are especially useful when the
+      screen changes state, such as when content loads or new actions become available. Animations
+      can also add a polished look to your app, which gives your app a higher quality feel.
+    </p>
+    <p>
+      Keep in mind though, that overusing animations or using them at the wrong time can be
+      detrimental, such as when they cause delays. This training class shows you how to
+      implement some common types of animations that can increase usability and add flair without
+      annoying your users.
+    </p>
+
+    <h2>
+      Lessons
+    </h2>
+    <dl>
+      <dt>
+        <b><a href="crossfade.html">Crossfading Two Views</a></b>
+      </dt>
+      <dd>
+        Learn how to crossfade between two overlapping views. This lesson shows you how to crossfade a progress
+        indicator to a view that contains text content.
+      </dd>
+      <dt>
+        <b><a href="screen-slide.html">Using ViewPager for Screen Slides</a></b>
+      </dt>
+      <dd>
+        Learn how to animate between horizontally adjacent screens with a sliding transition.
+      </dd>
+      <dt>
+        <b><a href="cardflip.html">Displaying Card Flip Animations</a></b>
+      </dt>
+      <dd>
+        Learn how to animate between two views with a flipping motion.
+      </dd>
+      <dt>
+        <b><a href="zoom.html">Zooming a View</a></b>
+      </dt>
+      <dd>
+        Learn how to enlarge views with a touch-to-zoom animation.
+      </dd>
+      <dt>
+        <b><a href="layout.html">Animating Layout Changes</a></b>
+      </dt>
+      <dd>
+        Learn how to enable built-in animations when adding, removing, or updating child views in a layout.
+      </dd>
+    </dl>
