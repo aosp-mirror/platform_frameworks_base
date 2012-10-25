@@ -39,6 +39,17 @@ public final class DisplayInfo implements Parcelable {
     public int flags;
 
     /**
+     * Display type.
+     */
+    public int type;
+
+    /**
+     * Display address, or null if none.
+     * Interpretation varies by display type.
+     */
+    public String address;
+
+    /**
      * The human-readable name of the display.
      */
     public String name;
@@ -143,10 +154,12 @@ public final class DisplayInfo implements Parcelable {
     public float physicalYDpi;
 
     public static final Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
+        @Override
         public DisplayInfo createFromParcel(Parcel source) {
             return new DisplayInfo(source);
         }
 
+        @Override
         public DisplayInfo[] newArray(int size) {
             return new DisplayInfo[size];
         }
@@ -171,6 +184,9 @@ public final class DisplayInfo implements Parcelable {
     public boolean equals(DisplayInfo other) {
         return other != null
                 && layerStack == other.layerStack
+                && flags == other.flags
+                && type == other.type
+                && Objects.equal(address, other.address)
                 && Objects.equal(name, other.name)
                 && appWidth == other.appWidth
                 && appHeight == other.appHeight
@@ -195,6 +211,8 @@ public final class DisplayInfo implements Parcelable {
     public void copyFrom(DisplayInfo other) {
         layerStack = other.layerStack;
         flags = other.flags;
+        type = other.type;
+        address = other.address;
         name = other.name;
         appWidth = other.appWidth;
         appHeight = other.appHeight;
@@ -214,6 +232,8 @@ public final class DisplayInfo implements Parcelable {
     public void readFromParcel(Parcel source) {
         layerStack = source.readInt();
         flags = source.readInt();
+        type = source.readInt();
+        address = source.readString();
         name = source.readString();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -234,6 +254,8 @@ public final class DisplayInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(layerStack);
         dest.writeInt(this.flags);
+        dest.writeInt(type);
+        dest.writeString(address);
         dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
@@ -294,7 +316,10 @@ public final class DisplayInfo implements Parcelable {
                 + ", rotation " + rotation
                 + ", density " + logicalDensityDpi
                 + ", " + physicalXDpi + " x " + physicalYDpi + " dpi"
-                + ", layerStack " + layerStack + flagsToString(flags) + "}";
+                + ", layerStack " + layerStack
+                + ", type " + Display.typeToString(type)
+                + ", address " + address
+                + flagsToString(flags) + "}";
     }
 
     private static String flagsToString(int flags) {

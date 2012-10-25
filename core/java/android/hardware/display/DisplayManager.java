@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
 
+import java.util.ArrayList;
+
 /**
  * Manages the properties of attached displays.
  * <p>
@@ -39,6 +41,8 @@ public final class DisplayManager {
 
     private final Object mLock = new Object();
     private final SparseArray<Display> mDisplays = new SparseArray<Display>();
+
+    private final ArrayList<Display> mTempDisplays = new ArrayList<Display>();
 
     /**
      * Broadcast receiver that indicates when the Wifi display status changes.
@@ -59,6 +63,20 @@ public final class DisplayManager {
      */
     public static final String EXTRA_WIFI_DISPLAY_STATUS =
             "android.hardware.display.extra.WIFI_DISPLAY_STATUS";
+
+    /**
+     * Display category: Presentation displays.
+     * <p>
+     * This category can be used to identify secondary displays that are suitable for
+     * use as presentation displays.
+     * </p>
+     *
+     * @see android.app.Presentation for information about presenting content
+     * on secondary displays.
+     * @see #getDisplays(String)
+     */
+    public static final String DISPLAY_CATEGORY_PRESENTATION =
+            "android.hardware.display.category.PRESENTATION";
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -87,24 +105,52 @@ public final class DisplayManager {
      * @return An array containing all displays.
      */
     public Display[] getDisplays() {
-        int[] displayIds = mGlobal.getDisplayIds();
-        int expectedCount = displayIds.length;
-        Display[] displays = new Display[expectedCount];
+        return getDisplays(null);
+    }
+
+    /**
+     * Gets all currently valid logical displays of the specified category.
+     * <p>
+     * When there are multiple displays in a category the returned displays are sorted
+     * of preference.  For example, if the requested category is
+     * {@link #DISPLAY_CATEGORY_PRESENTATION} and there are multiple presentation displays
+     * then the displays are sorted so that the first display in the returned array
+     * is the most preferred presentation display.  The application may simply
+     * use the first display or allow the user to choose.
+     * </p>
+     *
+     * @param category The requested display category or null to return all displays.
+     * @return An array containing all displays sorted by order of preference.
+     *
+     * @see #DISPLAY_CATEGORY_PRESENTATION
+     */
+    public Display[] getDisplays(String category) {
+        final int[] displayIds = mGlobal.getDisplayIds();
         synchronized (mLock) {
-            int actualCount = 0;
-            for (int i = 0; i < expectedCount; i++) {
-                Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
-                if (display != null) {
-                    displays[actualCount++] = display;
+            try {
+                if (category == null) {
+                    addMatchingDisplaysLocked(mTempDisplays, displayIds, -1);
+                } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
+                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
+                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_HDMI);
+                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                 }
-            }
-            if (actualCount != expectedCount) {
-                Display[] oldDisplays = displays;
-                displays = new Display[actualCount];
-                System.arraycopy(oldDisplays, 0, displays, 0, actualCount);
+                return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
+            } finally {
+                mTempDisplays.clear();
             }
         }
-        return displays;
+    }
+
+    private void addMatchingDisplaysLocked(
+            ArrayList<Display> displays, int[] displayIds, int matchType) {
+        for (int i = 0; i < displayIds.length; i++) {
+            Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
+            if (display != null
+                    && (matchType < 0 || display.getType() == matchType)) {
+                displays.add(display);
+            }
+        }
     }
 
     private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {

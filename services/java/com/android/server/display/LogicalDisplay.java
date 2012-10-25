@@ -189,6 +189,8 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SECURE) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_SECURE;
             }
+            mBaseDisplayInfo.type = deviceInfo.type;
+            mBaseDisplayInfo.address = deviceInfo.address;
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.appWidth = deviceInfo.width;
             mBaseDisplayInfo.appHeight = deviceInfo.height;
