@@ -49,7 +49,6 @@ import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 import android.widget.TextView;
-import android.widget.ViewFlipper;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -831,6 +830,46 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
+    private final CameraWidgetFrame.Callbacks mCameraWidgetCallbacks =
+        new CameraWidgetFrame.Callbacks() {
+            @Override
+            public void onLaunchingCamera() {
+                SlidingChallengeLayout slider = locateSlider();
+                if (slider != null) {
+                    slider.showHandle(false);
+                }
+            }
+
+            @Override
+            public void onCameraLaunched() {
+                SlidingChallengeLayout slider = locateSlider();
+                if (slider != null) {
+                    slider.showHandle(true);
+                }
+                mAppWidgetContainer.scrollLeft();
+            }
+
+            private SlidingChallengeLayout locateSlider() {
+                return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+            }
+        };
+
+    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
+        @Override
+        Context getContext() {
+            return mContext;
+        }
+
+        @Override
+        KeyguardSecurityCallback getCallback() {
+            return mCallback;
+        }
+
+        @Override
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }};
+
     private void addDefaultWidgets() {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
@@ -840,30 +879,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
         mAppWidgetContainer.addWidget(statusWidget);
         if (mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
-            View cameraWidget = new CameraWidgetFrame(mContext, new CameraWidgetFrame.Callbacks() {
-
-                private SlidingChallengeLayout locateSlider() {
-                    return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
-                }
-
-                @Override
-                public void onLaunchingCamera() {
-                    SlidingChallengeLayout slider = locateSlider();
-                    if (slider != null) {
-                        slider.showHandle(false);
-                    }
-                }
-
-                @Override
-                public void onCameraLaunched() {
-                    SlidingChallengeLayout slider = locateSlider();
-                    if (slider != null) {
-                        slider.showHandle(true);
-                    }
-                    mAppWidgetContainer.scrollLeft();
-                }
-            });
-            mAppWidgetContainer.addWidget(cameraWidget);
+            View cameraWidget =
+                    CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
+            if (cameraWidget != null) {
+                mAppWidgetContainer.addWidget(cameraWidget);
+            }
         }
 
         View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
