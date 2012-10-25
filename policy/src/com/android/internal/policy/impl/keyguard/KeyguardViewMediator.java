@@ -1309,13 +1309,6 @@ public class KeyguardViewMediator {
                 // (like recents). Temporary enable/disable (e.g. the "back" button) are
                 // done in KeyguardHostView.
                 flags |= StatusBarManager.DISABLE_RECENT;
-                if (!mScreenOn) {
-                    // Disable all navbar buttons on screen off.  The navigation bar will hide
-                    // these immediately to avoid seeing the end of layout transition animations
-                    // if quickly turning back on.
-                    flags |= StatusBarManager.DISABLE_HOME;
-                    flags |= StatusBarManager.DISABLE_BACK;
-                }
                 if (isSecure() || !ENABLE_INSECURE_STATUS_BAR_EXPAND) {
                     // showing secure lockscreen; disable expanding.
                     flags |= StatusBarManager.DISABLE_EXPAND;
