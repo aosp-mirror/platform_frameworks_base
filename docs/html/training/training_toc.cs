@@ -287,6 +287,34 @@
           </li>
         </ul>
       </li>
+
+        <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/animation/index.html">
+            <span class="en">Adding Animations</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/animation/crossfade.html">
+            <span class="en">Crossfading Two Views</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/animation/screen-slide.html">
+            <span class="en">Using ViewPager for Screen Slide</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/animation/cardflip.html">
+            <span class="en">Displaying Card Flip Animations</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/animation/zoom.html">
+            <span class="en">Zooming a View</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/animation/layout.html">
+            <span class="en">Animating Layout Changes</span>
+          </a>
+          </li>
+        </ul>
+      </li>
       
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/managing-audio/index.html">
