@@ -122,7 +122,7 @@ public class UserManager {
      * @param userHandle the user handle of the user whose information is being requested.
      * @return the UserInfo object for a specific user.
      * @hide
-     * */
+     */
     public UserInfo getUserInfo(int userHandle) {
         try {
             return mService.getUserInfo(userHandle);
@@ -134,10 +134,11 @@ public class UserManager {
 
     /**
      * Return the serial number for a user.  This is a device-unique
-     * number assigned to that user; if the user is deleted and new users
-     * created, the new users will not be given the same serial number.
+     * number assigned to that user; if the user is deleted and then a new
+     * user created, the new users will not be given the same serial number.
      * @param user The user whose serial number is to be retrieved.
-     * @return The serial number of the given user.
+     * @return The serial number of the given user; returns -1 if the
+     * given UserHandle does not exist.
      * @see #getUserForSerialNumber(long)
      */
     public long getSerialNumberForUser(UserHandle user) {
@@ -176,6 +177,14 @@ public class UserManager {
             Log.w(TAG, "Could not create a user", re);
             return null;
         }
+    }
+
+    /**
+     * Return the number of users currently created on the device.
+     */
+    public int getUserCount() {
+        List<UserInfo> users = getUsers();
+        return users != null ? users.size() : 1;
     }
 
     /**
