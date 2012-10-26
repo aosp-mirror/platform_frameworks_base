@@ -20,6 +20,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -29,6 +30,8 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
+
+import com.android.internal.R;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -61,6 +64,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private int mPage = 0;
     private Callbacks mCallbacks;
 
+    private boolean mCameraWidgetEnabled;
+
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -76,6 +81,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
 
         setPageSwitchListener(this);
+
+        Resources r = getResources();
+        mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
     }
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
@@ -417,6 +425,36 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 }
             }
         }
+    }
+
+    @Override
+    void boundByReorderablePages(boolean isReordering, int[] range) {
+        if (isReordering) {
+            if (isAddWidgetPageVisible()) {
+                range[0]++;
+            }
+            if (isMusicWidgetVisible()) {
+                range[1]--;
+            }
+            if (isCameraWidgetVisible()) {
+                range[1]--;
+            }
+        }
+    }
+
+    /*
+     * Special widgets
+     */
+    boolean isAddWidgetPageVisible() {
+        // TODO: Make proper test once we decide whether the add-page is always showing
+        return true;
+    }
+    boolean isMusicWidgetVisible() {
+        // TODO: Make proper test once we have music in the list
+        return false;
+    }
+    boolean isCameraWidgetVisible() {
+        return mCameraWidgetEnabled;
     }
 
     @Override
