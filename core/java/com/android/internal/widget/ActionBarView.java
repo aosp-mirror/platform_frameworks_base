@@ -946,9 +946,6 @@ public class ActionBarView extends AbsActionBarView {
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
 
-            final int layoutDirection = getLayoutDirection();
-            lp.resolveLayoutDirection(layoutDirection);
-
             int horizontalMargin = 0;
             int verticalMargin = 0;
             if (ablp != null) {
@@ -1099,9 +1096,8 @@ public class ActionBarView extends AbsActionBarView {
             customView = mCustomNavView;
         }
         if (customView != null) {
-            ViewGroup.LayoutParams lp = customView.getLayoutParams();
             final int layoutDirection = getLayoutDirection();
-            lp.resolveLayoutDirection(layoutDirection);
+            ViewGroup.LayoutParams lp = customView.getLayoutParams();
             final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
                     (ActionBar.LayoutParams) lp : null;
             final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
@@ -1339,15 +1335,11 @@ public class ActionBarView extends AbsActionBarView {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             measureChildWithMargins(mUpView, widthMeasureSpec, 0, heightMeasureSpec, 0);
-            // measureChildWithMargins() has triggered layout params resolution, so no need
-            // to do it now
             final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
             mUpWidth = upLp.leftMargin + mUpView.getMeasuredWidth() + upLp.rightMargin;
             int width = mUpView.getVisibility() == GONE ? 0 : mUpWidth;
             int height = upLp.topMargin + mUpView.getMeasuredHeight() + upLp.bottomMargin;
             measureChildWithMargins(mIconView, widthMeasureSpec, width, heightMeasureSpec, 0);
-            // measureChildWithMargins() has triggered layout params resolution, so no need
-            // to do it now
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
             width += iconLp.leftMargin + mIconView.getMeasuredWidth() + iconLp.rightMargin;
             height = Math.max(height,
@@ -1387,12 +1379,10 @@ public class ActionBarView extends AbsActionBarView {
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             final int vCenter = (b - t) / 2;
             final boolean isLayoutRtl = isLayoutRtl();
-            final int layoutDirection = getLayoutDirection();
             final int width = getWidth();
             int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
                 final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
-                upLp.resolveLayoutDirection(layoutDirection);
                 final int upHeight = mUpView.getMeasuredHeight();
                 final int upWidth = mUpView.getMeasuredWidth();
                 upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
@@ -1413,7 +1403,6 @@ public class ActionBarView extends AbsActionBarView {
             }
 
             final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
-            iconLp.resolveLayoutDirection(layoutDirection);
             final int iconHeight = mIconView.getMeasuredHeight();
             final int iconWidth = mIconView.getMeasuredWidth();
             final int hCenter = (r - l) / 2;

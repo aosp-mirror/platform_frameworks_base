@@ -343,11 +343,9 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
         
-        final int layoutDirection = getLayoutDirection();
         if (mClose != null) {
             availableWidth = measureChildView(mClose, availableWidth, childSpecHeight, 0);
             MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
-            lp.resolveLayoutDirection(layoutDirection);
             availableWidth -= lp.leftMargin + lp.rightMargin;
         }
 
