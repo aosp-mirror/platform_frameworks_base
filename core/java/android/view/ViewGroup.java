@@ -186,7 +186,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
      */
-    private int mLayoutMode = DEFAULT_LAYOUT_MODE;
+    private int mLayoutMode = LAYOUT_MODE_UNDEFINED;
 
     /**
      * NOTE: If you change the flags below make sure to reflect the changes
@@ -327,6 +327,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW = 0x400000;
 
     /**
+     * When true, indicates that a layoutMode has been explicitly set, either with
+     * an explicit call to {@link #setLayoutMode(int)} in code or from an XML resource.
+     * This distinguishes the situation in which a layout mode was inherited from
+     * one of the ViewGroup's ancestors and cached locally.
+     */
+    private static final int FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET = 0x800000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -355,6 +363,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Layout Modes
 
+    private static final int LAYOUT_MODE_UNDEFINED = -1;
+
     /**
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
      * Clip bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
@@ -371,7 +381,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public static final int LAYOUT_MODE_OPTICAL_BOUNDS = 1;
 
     /** @hide */
-    public static int DEFAULT_LAYOUT_MODE = LAYOUT_MODE_CLIP_BOUNDS;
+    public static int LAYOUT_MODE_DEFAULT = LAYOUT_MODE_CLIP_BOUNDS;
 
     /**
      * We clip to padding when FLAG_CLIP_TO_PADDING and FLAG_PADDING_NOT_NULL
@@ -507,7 +517,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                     break;
                 case R.styleable.ViewGroup_layoutMode:
-                    setLayoutMode(a.getInt(attr, DEFAULT_LAYOUT_MODE));
+                    setLayoutMode(a.getInt(attr, LAYOUT_MODE_UNDEFINED));
                     break;
             }
         }
@@ -3374,6 +3384,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    private void clearCachedLayoutMode() {
+        if (mLayoutMode != LAYOUT_MODE_UNDEFINED &&
+                (mGroupFlags & FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET) == 0) {
+           mLayoutMode = LAYOUT_MODE_UNDEFINED;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        clearCachedLayoutMode();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        clearCachedLayoutMode();
+    }
+
     /**
      * Adds a view during layout. This is useful if in your onLayout() method,
      * you need to add more views (as does the list view for example).
@@ -4710,29 +4739,36 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Returns the basis of alignment during layout operations on this view group:
+     * Returns the basis of alignment during layout operations on this ViewGroup:
      * either {@link #LAYOUT_MODE_CLIP_BOUNDS} or {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
+     * <p>
+     * If no layoutMode was explicitly set, either programmatically or in an XML resource,
+     * the method returns the layoutMode of the view's parent ViewGroup if such a parent exists,
+     * otherwise the method returns a default value of {@link #LAYOUT_MODE_CLIP_BOUNDS}.
      *
      * @return the layout mode to use during layout operations
      *
      * @see #setLayoutMode(int)
      */
     public int getLayoutMode() {
+        if (mLayoutMode == LAYOUT_MODE_UNDEFINED) {
+            mLayoutMode = (mParent instanceof ViewGroup) ?
+                    ((ViewGroup)mParent).getLayoutMode() : LAYOUT_MODE_DEFAULT;
+        }
         return mLayoutMode;
     }
 
     /**
-     * Sets the basis of alignment during the layout of this view group.
+     * Sets the basis of alignment during the layout of this ViewGroup.
      * Valid values are either {@link #LAYOUT_MODE_CLIP_BOUNDS} or
      * {@link #LAYOUT_MODE_OPTICAL_BOUNDS}.
-     * <p>
-     * The default is {@link #LAYOUT_MODE_CLIP_BOUNDS}.
      *
      * @param layoutMode the layout mode to use during layout operations
      *
      * @see #getLayoutMode()
      */
     public void setLayoutMode(int layoutMode) {
+        setBooleanFlag(FLAG_LAYOUT_MODE_WAS_EXPLICITLY_SET, layoutMode != LAYOUT_MODE_UNDEFINED);
         if (mLayoutMode != layoutMode) {
             mLayoutMode = layoutMode;
             requestLayout();
