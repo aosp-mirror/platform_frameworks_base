@@ -26,6 +26,7 @@ import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -75,6 +76,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
+    private static final String ATTR_USER_VERSION = "version";
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
 
@@ -83,6 +85,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_PHOTO_FILENAME = "photo.png";
 
     private static final int MIN_USER_ID = 10;
+
+    private static final int USER_VERSION = 1;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -104,6 +108,7 @@ public class UserManagerService extends IUserManager.Stub {
     // This resets on a reboot. Otherwise it keeps incrementing so that user ids are
     // not reused in quick succession
     private int mNextUserId = MIN_USER_ID;
+    private int mUserVersion = 0;
 
     private static UserManagerService sInstance;
 
@@ -432,12 +437,17 @@ public class UserManagerService extends IUserManager.Stub {
                 if (lastSerialNumber != null) {
                     mNextSerialNumber = Integer.parseInt(lastSerialNumber);
                 }
+                String versionNumber = parser.getAttributeValue(null, ATTR_USER_VERSION);
+                if (versionNumber != null) {
+                    mUserVersion = Integer.parseInt(versionNumber);
+                }
             }
 
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
                     String id = parser.getAttributeValue(null, ATTR_ID);
                     UserInfo user = readUser(Integer.parseInt(id));
+
                     if (user != null) {
                         mUsers.put(user.id, user);
                         if (user.isGuest()) {
@@ -450,6 +460,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             updateUserIdsLocked();
+            upgradeIfNecessary();
         } catch (IOException ioe) {
             fallbackToSingleUserLocked();
         } catch (XmlPullParserException pe) {
@@ -464,9 +475,35 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * This fixes an incorrect initialization of user name for the owner.
+     * TODO: Remove in the next release.
+     */
+    private void upgradeIfNecessary() {
+        int userVersion = mUserVersion;
+        if (userVersion < 1) {
+            // Assign a proper name for the owner, if not initialized correctly before
+            UserInfo user = mUsers.get(UserHandle.USER_OWNER);
+            if ("Primary".equals(user.name)) {
+                user.name = mContext.getResources().getString(com.android.internal.R.string.owner_name);
+                writeUserLocked(user);
+            }
+            userVersion = 1;
+        }
+
+        if (userVersion < USER_VERSION) {
+            Slog.w(LOG_TAG, "User version " + mUserVersion + " didn't upgrade as expected to "
+                    + USER_VERSION);
+        } else {
+            mUserVersion = userVersion;
+            writeUserListLocked();
+        }
+    }
+
     private void fallbackToSingleUserLocked() {
         // Create the primary user
-        UserInfo primary = new UserInfo(0, "Primary", null,
+        UserInfo primary = new UserInfo(0, 
+                mContext.getResources().getString(com.android.internal.R.string.owner_name), null,
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
         mUsers.put(0, primary);
         mNextSerialNumber = MIN_USER_ID;
@@ -547,6 +584,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             serializer.startTag(null, TAG_USERS);
             serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
+            serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
 
             for (int i = 0; i < mUsers.size(); i++) {
                 UserInfo user = mUsers.valueAt(i);
