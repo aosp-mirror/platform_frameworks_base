@@ -71,7 +71,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final int TRANSPORT_VISIBLE = 2;
 
     private AppWidgetHost mAppWidgetHost;
-    private KeyguardWidgetRegion mAppWidgetRegion;
     private KeyguardWidgetPager mAppWidgetContainer;
     private ViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
@@ -151,11 +150,10 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
-        mAppWidgetRegion = (KeyguardWidgetRegion) findViewById(R.id.kg_widget_region);
-        mAppWidgetRegion.setVisibility(VISIBLE);
-        mAppWidgetRegion.setCallbacks(mWidgetCallbacks);
-
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
+        mAppWidgetContainer.setVisibility(VISIBLE);
+        mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
+
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
 
@@ -196,7 +194,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
         // TODO: Re-enable when we have layouts that can support a better variety of widgets.
-        // maybePopulateWidgets();
+        maybePopulateWidgets();
         disableStatusViewInteraction();
         post(mSwitchPageRunnable);
     }
@@ -225,8 +223,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.addWidget(view);
     }
 
-    private KeyguardWidgetRegion.Callbacks mWidgetCallbacks
-            = new KeyguardWidgetRegion.Callbacks() {
+    private KeyguardWidgetPager.Callbacks mWidgetCallbacks
+            = new KeyguardWidgetPager.Callbacks() {
         @Override
         public void userActivity() {
             if (mViewMediatorCallback != null) {
@@ -246,8 +244,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     public long getUserActivityTimeout() {
         // Currently only considering user activity timeouts needed by widgets.
         // Could also take into account longer timeouts for certain security views.
-        if (mAppWidgetRegion != null) {
-            return mAppWidgetRegion.getUserActivityTimeout();
+        if (mAppWidgetContainer != null) {
+            return mAppWidgetContainer.getUserActivityTimeout();
         }
         return -1;
     }
@@ -607,7 +605,8 @@ public class KeyguardHostView extends KeyguardViewBase {
                 break;
             }
         }
-        boolean simPukFullScreen = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
+        boolean simPukFullScreen = getResources().getBoolean(
+                com.android.internal.R.bool.kg_sim_puk_account_full_screen);
         int layoutId = getLayoutIdFor(securityMode);
         if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -631,7 +630,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (securityMode == SecurityMode.SimPin || securityMode == SecurityMode.SimPuk ||
             securityMode == SecurityMode.Account) {
             if (simPukFullScreen) {
-                mAppWidgetRegion.setVisibility(View.GONE);
+                mAppWidgetContainer.setVisibility(View.GONE);
             }
         }
 
@@ -812,8 +811,11 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private void addDefaultWidgets() {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        inflater.inflate(R.layout.keyguard_status_view, mAppWidgetContainer, true);
         inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
+
+        inflater.inflate(R.layout.keyguard_add_widget, mAppWidgetContainer, true);
+        inflater.inflate(R.layout.keyguard_status_view, mAppWidgetContainer, true);
+        inflater.inflate(R.layout.keyguard_camera_widget, mAppWidgetContainer, true);
 
         inflateAndAddUserSelectorWidgetIfNecessary();
         initializeTransportControl();
@@ -892,7 +894,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         // Add user-selected widget
         final int[] widgets = mLockPatternUtils.getUserDefinedWidgets();
+        System.out.println("Num widgets: " + widgets.length);
         for (int i = 0; i < widgets.length; i++) {
+            System.out.println("   widget: " + widgets[i]);
             if (widgets[i] != -1) {
                 addWidget(widgets[i]);
             }
