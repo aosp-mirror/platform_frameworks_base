@@ -149,7 +149,8 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notification masquée"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Volet des notifications"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Paramètres rapides"</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Applications récentes"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (9014032916410590027) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Utilisateur <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>, <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Signal mobile : <xliff:g id="SIGNAL">%1$s</xliff:g>, <xliff:g id="TYPE">%2$s</xliff:g>, <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
