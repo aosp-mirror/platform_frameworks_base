@@ -323,5 +323,5 @@
 
     <!-- Size of the region along the edge of the screen that will accept
          swipes to scroll the widget area. -->
-    <dimen name="kg_edge_swipe_region_size">16dp</dimen>
+    <dimen name="kg_edge_swipe_region_size">24dp</dimen>
 </resources>
