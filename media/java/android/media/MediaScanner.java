@@ -1336,6 +1336,9 @@ public class MediaScanner
             prescan(path, true);
 
             File file = new File(path);
+            if (!file.exists()) {
+                return null;
+            }
 
             // lastModified is in milliseconds on Files.
             long lastModifiedSeconds = file.lastModified() / 1000;
