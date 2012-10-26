@@ -110,36 +110,50 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
         return false;
     }
 
+    private void setAllClickable(boolean clickable)
+    {
+        for(int i = 0; i < mUsersGrid.getChildCount(); i++) {
+            View v = mUsersGrid.getChildAt(i);
+            v.setClickable(clickable);
+            v.setPressed(false);
+        }
+    }
+
     @Override
     public void onClick(View v) {
         if (!(v instanceof KeyguardMultiUserAvatar)) return;
         final KeyguardMultiUserAvatar avatar = (KeyguardMultiUserAvatar) v;
-        if (mActiveUserAvatar == avatar) {
-            // If they click the currently active user, show the unlock hint
-            mCallback.showUnlockHint();
-            return;
-        } else {
-            // Reset the previously active user to appear inactive
-            mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
-            mActiveUserAvatar.setActive(false, true, new Runnable() {
-                @Override
-                public void run() {
-                    mActiveUserAvatar = avatar;
-                    mActiveUserAvatar.setActive(true, true, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (this.getClass().getName().contains("internal")) {
-                                try {
-                                    ActivityManagerNative.getDefault()
-                                            .switchUser(avatar.getUserInfo().id);
-                                } catch (RemoteException re) {
-                                    Log.e(TAG, "Couldn't switch user " + re);
+        if (avatar.isClickable()) { // catch race conditions
+            if (mActiveUserAvatar == avatar) {
+                // If they click the currently active user, show the unlock hint
+                mCallback.showUnlockHint();
+                return;
+            } else {
+                // Reset the previously active user to appear inactive
+                mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
+                setAllClickable(false);
+                mActiveUserAvatar.setActive(false, true, new Runnable() {
+                    @Override
+                    public void run() {
+                        mActiveUserAvatar = avatar;
+                        mActiveUserAvatar.setActive(true, true, new Runnable() {
+                            @Override
+                            public void run() {
+                                if (this.getClass().getName().contains("internal")) {
+                                    try {
+                                        ActivityManagerNative.getDefault()
+                                                .switchUser(avatar.getUserInfo().id);
+                                    } catch (RemoteException re) {
+                                        Log.e(TAG, "Couldn't switch user " + re);
+                                    }
+                                } else {
+                                    setAllClickable(true);
                                 }
                             }
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            }
         }
     }
 }
