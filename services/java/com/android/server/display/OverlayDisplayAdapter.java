@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.Surface;
 
@@ -240,6 +241,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
                 mInfo.flags = 0;
+                mInfo.type = Display.TYPE_OVERLAY;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
             return mInfo;

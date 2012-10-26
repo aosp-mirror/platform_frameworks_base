@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.Surface.PhysicalDisplayInfo;
@@ -139,11 +140,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                             | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(mPhys.density * 160 + 0.5f);
                     mInfo.xDpi = mPhys.xDpi;
                     mInfo.yDpi = mPhys.yDpi;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
+                    mInfo.type = Display.TYPE_HDMI;
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
