@@ -1421,7 +1421,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Павялiчыць гук больш за рэкамендаваны ўзровень?"\n"Доўгае слуханне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утрымлiвайце два пальцы, каб уключыць доступ."</string>
+    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
+    <skip />
     <string name="accessibility_enabled" msgid="1381972048564547685">"Даступнасць уключана."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Даступнасць адменена."</string>
     <string name="user_switched" msgid="3768006783166984410">"Бягучы карыстальнік <xliff:g id="NAME">%1$s</xliff:g>."</string>
