@@ -14197,11 +14197,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void resolveDrawables() {
-        if (mBackground != null) {
-            mBackground.setLayoutDirection(getLayoutDirection());
+        if (canResolveLayoutDirection()) {
+            if (mBackground != null) {
+                mBackground.setLayoutDirection(getLayoutDirection());
+            }
+            mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
+            onResolveDrawables(getLayoutDirection());
         }
-        mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
-        onResolveDrawables(getLayoutDirection());
     }
 
     /**
