@@ -22,7 +22,7 @@
 #include <stddef.h>
 #include <utils/threads.h>
 #include <utils/String16.h>
-#include <utils/GenerationCache.h>
+#include <utils/LruCache.h>
 #include <utils/KeyedVector.h>
 #include <utils/Compare.h>
 #include <utils/RefBase.h>
@@ -85,6 +85,15 @@ public:
 
     inline const UChar* getText() const { return textCopy.string(); }
 
+    bool operator==(const TextLayoutCacheKey& other) const {
+        return compare(*this, other) == 0;
+    }
+
+    bool operator!=(const TextLayoutCacheKey& other) const {
+        return compare(*this, other) != 0;
+    }
+
+    hash_t hash() const;
 private:
     String16 textCopy;
     size_t start;
@@ -108,6 +117,10 @@ inline int strictly_order_type(const TextLayoutCacheKey& lhs, const TextLayoutCa
 
 inline int compare_type(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey& rhs) {
     return TextLayoutCacheKey::compare(lhs, rhs);
+}
+
+inline hash_t hash_type(const TextLayoutCacheKey& key) {
+    return key.hash();
 }
 
 /*
@@ -276,7 +289,7 @@ private:
     Mutex mLock;
     bool mInitialized;
 
-    GenerationCache<TextLayoutCacheKey, sp<TextLayoutValue> > mCache;
+    LruCache<TextLayoutCacheKey, sp<TextLayoutValue> > mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
