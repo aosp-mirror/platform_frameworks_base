@@ -181,14 +181,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         mViewStateManager.showUsabilityHints();
 
-        updateSecurityViews();
         if (!(mContext instanceof Activity)) {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
         }
 
-        if (KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
-            showPrimarySecurityScreen(false);
-        }
+        showPrimarySecurityScreen(false);
+
+        updateSecurityViews();
     }
 
     private void updateSecurityViews() {
@@ -426,7 +425,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     void showPrimarySecurityScreen(boolean turningOff) {
         SecurityMode securityMode = mSecurityModel.getSecurityMode();
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
-        if (!turningOff && KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()) {
+        if (!turningOff && KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()
+                && !KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
             // If we're not turning off, then allow biometric alternate.
             // We'll reload it when the device comes back on.
             securityMode = mSecurityModel.getAlternateFor(securityMode);

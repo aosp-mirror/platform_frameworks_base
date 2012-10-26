@@ -245,9 +245,6 @@
     <!-- TEMP -->
     <dimen name="kg_security_panel_height">600dp</dimen>
 
-    <!-- Width of security view in keyguard. -->
-    <dimen name="kg_glow_pad_size">500dp</dimen>
-
     <!-- Height of security view in keyguard. -->
     <dimen name="kg_security_view_height">0dp</dimen>
 
