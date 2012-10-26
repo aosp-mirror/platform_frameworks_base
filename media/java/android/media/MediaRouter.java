@@ -32,7 +32,6 @@ import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.DisplayInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +52,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MediaRouter {
     private static final String TAG = "MediaRouter";
 
-    static class Static {
+    static class Static implements DisplayManager.DisplayListener {
         final Resources mResources;
         final IAudioService mAudioService;
         final DisplayManager mDisplayService;
@@ -105,6 +104,8 @@ public class MediaRouter {
             mDefaultAudioVideo = new RouteInfo(mSystemCategory);
             mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
+            mDefaultAudioVideo.mPresentationDisplay = choosePresentationDisplayForRoute(
+                    mDefaultAudioVideo, getAllPresentationDisplays());
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
@@ -114,6 +115,8 @@ public class MediaRouter {
                     new IntentFilter(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED));
             appContext.registerReceiver(new VolumeChangeReceiver(),
                     new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
+
+            mDisplayService.registerDisplayListener(this, mHandler);
 
             AudioRoutesInfo newAudioRoutes = null;
             try {
@@ -191,6 +194,39 @@ public class MediaRouter {
                 }
             }
         }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            updatePresentationDisplays(displayId);
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            updatePresentationDisplays(displayId);
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            updatePresentationDisplays(displayId);
+        }
+
+        public Display[] getAllPresentationDisplays() {
+            return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+        }
+
+        private void updatePresentationDisplays(int changedDisplayId) {
+            final Display[] displays = getAllPresentationDisplays();
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                final RouteInfo info = mRoutes.get(i);
+                Display display = choosePresentationDisplayForRoute(info, displays);
+                if (display != info.mPresentationDisplay
+                        || (display != null && display.getDisplayId() == changedDisplayId)) {
+                    info.mPresentationDisplay = display;
+                    dispatchRoutePresentationDisplayChanged(info);
+                }
+            }
+        }
     }
 
     static Static sStatic;
@@ -218,6 +254,9 @@ public class MediaRouter {
      * While remote routing is active the application may use a
      * {@link android.app.Presentation Presentation} to replace the mirrored view
      * on the external display with different content.</p>
+     *
+     * @see RouteInfo#getPresentationDisplay()
+     * @see android.app.Presentation
      */
     public static final int ROUTE_TYPE_LIVE_VIDEO = 0x2;
 
@@ -674,6 +713,14 @@ public class MediaRouter {
         }
     }
 
+    static void dispatchRoutePresentationDisplayChanged(RouteInfo info) {
+        for (CallbackInfo cbi : sStatic.mCallbacks) {
+            if ((cbi.type & info.mSupportedTypes) != 0) {
+                cbi.cb.onRoutePresentationDisplayChanged(cbi.router, info);
+            }
+        }
+    }
+
     static void systemVolumeChanged(int newValue) {
         final RouteInfo selectedRoute = sStatic.mSelectedRoute;
         if (selectedRoute == null) return;
@@ -755,6 +802,9 @@ public class MediaRouter {
         newRoute.mEnabled = available;
 
         newRoute.mName = display.getFriendlyDisplayName();
+
+        newRoute.mPresentationDisplay = choosePresentationDisplayForRoute(newRoute,
+                sStatic.getAllPresentationDisplays());
         return newRoute;
     }
 
@@ -830,6 +880,27 @@ public class MediaRouter {
         return null;
     }
 
+    private static Display choosePresentationDisplayForRoute(RouteInfo route, Display[] displays) {
+        if ((route.mSupportedTypes & ROUTE_TYPE_LIVE_VIDEO) != 0) {
+            if (route.mDeviceAddress != null) {
+                // Find the indicated Wifi display by its address.
+                for (Display display : displays) {
+                    if (display.getType() == Display.TYPE_WIFI
+                            && route.mDeviceAddress.equals(display.getAddress())) {
+                        return display;
+                    }
+                }
+                return null;
+            }
+
+            if (route == sStatic.mDefaultAudioVideo && displays.length > 0) {
+                // Choose the first presentation display from the list.
+                return displays[0];
+            }
+        }
+        return null;
+    }
+
     /**
      * Information about a media route.
      */
@@ -848,6 +919,7 @@ public class MediaRouter {
         int mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
         int mPlaybackStream = AudioManager.STREAM_MUSIC;
         VolumeCallbackInfo mVcb;
+        Display mPresentationDisplay;
 
         String mDeviceAddress;
         boolean mEnabled = true;
@@ -1119,6 +1191,38 @@ public class MediaRouter {
         }
 
         /**
+         * Gets the {@link Display} that should be used by the application to show
+         * a {@link android.app.Presentation} on an external display when this route is selected.
+         * Depending on the route, this may only be valid if the route is currently
+         * selected.
+         * <p>
+         * The preferred presentation display may change independently of the route
+         * being selected or unselected.  For example, the presentation display
+         * of the default system route may change when an external HDMI display is connected
+         * or disconnected even though the route itself has not changed.
+         * </p><p>
+         * This method may return null if there is no external display associated with
+         * the route or if the display is not ready to show UI yet.
+         * </p><p>
+         * The application should listen for changes to the presentation display
+         * using the {@link Callback#onRoutePresentationDisplayChanged} callback and
+         * show or dismiss its {@link android.app.Presentation} accordingly when the display
+         * becomes available or is removed.
+         * </p><p>
+         * This method only makes sense for {@link #ROUTE_TYPE_LIVE_VIDEO live video} routes.
+         * </p>
+         *
+         * @return The preferred presentation display to use when this route is
+         * selected or null if none.
+         *
+         * @see #ROUTE_TYPE_LIVE_VIDEO
+         * @see android.app.Presentation
+         */
+        public Display getPresentationDisplay() {
+            return mPresentationDisplay;
+        }
+
+        /**
          * @return true if this route is enabled and may be selected
          */
         public boolean isEnabled() {
@@ -1159,9 +1263,11 @@ public class MediaRouter {
         @Override
         public String toString() {
             String supportedTypes = typesToString(getSupportedTypes());
-            return getClass().getSimpleName() + "{ name=" + getName() + ", status=" + getStatus() +
-                    " category=" + getCategory() +
-                    " supportedTypes=" + supportedTypes + "}";
+            return getClass().getSimpleName() + "{ name=" + getName() +
+                    ", status=" + getStatus() +
+                    ", category=" + getCategory() +
+                    ", supportedTypes=" + supportedTypes +
+                    ", presentationDisplay=" + mPresentationDisplay + "}";
         }
     }
 
@@ -1856,6 +1962,21 @@ public class MediaRouter {
          * @param info The route with altered volume
          */
         public abstract void onRouteVolumeChanged(MediaRouter router, RouteInfo info);
+
+        /**
+         * Called when a route's presentation display changes.
+         * <p>
+         * This method is called whenever the route's presentation display becomes
+         * available, is removes or has changes to some of its properties (such as its size).
+         * </p>
+         *
+         * @param router the MediaRouter reporting the event
+         * @param info The route whose presentation display changed
+         *
+         * @see RouteInfo#getPresentationDisplay()
+         */
+        public void onRoutePresentationDisplayChanged(MediaRouter router, RouteInfo info) {
+        }
     }
 
     /**
