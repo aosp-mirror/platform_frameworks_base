@@ -1335,6 +1335,7 @@
   <java-symbol type="integer" name="config_lidOpenRotation" />
   <java-symbol type="integer" name="config_longPressOnHomeBehavior" />
   <java-symbol type="integer" name="kg_security_flip_duration" />
+  <java-symbol type="integer" name="kg_carousel_angle" />
   <java-symbol type="layout" name="global_actions_item" />
   <java-symbol type="layout" name="global_actions_silent_mode" />
   <java-symbol type="layout" name="keyguard_screen_glogin_unlock" />

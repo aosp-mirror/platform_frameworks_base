@@ -39,9 +39,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <include layout="@layout/keyguard_widget_pager"
-                     android:layout_width="match_parent"
-                     android:layout_height="match_parent"
-                     android:layout_gravity="center"/>
+                android:id="@+id/app_widget_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"/>
         </FrameLayout>
 
         <View android:layout_width="match_parent"
