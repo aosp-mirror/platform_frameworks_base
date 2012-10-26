@@ -102,7 +102,6 @@ public abstract class KeyguardActivityLauncher {
                 launchActivity(SECURE_CAMERA_INTENT, true);
             }
         } else {
-//            wouldLaunchResolverActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
             // Launch the normal camera
             launchActivity(INSECURE_CAMERA_INTENT, false);
         }
