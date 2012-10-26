@@ -242,6 +242,9 @@
     <dimen name="notification_subtext_size">12dp</dimen>
 
     <!-- Keyguard dimensions -->
+    <!-- TEMP -->
+    <dimen name="kg_security_panel_height">600dp</dimen>
+
     <!-- Width of security view in keyguard. -->
     <dimen name="kg_glow_pad_size">500dp</dimen>
 

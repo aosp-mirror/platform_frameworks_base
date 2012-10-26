@@ -233,7 +233,6 @@ public class KeyguardViewManager {
 
         if (mScreenOn) {
             mKeyguardView.show();
-            mKeyguardView.requestFocus();
         }
     }
 
