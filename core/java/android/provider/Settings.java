@@ -5300,6 +5300,14 @@ public final class Settings {
                 "always_finish_activities";
 
         /**
+         * Use Dock audio output for media:
+         *      0 = disabled
+         *      1 = enabled
+         * @hide
+         */
+        public static final String DOCK_AUDIO_MEDIA_ENABLED = "dock_audio_media_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5330,6 +5338,7 @@ public final class Settings {
             WIFI_NUM_OPEN_NETWORKS_KEPT,
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
+            DOCK_AUDIO_MEDIA_ENABLED
         };
 
         // Populated lazily, guarded by class object:
