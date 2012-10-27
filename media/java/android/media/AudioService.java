@@ -429,9 +429,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
     final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_AUX_DIGITAL |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
+            AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ALL_USB;
 
     private final boolean mMonitorOrientation;
+
+    private boolean mDockAudioMediaEnabled = true;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -630,6 +633,27 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
+    private void readDockAudioSettings(ContentResolver cr)
+    {
+        mDockAudioMediaEnabled = Settings.Global.getInt(
+                                        cr, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED, 1) == 1;
+
+        if (mDockAudioMediaEnabled) {
+            mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
+        } else {
+            mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
+        }
+
+        sendMsg(mAudioHandler,
+                MSG_SET_FORCE_USE,
+                SENDMSG_QUEUE,
+                AudioSystem.FOR_DOCK,
+                mDockAudioMediaEnabled ?
+                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE,
+                null,
+                0);
+    }
+
     private void readPersistedSettings() {
         final ContentResolver cr = mContentResolver;
 
@@ -693,6 +717,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                     mRingerModeAffectedStreams,
                     UserHandle.USER_CURRENT);
+
+            readDockAudioSettings(cr);
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -3408,6 +3434,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             super(new Handler());
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
+            mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
         }
 
         @Override
@@ -3443,6 +3471,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     mRingerModeAffectedStreams = ringerModeAffectedStreams;
                     setRingerModeInt(getRingerMode(), false);
                 }
+                readDockAudioSettings(mContentResolver);
             }
         }
     }
@@ -3722,7 +3751,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         config = AudioSystem.FORCE_BT_CAR_DOCK;
                         break;
                     case Intent.EXTRA_DOCK_STATE_LE_DESK:
-                        config = AudioSystem.FORCE_ANALOG_DOCK;
+                        synchronized (mSettingsLock) {
+                            if (mDockAudioMediaEnabled) {
+                                config = AudioSystem.FORCE_ANALOG_DOCK;
+                            } else {
+                                config = AudioSystem.FORCE_NONE;
+                            }
+                        }
                         break;
                     case Intent.EXTRA_DOCK_STATE_HE_DESK:
                         config = AudioSystem.FORCE_DIGITAL_DOCK;
@@ -3731,6 +3766,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     default:
                         config = AudioSystem.FORCE_NONE;
                 }
+
                 AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
