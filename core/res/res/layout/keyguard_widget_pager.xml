@@ -19,16 +19,15 @@
 
 <!-- This is the selector widget that allows the user to select an action. -->
 <com.android.internal.policy.impl.keyguard.KeyguardWidgetPager
-    xmlns:prvandroid="http://schemas.android.com/apk/res/com.android.lockhotness"
+
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/app_widget_container"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
     android:paddingLeft="25dp"
     android:paddingRight="25dp"
     android:paddingTop="25dp"
     android:paddingBottom="25dp"
     android:clipChildren="false"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:pageSpacing="10dp"
+    android:edgeSwipeRegionSize="8dp">
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>

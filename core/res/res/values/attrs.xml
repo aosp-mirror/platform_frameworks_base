@@ -5767,19 +5767,12 @@
     <!-- PagedView specific attributes. These attributes are used to customize
          a PagedView view in XML files. -->
     <declare-styleable name="PagedView">
-        <!-- A spacing override for the icons within a page -->
-        <attr name="pageLayoutWidthGap" format="dimension" />
-        <attr name="pageLayoutHeightGap" format="dimension" />
-        <!-- The padding of the pages that are dynamically created per page -->
-        <attr name="pageLayoutPaddingTop" format="dimension" />
-        <attr name="pageLayoutPaddingBottom" format="dimension" />
-        <attr name="pageLayoutPaddingLeft" format="dimension" />
-        <attr name="pageLayoutPaddingRight" format="dimension" />
         <!-- The space between adjacent pages of the PagedView. -->
         <attr name="pageSpacing" format="dimension" />
         <!-- The padding for the scroll indicator area -->
         <attr name="scrollIndicatorPaddingLeft" format="dimension" />
         <attr name="scrollIndicatorPaddingRight" format="dimension" />
+        <attr name="edgeSwipeRegionSize" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="KeyguardGlowStripView">
@@ -5787,6 +5780,14 @@
         <attr name="numDots" format="integer" />
         <attr name="glowDot" format="reference" />
         <attr name="leftToRight" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SlidingChallengeLayout">
+        <attr name="dragHandle" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="SlidingChallengeLayout_Layout">
+        <attr name="layout_isChallenge" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>

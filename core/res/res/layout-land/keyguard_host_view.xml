@@ -26,7 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <com.android.internal.policy.impl.keyguard.SlidingChallengeLayout
         android:id="@+id/sliding_layout"

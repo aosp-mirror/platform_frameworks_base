@@ -25,10 +25,12 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
@@ -50,6 +52,11 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private PowerManager mPowerManager;
     private boolean mDisableInteraction;
 
+    private float mBackgroundAlpha;
+    private float mBackgroundAlphaMultiplier;
+    private Drawable mBackgroundDrawable;
+    private Rect mBackgroundRect = new Rect();
+
     public KeyguardWidgetFrame(Context context) {
         this(context, null, 0);
     }
@@ -63,7 +70,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
-        
         Resources res = context.getResources();
         /*
         int hPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_horizontal_padding);
@@ -71,6 +77,12 @@ public class KeyguardWidgetFrame extends FrameLayout {
         int bottomPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
         setPadding(hPadding, topPadding, hPadding, bottomPadding);
         */
+        // TODO: this padding should really correspond to the padding embedded in the background
+        // drawable (ie. outlines). 
+        int padding = (int) (res.getDisplayMetrics().density * 8);
+        setPadding(padding, padding, padding, padding);
+
+        mBackgroundDrawable = res.getDrawable(R.drawable.security_frame);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
@@ -90,15 +102,112 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        drawBg(canvas);
         super.dispatchDraw(canvas);
         drawGradientOverlay(canvas);
 
+    }
+
+    /**
+     * Because this view has fading outlines, it is essential that we enable hardware
+     * layers on the content (child) so that updating the alpha of the outlines doesn't
+     * result in the content layer being recreated.
+     */
+    public void enableHardwareLayersForContent() {
+        View widget = getContent();
+        if (widget != null) {
+            widget.setLayerType(LAYER_TYPE_HARDWARE, null);
+        }
+    }
+
+    /**
+     * Because this view has fading outlines, it is essential that we enable hardware
+     * layers on the content (child) so that updating the alpha of the outlines doesn't
+     * result in the content layer being recreated.
+     */
+    public void disableHardwareLayersForContent() {
+        View widget = getContent();
+        if (widget != null) {
+            widget.setLayerType(LAYER_TYPE_NONE, null);
+        }
+    }
+
+    public View getContent() {
+        return getChildAt(0);
     }
 
     private void drawGradientOverlay(Canvas c) {
         mGradientPaint.setShader(mForegroundGradient);
         mGradientPaint.setAlpha(mForegroundAlpha);
         c.drawRect(mForegroundRect, mGradientPaint);
+    }
+
+    protected void drawBg(Canvas canvas) {
+        if (mBackgroundAlpha > 0.0f) {
+            Drawable bg = mBackgroundDrawable;
+
+            bg.setAlpha((int) (mBackgroundAlpha * mBackgroundAlphaMultiplier * 255));
+            bg.setBounds(mBackgroundRect);
+            bg.draw(canvas);
+        }
+    }
+
+    public float getBackgroundAlpha() {
+        return mBackgroundAlpha;
+    }
+
+    public void setBackgroundAlphaMultiplier(float multiplier) {
+        if (mBackgroundAlphaMultiplier != multiplier) {
+            mBackgroundAlphaMultiplier = multiplier;
+            invalidate();
+        }
+    }
+
+    public float getBackgroundAlphaMultiplier() {
+        return mBackgroundAlphaMultiplier;
+    }
+
+    public void setBackgroundAlpha(float alpha) {
+        if (mBackgroundAlpha != alpha) {
+            mBackgroundAlpha = alpha;
+            invalidate();
+        }
+    }
+
+    /**
+     * Depending on whether the security is up, the widget size needs to change
+     * 
+     * @param height The height of the widget, -1 for full height
+     */
+    public void setWidgetHeight(int height) {
+        boolean needLayout = false;
+        View widget = getContent();
+        if (widget != null) {
+            LayoutParams lp = (LayoutParams) widget.getLayoutParams();
+            if (lp.height != height) {
+                needLayout = true;
+                lp.height = height;
+            }
+        }
+        if (needLayout) {
+            requestLayout();
+        }
+    }
+
+    /**
+     * Set the top location of the challenge.
+     *
+     * @param top The top of the challenge, in _local_ coordinates, or -1 to indicate the challenge
+     *              is down.
+     */
+    public void setChallengeTop(int top) {
+        // The widget starts below the padding, and extends to the top of the challengs.
+        int widgetHeight = top - getPaddingTop();
+        setWidgetHeight(widgetHeight);
+    }
+
+    public void resetSize() {
+        setWidgetHeight(LayoutParams.MATCH_PARENT);
     }
 
     @Override
@@ -112,6 +221,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
                 mGradientColor, 0, Shader.TileMode.CLAMP);
         mRightToLeftGradient = new LinearGradient(x1, 0f, x0, 0f,
                 mGradientColor, 0, Shader.TileMode.CLAMP);
+        mBackgroundRect.set(0, 0, w, h);
     }
 
     void setOverScrollAmount(float r, boolean left) {

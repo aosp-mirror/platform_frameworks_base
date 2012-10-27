@@ -629,7 +629,9 @@ public class KeyguardViewMediator {
             mScreenOn = true;
             cancelDoKeyguardLaterLocked();
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            notifyScreenOnLocked(showListener);
+            if (showListener != null) {
+                notifyScreenOnLocked(showListener);
+            }
         }
         maybeSendUserPresentBroadcast();
     }
@@ -1321,7 +1323,9 @@ public class KeyguardViewMediator {
                         + " isSecure=" + isSecure() + " --> flags=0x" + Integer.toHexString(flags));
             }
 
-            mStatusBarManager.disable(flags);
+            if (!(mContext instanceof Activity)) {
+                mStatusBarManager.disable(flags);
+            }
         }
     }
 

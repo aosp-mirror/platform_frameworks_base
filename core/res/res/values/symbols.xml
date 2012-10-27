@@ -1223,6 +1223,7 @@
   <java-symbol type="drawable" name="magnified_region_frame" />
   <java-symbol type="drawable" name="menu_background" />
   <java-symbol type="drawable" name="stat_sys_secure" />
+  <java-symbol type="drawable" name="security_frame" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="alarm_status" />
   <java-symbol type="id" name="backspace" />
@@ -1307,6 +1308,9 @@
   <java-symbol type="id" name="clock_view" />
   <java-symbol type="id" name="keyguard_multi_user_selector" />
   <java-symbol type="id" name="status_security_message" />
+  <java-symbol type="id" name="sliding_layout" />
+  <java-symbol type="id" name="keyguard_add_widget" />
+  <java-symbol type="id" name="sliding_layout" />
 
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
