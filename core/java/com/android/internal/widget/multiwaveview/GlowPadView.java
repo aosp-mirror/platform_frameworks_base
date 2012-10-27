@@ -116,6 +116,8 @@ public class GlowPadView extends View {
 
     private float mOuterRadius = 0.0f;
     private float mSnapMargin = 0.0f;
+    private float mFirstItemOffset = 0.0f;
+    private boolean mMagneticTargets = false;
     private boolean mDragging;
     private int mNewTargetResources;
 
@@ -212,6 +214,9 @@ public class GlowPadView extends View {
         mInnerRadius = a.getDimension(R.styleable.GlowPadView_innerRadius, mInnerRadius);
         mOuterRadius = a.getDimension(R.styleable.GlowPadView_outerRadius, mOuterRadius);
         mSnapMargin = a.getDimension(R.styleable.GlowPadView_snapMargin, mSnapMargin);
+        mFirstItemOffset = (float) Math.toRadians(
+                a.getFloat(R.styleable.GlowPadView_firstItemOffset,
+                        (float) Math.toDegrees(mFirstItemOffset)));
         mVibrationDuration = a.getInt(R.styleable.GlowPadView_vibrationDuration,
                 mVibrationDuration);
         mFeedbackCount = a.getInt(R.styleable.GlowPadView_feedbackCount,
@@ -223,6 +228,7 @@ public class GlowPadView extends View {
                 getResourceId(a, R.styleable.GlowPadView_outerRingDrawable));
 
         mAlwaysTrackFinger = a.getBoolean(R.styleable.GlowPadView_alwaysTrackFinger, false);
+        mMagneticTargets = a.getBoolean(R.styleable.GlowPadView_magneticTargets, mMagneticTargets);
 
         int pointId = getResourceId(a, R.styleable.GlowPadView_pointDrawable);
         Drawable pointDrawable = pointId != 0 ? res.getDrawable(pointId) : null;
@@ -820,6 +826,7 @@ public class GlowPadView extends View {
         int ntargets = targets.size();
         float x = 0.0f;
         float y = 0.0f;
+        float activeAngle = 0.0f;
         int actionIndex = event.findPointerIndex(mPointerId);
 
         if (actionIndex == -1) {
@@ -852,15 +859,18 @@ public class GlowPadView extends View {
                 for (int i = 0; i < ntargets; i++) {
                     TargetDrawable target = targets.get(i);
 
-                    double targetMinRad = (i - 0.5) * 2 * Math.PI / ntargets;
-                    double targetMaxRad = (i + 0.5) * 2 * Math.PI / ntargets;
+                    double targetMinRad = mFirstItemOffset + (i - 0.5) * 2 * Math.PI / ntargets;
+                    double targetMaxRad = mFirstItemOffset + (i + 0.5) * 2 * Math.PI / ntargets;
                     if (target.isEnabled()) {
                         boolean angleMatches =
                             (angleRad > targetMinRad && angleRad <= targetMaxRad) ||
                             (angleRad + 2 * Math.PI > targetMinRad &&
-                             angleRad + 2 * Math.PI <= targetMaxRad);
+                             angleRad + 2 * Math.PI <= targetMaxRad) ||
+                            (angleRad - 2 * Math.PI > targetMinRad &&
+                             angleRad - 2 * Math.PI <= targetMaxRad);
                         if (angleMatches && (dist2(tx, ty) > snapDistance2)) {
                             activeTarget = i;
+                            activeAngle = (float) -angleRad;
                         }
                     }
                 }
@@ -888,12 +898,18 @@ public class GlowPadView extends View {
                 if (target.hasState(TargetDrawable.STATE_FOCUSED)) {
                     target.setState(TargetDrawable.STATE_INACTIVE);
                 }
+                if (mMagneticTargets) {
+                    updateTargetPosition(mActiveTarget, mWaveCenterX, mWaveCenterY);
+                }
             }
             // Focus the new target
             if (activeTarget != -1) {
                 TargetDrawable target = targets.get(activeTarget);
                 if (target.hasState(TargetDrawable.STATE_FOCUSED)) {
                     target.setState(TargetDrawable.STATE_FOCUSED);
+                }
+                if (mMagneticTargets) {
+                    updateTargetPosition(activeTarget, mWaveCenterX, mWaveCenterY, activeAngle);
                 }
                 if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                     String targetContentDescription = getTargetDescription(activeTarget);
@@ -1039,19 +1055,43 @@ public class GlowPadView extends View {
         if (DEBUG) dump();
     }
 
-    private void updateTargetPositions(float centerX, float centerY) {
-        // Reposition the target drawables if the view changed.
-        ArrayList<TargetDrawable> targets = mTargetDrawables;
-        final int size = targets.size();
-        final float alpha = (float) (-2.0f * Math.PI / size);
-        for (int i = 0; i < size; i++) {
+    private void updateTargetPosition(int i, float centerX, float centerY) {
+        final float angle = getAngle(getSliceAngle(), i);
+        updateTargetPosition(i, centerX, centerY, angle);
+    }
+
+    private void updateTargetPosition(int i, float centerX, float centerY, float angle) {
+        if (i >= 0) {
+            ArrayList<TargetDrawable> targets = mTargetDrawables;
             final TargetDrawable targetIcon = targets.get(i);
-            final float angle = alpha * i;
             targetIcon.setPositionX(centerX);
             targetIcon.setPositionY(centerY);
             targetIcon.setX(mOuterRadius * (float) Math.cos(angle));
             targetIcon.setY(mOuterRadius * (float) Math.sin(angle));
         }
+    }
+
+    private void updateTargetPositions(float centerX, float centerY) {
+        updateTargetPositions(centerX, centerY, false);
+    }
+
+    private void updateTargetPositions(float centerX, float centerY, boolean skipActive) {
+        final int size = mTargetDrawables.size();
+        final float alpha = getSliceAngle();
+        // Reposition the target drawables if the view changed.
+        for (int i = 0; i < size; i++) {
+            if (!skipActive || i != mActiveTarget) {
+                updateTargetPosition(i, centerX, centerY, getAngle(alpha, i));
+            }
+        }
+    }
+
+    private float getAngle(float alpha, int i) {
+        return mFirstItemOffset + alpha * i;
+    }
+
+    private float getSliceAngle() {
+        return (float) (-2.0f * Math.PI / mTargetDrawables.size());
     }
 
     private void updatePointCloudPosition(float centerX, float centerY) {
