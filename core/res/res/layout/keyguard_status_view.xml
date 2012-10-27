@@ -35,7 +35,7 @@
 
         <LinearLayout android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:layout_gravity="center_vertical"
+                      android:layout_gravity="center_horizontal|top"
                       android:orientation="vertical">
             <com.android.internal.policy.impl.keyguard.ClockView
                 android:id="@+id/clock_view"
