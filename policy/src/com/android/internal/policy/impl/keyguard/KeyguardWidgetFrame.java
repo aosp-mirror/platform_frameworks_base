@@ -51,6 +51,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private CheckLongPressHelper mLongPressHelper;
 
     private float mBackgroundAlpha;
+    private float mContentAlpha;
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
@@ -74,7 +75,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
         int padding = (int) (res.getDisplayMetrics().density * 8);
         setPadding(padding, padding, padding, padding);
 
-        mBackgroundDrawable = res.getDrawable(R.drawable.security_frame);
+        mBackgroundDrawable = res.getDrawable(R.drawable.kg_bouncer_bg_white);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
@@ -133,6 +134,23 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mLongPressHelper.cancelLongPress();
     }
 
+
+    private void drawGradientOverlay(Canvas c) {
+        mGradientPaint.setShader(mForegroundGradient);
+        mGradientPaint.setAlpha(mForegroundAlpha);
+        c.drawRect(mForegroundRect, mGradientPaint);
+    }
+
+    protected void drawBg(Canvas canvas) {
+        if (mBackgroundAlpha > 0.0f) {
+            Drawable bg = mBackgroundDrawable;
+
+            bg.setAlpha((int) (mBackgroundAlpha * mBackgroundAlphaMultiplier * 255));
+            bg.setBounds(mBackgroundRect);
+            bg.draw(canvas);
+        }
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         drawBg(canvas);
@@ -164,6 +182,14 @@ public class KeyguardWidgetFrame extends FrameLayout {
         }
     }
 
+    public void enableHardwareLayers() {
+        setLayerType(LAYER_TYPE_HARDWARE, null);
+    }
+
+    public void disableHardwareLayers() {
+        setLayerType(LAYER_TYPE_NONE, null);
+    }
+
     public View getContent() {
         return getChildAt(0);
     }
@@ -177,28 +203,12 @@ public class KeyguardWidgetFrame extends FrameLayout {
         }
     }
 
-    private void drawGradientOverlay(Canvas c) {
-        mGradientPaint.setShader(mForegroundGradient);
-        mGradientPaint.setAlpha(mForegroundAlpha);
-        c.drawRect(mForegroundRect, mGradientPaint);
-    }
-
-    protected void drawBg(Canvas canvas) {
-        if (mBackgroundAlpha > 0.0f) {
-            Drawable bg = mBackgroundDrawable;
-
-            bg.setAlpha((int) (mBackgroundAlpha * mBackgroundAlphaMultiplier * 255));
-            bg.setBounds(mBackgroundRect);
-            bg.draw(canvas);
-        }
-    }
-
     public float getBackgroundAlpha() {
         return mBackgroundAlpha;
     }
 
     public void setBackgroundAlphaMultiplier(float multiplier) {
-        if (mBackgroundAlphaMultiplier != multiplier) {
+        if (Float.compare(mBackgroundAlphaMultiplier, multiplier) != 0) {
             mBackgroundAlphaMultiplier = multiplier;
             invalidate();
         }
@@ -209,13 +219,18 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     public void setBackgroundAlpha(float alpha) {
-        if (mBackgroundAlpha != alpha) {
+        if (Float.compare(mBackgroundAlpha, alpha) != 0) {
             mBackgroundAlpha = alpha;
             invalidate();
         }
     }
 
+    public float getContentAlpha() {
+        return mContentAlpha;
+    }
+
     public void setContentAlpha(float alpha) {
+        mContentAlpha = alpha;
         View content = getContent();
         if (content != null) {
             content.setAlpha(alpha);
