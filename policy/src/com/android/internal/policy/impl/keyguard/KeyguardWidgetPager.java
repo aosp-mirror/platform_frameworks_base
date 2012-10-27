@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
@@ -29,7 +30,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.R;
 
-public class KeyguardWidgetPager extends PagedView {
+public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwitchListener {
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
     private static float CAMERA_DISTANCE = 10000;
     private static float TRANSITION_SCALE_FACTOR = 0.74f;
@@ -38,6 +39,12 @@ public class KeyguardWidgetPager extends PagedView {
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
     private AccelerateInterpolator mAlphaInterpolator = new AccelerateInterpolator(0.9f);
     private DecelerateInterpolator mLeftScreenAlphaInterpolator = new DecelerateInterpolator(4);
+
+    private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
+    private static final boolean CAFETERIA_TRAY = false;
+
+    private int mPage = 0;
+    private Callbacks mCallbacks;
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -52,8 +59,63 @@ public class KeyguardWidgetPager extends PagedView {
         if (getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+
+        setPageSwitchListener(this);
     }
 
+    @Override
+    public void onPageSwitch(View newPage, int newPageIndex) {
+        boolean showingStatusWidget = false;
+        if (newPage instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) newPage;
+            if (vg.getChildAt(0) instanceof KeyguardStatusView) {
+                showingStatusWidget = true;
+            }
+        }
+
+        // Disable the status bar clock if we're showing the default status widget
+        if (showingStatusWidget) {
+            setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_CLOCK);
+        } else {
+            setSystemUiVisibility(getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK);
+        }
+
+        // Extend the display timeout if the user switches pages
+        if (mPage != newPageIndex) {
+            mPage = newPageIndex;
+            if (mCallbacks != null) {
+                mCallbacks.onUserActivityTimeoutChanged();
+                mCallbacks.userActivity();
+            }
+        }
+    }
+
+    public void showPagingFeedback() {
+        // Nothing yet.
+    }
+    
+    public long getUserActivityTimeout() {
+        View page = getPageAt(mPage);
+        if (page instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) page;
+            View view = vg.getChildAt(0);
+            if (!(view instanceof KeyguardStatusView)
+                    && !(view instanceof KeyguardMultiUserSelectorView)) {
+                return CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT;
+            }
+        }
+        return -1;
+    }
+
+    public void setCallbacks(Callbacks callbacks) {
+        mCallbacks = callbacks;
+    }
+
+    public interface Callbacks {
+        public void userActivity();
+        public void onUserActivityTimeoutChanged();
+    }
+    
     /*
      * We wrap widgets in a special frame which handles drawing the overscroll foreground.
      */
@@ -71,9 +133,7 @@ public class KeyguardWidgetPager extends PagedView {
     }
 
     protected void onUnhandledTap(MotionEvent ev) {
-        if (getParent() instanceof KeyguardWidgetRegion) {
-            ((KeyguardWidgetRegion) getParent()).showPagingFeedback();
-        }
+        showPagingFeedback();
     }
 
     @Override
@@ -144,21 +204,24 @@ public class KeyguardWidgetPager extends PagedView {
             View v = getPageAt(i);
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenCenter, v, i);
-
-                float interpolatedProgress =
+                float interpolatedProgress = 
                         mZInterpolator.getInterpolation(Math.abs(Math.min(scrollProgress, 0)));
-                float scale = (1 - interpolatedProgress) +
-                        interpolatedProgress * TRANSITION_SCALE_FACTOR;
-                float translationX = Math.min(0, scrollProgress) * v.getMeasuredWidth();
+                float scale = 1.0f;
+                float translationX = 0;
+                float alpha = 1.0f;
 
-                float alpha;
-
-                if (scrollProgress < 0) {
-                    alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
-                        1 - Math.abs(scrollProgress)) : 1.0f;
-                } else {
-                    // On large screens we need to fade the page as it nears its leftmost position
-                    alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
+                if (CAFETERIA_TRAY) {
+                    scale = (1 - interpolatedProgress) +
+                            interpolatedProgress * TRANSITION_SCALE_FACTOR;
+                    translationX = Math.min(0, scrollProgress) * v.getMeasuredWidth();
+                    
+                    if (scrollProgress < 0) {
+                        alpha = scrollProgress < 0 ? mAlphaInterpolator.getInterpolation(
+                            1 - Math.abs(scrollProgress)) : 1.0f;
+                    } else {
+                        // On large screens we need to fade the page as it nears its leftmost position
+                        alpha = mLeftScreenAlphaInterpolator.getInterpolation(1 - scrollProgress);
+                    }
                 }
 
                 v.setCameraDistance(mDensity * CAMERA_DISTANCE);
