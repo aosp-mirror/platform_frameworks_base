@@ -78,7 +78,7 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
     // Whether to use the last line as a combined line to either display owner info / charging.
     // If false, each item will be given a dedicated space.
     private boolean mShareStatusRegion = false;
-    
+
     // last known battery level
     private int mBatteryLevel = 100;
 
@@ -121,9 +121,9 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
         Resources res = getContext().getResources();
-        mDateFormatString = 
+        mDateFormatString =
                 res.getText(com.android.internal.R.string.abbrev_wday_month_day_no_year);
-        mShareStatusRegion = res.getBoolean(R.bool.kg_share_status_area);
+        mShareStatusRegion = res.getBoolean(com.android.internal.R.bool.kg_share_status_area);
         mLockPatternUtils = new LockPatternUtils(view.getContext());
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(view.getContext());
 

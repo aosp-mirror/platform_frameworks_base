@@ -27,11 +27,11 @@ import android.media.IAudioService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
-import android.view.KeyEvent;
-import android.widget.LinearLayout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
+import android.view.KeyEvent;
+import android.widget.FrameLayout;
 
 /**
  * Base class for keyguard view.  {@link #reset} is where you should
@@ -42,7 +42,7 @@ import android.util.Slog;
  * Handles intercepting of media keys that still work when the keyguard is
  * showing.
  */
-public abstract class KeyguardViewBase extends LinearLayout {
+public abstract class KeyguardViewBase extends FrameLayout {
 
     private static final int BACKGROUND_COLOR = 0x70000000;
     private AudioManager mAudioManager;

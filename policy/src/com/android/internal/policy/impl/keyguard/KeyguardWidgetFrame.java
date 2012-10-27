@@ -19,7 +19,6 @@ package com.android.internal.policy.impl.keyguard;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -64,11 +63,14 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
+        
         Resources res = context.getResources();
+        /*
         int hPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_horizontal_padding);
         int topPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_top_padding);
         int bottomPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
         setPadding(hPadding, topPadding, hPadding, bottomPadding);
+        */
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
