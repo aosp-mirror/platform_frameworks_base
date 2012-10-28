@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"允许该应用测试将对以后的设备开放的 USB 存储设备权限。"</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允许该应用测试将对以后的设备开放的 SD 卡权限。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的 USB 存储设备中的内容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的 SD 卡中的内容"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
+    <string name="owner_name" msgid="2716755460376028154">"机主"</string>
 </resources>

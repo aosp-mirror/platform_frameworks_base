@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Inaruhusu programu kuandika maneno mapya katika kamusi ya mtumiaji."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"jaribu mfikio kwa hifadhi iliyolindwa"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"jaribu mfikio kwa hifadhi iliyolindwa"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Inaruhusu programu kujaribu idhini ya hifadhi ya USB itakayokuwa kwenye vifaa vya baadaye."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Inaruhusu programu kujaribu idhini ya kadi ya SD itakayokuwa kwenye vifaa vya baadaye."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"rekebisha au ufute maudhui ya hifadhi yako ya USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"rekebisha au ufute maudhui ya kadi yako ya SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ufikivu umeghairiwa."</string>
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
 </resources>

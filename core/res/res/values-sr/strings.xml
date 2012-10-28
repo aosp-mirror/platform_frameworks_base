@@ -306,7 +306,7 @@
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"слање емитовања примљених путем SMS порука"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Дозвољава апликацији да емитује обавештење да је SMS порука примљена. Злонамерне апликације на тај начин могу да фалсификују долазне SMS поруке."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"слање примљених PUSH емитовања преко WAP-а"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб странице уносом злонамерног садржаја."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб-странице уносом злонамерног садржаја."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничење броја покренутих процеса"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозвољава апликацији да управља максималним бројем процеса који ће моћи да се покрену. Никада није потребна уобичајеним апликацијама."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"принудно затварање позадинских апликација"</string>
@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозвољава апликацији да уписује нове речи у кориснички речник."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Дозвољава апликацији да тестира дозволу за USB меморију која ће бити доступна на будућим уређајима."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дозвољава апликацији да тестира дозволу за SD картицу која ће бити доступна на будућим уређајима."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измена или брисање садржаја USB меморије"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"мењање или брисање садржаја SD картице"</string>
@@ -1264,7 +1265,7 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Екстерни медиј непознатог статуса."</string>
     <string name="share" msgid="1778686618230011964">"Дели"</string>
     <string name="find" msgid="4808270900322985960">"Пронађи"</string>
-    <string name="websearch" msgid="4337157977400211589">"Веб претрага"</string>
+    <string name="websearch" msgid="4337157977400211589">"Веб-претрага"</string>
     <string name="find_next" msgid="5742124618942193978">"Пронађи следеће"</string>
     <string name="find_previous" msgid="2196723669388360506">"Пронађи претходно"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Захтев за локацију од корисника <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
 </resources>
