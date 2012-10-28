@@ -223,8 +223,8 @@ public class NativeDaemonEvent {
                 current++;  // skip the trailing quote
             }
             // unescape stuff within the word
-            word.replace("\\\\", "\\");
-            word.replace("\\\"", "\"");
+            word = word.replace("\\\\", "\\");
+            word = word.replace("\\\"", "\"");
 
             if (DEBUG_ROUTINE) Slog.e(LOGTAG, "found '" + word + "'");
             parsed.add(word);
