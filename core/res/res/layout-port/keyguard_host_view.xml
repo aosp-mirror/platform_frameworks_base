@@ -32,7 +32,6 @@
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        androidprv:dragHandle="@drawable/kg_security_grip"
         androidprv:dragIcon="@drawable/kg_security_lock">
 
         <FrameLayout
