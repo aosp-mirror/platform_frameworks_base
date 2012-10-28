@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Membenarkan apl menulis perkataan baharu ke dalam kamus pengguna."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Membenarkan apl menguji kebenaran untuk storan USB yang akan tersedia pada peranti akan datang."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Membenarkan apl menguji kebenaran untuk kad SD yang akan tersedia pada peranti akan datang."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah suai atau padam kandungan storan USB anda"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ubah suai atau padam kandungan kad SD anda"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Kebolehcapaian dibatalkan."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
 </resources>

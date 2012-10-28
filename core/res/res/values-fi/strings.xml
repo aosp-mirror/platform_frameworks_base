@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Antaa sovelluksen kirjoittaa uusia sanoja käyttäjän sanakirjaan."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"suojatun tallennustilan käyttöoikeuden testaus"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"suojatun tallennustilan käyttöoikeuden testaus"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Antaa sovelluksen testata muiden laitteiden käyttämän USB-tallennustilan käyttölupaa."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Antaa sovelluksen testata muiden laitteiden käyttämän SD-kortin käyttölupaa."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muokkaa tai poista USB:n sis."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"muokkaa tai poista SD-kortin sisältöä"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Esteettömyystila käytössä."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Esteettömyystila peruutettu."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nykyinen käyttäjä: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Omistaja"</string>
 </resources>

@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite aplicaţiei să scrie cuvinte noi în dicţionarul utilizatorului."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testează accesul la stocarea protejată"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testează accesul la stocarea protejată"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Permite aplic. să testeze o permis. pt. stoc. USB care va fi dispon. pe dispozit. viitoare."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite aplicaţiei să testeze o permisiune pentru cardul SD care va fi disponibil pe dispozitivele viitoare."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifică sau şterge conţinutul stocării USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifică sau şterge conţinutul cardului SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
 </resources>

@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lar appen skrive nye ord i brukerordlisten."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testadgang til beskyttet lagring"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testadgang til beskyttet lagring"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Lar appen teste en tillatelse for USB-lagring som kommer til å bli tilgjengelig på fremtidige enheter."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Lar appen teste en tillatelse for SD-kortet som kommer til å bli tilgjengelig på fremtidige enheter."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"endre eller slette innholdet i USB-lagringen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"endre eller slette innhold i SD-kortet"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgjengelighet er aktivert."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgjengelighetstjenesten ble avbrutt."</string>
     <string name="user_switched" msgid="3768006783166984410">"Gjeldende bruker: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Eier"</string>
 </resources>

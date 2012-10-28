@@ -969,7 +969,7 @@
     <skip />
     <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
     <skip />
     <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
     <skip />
@@ -2303,5 +2303,8 @@
     <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
     <!-- no translation found for user_switched (3768006783166984410) -->
+    <skip />
+    <!-- no translation found for owner_name (2716755460376028154) -->
+    <!-- no translation found for owner_name (3879126011135546571) -->
     <skip />
 </resources>
