@@ -140,6 +140,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             if (!challengeOverlapping) {
                 frame.resetSize();
             }
+            frame.onChallengeActive(mChallengeLayout.isChallengeShowing());
             frame.hideFrame(this);
 
             if (challengeOverlapping) {
@@ -174,6 +175,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             }
             // View is on the move.  Pause the security view until it completes.
             mKeyguardSecurityContainer.onPause();
+
+            frame.onChallengeActive(true);
         }
         mLastScrollState = scrollState;
     }

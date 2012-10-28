@@ -131,6 +131,15 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        KeyguardWidgetFrame currentWidgetPage = getWidgetPageAt(getCurrentPage());
+        if (currentWidgetPage != null && currentWidgetPage.onUserInteraction(ev.getAction())) {
+            return true;
+        }
+        return super.onTouchEvent(ev);
+    }
+
     public void showPagingFeedback() {
         // Nothing yet.
     }
