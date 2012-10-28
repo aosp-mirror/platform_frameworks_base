@@ -46,29 +46,25 @@ import android.util.Log;
  * The following wake lock levels are defined, with varying effects on system power.
  * <i>These levels are mutually exclusive - you may only specify one of them.</i>
  *
- * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
- *     <thead>
+ * <table>
  *     <tr><th>Flag Value</th> 
  *     <th>CPU</th> <th>Screen</th> <th>Keyboard</th></tr>
- *     </thead>
  *
- *     <tbody>
- *     <tr><th>{@link #PARTIAL_WAKE_LOCK}</th>
+ *     <tr><td>{@link #PARTIAL_WAKE_LOCK}</td>
  *         <td>On*</td> <td>Off</td> <td>Off</td> 
  *     </tr>
  *     
- *     <tr><th>{@link #SCREEN_DIM_WAKE_LOCK}</th>
+ *     <tr><td>{@link #SCREEN_DIM_WAKE_LOCK}</td>
  *         <td>On</td> <td>Dim</td> <td>Off</td> 
  *     </tr>
  *
- *     <tr><th>{@link #SCREEN_BRIGHT_WAKE_LOCK}</th>
+ *     <tr><td>{@link #SCREEN_BRIGHT_WAKE_LOCK}</td>
  *         <td>On</td> <td>Bright</td> <td>Off</td> 
  *     </tr>
  *     
- *     <tr><th>{@link #FULL_WAKE_LOCK}</th>
+ *     <tr><td>{@link #FULL_WAKE_LOCK}</td>
  *         <td>On</td> <td>Bright</td> <td>Bright</td> 
  *     </tr>
- *     </tbody>
  * </table>
  * </p><p>
  * *<i>If you hold a partial wake lock, the CPU will continue to run, regardless of any
@@ -77,15 +73,12 @@ import android.util.Log;
  * using the power button.</i>
  * </p><p>
  * In addition, you can add two more flags, which affect behavior of the screen only.
- * <i>These flags have no effect when combined with a {@link #PARTIAL_WAKE_LOCK}.</i>
+ * <i>These flags have no effect when combined with a {@link #PARTIAL_WAKE_LOCK}.</i></p>
  *
- * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
- *     <thead>
+ * <table>
  *     <tr><th>Flag Value</th> <th>Description</th></tr>
- *     </thead>
  *
- *     <tbody>
- *     <tr><th>{@link #ACQUIRE_CAUSES_WAKEUP}</th>
+ *     <tr><td>{@link #ACQUIRE_CAUSES_WAKEUP}</td>
  *         <td>Normal wake locks don't actually turn on the illumination.  Instead, they cause
  *         the illumination to remain on once it turns on (e.g. from user activity).  This flag
  *         will force the screen and/or keyboard to turn on immediately, when the WakeLock is
@@ -93,14 +86,13 @@ import android.util.Log;
  *         see immediately.</td> 
  *     </tr>
  *     
- *     <tr><th>{@link #ON_AFTER_RELEASE}</th>
+ *     <tr><td>{@link #ON_AFTER_RELEASE}</td>
  *         <td>If this flag is set, the user activity timer will be reset when the WakeLock is
  *         released, causing the illumination to remain on a bit longer.  This can be used to 
  *         reduce flicker if you are cycling between wake lock conditions.</td> 
  *     </tr>
- *     </tbody>
  * </table>
- * </p><p>
+ * <p>
  * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
  * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
  * </p>
