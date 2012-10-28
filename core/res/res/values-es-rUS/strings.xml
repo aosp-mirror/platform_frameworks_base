@@ -1421,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu tableta mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Dibujaste incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees tu dispositivo mediante el uso de una cuenta de correo."\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"¿Aumentar el volumen por encima del nivel seguro?"\n"Si escuchas con el volumen alto durante períodos prolongados, puedes dañar tu audición."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén presionado con dos dedos para activar la accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Se activó la accesibilidad."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Se canceló la accesibilidad."</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>

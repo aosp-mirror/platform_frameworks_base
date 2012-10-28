@@ -1421,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>

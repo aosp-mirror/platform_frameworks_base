@@ -1421,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>

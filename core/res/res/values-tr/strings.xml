@@ -1421,8 +1421,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra, tabletinizi bir e-posta hesabı kullanarak açmanız istenir."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu bir e-posta hesabı kullanarak açmanız istenir."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ses düzeyi güvenli seviyenin üzerine çıkarılsın mı?"\n"Yüksek sesle uzun süre dinlemek işitme yetinize zarar verebilir."</string>
-    <!-- no translation found for continue_to_enable_accessibility (1626427372316070258) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Erişilebilirliği etkinleştirmek için iki parmağınızı basılı tutmaya devam edin."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Erişilebilirlik etkinleştirildi."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erişilebilirlik iptal edildi."</string>
     <string name="user_switched" msgid="3768006783166984410">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
