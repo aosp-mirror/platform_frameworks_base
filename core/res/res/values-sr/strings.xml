@@ -306,7 +306,7 @@
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"слање емитовања примљених путем SMS порука"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Дозвољава апликацији да емитује обавештење да је SMS порука примљена. Злонамерне апликације на тај начин могу да фалсификују долазне SMS поруке."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"слање примљених PUSH емитовања преко WAP-а"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб странице уносом злонамерног садржаја."</string>
+    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозвољава апликацији да емитује обавештење да је примљена PUSH порука преко WAP-а. Злонамерне апликације то могу да искористе да фалсификују пријем MMS порука или да кришом замене садржај било које веб-странице уносом злонамерног садржаја."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничење броја покренутих процеса"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозвољава апликацији да управља максималним бројем процеса који ће моћи да се покрену. Никада није потребна уобичајеним апликацијама."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"принудно затварање позадинских апликација"</string>
@@ -1264,7 +1264,7 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Екстерни медиј непознатог статуса."</string>
     <string name="share" msgid="1778686618230011964">"Дели"</string>
     <string name="find" msgid="4808270900322985960">"Пронађи"</string>
-    <string name="websearch" msgid="4337157977400211589">"Веб претрага"</string>
+    <string name="websearch" msgid="4337157977400211589">"Веб-претрага"</string>
     <string name="find_next" msgid="5742124618942193978">"Пронађи следеће"</string>
     <string name="find_previous" msgid="2196723669388360506">"Пронађи претходно"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Захтев за локацију од корисника <xliff:g id="NAME">%s</xliff:g>"</string>
