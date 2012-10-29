@@ -207,9 +207,11 @@ class KeyguardMultiUserAvatar extends FrameLayout {
 
     @Override
     public void setPressed(boolean pressed) {
-        super.setPressed(pressed);
-        mFramed.setPressed(pressed);
-        mUserImage.invalidate();
+        if (!pressed || isClickable()) {
+            super.setPressed(pressed);
+            mFramed.setPressed(pressed);
+            mUserImage.invalidate();
+        }
     }
 
     public UserInfo getUserInfo() {
