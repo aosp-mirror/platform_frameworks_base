@@ -1383,10 +1383,6 @@
   <java-symbol type="string" name="keyguard_password_enter_pin_code" />
   <java-symbol type="string" name="keyguard_password_enter_puk_code" />
   <java-symbol type="string" name="keyguard_password_wrong_pin_code" />
-  <java-symbol type="string" name="kg_camera_widget_context_package" />
-  <java-symbol type="string" name="kg_camera_widget_layout_name" />
-  <java-symbol type="string" name="kg_camera_widget_layout_package" />
-  <java-symbol type="string" name="kg_camera_widget_not_found" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
   <java-symbol type="string" name="lockscreen_charged" />
   <java-symbol type="string" name="lockscreen_failed_attempts_almost_at_wipe" />
