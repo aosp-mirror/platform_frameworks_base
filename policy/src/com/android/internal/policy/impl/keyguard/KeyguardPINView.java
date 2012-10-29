@@ -87,6 +87,7 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    doHapticKeyClick();
                     verifyPasswordAndUnlock();
                 }
             });
