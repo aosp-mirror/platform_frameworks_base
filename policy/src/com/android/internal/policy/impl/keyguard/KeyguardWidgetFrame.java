@@ -265,4 +265,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
             invalidate();
         }
     }
+
+    public void onActive(boolean isActive) {
+        // hook for subclasses
+    }
 }

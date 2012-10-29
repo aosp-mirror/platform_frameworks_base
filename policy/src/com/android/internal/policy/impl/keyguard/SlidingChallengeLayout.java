@@ -42,6 +42,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
     private Drawable mHandleDrawable;
+    private boolean mShowHandle = true;
 
     // Initialized during measurement from child layoutparams
     private View mChallengeView;
@@ -556,7 +557,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public void draw(Canvas c) {
         super.draw(c);
-        if (mChallengeOffset < 1.f && mChallengeView != null && mHandleDrawable != null) {
+        if (mChallengeOffset < 1.f
+                && mChallengeView != null && mHandleDrawable != null && mShowHandle) {
             final int top = mChallengeView.getTop();
             mHandleDrawable.setBounds(0, top, getWidth(), top + mDragHandleSize);
             final float alpha = sHandleFadeInterpolator.getInterpolation(1 - mChallengeOffset);
@@ -659,6 +661,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public void showBouncer() {
         // TODO Block access to other views
         showChallenge(true);
+    }
+
+    public void showHandle(boolean show) {
+        mShowHandle = show;
+        invalidate();
     }
 
     @Override

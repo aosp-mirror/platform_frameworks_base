@@ -1088,7 +1088,6 @@
   <java-symbol type="layout" name="keyguard_multi_user_selector_widget" />
   <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
   <java-symbol type="layout" name="keyguard_add_widget" />
-  <java-symbol type="layout" name="keyguard_camera_widget" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -1192,6 +1191,7 @@
   <java-symbol type="bool" name="config_lidControlsSleep" />
   <java-symbol type="bool" name="config_reverseDefaultRotation" />
   <java-symbol type="bool" name="config_showNavigationBar" />
+  <java-symbol type="bool" name="kg_enable_camera_default_widget" />
   <java-symbol type="bool" name="kg_share_status_area" />
   <java-symbol type="bool" name="kg_sim_puk_account_full_screen" />
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
@@ -1381,6 +1381,10 @@
   <java-symbol type="string" name="keyguard_password_enter_pin_code" />
   <java-symbol type="string" name="keyguard_password_enter_puk_code" />
   <java-symbol type="string" name="keyguard_password_wrong_pin_code" />
+  <java-symbol type="string" name="kg_camera_widget_context_package" />
+  <java-symbol type="string" name="kg_camera_widget_layout_name" />
+  <java-symbol type="string" name="kg_camera_widget_layout_package" />
+  <java-symbol type="string" name="kg_camera_widget_not_found" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
   <java-symbol type="string" name="lockscreen_charged" />
   <java-symbol type="string" name="lockscreen_failed_attempts_almost_at_wipe" />
