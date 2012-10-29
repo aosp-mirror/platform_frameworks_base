@@ -17,37 +17,12 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewParent;
-
-import com.android.internal.widget.LockPatternUtils;
-import java.util.List;
-
-import android.app.admin.DevicePolicyManager;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-
-import com.android.internal.widget.PasswordEntryKeyboardView;
-
-import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
-import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import android.text.method.TextKeyListener;
-import android.text.style.TextAppearanceSpan;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.R;
