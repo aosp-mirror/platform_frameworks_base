@@ -5774,7 +5774,6 @@
         <!-- The padding for the scroll indicator area -->
         <attr name="scrollIndicatorPaddingLeft" format="dimension" />
         <attr name="scrollIndicatorPaddingRight" format="dimension" />
-        <attr name="edgeSwipeRegionSize" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="KeyguardGlowStripView">

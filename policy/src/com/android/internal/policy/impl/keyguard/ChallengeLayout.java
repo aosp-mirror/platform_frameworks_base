@@ -57,4 +57,36 @@ public interface ChallengeLayout {
      * potentially blocking access to other child views.
      */
     boolean isBouncing();
+
+    /**
+     * Set a listener that will respond to changes in bouncer state.
+     *
+     * @param listener listener to register
+     */
+    void setOnBouncerStateChangedListener(OnBouncerStateChangedListener listener);
+
+    /**
+     * Listener interface that reports changes in bouncer state.
+     * The bouncer is
+     */
+    public interface OnBouncerStateChangedListener {
+        /**
+         * Called when the bouncer state changes.
+         * The bouncer is activated when the user must pass a security challenge
+         * to proceed with the requested action.
+         *
+         * <p>This differs from simply showing or hiding the security challenge
+         * as the bouncer will prevent interaction with other elements of the UI.
+         * If the user attempts to escape from the bouncer, it will be dismissed,
+         * this method will be called with false as the parameter, and the action
+         * should be canceled. If the security component reports a successful
+         * authentication and the containing code calls hideBouncer() as a result,
+         * this method will also be called with a false parameter. It is up to the
+         * caller of hideBouncer to be ready for this.</p>
+         *
+         * @param bouncerActive true if the bouncer is now active,
+         *                      false if the bouncer was dismissed.
+         */
+        public void onBouncerStateChanged(boolean bouncerActive);
+    }
 }
