@@ -5784,12 +5784,31 @@
         <attr name="leftToRight" format="boolean" />
     </declare-styleable>
 
+    <!-- Some child types have special behavior. -->
+    <attr name="layout_childType">
+        <!-- No special behavior. Layout will proceed as normal. -->
+        <enum name="none" value="0" />
+        <!-- Widget container.
+             This will be resized in response to certain events. -->
+        <enum name="widget" value="1" />
+        <!-- Security challenge container.
+             This will be dismissed/shown in response to certain events,
+             possibly obscuring widget elements. -->
+        <enum name="challenge" value="2" />
+        <!-- User switcher.
+             This will consume space from the total layout area. -->
+        <enum name="userSwitcher" value="3" />
+        <!-- Scrim. This will block access to child views that
+             come before it in the child list in bouncer mode. -->
+        <enum name="scrim" value="4" />
+    </attr>
+
     <declare-styleable name="SlidingChallengeLayout">
         <attr name="dragHandle" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="SlidingChallengeLayout_Layout">
-        <attr name="layout_isChallenge" format="boolean" />
+        <attr name="layout_childType" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>
@@ -5808,21 +5827,7 @@
              If 0/default, the view will be measured by standard rules
              as if this were a FrameLayout. -->
         <attr name="layout_centerWithinArea" format="float" />
-        <!-- Some child types have special behavior. -->
-        <attr name="layout_childType">
-            <!-- No special behavior. Layout will proceed as normal. -->
-            <enum name="none" value="0" />
-            <!-- Widget container.
-                 This will be resized in response to certain events. -->
-            <enum name="widget" value="1" />
-            <!-- Security challenge container.
-                 This will be dismissed/shown in response to certain events,
-                 possibly obscuring widget elements. -->
-            <enum name="challenge" value="2" />
-            <!-- User switcher.
-                 This will consume space from the total layout area. -->
-            <enum name="userSwitcher" value="3" />
-        </attr>
+        <attr name="layout_childType" />
         <attr name="layout_gravity" />
         <attr name="layout_maxWidth" format="dimension" />
         <attr name="layout_maxHeight" />
