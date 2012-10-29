@@ -17,7 +17,5 @@
 */
 -->
 <resources>
-    <integer name="kg_carousel_angle">75</integer>
-    <integer name="kg_security_flip_duration">75</integer>
-    <integer name="kg_security_fade_duration">75</integer>
+    <integer name="kg_carousel_angle">60</integer>
 </resources>

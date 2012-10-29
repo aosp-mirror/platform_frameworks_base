@@ -696,22 +696,6 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void screenScrolled(int screenCenter) {
-        if (isScrollingIndicatorEnabled()) {
-            updateScrollingIndicator();
-        }
-        boolean isInOverscroll = mOverScrollX < 0 || mOverScrollX > mMaxScrollX;
-
-        if (mFadeInAdjacentScreens && !isInOverscroll) {
-            for (int i = 0; i < getChildCount(); i++) {
-                View child = getChildAt(i);
-                if (child != null && child != mDragView) {
-                    float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    float alpha = 1 - Math.abs(scrollProgress);
-                    child.setAlpha(alpha);
-                }
-            }
-            invalidate();
-        }
     }
 
     @Override
@@ -1164,6 +1148,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     }
 
+    protected float getMaxScrollProgress() {
+        return 1.0f;
+    }
+
     protected float getScrollProgress(int screenCenter, View v, int page) {
         final int halfScreenSize = getMinScaledMeasuredWidth() / 2;
 
@@ -1172,8 +1160,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 getRelativeChildOffset(page) + halfScreenSize);
 
         float scrollProgress = delta / (totalDistance * 1.0f);
-        scrollProgress = Math.min(scrollProgress, 1.0f);
-        scrollProgress = Math.max(scrollProgress, -1.0f);
+        scrollProgress = Math.min(scrollProgress, getMaxScrollProgress());
+        scrollProgress = Math.max(scrollProgress, - getMaxScrollProgress());
         return scrollProgress;
     }
 
