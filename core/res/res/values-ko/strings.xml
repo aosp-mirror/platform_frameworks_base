@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"앱이 사용자 사전에 새 단어를 입력할 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"앱이 미래의 기기에서 사용할 수 있는 USB 저장소의 권한을 테스트하도록 허용합니다."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"앱이 미래의 기기에서 사용할 수 있는 SD 카드의 권한을 테스트하도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
+    <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
 </resources>

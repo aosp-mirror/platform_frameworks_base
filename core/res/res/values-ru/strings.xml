@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Приложение сможет добавлять слова в пользовательский словарь."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"Проверка доступа к защищенному хранилищу"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"Проверка доступа к защищенному хранилищу"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Приложение сможет проверять разрешение для USB-накопителя, которое в дальнейшем будет предоставляться на других устройствах."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Приложение сможет проверять разрешение для SD-карты, которое в дальнейшем будет предоставляться на других устройствах."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Изменение/удаление данных на USB-накопителе"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Изменение или удаление содержимого SD-карты"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Специальные возможности включены."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Специальные возможности не будут включены."</string>
     <string name="user_switched" msgid="3768006783166984410">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Владелец"</string>
 </resources>
