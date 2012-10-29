@@ -21,14 +21,17 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ViewFlipper;
+
+import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so
  * we can emulate {@link WindowManager.LayoutParams#FLAG_SLIPPERY} within a view hierarchy.
  *
  */
-public class KeyguardSecurityViewFlipper extends ViewFlipper {
+public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
     private Rect mTempRect = new Rect();
 
     public KeyguardSecurityViewFlipper(Context context) {
@@ -55,4 +58,53 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
         return result;
     }
 
+    KeyguardSecurityView getSecurityView() {
+        View child = getChildAt(getDisplayedChild());
+        if (child instanceof KeyguardSecurityView) {
+            return (KeyguardSecurityView) child;
+        }
+        return null;
+    }
+
+    @Override
+    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+    }
+
+    @Override
+    public void setLockPatternUtils(LockPatternUtils utils) {
+    }
+
+    @Override
+    public void reset() {
+    }
+
+    @Override
+    public void onPause() {
+    }
+
+    @Override
+    public void onResume() {
+    }
+
+    @Override
+    public boolean needsInput() {
+        return false;
+    }
+
+    @Override
+    public KeyguardSecurityCallback getCallback() {
+        return null;
+    }
+
+    @Override
+    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
+    }
+
+    @Override
+    public void showUsabilityHint() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.showUsabilityHint();
+        }
+    }
 }
