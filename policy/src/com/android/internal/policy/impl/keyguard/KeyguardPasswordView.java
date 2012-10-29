@@ -233,5 +233,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         // input method subtype (The current IME should be LatinIME.)
                 || imm.getEnabledInputMethodSubtypeList(null, false).size() > 1;
     }
+
+    @Override
+    public void showUsabilityHint() {
+    }
 }
 

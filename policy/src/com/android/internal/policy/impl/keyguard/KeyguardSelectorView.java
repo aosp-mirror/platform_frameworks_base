@@ -183,7 +183,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         return mGlowPadView.getTargetPosition(resId) != -1;
     }
 
-    public void ping() {
+    @Override
+    public void showUsabilityHint() {
         mGlowPadView.ping();
     }
 

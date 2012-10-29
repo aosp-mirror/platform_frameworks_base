@@ -15,6 +15,8 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChallengeScrolledListener {
@@ -22,7 +24,11 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private KeyguardWidgetPager mPagedView;
     private int mCurrentPageIndex;
     private ChallengeLayout mChallengeLayout;
+    private Runnable mHideHintsRunnable;
+    private KeyguardSecurityView mKeyguardSecurityContainer;
     private int[] mTmpPoint = new int[2];
+    private static final int SCREEN_ON_HINT_DURATION = 1000;
+    Handler mMainQueue = new Handler(Looper.myLooper());
 
     int mChallengeTop = 0;
 
@@ -37,9 +43,17 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         mChallengeLayout = layout;
     }
 
+    public void setSecurityViewContainer(KeyguardSecurityView container) {
+        mKeyguardSecurityContainer = container;
+    }
+
     public void onPageBeginMoving() {
         if (mChallengeLayout.isChallengeShowing()) {
             mChallengeLayout.showChallenge(false);
+        }
+        if (mHideHintsRunnable != null) {
+            mMainQueue.removeCallbacks(mHideHintsRunnable);
+            mHideHintsRunnable = null;
         }
     }
 
@@ -121,6 +135,20 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             }
 
         }
+    }
+
+    public void showUsabilityHints() {
+        mKeyguardSecurityContainer.showUsabilityHint();
+        mPagedView.showInitialPageHints();
+        mHideHintsRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mPagedView.hideOutlinesAndSidePages();
+                mHideHintsRunnable = null;
+            }
+        };
+
+        mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
     }
 
     @Override

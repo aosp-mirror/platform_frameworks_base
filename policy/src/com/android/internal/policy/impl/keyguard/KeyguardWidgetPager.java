@@ -16,6 +16,7 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
@@ -51,6 +52,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private ObjectAnimator mChildrenOutlineFadeInAnimation;
     private ObjectAnimator mChildrenOutlineFadeOutAnimation;
     private float mChildrenOutlineAlpha = 0;
+    private float mSidePagesAlpha = 1f;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
     private static final boolean CAFETERIA_TRAY = false;
@@ -235,7 +237,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageBeginMoving();
         }
-        showOutlines();
+        showOutlinesAndSidePages();
     }
 
     @Override
@@ -249,7 +251,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageEndMoving();
         }
-        hideOutlines();
+        hideOutlinesAndSidePages();
     }
 
     /*
@@ -400,29 +402,50 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected void onStartReordering() {
         super.onStartReordering();
         setChildrenOutlineMultiplier(1.0f);
-        showOutlines();
+        showOutlinesAndSidePages();
     }
 
     @Override
     protected void onEndReordering() {
         super.onEndReordering();
-        hideOutlines();
+        hideOutlinesAndSidePages();
     }
 
-    void showOutlines() {
+    void showOutlinesAndSidePages() {
         if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
         if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
-        mChildrenOutlineFadeInAnimation = ObjectAnimator.ofFloat(this,
-                "childrenOutlineAlpha", 1.0f);
+
+        PropertyValuesHolder outlinesAlpha =
+                PropertyValuesHolder.ofFloat("childrenOutlineAlpha", 1.0f);
+        PropertyValuesHolder sidePagesAlpha = PropertyValuesHolder.ofFloat("sidePagesAlpha", 1.0f);
+        mChildrenOutlineFadeInAnimation =
+                ObjectAnimator.ofPropertyValuesHolder(this, outlinesAlpha, sidePagesAlpha);
+
         mChildrenOutlineFadeInAnimation.setDuration(CHILDREN_OUTLINE_FADE_IN_DURATION);
         mChildrenOutlineFadeInAnimation.start();
     }
 
-    void hideOutlines() {
+    public void showInitialPageHints() {
+        // We start with everything showing
+        setChildrenOutlineAlpha(1.0f);
+        setSidePagesAlpha(1.0f);
+        setChildrenOutlineMultiplier(1.0f);
+
+        int currPage = getCurrentPage();
+        KeyguardWidgetFrame frame = getWidgetPageAt(currPage);
+        frame.setBackgroundAlphaMultiplier(0f);
+    }
+
+    void hideOutlinesAndSidePages() {
         if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
         if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
-        mChildrenOutlineFadeOutAnimation = ObjectAnimator.ofFloat(this,
-                "childrenOutlineAlpha", 0.0f);
+
+        PropertyValuesHolder outlinesAlpha =
+                PropertyValuesHolder.ofFloat("childrenOutlineAlpha", 0f);
+        PropertyValuesHolder sidePagesAlpha = PropertyValuesHolder.ofFloat("sidePagesAlpha", 0f);
+        mChildrenOutlineFadeOutAnimation =
+                ObjectAnimator.ofPropertyValuesHolder(this, outlinesAlpha, sidePagesAlpha);
+
         mChildrenOutlineFadeOutAnimation.setDuration(CHILDREN_OUTLINE_FADE_OUT_DURATION);
         mChildrenOutlineFadeOutAnimation.setStartDelay(CHILDREN_OUTLINE_FADE_OUT_DELAY);
         mChildrenOutlineFadeOutAnimation.start();
@@ -435,11 +458,29 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    public void setSidePagesAlpha(float alpha) {
+        // This gives the current page, or the destination page if in transit.
+        int curPage = getNextPage();
+        mSidePagesAlpha = alpha;
+        for (int i = 0; i < getChildCount(); i++) {
+            if (curPage != i) {
+                getWidgetPageAt(i).setContentAlpha(alpha);
+            } else {
+                // We lock the current page alpha to 1.
+                getWidgetPageAt(i).setContentAlpha(1.0f);
+            }
+        }
+    }
+
     public void setChildrenOutlineMultiplier(float alpha) {
         mChildrenOutlineAlpha = alpha;
         for (int i = 0; i < getChildCount(); i++) {
             getWidgetPageAt(i).setBackgroundAlphaMultiplier(alpha);
         }
+    }
+
+    public float getSidePagesAlpha() {
+        return mSidePagesAlpha;
     }
 
     public float getChildrenOutlineAlpha() {

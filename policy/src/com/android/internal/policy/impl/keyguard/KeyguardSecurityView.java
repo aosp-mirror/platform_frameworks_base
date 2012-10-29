@@ -62,4 +62,6 @@ public interface KeyguardSecurityView {
     KeyguardSecurityCallback getCallback();
 
     void setSecurityMessageDisplay(SecurityMessageDisplay display);
+
+    void showUsabilityHint();
 }

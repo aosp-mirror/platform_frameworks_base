@@ -113,5 +113,9 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
 
         mPasswordEntry.requestFocus();
     }
+
+    @Override
+    public void showUsabilityHint() {
+    }
 }
 
