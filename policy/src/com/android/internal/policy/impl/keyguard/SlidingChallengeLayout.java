@@ -303,6 +303,10 @@ public class SlidingChallengeLayout extends ViewGroup {
 
         final int action = ev.getActionMasked();
         switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mLastTouchY = ev.getY();
+                break;
+
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 resetTouch();
@@ -314,7 +318,7 @@ public class SlidingChallengeLayout extends ViewGroup {
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
 
-                    if ((isInDragHandle(x, y) ||
+                    if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
                             (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING)) &&
                             mActivePointerId == INVALID_POINTER) {
                         mActivePointerId = ev.getPointerId(i);
@@ -377,7 +381,7 @@ public class SlidingChallengeLayout extends ViewGroup {
                         final float x = ev.getX(i);
                         final float y = ev.getY(i);
 
-                        if ((isInDragHandle(x, y) ||
+                        if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
                                 (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING))
                                 && mActivePointerId == INVALID_POINTER) {
                             mActivePointerId = ev.getPointerId(i);
@@ -400,7 +404,7 @@ public class SlidingChallengeLayout extends ViewGroup {
                         showChallenge(0);
                         return true;
                     }
-                    final float y = ev.getY(index);
+                    final float y = Math.max(ev.getY(index), getChallengeOpenedTop());
                     final float delta = y - mLastTouchY;
                     final int idelta = (int) delta;
                     // Don't lose the rounded component
@@ -425,6 +429,12 @@ public class SlidingChallengeLayout extends ViewGroup {
 
         return x >= 0 && y >= mChallengeView.getTop() && x < getWidth() &&
                 y < mChallengeView.getTop() + mDragHandleSize;
+    }
+
+    private boolean crossedDragHandle(float x, float y, float lastY) {
+        final int challengeTop = mChallengeView.getTop();
+        return x >= 0 && x < getWidth() && lastY < challengeTop &&
+                y > challengeTop + mDragHandleSize;
     }
 
     @Override
@@ -592,6 +602,16 @@ public class SlidingChallengeLayout extends ViewGroup {
         if (mChallengeView == null) return 0;
 
         return mChallengeView.getBottom();
+    }
+
+    private int getChallengeOpenedTop() {
+        final int paddedBottom = getHeight() - getPaddingBottom();
+        if (mChallengeView == null) return paddedBottom;
+
+        final int bottomMargin = ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
+        final int layoutBottom = paddedBottom - bottomMargin;
+
+        return layoutBottom - mChallengeView.getHeight();
     }
 
     private void moveChallengeBy(int delta) {
