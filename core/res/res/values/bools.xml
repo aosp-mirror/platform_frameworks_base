@@ -15,6 +15,7 @@
 -->
 
 <resources>
+    <bool name="kg_enable_camera_default_widget">true</bool>
     <bool name="action_bar_embed_tabs">true</bool>
     <bool name="action_bar_embed_tabs_pre_jb">false</bool>
     <bool name="split_action_bar_is_narrow">true</bool>

@@ -98,10 +98,19 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         // Extend the display timeout if the user switches pages
         if (mPage != newPageIndex) {
+            int oldPageIndex = mPage;
             mPage = newPageIndex;
             if (mCallbacks != null) {
                 mCallbacks.onUserActivityTimeoutChanged();
                 mCallbacks.userActivity();
+            }
+            KeyguardWidgetFrame oldWidgetPage = getWidgetPageAt(oldPageIndex);
+            if (oldWidgetPage != null) {
+                oldWidgetPage.onActive(false);
+            }
+            KeyguardWidgetFrame newWidgetPage = getWidgetPageAt(newPageIndex);
+            if (newWidgetPage != null) {
+                newWidgetPage.onActive(true);
             }
         }
         if (mViewStateManager != null) {
