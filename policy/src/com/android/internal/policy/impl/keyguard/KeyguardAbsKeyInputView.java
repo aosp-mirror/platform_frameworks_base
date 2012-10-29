@@ -58,7 +58,7 @@ import com.android.internal.R;
 public abstract class KeyguardAbsKeyInputView extends LinearLayout
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
     protected KeyguardSecurityCallback mCallback;
-    protected EditText mPasswordEntry;
+    protected TextView mPasswordEntry;
     protected LockPatternUtils mLockPatternUtils;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
 
@@ -112,7 +112,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
         mLockPatternUtils = new LockPatternUtils(mContext); // TODO: use common one
 
-        mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
+        mPasswordEntry = (TextView) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
         mPasswordEntry.addTextChangedListener(this);
 
