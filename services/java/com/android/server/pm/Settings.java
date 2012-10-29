@@ -196,7 +196,7 @@ final class Settings {
         final String name = pkg.packageName;
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
                 resourcePath, nativeLibraryPathString, pkg.mVersionCode, pkgFlags,
-                user, add);
+                user, add, true /* allowInstall */);
         return p;
     }
 
@@ -358,7 +358,7 @@ final class Settings {
     private PackageSetting getPackageLPw(String name, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String nativeLibraryPathString, int vc, int pkgFlags,
-            UserHandle installUser, boolean add) {
+            UserHandle installUser, boolean add, boolean allowInstall) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (!p.codePath.equals(codePath)) {
@@ -432,7 +432,7 @@ final class Settings {
                         Slog.i(PackageManagerService.TAG, "Stopping package " + name, e);
                     }
                     List<UserInfo> users = getAllUsers();
-                    if (users != null) {
+                    if (users != null && allowInstall) {
                         for (UserInfo user : users) {
                             // By default we consider this app to be installed
                             // for the user if no user has been specified (which
@@ -498,7 +498,7 @@ final class Settings {
                 addPackageSettingLPw(p, name, sharedUser);
             }
         } else {
-            if (installUser != null) {
+            if (installUser != null && allowInstall) {
                 // The caller has explicitly specified the user they want this
                 // package installed for, and the package already exists.
                 // Make sure it conforms to the new request.
@@ -1701,24 +1701,6 @@ final class Settings {
             Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
         }
 
-        if (mBackupStoppedPackagesFilename.exists()
-                || mStoppedPackagesFilename.exists()) {
-            // Read old file
-            readStoppedLPw();
-            mBackupStoppedPackagesFilename.delete();
-            mStoppedPackagesFilename.delete();
-            // Migrate to new file format
-            writePackageRestrictionsLPr(0);
-        } else {
-            if (users == null) {
-                readPackageRestrictionsLPr(0);
-            } else {
-                for (UserInfo user : users) {
-                    readPackageRestrictionsLPr(user.id);
-                }
-            }
-        }
-
         final int N = mPendingPackages.size();
         for (int i = 0; i < N; i++) {
             final PendingPackage pp = mPendingPackages.get(i);
@@ -1727,7 +1709,7 @@ final class Settings {
                 PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
                         (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
                         pp.nativeLibraryPathString, pp.versionCode, pp.pkgFlags,
-                        UserHandle.ALL, true);
+                        null, true /* add */, false /* allowInstall */);
                 if (p == null) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unable to create application package for " + pp.name);
@@ -1747,6 +1729,24 @@ final class Settings {
             }
         }
         mPendingPackages.clear();
+
+        if (mBackupStoppedPackagesFilename.exists()
+                || mStoppedPackagesFilename.exists()) {
+            // Read old file
+            readStoppedLPw();
+            mBackupStoppedPackagesFilename.delete();
+            mStoppedPackagesFilename.delete();
+            // Migrate to new file format
+            writePackageRestrictionsLPr(0);
+        } else {
+            if (users == null) {
+                readPackageRestrictionsLPr(0);
+            } else {
+                for (UserInfo user : users) {
+                    readPackageRestrictionsLPr(user.id);
+                }
+            }
+        }
 
         /*
          * Make sure all the updated system packages have their shared users
