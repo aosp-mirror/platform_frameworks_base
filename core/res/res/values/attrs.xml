@@ -5796,6 +5796,7 @@
 
     <declare-styleable name="SlidingChallengeLayout">
         <attr name="dragHandle" format="reference" />
+        <attr name="dragIcon" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="SlidingChallengeLayout_Layout">
