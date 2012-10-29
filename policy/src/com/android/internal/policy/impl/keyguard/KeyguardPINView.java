@@ -82,7 +82,7 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        final View ok = findViewById(R.id.keyOK);
+        final View ok = findViewById(R.id.key_enter);
         if (ok != null) {
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -99,7 +99,7 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
             pinDelete.setVisibility(View.VISIBLE);
             pinDelete.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    Editable str = mPasswordEntry.getText();
+                    CharSequence str = mPasswordEntry.getText();
                     if (str.length() > 0) {
                         mPasswordEntry.setText(str.subSequence(0, str.length()-1));
                     }
