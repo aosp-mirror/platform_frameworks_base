@@ -45,7 +45,7 @@
 
         <View android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_childType="scrim"
+              androidprv:layout_childType="scrim"
               android:background="#99000000" />
 
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
