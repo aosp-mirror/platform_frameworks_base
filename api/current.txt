@@ -20610,21 +20610,23 @@ package android.speech.tts {
   public class TextToSpeech.Engine {
     ctor public TextToSpeech.Engine();
     field public static final java.lang.String ACTION_CHECK_TTS_DATA = "android.speech.tts.engine.CHECK_TTS_DATA";
+    field public static final java.lang.String ACTION_GET_SAMPLE_TEXT = "android.speech.tts.engine.GET_SAMPLE_TEXT";
     field public static final java.lang.String ACTION_INSTALL_TTS_DATA = "android.speech.tts.engine.INSTALL_TTS_DATA";
     field public static final java.lang.String ACTION_TTS_DATA_INSTALLED = "android.speech.tts.engine.TTS_DATA_INSTALLED";
-    field public static final int CHECK_VOICE_DATA_BAD_DATA = -1; // 0xffffffff
+    field public static final deprecated int CHECK_VOICE_DATA_BAD_DATA = -1; // 0xffffffff
     field public static final int CHECK_VOICE_DATA_FAIL = 0; // 0x0
-    field public static final int CHECK_VOICE_DATA_MISSING_DATA = -2; // 0xfffffffe
-    field public static final int CHECK_VOICE_DATA_MISSING_VOLUME = -3; // 0xfffffffd
+    field public static final deprecated int CHECK_VOICE_DATA_MISSING_DATA = -2; // 0xfffffffe
+    field public static final deprecated int CHECK_VOICE_DATA_MISSING_VOLUME = -3; // 0xfffffffd
     field public static final int CHECK_VOICE_DATA_PASS = 1; // 0x1
     field public static final int DEFAULT_STREAM = 3; // 0x3
     field public static final java.lang.String EXTRA_AVAILABLE_VOICES = "availableVoices";
-    field public static final java.lang.String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
-    field public static final java.lang.String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
+    field public static final deprecated java.lang.String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
+    field public static final java.lang.String EXTRA_SAMPLE_TEXT = "sampleText";
+    field public static final deprecated java.lang.String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
     field public static final java.lang.String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
-    field public static final java.lang.String EXTRA_VOICE_DATA_FILES = "dataFiles";
-    field public static final java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
-    field public static final java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+    field public static final deprecated java.lang.String EXTRA_VOICE_DATA_FILES = "dataFiles";
+    field public static final deprecated java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+    field public static final deprecated java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
     field public static final java.lang.String INTENT_ACTION_TTS_SERVICE = "android.intent.action.TTS_SERVICE";
     field public static final java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
     field public static final java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
