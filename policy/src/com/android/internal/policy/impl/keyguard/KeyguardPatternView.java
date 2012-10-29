@@ -200,6 +200,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     }
 
+    @Override
+    public void showUsabilityHint() {
+    }
+
     /** TODO: hook this up */
     public void cleanUp() {
         if (DEBUG) Log.v(TAG, "Cleanup() called on " + this);

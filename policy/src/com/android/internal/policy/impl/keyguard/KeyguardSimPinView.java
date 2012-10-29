@@ -121,6 +121,10 @@ public class KeyguardSimPinView extends LinearLayout
         mPinEntry.requestFocus();
     }
 
+    @Override
+    public void showUsabilityHint() {
+    }
+
     /** {@inheritDoc} */
     public void cleanUp() {
         // dismiss the dialog.

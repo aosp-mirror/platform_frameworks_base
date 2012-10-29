@@ -52,7 +52,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private CheckLongPressHelper mLongPressHelper;
 
     private float mBackgroundAlpha;
-    private float mBackgroundAlphaMultiplier;
+    private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
 
@@ -204,6 +204,13 @@ public class KeyguardWidgetFrame extends FrameLayout {
         if (mBackgroundAlpha != alpha) {
             mBackgroundAlpha = alpha;
             invalidate();
+        }
+    }
+
+    public void setContentAlpha(float alpha) {
+        View content = getContent();
+        if (content != null) {
+            content.setAlpha(alpha);
         }
     }
 
