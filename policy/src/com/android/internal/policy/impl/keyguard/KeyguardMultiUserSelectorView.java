@@ -105,9 +105,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        Log.e(TAG, "touch");
         if(event.getActionMasked() != MotionEvent.ACTION_CANCEL && mCallback != null) {
-            Log.e(TAG, "userActivitytouch");
             mCallback.userActivity();
         }
         return false;
