@@ -110,6 +110,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             if (mCallbacks != null) {
                 mCallbacks.onUserActivityTimeoutChanged();
                 mCallbacks.userActivity();
+                mCallbacks.onPageSwitch(newPageIndex);
             }
             KeyguardWidgetFrame oldWidgetPage = getWidgetPageAt(oldPageIndex);
             if (oldWidgetPage != null) {
@@ -149,6 +150,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     public interface Callbacks {
         public void userActivity();
         public void onUserActivityTimeoutChanged();
+        public void onPageSwitch(int newPageIndex);
     }
 
     public void addWidget(View widget) {

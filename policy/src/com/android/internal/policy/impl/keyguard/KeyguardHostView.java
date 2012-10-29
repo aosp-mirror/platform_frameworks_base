@@ -249,6 +249,14 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mViewMediatorCallback.onUserActivityTimeoutChanged();
             }
         }
+
+        @Override
+        public void onPageSwitch(int newPageIndex) {
+            if (!isCameraOrAdd(newPageIndex)) {
+                if (DEBUG) Log.d(TAG, "Setting sticky widget index: " + newPageIndex);
+                mLockPatternUtils.setStickyWidgetIndex(newPageIndex);
+            }
+        }
     };
 
     @Override
@@ -712,7 +720,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onScreenTurnedOn() {
-        if (DEBUG) Log.d(TAG, "screen on");
+        if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
         showPrimarySecurityScreen(false);
         getSecurityView(mCurrentSecuritySelection).onResume();
 
@@ -728,7 +736,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, "screen off");
+        if (DEBUG) Log.d(TAG, "screen off, instance " + Integer.toHexString(hashCode()));
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
     }
@@ -849,6 +857,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
                     slider.showHandle(true);
+                    slider.showChallenge(true);
                 }
                 View v = mAppWidgetContainer.getChildAt(mAppWidgetContainer.getCurrentPage());
                 if (v instanceof CameraWidgetFrame) {
@@ -1060,39 +1069,64 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showAppropriateWidgetPage() {
-
-        // The following sets the priority for showing widgets. Transport should be shown if
-        // music is playing, followed by the multi-user widget if enabled, followed by the
-        // status widget.
-        final int pageToShow;
-        if (mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE) {
+        boolean music = mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
+        if (music) {
             mTransportState = TRANSPORT_VISIBLE;
-            pageToShow = mAppWidgetContainer.indexOfChild(mTransportControl);
-        } else {
-            UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            final View multiUserView = findViewById(R.id.keyguard_multi_user_selector);
-            final int multiUserPosition = mAppWidgetContainer.indexOfChild(multiUserView);
-            if (multiUserPosition != -1 && mUm.getUsers(true).size() > 1) {
-                pageToShow = multiUserPosition;
-            } else {
-                final View statusView = findViewById(R.id.keyguard_status_view);
-                int statusViewIndex = mAppWidgetContainer.indexOfChild(statusView);
-                if (statusViewIndex == -1) {
-                    // TEMP code for default page
-                    if (mAppWidgetContainer.getChildCount() > 2) {
-                        pageToShow = mAppWidgetContainer.getChildCount() - 2;
-                    } else {
-                        pageToShow = 0;
-                    }
-                } else {
-                    pageToShow = mAppWidgetContainer.indexOfChild(statusView);
-                }
-            }
-            if (mTransportState == TRANSPORT_VISIBLE) {
-                mTransportState = TRANSPORT_INVISIBLE;
-            }
+        } else if (mTransportState == TRANSPORT_VISIBLE) {
+            mTransportState = TRANSPORT_INVISIBLE;
         }
+        int pageToShow = getAppropriateWidgetPage();
         mAppWidgetContainer.setCurrentPage(pageToShow);
+    }
+
+    private boolean isCameraOrAdd(int pageIndex) {
+        View v = mAppWidgetContainer.getChildAt(pageIndex);
+        return v.getId() == R.id.keyguard_add_widget || v instanceof CameraWidgetFrame;
+    }
+
+    private int getAppropriateWidgetPage() {
+        // assumes at least one widget (besides camera + add)
+
+        boolean music = mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
+        // if music playing, show transport
+        if (music) {
+            if (DEBUG) Log.d(TAG, "Music playing, show transport");
+            return mAppWidgetContainer.indexOfChild(mTransportControl);
+        }
+
+        // if multi-user applicable, show it
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        View multiUserView = findViewById(R.id.keyguard_multi_user_selector);
+        int multiUserPosition = mAppWidgetContainer.indexOfChild(multiUserView);
+        if (multiUserPosition != -1 && userManager.getUsers(true).size() > 1) {
+            if (DEBUG) Log.d(TAG, "Multi-user applicable, show it");
+            return multiUserPosition;
+        }
+
+        // if we have a sticky widget, show it
+        int stickyWidgetIndex = mLockPatternUtils.getStickyWidgetIndex();
+        if (stickyWidgetIndex > -1
+                && stickyWidgetIndex < mAppWidgetContainer.getChildCount()
+                && !isCameraOrAdd(stickyWidgetIndex)) {
+            if (DEBUG) Log.d(TAG, "Sticky widget found, show it");
+            return stickyWidgetIndex;
+        }
+
+        // if we have a status view, show it
+        View statusView = findViewById(R.id.keyguard_status_view);
+        int statusViewIndex = mAppWidgetContainer.indexOfChild(statusView);
+        if (statusViewIndex > -1) {
+            if (DEBUG) Log.d(TAG, "Status widget found, show it");
+            return mAppWidgetContainer.indexOfChild(statusView);
+        }
+
+        // else the right-most (except for camera)
+        int rightMost = mAppWidgetContainer.getChildCount() - 1;
+        if (mAppWidgetContainer.getChildAt(rightMost) instanceof CameraWidgetFrame) {
+            rightMost--;
+        }
+        if (DEBUG) Log.d(TAG, "Show right-most");
+        return rightMost;
     }
 
     private void enableUserSelectorIfNecessary() {
