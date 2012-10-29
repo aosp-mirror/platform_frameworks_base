@@ -39,6 +39,9 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     private View mFaceUnlockAreaView;
     private ImageButton mCancelButton;
 
+    private boolean mIsShowing = false;
+    private final Object mIsShowingLock = new Object();
+
     public KeyguardFaceUnlockView(Context context) {
         this(context, null);
     }
@@ -112,6 +115,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     }
 
     private void initializeBiometricUnlockView() {
+        if (DEBUG) Log.d(TAG, "initializeBiometricUnlockView()");
         mFaceUnlockAreaView = findViewById(R.id.face_unlock_area_view);
         if (mFaceUnlockAreaView != null) {
             mBiometricUnlock = new FaceUnlock(mContext);
@@ -129,9 +133,9 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     }
 
     /**
-     * Starts the biometric unlock if it should be started based on a number of factors including
-     * the mSuppressBiometricUnlock flag.  If it should not be started, it hides the biometric
-     * unlock area.
+     * Starts the biometric unlock if it should be started based on a number of factors.  If it
+     * should not be started, it either goes to the back up, or remains showing to prepare for
+     * it being started later.
      */
     private void maybeStartBiometricUnlock() {
         if (DEBUG) Log.d(TAG, "maybeStartBiometricUnlock()");
@@ -142,12 +146,25 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
                     LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
             PowerManager powerManager = (PowerManager) mContext.getSystemService(
                     Context.POWER_SERVICE);
+
+            boolean isShowing;
+            synchronized(mIsShowingLock) {
+                isShowing = mIsShowing;
+            }
+
+            // Don't start it if the screen is off or if it's not showing, but keep this view up
+            // because we want it here and ready for when the screen turns on or when it does start
+            // showing.
+            if (!powerManager.isScreenOn() || !isShowing) {
+                mBiometricUnlock.stop(); // It shouldn't be running but calling this can't hurt.
+                return;
+            }
+
             // TODO: Some of these conditions are handled in KeyguardSecurityModel and may not be
             // necessary here.
             if (monitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
                     && !monitor.getMaxBiometricUnlockAttemptsReached()
-                    && !backupIsTimedOut
-                    && powerManager.isScreenOn()) {
+                    && !backupIsTimedOut) {
                 mBiometricUnlock.start();
             } else {
                 mBiometricUnlock.stopAndShowBackup();
@@ -161,7 +178,9 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         public void onPhoneStateChanged(int phoneState) {
             if (DEBUG) Log.d(TAG, "onPhoneStateChanged(" + phoneState + ")");
             if (phoneState == TelephonyManager.CALL_STATE_RINGING) {
-                mBiometricUnlock.stopAndShowBackup();
+                if (mBiometricUnlock != null) {
+                    mBiometricUnlock.stopAndShowBackup();
+                }
             }
         }
 
@@ -174,10 +193,29 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             // No longer required; static value set by KeyguardViewMediator
             // mLockPatternUtils.setCurrentUser(userId);
         }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
+            boolean wasShowing = false;
+            synchronized(mIsShowingLock) {
+                wasShowing = mIsShowing;
+                mIsShowing = showing;
+            }
+            PowerManager powerManager = (PowerManager) mContext.getSystemService(
+                    Context.POWER_SERVICE);
+            if (mBiometricUnlock != null) {
+                if (!showing && wasShowing) {
+                    mBiometricUnlock.stop();
+                } else if (showing && powerManager.isScreenOn() && !wasShowing) {
+                    maybeStartBiometricUnlock();
+                }
+            }
+        }
     };
 
     @Override
     public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;    
+        mSecurityMessageDisplay = display;
     }
 }
