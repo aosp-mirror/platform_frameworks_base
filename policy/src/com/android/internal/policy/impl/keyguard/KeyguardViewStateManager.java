@@ -17,6 +17,7 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
 public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChallengeScrolledListener {
@@ -134,6 +135,14 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
                 mPagedView.setOnlyAllowEdgeSwipes(false);
             }
 
+            if (mChallengeLayout.isChallengeShowing()) {
+                mKeyguardSecurityContainer.onResume();
+            } else {
+                mKeyguardSecurityContainer.onPause();
+            }
+        } else {
+            // View is on the move.  Pause the security view until it completes.
+            mKeyguardSecurityContainer.onPause();
         }
     }
 
