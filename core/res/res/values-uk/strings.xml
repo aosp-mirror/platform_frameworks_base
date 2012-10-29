@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозволяє програмі писати нові слова в словник користувача."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"тестувати доступ до захищеної пам’яті"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"тестувати доступ до захищеної пам’яті"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Дозволяє програмі тестувати дозвіл для носія USB, який буде доступний на майбутніх пристроях."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дозволяє програмі тестувати дозвіл для карти SD, яка буде доступна на майбутніх пристроях."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"змінювати чи видаляти вміст USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"змінювати чи видаляти вміст на карті SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Доступність увімкнено."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Доступність скасовано."</string>
     <string name="user_switched" msgid="3768006783166984410">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
 </resources>

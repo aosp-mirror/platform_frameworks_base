@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Επιτρέπει στην εφαρμογή την εγγραφή νέων λέξεων στο λεξικό χρήστη."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"δοκιμή πρόσβασης σε προστατευμένο χώρο αποθήκευσης"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"δοκιμή πρόσβασης σε προστατευμένο χώρο αποθήκευσης"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Επιτρέπει στην εφαρμογή τη δοκιμή μια άδειας για το χώρο αποθήκευσης USB που θα διατίθεται σε μελλοντικές συσκευές."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Επιτρέπει στην εφαρμογή τη δοκιμή μια άδειας για την κάρτα SD που θα διατίθεται σε μελλοντικές συσκευές."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"τροπ. ή διαγρ. περιεχ. αποθ. χώρ. USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"τροποποίηση ή διαγραφή των περιεχομένων της κάρτας SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ενεργοποιήθηκε η προσβασιμότητα."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Κάτοχος"</string>
 </resources>

@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Laat die program toe om \'n toestemming vir USB-storing wat op toekomstige toestelle beskikbaar sal wees, te toets."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Laat die program toe om \'n toestemming vir die SD-kaart wat op toekomstige toestelle beskikbaar sal wees, te toets."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Verander of vee die inhoud van jou SD-kaart uit"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g> ."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Eienaar"</string>
 </resources>

@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्लिकेशन को उपयोगकर्ता डिक्शनरी में नए शब्द लिखने देता है."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"एप्लि. को USB संग्रहण अनुमति जांचने देता है जो भावी उपकरणों में उपलब्‍ध होगा."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"एप्लिकेशन को SD कार्ड के लिए किसी अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री बदलें या हटाएं"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री बदलें या हटाएं"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
 </resources>
