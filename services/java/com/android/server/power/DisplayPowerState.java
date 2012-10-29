@@ -302,8 +302,8 @@ final class DisplayPowerState {
         public void run() {
             mScreenUpdatePending = false;
 
-            if (mPhotonicModulator.setState(mScreenOn,
-                    mScreenOn ? (int)(mScreenBrightness * mElectronBeamLevel) : 0)) {
+            int brightness = mScreenOn && mElectronBeamLevel > 0f ? mScreenBrightness : 0;
+            if (mPhotonicModulator.setState(mScreenOn, brightness)) {
                 mScreenReady = true;
                 invokeCleanListenerIfNeeded();
             }
