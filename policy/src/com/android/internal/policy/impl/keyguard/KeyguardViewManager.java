@@ -48,7 +48,7 @@ import com.android.internal.widget.LockPatternUtils;
  * reported to this class by the current {@link KeyguardViewBase}.
  */
 public class KeyguardViewManager {
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = KeyguardViewMediator.DEBUG;
     private static String TAG = "KeyguardViewManager";
     public static boolean USE_UPPER_CASE = true;
 
@@ -65,7 +65,6 @@ public class KeyguardViewManager {
     private FrameLayout mKeyguardHost;
     private KeyguardHostView mKeyguardView;
 
-    private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
 
     public interface ShowListener {
@@ -96,7 +95,7 @@ public class KeyguardViewManager {
 
         boolean enableScreenRotation = shouldEnableScreenRotation();
 
-        maybeCreateKeyguardLocked(enableScreenRotation, options);
+        maybeCreateKeyguardLocked(enableScreenRotation, false, options);
         maybeEnableScreenRotation(enableScreenRotation);
 
         // Disable common aspects of the system/status/navigation bars that are not appropriate or
@@ -104,7 +103,7 @@ public class KeyguardViewManager {
         // activities. Other disabled bits are handled by the KeyguardViewMediator talking
         // directly to the status bar service.
         final int visFlags = View.STATUS_BAR_DISABLE_HOME;
-        if (DEBUG) Log.v(TAG, "KGVM: Set visibility on " + mKeyguardHost + " to " + visFlags);
+        if (DEBUG) Log.v(TAG, "show:setSystemUiVisibility(" + Integer.toHexString(visFlags)+")");
         mKeyguardHost.setSystemUiVisibility(visFlags);
 
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
@@ -127,7 +126,12 @@ public class KeyguardViewManager {
         @Override
         protected void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
-            maybeCreateKeyguardLocked(shouldEnableScreenRotation(), null);
+            if (mKeyguardHost.getVisibility() == View.VISIBLE) {
+                // only propagate configuration messages if we're currently showing
+                maybeCreateKeyguardLocked(shouldEnableScreenRotation(), true, null);
+            } else {
+                if (DEBUG) Log.v(TAG, "onConfigurationChanged: view not visible");
+            }
         }
 
         @Override
@@ -145,7 +149,8 @@ public class KeyguardViewManager {
 
     SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
 
-    private void maybeCreateKeyguardLocked(boolean enableScreenRotation, Bundle options) {
+    private void maybeCreateKeyguardLocked(boolean enableScreenRotation, boolean force,
+            Bundle options) {
         final boolean isActivity = (mContext instanceof Activity); // for test activity
 
         if (mKeyguardHost != null) {
@@ -189,7 +194,9 @@ public class KeyguardViewManager {
             mViewManager.addView(mKeyguardHost, lp);
         }
 
-        inflateKeyguardView(options);
+        if (force || mKeyguardView == null) {
+            inflateKeyguardView(options);
+        }
         updateUserActivityTimeoutInWindowLayoutParams();
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
 
@@ -229,10 +236,6 @@ public class KeyguardViewManager {
             if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE)) {
                 mKeyguardView.showNextSecurityScreenIfPresent();
             }
-        }
-
-        if (mScreenOn) {
-            mKeyguardView.show();
         }
     }
 
@@ -294,12 +297,11 @@ public class KeyguardViewManager {
         if (DEBUG) Log.d(TAG, "reset()");
         // User might have switched, check if we need to go back to keyguard
         // TODO: It's preferable to stay and show the correct lockscreen or unlock if none
-        maybeCreateKeyguardLocked(shouldEnableScreenRotation(), options);
+        maybeCreateKeyguardLocked(shouldEnableScreenRotation(), true, options);
     }
 
     public synchronized void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOff()");
-        mScreenOn = false;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOff();
         }
@@ -308,7 +310,6 @@ public class KeyguardViewManager {
     public synchronized void onScreenTurnedOn(
             final KeyguardViewManager.ShowListener showListener) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
-        mScreenOn = true;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
 

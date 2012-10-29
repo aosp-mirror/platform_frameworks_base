@@ -61,7 +61,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardViewHost";
 
     // Use this to debug all of keyguard
-    public static boolean DEBUG;
+    public static boolean DEBUG = KeyguardViewMediator.DEBUG;
 
     // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
@@ -618,8 +618,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 break;
             }
         }
-        boolean simPukFullScreen = getResources().getBoolean(
-                com.android.internal.R.bool.kg_sim_puk_account_full_screen);
         int layoutId = getLayoutIdFor(securityMode);
         if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -639,13 +637,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 if (mKeyguardStatusViewManager != null) {
                     view.setSecurityMessageDisplay(mKeyguardStatusViewManager);
                 }
-            }
-        }
-
-        if (securityMode == SecurityMode.SimPin || securityMode == SecurityMode.SimPuk ||
-            securityMode == SecurityMode.Account) {
-            if (simPukFullScreen) {
-                mAppWidgetContainer.setVisibility(View.GONE);
             }
         }
 
@@ -671,6 +662,15 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         KeyguardSecurityView oldView = getSecurityView(mCurrentSecuritySelection);
         KeyguardSecurityView newView = getSecurityView(securityMode);
+
+        // Enter full screen mode if we're in SIM or Account screen
+        boolean fullScreenEnabled = getResources().getBoolean(
+                com.android.internal.R.bool.kg_sim_puk_account_full_screen);
+        boolean isSimOrAccount = securityMode == SecurityMode.SimPin
+                || securityMode == SecurityMode.SimPuk
+                || securityMode == SecurityMode.Account;
+        mAppWidgetContainer.setVisibility(
+                isSimOrAccount && fullScreenEnabled ? View.GONE : View.VISIBLE);
 
         // Emulate Activity life cycle
         if (oldView != null) {
