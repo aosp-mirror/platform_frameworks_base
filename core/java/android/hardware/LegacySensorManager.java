@@ -371,7 +371,7 @@ final class LegacySensorManager {
         private static final float PREDICTION_RATIO = 1.0f/3.0f;
         private static final float PREDICTION_TIME = (SENSORS_RATE_MS*COUNT/1000.0f)*PREDICTION_RATIO;
         private float mV[] = new float[COUNT*2];
-        private float mT[] = new float[COUNT*2];
+        private long mT[] = new long[COUNT*2];
         private int mIndex;
 
         public LmsFilter() {
@@ -381,7 +381,6 @@ final class LegacySensorManager {
         public float filter(long time, float in) {
             float v = in;
             final float ns = 1.0f / 1000000000.0f;
-            final float t = time*ns;
             float v1 = mV[mIndex];
             if ((v-v1) > 180) {
                 v -= 360;
@@ -396,9 +395,9 @@ final class LegacySensorManager {
             if (mIndex >= COUNT*2)
                 mIndex = COUNT;
             mV[mIndex] = v;
-            mT[mIndex] = t;
+            mT[mIndex] = time;
             mV[mIndex-COUNT] = v;
-            mT[mIndex-COUNT] = t;
+            mT[mIndex-COUNT] = time;
 
             float A, B, C, D, E;
             float a, b;
@@ -408,8 +407,8 @@ final class LegacySensorManager {
             for (i=0 ; i<COUNT-1 ; i++) {
                 final int j = mIndex - 1 - i;
                 final float Z = mV[j];
-                final float T = 0.5f*(mT[j] + mT[j+1]) - t;
-                float dT = mT[j] - mT[j+1];
+                final float T = (mT[j]/2 + mT[j+1]/2 - time)*ns;
+                float dT = (mT[j] - mT[j+1])*ns;
                 dT *= dT;
                 A += Z*dT;
                 B += T*(T*dT);
