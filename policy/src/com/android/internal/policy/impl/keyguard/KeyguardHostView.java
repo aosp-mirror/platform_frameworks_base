@@ -850,7 +850,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 if (slider != null) {
                     slider.showHandle(true);
                 }
-                mAppWidgetContainer.scrollLeft();
+                View v = mAppWidgetContainer.getChildAt(mAppWidgetContainer.getCurrentPage());
+                if (v instanceof CameraWidgetFrame) {
+                    mAppWidgetContainer.scrollLeft();
+                }
             }
 
             private SlidingChallengeLayout locateSlider() {

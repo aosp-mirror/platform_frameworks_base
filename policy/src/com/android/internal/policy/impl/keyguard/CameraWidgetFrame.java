@@ -31,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
-import com.android.internal.R;
 
 public class CameraWidgetFrame extends KeyguardWidgetFrame {
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
@@ -49,10 +48,12 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
 
     private View mWidgetView;
     private long mLaunchCameraStart;
+    private boolean mRendered;
 
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
         public void run() {
+            mLaunchCameraStart = SystemClock.uptimeMillis();
             mActivityLauncher.launchCamera();
         }};
 
@@ -85,7 +86,9 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
             return null;
 
         ImageView preview = new ImageView(context);
-        preview.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        preview.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
         preview.setScaleType(ScaleType.FIT_CENTER);
         CameraWidgetFrame cameraWidgetFrame = new CameraWidgetFrame(context, callbacks, launcher);
         cameraWidgetFrame.addView(preview);
@@ -123,15 +126,31 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
     }
 
     public void render() {
-        int width = getRootView().getWidth();
-        int height = getRootView().getHeight();
-        if (DEBUG) Log.d(TAG, String.format("render [%sx%s]", width, height));
-        Bitmap offscreen = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(offscreen);
-        mWidgetView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        mWidgetView.layout(0, 0, width, height);
-        mWidgetView.draw(c);
-        ((ImageView)getChildAt(0)).setImageBitmap(offscreen);
+        if (mRendered) return;
+
+        try {
+            int width = getRootView().getWidth();
+            int height = getRootView().getHeight();
+            if (DEBUG) Log.d(TAG, String.format("render [%sx%s] %s",
+                    width, height, Integer.toHexString(hashCode())));
+            if (width == 0 || height == 0) {
+                return;
+            }
+            Bitmap offscreen = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(offscreen);
+            mWidgetView.measure(
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            mWidgetView.layout(0, 0, width, height);
+            mWidgetView.draw(c);
+            ((ImageView)getChildAt(0)).setImageBitmap(offscreen);
+            mRendered = true;
+        } catch (Throwable t) {
+            Log.w(TAG, "Error rendering camera widget", t);
+            removeAllViews();
+            View genericView = inflateGenericWidgetView(mContext);
+            addView(genericView);
+        }
     }
 
     private void transitionToCamera() {
@@ -161,10 +180,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
         if (!hasWindowFocus) {
             if (mLaunchCameraStart > 0) {
                 long launchTime = SystemClock.uptimeMillis() - mLaunchCameraStart;
-                if (DEBUG) Log.d(TAG, String.format("Camera took %s to launch", launchTime));
+                if (DEBUG) Log.d(TAG, String.format("Camera took %sms to launch", launchTime));
                 mLaunchCameraStart = 0;
+                onCameraLaunched();
             }
-            onCameraLaunched();
         }
     }
 
