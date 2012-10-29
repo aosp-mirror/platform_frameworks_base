@@ -41,6 +41,13 @@
                  androidprv:layout_maxWidth="480dp"
                  androidprv:layout_maxHeight="480dp" />
 
+        <include layout="@layout/keyguard_multi_user_selector"/>
+
+        <View android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_childType="scrim"
+              android:background="#99000000" />
+
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
@@ -60,8 +67,6 @@
                 android:gravity="center">
             </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
         </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>
-
-        <include layout="@layout/keyguard_multi_user_selector"/>
 
     </com.android.internal.policy.impl.keyguard.MultiPaneChallengeLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardHostView>

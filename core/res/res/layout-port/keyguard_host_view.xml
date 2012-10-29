@@ -43,11 +43,16 @@
                      android:layout_gravity="center"/>
         </FrameLayout>
 
+        <View android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              androidprv:layout_childType="scrim"
+              android:background="#99000000" />
+
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            androidprv:layout_isChallenge="true"
+            androidprv:layout_childType="challenge"
             android:gravity="bottom|center_horizontal"
             android:background="@drawable/security_frame">
             <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper

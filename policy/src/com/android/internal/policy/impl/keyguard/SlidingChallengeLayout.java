@@ -46,10 +46,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     // Initialized during measurement from child layoutparams
     private View mChallengeView;
+    private View mScrimView;
 
     // Range: 0 (fully hidden) to 1 (fully visible)
     private float mChallengeOffset = 1.f;
     private boolean mChallengeShowing = true;
+    private boolean mIsBouncing = false;
 
     private final Scroller mScroller;
     private int mScrollState;
@@ -97,6 +99,13 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private final Runnable mEndScrollRunnable = new Runnable () {
         public void run() {
             completeChallengeScroll();
+        }
+    };
+
+    private final OnClickListener mScrimClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            hideBouncer();
         }
     };
 
@@ -232,6 +241,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         setScrollState(SCROLL_STATE_IDLE);
     }
 
+    void setScrimView(View scrim) {
+        if (mScrimView != null) {
+            mScrimView.setOnClickListener(null);
+        }
+        mScrimView = scrim;
+        mScrimView.setVisibility(mIsBouncing ? VISIBLE : GONE);
+        mScrimView.setFocusable(true);
+        mScrimView.setOnClickListener(mScrimClickListener);
+    }
+
     /**
      * Animate the bottom edge of the challenge view to the given position.
      *
@@ -291,6 +310,31 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public boolean isChallengeOverlapping() {
         return mChallengeShowing;
+    }
+
+    @Override
+    public boolean isBouncing() {
+        return mIsBouncing;
+    }
+
+    @Override
+    public void showBouncer() {
+        if (mIsBouncing) return;
+        showChallenge(true);
+        mIsBouncing = true;
+        if (mScrimView != null) {
+            mScrimView.setVisibility(GONE);
+        }
+    }
+
+    @Override
+    public void hideBouncer() {
+        if (!mIsBouncing) return;
+        setChallengeShowing(false);
+        mIsBouncing = false;
+        if (mScrimView != null) {
+            mScrimView.setVisibility(GONE);
+        }
     }
 
     @Override
@@ -463,7 +507,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-            if (lp.isChallenge) {
+            if (lp.childType == LayoutParams.CHILD_TYPE_CHALLENGE) {
                 if (mChallengeView != null) {
                     throw new IllegalStateException(
                             "There may only be one child with layout_isChallenge=\"true\"");
@@ -472,6 +516,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 if (mChallengeView != oldChallengeView) {
                     mChallengeView.setVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
                 }
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
+                setScrimView(child);
             }
 
             if (child.getVisibility() == GONE) continue;
@@ -497,7 +543,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-            if (lp.isChallenge) {
+            if (lp.childType == LayoutParams.CHILD_TYPE_CHALLENGE) {
                 // Challenge views pin to the bottom, offset by a portion of their height,
                 // and center horizontally.
                 final int center = (paddingLeft + width - paddingRight) / 2;
@@ -657,12 +703,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
     }
 
-    @Override
-    public void showBouncer() {
-        // TODO Block access to other views
-        showChallenge(true);
-    }
-
     public void showHandle(boolean show) {
         mShowHandle = show;
         invalidate();
@@ -691,7 +731,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     public static class LayoutParams extends MarginLayoutParams {
-        public boolean isChallenge = false;
+        public int childType = CHILD_TYPE_NONE;
+        public static final int CHILD_TYPE_NONE = 0;
+        public static final int CHILD_TYPE_CHALLENGE = 2;
+        public static final int CHILD_TYPE_SCRIM = 4;
 
         public LayoutParams() {
             this(MATCH_PARENT, WRAP_CONTENT);
@@ -712,7 +755,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         public LayoutParams(LayoutParams source) {
             super(source);
 
-            isChallenge = source.isChallenge;
+            childType = source.childType;
         }
 
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -720,8 +763,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
             final TypedArray a = c.obtainStyledAttributes(attrs,
                     R.styleable.SlidingChallengeLayout_Layout);
-            isChallenge = a.getBoolean(R.styleable.SlidingChallengeLayout_Layout_layout_isChallenge,
-                    false);
+            childType = a.getInt(R.styleable.SlidingChallengeLayout_Layout_layout_childType,
+                    CHILD_TYPE_NONE);
             a.recycle();
         }
     }

@@ -32,14 +32,23 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     private static final String TAG = "MultiPaneChallengeLayout";
 
     final int mOrientation;
+    private boolean mIsBouncing;
 
     public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
     public static final int VERTICAL = LinearLayout.VERTICAL;
 
     private View mChallengeView;
     private View mUserSwitcherView;
+    private View mScrimView;
 
     private final Rect mTempRect = new Rect();
+
+    private final OnClickListener mScrimClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            hideBouncer();
+        }
+    };
 
     public MultiPaneChallengeLayout(Context context) {
         this(context, null);
@@ -75,7 +84,35 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     @Override
     public void showBouncer() {
-        // TODO Block access to other views
+        if (mIsBouncing) return;
+        mIsBouncing = true;
+        if (mScrimView != null) {
+            mScrimView.setVisibility(GONE);
+        }
+    }
+
+    @Override
+    public void hideBouncer() {
+        if (!mIsBouncing) return;
+        mIsBouncing = false;
+        if (mScrimView != null) {
+            mScrimView.setVisibility(GONE);
+        }
+    }
+
+    @Override
+    public boolean isBouncing() {
+        return mIsBouncing;
+    }
+
+    void setScrimView(View scrim) {
+        if (mScrimView != null) {
+            mScrimView.setOnClickListener(null);
+        }
+        mScrimView = scrim;
+        mScrimView.setVisibility(mIsBouncing ? VISIBLE : GONE);
+        mScrimView.setFocusable(true);
+        mScrimView.setOnClickListener(mScrimClickListener);
     }
 
     @Override
@@ -139,6 +176,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 } else if (Gravity.isHorizontal(lp.gravity)) {
                     widthUsed += child.getMeasuredWidth() * 1.5f;
                 }
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
+                setScrimView(child);
+                child.measure(widthSpec, heightSpec);
             }
         }
 
@@ -148,6 +188,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
             if (lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER ||
+                    lp.childType == LayoutParams.CHILD_TYPE_SCRIM ||
                     child.getVisibility() == GONE) {
                 // Don't need to measure GONE children, and the user switcher was already measured.
                 continue;
@@ -207,6 +248,11 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
             // We did the user switcher above if we have one.
             if (child == mUserSwitcherView || child.getVisibility() == GONE) continue;
+
+            if (child == mScrimView) {
+                child.layout(0, 0, width, height);
+                continue;
+            }
 
             layoutWithGravity(width, height, child, padding, false);
         }
@@ -333,6 +379,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         public static final int CHILD_TYPE_WIDGET = 1;
         public static final int CHILD_TYPE_CHALLENGE = 2;
         public static final int CHILD_TYPE_USER_SWITCHER = 3;
+        public static final int CHILD_TYPE_SCRIM = 4;
 
         public int gravity = Gravity.NO_GRAVITY;
 
