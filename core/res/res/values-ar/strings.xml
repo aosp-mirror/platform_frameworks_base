@@ -585,8 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"للسماح للتطبيق بكتابة كلمات جديدة في قاموس المستخدم."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"اختبار إمكانية الدخول إلى وحدة تخزين محمية"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"اختبار إمكانية الدخول إلى وحدة تخزين محمية"</string>
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
-    <skip />
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"للسماح للتطبيق باختبار إذن لوحدة تخزين USB التي ستتوفر على أجهزة مستقبلية."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"للسماح للتطبيق باختبار إذن لبطاقة SD سيتم توفيرها على أجهزة مستقبلية."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"تعديل محتويات وحدة تخزين USB أو حذفها"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"تعديل محتويات بطاقة SD أو حذفها"</string>
