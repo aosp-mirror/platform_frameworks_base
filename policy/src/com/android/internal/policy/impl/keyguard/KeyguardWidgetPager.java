@@ -403,7 +403,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     void showOutlines() {
         if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
         if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
-        mChildrenOutlineFadeInAnimation = ObjectAnimator.ofFloat(this, "childrenOutlineAlpha", 1.0f);
+        mChildrenOutlineFadeInAnimation = ObjectAnimator.ofFloat(this,
+                "childrenOutlineAlpha", 1.0f);
         mChildrenOutlineFadeInAnimation.setDuration(CHILDREN_OUTLINE_FADE_IN_DURATION);
         mChildrenOutlineFadeInAnimation.start();
     }
@@ -411,7 +412,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     void hideOutlines() {
         if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
         if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
-        mChildrenOutlineFadeOutAnimation = ObjectAnimator.ofFloat(this, "childrenOutlineAlpha", 0.0f);
+        mChildrenOutlineFadeOutAnimation = ObjectAnimator.ofFloat(this,
+                "childrenOutlineAlpha", 0.0f);
         mChildrenOutlineFadeOutAnimation.setDuration(CHILDREN_OUTLINE_FADE_OUT_DURATION);
         mChildrenOutlineFadeOutAnimation.setStartDelay(CHILDREN_OUTLINE_FADE_OUT_DELAY);
         mChildrenOutlineFadeOutAnimation.start();

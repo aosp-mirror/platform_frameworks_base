@@ -102,4 +102,13 @@
 
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_margin">100dp</dimen>
+
+    <!-- Size of the avator on hte multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_height">60dp</dimen>
+
+    <!-- Size of the avator on hte multiuser lockscreen. -->
+    <dimen name="keyguard_avatar_padding">14dp</dimen>
+
+    <!-- The height of the avator plus twice the padding. -->
+    <dimen name="keyguard_avatar_width">88dp</dimen>
 </resources>
