@@ -3222,18 +3222,11 @@ public final class Settings {
         public static final String LOCK_SCREEN_OWNER_INFO = "lock_screen_owner_info";
 
         /**
-         * Id of the time appwidget on the lockscreen, or -1 if none
-         * @hide
-         */
-        public static final String LOCK_SCREEN_STATUS_APPWIDGET_ID =
-            "lock_screen_status_appwidget_id";
-
-        /**
          * Id of the user-selected appwidget on the lockscreen, or -1 if none
          * @hide
          */
-        public static final String LOCK_SCREEN_USER_SELECTED_APPWIDGET_ID =
-            "lock_screen_user_selected_appwidget_id";
+        public static final String LOCK_SCREEN_APPWIDGET_IDS =
+            "lock_screen_appwidget_ids";
 
         /**
          * This preference enables showing the owner info on LockScren.
