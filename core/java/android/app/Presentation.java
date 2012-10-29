@@ -50,6 +50,93 @@ import android.util.TypedValue;
  * whenever the activity itself is paused or resumed.
  * </p>
  *
+ * <h3>Choosing a presentation display</h3>
+ * <p>
+ * Before showing a {@link Presentation} it's important to choose the {@link Display}
+ * on which it will appear.  Choosing a presentation display is sometimes difficult
+ * because there may be multiple displays attached.  Rather than trying to guess
+ * which display is best, an application should let the system choose a suitable
+ * presentation display.
+ * </p><p>
+ * There are two main ways to choose a {@link Display}.
+ * </p>
+ *
+ * <h4>Using the media router to choose a presentation display</h4>
+ * <p>
+ * The easiest way to choose a presentation display is to use the
+ * {@link android.media.MediaRouter MediaRouter} API.  The media router service keeps
+ * track of which audio and video routes are available on the system.
+ * The media router sends notifications whenever routes are selected or unselected
+ * or when the preferred presentation display of a route changes.
+ * So an application can simply watch for these notifications and show or dismiss
+ * a presentation on the preferred presentation display automatically.
+ * </p><p>
+ * The preferred presentation display is the display that the media router recommends
+ * that the application should use if it wants to show content on the secondary display.
+ * Sometimes there may not be a preferred presentation display in which
+ * case the application should show its content locally without using a presentation.
+ * </p><p>
+ * Here's how to use the media router to create and show a presentation on the preferred
+ * presentation display using {@link android.media.MediaRouter.RouteInfo#getPresentationDisplay()}.
+ * </p>
+ * {@samplecode
+ * MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+ * MediaRouter.RouteInfo route = mediaRouter.getSelectedRoute();
+ * if (route != null) $&#123;
+ *     Display presentationDisplay = route.getPresentationDisplay();
+ *     if (presentationDisplay != null) $&#123;
+ *         Presentation presentation = new MyPresentation(context, presentationDisplay);
+ *         presentation.show();
+ *     $&#125;
+ * $&#125;
+ * }
+ * <p>
+ * The following sample code from <code>ApiDemos</code> demonstrates how to use the media
+ * router to automatically switch between showing content in the main activity and showing
+ * the content in a presentation when a presentation display is available.
+ * </p>
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/PresentationWithMediaRouterActivity.java
+ *      activity}
+ *
+ * <h4>Using the display manager to choose a presentation display</h4>
+ * <p>
+ * Another way to choose a presentation display is to use the {@link DisplayManager} API
+ * directly.  The display manager service provides functions to enumerate and describe all
+ * displays that are attached to the system including displays that may be used
+ * for presentations.
+ * </p><p>
+ * The display manager keeps track of all displays in the system.  However, not all
+ * displays are appropriate for showing presentations.  For example, if an activity
+ * attempted to show a presentation on the main display it might obscure its own content
+ * (it's like opening a dialog on top of your activity).
+ * </p><p>
+ * Here's how to identify suitable displays for showing presentations using
+ * {@link DisplayManager#getDisplays(String)} and the
+ * {@link DisplayManager#DISPLAY_CATEGORY_PRESENTATION} category.
+ * </p>
+ * {@samplecode
+ * DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+ * Display[] presentationDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+ * if (presentationDisplays.length > 0) $&#123;
+ *     // If there is more than one suitable presentation display, then we could consider
+ *     // giving the user a choice.  For this example, we simply choose the first display
+ *     // which is the one the system recommends as the preferred presentation display.
+ *     Display display = presentationDisplays[0];
+ *     Presentation presentation = new MyPresentation(context, presentationDisplay);
+ *     presentation.show();
+ * $&#125;
+ * }
+ * <p>
+ * The following sample code from <code>ApiDemos</code> demonstrates how to use the display
+ * manager to enumerate displays and show content on multiple presentation displays
+ * simultaneously.
+ * </p>
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/PresentationActivity.java
+ *      activity}
+ *
+ * @see android.media.MediaRouter#ROUTE_TYPE_LIVE_VIDEO for information on about live
+ * video routes and how to obtain the preferred presentation display for the
+ * current media route.
  * @see DisplayManager for information on how to enumerate displays and receive
  * notifications when displays are added or removed.
  */
@@ -121,7 +208,7 @@ public class Presentation extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        mDisplayManager.registerDisplayListener(mDisplayListener, null);
+        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
 
         // Since we were not watching for display changes until just now, there is a
         // chance that the display metrics have changed.  If so, we will need to

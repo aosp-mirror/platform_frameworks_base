@@ -10093,8 +10093,10 @@ package android.hardware.display {
   public final class DisplayManager {
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
+    method public android.view.Display[] getDisplays(java.lang.String);
     method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
     method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
+    field public static final java.lang.String DISPLAY_CATEGORY_PRESENTATION = "android.hardware.display.category.PRESENTATION";
   }
 
   public static abstract interface DisplayManager.DisplayListener {
@@ -11768,6 +11770,7 @@ package android.media {
     method public abstract void onRouteAdded(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteGrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup, int);
+    method public void onRoutePresentationDisplayChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteRemoved(android.media.MediaRouter, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteSelected(android.media.MediaRouter, int, android.media.MediaRouter.RouteInfo);
     method public abstract void onRouteUngrouped(android.media.MediaRouter, android.media.MediaRouter.RouteInfo, android.media.MediaRouter.RouteGroup);
@@ -11802,6 +11805,7 @@ package android.media {
     method public java.lang.CharSequence getName(android.content.Context);
     method public int getPlaybackStream();
     method public int getPlaybackType();
+    method public android.view.Display getPresentationDisplay();
     method public java.lang.CharSequence getStatus();
     method public int getSupportedTypes();
     method public java.lang.Object getTag();

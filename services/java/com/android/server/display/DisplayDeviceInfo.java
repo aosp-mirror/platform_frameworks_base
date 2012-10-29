@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Surface;
 
 import libcore.util.Objects;
@@ -138,6 +139,17 @@ final class DisplayDeviceInfo {
      */
     public int rotation = Surface.ROTATION_0;
 
+    /**
+     * Display type.
+     */
+    public int type;
+
+    /**
+     * Display address, or null if none.
+     * Interpretation varies by display type.
+     */
+    public String address;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -162,7 +174,9 @@ final class DisplayDeviceInfo {
                 && yDpi == other.yDpi
                 && flags == other.flags
                 && touch == other.touch
-                && rotation == other.rotation;
+                && rotation == other.rotation
+                && type == other.type
+                && Objects.equal(address, other.address);
     }
 
     @Override
@@ -181,6 +195,8 @@ final class DisplayDeviceInfo {
         flags = other.flags;
         touch = other.touch;
         rotation = other.rotation;
+        type = other.type;
+        address = other.address;
     }
 
     // For debugging purposes
@@ -191,6 +207,8 @@ final class DisplayDeviceInfo {
                 + "density " + densityDpi + ", " + xDpi + " x " + yDpi + " dpi"
                 + ", touch " + touchToString(touch) + flagsToString(flags)
                 + ", rotation " + rotation
+                + ", type " + Display.typeToString(type)
+                + ", address " + address
                 + "}";
     }
 
