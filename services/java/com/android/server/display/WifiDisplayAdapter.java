@@ -39,6 +39,7 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.Display;
 import android.view.Surface;
 
 import java.io.PrintWriter;
@@ -293,9 +294,10 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         float refreshRate = 60.0f; // TODO: get this for real
 
         String name = display.getFriendlyDisplayName();
+        String address = display.getDeviceAddress();
         IBinder displayToken = Surface.createDisplay(name, secure);
         mDisplayDevice = new WifiDisplayDevice(displayToken, name, width, height,
-                refreshRate, deviceFlags, surface);
+                refreshRate, deviceFlags, address, surface);
         sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_ADDED);
 
         scheduleUpdateNotificationLocked();
@@ -515,12 +517,13 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         private final int mHeight;
         private final float mRefreshRate;
         private final int mFlags;
+        private final String mAddress;
 
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
 
         public WifiDisplayDevice(IBinder displayToken, String name,
-                int width, int height, float refreshRate, int flags,
+                int width, int height, float refreshRate, int flags, String address,
                 Surface surface) {
             super(WifiDisplayAdapter.this, displayToken);
             mName = name;
@@ -528,6 +531,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mHeight = height;
             mRefreshRate = refreshRate;
             mFlags = flags;
+            mAddress = address;
             mSurface = surface;
         }
 
@@ -555,6 +559,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
                 mInfo.flags = mFlags;
+                mInfo.type = Display.TYPE_WIFI;
+                mInfo.address = mAddress;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
             }
