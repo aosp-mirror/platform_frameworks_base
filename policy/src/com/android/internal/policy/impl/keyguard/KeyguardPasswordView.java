@@ -16,38 +16,26 @@
 
 package com.android.internal.policy.impl.keyguard;
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
-
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
-import java.util.List;
-
 import android.app.admin.DevicePolicyManager;
+import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Rect;
-
-import com.android.internal.widget.PasswordEntryKeyboardView;
-
-import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
+import android.util.AttributeSet;
+import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.internal.R;
 import com.android.internal.widget.PasswordEntryKeyboardHelper;
+import com.android.internal.widget.PasswordEntryKeyboardView;
+
+import java.util.List;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password

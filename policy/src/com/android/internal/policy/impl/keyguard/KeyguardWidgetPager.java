@@ -30,7 +30,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 
 public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwitchListener,
         OnLongClickListener {
@@ -44,6 +44,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private AccelerateInterpolator mAlphaInterpolator = new AccelerateInterpolator(0.9f);
     private DecelerateInterpolator mLeftScreenAlphaInterpolator = new DecelerateInterpolator(4);
     private KeyguardViewStateManager mViewStateManager;
+    private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
     private static final int CHILDREN_OUTLINE_FADE_OUT_DELAY = 0;
@@ -79,6 +80,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
         mViewStateManager = viewStateManager;
+    }
+
+    public void setLockPatternUtils(LockPatternUtils l) {
+        mLockPatternUtils = l;
     }
 
     @Override
@@ -148,6 +153,21 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     public void addWidget(View widget) {
         addWidget(widget, -1);
+    }
+
+
+    public void onRemoveView(View v) {
+        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        mLockPatternUtils.removeAppWidget(appWidgetId);
+    }
+
+    public void onAddView(View v, int index) {
+        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        getVisiblePages(mTempVisiblePagesRange);
+        boundByReorderablePages(true, mTempVisiblePagesRange);
+        // Subtract from the index to take into account pages before the reorderable
+        // pages (e.g. the "add widget" page)
+        mLockPatternUtils.addAppWidget(appWidgetId, index - mTempVisiblePagesRange[0]);
     }
 
     /*
@@ -305,7 +325,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 KeyguardWidgetFrame child = getWidgetPageAt(i);
                 if (child != null) {
                     float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    float alpha = 1 - Math.abs(scrollProgress);
                     // TODO: Set content alpha
                     if (!isReordering(false)) {
                         child.setBackgroundAlphaMultiplier(
