@@ -24,11 +24,12 @@
     android:layout_gravity="center"
     android:contentDescription="@string/keyguard_accessibility_user_selector">
 
-    <com.android.internal.policy.impl.keyguard.KeyguardSubdivisionLayout
+    <om.android.internal.policy.impl.keyguard.KeyguardLinearLayout
         android:id="@+id/keyguard_users_grid"
         android:orientation="horizontal"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_gravity="center" />
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_height="@dimen/keyguard_avatar_height"
+        android:layout_gravity="center|bottom" />
 
 </com.android.internal.policy.impl.keyguard.KeyguardMultiUserSelectorView>

@@ -1198,6 +1198,9 @@
   <java-symbol type="color" name="kg_multi_user_text_active" />
   <java-symbol type="color" name="kg_multi_user_text_inactive" />
   <java-symbol type="color" name="kg_widget_pager_gradient" />
+  <java-symbol type="color" name="keyguard_avatar_frame_color" />
+  <java-symbol type="color" name="keyguard_avatar_frame_shadow_color" />
+  <java-symbol type="color" name="keyguard_avatar_matte_color" />
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
@@ -1205,6 +1208,11 @@
   <java-symbol type="dimen" name="kg_widget_pager_horizontal_padding" />
   <java-symbol type="dimen" name="kg_widget_pager_top_padding" />
   <java-symbol type="dimen" name="kg_widget_pager_bottom_padding" />
+  <java-symbol type="dimen" name="keyguard_avatar_height" />
+  <java-symbol type="dimen" name="keyguard_avatar_frame_stroke_width" />
+  <java-symbol type="dimen" name="keyguard_avatar_frame_shadow_radius" />
+  <java-symbol type="dimen" name="keyguard_avatar_frame_shadow_dx" />
+  <java-symbol type="dimen" name="keyguard_avatar_frame_shadow_dy" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
@@ -1310,9 +1318,8 @@
   <java-symbol type="id" name="status_security_message" />
   <java-symbol type="id" name="sliding_layout" />
   <java-symbol type="id" name="keyguard_add_widget" />
-  <java-symbol type="id" name="sliding_layout" />
   <java-symbol type="id" name="keyguard_add_widget_view" />
-
+  <java-symbol type="id" name="sliding_layout" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />

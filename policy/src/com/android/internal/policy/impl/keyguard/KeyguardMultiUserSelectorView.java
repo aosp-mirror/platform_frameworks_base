@@ -24,6 +24,7 @@ import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
@@ -36,10 +37,9 @@ import java.util.Comparator;
 public class KeyguardMultiUserSelectorView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "KeyguardMultiUserSelectorView";
 
-    private KeyguardSubdivisionLayout mUsersGrid;
+    private ViewGroup mUsersGrid;
     private KeyguardMultiUserAvatar mActiveUserAvatar;
     private KeyguardHostView.UserSwitcherCallback mCallback;
-    private static final int SWITCH_ANIMATION_DURATION = 150;
     private static final int FADE_OUT_ANIMATION_DURATION = 100;
 
     public KeyguardMultiUserSelectorView(Context context) {
@@ -63,7 +63,7 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
     }
 
     public void init() {
-        mUsersGrid = (KeyguardSubdivisionLayout) findViewById(R.id.keyguard_users_grid);
+        mUsersGrid = (ViewGroup) findViewById(R.id.keyguard_users_grid);
         mUsersGrid.removeAllViews();
         setClipChildren(false);
         setClipToPadding(false);
@@ -83,9 +83,11 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             KeyguardMultiUserAvatar uv = createAndAddUser(user);
             if (user.id == activeUser.id) {
                 mActiveUserAvatar = uv;
+                mActiveUserAvatar.setActive(true, false, null);
+            } else {
+                uv.setActive(false, false, null);
             }
         }
-        mActiveUserAvatar.setActive(true, false, 0, null);
     }
 
     Comparator<UserInfo> mOrderAddedComparator = new Comparator<UserInfo>() {
@@ -114,13 +116,19 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             // Reset the previously active user to appear inactive
             avatar.lockPressedState();
             mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
-            mActiveUserAvatar.setActive(false, true,  SWITCH_ANIMATION_DURATION, new Runnable() {
+            mActiveUserAvatar.setActive(false, true, new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
-                    } catch (RemoteException re) {
-                        Log.e(TAG, "Couldn't switch user " + re);
+                    if (!this.getClass().getName().contains("internal")) {
+                        mActiveUserAvatar = avatar;
+                        mActiveUserAvatar.setActive(true, true, null);
+                        mActiveUserAvatar.releasePressedState();
+                    } else {
+                        try {
+                            ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
+                        } catch (RemoteException re) {
+                            Log.e(TAG, "Couldn't switch user " + re);
+                        }
                     }
                 }
             });

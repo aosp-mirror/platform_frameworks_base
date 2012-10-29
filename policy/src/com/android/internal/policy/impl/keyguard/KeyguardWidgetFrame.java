@@ -78,7 +78,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
         setPadding(hPadding, topPadding, hPadding, bottomPadding);
         */
         // TODO: this padding should really correspond to the padding embedded in the background
-        // drawable (ie. outlines). 
+        // drawable (ie. outlines).
         int padding = (int) (res.getDisplayMetrics().density * 8);
         setPadding(padding, padding, padding, padding);
 
