@@ -520,11 +520,11 @@ public class KeyguardViewMediator {
             if (DEBUG) Log.d(TAG, "onSystemReady");
             mSystemReady = true;
             mUpdateMonitor.registerCallback(mUpdateCallback);
-            
+
             // Disable alternate unlock right after boot until things have settled.
             mUpdateMonitor.setAlternateUnlockEnabled(false);
             mUpdateMonitor.setIsFirstBoot(true);
-            
+
             doKeyguardLocked();
         }
         // Most services aren't available until the system reaches the ready state, so we
