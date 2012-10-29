@@ -76,6 +76,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    public boolean needsInput() {
+        return true;
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
