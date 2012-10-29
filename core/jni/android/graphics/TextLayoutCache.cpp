@@ -16,6 +16,8 @@
 
 #define LOG_TAG "TextLayoutCache"
 
+#include <utils/JenkinsHash.h>
+
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
 #include "SkFontHost.h"
@@ -38,7 +40,7 @@ ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
 TextLayoutCache::TextLayoutCache(TextLayoutShaper* shaper) :
         mShaper(shaper),
-        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutValue> >::kUnlimitedCapacity),
+        mCache(LruCache<TextLayoutCacheKey, sp<TextLayoutValue> >::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB)),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
@@ -199,11 +201,7 @@ void TextLayoutCache::dumpCacheStats() {
     float remainingPercent = 100 * ((mMaxSize - mSize) / ((float)mMaxSize));
     float timeRunningInSec = (systemTime(SYSTEM_TIME_MONOTONIC) - mCacheStartTime) / 1000000000;
 
-    size_t bytes = 0;
     size_t cacheSize = mCache.size();
-    for (size_t i = 0; i < cacheSize; i++) {
-        bytes += mCache.getKeyAt(i).getSize() + mCache.getValueAt(i)->getSize();
-    }
 
     ALOGD("------------------------------------------------");
     ALOGD("Cache stats");
@@ -212,7 +210,7 @@ void TextLayoutCache::dumpCacheStats() {
     ALOGD("running   : %.0f seconds", timeRunningInSec);
     ALOGD("entries   : %d", cacheSize);
     ALOGD("max size  : %d bytes", mMaxSize);
-    ALOGD("used      : %d bytes according to mSize, %d bytes actual", mSize, bytes);
+    ALOGD("used      : %d bytes according to mSize", mSize);
     ALOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);
     ALOGD("hits      : %d", mCacheHitCount);
     ALOGD("saved     : %0.6f ms", mNanosecondsSaved * 0.000001f);
@@ -300,6 +298,23 @@ int TextLayoutCacheKey::compare(const TextLayoutCacheKey& lhs, const TextLayoutC
 
 size_t TextLayoutCacheKey::getSize() const {
     return sizeof(TextLayoutCacheKey) + sizeof(UChar) * contextCount;
+}
+
+hash_t TextLayoutCacheKey::hash() const {
+    uint32_t hash = JenkinsHashMix(0, start);
+    hash = JenkinsHashMix(hash, count);
+    /* contextCount not needed because it's included in text, below */
+    hash = JenkinsHashMix(hash, hash_type(typeface));
+    hash = JenkinsHashMix(hash, hash_type(textSize));
+    hash = JenkinsHashMix(hash, hash_type(textSkewX));
+    hash = JenkinsHashMix(hash, hash_type(textScaleX));
+    hash = JenkinsHashMix(hash, flags);
+    hash = JenkinsHashMix(hash, hinting);
+    hash = JenkinsHashMix(hash, variant);
+    // Note: leaving out language is not problematic, as equality comparisons
+    // are still valid - the only bad thing that could happen is collisions.
+    hash = JenkinsHashMixShorts(hash, getText(), contextCount);
+    return JenkinsHashWhiten(hash);
 }
 
 /**
