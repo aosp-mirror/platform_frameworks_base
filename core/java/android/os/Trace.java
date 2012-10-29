@@ -44,6 +44,7 @@ public final class Trace {
     public static final long TRACE_TAG_AUDIO = 1L << 8;
     public static final long TRACE_TAG_VIDEO = 1L << 9;
     public static final long TRACE_TAG_CAMERA = 1L << 10;
+    private static final long TRACE_TAG_NOT_READY = 1L << 63;
 
     public static final int TRACE_FLAGS_START_BIT = 1;
     public static final String[] TRACE_TAGS = {
@@ -53,11 +54,8 @@ public final class Trace {
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
 
-    // This works as a "not ready" flag because TRACE_TAG_ALWAYS is always set.
-    private static final long TRACE_FLAGS_NOT_READY = 0;
-
     // Must be volatile to avoid word tearing.
-    private static volatile long sEnabledTags = TRACE_FLAGS_NOT_READY;
+    private static volatile long sEnabledTags = TRACE_TAG_NOT_READY;
 
     private static native long nativeGetEnabledTags();
     private static native void nativeTraceCounter(long tag, String name, int value);
@@ -99,7 +97,7 @@ public final class Trace {
      */
     private static long cacheEnabledTags() {
         long tags = nativeGetEnabledTags();
-        if (tags == TRACE_FLAGS_NOT_READY) {
+        if (tags == TRACE_TAG_NOT_READY) {
             Log.w(TAG, "Unexpected value from nativeGetEnabledTags: " + tags);
             // keep going
         }
@@ -115,7 +113,7 @@ public final class Trace {
      */
     public static boolean isTagEnabled(long traceTag) {
         long tags = sEnabledTags;
-        if (tags == TRACE_FLAGS_NOT_READY) {
+        if (tags == TRACE_TAG_NOT_READY) {
             tags = cacheEnabledTags();
         }
         return (tags & traceTag) != 0;
