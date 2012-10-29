@@ -29,9 +29,8 @@ import android.widget.TextView;
 import com.android.internal.R;
 
 public class NumPadKey extends Button {
-    // XXX localize
-    static final String KLONDIKE[] = {
-        "", "", " ABC", " DEF", " GHI", " JKL", " MNO", " PQRS", " TUV", " WXYZ" };
+    // list of "ABC", etc per digit, starting with '0'
+    static String sKlondike[];
 
     int mDigit = -1;
     int mTextViewResId;
@@ -74,13 +73,19 @@ public class NumPadKey extends Button {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         builder.append(String.valueOf(mDigit));
         if (mDigit >= 0) {
-            final String extra = KLONDIKE[mDigit];
-            final int extraLen = extra.length();
-            if (extraLen > 0) {
-                builder.append(extra);
-                builder.setSpan(
-                        new TextAppearanceSpan(context, R.style.PINButtonKlondikeText),
+            if (sKlondike == null) {
+                sKlondike = context.getResources().getStringArray(
+                        R.array.lockscreen_num_pad_klondike);
+            }
+            if (sKlondike != null && sKlondike.length > mDigit) {
+                final String extra = sKlondike[mDigit];
+                final int extraLen = extra.length();
+                if (extraLen > 0) {
+                    builder.append(extra);
+                    builder.setSpan(
+                        new TextAppearanceSpan(context, R.style.TextAppearance_NumPadKey_Klondike),
                         builder.length()-extraLen, builder.length(), 0);
+                }
             }
         }
         setText(builder);

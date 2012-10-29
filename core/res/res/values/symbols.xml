@@ -962,6 +962,7 @@
   <java-symbol type="drawable" name="status_bar_background" />
   <java-symbol type="drawable" name="sym_keyboard_shift" />
   <java-symbol type="drawable" name="sym_keyboard_shift_locked" />
+  <java-symbol type="drawable" name="sym_keyboard_return_holo" />
   <java-symbol type="drawable" name="tab_bottom_left" />
   <java-symbol type="drawable" name="tab_bottom_left_v4" />
   <java-symbol type="drawable" name="tab_bottom_right" />
@@ -1177,6 +1178,7 @@
   <java-symbol type="array" name="lockscreen_targets_when_silent" />
   <java-symbol type="array" name="lockscreen_targets_when_soundon" />
   <java-symbol type="array" name="lockscreen_targets_with_camera" />
+  <java-symbol type="array" name="lockscreen_num_pad_klondike" />
   <java-symbol type="attr" name="actionModePopupWindowStyle" />
   <java-symbol type="attr" name="dialogCustomTitleDecorLayout" />
   <java-symbol type="attr" name="dialogTitleDecorLayout" />
@@ -1322,7 +1324,7 @@
   <java-symbol type="id" name="sliding_layout" />
   <java-symbol type="id" name="multi_pane_challenge" />
   <java-symbol type="id" name="keyguard_user_selector" />
-  <java-symbol type="id" name="keyOK" />
+  <java-symbol type="id" name="key_enter" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
@@ -1421,7 +1423,9 @@
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
-  <java-symbol type="style" name="PINButtonKlondikeText" />
+  <java-symbol type="style" name="Widget.Button.NumPadKey" />
+  <java-symbol type="style" name="TextAppearance.NumPadKey" />
+  <java-symbol type="style" name="TextAppearance.NumPadKey.Klondike" />
   <java-symbol type="string" name="kg_emergency_call_label" />
   <java-symbol type="string" name="kg_forgot_pattern_button_text" />
   <java-symbol type="string" name="kg_wrong_pattern" />
