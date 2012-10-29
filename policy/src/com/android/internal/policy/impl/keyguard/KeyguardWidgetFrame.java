@@ -49,8 +49,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mOverScrollAmount = 0f;
     private final Rect mForegroundRect = new Rect();
     private int mForegroundAlpha = 0;
-    private PowerManager mPowerManager;
-    private boolean mDisableInteraction;
+    private CheckLongPressHelper mLongPressHelper;
 
     private float mBackgroundAlpha;
     private float mBackgroundAlphaMultiplier;
@@ -68,15 +67,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public KeyguardWidgetFrame(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mLongPressHelper = new CheckLongPressHelper(this);
 
         Resources res = context.getResources();
-        /*
-        int hPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_horizontal_padding);
-        int topPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_top_padding);
-        int bottomPadding = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
-        setPadding(hPadding, topPadding, hPadding, bottomPadding);
-        */
         // TODO: this padding should really correspond to the padding embedded in the background
         // drawable (ie. outlines).
         int padding = (int) (res.getDisplayMetrics().density * 8);
@@ -87,17 +80,58 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mGradientPaint.setXfermode(sAddBlendMode);
     }
 
-    public void setDisableUserInteraction(boolean disabled) {
-        mDisableInteraction = disabled;
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // Watch for longpress events at this level to make sure
+        // users can always pick up this widget
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mLongPressHelper.postCheckForLongPress(ev);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mLongPressHelper.onMove(ev);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mLongPressHelper.cancelLongPress();
+                break;
+        }
+
+        // Otherwise continue letting touch events fall through to children
+        return false;
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (!mDisableInteraction) {
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
-            return super.onInterceptTouchEvent(ev);
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Watch for longpress events at this level to make sure
+        // users can always pick up this widget
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_MOVE:
+                mLongPressHelper.onMove(ev);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mLongPressHelper.cancelLongPress();
+                break;
         }
+
+        // We return true here to ensure that we will get cancel / up signal
+        // even if none of our children have requested touch.
         return true;
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        cancelLongPress();
+    }
+
+    @Override
+    public void cancelLongPress() {
+        super.cancelLongPress();
+        mLongPressHelper.cancelLongPress();
     }
 
     @Override
@@ -105,7 +139,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
         drawBg(canvas);
         super.dispatchDraw(canvas);
         drawGradientOverlay(canvas);
-
     }
 
     /**

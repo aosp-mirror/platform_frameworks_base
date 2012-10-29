@@ -23,11 +23,11 @@ import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
-
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -105,6 +105,16 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        Log.e(TAG, "touch");
+        if(event.getActionMasked() != MotionEvent.ACTION_CANCEL && mCallback != null) {
+            Log.e(TAG, "userActivitytouch");
+            mCallback.userActivity();
+        }
+        return false;
+    }
+
+    @Override
     public void onClick(View v) {
         if (!(v instanceof KeyguardMultiUserAvatar)) return;
         final KeyguardMultiUserAvatar avatar = (KeyguardMultiUserAvatar) v;
@@ -124,7 +134,8 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
                         public void run() {
                             if (this.getClass().getName().contains("internal")) {
                                 try {
-                                    ActivityManagerNative.getDefault().switchUser(avatar.getUserInfo().id);
+                                    ActivityManagerNative.getDefault()
+                                            .switchUser(avatar.getUserInfo().id);
                                 } catch (RemoteException re) {
                                     Log.e(TAG, "Couldn't switch user " + re);
                                 }

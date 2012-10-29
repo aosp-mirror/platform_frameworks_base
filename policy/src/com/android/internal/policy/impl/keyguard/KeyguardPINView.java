@@ -82,7 +82,7 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        final View ok = findViewById(R.id.key_enter);
+        final View ok = findViewById(R.id.keyOK);
         if (ok != null) {
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
