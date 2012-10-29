@@ -3935,6 +3935,14 @@
        you will be asked to unlock your phone using an email account.\n\n
        Try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
+    <!-- Placeholder text shown if the camera widget layout is missing or invalid -->
+    <string name="kg_camera_widget_not_found">Camera widget not found</string>
+    <!-- DO NOT TRANSLATE. Context package to use when locating the camera widget -->
+    <string name="kg_camera_widget_context_package">com.google.android.gallery3d</string>
+    <!-- DO NOT TRANSLATE. Layout package to use when locating the camera widget -->
+    <string name="kg_camera_widget_layout_package">com.android.gallery3d</string>
+    <!-- DO NOT TRANSLATE. Layout name to use when locating the camera widget -->
+    <string name="kg_camera_widget_layout_name">keyguard_widget</string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
