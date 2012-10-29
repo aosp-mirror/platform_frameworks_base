@@ -29,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -43,9 +42,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import org.apache.harmony.kernel.vm.StringUtils;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -1045,28 +1047,103 @@ public class LockPatternUtils {
         }
     }
 
-    public int[] getUserDefinedWidgets() {
-        int appWidgetId = -1;
+    public int[] getAppWidgets() {
         String appWidgetIdString = Settings.Secure.getStringForUser(
-                mContentResolver, Settings.Secure.LOCK_SCREEN_USER_SELECTED_APPWIDGET_ID,
+                mContentResolver, Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
                 UserHandle.USER_CURRENT);
+        String delims = ",";
         if (appWidgetIdString != null) {
-            appWidgetId = (int) Integer.decode(appWidgetIdString);
+            String[] appWidgetStringIds = appWidgetIdString.split(delims);
+            int[] appWidgetIds = new int[appWidgetStringIds.length];
+            for (int i = 0; i < appWidgetStringIds.length; i++) {
+                String appWidget = appWidgetStringIds[i];
+                try {
+                    appWidgetIds[i] = Integer.decode(appWidget);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            return appWidgetIds;
         }
-
-        return new int[] { appWidgetId };
+        return new int[0];
     }
 
-    public int getStatusWidget() {
-        int appWidgetId = -1;
-        String appWidgetIdString = Settings.Secure.getStringForUser(
-                mContentResolver, Settings.Secure.LOCK_SCREEN_STATUS_APPWIDGET_ID,
-                UserHandle.USER_CURRENT);
-        if (appWidgetIdString != null) {
-            appWidgetId = (int) Integer.decode(appWidgetIdString);
+    private static String combineStrings(int[] list, String separator) {
+        int listLength = list.length;
+
+        switch (listLength) {
+            case 0: {
+                return "";
+            }
+            case 1: {
+                return Integer.toString(list[0]);
+            }
         }
 
-        return appWidgetId;
+        int strLength = 0;
+        int separatorLength = separator.length();
+
+        String[] stringList = new String[list.length];
+        for (int i = 0; i < listLength; i++) {
+            stringList[i] = Integer.toString(list[i]);
+            strLength += stringList[i].length();
+            if (i < listLength - 1) {
+                strLength += separatorLength;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder(strLength);
+
+        for (int i = 0; i < listLength; i++) {
+            sb.append(list[i]);
+            if (i < listLength - 1) {
+                sb.append(separator);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private void writeAppWidgets(int[] appWidgetIds) {
+        Settings.Secure.putString(mContentResolver,
+        Settings.Secure.putStringForUser(mContentResolver,
+                        Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
+                        combineStrings(appWidgetIds, ","),
+                        UserHandle.USER_CURRENT);
+    }
+
+    public void addAppWidget(int widgetId, int index) {
+        int[] widgets = getAppWidgets();
+        int[] newWidgets = new int[widgets.length + 1];
+        for (int i = 0, j = 0; i < newWidgets.length; i++) {
+            if (index == i) {
+                newWidgets[i] = widgetId;
+                i++;
+            }
+            if (i < newWidgets.length) {
+                newWidgets[i] = widgets[j];
+                j++;
+            }
+        }
+        writeAppWidgets(newWidgets);
+    }
+
+    public boolean removeAppWidget(int widgetId, int index) {
+        int[] widgets = getAppWidgets();
+        int[] newWidgets = new int[widgets.length - 1];
+        for (int i = 0, j = 0; i < widgets.length; i++) {
+            if (index == i) {
+                if (widgets[i] != widgetId) {
+                    return false;
+                }
+                // continue...
+            } else {
+                newWidgets[j] = widgets[i];
+                j++;
+            }
+        }
+        writeAppWidgets(newWidgets);
+        return true;
     }
 
     private long getLong(String secureSettingKey, long defaultValue) {
