@@ -333,13 +333,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Pattern:
                 messageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message;
                 break;
-
-            case Password: {
-                    final boolean isPin = mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
-                        DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-                    messageId = isPin ? R.string.kg_too_many_failed_pin_attempts_dialog_message
-                            : R.string.kg_too_many_failed_password_attempts_dialog_message;
-                }
+            case PIN:
+                messageId = R.string.kg_too_many_failed_pin_attempts_dialog_message;
+                break;
+            case Password:
+                messageId = R.string.kg_too_many_failed_password_attempts_dialog_message;
                 break;
         }
 
@@ -481,6 +479,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             switch (mCurrentSecuritySelection) {
                 case Pattern:
                 case Password:
+                case PIN:
                 case Account:
                 case Biometric:
                     finish = true;
@@ -746,6 +745,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Pattern:
                 return mLockPatternUtils.isLockPatternEnabled();
             case Password:
+            case PIN:
                 return mLockPatternUtils.isLockPasswordEnabled();
             case SimPin:
             case SimPuk:
@@ -780,6 +780,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mViewMediatorCallback.keyguardDone(true);
             }
         } else if (securityMode != KeyguardSecurityModel.SecurityMode.Pattern
+                && securityMode != KeyguardSecurityModel.SecurityMode.PIN
                 && securityMode != KeyguardSecurityModel.SecurityMode.Password) {
             // can only verify unlock when in pattern/password mode
             if (mViewMediatorCallback != null) {
@@ -796,6 +797,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         switch (securityMode) {
             case None: return R.id.keyguard_selector_view;
             case Pattern: return R.id.keyguard_pattern_view;
+            case PIN: return R.id.keyguard_pin_view;
             case Password: return R.id.keyguard_password_view;
             case Biometric: return R.id.keyguard_face_unlock_view;
             case Account: return R.id.keyguard_account_view;
@@ -809,6 +811,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         switch (securityMode) {
             case None: return R.layout.keyguard_selector_view;
             case Pattern: return R.layout.keyguard_pattern_view;
+            case PIN: return R.layout.keyguard_pin_view;
             case Password: return R.layout.keyguard_password_view;
             case Biometric: return R.layout.keyguard_face_unlock_view;
             case Account: return R.layout.keyguard_account_view;
