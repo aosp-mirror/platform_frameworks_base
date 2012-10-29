@@ -113,10 +113,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mPage != newPageIndex) {
             int oldPageIndex = mPage;
             mPage = newPageIndex;
-            if (mCallbacks != null) {
-                mCallbacks.onUserActivityTimeoutChanged();
-                mCallbacks.userActivity();
-            }
+            userActivity();
             KeyguardWidgetFrame oldWidgetPage = getWidgetPageAt(oldPageIndex);
             if (oldWidgetPage != null) {
                 oldWidgetPage.onActive(false);
@@ -128,6 +125,13 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
         if (mViewStateManager != null) {
             mViewStateManager.onPageSwitch(newPage, newPageIndex);
+        }
+    }
+
+    private void userActivity() {
+        if (mCallbacks != null) {
+            mCallbacks.onUserActivityTimeoutChanged();
+            mCallbacks.userActivity();
         }
     }
 
@@ -257,6 +261,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             mViewStateManager.onPageBeginMoving();
         }
         showOutlinesAndSidePages();
+        userActivity();
     }
 
     @Override
