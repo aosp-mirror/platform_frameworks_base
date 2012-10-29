@@ -133,10 +133,11 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
 
                 // Only subtract out space from one dimension. Favor vertical.
+                // Offset by 1.5x to add some balance along the other edge.
                 if (Gravity.isVertical(lp.gravity)) {
-                    heightUsed = child.getMeasuredHeight();
+                    heightUsed += child.getMeasuredHeight() * 1.5f;
                 } else if (Gravity.isHorizontal(lp.gravity)) {
-                    widthUsed = child.getMeasuredWidth();
+                    widthUsed += child.getMeasuredWidth() * 1.5f;
                 }
             }
         }
@@ -224,11 +225,13 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         final int adjustedWidth;
         final int adjustedHeight;
         if (fixedLayoutHorizontal) {
-            adjustedWidth = (int) (width * lp.centerWithinArea + 0.5f);
+            final int paddedWidth = width - padding.left - padding.right;
+            adjustedWidth = (int) (paddedWidth * lp.centerWithinArea + 0.5f);
             adjustedHeight = height;
         } else if (fixedLayoutVertical) {
+            final int paddedHeight = height - padding.top - padding.bottom;
             adjustedWidth = width;
-            adjustedHeight = (int) (height * lp.centerWithinArea + 0.5f);
+            adjustedHeight = (int) (paddedHeight * lp.centerWithinArea + 0.5f);
         } else {
             adjustedWidth = width;
             adjustedHeight = height;
@@ -248,17 +251,24 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 top = fixedLayoutVertical ?
                         padding.top + (adjustedHeight - childHeight) / 2 : padding.top;
                 bottom = top + childHeight;
-                if (adjustPadding && isVertical) padding.top = bottom;
+                if (adjustPadding && isVertical) {
+                    padding.top = bottom;
+                    padding.bottom += childHeight / 2;
+                }
                 break;
             case Gravity.BOTTOM:
                 bottom = fixedLayoutVertical
                         ? height - padding.bottom - (adjustedHeight - childHeight) / 2
                         : height - padding.bottom;
                 top = bottom - childHeight;
-                if (adjustPadding && isVertical) padding.bottom = top;
+                if (adjustPadding && isVertical) {
+                    padding.bottom = height - top;
+                    padding.top += childHeight / 2;
+                }
                 break;
             case Gravity.CENTER_VERTICAL:
-                top = (height - childHeight) / 2;
+                final int paddedHeight = height - padding.top - padding.bottom;
+                top = padding.top + (paddedHeight - childHeight) / 2;
                 bottom = top + childHeight;
                 break;
         }
@@ -267,17 +277,24 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 left = fixedLayoutHorizontal ?
                         padding.left + (adjustedWidth - childWidth) / 2 : padding.left;
                 right = left + childWidth;
-                if (adjustPadding && isHorizontal && !isVertical) padding.left = right;
+                if (adjustPadding && isHorizontal && !isVertical) {
+                    padding.left = right;
+                    padding.right += childWidth / 2;
+                }
                 break;
             case Gravity.RIGHT:
                 right = fixedLayoutHorizontal
                         ? width - padding.right - (adjustedWidth - childWidth) / 2
                         : width - padding.right;
                 left = right - childWidth;
-                if (adjustPadding && isHorizontal && !isVertical) padding.right = left;
+                if (adjustPadding && isHorizontal && !isVertical) {
+                    padding.right = width - left;
+                    padding.left += childWidth / 2;
+                }
                 break;
             case Gravity.CENTER_HORIZONTAL:
-                left = (width - childWidth) / 2;
+                final int paddedWidth = width - padding.left - padding.right;
+                left = (paddedWidth - childWidth) / 2;
                 right = left + childWidth;
                 break;
         }
