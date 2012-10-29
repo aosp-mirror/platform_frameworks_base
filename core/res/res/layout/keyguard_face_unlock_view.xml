@@ -39,7 +39,7 @@
             android:id="@+id/spotlightMask"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/facelock_spotlight_mask"
+            android:background="@*android:color/facelock_spotlight_mask"
         />
 
         <ImageButton
@@ -50,7 +50,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:background="#00000000"
-            android:src="@drawable/ic_facial_backup"
+            android:src="@*android:drawable/ic_facial_backup"
         />
 
     </RelativeLayout>

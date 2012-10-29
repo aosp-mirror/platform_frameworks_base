@@ -103,6 +103,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         void hideSecurityView(int duration);
         void showSecurityView();
         void showUnlockHint();
+        void userActivity();
     }
 
     public KeyguardHostView(Context context) {
@@ -164,13 +165,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         maybePopulateWidgets();
 
         mViewStateManager = new KeyguardViewStateManager();
-        SlidingChallengeLayout challengeLayout =
+        SlidingChallengeLayout slider =
                 (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
-        challengeLayout.setOnChallengeScrolledListener(mViewStateManager);
+        if (slider != null) {
+            slider.setOnChallengeScrolledListener(mViewStateManager);
+        }
         mAppWidgetContainer.setViewStateManager(mViewStateManager);
 
         mViewStateManager.setPagedView(mAppWidgetContainer);
-        mViewStateManager.setSlidingChallenge(challengeLayout);
+        mViewStateManager.setChallengeLayout(slider != null ? slider :
+                (ChallengeLayout) findViewById(R.id.multi_pane_challenge));
 
         mSecurityViewContainer = (ViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
@@ -213,18 +217,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
-        disableStatusViewInteraction();
         post(mSwitchPageRunnable);
-    }
-
-    private void disableStatusViewInteraction() {
-        // Disable all user interaction on status view. This is done to prevent falsing in the
-        // pocket from triggering useractivity and prevents 3rd party replacement widgets
-        // from responding to user interaction while in this position.
-        View statusView = findViewById(R.id.keyguard_status_view);
-        if (statusView instanceof KeyguardWidgetFrame) {
-            ((KeyguardWidgetFrame) statusView).setDisableUserInteraction(true);
-        }
     }
 
     @Override
@@ -866,7 +859,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         });
 
-        inflateAndAddUserSelectorWidgetIfNecessary();
+        enableUserSelectorIfNecessary();
         initializeTransportControl();
     }
 
@@ -1027,22 +1020,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setCurrentPage(pageToShow);
     }
 
-    private void inflateAndAddUserSelectorWidgetIfNecessary() {
+    private void enableUserSelectorIfNecessary() {
         // if there are multiple users, we need to add the multi-user switcher widget to the
         // keyguard.
+        KeyguardMultiUserSelectorView multiUser =
+                (KeyguardMultiUserSelectorView) findViewById(R.id.keyguard_user_selector);
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> users = mUm.getUsers(true);
 
         if (users.size() > 1) {
-            KeyguardWidgetFrame userSwitcher = (KeyguardWidgetFrame)
-                LayoutInflater.from(mContext).inflate(R.layout.keyguard_multi_user_selector_widget,
-                        mAppWidgetContainer, false);
-
-            // add the switcher in the first position
-            mAppWidgetContainer.addView(userSwitcher, getWidgetPosition(R.id.keyguard_status_view));
-            KeyguardMultiUserSelectorView multiUser = (KeyguardMultiUserSelectorView)
-                    userSwitcher.getChildAt(0);
-
+            multiUser.setVisibility(View.VISIBLE);
             UserSwitcherCallback callback = new UserSwitcherCallback() {
                 @Override
                 public void hideSecurityView(int duration) {
@@ -1061,6 +1048,12 @@ public class KeyguardHostView extends KeyguardViewBase {
                     }
                 }
 
+                @Override
+                public void userActivity() {
+                    if (mViewMediatorCallback != null) {
+                        mViewMediatorCallback.userActivity();
+                    }
+                }
             };
             multiUser.setCallback(callback);
         }

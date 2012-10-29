@@ -61,7 +61,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableLeft="@drawable/lockscreen_forgot_password_button"
+            android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
             style="?android:attr/buttonBarButtonStyle"
             android:textSize="@dimen/kg_status_line_font_size"
             android:textColor="?android:attr/textColorSecondary"

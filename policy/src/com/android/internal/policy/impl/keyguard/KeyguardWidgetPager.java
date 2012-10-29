@@ -296,7 +296,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                     float scrollProgress = getScrollProgress(screenCenter, child, i);
                     float alpha = 1 - Math.abs(scrollProgress);
                     // TODO: Set content alpha
-                    if (!isReordering()) {
+                    if (!isReordering(false)) {
                         child.setBackgroundAlphaMultiplier(
                                 backgroundAlphaInterpolator(Math.abs(scrollProgress)));
                     } else {
@@ -439,7 +439,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     public boolean onLongClick(View v) {
-        startReordering();
-        return true;
+        if (startReordering()) {
+            return true;
+        }
+        return false;
     }
 }

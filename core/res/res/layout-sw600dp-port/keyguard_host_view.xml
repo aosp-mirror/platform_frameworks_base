@@ -31,7 +31,8 @@
         android:id="@+id/multi_pane_challenge"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipChildren="false">
+        android:clipChildren="false"
+        android:orientation="vertical">
 
         <include layout="@layout/keyguard_widget_pager"
                  android:layout_width="match_parent"
@@ -65,4 +66,3 @@
 
     </com.android.internal.policy.impl.keyguard.MultiPaneChallengeLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardHostView>
-
