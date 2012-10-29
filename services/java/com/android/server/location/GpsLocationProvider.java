@@ -1452,11 +1452,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void requestRefLocation(int flags) {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+        final int phoneType = phone.getPhoneType();
+        if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
             GsmCellLocation gsm_cell = (GsmCellLocation) phone.getCellLocation();
-            if ((gsm_cell != null) && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) &&
-                    (phone.getNetworkOperator() != null) &&
-                        (phone.getNetworkOperator().length() > 3)) {
+            if ((gsm_cell != null) && (phone.getNetworkOperator() != null)
+                    && (phone.getNetworkOperator().length() > 3)) {
                 int type;
                 int mcc = Integer.parseInt(phone.getNetworkOperator().substring(0,3));
                 int mnc = Integer.parseInt(phone.getNetworkOperator().substring(3));
@@ -1474,9 +1474,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             } else {
                 Log.e(TAG,"Error getting cell location info.");
             }
-        }
-        else {
-            Log.e(TAG,"CDMA not supported.");
+        } else if (phoneType == TelephonyManager.PHONE_TYPE_CDMA) {
+            Log.e(TAG, "CDMA not supported.");
         }
     }
 
