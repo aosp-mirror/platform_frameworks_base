@@ -16,18 +16,12 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.ObjectAnimator;
-import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
-import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -40,8 +34,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.internal.R;
-
-import java.util.List;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
@@ -67,7 +59,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                             .getAssistIntent(mContext, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
-                        launchActivity(assistIntent, false);
+                        mActivityLauncher.launchActivity(assistIntent, false);
                     } else {
                         Log.w(TAG, "Failed to get intent for assist activity");
                     }
@@ -75,7 +67,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                     break;
 
                 case com.android.internal.R.drawable.ic_lockscreen_camera:
-                    launchCamera();
+                    mActivityLauncher.launchCamera();
                     mCallback.userActivity(0);
                     break;
 
@@ -119,47 +111,25 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
     };
 
+    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
+
+        @Override
+        KeyguardSecurityCallback getCallback() {
+            return mCallback;
+        }
+
+        @Override
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }
+
+        @Override
+        Context getContext() {
+            return mContext;
+        }};
+
     public KeyguardSelectorView(Context context) {
         this(context, null);
-    }
-
-    private boolean wouldLaunchResolverActivity(Intent intent) {
-        PackageManager packageManager = mContext.getPackageManager();
-        ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
-                PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
-        final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
-                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
-        // If the list contains the above resolved activity, then it can't be
-        // ResolverActivity itself.
-        for (int i = 0; i < appList.size(); i++) {
-            ResolveInfo tmp = appList.get(i);
-            if (tmp.activityInfo.name.equals(resolved.activityInfo.name)
-                    && tmp.activityInfo.packageName.equals(resolved.activityInfo.packageName)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected void launchCamera() {
-        if (mLockPatternUtils.isSecure()) {
-            // Launch the secure version of the camera
-            final Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
-            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
-            if (wouldLaunchResolverActivity(intent)) {
-                // TODO: Show disambiguation dialog instead.
-                // For now, we'll treat this like launching any other app from secure keyguard.
-                // When they do, user sees the system's ResolverActivity which lets them choose
-                // which secure camera to use.
-                launchActivity(intent, false);
-            } else {
-                launchActivity(intent, true);
-            }
-        } else {
-            // Launch the normal camera
-            launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA), false);
-        }
     }
 
     public KeyguardSelectorView(Context context, AttributeSet attrs) {
@@ -265,42 +235,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
-    }
-
-    /**
-     * Launches the said intent for the current foreground user.
-     * @param intent
-     * @param showsWhileLocked true if the activity can be run on top of keyguard.
-     * See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
-     */
-    private void launchActivity(final Intent intent, boolean showsWhileLocked) {
-        intent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        boolean isSecure = mLockPatternUtils.isSecure();
-        if (!isSecure || showsWhileLocked) {
-            if (!isSecure) try {
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-                Log.w(TAG, "can't dismiss keyguard on launch");
-            }
-            try {
-                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-            } catch (ActivityNotFoundException e) {
-                Log.w(TAG, "Activity not found for intent + " + intent.getAction());
-            }
-        } else {
-            // Create a runnable to start the activity and ask the user to enter their
-            // credentials.
-            mCallback.setOnDismissRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-                }
-            });
-            mCallback.dismiss(false);
-        }
     }
 
     @Override
