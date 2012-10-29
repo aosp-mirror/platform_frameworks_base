@@ -939,8 +939,9 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @param preferenceScreen A {@link PreferenceScreen} whose hierarchy click
      *            listener should be called in the proper order (between other
      *            processing). May be null.
+     * @hide
      */
-    void performClick(PreferenceScreen preferenceScreen) {
+    public void performClick(PreferenceScreen preferenceScreen) {
         
         if (!isEnabled()) {
             return;
