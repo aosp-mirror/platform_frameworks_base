@@ -1105,7 +1105,6 @@ public class LockPatternUtils {
     }
 
     private void writeAppWidgets(int[] appWidgetIds) {
-        Settings.Secure.putString(mContentResolver,
         Settings.Secure.putStringForUser(mContentResolver,
                         Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
                         combineStrings(appWidgetIds, ","),
