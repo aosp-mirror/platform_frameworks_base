@@ -54,7 +54,9 @@ public final class Display {
     private final DisplayManagerGlobal mGlobal;
     private final int mDisplayId;
     private final int mLayerStack;
-    private final String mName;
+    private final int mFlags;
+    private final int mType;
+    private final String mAddress;
     private final CompatibilityInfoHolder mCompatibilityInfo;
 
     private DisplayInfo mDisplayInfo; // never null
@@ -141,6 +143,36 @@ public final class Display {
     public static final int FLAG_SECURE = 1 << 1;
 
     /**
+     * Display type: Unknown display type.
+     * @hide
+     */
+    public static final int TYPE_UNKNOWN = 0;
+
+    /**
+     * Display type: Built-in display.
+     * @hide
+     */
+    public static final int TYPE_BUILT_IN = 1;
+
+    /**
+     * Display type: HDMI display.
+     * @hide
+     */
+    public static final int TYPE_HDMI = 2;
+
+    /**
+     * Display type: WiFi display.
+     * @hide
+     */
+    public static final int TYPE_WIFI = 3;
+
+    /**
+     * Display type: Overlay display.
+     * @hide
+     */
+    public static final int TYPE_OVERLAY = 4;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -154,10 +186,14 @@ public final class Display {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
-        mLayerStack = displayInfo.layerStack; // can never change as long as the display is valid
-        mName = displayInfo.name; // cannot change as long as the display is valid
         mCompatibilityInfo = compatibilityInfo;
         mIsValid = true;
+
+        // Cache properties that cannot change as long as the display is valid.
+        mLayerStack = displayInfo.layerStack;
+        mFlags = displayInfo.flags;
+        mType = displayInfo.type;
+        mAddress = displayInfo.address;
     }
 
     /**
@@ -228,10 +264,34 @@ public final class Display {
      * @see #FLAG_SECURE
      */
     public int getFlags() {
-        synchronized (this) {
-            updateDisplayInfoLocked();
-            return mDisplayInfo.flags;
-        }
+        return mFlags;
+    }
+
+    /**
+     * Gets the display type.
+     *
+     * @return The display type.
+     *
+     * @see #TYPE_UNKNOWN
+     * @see #TYPE_BUILT_IN
+     * @see #TYPE_HDMI
+     * @see #TYPE_WIFI
+     * @see #TYPE_OVERLAY
+     * @hide
+     */
+    public int getType() {
+        return mType;
+    }
+
+    /**
+     * Gets the display address, or null if none.
+     * Interpretation varies by display type.
+     *
+     * @return The display address.
+     * @hide
+     */
+    public String getAddress() {
+        return mAddress;
     }
 
     /**
@@ -246,10 +306,17 @@ public final class Display {
 
     /**
      * Gets the name of the display.
+     * <p>
+     * Note that some displays may be renamed by the user.
+     * </p>
+     *
      * @return The display's name.
      */
     public String getName() {
-        return mName;
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.name;
+        }
     }
 
     /**
@@ -525,6 +592,26 @@ public final class Display {
             mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
                     + ", " + mTempMetrics + ", isValid=" + mIsValid;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static String typeToString(int type) {
+        switch (type) {
+            case TYPE_UNKNOWN:
+                return "UNKNOWN";
+            case TYPE_BUILT_IN:
+                return "BUILT_IN";
+            case TYPE_HDMI:
+                return "HDMI";
+            case TYPE_WIFI:
+                return "WIFI";
+            case TYPE_OVERLAY:
+                return "OVERLAY";
+            default:
+                return Integer.toString(type);
         }
     }
 }

@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.content.Context;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.view.Display;
 
 /**
  * Provides a fake default display for headless systems.
@@ -63,6 +64,7 @@ final class HeadlessDisplayAdapter extends DisplayAdapter {
                 mInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                         | DisplayDeviceInfo.FLAG_SECURE
                         | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
+                mInfo.type = Display.TYPE_BUILT_IN;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
             }
             return mInfo;
