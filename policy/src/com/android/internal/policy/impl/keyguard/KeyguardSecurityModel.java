@@ -31,7 +31,8 @@ public class KeyguardSecurityModel {
         Invalid, // NULL state
         None, // No security enabled
         Pattern, // Unlock by drawing a pattern.
-        Password, // Unlock by entering a password or PIN
+        Password, // Unlock by entering an alphanumeric password
+        PIN, // Strictly numeric password
         Biometric, // Unlock with a biometric key (e.g. finger print or face unlock)
         Account, // Unlock by entering an account's login and password.
         SimPin, // Unlock by entering a sim pin.
@@ -85,6 +86,9 @@ public class KeyguardSecurityModel {
             final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
             switch (security) {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+                    mode = mLockPatternUtils.isLockPasswordEnabled() ?
+                            SecurityMode.PIN : SecurityMode.None;
+                    break;
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
@@ -117,7 +121,9 @@ public class KeyguardSecurityModel {
      */
     SecurityMode getAlternateFor(SecurityMode mode) {
         if (isBiometricUnlockEnabled() && !isBiometricUnlockSuppressed()
-                && (mode == SecurityMode.Password || mode == SecurityMode.Pattern)) {
+                && (mode == SecurityMode.Password
+                        || mode == SecurityMode.PIN
+                        || mode == SecurityMode.Pattern)) {
             return SecurityMode.Biometric;
         }
         return mode; // no alternate, return what was given
