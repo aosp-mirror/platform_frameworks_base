@@ -587,7 +587,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Allows the app to write new words into the user dictionary."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"test access to protected storage"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"test access to protected storage"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Allows the app to test a permission for USB storage that will be availabe on future devices."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Allows the app to test a permission for USB storage that will be available on future devices."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Allows the app to test a permission for the SD card that will be available on future devices."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modify or delete the contents of your USB storage"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modify or delete the contents of your SD card"</string>
