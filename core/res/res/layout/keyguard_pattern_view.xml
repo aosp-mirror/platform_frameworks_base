@@ -32,13 +32,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <include layout="@layout/keyguard_message_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center">
-
-            <include layout="@layout/keyguard_navigation"/>
 
             <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
             the pattern view for it to compute its size. This is an unusual case, caused by
@@ -55,7 +57,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center" />
 
-            <include layout="@layout/keyguard_emergency_carrier_area_and_recovery"
+            <include layout="@layout/keyguard_emergency_carrier_area"
                 android:id="@+id/keyguard_selector_fade_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -25,6 +25,10 @@
     android:layout_height="350dp"
     android:orientation="vertical"
     >
+    <include layout="@layout/keyguard_message_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -186,7 +190,7 @@
             />
         <ImageButton
             android:id="@+id/key_enter"
-            style="@android:style/Widget.Button.NumPadKey"
+            style="@style/Widget.Button.NumPadKey"
             android:gravity="center"
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -195,7 +199,7 @@
             />
     </LinearLayout>
 
-    <include layout="@layout/keyguard_emergency_carrier_area_and_recovery"
+    <include layout="@layout/keyguard_emergency_carrier_area"
                    android:id="@+id/keyguard_selector_fade_container"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"

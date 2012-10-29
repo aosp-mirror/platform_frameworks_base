@@ -326,4 +326,8 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
         return mContainer.getContext();
     }
 
+    @Override
+    public void setTimeout(int timeout_ms) {
+    }
+
 }

@@ -130,10 +130,6 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        // We always set a dummy NavigationManager to avoid null checks
-        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
-
         mSimPinEntry = (TextView) findViewById(R.id.sim_pin_entry);
         mSimPinEntry.setOnEditorActionListener(this);
         mSimPinEntry.addTextChangedListener(this);
@@ -150,6 +146,9 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
                 });
         mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
         mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
+
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mSecurityMessageDisplay.setTimeout(0); // don't show ownerinfo/charging status by default
         reset();
     }
 
@@ -337,11 +336,5 @@ public class KeyguardSimPukView extends LinearLayout implements View.OnClickList
 
     @Override
     public void afterTextChanged(Editable s) {
-    }
-
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-        reset();
     }
 }

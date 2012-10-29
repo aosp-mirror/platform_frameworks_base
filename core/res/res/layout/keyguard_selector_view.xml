@@ -36,6 +36,10 @@
         android:clipToPadding="false"
         android:gravity="center">
 
+        <include layout="@layout/keyguard_message_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <include layout="@layout/keyguard_glow_pad_container" />
 
         <include layout="@layout/keyguard_emergency_carrier_area"
