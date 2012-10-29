@@ -38,6 +38,8 @@ import android.widget.TextView;
 import com.android.internal.R;
 
 class KeyguardMultiUserAvatar extends FrameLayout {
+    private static final String TAG = KeyguardMultiUserAvatar.class.getSimpleName();
+    private static final boolean DEBUG = KeyguardHostView.DEBUG;
 
     private ImageView mUserImage;
     private TextView mUserName;
@@ -122,9 +124,20 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
         mUserName = (TextView) findViewById(R.id.keyguard_user_name);
 
-        mFramed = new KeyguardCircleFramedDrawable(
-                BitmapFactory.decodeFile(rewriteIconPath(user.iconPath)), (int) mIconSize,
-                mFrameColor, mStroke, mFrameShadowColor, mShadowRadius, mHighlightColor);
+        Bitmap icon = null; 
+        try {
+            icon = BitmapFactory.decodeFile(rewriteIconPath(user.iconPath));
+        } catch (Exception e) {
+            if (DEBUG) Log.d(TAG, "failed to open profile icon " + user.iconPath, e);
+        }
+
+        if (icon == null) {
+            icon = BitmapFactory.decodeResource(mContext.getResources(),
+                    com.android.internal.R.drawable.ic_contact_picture);
+        }
+
+        mFramed = new KeyguardCircleFramedDrawable(icon, (int) mIconSize, mFrameColor, mStroke,
+                mFrameShadowColor, mShadowRadius, mHighlightColor);
         mUserImage.setImageDrawable(mFramed);
         mUserName.setText(mUserInfo.name);
         setOnClickListener(mUserSelector);
