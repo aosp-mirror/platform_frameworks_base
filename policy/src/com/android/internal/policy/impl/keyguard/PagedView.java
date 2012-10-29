@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -43,8 +42,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -61,7 +58,7 @@ import java.util.ArrayList;
  * An abstraction of the original Workspace which supports browsing through a
  * sequential list of "pages"
  */
-public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeListener {
+public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeListener {
     private static final String TAG = "WidgetPagedView";
     private static final boolean DEBUG = false;
     protected static final int INVALID_PAGE = -1;
@@ -1400,7 +1397,9 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
                                 }
 
                                 removeView(mDragView);
+                                onRemoveView(mDragView);
                                 addView(mDragView, pageUnderPointIndex);
+                                onAddView(mDragView, pageUnderPointIndex);
                                 mSidePageHoverIndex = -1;
                             }
                         };
@@ -1510,6 +1509,10 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
 
         return true;
     }
+
+    //public abstract void onFlingToDelete(View v);
+    public abstract void onRemoveView(View v);
+    public abstract void onAddView(View v, int index);
 
     private void resetTouchState() {
         releaseVelocityTracker();
@@ -2159,7 +2162,6 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
     };
 
     public void onFlingToDelete(PointF vel) {
-        final ViewConfiguration config = ViewConfiguration.get(getContext());
         final long startTime = AnimationUtils.currentAnimationTimeMillis();
 
         // NOTE: Because it takes time for the first frame of animation to actually be
@@ -2245,6 +2247,7 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
                 }
 
                 removeView(dragView);
+                onRemoveView(dragView);
             }
         };
 

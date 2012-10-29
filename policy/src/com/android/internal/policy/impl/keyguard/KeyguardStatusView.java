@@ -20,6 +20,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.GridLayout;
 
+import com.android.internal.widget.LockPatternUtils;
+
 public class KeyguardStatusView extends GridLayout {
     @SuppressWarnings("unused")
     private KeyguardStatusViewManager mStatusViewManager;
@@ -34,6 +36,10 @@ public class KeyguardStatusView extends GridLayout {
 
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    public int getAppWidgetId() {
+        return LockPatternUtils.ID_DEFAULT_STATUS_WIDGET;
     }
 
     @Override

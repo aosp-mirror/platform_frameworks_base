@@ -46,7 +46,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;

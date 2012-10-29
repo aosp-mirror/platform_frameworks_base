@@ -16,17 +16,15 @@
 
 package com.android.internal.policy.impl.keyguard;
 
-import java.lang.ref.WeakReference;
-
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.media.IRemoteControlDisplay;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
-import android.media.IRemoteControlDisplay;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,11 +40,12 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
+
+import java.lang.ref.WeakReference;
 /**
  * This is the widget responsible for showing music controls in keyguard.
  */
@@ -264,7 +263,7 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int dim = Math.min(MAXDIM, Math.max(getWidth(), getHeight()));
+//        int dim = Math.min(MAXDIM, Math.max(getWidth(), getHeight()));
 //        Log.v(TAG, "setting max bitmap size: " + dim + "x" + dim);
 //        mAudioManager.remoteControlDisplayUsesBitmapSize(mIRCD, dim, dim);
     }
