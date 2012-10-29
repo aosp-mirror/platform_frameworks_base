@@ -28,6 +28,5 @@
     android:paddingBottom="25dp"
     android:clipChildren="false"
     android:clipToPadding="false"
-    androidprv:pageSpacing="10dp"
-    androidprv:edgeSwipeRegionSize="8dp">
+    androidprv:pageSpacing="10dp">
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>

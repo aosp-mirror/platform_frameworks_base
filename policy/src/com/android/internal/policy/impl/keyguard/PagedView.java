@@ -253,10 +253,11 @@ public class PagedView extends ViewGroup implements ViewGroup.OnHierarchyChangeL
         mScrollIndicatorPaddingLeft =
             a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingLeft, 0);
         mScrollIndicatorPaddingRight =
-            a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingRight, 0);
-        mEdgeSwipeRegionSize =
-                a.getDimensionPixelSize(R.styleable.PagedView_edgeSwipeRegionSize, 0);
+                a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingRight, 0);
         a.recycle();
+
+        mEdgeSwipeRegionSize =
+                getResources().getDimensionPixelSize(R.dimen.kg_edge_swipe_region_size);
 
         setHapticFeedbackEnabled(false);
         init();

@@ -55,7 +55,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     private final Scroller mScroller;
     private int mScrollState;
-    private OnChallengeScrolledListener mListener;
+    private OnChallengeScrolledListener mScrollListener;
+    private OnBouncerStateChangedListener mBouncerListener;
 
     public static final int SCROLL_STATE_IDLE = 0;
     public static final int SCROLL_STATE_DRAGGING = 1;
@@ -77,6 +78,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private int mMaxVelocity;
     private float mLastTouchY;
     private int mDragHandleSize;
+    private int mDragHandleEdgeSlop;
 
     private static final int DRAG_HANDLE_DEFAULT_SIZE = 32; // dp
 
@@ -172,6 +174,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mMinVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxVelocity = vc.getScaledMaximumFlingVelocity();
 
+        mDragHandleEdgeSlop = getResources().getDimensionPixelSize(
+                R.dimen.kg_edge_swipe_region_size);
+
         setWillNotDraw(false);
     }
 
@@ -187,18 +192,22 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     private void sendInitialListenerUpdates() {
-        if (mListener != null) {
+        if (mScrollListener != null) {
             int challengeTop = mChallengeView != null ? mChallengeView.getTop() : 0;
-            mListener.onScrollPositionChanged(mChallengeOffset, challengeTop);
-            mListener.onScrollStateChanged(mScrollState);
+            mScrollListener.onScrollPositionChanged(mChallengeOffset, challengeTop);
+            mScrollListener.onScrollStateChanged(mScrollState);
         }
     }
 
     public void setOnChallengeScrolledListener(OnChallengeScrolledListener listener) {
-        mListener = listener;
+        mScrollListener = listener;
         if (mHasLayout) {
             sendInitialListenerUpdates();
         }
+    }
+
+    public void setOnBouncerStateChangedListener(OnBouncerStateChangedListener listener) {
+        mBouncerListener = listener;
     }
 
     @Override
@@ -216,6 +225,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mHasLayout = false;
     }
 
+    @Override
+    public void requestChildFocus(View child, View focused) {
+        if (mIsBouncing && child != mChallengeView) {
+            // Clear out of the bouncer if the user tries to move focus outside of
+            // the security challenge view.
+            hideBouncer();
+        }
+        super.requestChildFocus(child, focused);
+    }
+
     // We want the duration of the page snap animation to be influenced by the distance that
     // the screen has to travel, however, we don't want this duration to be effected in a
     // purely linear fashion. Instead, we use this method to moderate the effect that the distance
@@ -230,8 +249,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrollState != state) {
             mScrollState = state;
 
-            if (mListener != null) {
-                mListener.onScrollStateChanged(state);
+            if (mScrollListener != null) {
+                mScrollListener.onScrollStateChanged(state);
             }
         }
     }
@@ -325,6 +344,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
         }
+        if (mBouncerListener != null) {
+            mBouncerListener.onBouncerStateChanged(true);
+        }
     }
 
     @Override
@@ -334,6 +356,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mIsBouncing = false;
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
+        }
+        if (mBouncerListener != null) {
+            mBouncerListener.onBouncerStateChanged(false);
         }
     }
 
@@ -477,7 +502,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private boolean isInDragHandle(float x, float y) {
         if (mChallengeView == null) return false;
 
-        return x >= 0 && y >= mChallengeView.getTop() && x < getWidth() &&
+        return x >= mDragHandleEdgeSlop &&
+                y >= mChallengeView.getTop() &&
+                x < getWidth() - mDragHandleEdgeSlop &&
                 y < mChallengeView.getTop() + mDragHandleSize;
     }
 
@@ -644,8 +671,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 bottom - mChallengeView.getHeight(), mChallengeView.getRight(), bottom);
 
         mChallengeView.setAlpha(offset);
-        if (mListener != null) {
-            mListener.onScrollPositionChanged(offset, mChallengeView.getTop());
+        if (mScrollListener != null) {
+            mScrollListener.onScrollPositionChanged(offset, mChallengeView.getTop());
         }
         postInvalidateOnAnimation();
         return true;
