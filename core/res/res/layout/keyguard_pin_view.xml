@@ -191,4 +191,13 @@
             android:text="@android:string/ok"
             />
     </LinearLayout>
+
+    <include layout="@layout/keyguard_emergency_carrier_area_and_recovery"
+                   android:id="@+id/keyguard_selector_fade_container"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical"
+                   android:layout_gravity="bottom|center_horizontal"
+                   android:gravity="center_horizontal" />
+
 </com.android.internal.policy.impl.keyguard.KeyguardPINView>
