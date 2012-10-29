@@ -103,6 +103,9 @@
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_margin">100dp</dimen>
 
+    <!-- Margin around the various security views -->
+    <dimen name="keyguard_muliuser_selector_margin">24dp</dimen>
+
     <!-- Stroke width of the frame for the circular avatars. -->
     <dimen name="keyguard_avatar_frame_stroke_width">3dp</dimen>
 

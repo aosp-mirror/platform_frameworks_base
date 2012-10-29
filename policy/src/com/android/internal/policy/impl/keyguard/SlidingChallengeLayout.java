@@ -36,7 +36,7 @@ import com.android.internal.R;
  * This layout handles interaction with the sliding security challenge views
  * that overlay/resize other keyguard contents.
  */
-public class SlidingChallengeLayout extends ViewGroup {
+public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout {
     private static final String TAG = "SlidingChallengeLayout";
 
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
@@ -284,6 +284,11 @@ public class SlidingChallengeLayout extends ViewGroup {
      * @return true if the challenge is at all visible.
      */
     public boolean isChallengeShowing() {
+        return mChallengeShowing;
+    }
+
+    @Override
+    public boolean isChallengeOverlapping() {
         return mChallengeShowing;
     }
 
@@ -648,6 +653,12 @@ public class SlidingChallengeLayout extends ViewGroup {
             animateChallengeTo(show ? layoutBottom :
                 layoutBottom + mChallengeView.getHeight() - mDragHandleSize, velocity);
         }
+    }
+
+    @Override
+    public void showBouncer() {
+        // TODO Block access to other views
+        showChallenge(true);
     }
 
     @Override
