@@ -24,7 +24,7 @@
     android:layout_gravity="center"
     android:contentDescription="@string/keyguard_accessibility_user_selector">
 
-    <om.android.internal.policy.impl.keyguard.KeyguardLinearLayout
+    <com.android.internal.policy.impl.keyguard.KeyguardLinearLayout
         android:id="@+id/keyguard_users_grid"
         android:orientation="horizontal"
         android:layout_width="wrap_content"
