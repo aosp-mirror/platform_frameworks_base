@@ -1125,7 +1125,7 @@ public class LockPatternUtils {
         if (widgets == null) {
             return false;
         }
-        if (index < 0 || index >= widgets.length) {
+        if (index < 0 || index > widgets.length) {
             return false;
         }
         int[] newWidgets = new int[widgets.length + 1];
