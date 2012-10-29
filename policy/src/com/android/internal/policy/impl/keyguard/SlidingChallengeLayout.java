@@ -16,12 +16,15 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.Log;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -42,7 +45,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
     private Drawable mHandleDrawable;
-    private boolean mShowHandle = true;
+    private Drawable mFrameDrawable;
+    private Drawable mDragIconDrawable;
 
     // Initialized during measurement from child layoutparams
     private View mChallengeView;
@@ -79,8 +83,44 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private float mLastTouchY;
     private int mDragHandleSize;
     private int mDragHandleEdgeSlop;
+    float mHandleAlpha;
+    float mFrameAlpha;
+    private ObjectAnimator mHandleAnimation;
+    private ObjectAnimator mFrameAnimation;
+
+    static final Property<SlidingChallengeLayout, Float> HANDLE_ALPHA =
+            new FloatProperty<SlidingChallengeLayout>("handleAlpha") {
+        @Override
+        public void setValue(SlidingChallengeLayout view, float value) {
+            view.mHandleAlpha = value;
+            view.invalidate();
+        }
+
+        @Override
+        public Float get(SlidingChallengeLayout view) {
+            return view.mHandleAlpha;
+        }
+    };
+
+    static final Property<SlidingChallengeLayout, Float> FRAME_ALPHA =
+            new FloatProperty<SlidingChallengeLayout>("frameAlpha") {
+        @Override
+        public void setValue(SlidingChallengeLayout view, float value) {
+            if (view.mFrameDrawable != null) {
+                view.mFrameAlpha = value;
+                view.mFrameDrawable.setAlpha((int) (value * 0xFF));
+                view.mFrameDrawable.invalidateSelf();
+            }
+        }
+
+        @Override
+        public Float get(SlidingChallengeLayout view) {
+            return view.mFrameAlpha;
+        }
+    };
 
     private static final int DRAG_HANDLE_DEFAULT_SIZE = 32; // dp
+    private static final int HANDLE_ANIMATE_DURATION = 200; // ms
 
     // True if at least one layout pass has happened since the view was attached.
     private boolean mHasLayout;
@@ -164,7 +204,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.SlidingChallengeLayout, defStyle, 0);
-        setDragHandleDrawable(a.getDrawable(R.styleable.SlidingChallengeLayout_dragHandle));
+        setDragDrawables(a.getDrawable(R.styleable.SlidingChallengeLayout_dragHandle),
+                a.getDrawable(R.styleable.SlidingChallengeLayout_dragIcon));
 
         a.recycle();
 
@@ -180,15 +221,53 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         setWillNotDraw(false);
     }
 
-    public void setDragHandleDrawable(Drawable d) {
-        if (d != null) {
-            mDragHandleSize = d.getIntrinsicHeight();
+    public void setDragDrawables(Drawable handle, Drawable icon) {
+        final float density = getResources().getDisplayMetrics().density;
+        final int defaultSize = (int) (DRAG_HANDLE_DEFAULT_SIZE * density + 0.5f);
+        mDragHandleSize = Math.max(handle != null ? handle.getIntrinsicHeight() : defaultSize,
+                icon != null ? icon.getIntrinsicHeight() : defaultSize);
+        mHandleDrawable = handle;
+        mDragIconDrawable = icon;
+    }
+
+    public void setDragIconDrawable(Drawable d) {
+        mDragIconDrawable = d;
+    }
+
+    public void showHandle(boolean visible) {
+        if (visible) {
+            if (mHandleAnimation != null) {
+                mHandleAnimation.cancel();
+                mHandleAnimation = null;
+            }
+            mHandleAlpha = 1.f;
+            invalidate();
+        } else {
+            animateHandle(false);
         }
-        if (mDragHandleSize == 0 || d == null) {
-            final float density = getResources().getDisplayMetrics().density;
-            mDragHandleSize = (int) (DRAG_HANDLE_DEFAULT_SIZE * density + 0.5f);
+    }
+
+    void animateHandle(boolean visible) {
+        if (mHandleAnimation != null) {
+            mHandleAnimation.cancel();
         }
-        mHandleDrawable = d;
+        mHandleAnimation = ObjectAnimator.ofFloat(this, HANDLE_ALPHA, visible ? 1.f : 0.f);
+        mHandleAnimation.setInterpolator(sHandleFadeInterpolator);
+        mHandleAnimation.setDuration(HANDLE_ANIMATE_DURATION);
+        mHandleAnimation.start();
+    }
+
+    void animateFrame(boolean visible, boolean full) {
+        if (mFrameDrawable == null) return;
+
+        if (mFrameAnimation != null) {
+            mFrameAnimation.cancel();
+        }
+        mFrameAnimation = ObjectAnimator.ofFloat(this, FRAME_ALPHA,
+                visible ? (full ? 1.f : 0.5f) : 0.f);
+        mFrameAnimation.setInterpolator(sHandleFadeInterpolator);
+        mFrameAnimation.setDuration(HANDLE_ANIMATE_DURATION);
+        mFrameAnimation.start();
     }
 
     private void sendInitialListenerUpdates() {
@@ -249,6 +328,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrollState != state) {
             mScrollState = state;
 
+            animateHandle(state == SCROLL_STATE_IDLE && !mChallengeShowing);
+            animateFrame(state == SCROLL_STATE_DRAGGING, false);
             if (mScrollListener != null) {
                 mScrollListener.onScrollStateChanged(state);
             }
@@ -342,8 +423,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         showChallenge(true);
         mIsBouncing = true;
         if (mScrimView != null) {
-            mScrimView.setVisibility(GONE);
+            mScrimView.setVisibility(VISIBLE);
         }
+        animateFrame(true, true);
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(true);
         }
@@ -357,6 +439,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
         }
+        animateFrame(false, false);
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(false);
         }
@@ -393,7 +476,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
 
-                    if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
+                    if (!mIsBouncing &&
+                            (isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
                             (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING)) &&
                             mActivePointerId == INVALID_POINTER) {
                         mActivePointerId = ev.getPointerId(i);
@@ -450,7 +534,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if (!mDragging && !mBlockDrag) {
+                if (!mDragging && !mBlockDrag && !mIsBouncing) {
                     final int count = ev.getPointerCount();
                     for (int i = 0; i < count; i++) {
                         final float x = ev.getX(i);
@@ -543,6 +627,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 if (mChallengeView != oldChallengeView) {
                     mChallengeView.setVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
                 }
+                // We're going to play silly games with the frame's background drawable later.
+                mFrameDrawable = mChallengeView.getBackground();
+                mFrameDrawable.setAlpha(0);
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);
             }
@@ -603,8 +690,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     sendInitialListenerUpdates();
                 }
             });
+            mHasLayout = true;
         }
-        mHasLayout = true;
     }
 
     public void computeScroll() {
@@ -630,13 +717,25 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public void draw(Canvas c) {
         super.draw(c);
-        if (mChallengeOffset < 1.f
-                && mChallengeView != null && mHandleDrawable != null && mShowHandle) {
+        if (mChallengeView != null && mHandleAlpha > 0 && mHandleDrawable != null) {
             final int top = mChallengeView.getTop();
-            mHandleDrawable.setBounds(0, top, getWidth(), top + mDragHandleSize);
-            final float alpha = sHandleFadeInterpolator.getInterpolation(1 - mChallengeOffset);
-            mHandleDrawable.setAlpha((int) (alpha * 0xFF));
+            final int handleHeight = mHandleDrawable.getIntrinsicHeight();
+            final int challengeLeft = mChallengeView.getLeft();
+            final int challengeRight = mChallengeView.getRight();
+            mHandleDrawable.setBounds(challengeLeft, top, challengeRight, top + handleHeight);
+            mHandleDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
             mHandleDrawable.draw(c);
+
+            if (mDragIconDrawable != null) {
+                final int iconWidth = mDragIconDrawable.getIntrinsicWidth();
+                final int iconHeight = mDragIconDrawable.getIntrinsicHeight();
+                final int iconLeft = (challengeLeft + challengeRight - iconWidth) / 2;
+                final int iconTop = top + (handleHeight - iconHeight) / 2;
+                mDragIconDrawable.setBounds(iconLeft, iconTop, iconLeft + iconWidth,
+                        iconTop + iconHeight);
+                mDragIconDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
+                mDragIconDrawable.draw(c);
+            }
         }
     }
 
@@ -728,11 +827,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             animateChallengeTo(show ? layoutBottom :
                 layoutBottom + mChallengeView.getHeight() - mDragHandleSize, velocity);
         }
-    }
-
-    public void showHandle(boolean show) {
-        mShowHandle = show;
-        invalidate();
     }
 
     @Override
