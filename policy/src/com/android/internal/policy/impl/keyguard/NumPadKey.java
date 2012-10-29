@@ -21,12 +21,14 @@ import android.content.res.TypedArray;
 import android.text.SpannableStringBuilder;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 
 public class NumPadKey extends Button {
     // list of "ABC", etc per digit, starting with '0'
@@ -35,6 +37,7 @@ public class NumPadKey extends Button {
     int mDigit = -1;
     int mTextViewResId;
     TextView mTextView = null;
+    boolean mEnableHaptics;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -50,6 +53,7 @@ public class NumPadKey extends Button {
             if (mTextView != null) {
                 mTextView.append(String.valueOf(mDigit));
             }
+            doHapticKeyClick();
         }
     };
 
@@ -69,6 +73,8 @@ public class NumPadKey extends Button {
         setTextViewResId(a.getResourceId(R.styleable.NumPadKey_textView, 0));
 
         setOnClickListener(mListener);
+
+        mEnableHaptics = new LockPatternUtils(context).isTactileFeedbackEnabled();
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
         builder.append(String.valueOf(mDigit));
@@ -98,5 +104,14 @@ public class NumPadKey extends Button {
     public void setTextViewResId(int resId) {
         mTextView = null;
         mTextViewResId = resId;
+    }
+
+    // Cause a VIRTUAL_KEY vibration
+    public void doHapticKeyClick() {
+        if (mEnableHaptics) {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        }
     }
 }
