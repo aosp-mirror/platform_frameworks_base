@@ -732,7 +732,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void show() {
-        onScreenTurnedOn();
+        if (DEBUG) Log.d(TAG, "show()");
+        showPrimarySecurityScreen(false);
     }
 
     private boolean isSecure() {
