@@ -405,7 +405,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mLastLocation.clear();
             for (LocationProviderInterface p : mProviders) {
                 updateProviderListenersLocked(p.getName(), false, mCurrentUserId);
-                p.switchUser(userId);
+                if (!LocationManager.FUSED_PROVIDER.equals(p.getName())) {
+                    p.switchUser(userId);
+                }
             }
             mCurrentUserId = userId;
             updateProvidersLocked();
@@ -664,9 +666,27 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mProvidersByName.remove(provider.getName());
     }
 
+    /**
+     * Returns true if the specified UID is SYSTEM_UID or matches the current user.
+     *
+     * @param uid the uid
+     * @return true if uid is SYSTEM_UID or matches the current user
+     */
+    private boolean isCurrentUserOrSystemLocked(int uid) {
+        return uid == Process.SYSTEM_UID || UserHandle.getUserId(uid) == mCurrentUserId;
+    }
 
-    private boolean isAllowedBySettingsLocked(String provider, int userId) {
-        if (userId != mCurrentUserId) {
+    /**
+     * Returns the first UID in the current user's range.
+     *
+     * @return the first UID in the current user's range
+     */
+    private int getCurrentUidBaseLocked() {
+        return UserHandle.getUid(mCurrentUserId, 0);
+    }
+
+    private boolean isAllowedBySettingsLocked(String provider, int uid) {
+        if (!isCurrentUserOrSystemLocked(uid)) {
             return false;
         }
         if (mEnabledProviders.contains(provider)) {
@@ -675,6 +695,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (mDisabledProviders.contains(provider)) {
             return false;
         }
+        if (uid == Process.SYSTEM_UID) {
+            return true;
+        }
+
         // Use system settings
         ContentResolver resolver = mContext.getContentResolver();
 
@@ -828,8 +852,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         ArrayList<String> out;
-        int callingUserId = UserHandle.getCallingUserId();
-        long identity = Binder.clearCallingIdentity();
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 out = new ArrayList<String>(mProviders.size());
@@ -839,7 +863,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         continue;
                     }
                     if (allowedResolutionLevel >= getMinimumResolutionLevelForProviderUse(name)) {
-                        if (enabledOnly && !isAllowedBySettingsLocked(name, callingUserId)) {
+                        if (enabledOnly && !isAllowedBySettingsLocked(name, callingUid)) {
                             continue;
                         }
                         if (criteria != null && !LocationProvider.propertiesMeetCriteria(
@@ -915,7 +939,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             LocationProviderInterface p = mProviders.get(i);
             boolean isEnabled = p.isEnabled();
             String name = p.getName();
-            boolean shouldBeEnabled = isAllowedBySettingsLocked(name, mCurrentUserId);
+            boolean shouldBeEnabled = isAllowedBySettingsLocked(name, getCurrentUidBaseLocked());
             if (isEnabled && !shouldBeEnabled) {
                 updateProviderListenersLocked(name, false, mCurrentUserId);
                 changesMade = true;
@@ -943,7 +967,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             final int N = records.size();
             for (int i = 0; i < N; i++) {
                 UpdateRecord record = records.get(i);
-                if (UserHandle.getUserId(record.mReceiver.mUid) == userId) {
+                if (isCurrentUserOrSystemLocked(record.mReceiver.mUid)) {
                     // Sends a notification message to the receiver
                     if (!record.mReceiver.callProviderEnabledLocked(provider, enabled)) {
                         if (deadReceivers == null) {
@@ -982,7 +1006,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         if (records != null) {
             for (UpdateRecord record : records) {
-                if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
+                if (isCurrentUserOrSystemLocked(record.mReceiver.mUid)) {
                     LocationRequest locationRequest = record.mRequest;
                     providerRequest.locationRequests.add(locationRequest);
                     if (locationRequest.getInterval() < providerRequest.interval) {
@@ -1000,7 +1024,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 // under that threshold.
                 long thresholdInterval = (providerRequest.interval + 1000) * 3 / 2;
                 for (UpdateRecord record : records) {
-                    if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
+                    if (isCurrentUserOrSystemLocked(record.mReceiver.mUid)) {
                         LocationRequest locationRequest = record.mRequest;
                         if (locationRequest.getInterval() <= thresholdInterval) {
                             worksource.add(record.mReceiver.mUid);
@@ -1223,7 +1247,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             oldRecord.disposeLocked(false);
         }
 
-        boolean isProviderEnabled = isAllowedBySettingsLocked(name, UserHandle.getUserId(uid));
+        boolean isProviderEnabled = isAllowedBySettingsLocked(name, uid);
         if (isProviderEnabled) {
             applyRequirementsLocked(name);
         } else {
@@ -1278,9 +1302,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         // update provider
+        int currentUidBase = getCurrentUidBaseLocked();
         for (String provider : providers) {
             // If provider is already disabled, don't need to do anything
-            if (!isAllowedBySettingsLocked(provider, mCurrentUserId)) {
+            if (!isAllowedBySettingsLocked(provider, currentUidBase)) {
                 continue;
             }
 
@@ -1298,7 +1323,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 request.getProvider());
         // no need to sanitize this request, as only the provider name is used
 
-        long identity = Binder.clearCallingIdentity();
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
         try {
             if (mBlacklist.isBlacklisted(packageName)) {
                 if (D) Log.d(TAG, "not returning last loc for blacklisted app: " +
@@ -1314,7 +1340,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 LocationProviderInterface provider = mProvidersByName.get(name);
                 if (provider == null) return null;
 
-                if (!isAllowedBySettingsLocked(name, mCurrentUserId)) return null;
+                if (!isAllowedBySettingsLocked(name, callingUid)) {
+                    return null;
+                }
 
                 Location location = mLastLocation.get(name);
                 if (location == null) {
@@ -1471,13 +1499,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 provider);
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
 
-        long identity = Binder.clearCallingIdentity();
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 LocationProviderInterface p = mProvidersByName.get(provider);
                 if (p == null) return false;
 
-                return isAllowedBySettingsLocked(provider, mCurrentUserId);
+                return isAllowedBySettingsLocked(provider, callingUid);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1616,10 +1645,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             Receiver receiver = r.mReceiver;
             boolean receiverDead = false;
 
-            int receiverUserId = UserHandle.getUserId(receiver.mUid);
-            if (receiverUserId != mCurrentUserId) {
+            final int receiverUid = receiver.mUid;
+            if (!isCurrentUserOrSystemLocked(receiverUid)) {
                 if (D) {
-                    Log.d(TAG, "skipping loc update for background user " + receiverUserId +
+                    Log.d(TAG, "skipping loc update for background uid " + receiverUid +
                             " (current user: " + mCurrentUserId + ", app: " +
                             receiver.mPackageName + ")");
                 }
@@ -1716,7 +1745,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
 
         synchronized (mLock) {
-            if (isAllowedBySettingsLocked(provider, mCurrentUserId)) {
+            if (isAllowedBySettingsLocked(provider, getCurrentUidBaseLocked())) {
                 handleLocationChangedLocked(location, passive);
             }
         }
