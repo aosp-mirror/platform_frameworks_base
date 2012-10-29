@@ -147,7 +147,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     public boolean stop() {
         if (DEBUG) Log.d(TAG, "stop()");
         if (mHandler.getLooper() != Looper.myLooper()) {
-            Log.e(TAG, "stop() called off of the UI thread");
+            Log.e(TAG, "stop() called from non-UI thread");
         }
 
         boolean mWasRunning = mIsRunning;
