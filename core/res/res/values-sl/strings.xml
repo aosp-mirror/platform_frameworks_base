@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Programu omogoča pisanje nove besede v uporabniški slovar."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"preskus dostopa do zaščitene shrambe"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"preskus dostopa do zaščitene shrambe"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Aplikaciji omogoča preskušanje dovoljenja za pomnilnik USB, ki bo na voljo v prihodnjih napravah."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Aplikaciji omogoča preskušanje dovoljenja za kartico SD, ki bo na voljo v prihodnjih napravah."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"spr. ali bris. vseb. pomn. USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"spreminjanje ali brisanje vsebine kartice SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pripomočki za ljudi s posebnimi potrebami so omogočeni."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Omogočanje pripomočkov za ljudi s posebnimi potrebami preklicano."</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Lastnik"</string>
 </resources>

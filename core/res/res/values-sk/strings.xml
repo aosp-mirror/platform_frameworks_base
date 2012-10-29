@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Umožňuje aplikácii zapisovať nové slová do používateľského slovníka."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testovanie prístupu do chráneného ukladacieho priestoru"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testovanie prístupu do chráneného ukladacieho priestoru"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Umožňuje aplikácii testovať povolenie pre ukladací priestor USB, ktorý bude k dispozícii v budúcich zariadeniach."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Umožňuje aplikácii testovať povolenie pre kartu SD, ktorá bude k dispozícii v budúcich zariadeniach."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"upraviť alebo odstrániť obsah úložiska USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava alebo odstránenie obsahu na karte SD"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Zjednodušenie ovládania bolo zrušené."</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
 </resources>

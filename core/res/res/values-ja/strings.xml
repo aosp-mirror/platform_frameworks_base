@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"保護されたストレージへのテストアクセス"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"今後追加するデバイスで使用できるUSBストレージの権限のテストをアプリに許可します。"</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"今後追加するデバイスで使用できるSDカードの権限のテストをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USBストレージのコンテンツの変更または削除"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SDカードのコンテンツの変更または削除"</string>
@@ -1425,4 +1426,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ユーザー補助が有効になりました。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
+    <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
 </resources>
