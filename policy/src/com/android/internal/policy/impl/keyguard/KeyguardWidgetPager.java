@@ -450,8 +450,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         return true;
     }
     boolean isMusicWidgetVisible() {
-        // TODO: Make proper test once we have music in the list
-        return false;
+        return mViewStateManager.getTransportState() != KeyguardViewStateManager.TRANSPORT_GONE;
     }
     boolean isCameraWidgetVisible() {
         return mCameraWidgetEnabled;
