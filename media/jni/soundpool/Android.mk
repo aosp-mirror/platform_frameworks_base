@@ -9,8 +9,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libandroid_runtime \
 	libnativehelper \
-	libmedia \
-	libmedia_native
+	libmedia
 
 LOCAL_MODULE:= libsoundpool
 
