@@ -16,4 +16,16 @@
 ** limitations under the License.
 */
 -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android" />
+
+<!-- This contains emergency call button and carrier as shared by pin/pattern/password screens -->
+<com.android.internal.policy.impl.keyguard.KeyguardMessageArea
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:id="@+id/keyguard_message_area"
+    android:maxLines="4"
+    android:textAppearance="?android:attr/textAppearance"
+    android:textSize="@dimen/kg_status_line_font_size"
+    android:textColor="?android:attr/textColorSecondary" />
+

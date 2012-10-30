@@ -76,9 +76,6 @@ public class KeyguardSimPinView extends LinearLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        // We always set a dummy NavigationManager to avoid null checks
-        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
-
         mPinEntry = (EditText) findViewById(R.id.sim_pin_entry);
         mPinEntry.setOnEditorActionListener(this);
         mPinEntry.addTextChangedListener(this);
@@ -103,6 +100,9 @@ public class KeyguardSimPinView extends LinearLayout
                 }
             });
         }
+
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mSecurityMessageDisplay.setTimeout(0);
         reset();
     }
 
@@ -269,9 +269,4 @@ public class KeyguardSimPinView extends LinearLayout
     public void afterTextChanged(Editable s) {
     }
 
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-        reset();
-    }
 }

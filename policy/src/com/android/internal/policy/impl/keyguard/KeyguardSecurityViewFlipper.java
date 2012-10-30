@@ -119,14 +119,6 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.setSecurityMessageDisplay(display);
-        }
-    }
-
-    @Override
     public void showUsabilityHint() {
         KeyguardSecurityView ksv = getSecurityView();
         if (ksv != null) {

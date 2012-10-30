@@ -266,7 +266,7 @@
     <!-- Size of margin on the right of keyguard's status view -->
     <dimen name="kg_status_line_font_right_margin">16dp</dimen>
 
-    <!-- Top margin for the clock view --> 
+    <!-- Top margin for the clock view -->
     <dimen name="kg_clock_top_margin">-16dp</dimen>
 
     <!-- Horizontal gap between keys in PIN and SIM PIN numeric keyboards in keyguard -->

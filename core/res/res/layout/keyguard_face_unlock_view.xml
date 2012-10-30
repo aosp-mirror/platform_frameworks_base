@@ -25,7 +25,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/keyguard_navigation"/>
+    <include layout="@layout/keyguard_message_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 
     <RelativeLayout
         android:id="@+id/face_unlock_area_view"

@@ -625,19 +625,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             View v = inflater.inflate(layoutId, this, false);
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
-
-            view = (KeyguardSecurityView) v;
-            TextView navigationText = ((TextView) findViewById(R.id.keyguard_message_area));
-
-            // Some devices can fit a navigation area, others cannot. On devices that cannot,
-            // we display the security message in status area.
-            if (navigationText != null) {
-                view.setSecurityMessageDisplay(new KeyguardNavigationManager(navigationText));
-            } else {
-                if (mKeyguardStatusViewManager != null) {
-                    view.setSecurityMessageDisplay(mKeyguardStatusViewManager);
-                }
-            }
+            view = (KeyguardSecurityView)v;
         }
 
         if (view instanceof KeyguardSelectorView) {
@@ -955,13 +943,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 }
             });
         }
-
-        KeyguardStatusView ksv = (KeyguardStatusView)
-                findViewById(R.id.keyguard_status_view_face_palm);
-        if (ksv != null) {
-            mKeyguardStatusViewManager = ksv.getManager();
-        }
-
     }
 
     private void addWidgetsFromSettings() {

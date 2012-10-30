@@ -43,7 +43,10 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_lockscreen_sim"/>
 
-            <include layout="@layout/keyguard_sim_puk_pin_account_navigation"/>
+            <include layout="@layout/keyguard_message_area_large"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
          </LinearLayout>
 
         <!-- Password entry field -->
