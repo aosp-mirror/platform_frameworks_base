@@ -1009,6 +1009,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
+            mAppInstallDir = new File(dataDir, "app");
+            mAppLibInstallDir = new File(dataDir, "app-lib");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
@@ -1218,8 +1220,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            mAppInstallDir = new File(dataDir, "app");
-            mAppLibInstallDir = new File(dataDir, "app-lib");
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
             //clean up list
