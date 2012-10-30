@@ -24,8 +24,10 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private KeyguardWidgetPager mPagedView;
     private ChallengeLayout mChallengeLayout;
     private Runnable mHideHintsRunnable;
-    private KeyguardSecurityView mKeyguardSecurityContainer;
     private int[] mTmpPoint = new int[2];
+    private int[] mTmpLoc = new int[2];
+
+    private KeyguardSecurityView mKeyguardSecurityContainer;
     private static final int SCREEN_ON_HINT_DURATION = 1000;
     private static final int SCREEN_ON_RING_HINT_DELAY = 300;
     Handler mMainQueue = new Handler(Looper.myLooper());
@@ -91,7 +93,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             boolean challengeOverlapping = mChallengeLayout.isChallengeOverlapping();
             if (challengeOverlapping && !newCurPage.isSmall()
                     && mPageListeningToSlider != newPageIndex) {
-                shrinkWidget(newCurPage);
+                newCurPage.shrinkWidget();
             }
         }
         mCurrentPage = newPageIndex;
@@ -104,15 +106,6 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         return mTmpPoint[1];
     }
 
-    private void shrinkWidget(KeyguardWidgetFrame frame) {
-        if (frame != null && mChallengeLayout != null &&
-                mChallengeLayout instanceof SlidingChallengeLayout) {
-            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
-            int top = scl.getMaxChallengeTop();
-            frame.shrinkWidget(getChallengeTopRelativeToFrame(frame, top));
-        }
-    }
-
     /**
      * Simple method to map a point from one view's coordinates to another's. Note: this method
      * doesn't account for transforms, so if the views will be transformed, this should not be used.
@@ -121,15 +114,15 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
      * @param toView The view into which the point should be mapped
      * @param pt The point
      */
-    public void mapPoint(View fromView, View toView, int pt[]) {
-        int[] loc = new int[2];
-        fromView.getLocationInWindow(loc);
-        int x = loc[0];
-        int y = loc[1];
+    private void mapPoint(View fromView, View toView, int pt[]) {
+        fromView.getLocationInWindow(mTmpLoc);
 
-        toView.getLocationInWindow(loc);
-        int vX = loc[0];
-        int vY = loc[1];
+        int x = mTmpLoc[0];
+        int y = mTmpLoc[1];
+
+        toView.getLocationInWindow(mTmpLoc);
+        int vX = mTmpLoc[0];
+        int vY = mTmpLoc[1];
 
         pt[0] += x - vX;
         pt[1] += y - vY;
@@ -177,8 +170,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             if (!frame.isSmall()) {
                 // We need to fetch the final page, in case the pages are in motion.
                 mPageListeningToSlider = mPagedView.getNextPage();
-                System.out.println("Shrink widget from scroll state changed!");
-                shrinkWidget(frame);
+                frame.shrinkWidget();
             }
             // View is on the move.  Pause the security view until it completes.
             mKeyguardSecurityContainer.onPause();
