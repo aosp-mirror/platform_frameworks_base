@@ -192,6 +192,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
+    static final boolean DEBUG_WALLPAPER_LIGHT = true || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
@@ -1625,7 +1626,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (foundW == null && windowDetachedI >= 0) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Found animating detached wallpaper activity: #" + i + "=" + w);
             foundW = w;
             foundI = windowDetachedI;
@@ -1641,12 +1642,12 @@ public class WindowManagerService extends IWindowManager.Stub
             // enough (we'll just wait until whatever transition is pending
             // executes).
             if (mWallpaperTarget != null && mWallpaperTarget.mAppToken != null) {
-                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                         "Wallpaper not changing: waiting for app anim in current target");
                 return 0;
             }
             if (foundW != null && foundW.mAppToken != null) {
-                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                         "Wallpaper not changing: waiting for app anim in found target");
                 return 0;
             }
@@ -1654,7 +1655,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mWallpaperTarget != foundW
                 && (mLowerWallpaperTarget == null || mLowerWallpaperTarget != foundW)) {
-            if (DEBUG_WALLPAPER) {
+            if (DEBUG_WALLPAPER_LIGHT) {
                 Slog.v(TAG, "New wallpaper target: " + foundW
                         + " oldTarget: " + mWallpaperTarget);
             }
@@ -1674,17 +1675,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean foundAnim = foundW.mWinAnimator.mAnimation != null
                         || (foundW.mAppToken != null &&
                             foundW.mAppToken.mAppAnimator.animation != null);
-                if (DEBUG_WALLPAPER) {
+                if (DEBUG_WALLPAPER_LIGHT) {
                     Slog.v(TAG, "New animation: " + foundAnim
                             + " old animation: " + oldAnim);
                 }
                 if (foundAnim && oldAnim) {
                     int oldI = windows.indexOf(oldW);
-                    if (DEBUG_WALLPAPER) {
+                    if (DEBUG_WALLPAPER_LIGHT) {
                         Slog.v(TAG, "New i: " + foundI + " old i: " + oldI);
                     }
                     if (oldI >= 0) {
-                        if (DEBUG_WALLPAPER) {
+                        if (DEBUG_WALLPAPER_LIGHT) {
                             Slog.v(TAG, "Animating wallpapers: old#" + oldI
                                     + "=" + oldW + "; new#" + foundI
                                     + "=" + foundW);
@@ -1692,7 +1693,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         // Set the new target correctly.
                         if (foundW.mAppToken != null && foundW.mAppToken.hiddenRequested) {
-                            if (DEBUG_WALLPAPER) {
+                            if (DEBUG_WALLPAPER_LIGHT) {
                                 Slog.v(TAG, "Old wallpaper still the target.");
                             }
                             mWallpaperTarget = oldW;
@@ -1704,7 +1705,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // the wallpaper below the lower.
                         else if (foundI > oldI) {
                             // The new target is on top of the old one.
-                            if (DEBUG_WALLPAPER) {
+                            if (DEBUG_WALLPAPER_LIGHT) {
                                 Slog.v(TAG, "Found target above old target.");
                             }
                             mUpperWallpaperTarget = foundW;
@@ -1713,7 +1714,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             foundI = oldI;
                         } else {
                             // The new target is below the old one.
-                            if (DEBUG_WALLPAPER) {
+                            if (DEBUG_WALLPAPER_LIGHT) {
                                 Slog.v(TAG, "Found target below old target.");
                             }
                             mUpperWallpaperTarget = oldW;
@@ -1732,7 +1733,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     || (mUpperWallpaperTarget.mAppToken != null
                             && mUpperWallpaperTarget.mAppToken.mAppAnimator.animation != null);
             if (!lowerAnimating || !upperAnimating) {
-                if (DEBUG_WALLPAPER) {
+                if (DEBUG_WALLPAPER_LIGHT) {
                     Slog.v(TAG, "No longer animating wallpaper targets!");
                 }
                 mLowerWallpaperTarget = null;
@@ -1810,6 +1811,8 @@ public class WindowManagerService extends IWindowManager.Stub
             curTokenIndex--;
             WindowToken token = mWallpaperTokens.get(curTokenIndex);
             if (token.hidden == visible) {
+                if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
+                        "Wallpaper token " + token + " hidden=" + !visible);
                 changed |= ADJUST_WALLPAPER_VISIBILITY_CHANGED;
                 token.hidden = !visible;
                 // Need to do a layout to ensure the wallpaper now has the
@@ -1831,7 +1834,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 dispatchWallpaperVisibility(wallpaper, visible);
 
                 wallpaper.mWinAnimator.mAnimLayer = wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
-                if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG, "adjustWallpaper win "
+                if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
                         + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);
 
                 // First, if this window is at the current index, then all
@@ -1858,7 +1861,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // Now stick it in.
-                if (DEBUG_WALLPAPER || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
+                if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                     Slog.v(TAG, "Moving wallpaper " + wallpaper
                             + " from " + oldIndex + " to " + foundI);
                 }
@@ -2033,9 +2036,9 @@ public class WindowManagerService extends IWindowManager.Stub
         if (wallpaper.mWallpaperVisible != visible) {
             wallpaper.mWallpaperVisible = visible;
             try {
-                if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Slog.v(TAG,
-                        "Updating visibility of wallpaper " + wallpaper
-                        + ": " + visible + " Callers=" + Debug.getCallers(2));
+                if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                        "Updating vis of wallpaper " + wallpaper
+                        + ": " + visible + " from:\n" + Debug.getCallers(4, "  "));
                 wallpaper.mClient.dispatchAppVisibility(visible);
             } catch (RemoteException e) {
             }
@@ -8800,10 +8803,10 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState oldWallpaper = mWallpaperTarget;
         if (mLowerWallpaperTarget != null
                 && mLowerWallpaperTarget.mAppToken != null) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "wallpaperForceHiding changed with lower="
                     + mLowerWallpaperTarget);
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "hidden=" + mLowerWallpaperTarget.mAppToken.hidden +
                     " hiddenRequested=" + mLowerWallpaperTarget.mAppToken.hiddenRequested);
             if (mLowerWallpaperTarget.mAppToken.hidden) {
@@ -8815,7 +8818,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         mInnerFields.mAdjResult |= adjustWallpaperWindowsLocked();
-        if (DEBUG_WALLPAPER) Slog.v(TAG, "****** OLD: " + oldWallpaper
+        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "****** OLD: " + oldWallpaper
                 + " NEW: " + mWallpaperTarget
                 + " LOWER: " + mLowerWallpaperTarget);
         return changes;
@@ -9189,7 +9192,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 }
                             }
                             if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-                                if (DEBUG_WALLPAPER) Slog.v(TAG,
+                                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                                         "First draw done in potential wallpaper target " + w);
                                 mInnerFields.mWallpaperMayChange = true;
                                 displayContent.pendingLayoutChanges |=
@@ -9340,18 +9343,18 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mWallpaperForceHidingChanged = false;
 
         if (mInnerFields.mWallpaperMayChange) {
-            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+            if (WindowManagerService.DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Wallpaper may change!  Adjusting");
             mInnerFields.mAdjResult |= adjustWallpaperWindowsLocked();
         }
 
         if ((mInnerFields.mAdjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Wallpaper layer changed: assigning layers + relayout");
             defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
             assignLayersLocked(defaultWindows);
         } else if ((mInnerFields.mAdjResult&ADJUST_WALLPAPER_VISIBILITY_CHANGED) != 0) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Wallpaper visibility changed: relayout");
             defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
         }
@@ -10326,7 +10329,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Iterator<WindowToken> it = mTokenMap.values().iterator();
             while (it.hasNext()) {
                 WindowToken token = it.next();
-                pw.print("  Token "); pw.print(token.token);
+                pw.print("  "); pw.print(token);
                 if (dumpAll) {
                     pw.println(':');
                     token.dump(pw, "    ");
@@ -10354,8 +10357,9 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.println();
             pw.println("  Application tokens in Z order:");
             for (int i=mAppTokens.size()-1; i>=0; i--) {
-                pw.print("  App #"); pw.print(i); pw.println(": ");
-                        mAppTokens.get(i).dump(pw, "    ");
+                pw.print("  App #"); pw.print(i);
+                        pw.print(' '); pw.print(mAppTokens.get(i)); pw.println(":");
+                mAppTokens.get(i).dump(pw, "    ");
             }
         }
         if (mFinishedStarting.size() > 0) {
