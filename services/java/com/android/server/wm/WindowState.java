@@ -282,7 +282,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
-            + " token=" + token + " (" + mAttrs.token + ")");
+            + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
         try {
             c.asBinder().linkToDeath(deathRecipient, 0);
         } catch (RemoteException e) {
