@@ -481,6 +481,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mGestureStartY = ev.getY();
+                mBlockDrag = false;
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -533,6 +534,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         final int action = ev.getActionMasked();
         switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mBlockDrag = false;
+                mGestureStartY = ev.getY();
+                break;
+
             case MotionEvent.ACTION_CANCEL:
                 if (mDragging) {
                     showChallenge(0);
@@ -856,18 +862,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     /**
-     * The top edge of the challenge if it were fully opened.
-     */
-    private int getChallengeOpenedTop() {
-        return getLayoutBottom() - ((mChallengeView == null) ? 0 : mChallengeView.getHeight());
-    }
-
-    /**
      * Show or hide the challenge view, animating it if necessary.
      * @param show true to show, false to hide
      */
     public void showChallenge(boolean show) {
         showChallenge(show, 0);
+        if (!show) {
+            // Block any drags in progress so that callers can use this to disable dragging
+            // for other touch interactions.
+            mBlockDrag = true;
+        }
     }
 
     private void showChallenge(int velocity) {
