@@ -264,6 +264,8 @@ public class WindowAnimator {
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                     }
                 }
+                if (WindowManagerService.DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG,
+                        "Hiding wallpaper " + token + " from " + w);
                 token.hidden = true;
             }
         }
