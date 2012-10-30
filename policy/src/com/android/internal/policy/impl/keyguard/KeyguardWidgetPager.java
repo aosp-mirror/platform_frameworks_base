@@ -24,6 +24,8 @@ import android.animation.TimeInterpolator;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -33,7 +35,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
@@ -67,6 +68,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     private boolean mCameraWidgetEnabled;
 
+    // Background threads to deal with persistence
+    private HandlerThread mBgPersistenceWorkerThread;
+    private Handler mBgPersistenceWorkerHandler;
+
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -85,6 +90,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         Resources r = getResources();
         mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
+        mBgPersistenceWorkerThread = new HandlerThread("KeyguardWidgetPager Persistence");
+        mBgPersistenceWorkerThread.start();
+        mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
     }
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
@@ -179,17 +187,28 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
 
     public void onRemoveView(View v) {
-        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        mLockPatternUtils.removeAppWidget(appWidgetId);
+        final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        mBgPersistenceWorkerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLockPatternUtils.removeAppWidget(appWidgetId);
+            }
+        });
     }
 
-    public void onAddView(View v, int index) {
-        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        getVisiblePages(mTempVisiblePagesRange);
-        boundByReorderablePages(true, mTempVisiblePagesRange);
+    public void onAddView(View v, final int index) {
+        final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        final int[] pagesRange = new int[mTempVisiblePagesRange.length];
+        getVisiblePages(pagesRange);
+        boundByReorderablePages(true, pagesRange);
         // Subtract from the index to take into account pages before the reorderable
         // pages (e.g. the "add widget" page)
-        mLockPatternUtils.addAppWidget(appWidgetId, index - mTempVisiblePagesRange[0]);
+        mBgPersistenceWorkerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLockPatternUtils.addAppWidget(appWidgetId, index - pagesRange[0]);
+            }
+        });
     }
 
     /*
