@@ -1363,6 +1363,23 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Like {@link #getCallers(int)}, but each location is append to the string
+     * as a new line with <var>linePrefix</var> in front of it.
+     * @param depth the number of levels to return, starting with the immediate caller.
+     * @param linePrefix prefix to put in front of each location.
+     * @return a string describing the call stack.
+     * {@hide}
+     */
+    public static String getCallers(final int depth, String linePrefix) {
+        final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < depth; i++) {
+            sb.append(linePrefix).append(getCaller(callStack, i)).append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
      * @return a String describing the immediate caller of the calling function.
      * {@hide}
      */
