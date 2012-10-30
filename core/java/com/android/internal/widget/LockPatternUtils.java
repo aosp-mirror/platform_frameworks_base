@@ -150,7 +150,6 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
-    private int mStickyWidgetIndex = -1;
 
     // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
     private static volatile int sCurrentUserId = UserHandle.USER_NULL;
@@ -1162,6 +1161,21 @@ public class LockPatternUtils {
         return true;
     }
 
+    public int getStickyAppWidgetIndex() {
+        return Settings.Secure.getIntForUser(
+                mContentResolver,
+                Settings.Secure.LOCK_SCREEN_STICKY_APPWIDGET,
+                -1,
+                UserHandle.USER_CURRENT);
+    }
+
+    public void setStickyAppWidgetIndex(int value) {
+        Settings.Secure.putIntForUser(mContentResolver,
+                Settings.Secure.LOCK_SCREEN_STICKY_APPWIDGET,
+                value,
+                UserHandle.USER_CURRENT);
+    }
+
     private long getLong(String secureSettingKey, long defaultValue) {
         try {
             return getLockSettings().getLong(secureSettingKey, defaultValue,
@@ -1309,14 +1323,6 @@ public class LockPatternUtils {
 
     public boolean getPowerButtonInstantlyLocks() {
         return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true);
-    }
-
-    public int getStickyWidgetIndex() {
-        return mStickyWidgetIndex;
-    }
-
-    public void setStickyWidgetIndex(int stickyWidgetIndex) {
-        mStickyWidgetIndex = stickyWidgetIndex;
     }
 
 }

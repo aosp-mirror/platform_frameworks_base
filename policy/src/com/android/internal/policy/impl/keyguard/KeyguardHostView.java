@@ -249,14 +249,6 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mViewMediatorCallback.onUserActivityTimeoutChanged();
             }
         }
-
-        @Override
-        public void onPageSwitch(int newPageIndex) {
-            if (!isCameraOrAdd(newPageIndex)) {
-                if (DEBUG) Log.d(TAG, "Setting sticky widget index: " + newPageIndex);
-                mLockPatternUtils.setStickyWidgetIndex(newPageIndex);
-            }
-        }
     };
 
     @Override
@@ -737,6 +729,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "screen off, instance " + Integer.toHexString(hashCode()));
+        saveStickyWidgetIndex();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
     }
@@ -859,8 +852,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                     slider.showHandle(true);
                     slider.showChallenge(true);
                 }
-                View v = mAppWidgetContainer.getChildAt(mAppWidgetContainer.getCurrentPage());
-                if (v instanceof CameraWidgetFrame) {
+                if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
                     mAppWidgetContainer.scrollLeft();
                 }
             }
@@ -1050,6 +1042,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public Parcelable onSaveInstanceState() {
+        if (DEBUG) Log.d(TAG, "onSaveInstanceState");
+        saveStickyWidgetIndex();
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.transportState = mTransportState;
@@ -1058,6 +1052,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
+        if (DEBUG) Log.d(TAG, "onRestoreInstanceState");
         if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
@@ -1068,70 +1063,82 @@ public class KeyguardHostView extends KeyguardViewBase {
         post(mSwitchPageRunnable);
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (DEBUG) Log.d(TAG, "Window is " + (hasWindowFocus ? "focused" : "unfocused"));
+        if (!hasWindowFocus) {
+            saveStickyWidgetIndex();
+        }
+    }
+
     private void showAppropriateWidgetPage() {
-        boolean music = mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
-        if (music) {
+        boolean isMusicPlaying =
+                mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
+        if (isMusicPlaying) {
             mTransportState = TRANSPORT_VISIBLE;
         } else if (mTransportState == TRANSPORT_VISIBLE) {
             mTransportState = TRANSPORT_INVISIBLE;
         }
-        int pageToShow = getAppropriateWidgetPage();
+        int pageToShow = getAppropriateWidgetPage(isMusicPlaying);
         mAppWidgetContainer.setCurrentPage(pageToShow);
     }
 
-    private boolean isCameraOrAdd(int pageIndex) {
+    private boolean isCameraPage(int pageIndex) {
         View v = mAppWidgetContainer.getChildAt(pageIndex);
-        return v.getId() == R.id.keyguard_add_widget || v instanceof CameraWidgetFrame;
+        return v != null && v instanceof CameraWidgetFrame;
     }
 
-    private int getAppropriateWidgetPage() {
+    private boolean isAddPage(int pageIndex) {
+        View v = mAppWidgetContainer.getChildAt(pageIndex);
+        return v != null && v.getId() == R.id.keyguard_add_widget;
+    }
+
+    private int getAppropriateWidgetPage(boolean isMusicPlaying) {
         // assumes at least one widget (besides camera + add)
 
-        boolean music = mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
         // if music playing, show transport
-        if (music) {
+        if (isMusicPlaying) {
             if (DEBUG) Log.d(TAG, "Music playing, show transport");
             return mAppWidgetContainer.indexOfChild(mTransportControl);
         }
 
-        // if multi-user applicable, show it
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        View multiUserView = findViewById(R.id.keyguard_multi_user_selector);
-        int multiUserPosition = mAppWidgetContainer.indexOfChild(multiUserView);
-        if (multiUserPosition != -1 && userManager.getUsers(true).size() > 1) {
-            if (DEBUG) Log.d(TAG, "Multi-user applicable, show it");
-            return multiUserPosition;
-        }
-
-        // if we have a sticky widget, show it
-        int stickyWidgetIndex = mLockPatternUtils.getStickyWidgetIndex();
+        // if we have a valid sticky widget, show it
+        int stickyWidgetIndex = mLockPatternUtils.getStickyAppWidgetIndex();
         if (stickyWidgetIndex > -1
                 && stickyWidgetIndex < mAppWidgetContainer.getChildCount()
-                && !isCameraOrAdd(stickyWidgetIndex)) {
-            if (DEBUG) Log.d(TAG, "Sticky widget found, show it");
+                && !isAddPage(stickyWidgetIndex)
+                && !isCameraPage(stickyWidgetIndex)) {
+            if (DEBUG) Log.d(TAG, "Valid sticky widget found, show page " + stickyWidgetIndex);
             return stickyWidgetIndex;
         }
 
-        // if we have a status view, show it
-        View statusView = findViewById(R.id.keyguard_status_view);
-        int statusViewIndex = mAppWidgetContainer.indexOfChild(statusView);
-        if (statusViewIndex > -1) {
-            if (DEBUG) Log.d(TAG, "Status widget found, show it");
-            return mAppWidgetContainer.indexOfChild(statusView);
-        }
-
-        // else the right-most (except for camera)
+        // else show the right-most widget (except for camera)
         int rightMost = mAppWidgetContainer.getChildCount() - 1;
-        if (mAppWidgetContainer.getChildAt(rightMost) instanceof CameraWidgetFrame) {
+        if (isCameraPage(rightMost)) {
             rightMost--;
         }
-        if (DEBUG) Log.d(TAG, "Show right-most");
+        if (DEBUG) Log.d(TAG, "Show right-most page " + rightMost);
         return rightMost;
     }
 
+    private void saveStickyWidgetIndex() {
+        int stickyWidgetIndex = mAppWidgetContainer.getCurrentPage();
+        if (isAddPage(stickyWidgetIndex)) {
+            stickyWidgetIndex++;
+        }
+        if (isCameraPage(stickyWidgetIndex)) {
+            stickyWidgetIndex--;
+        }
+        if (stickyWidgetIndex < 0 || stickyWidgetIndex >= mAppWidgetContainer.getChildCount()) {
+            stickyWidgetIndex = -1;
+        }
+        if (DEBUG) Log.d(TAG, "saveStickyWidgetIndex: " + stickyWidgetIndex);
+        mLockPatternUtils.setStickyAppWidgetIndex(stickyWidgetIndex);
+    }
+
     private void enableUserSelectorIfNecessary() {
-        // if there are multiple users, we need to add the multi-user switcher widget to the
-        // keyguard.
+        // if there are multiple users, we need to enable to multi-user switcher
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> users = mUm.getUsers(true);
 

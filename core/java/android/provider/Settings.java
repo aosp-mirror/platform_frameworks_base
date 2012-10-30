@@ -3216,20 +3216,27 @@ public final class Settings {
 
 
         /**
-         * This preference contains the string that shows for owner info on LockScren.
+         * This preference contains the string that shows for owner info on LockScreen.
          * @hide
          */
         public static final String LOCK_SCREEN_OWNER_INFO = "lock_screen_owner_info";
 
         /**
-         * Id of the user-selected appwidget on the lockscreen, or -1 if none
+         * Ids of the user-selected appwidgets on the lockscreen (comma-delimited).
          * @hide
          */
         public static final String LOCK_SCREEN_APPWIDGET_IDS =
             "lock_screen_appwidget_ids";
 
         /**
-         * This preference enables showing the owner info on LockScren.
+         * Index of the lockscreen appwidget to restore, -1 if none.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_STICKY_APPWIDGET =
+            "lock_screen_sticky_appwidget";
+
+        /**
+         * This preference enables showing the owner info on LockScreen.
          * @hide
          */
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
