@@ -110,10 +110,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        // We always set a dummy NavigationManager to avoid null checks
-        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
-
         mLockPatternUtils = mLockPatternUtils == null
                 ? new LockPatternUtils(mContext) : mLockPatternUtils;
 
@@ -139,6 +135,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         setFocusableInTouchMode(true);
 
         maybeEnableFallback(mContext);
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
     }
 
     private void updateFooter(FooterMode mode) {
@@ -375,12 +372,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
-    }
-
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-        reset();
     }
 }
 

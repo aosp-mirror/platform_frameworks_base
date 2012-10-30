@@ -35,7 +35,6 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     private LockPatternUtils mLockPatternUtils;
     private BiometricSensorUnlock mBiometricUnlock;
-    private SecurityMessageDisplay mSecurityMessageDisplay;
     private View mFaceUnlockAreaView;
     private ImageButton mCancelButton;
 
@@ -213,11 +212,6 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
             }
         }
     };
-
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-    }
 
     @Override
     public void showUsabilityHint() {

@@ -33,13 +33,6 @@ import com.android.internal.R;
 public class KeyguardPINView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
-    // To avoid accidental lockout due to events while the device in in the pocket, ignore
-    // any passwords with length less than or equal to this length.
-    private static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
-
-    // Enable this if we want to hide the on-screen PIN keyboard when a physical one is showing
-    private static final boolean ENABLE_HIDE_KEYBOARD = false;
-
     public KeyguardPINView(Context context) {
         this(context, null);
     }

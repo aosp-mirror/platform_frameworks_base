@@ -67,7 +67,6 @@
                 android:paddingLeft="@dimen/keyguard_security_view_margin"
                 android:paddingTop="@dimen/keyguard_security_view_margin"
                 android:paddingRight="@dimen/keyguard_security_view_margin"
-                android:paddingBottom="@dimen/keyguard_security_view_margin"
                 android:gravity="center">
             </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
         </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>

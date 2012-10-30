@@ -91,9 +91,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     protected void onFinishInflate() {
-        // We always set a dummy NavigationManager to avoid null checks
-        mSecurityMessageDisplay = new KeyguardNavigationManager(null);
-
         mLockPatternUtils = new LockPatternUtils(mContext);
 
         mPasswordEntry = (TextView) findViewById(R.id.passwordEntry);
@@ -120,6 +117,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 }
             }
         });
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
     }
 
     @Override
@@ -217,12 +215,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public void afterTextChanged(Editable s) {
-    }
-
-    @Override
-    public void setSecurityMessageDisplay(SecurityMessageDisplay display) {
-        mSecurityMessageDisplay = display;
-        reset();
     }
 
     // Cause a VIRTUAL_KEY vibration
