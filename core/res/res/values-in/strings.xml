@@ -585,8 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Mengizinkan apl menulis kata-kata baru ke dalam kamus pengguna."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
-    <skip />
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Memungkinkan aplikasi menguji izin penyimpanan USB yang akan tersedia di perangkat mendatang."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Memungkinkan aplikasi menguji izin untuk kartu SD yang akan tersedia pada perangkat yang akan datang."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah/hapus konten pympanan USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"mengubah atau menghapus konten kartu SD Anda"</string>
