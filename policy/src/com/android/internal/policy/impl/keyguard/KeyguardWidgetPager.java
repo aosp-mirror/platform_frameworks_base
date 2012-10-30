@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,6 +63,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private boolean mShowHintsOnLayout = false;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
+    private static final String TAG = "KeyguardWidgetPager";
 
     private int mPage = 0;
     private Callbacks mCallbacks;
@@ -245,25 +247,40 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
-    // We enforce that all children are KeyguardWidgetFrames
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, index);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int width, int height) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, width, height);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, params);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
@@ -614,5 +631,31 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             return true;
         }
         return false;
+    }
+
+    public void removeWidget(View view) {
+        if (view instanceof KeyguardWidgetFrame) {
+            removeView(view);
+        } else {
+            // Assume view was wrapped by a KeyguardWidgetFrame in KeyguardWidgetPager#addWidget().
+            // This supports legacy hard-coded "widgets" like KeyguardTransportControlView.
+            int pos = getWidgetPageIndex(view);
+            if (pos != -1) {
+                KeyguardWidgetFrame frame = (KeyguardWidgetFrame) getChildAt(pos);
+                frame.removeView(view);
+                removeView(frame);
+            } else {
+                Slog.w(TAG, "removeWidget() can't find:" + view);
+            }
+        }
+    }
+
+    public int getWidgetPageIndex(View view) {
+        if (view instanceof KeyguardWidgetFrame) {
+            return indexOfChild(view);
+        } else {
+            // View was wrapped by a KeyguardWidgetFrame by KeyguardWidgetPager#addWidget()
+            return indexOfChild((KeyguardWidgetFrame)view.getParent());
+        }
     }
 }
