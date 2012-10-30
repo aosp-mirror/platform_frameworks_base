@@ -87,13 +87,14 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         }
     }
 
+    protected abstract int getPasswordTextViewId();
     protected abstract void resetState();
 
     @Override
     protected void onFinishInflate() {
         mLockPatternUtils = new LockPatternUtils(mContext);
 
-        mPasswordEntry = (TextView) findViewById(R.id.passwordEntry);
+        mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
         mPasswordEntry.setOnEditorActionListener(this);
         mPasswordEntry.addTextChangedListener(this);
 
