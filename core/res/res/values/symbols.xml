@@ -1234,7 +1234,7 @@
   <java-symbol type="drawable" name="magnified_region_frame" />
   <java-symbol type="drawable" name="menu_background" />
   <java-symbol type="drawable" name="stat_sys_secure" />
-  <java-symbol type="drawable" name="security_frame" />
+  <java-symbol type="drawable" name="kg_bouncer_bg_white" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="alarm_status" />
   <java-symbol type="id" name="backspace" />

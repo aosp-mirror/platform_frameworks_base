@@ -17,12 +17,14 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 
 import com.android.internal.R;
 
 public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
 
     private float mAdjacentPagesAngle;
+    private static float MAX_SCROLL_PROGRESS = 1.3f;
     private static float CAMERA_DISTANCE = 10000;
 
     public KeyguardWidgetCarousel(Context context, AttributeSet attrs) {
@@ -39,43 +41,73 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
     }
 
     protected float getMaxScrollProgress() {
-        return 1.5f;
+        return MAX_SCROLL_PROGRESS;
+    }
+
+    public float getAlphaForPage(int screenCenter, int index) {
+        View child = getChildAt(index);
+        if (child == null) return 0f;
+
+        float scrollProgress = getScrollProgress(screenCenter, child, index);
+        if (!isOverScrollChild(index, scrollProgress)) {
+            scrollProgress = getBoundedScrollProgress(screenCenter, child, index);
+            float alpha = 1 - Math.abs(scrollProgress / MAX_SCROLL_PROGRESS);
+            return alpha;
+        } else {
+            return 1f;
+        }
     }
 
     private void updatePageAlphaValues(int screenCenter) {
-        boolean isInOverscroll = mOverScrollX < 0 || mOverScrollX > mMaxScrollX;
-        if (!isInOverscroll) {
+        if (mChildrenOutlineFadeAnimation != null) {
+            mChildrenOutlineFadeAnimation.cancel();
+            mChildrenOutlineFadeAnimation = null;
+        }
+        if (!isReordering(false)) {
             for (int i = 0; i < getChildCount(); i++) {
                 KeyguardWidgetFrame child = getWidgetPageAt(i);
                 if (child != null) {
-                    float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    if (!isReordering(false)) {
-                        child.setBackgroundAlphaMultiplier(
-                                backgroundAlphaInterpolator(Math.abs(scrollProgress)));
-                    } else {
-                        child.setBackgroundAlphaMultiplier(1f);
-                    }
+                    float alpha = getAlphaForPage(screenCenter, i);
+                    child.setBackgroundAlpha(alpha);
+                    child.setContentAlpha(alpha);
                 }
             }
         }
+
     }
 
     @Override
     protected void screenScrolled(int screenCenter) {
+        mScreenCenter = screenCenter;
         updatePageAlphaValues(screenCenter);
         for (int i = 0; i < getChildCount(); i++) {
             KeyguardWidgetFrame v = getWidgetPageAt(i);
-            if (v == mDragView) continue;
-            if (v != null) {
-                float scrollProgress = getScrollProgress(screenCenter, v, i);
+            float scrollProgress = getScrollProgress(screenCenter, v, i);
+            if (v == mDragView || v == null) continue;
+            v.setCameraDistance(CAMERA_DISTANCE);
+
+            if (isOverScrollChild(i, scrollProgress)) {
+                v.setRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
+                v.setOverScrollAmount(Math.abs(scrollProgress), scrollProgress < 0);
+            } else {
+                scrollProgress = getBoundedScrollProgress(screenCenter, v, i);
                 int width = v.getMeasuredWidth();
                 float pivotX = (width / 2f) + scrollProgress * (width / 2f);
                 float pivotY = v.getMeasuredHeight() / 2;
                 float rotationY = - mAdjacentPagesAngle * scrollProgress;
-                v.setCameraDistance(CAMERA_DISTANCE);
                 v.setPivotX(pivotX);
                 v.setPivotY(pivotY);
                 v.setRotationY(rotationY);
+                v.setOverScrollAmount(0f, false);
+            }
+
+            float alpha = v.getAlpha();
+            // If the view has 0 alpha, we set it to be invisible so as to prevent
+            // it from accepting touches
+            if (alpha == 0) {
+                v.setVisibility(INVISIBLE);
+            } else if (v.getVisibility() != VISIBLE) {
+                v.setVisibility(VISIBLE);
             }
         }
     }
