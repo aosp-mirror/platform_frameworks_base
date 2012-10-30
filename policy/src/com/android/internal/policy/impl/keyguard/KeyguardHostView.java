@@ -835,13 +835,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
             @Override
             public void onCameraLaunched() {
+                if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
+                    mAppWidgetContainer.scrollLeft();
+                }
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
                     slider.showHandle(true);
                     slider.showChallenge(true);
-                }
-                if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
-                    mAppWidgetContainer.scrollLeft();
                 }
             }
 
