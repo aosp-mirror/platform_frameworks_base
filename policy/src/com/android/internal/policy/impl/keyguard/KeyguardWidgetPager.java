@@ -15,6 +15,9 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
@@ -27,33 +30,32 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
 
 import com.android.internal.widget.LockPatternUtils;
 
+import java.util.ArrayList;
+
 public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwitchListener,
         OnLongClickListener {
 
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
     private static float CAMERA_DISTANCE = 10000;
-    private static float TRANSITION_MAX_ROTATION = 30;
+    protected static float OVERSCROLL_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
 
     private KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
-    private static final int CHILDREN_OUTLINE_FADE_OUT_DELAY = 0;
     private static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
-    private static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 100;
-    private ObjectAnimator mChildrenOutlineFadeInAnimation;
-    private ObjectAnimator mChildrenOutlineFadeOutAnimation;
+    private static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 75;
+    protected AnimatorSet mChildrenOutlineFadeAnimation;
     private float mChildrenOutlineAlpha = 0;
     private float mSidePagesAlpha = 1f;
+    protected int mScreenCenter;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
 
@@ -253,13 +255,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     protected void onPageBeginMoving() {
-        // Enable hardware layers while pages are moving
-        // TODO: We should only do this for the two views that are actually moving
-        int children = getChildCount();
-        for (int i = 0; i < children; i++) {
-            getWidgetPageAt(i).enableHardwareLayersForContent();
-        }
-
+        enablePageLayers();
         if (mViewStateManager != null) {
             mViewStateManager.onPageBeginMoving();
         }
@@ -268,16 +264,24 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     protected void onPageEndMoving() {
-        // Disable hardware layers while pages are moving
-        int children = getChildCount();
-        for (int i = 0; i < children; i++) {
-            getWidgetPageAt(i).disableHardwareLayersForContent();
-        }
-
         if (mViewStateManager != null) {
             mViewStateManager.onPageEndMoving();
         }
         hideOutlinesAndSidePages();
+    }
+
+    private void enablePageLayers() {
+        int children = getChildCount();
+        for (int i = 0; i < children; i++) {
+            getWidgetPageAt(i).enableHardwareLayersForContent();
+        }
+    }
+
+    private void disablePageLayers() {
+        int children = getChildCount();
+        for (int i = 0; i < children; i++) {
+            getWidgetPageAt(i).disableHardwareLayersForContent();
+        }
     }
 
     /*
@@ -325,25 +329,21 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     private void updatePageAlphaValues(int screenCenter) {
+    }
+
+    public float getAlphaForPage(int screenCenter, int index) {
+        return 1f;
+    }
+
+    protected boolean isOverScrollChild(int index, float scrollProgress) {
         boolean isInOverscroll = mOverScrollX < 0 || mOverScrollX > mMaxScrollX;
-        if (!isInOverscroll) {
-            for (int i = 0; i < getChildCount(); i++) {
-                KeyguardWidgetFrame child = getWidgetPageAt(i);
-                if (child != null) {
-                    float scrollProgress = getScrollProgress(screenCenter, child, i);
-                    if (!isReordering(false)) {
-                        child.setBackgroundAlphaMultiplier(
-                                backgroundAlphaInterpolator(Math.abs(scrollProgress)));
-                    } else {
-                        child.setBackgroundAlphaMultiplier(1f);
-                    }
-                }
-            }
-        }
+        return (isInOverscroll && (index == 0 && scrollProgress < 0 ||
+                index == getChildCount() - 1 && scrollProgress > 0));
     }
 
     @Override
     protected void screenScrolled(int screenCenter) {
+        mScreenCenter = screenCenter;
         updatePageAlphaValues(screenCenter);
         for (int i = 0; i < getChildCount(); i++) {
             KeyguardWidgetFrame v = getWidgetPageAt(i);
@@ -351,30 +351,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             if (v != null) {
                 float scrollProgress = getScrollProgress(screenCenter, v, i);
 
-                float alpha = 1.0f;
-
                 v.setCameraDistance(mDensity * CAMERA_DISTANCE);
 
-                if (PERFORM_OVERSCROLL_ROTATION) {
-                    if (i == 0 && scrollProgress < 0) {
-                        // Over scroll to the left
-                        v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
-                        v.setOverScrollAmount(Math.abs(scrollProgress), true);
-                        alpha = 1.0f;
-                        // On the first page, we don't want the page to have any lateral motion
-                    } else if (i == getChildCount() - 1 && scrollProgress > 0) {
-                        // Over scroll to the right
-                        v.setRotationY(-TRANSITION_MAX_ROTATION * scrollProgress);
-                        alpha = 1.0f;
-                        v.setOverScrollAmount(Math.abs(scrollProgress), false);
-                        // On the last page, we don't want the page to have any lateral motion.
-                    } else {
-                        v.setRotationY(0f);
-                        v.setOverScrollAmount(0, false);
-                    }
+                if (isOverScrollChild(i, scrollProgress) && PERFORM_OVERSCROLL_ROTATION) {
+                    v.setRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
+                    v.setOverScrollAmount(Math.abs(scrollProgress), scrollProgress < 0);
+                } else {
+                    v.setRotationY(0f);
+                    v.setOverScrollAmount(0, false);
                 }
-                v.setAlpha(alpha);
 
+                float alpha = v.getAlpha();
                 // If the view has 0 alpha, we set it to be invisible so as to prevent
                 // it from accepting touches
                 if (alpha == 0) {
@@ -385,6 +372,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             }
         }
     }
+
     @Override
     void boundByReorderablePages(boolean isReordering, int[] range) {
         if (isReordering) {
@@ -418,7 +406,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
-        setChildrenOutlineMultiplier(1.0f);
         showOutlinesAndSidePages();
     }
 
@@ -429,43 +416,67 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void showOutlinesAndSidePages() {
-        if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
-        if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
+        animateOutlinesAndSidePages(true);
+    }
 
-        PropertyValuesHolder outlinesAlpha =
-                PropertyValuesHolder.ofFloat("childrenOutlineAlpha", 1.0f);
-        PropertyValuesHolder sidePagesAlpha = PropertyValuesHolder.ofFloat("sidePagesAlpha", 1.0f);
-        mChildrenOutlineFadeInAnimation =
-                ObjectAnimator.ofPropertyValuesHolder(this, outlinesAlpha, sidePagesAlpha);
-
-        mChildrenOutlineFadeInAnimation.setDuration(CHILDREN_OUTLINE_FADE_IN_DURATION);
-        mChildrenOutlineFadeInAnimation.start();
+    void hideOutlinesAndSidePages() {
+        animateOutlinesAndSidePages(false);
     }
 
     public void showInitialPageHints() {
         // We start with everything showing
         setChildrenOutlineAlpha(1.0f);
         setSidePagesAlpha(1.0f);
-        setChildrenOutlineMultiplier(1.0f);
 
         int currPage = getCurrentPage();
         KeyguardWidgetFrame frame = getWidgetPageAt(currPage);
-        frame.setBackgroundAlphaMultiplier(0f);
+        frame.setBackgroundAlpha(0f);
     }
 
-    void hideOutlinesAndSidePages() {
-        if (mChildrenOutlineFadeInAnimation != null) mChildrenOutlineFadeInAnimation.cancel();
-        if (mChildrenOutlineFadeOutAnimation != null) mChildrenOutlineFadeOutAnimation.cancel();
+    void animateOutlinesAndSidePages(final boolean show) {
+        if (mChildrenOutlineFadeAnimation != null) {
+            mChildrenOutlineFadeAnimation.cancel();
+            mChildrenOutlineFadeAnimation = null;
+        }
 
-        PropertyValuesHolder outlinesAlpha =
-                PropertyValuesHolder.ofFloat("childrenOutlineAlpha", 0f);
-        PropertyValuesHolder sidePagesAlpha = PropertyValuesHolder.ofFloat("sidePagesAlpha", 0f);
-        mChildrenOutlineFadeOutAnimation =
-                ObjectAnimator.ofPropertyValuesHolder(this, outlinesAlpha, sidePagesAlpha);
+        int count = getChildCount();
+        PropertyValuesHolder alpha;
+        PropertyValuesHolder outlineAlpha;
+        ArrayList<Animator> anims = new ArrayList<Animator>();
 
-        mChildrenOutlineFadeOutAnimation.setDuration(CHILDREN_OUTLINE_FADE_OUT_DURATION);
-        mChildrenOutlineFadeOutAnimation.setStartDelay(CHILDREN_OUTLINE_FADE_OUT_DELAY);
-        mChildrenOutlineFadeOutAnimation.start();
+        int curPage = getNextPage();
+        for (int i = 0; i < count; i++) {
+            float finalContentAlpha;
+            if (show) {
+                finalContentAlpha = getAlphaForPage(mScreenCenter, i);
+            } else if (!show && i == curPage) {
+                finalContentAlpha = 1f;
+            } else {
+                finalContentAlpha = 0f;
+            }
+            float finalOutlineAlpha = show ? getAlphaForPage(mScreenCenter, i) : 0f;
+            KeyguardWidgetFrame child = getWidgetPageAt(i);
+            alpha = PropertyValuesHolder.ofFloat("contentAlpha", finalContentAlpha);
+            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha",finalOutlineAlpha);
+            ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha, outlineAlpha);
+            anims.add(a);
+        }
+
+        int duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
+            CHILDREN_OUTLINE_FADE_OUT_DURATION;
+        mChildrenOutlineFadeAnimation = new AnimatorSet();
+        mChildrenOutlineFadeAnimation.playTogether(anims);
+
+        mChildrenOutlineFadeAnimation.setDuration(duration);
+        mChildrenOutlineFadeAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!show) {
+                    disablePageLayers();
+                }
+            }
+        });
+        mChildrenOutlineFadeAnimation.start();
     }
 
     public void setChildrenOutlineAlpha(float alpha) {
