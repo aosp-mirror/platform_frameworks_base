@@ -58,6 +58,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         return false;
     }
 
+    public boolean isChallengeOverlapping() {
+        if (mChallengeLayout != null) {
+            return mChallengeLayout.isChallengeOverlapping();
+        }
+        return false;
+    }
+
     public void setSecurityViewContainer(KeyguardSecurityView container) {
         mKeyguardSecurityContainer = container;
     }

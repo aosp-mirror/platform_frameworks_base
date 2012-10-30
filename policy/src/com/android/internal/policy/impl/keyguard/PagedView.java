@@ -2072,15 +2072,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
         // If we haven't flung-to-delete the current child, then we just animate the drag view
         // back into position
+        final Runnable onCompleteRunnable = new Runnable() {
+            @Override
+            public void run() {
+                onEndReordering();
+            }
+        };
         if (!mIsFlingingToDelete) {
             mPostReorderingPreZoomInRunnable = new Runnable() {
                 public void run() {
-                    Runnable onCompleteRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            onEndReordering();
-                        }
-                    };
                     zoomIn(onCompleteRunnable);
                 };
             };
@@ -2091,6 +2091,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             snapToPage(indexOfChild(mDragView), 0);
             // Animate the drag view back to the front position
             animateDragViewToOriginalPosition();
+        } else {
+            zoomIn(onCompleteRunnable);
         }
     }
 
