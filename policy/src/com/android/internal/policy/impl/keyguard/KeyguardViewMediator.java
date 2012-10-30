@@ -813,9 +813,7 @@ public class KeyguardViewMediator {
     }
 
     /**
-     * Enable the keyguard if the settings are appropriate.  Return true if all
-     * work that will happen is done; returns false if the caller can wait for
-     * the keyguard to be shown.
+     * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
         // if another app is disabling us, don't show
@@ -864,6 +862,13 @@ public class KeyguardViewMediator {
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
         showLocked(options);
+    }
+
+    /**
+     * Dismiss the keyguard through the security layers.
+     */
+    public void dismiss() {
+        mKeyguardViewManager.dismiss();
     }
 
     /**

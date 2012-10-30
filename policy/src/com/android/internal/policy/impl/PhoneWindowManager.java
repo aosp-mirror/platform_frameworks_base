@@ -412,7 +412,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
     boolean mHideLockScreen;
-    boolean mDismissKeyguard;
+
+    // States of keyguard dismiss.
+    private static final int DISMISS_KEYGUARD_NONE = 0; // Keyguard not being dismissed.
+    private static final int DISMISS_KEYGUARD_START = 1; // Keyguard needs to be dismissed.
+    private static final int DISMISS_KEYGUARD_CONTINUE = 2; // Keyguard has been dismissed.
+    int mDismissKeyguard = DISMISS_KEYGUARD_NONE;
+
+    /** The window that is currently dismissing the keyguard. Dismissing the keyguard must only
+     * be done once per window. */
+    private WindowState mWinDismissingKeyguard;
+
     boolean mShowingLockscreen;
     boolean mShowingDream;
     boolean mDreamingLockscreen;
@@ -2921,6 +2931,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
@@ -2928,12 +2939,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         mHideLockScreen = false;
         mAllowLockscreenWhenOn = false;
-        mDismissKeyguard = false;
+        mDismissKeyguard = DISMISS_KEYGUARD_NONE;
         mShowingLockscreen = false;
         mShowingDream = false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void applyPostLayoutPolicyLw(WindowState win,
                                 WindowManager.LayoutParams attrs) {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
@@ -2971,9 +2983,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHideLockScreen = true;
                     mForceStatusBarFromKeyguard = false;
                 }
-                if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
+                if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0
+                        && mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
-                    mDismissKeyguard = true;
+                    mDismissKeyguard = mWinDismissingKeyguard == win ?
+                            DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
+                    mWinDismissingKeyguard = win;
                     mForceStatusBarFromKeyguard = false;
                 }
                 if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
@@ -2984,6 +2999,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int finishPostLayoutPolicyLw() {
         int changes = 0;
         boolean topIsFullscreen = false;
@@ -3023,7 +3039,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mStatusBar.hideLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
 
-                        mHandler.post(new Runnable() { public void run() {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
                             try {
                                 IStatusBarService statusbar = getStatusBarService();
                                 if (statusbar != null) {
@@ -3051,7 +3069,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguard != null) {
             if (localLOGV) Log.v(TAG, "finishPostLayoutPolicyLw: mHideKeyguard="
                     + mHideLockScreen);
-            if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
+            if (mDismissKeyguard != DISMISS_KEYGUARD_NONE && !mKeyguardMediator.isSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
@@ -3059,6 +3077,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (mKeyguardMediator.isShowing()) {
                     mHandler.post(new Runnable() {
+                        @Override
                         public void run() {
                             mKeyguardMediator.keyguardDone(false, false);
                         }
@@ -3071,7 +3090,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 mKeyguardMediator.setHidden(true);
+            } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
+                // This is the case of keyguard isSecure() and not mHideLockScreen.
+                if (mDismissKeyguard == DISMISS_KEYGUARD_START) {
+                    // Only launch the next keyguard unlock window once per window.
+                    if (mKeyguard.showLw(true)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT
+                                | FINISH_LAYOUT_REDO_CONFIG
+                                | FINISH_LAYOUT_REDO_WALLPAPER;
+                    }
+                    mKeyguardMediator.setHidden(false);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mKeyguardMediator.dismiss();
+                        }
+                    });
+                }
             } else {
+                mWinDismissingKeyguard = null;
                 if (mKeyguard.showLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
@@ -4549,6 +4586,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mForceStatusBarFromKeyguard=");
                 pw.println(mForceStatusBarFromKeyguard);
         pw.print(prefix); pw.print("mDismissKeyguard="); pw.print(mDismissKeyguard);
+                pw.print(" mWinDismissingKeyguard="); pw.print(mWinDismissingKeyguard);
                 pw.print(" mHomePressed="); pw.println(mHomePressed);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
                 pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);

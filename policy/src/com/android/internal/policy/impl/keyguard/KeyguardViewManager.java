@@ -65,6 +65,7 @@ public class KeyguardViewManager {
     private FrameLayout mKeyguardHost;
     private KeyguardHostView mKeyguardView;
 
+    private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
 
     public interface ShowListener {
@@ -302,6 +303,7 @@ public class KeyguardViewManager {
 
     public synchronized void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOff()");
+        mScreenOn = false;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOff();
         }
@@ -310,6 +312,7 @@ public class KeyguardViewManager {
     public synchronized void onScreenTurnedOn(
             final KeyguardViewManager.ShowListener showListener) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
+        mScreenOn = true;
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
 
@@ -394,6 +397,15 @@ public class KeyguardViewManager {
                     }
                 }, 500);
             }
+        }
+    }
+
+    /**
+     * Dismisses the keyguard by going to the next screen or making it gone.
+     */
+    public synchronized void dismiss() {
+        if (mScreenOn) {
+            mKeyguardView.dismiss();
         }
     }
 
