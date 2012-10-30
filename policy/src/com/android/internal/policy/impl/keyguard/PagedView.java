@@ -201,8 +201,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // We use the min scale to determine how much to expand the actually PagedView measured
     // dimensions such that when we are zoomed out, the view is not clipped
     private int REORDERING_DROP_REPOSITION_DURATION = 200;
-    private int REORDERING_REORDER_REPOSITION_DURATION = 350;
-    private int REORDERING_ZOOM_IN_OUT_DURATION = 250;
+    protected int REORDERING_REORDER_REPOSITION_DURATION = 350;
+    protected int REORDERING_ZOOM_IN_OUT_DURATION = 250;
     private int REORDERING_SIDE_PAGE_HOVER_TIMEOUT = 500;
     private float REORDERING_SIDE_PAGE_BUFFER_PERCENTAGE = 0.1f;
     private float mMinScale = 1f;
@@ -1160,6 +1160,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     protected float getMaxScrollProgress() {
         return 1.0f;
+    }
+
+    protected float getBoundedScrollProgress(int screenCenter, View v, int page) {
+        final int halfScreenSize = getViewportWidth() / 2;
+
+        screenCenter = Math.min(mScrollX + halfScreenSize, screenCenter);
+        screenCenter = Math.max(halfScreenSize,  screenCenter);
+
+        return getScrollProgress(screenCenter, v, page);
     }
 
     protected float getScrollProgress(int screenCenter, View v, int page) {
