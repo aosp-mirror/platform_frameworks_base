@@ -17,7 +17,6 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 
 public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChallengeScrolledListener {
@@ -29,6 +28,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private KeyguardSecurityView mKeyguardSecurityContainer;
     private int[] mTmpPoint = new int[2];
     private static final int SCREEN_ON_HINT_DURATION = 1000;
+    private static final int SCREEN_ON_RING_HINT_DELAY = 300;
     Handler mMainQueue = new Handler(Looper.myLooper());
 
     int mChallengeTop = 0;
@@ -147,7 +147,12 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     }
 
     public void showUsabilityHints() {
-        mKeyguardSecurityContainer.showUsabilityHint();
+        mMainQueue.postDelayed( new Runnable() {
+            @Override
+            public void run() {
+                mKeyguardSecurityContainer.showUsabilityHint();
+            }
+        } , SCREEN_ON_RING_HINT_DELAY);
         mPagedView.showInitialPageHints();
         mHideHintsRunnable = new Runnable() {
             @Override

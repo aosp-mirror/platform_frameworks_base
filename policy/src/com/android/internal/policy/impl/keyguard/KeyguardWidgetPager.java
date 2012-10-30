@@ -255,7 +255,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     protected void onPageBeginMoving() {
-        enablePageLayers();
         if (mViewStateManager != null) {
             mViewStateManager.onPageBeginMoving();
         }
@@ -416,6 +415,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void showOutlinesAndSidePages() {
+        enablePageLayers();
         animateOutlinesAndSidePages(true);
     }
 
@@ -424,13 +424,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public void showInitialPageHints() {
-        // We start with everything showing
-        setChildrenOutlineAlpha(1.0f);
-        setSidePagesAlpha(1.0f);
-
-        int currPage = getCurrentPage();
-        KeyguardWidgetFrame frame = getWidgetPageAt(currPage);
-        frame.setBackgroundAlpha(0f);
+        showOutlinesAndSidePages();
     }
 
     void animateOutlinesAndSidePages(final boolean show) {
