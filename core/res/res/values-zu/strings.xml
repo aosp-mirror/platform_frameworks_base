@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ivumela insiza ukuthi ibhale amagama amasha esichazinimazwi."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ivumela uhlelo lokusebenza ukuhlola imvume yokugciniwe okufinyeleleka nge-USB okuzotholakala kumadivayisi alandelayo."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Ivumela uhlelo lokusebenza ukuhlola imvume yekhadi le-SD okuzotholakala kumadivayisi alandelayo."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"guqula noma ususe okuqukethwe kwakho okugciniwe okufinyeleleka nge-USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"shintsha noma ususe okuqukethwe ekhadini lakho le-SD"</string>

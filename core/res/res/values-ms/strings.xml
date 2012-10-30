@@ -585,7 +585,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Membenarkan apl menulis perkataan baharu ke dalam kamus pengguna."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"uji akses ke storan dilindungi"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Apl boleh uji kebenaran USB."</string>
+    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <skip />
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Membenarkan apl menguji kebenaran untuk kad SD yang akan tersedia pada peranti akan datang."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah suai atau padam kandungan storan USB anda"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ubah suai atau padam kandungan kad SD anda"</string>
