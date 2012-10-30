@@ -35,6 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="24dp"
-            android:src="@drawable/add_widget" />
+            android:src="@drawable/kg_add_widget" />
     </FrameLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>
