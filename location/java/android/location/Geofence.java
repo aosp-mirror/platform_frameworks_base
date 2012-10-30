@@ -36,8 +36,8 @@ public final class Geofence implements Parcelable {
     /**
      * Create a horizontal, circular geofence.
      *
-     * @param latitude latitude in degrees
-     * @param longitude longitude in degrees
+     * @param latitude latitude in degrees, between -90 and +90 inclusive
+     * @param longitude longitude in degrees, between -180 and +180 inclusive
      * @param radius radius in meters
      * @return a new geofence
      * @throws IllegalArgumentException if any parameters are out of range
