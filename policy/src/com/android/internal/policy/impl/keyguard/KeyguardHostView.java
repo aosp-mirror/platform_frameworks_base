@@ -162,6 +162,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         addDefaultWidgets();
         addWidgetsFromSettings();
+        mSwitchPageRunnable.run();
 
         mViewStateManager = new KeyguardViewStateManager();
         SlidingChallengeLayout slider =
@@ -217,7 +218,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
-        post(mSwitchPageRunnable);
     }
 
     @Override

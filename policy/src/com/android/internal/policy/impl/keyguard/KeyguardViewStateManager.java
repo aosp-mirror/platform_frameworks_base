@@ -86,6 +86,14 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         mChallengeLayout.showBouncer();
     }
 
+    public void fadeOutSecurity(int duration) {
+        ((View) mKeyguardSecurityContainer).animate().alpha(0).setDuration(duration);
+    }
+
+    public void fadeInSecurity(int duration) {
+        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration);
+    }
+
     public void onPageSwitch(View newPage, int newPageIndex) {
         // Reset the previous page size and ensure the current page is sized appropriately.
         // We only modify the page state if it is not currently under control by the slider.

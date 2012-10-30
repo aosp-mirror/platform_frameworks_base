@@ -47,7 +47,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected static float OVERSCROLL_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
 
-    private KeyguardViewStateManager mViewStateManager;
+    protected KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
@@ -59,7 +59,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected int mScreenCenter;
     private boolean mHasLayout = false;
     private boolean mHasMeasure = false;
-    private boolean mShowHintsOnLayout = false;
+    boolean showHintsAfterLayout = false;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
 
@@ -291,7 +291,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageBeginMoving();
         }
-        showOutlinesAndSidePages();
+        if (!isReordering(false)) {
+            showOutlinesAndSidePages();
+        }
         userActivity();
     }
 
@@ -300,17 +302,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageEndMoving();
         }
-        hideOutlinesAndSidePages();
+
+        // In the reordering case, the pages will be faded appropriately on completion
+        // of the zoom in animation.
+        if (!isReordering(false)) {
+            hideOutlinesAndSidePages();
+        }
     }
 
-    private void enablePageLayers() {
+    protected void enablePageLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).enableHardwareLayersForContent();
         }
     }
 
-    private void disablePageLayers() {
+    protected void disablePageLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).disableHardwareLayersForContent();
@@ -440,10 +447,15 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         return mCameraWidgetEnabled;
     }
 
+    protected void reorderStarting() {
+        showOutlinesAndSidePages();
+    }
+
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
-        showOutlinesAndSidePages();
+        enablePageLayers();
+        reorderStarting();
     }
 
     @Override
@@ -453,7 +465,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void showOutlinesAndSidePages() {
-        enablePageLayers();
         animateOutlinesAndSidePages(true);
     }
 
@@ -466,7 +477,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             showOutlinesAndSidePages();
         } else {
             // The layout hints depend on layout being run once
-            mShowHintsOnLayout = true;
+            showHintsAfterLayout = true;
         }
     }
 
@@ -477,16 +488,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         mHasLayout = false;
     }
 
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (mShowHintsOnLayout) {
+        if (showHintsAfterLayout) {
             post(new Runnable() {
                 @Override
                 public void run() {
                     showOutlinesAndSidePages();
                 }
             });
-            mShowHintsOnLayout = false;
+            showHintsAfterLayout = false;
         }
         mHasLayout = true;
     }
@@ -523,17 +535,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void animateOutlinesAndSidePages(final boolean show) {
+        animateOutlinesAndSidePages(show, -1);
+    }
+
+    void animateOutlinesAndSidePages(final boolean show, int duration) {
         if (mChildrenOutlineFadeAnimation != null) {
             mChildrenOutlineFadeAnimation.cancel();
             mChildrenOutlineFadeAnimation = null;
         }
-
         int count = getChildCount();
         PropertyValuesHolder alpha;
         ArrayList<Animator> anims = new ArrayList<Animator>();
 
-        int duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
-            CHILDREN_OUTLINE_FADE_OUT_DURATION;
+        if (duration == -1) {
+            duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
+                CHILDREN_OUTLINE_FADE_OUT_DURATION;
+        }
 
         int curPage = getNextPage();
         for (int i = 0; i < count; i++) {
@@ -559,6 +576,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         mChildrenOutlineFadeAnimation.setDuration(duration);
         mChildrenOutlineFadeAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (show) {
+                    enablePageLayers();
+                }
+            }
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!show) {

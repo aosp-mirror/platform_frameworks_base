@@ -1995,7 +1995,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     // "Zooms out" the PagedView to reveal more side pages
-    boolean zoomOut() {
+    protected boolean zoomOut() {
         if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
             mZoomInOutAnim.cancel();
         }
@@ -2097,7 +2097,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     // "Zooms in" the PagedView to highlight the current page
-    boolean zoomIn(final Runnable onCompleteRunnable) {
+    protected boolean zoomIn(final Runnable onCompleteRunnable) {
         if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
             mZoomInOutAnim.cancel();
         }
