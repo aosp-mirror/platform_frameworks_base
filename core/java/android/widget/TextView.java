@@ -307,7 +307,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout.Alignment mLayoutAlignment;
     private int mResolvedTextAlignment;
 
-    private boolean mResolvedDrawables;
+    private int mLastLayoutDirection = -1;
 
     /**
      * On some devices the fading edges add a performance penalty if used
@@ -8257,16 +8257,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onResolveDrawables(int layoutDirection) {
         // No need to resolve twice
-        if (mResolvedDrawables) {
+        if (mLastLayoutDirection == layoutDirection) {
             return;
         }
+        mLastLayoutDirection = layoutDirection;
         // No drawable to resolve
         if (mDrawables == null) {
             return;
         }
         // No relative drawable to resolve
         if (mDrawables.mDrawableStart == null && mDrawables.mDrawableEnd == null) {
-            mResolvedDrawables = true;
             return;
         }
 
@@ -8304,7 +8304,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
         }
         updateDrawablesLayoutDirection(dr, layoutDirection);
-        mResolvedDrawables = true;
     }
 
     private void updateDrawablesLayoutDirection(Drawables dr, int layoutDirection) {
@@ -8326,7 +8325,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     protected void resetResolvedDrawables() {
-        mResolvedDrawables = false;
+        mLastLayoutDirection = -1;
     }
 
     /**

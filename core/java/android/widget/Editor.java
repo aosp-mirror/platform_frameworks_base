@@ -144,6 +144,8 @@ public class Editor {
     CharSequence mError;
     boolean mErrorWasChanged;
     ErrorPopup mErrorPopup;
+    private int mLastLayoutDirection = -1;
+
     /**
      * This flag is set if the TextView tries to display an error before it
      * is attached to the window (so its position is still unknown).
@@ -288,23 +290,30 @@ public class Editor {
     public void setError(CharSequence error, Drawable icon) {
         mError = TextUtils.stringOrSpannedString(error);
         mErrorWasChanged = true;
-        final Drawables dr = mTextView.mDrawables;
-        if (dr != null) {
-            switch (mTextView.getLayoutDirection()) {
+        final int layoutDirection = mTextView.getLayoutDirection();
+        if (mLastLayoutDirection != layoutDirection) {
+            final Drawables dr = mTextView.mDrawables;
+            switch (layoutDirection) {
                 default:
                 case View.LAYOUT_DIRECTION_LTR:
-                    mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
-                            dr.mDrawableBottom);
+                    if (dr != null) {
+                        mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
+                                dr.mDrawableBottom);
+                    } else {
+                        mTextView.setCompoundDrawables(null, null, icon, null);
+                    }
                     break;
                 case View.LAYOUT_DIRECTION_RTL:
-                    mTextView.setCompoundDrawables(icon, dr.mDrawableTop, dr.mDrawableRight,
-                            dr.mDrawableBottom);
+                    if (dr != null) {
+                        mTextView.setCompoundDrawables(icon, dr.mDrawableTop, dr.mDrawableRight,
+                                dr.mDrawableBottom);
+                    } else {
+                        mTextView.setCompoundDrawables(icon, null, null, null);
+                    }
                     break;
             }
-        } else {
-            mTextView.setCompoundDrawables(null, null, icon, null);
+            mLastLayoutDirection = layoutDirection;
         }
-
         if (mError == null) {
             if (mErrorPopup != null) {
                 if (mErrorPopup.isShowing()) {

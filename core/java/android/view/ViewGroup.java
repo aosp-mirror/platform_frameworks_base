@@ -3478,7 +3478,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (child.isLayoutDirectionInherited()) {
             child.resetRtlProperties();
-            child.resolveRtlPropertiesIfNeeded();
         }
 
         onViewAdded(child);
