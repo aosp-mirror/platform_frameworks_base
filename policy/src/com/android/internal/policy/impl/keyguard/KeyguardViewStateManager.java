@@ -32,6 +32,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private static final int SCREEN_ON_RING_HINT_DELAY = 300;
     Handler mMainQueue = new Handler(Looper.myLooper());
 
+    // transport control states
+    static final int TRANSPORT_GONE = 0;
+    static final int TRANSPORT_INVISIBLE = 1;
+    static final int TRANSPORT_VISIBLE = 2;
+
+    private int mTransportState = TRANSPORT_GONE;
+
     int mLastScrollState = SlidingChallengeLayout.SCROLL_STATE_IDLE;
 
     // Paged view state
@@ -213,5 +220,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         };
 
         mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
+    }
+
+    public void setTransportState(int state) {
+        mTransportState = state;
+    }
+
+    public int getTransportState() {
+        return mTransportState;
     }
 }

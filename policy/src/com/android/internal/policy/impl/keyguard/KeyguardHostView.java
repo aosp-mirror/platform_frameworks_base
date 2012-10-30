@@ -65,11 +65,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
 
-    // transport control states
-    private static final int TRANSPORT_GONE = 0;
-    private static final int TRANSPORT_INVISIBLE = 1;
-    private static final int TRANSPORT_VISIBLE = 2;
-
     private AppWidgetHost mAppWidgetHost;
     private KeyguardWidgetPager mAppWidgetContainer;
     private KeyguardSecurityViewFlipper mSecurityViewContainer;
@@ -89,7 +84,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardViewStateManager mViewStateManager;
 
     private Rect mTempRect = new Rect();
-    private int mTransportState = TRANSPORT_GONE;
 
     /*package*/ interface TransportCallback {
         void onListenerDetached();
@@ -914,7 +908,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             // XXX keep view attached so we still get show/hide events from AudioManager
             KeyguardHostView.this.addView(mTransportControl);
             mTransportControl.setVisibility(View.GONE);
-            mTransportState = TRANSPORT_GONE;
+            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_GONE);
             mTransportControl.post(mSwitchPageRunnable);
         }
     }
@@ -1044,7 +1038,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         saveStickyWidgetIndex();
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        ss.transportState = mTransportState;
+        ss.transportState = mViewStateManager.getTransportState();
         return ss;
     }
 
@@ -1057,7 +1051,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        mTransportState = ss.transportState;
+        mViewStateManager.setTransportState(ss.transportState);
         post(mSwitchPageRunnable);
     }
 
@@ -1071,13 +1065,14 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void showAppropriateWidgetPage() {
-        boolean isMusicPlaying =
-                mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
+        int state = mViewStateManager.getTransportState();
+        boolean isMusicPlaying = mTransportControl.isMusicPlaying()
+                || state == KeyguardViewStateManager.TRANSPORT_VISIBLE;
         if (isMusicPlaying) {
-            mTransportState = TRANSPORT_VISIBLE;
+            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_VISIBLE);
             addTransportToWidgetPager();
-        } else if (mTransportState == TRANSPORT_VISIBLE) {
-            mTransportState = TRANSPORT_INVISIBLE;
+        } else if (state == KeyguardViewStateManager.TRANSPORT_VISIBLE) {
+            mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_INVISIBLE);
         }
         int pageToShow = getAppropriateWidgetPage(isMusicPlaying);
         mAppWidgetContainer.setCurrentPage(pageToShow);
