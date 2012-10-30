@@ -59,7 +59,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                             .getAssistIntent(mContext, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
-                        mActivityLauncher.launchActivity(assistIntent, false);
+                        mActivityLauncher.launchActivity(assistIntent, false, true);
                     } else {
                         Log.w(TAG, "Failed to get intent for assist activity");
                     }
