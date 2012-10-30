@@ -4907,8 +4907,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             int parentWidthMeasureSpec, int widthUsed,
             int parentHeightMeasureSpec, int heightUsed) {
         final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-        final int layoutDirection = getLayoutDirection();
-        lp.resolveLayoutDirection(layoutDirection);
 
         final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
                 mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin

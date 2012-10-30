@@ -304,16 +304,11 @@ public class FrameLayout extends ViewGroup {
         int maxWidth = 0;
         int childState = 0;
 
-        final int layoutDirection = getLayoutDirection();
-
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (mMeasureAllChildren || child.getVisibility() != GONE) {
                 measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
-                // measureChildWithMargins() has triggered layout params resolution, so no need
-                // to do it now
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
                 maxWidth = Math.max(maxWidth,
                         child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
                 maxHeight = Math.max(maxHeight,

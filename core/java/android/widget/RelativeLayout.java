@@ -414,15 +414,12 @@ public class RelativeLayout extends ViewGroup {
         final boolean isWrapContentWidth = widthMode != MeasureSpec.EXACTLY;
         final boolean isWrapContentHeight = heightMode != MeasureSpec.EXACTLY;
 
-        final int layoutDirection = getLayoutDirection();
-
         View[] views = mSortedHorizontalChildren;
         int count = views.length;
         for (int i = 0; i < count; i++) {
             View child = views[i];
             if (child.getVisibility() != GONE) {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
-                params.resolveLayoutDirection(layoutDirection);
 
                 applyHorizontalSizeRules(params, myWidth);
                 measureChildHorizontal(child, params, myWidth, myHeight);
@@ -485,6 +482,8 @@ public class RelativeLayout extends ViewGroup {
                 }
             }
         }
+
+        final int layoutDirection = getLayoutDirection();
 
         if (isWrapContentWidth) {
             // Width already has left padding in it since it was calculated by looking at
@@ -742,7 +741,6 @@ public class RelativeLayout extends ViewGroup {
 
         final int layoutDirection = getLayoutDirection();
         int[] rules = params.getRules(layoutDirection);
-        params.resolveLayoutDirection(layoutDirection);
 
         if (params.mLeft < 0 && params.mRight >= 0) {
             // Right is fixed, but left varies
@@ -996,7 +994,6 @@ public class RelativeLayout extends ViewGroup {
             if (child.getVisibility() != GONE) {
                 RelativeLayout.LayoutParams st =
                         (RelativeLayout.LayoutParams) child.getLayoutParams();
-                st.resolveLayoutDirection(getLayoutDirection());
                 child.layout(st.mLeft, st.mTop, st.mRight, st.mBottom);
             }
         }
