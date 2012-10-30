@@ -48,7 +48,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
-import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -144,7 +143,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private int getWidgetPosition(int id) {
         final int children = mAppWidgetContainer.getChildCount();
         for (int i = 0; i < children; i++) {
-            if (mAppWidgetContainer.getChildAt(i).getId() == id) {
+            if (mAppWidgetContainer.getWidgetPageAt(i).getContent().getId() == id) {
                 return i;
             }
         }
@@ -864,7 +863,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         @Override
         LockPatternUtils getLockPatternUtils() {
             return mLockPatternUtils;
-        }};
+        }
+    };
 
     private void addDefaultWidgets() {
         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -906,6 +906,33 @@ public class KeyguardHostView extends KeyguardViewBase {
         initializeTransportControl();
     }
 
+    private void removeTransportFromWidgetPager() {
+        int page = getWidgetPosition(R.id.keyguard_transport_control);
+        if (page != -1) {
+            mAppWidgetContainer.removeWidget(mTransportControl);
+
+            // XXX keep view attached so we still get show/hide events from AudioManager
+            KeyguardHostView.this.addView(mTransportControl);
+            mTransportControl.setVisibility(View.GONE);
+            mTransportState = TRANSPORT_GONE;
+            mTransportControl.post(mSwitchPageRunnable);
+        }
+    }
+
+    private void addTransportToWidgetPager() {
+        if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
+            KeyguardHostView.this.removeView(mTransportControl);
+            // insert to left of camera if it exists, otherwise after right-most widget
+            int lastWidget = mAppWidgetContainer.getChildCount() - 1;
+            int position = 0; // handle no widget case
+            if (lastWidget >= 0) {
+                position = isCameraPage(lastWidget) ? lastWidget : lastWidget + 1;
+            }
+            mAppWidgetContainer.addWidget(mTransportControl, position);
+            mTransportControl.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void initializeTransportControl() {
         mTransportControl =
             (KeyguardTransportControlView) findViewById(R.id.keyguard_transport_control);
@@ -917,24 +944,14 @@ public class KeyguardHostView extends KeyguardViewBase {
             mTransportControl.setKeyguardCallback(new TransportCallback() {
                 @Override
                 public void onListenerDetached() {
-                    int page = getWidgetPosition(R.id.keyguard_transport_control);
-                    if (page != -1) {
-                        mAppWidgetContainer.removeView(mTransportControl);
-                        // XXX keep view attached so we still get show/hide events from AudioManager
-                        KeyguardHostView.this.addView(mTransportControl);
-                        mTransportControl.setVisibility(View.GONE);
-                        mTransportState = TRANSPORT_GONE;
-                        mTransportControl.post(mSwitchPageRunnable);
-                    }
+                    removeTransportFromWidgetPager();
+                    mTransportControl.post(mSwitchPageRunnable);
                 }
 
                 @Override
                 public void onListenerAttached() {
-                    if (getWidgetPosition(R.id.keyguard_transport_control) == -1) {
-                        KeyguardHostView.this.removeView(mTransportControl);
-                        mAppWidgetContainer.addView(mTransportControl, 0);
-                        mTransportControl.setVisibility(View.VISIBLE);
-                    }
+                    // Transport will be added when playstate changes...
+                    mTransportControl.post(mSwitchPageRunnable);
                 }
 
                 @Override
@@ -1058,6 +1075,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 mTransportControl.isMusicPlaying() || mTransportState == TRANSPORT_VISIBLE;
         if (isMusicPlaying) {
             mTransportState = TRANSPORT_VISIBLE;
+            addTransportToWidgetPager();
         } else if (mTransportState == TRANSPORT_VISIBLE) {
             mTransportState = TRANSPORT_INVISIBLE;
         }
@@ -1081,7 +1099,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // if music playing, show transport
         if (isMusicPlaying) {
             if (DEBUG) Log.d(TAG, "Music playing, show transport");
-            return mAppWidgetContainer.indexOfChild(mTransportControl);
+            return mAppWidgetContainer.getWidgetPageIndex(mTransportControl);
         }
 
         // if we have a valid sticky widget, show it
