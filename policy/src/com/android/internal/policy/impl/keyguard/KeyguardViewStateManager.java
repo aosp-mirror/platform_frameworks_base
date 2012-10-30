@@ -49,6 +49,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         mChallengeLayout = layout;
     }
 
+    public boolean isChallengeShowing() {
+        if (mChallengeLayout != null) {
+            return mChallengeLayout.isChallengeShowing();
+        }
+        return false;
+    }
+
     public void setSecurityViewContainer(KeyguardSecurityView container) {
         mKeyguardSecurityContainer = container;
     }

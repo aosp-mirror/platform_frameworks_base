@@ -510,7 +510,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     public boolean onLongClick(View v) {
-        if (startReordering()) {
+        // Disallow long pressing to reorder if the challenge is showing
+        if (!mViewStateManager.isChallengeShowing() && startReordering()) {
             return true;
         }
         return false;
