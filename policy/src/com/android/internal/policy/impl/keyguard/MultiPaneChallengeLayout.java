@@ -221,30 +221,35 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             if (lp.centerWithinArea > 0) {
                 if (mOrientation == HORIZONTAL) {
                     adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                            (int) (width * lp.centerWithinArea + 0.5f), MeasureSpec.EXACTLY);
-                    adjustedHeightSpec = heightSpec;
-                } else {
-                    adjustedWidthSpec = widthSpec;
+                            (int) ((width - widthUsed) * lp.centerWithinArea + 0.5f),
+                            MeasureSpec.EXACTLY);
                     adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                            (int) (height * lp.centerWithinArea + 0.5f), MeasureSpec.EXACTLY);
+                            MeasureSpec.getSize(heightSpec) - heightUsed, MeasureSpec.EXACTLY);
+                } else {
+                    adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
+                            MeasureSpec.getSize(widthSpec) - widthUsed, MeasureSpec.EXACTLY);
+                    adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
+                            (int) ((height - heightUsed) * lp.centerWithinArea + 0.5f),
+                            MeasureSpec.EXACTLY);
                 }
             } else {
-                adjustedWidthSpec = widthSpec;
-                adjustedHeightSpec = heightSpec;
+                adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
+                        MeasureSpec.getSize(widthSpec) - widthUsed, MeasureSpec.EXACTLY);
+                adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
+                        MeasureSpec.getSize(heightSpec) - heightUsed, MeasureSpec.EXACTLY);
             }
             if (lp.maxWidth >= 0) {
                 adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                        Math.min(lp.maxWidth, MeasureSpec.getSize(widthSpec)),
+                        Math.min(lp.maxWidth, MeasureSpec.getSize(adjustedWidthSpec)),
                         MeasureSpec.EXACTLY);
             }
             if (lp.maxHeight >= 0) {
                 adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                        Math.min(lp.maxHeight, MeasureSpec.getSize(heightSpec)),
+                        Math.min(lp.maxHeight, MeasureSpec.getSize(adjustedHeightSpec)),
                         MeasureSpec.EXACTLY);
             }
 
-            measureChildWithMargins(child, adjustedWidthSpec, widthUsed,
-                    adjustedHeightSpec, heightUsed);
+            measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
         }
     }
 
