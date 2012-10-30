@@ -16,6 +16,9 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
@@ -49,12 +52,19 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private final Rect mForegroundRect = new Rect();
     private int mForegroundAlpha = 0;
     private CheckLongPressHelper mLongPressHelper;
+    private Animator mFrameFade;
+    private boolean mIsSmall = false;
 
     private float mBackgroundAlpha;
     private float mContentAlpha;
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
+
+    // Multiple callers may try and adjust the alpha of the frame. When a caller shows
+    // the outlines, we give that caller control, and nobody else can fade them out.
+    // This prevents animation conflicts.
+    private Object mBgAlphaController;
 
     public KeyguardWidgetFrame(Context context) {
         this(context, null, 0);
@@ -78,6 +88,11 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mBackgroundDrawable = res.getDrawable(R.drawable.kg_bouncer_bg_white);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        cancelLongPress();
     }
 
     @Override
@@ -238,11 +253,28 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     /**
+     * Set the top location of the challenge.
+     *
+     * @param top The top of the challenge, in _local_ coordinates, or -1 to indicate the challenge
+     *              is down.
+     */
+    private void setChallengeTop(int top, boolean updateWidgetSize) {
+        // The widget starts below the padding, and extends to the top of the challengs.
+        int widgetHeight = top - getPaddingTop();
+        int frameHeight = top + getPaddingBottom();
+        setFrameHeight(frameHeight);
+        if (updateWidgetSize) {
+            setWidgetHeight(widgetHeight);
+        }
+    }
+
+    /**
      * Depending on whether the security is up, the widget size needs to change
      * 
      * @param height The height of the widget, -1 for full height
      */
-    public void setWidgetHeight(int height) {
+    private void setWidgetHeight(int height) {
+        System.out.println("Set widget height: " + this + " : " + height);
         boolean needLayout = false;
         View widget = getContent();
         if (widget != null) {
@@ -257,20 +289,54 @@ public class KeyguardWidgetFrame extends FrameLayout {
         }
     }
 
-    /**
-     * Set the top location of the challenge.
-     *
-     * @param top The top of the challenge, in _local_ coordinates, or -1 to indicate the challenge
-     *              is down.
-     */
-    public void setChallengeTop(int top) {
-        // The widget starts below the padding, and extends to the top of the challengs.
-        int widgetHeight = top - getPaddingTop();
-        setWidgetHeight(widgetHeight);
+    public boolean isSmall() {
+        return mIsSmall;
+    }
+
+    public void adjustFrame(int challengeTop) {
+        setChallengeTop(challengeTop, false);
+    }
+
+    public void shrinkWidget(int challengeTop) {
+        mIsSmall = true;
+        setChallengeTop(challengeTop, true);
     }
 
     public void resetSize() {
+        mIsSmall = false;
+        setFrameHeight(getMeasuredHeight());
         setWidgetHeight(LayoutParams.MATCH_PARENT);
+    }
+
+    public void setFrameHeight(int height) {
+        height = Math.min(height, getMeasuredHeight());
+        mBackgroundRect.set(0, 0, getMeasuredWidth(), height);
+        invalidate();
+    }
+
+    public void hideFrame(Object caller) {
+        fadeFrame(caller, false, 0f, 150);
+    }
+
+    public void showFrame(Object caller) {
+        fadeFrame(caller, true, 1f, 150);
+    }
+
+    public void fadeFrame(Object caller, boolean takeControl, float alpha, int duration) {
+        if (takeControl) {
+            mBgAlphaController = caller;
+        }
+
+        if (mBgAlphaController != caller) return;
+
+        if (mFrameFade != null) {
+            mFrameFade.cancel();
+            mFrameFade = null;
+        }
+        PropertyValuesHolder bgAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha", alpha);
+        mFrameFade = ObjectAnimator.ofPropertyValuesHolder(this, bgAlpha);
+        mFrameFade.setDuration(duration);
+        mFrameFade.start();
     }
 
     @Override
@@ -285,6 +351,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mRightToLeftGradient = new LinearGradient(x1, 0f, x0, 0f,
                 mGradientColor, 0, Shader.TileMode.CLAMP);
         mBackgroundRect.set(0, 0, w, h);
+        invalidate();
     }
 
     void setOverScrollAmount(float r, boolean left) {

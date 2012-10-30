@@ -374,7 +374,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             mScrollState = state;
 
             animateHandle(state == SCROLL_STATE_IDLE && !mChallengeShowing);
-            animateFrame(state != SCROLL_STATE_IDLE, false);
+            animateFrame(false , false);
             if (mScrollListener != null) {
                 mScrollListener.onScrollStateChanged(state);
             }
@@ -843,6 +843,14 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 }
             }
         }
+    }
+
+    public int getMaxChallengeTop() {
+        if (mChallengeView == null) return 0;
+
+        final int layoutBottom = getLayoutBottom();
+        final int challengeHeight = mChallengeView.getHeight();
+        return layoutBottom - challengeHeight;
     }
 
     /**
