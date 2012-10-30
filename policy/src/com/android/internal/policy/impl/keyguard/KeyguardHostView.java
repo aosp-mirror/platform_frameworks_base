@@ -1119,6 +1119,10 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void enableUserSelectorIfNecessary() {
+        if (!UserManager.supportsMultipleUsers()) {
+            return; // device doesn't support multi-user mode
+        }
+
         // if there are multiple users, we need to enable to multi-user switcher
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> users = mUm.getUsers(true);
