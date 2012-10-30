@@ -47,6 +47,11 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected int getPasswordTextViewId() {
+        return R.id.pinEntry;
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
