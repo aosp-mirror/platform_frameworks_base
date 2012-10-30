@@ -1205,4 +1205,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         return false;
     }
 
+    /**
+     *  Dismisses the keyguard by going to the next screen or making it gone.
+     */
+    public void dismiss() {
+        showNextSecurityScreenOrFinish(false);
+    }
 }
