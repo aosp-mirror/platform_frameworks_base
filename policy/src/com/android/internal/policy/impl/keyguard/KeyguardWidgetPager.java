@@ -56,6 +56,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private float mChildrenOutlineAlpha = 0;
     private float mSidePagesAlpha = 1f;
     protected int mScreenCenter;
+    private boolean mHasLayout = false;
+    private boolean mHasMeasure = false;
+    private boolean mShowHintsOnLayout = false;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
 
@@ -435,7 +438,64 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public void showInitialPageHints() {
-        showOutlinesAndSidePages();
+        if (mHasLayout) {
+            showOutlinesAndSidePages();
+        } else {
+            // The layout hints depend on layout being run once
+            mShowHintsOnLayout = true;
+        }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mHasMeasure = false;
+        mHasLayout = false;
+    }
+
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mShowHintsOnLayout) {
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    showOutlinesAndSidePages();
+                }
+            });
+            mShowHintsOnLayout = false;
+        }
+        mHasLayout = true;
+    }
+
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int maxChallengeTop = -1;
+        View parent = (View) getParent();
+        boolean challengeShowing = false;
+        // Widget pages need to know where the top of the sliding challenge is so that they
+        // now how big the widget should be when the challenge is up. We compute it here and
+        // then propagate it to each of our children.
+        if (parent.getParent() instanceof SlidingChallengeLayout) {
+            SlidingChallengeLayout scl = (SlidingChallengeLayout) parent.getParent();
+            int top = scl.getMaxChallengeTop();
+
+            // This is a bit evil, but we need to map a coordinate relative to the SCL into a
+            // coordinate relative to our children, hence we subtract the top padding.s
+            maxChallengeTop = top - getPaddingTop();
+            challengeShowing = scl.isChallengeShowing();
+        }
+
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            KeyguardWidgetFrame frame = getWidgetPageAt(i);
+            frame.setMaxChallengeTop(maxChallengeTop);
+
+            // On the very first measure pass, if the challenge is showing, we need to make sure
+            // that the widget on the current page is small.
+            if (challengeShowing && i == mCurrentPage && !mHasMeasure) {
+                frame.shrinkWidget();
+            }
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     void animateOutlinesAndSidePages(final boolean show) {
