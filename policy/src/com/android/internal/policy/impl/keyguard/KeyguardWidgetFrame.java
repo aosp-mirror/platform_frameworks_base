@@ -62,6 +62,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
+    private static int mSmallWidgetHeight;
 
     // Multiple callers may try and adjust the alpha of the frame. When a caller shows
     // the outlines, we give that caller control, and nobody else can fade them out.
@@ -95,6 +96,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         cancelLongPress();
+    }
+
+    public void setMaxChallengeTop(int top) {
+        mSmallWidgetHeight = top - getPaddingTop();
     }
 
     @Override
@@ -276,7 +281,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
      * @param height The height of the widget, -1 for full height
      */
     private void setWidgetHeight(int height) {
-        System.out.println("Set widget height: " + this + " : " + height);
         boolean needLayout = false;
         View widget = getContent();
         if (widget != null) {
@@ -299,9 +303,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
         setChallengeTop(challengeTop, false);
     }
 
-    public void shrinkWidget(int challengeTop) {
+    public void shrinkWidget() {
         mIsSmall = true;
-        setChallengeTop(challengeTop, true);
+        setChallengeTop(mSmallWidgetHeight, true);
     }
 
     public void resetSize() {
