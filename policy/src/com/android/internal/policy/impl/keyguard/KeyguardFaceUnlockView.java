@@ -85,7 +85,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     public void onPause() {
         if (DEBUG) Log.d(TAG, "onPause()");
         if (mBiometricUnlock != null) {
-            mBiometricUnlock.stopAndShowBackup();
+            mBiometricUnlock.stop();
         }
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateCallback);
     }
