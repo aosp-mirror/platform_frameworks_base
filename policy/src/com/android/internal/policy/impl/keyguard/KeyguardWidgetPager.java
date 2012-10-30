@@ -433,8 +433,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         int count = getChildCount();
         PropertyValuesHolder alpha;
-        PropertyValuesHolder outlineAlpha;
         ArrayList<Animator> anims = new ArrayList<Animator>();
+
+        int duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
+            CHILDREN_OUTLINE_FADE_OUT_DURATION;
 
         int curPage = getNextPage();
         for (int i = 0; i < count; i++) {
@@ -446,16 +448,15 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             } else {
                 finalContentAlpha = 0f;
             }
-            float finalOutlineAlpha = show ? getAlphaForPage(mScreenCenter, i) : 0f;
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             alpha = PropertyValuesHolder.ofFloat("contentAlpha", finalContentAlpha);
-            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha",finalOutlineAlpha);
-            ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha, outlineAlpha);
+            ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha);
             anims.add(a);
+
+            float finalOutlineAlpha = show ? getAlphaForPage(mScreenCenter, i) : 0f;
+            child.fadeFrame(this, show, finalOutlineAlpha, duration);
         }
 
-        int duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
-            CHILDREN_OUTLINE_FADE_OUT_DURATION;
         mChildrenOutlineFadeAnimation = new AnimatorSet();
         mChildrenOutlineFadeAnimation.playTogether(anims);
 

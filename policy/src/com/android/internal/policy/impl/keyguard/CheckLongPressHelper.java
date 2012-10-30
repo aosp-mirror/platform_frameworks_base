@@ -60,8 +60,10 @@ public class CheckLongPressHelper {
     public void onMove(MotionEvent ev) {
         float x = ev.getX();
         float y = ev.getY();
+        boolean xMoved = Math.abs(mDownX - x) > mScaledTouchSlop;
+        boolean yMoved = Math.abs(mDownY - y) > mScaledTouchSlop;
 
-        if (Math.sqrt(Math.pow(mDownX - x, 2) + Math.pow(mDownY - y, 2)) > mScaledTouchSlop) {
+        if (xMoved || yMoved) {
             cancelLongPress();
         }
     }
