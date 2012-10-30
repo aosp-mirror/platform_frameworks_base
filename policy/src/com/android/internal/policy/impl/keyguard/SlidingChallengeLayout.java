@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -41,6 +42,7 @@ import com.android.internal.R;
  */
 public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout {
     private static final String TAG = "SlidingChallengeLayout";
+    private static final boolean DEBUG = false;
 
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
@@ -81,7 +83,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private int mMinVelocity;
     private int mMaxVelocity;
     private float mLastTouchY;
-    private int mDragHandleSize;
+    private int mDragHandleSize; // handle hitrect extension into the challenge view
+    private int mDragHandleHeadroom; // extend the handle's hitrect this far above the line
     private int mDragHandleEdgeSlop;
     float mHandleAlpha;
     float mFrameAlpha;
@@ -226,6 +229,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int defaultSize = (int) (DRAG_HANDLE_DEFAULT_SIZE * density + 0.5f);
         mDragHandleSize = Math.max(handle != null ? handle.getIntrinsicHeight() : defaultSize,
                 icon != null ? icon.getIntrinsicHeight() : defaultSize);
+
+        // top half of the lock icon, plus another 25% to be sure
+        mDragHandleHeadroom = (icon != null) ? (int)(icon.getIntrinsicHeight() * 0.75f) : 0;
+
         mHandleDrawable = handle;
         mDragIconDrawable = icon;
     }
@@ -563,7 +570,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         showChallenge(0);
                         return true;
                     }
-                    final float y = Math.max(ev.getY(index), getChallengeOpenedTop());
+                    final float y = Math.max(ev.getY(index),
+                            getChallengeOpenedTop() - mDragHandleHeadroom);
                     final float delta = y - mLastTouchY;
                     final int idelta = (int) delta;
                     // Don't lose the rounded component
@@ -587,14 +595,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mChallengeView == null) return false;
 
         return x >= mDragHandleEdgeSlop &&
-                y >= mChallengeView.getTop() &&
+                y >= mChallengeView.getTop() - mDragHandleHeadroom &&
                 x < getWidth() - mDragHandleEdgeSlop &&
                 y < mChallengeView.getTop() + mDragHandleSize;
     }
 
     private boolean crossedDragHandle(float x, float y, float lastY) {
         final int challengeTop = mChallengeView.getTop();
-        return x >= 0 && x < getWidth() && lastY < challengeTop &&
+        return  x >= 0 &&
+                x < getWidth() &&
+                lastY < (challengeTop - mDragHandleHeadroom) &&
                 y > challengeTop + mDragHandleSize;
     }
 
@@ -717,6 +727,19 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public void draw(Canvas c) {
         super.draw(c);
+
+        final Paint debugPaint;
+        if (DEBUG) {
+            debugPaint = new Paint();
+            debugPaint.setColor(0x40FF00CC);
+            // show the isInDragHandle() rect
+            c.drawRect(mDragHandleEdgeSlop,
+                    mChallengeView.getTop() - mDragHandleHeadroom,
+                    getWidth() - mDragHandleEdgeSlop,
+                    mChallengeView.getTop() + mDragHandleSize,
+                    debugPaint);
+        }
+
         if (mChallengeView != null && mHandleAlpha > 0 && mHandleDrawable != null) {
             final int top = mChallengeView.getTop();
             final int handleHeight = mHandleDrawable.getIntrinsicHeight();
@@ -725,6 +748,14 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             mHandleDrawable.setBounds(challengeLeft, top, challengeRight, top + handleHeight);
             mHandleDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
             mHandleDrawable.draw(c);
+
+            if (DEBUG) {
+                // now show the actual drag handle
+                debugPaint.setStyle(Paint.Style.STROKE);
+                debugPaint.setStrokeWidth(1);
+                debugPaint.setColor(0xFF80FF00);
+                c.drawRect(challengeLeft, top, challengeRight, top + handleHeight, debugPaint);
+            }
 
             if (mDragIconDrawable != null) {
                 final int iconWidth = mDragIconDrawable.getIntrinsicWidth();
@@ -735,6 +766,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         iconTop + iconHeight);
                 mDragIconDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
                 mDragIconDrawable.draw(c);
+
+                if (DEBUG) {
+                    debugPaint.setColor(0xFF00FF00);
+                    c.drawRect(iconLeft, iconTop, iconLeft + iconWidth,
+                        iconTop + iconHeight, debugPaint);
+                }
             }
         }
     }
