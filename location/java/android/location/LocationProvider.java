@@ -33,8 +33,8 @@ import com.android.internal.location.ProviderProperties;
  * Criteria} class allows providers to be selected based on
  * user-specified criteria.
  *
- * @deprecated Use the {@link Criteria} class to request location instead of
- * enumerating providers.
+ * @deprecated Use the {@link LocationRequest} class to request location
+ * instead of enumerating providers.
  */
 @Deprecated
 public class LocationProvider {
