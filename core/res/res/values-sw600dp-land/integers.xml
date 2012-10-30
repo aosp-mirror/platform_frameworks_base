@@ -19,4 +19,5 @@
 <resources>
     <integer name="kg_widget_region_weight">50</integer>
     <integer name="kg_security_flipper_weight">50</integer>
+    <integer name="kg_glowpad_rotation_offset">0</integer>
 </resources>

@@ -398,6 +398,14 @@
         <item>@null</item>
     </array>
 
+    <array name="lockscreen_targets_unlock_only">
+        <item>@*android:drawable/ic_lockscreen_unlock</item>
+    </array>
+
+    <array name="lockscreen_target_descriptions_unlock_only">
+        <item>@*android:string/description_target_unlock</item>
+    </array>
+
     <!-- list of 3- or 4-letter mnemonics for a 10-key numeric keypad -->
     <string-array translatable="false" name="lockscreen_num_pad_klondike">
         <item></item><!-- 0 -->
