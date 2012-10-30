@@ -3913,7 +3913,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             } else if (action.equalsIgnoreCase(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                // attempt to stop music playabck for background user
+                // attempt to stop music playback for background user
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
                         SENDMSG_REPLACE,
@@ -3921,6 +3921,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         null,
                         0);
+                // the current audio focus owner is no longer valid
+                discardAudioFocusOwner();
+
                 // load volume settings for new user
                 readAudioSettings(true /*userSwitch*/);
                 // preserve STREAM_MUSIC volume from one user to the next.
@@ -3964,6 +3967,32 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
     };
+
+    /**
+     * Discard the current audio focus owner.
+     * Notify top of audio focus stack that it lost focus (regardless of possibility to reassign
+     * focus), remove it from the stack, and clear the remote control display.
+     */
+    private void discardAudioFocusOwner() {
+        synchronized(mAudioFocusLock) {
+            if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
+                // notify the current focus owner it lost focus after removing it from stack
+                FocusStackEntry focusOwner = mFocusStack.pop();
+                try {
+                    focusOwner.mFocusDispatcher.dispatchAudioFocusChange(
+                            AudioManager.AUDIOFOCUS_LOSS, focusOwner.mClientId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failure to signal loss of audio focus due to "+ e);
+                    e.printStackTrace();
+                }
+                focusOwner.unlinkToDeath();
+                // clear RCD
+                synchronized(mRCStack) {
+                    clearRemoteControlDisplay_syncAfRcs();
+                }
+            }
+        }
+    }
 
     private void notifyTopOfAudioFocusStack() {
         // notify the top of the stack it gained focus
@@ -4036,7 +4065,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
-                pw.println("  source:" + fse.mSourceRef + " -- client: " + fse.mClientId
+                pw.println("  source:" + fse.mSourceRef
+                        + " -- pack: " + fse.mPackageName
+                        + " -- client: " + fse.mClientId
                         + " -- duration: " + fse.mFocusChangeType
                         + " -- uid: " + fse.mCallingUid
                         + " -- stream: " + fse.mStreamType);
@@ -4718,6 +4749,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
                 pw.println("  pi: " + rcse.mMediaIntent +
+                        " -- pack: " + rcse.mCallingPackageName +
                         "  -- ercvr: " + rcse.mReceiverComponent +
                         "  -- client: " + rcse.mRcClient +
                         "  -- uid: " + rcse.mCallingUid +
