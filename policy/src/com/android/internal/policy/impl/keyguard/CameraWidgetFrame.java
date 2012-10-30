@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -32,10 +33,11 @@ import android.widget.ImageView.ScaleType;
 
 import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
 
-public class CameraWidgetFrame extends KeyguardWidgetFrame {
+public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
     private static final int WIDGET_ANIMATION_DURATION = 250;
+    private static final int WIDGET_WAIT_DURATION = 650;
 
     interface Callbacks {
         void onLaunchingCamera();
@@ -49,6 +51,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
     private View mWidgetView;
     private long mLaunchCameraStart;
     private boolean mRendered;
+    private boolean mActive;
+    private boolean mChallengeActive;
+    private boolean mTransitioning;
+    private boolean mDown;
 
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
@@ -61,6 +67,12 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
         @Override
         public void run() {
             render();
+        }};
+
+    private final Runnable mTransitionToCameraRunnable = new Runnable() {
+        @Override
+        public void run() {
+            transitionToCamera();
         }};
 
     private CameraWidgetFrame(Context context, Callbacks callbacks,
@@ -93,10 +105,12 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
         CameraWidgetFrame cameraWidgetFrame = new CameraWidgetFrame(context, callbacks, launcher);
         cameraWidgetFrame.addView(preview);
         cameraWidgetFrame.mWidgetView = widgetView;
+        preview.setOnClickListener(cameraWidgetFrame);
         return cameraWidgetFrame;
     }
 
     private static View inflateWidgetView(Context context, CameraWidgetInfo widgetInfo) {
+        if (DEBUG) Log.d(TAG, "inflateWidgetView: " + widgetInfo.contextPackage);
         View widgetView = null;
         Exception exception = null;
         try {
@@ -118,6 +132,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
     }
 
     private static View inflateGenericWidgetView(Context context) {
+        if (DEBUG) Log.d(TAG, "inflateGenericWidgetView");
         ImageView iv = new ImageView(context);
         iv.setImageResource(com.android.internal.R.drawable.ic_lockscreen_camera);
         iv.setScaleType(ScaleType.CENTER);
@@ -154,6 +169,9 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
     }
 
     private void transitionToCamera() {
+        if (mTransitioning || mChallengeActive || mDown) return;
+        if (DEBUG) Log.d(TAG, "Transitioning to camera...");
+        mTransitioning = true;
         int startWidth = getChildAt(0).getWidth();
         int startHeight = getChildAt(0).getHeight();
 
@@ -174,10 +192,21 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
     }
 
     @Override
+    public void onClick(View v) {
+        if (DEBUG) Log.d(TAG, "clicked");
+        if (mTransitioning) return;
+        if (mActive && !mChallengeActive) {
+            cancelTransitionToCamera();
+            transitionToCamera();
+        }
+    }
+
+    @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-
+        if (DEBUG) Log.d(TAG, "onWindowFocusChanged: " + hasWindowFocus);
         if (!hasWindowFocus) {
+            mTransitioning = false;
             if (mLaunchCameraStart > 0) {
                 long launchTime = SystemClock.uptimeMillis() - mLaunchCameraStart;
                 if (DEBUG) Log.d(TAG, String.format("Camera took %sms to launch", launchTime));
@@ -189,23 +218,69 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame {
 
     @Override
     public void onActive(boolean isActive) {
-        if (isActive) {
-            mHandler.post(new Runnable(){
-                @Override
-                public void run() {
-                    transitionToCamera();
-                }});
+        mActive = isActive;
+        if (mActive) {
+            rescheduleTransitionToCamera();
         } else {
             reset();
         }
     }
 
+    @Override
+    public boolean onUserInteraction(int action) {
+        if (mTransitioning) return true;
+        if (DEBUG) Log.d(TAG, "onUserInteraction " + action);
+        mDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE;
+        if (mActive && !mChallengeActive) {
+            rescheduleTransitionToCamera();
+        }
+        return false;
+    }
+
+    @Override
+    protected void onFocusLost() {
+        Log.d(TAG, "onFocusLost");
+        cancelTransitionToCamera();
+        super.onFocusLost();
+    }
+
+    @Override
+    public void onChallengeActive(boolean challengeActive) {
+        if (DEBUG) Log.d(TAG, "onChallengeActive: " + challengeActive);
+        mChallengeActive = challengeActive;
+        if (mTransitioning) return;
+        if (mActive) {
+            if (mChallengeActive) {
+                cancelTransitionToCamera();
+            } else {
+                rescheduleTransitionToCamera();
+            }
+        }
+    }
+
+    private void rescheduleTransitionToCamera() {
+        if (DEBUG) Log.d(TAG, "rescheduleTransitionToCamera at " + SystemClock.uptimeMillis());
+        mHandler.removeCallbacks(mTransitionToCameraRunnable);
+        mHandler.postDelayed(mTransitionToCameraRunnable, WIDGET_WAIT_DURATION);
+    }
+
+    private void cancelTransitionToCamera() {
+        if (DEBUG) Log.d(TAG, "cancelTransitionToCamera at " + SystemClock.uptimeMillis());
+        mHandler.removeCallbacks(mTransitionToCameraRunnable);
+    }
+
     private void onCameraLaunched() {
-        reset();
         mCallbacks.onCameraLaunched();
+        reset();
     }
 
     private void reset() {
+        if (DEBUG) Log.d(TAG, "reset");
+        mLaunchCameraStart = 0;
+        mTransitioning = false;
+        mChallengeActive = false;
+        mDown = false;
+        cancelTransitionToCamera();
         animate().cancel();
         setScaleX(1);
         setScaleY(1);

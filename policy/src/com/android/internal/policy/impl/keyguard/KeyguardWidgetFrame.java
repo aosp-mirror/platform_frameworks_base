@@ -366,4 +366,13 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public void onActive(boolean isActive) {
         // hook for subclasses
     }
+
+    public boolean onUserInteraction(int action) {
+        // hook for subclasses
+        return false;
+    }
+
+    public void onChallengeActive(boolean challengeActive) {
+        // hook for subclasses
+    }
 }
