@@ -24,31 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HarfbuzzSkia_h
-#define HarfbuzzSkia_h
+#ifndef HarfBuzzNGFaceSkia_h
+#define HarfBuzzNGFaceSkia_h
 
-#include "SkScalar.h"
-#include "SkTypeface.h"
-#include "SkPaint.h"
+#include <SkScalar.h>
+#include <SkPaint.h>
 
-extern "C" {
-#include "harfbuzz-shaper.h"
-}
+#include <hb.h>
 
 namespace android {
 
-static inline float HBFixedToFloat(HB_Fixed v) {
-    // Harfbuzz uses 26.6 fixed point values for pixel offsets
-    return v * (1.0f / 64);
+static inline float
+HBFixedToFloat (hb_position_t v)
+{
+    return scalblnf (v, -8);
 }
 
-static inline HB_Fixed SkScalarToHBFixed(SkScalar value) {
-    // HB_Fixed is a 26.6 fixed point format.
-    return SkScalarToFloat(value) * 64.0f;
+static inline hb_position_t
+HBFloatToFixed (float v)
+{
+    return scalblnf (v, +8);
 }
 
-HB_Error harfbuzzSkiaGetTable(void* voidface, const HB_Tag, HB_Byte* buffer, HB_UInt* len);
-extern const HB_FontClass harfbuzzSkiaClass;
+static inline hb_position_t SkScalarToHBFixed(SkScalar value) {
+    return HBFloatToFixed(SkScalarToFloat(value));
+}
+
+hb_blob_t* harfbuzzSkiaReferenceTable(hb_face_t* face, hb_tag_t tag, void* userData);
+
+hb_font_t* createFont(hb_face_t* face, SkPaint* paint, float sizeX, float sizeY);
 
 }  // namespace android
 
