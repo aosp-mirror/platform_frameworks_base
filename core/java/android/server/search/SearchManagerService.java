@@ -74,7 +74,7 @@ public class SearchManagerService extends ISearchManager.Stub {
         mContext = context;
         mContext.registerReceiver(new BootCompletedReceiver(),
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
-        mContext.registerReceiver(new UserReceiver(), 
+        mContext.registerReceiver(new UserReceiver(),
                 new IntentFilter(Intent.ACTION_USER_REMOVED));
         new MyPackageMonitor().register(context, null, UserHandle.ALL, true);
     }
@@ -161,7 +161,8 @@ public class SearchManagerService extends ISearchManager.Stub {
             }
             // Inform all listeners that the list of searchables has been updated.
             Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcastAsUser(intent, new UserHandle(changingUserId));
         }
     }
