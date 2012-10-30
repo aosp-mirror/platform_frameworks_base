@@ -82,7 +82,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private VelocityTracker mVelocityTracker;
     private int mMinVelocity;
     private int mMaxVelocity;
-    private float mLastTouchY;
+    private float mGestureStartY; // where did you touch the screen to start this gesture?
+    private int mGestureStartChallengeBottom; // where was the challenge at that time?
     private int mDragHandleSize; // handle hitrect extension into the challenge view
     private int mDragHandleHeadroom; // extend the handle's hitrect this far above the line
     private int mDragHandleEdgeSlop;
@@ -469,7 +470,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                mLastTouchY = ev.getY();
+                mGestureStartY = ev.getY();
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -484,11 +485,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     final float y = ev.getY(i);
 
                     if (!mIsBouncing &&
-                            (isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
+                            (isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
                             (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING)) &&
                             mActivePointerId == INVALID_POINTER) {
                         mActivePointerId = ev.getPointerId(i);
-                        mLastTouchY = y;
+                        mGestureStartY = ev.getY();
+                        mGestureStartChallengeBottom = getChallengeBottom();
                         mDragging = true;
                     } else if (isInChallengeView(x, y)) {
                         mBlockDrag = true;
@@ -547,10 +549,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         final float x = ev.getX(i);
                         final float y = ev.getY(i);
 
-                        if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mLastTouchY) ||
+                        if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
                                 (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING))
                                 && mActivePointerId == INVALID_POINTER) {
+                            mGestureStartY = y;
                             mActivePointerId = ev.getPointerId(i);
+                            mGestureStartChallengeBottom = getChallengeBottom();
                             mDragging = true;
                             break;
                         }
@@ -570,18 +574,23 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         showChallenge(0);
                         return true;
                     }
-                    final float y = Math.max(ev.getY(index),
-                            getChallengeOpenedTop() - mDragHandleHeadroom);
-                    final float delta = y - mLastTouchY;
-                    final int idelta = (int) delta;
-                    // Don't lose the rounded component
-                    mLastTouchY = y + delta - idelta;
+                    final float y = ev.getY(index);
+                    final float pos = Math.min(y - mGestureStartY,
+                            getChallengeOpenedTop());
 
-                    moveChallengeBy(idelta);
+                    moveChallengeTo(mGestureStartChallengeBottom + (int) pos);
                 }
                 break;
         }
         return true;
+    }
+
+    /**
+     * We only want to add additional vertical space to the drag handle when the panel is fully
+     * closed.
+     */
+    private int getDragHandleHeadroom() {
+        return isChallengeShowing() ? 0 : mDragHandleHeadroom;
     }
 
     private boolean isInChallengeView(float x, float y) {
@@ -595,16 +604,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mChallengeView == null) return false;
 
         return x >= mDragHandleEdgeSlop &&
-                y >= mChallengeView.getTop() - mDragHandleHeadroom &&
+                y >= mChallengeView.getTop() - getDragHandleHeadroom() &&
                 x < getWidth() - mDragHandleEdgeSlop &&
                 y < mChallengeView.getTop() + mDragHandleSize;
     }
 
-    private boolean crossedDragHandle(float x, float y, float lastY) {
+    private boolean crossedDragHandle(float x, float y, float initialY) {
         final int challengeTop = mChallengeView.getTop();
         return  x >= 0 &&
                 x < getWidth() &&
-                lastY < (challengeTop - mDragHandleHeadroom) &&
+                initialY < (challengeTop - getDragHandleHeadroom()) &&
                 y > challengeTop + mDragHandleSize;
     }
 
@@ -734,7 +743,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             debugPaint.setColor(0x40FF00CC);
             // show the isInDragHandle() rect
             c.drawRect(mDragHandleEdgeSlop,
-                    mChallengeView.getTop() - mDragHandleHeadroom,
+                    mChallengeView.getTop() - getDragHandleHeadroom(),
                     getWidth() - mDragHandleEdgeSlop,
                     mChallengeView.getTop() + mDragHandleSize,
                     debugPaint);
@@ -790,8 +799,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             return false;
         }
 
-        final int bottomMargin = ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
-        final int layoutBottom = getHeight() - getPaddingBottom() - bottomMargin;
+        final int layoutBottom = getLayoutBottom();
         final int challengeHeight = mChallengeView.getHeight();
 
         bottom = Math.max(layoutBottom,
@@ -814,20 +822,32 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         return true;
     }
 
+    /**
+     * The bottom edge of this SlidingChallengeLayout's coordinate system; will coincide with
+     * the bottom edge of mChallengeView when the challenge is fully opened.
+     */
+    private int getLayoutBottom() {
+        final int bottomMargin = (mChallengeView == null)
+                ? 0
+                : ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
+        final int layoutBottom = getHeight() - getPaddingBottom() - bottomMargin;
+        return layoutBottom;
+    }
+
+    /**
+     * The bottom edge of mChallengeView; essentially, where the sliding challenge 'is'.
+     */
     private int getChallengeBottom() {
         if (mChallengeView == null) return 0;
 
         return mChallengeView.getBottom();
     }
 
+    /**
+     * The top edge of the challenge if it were fully opened.
+     */
     private int getChallengeOpenedTop() {
-        final int paddedBottom = getHeight() - getPaddingBottom();
-        if (mChallengeView == null) return paddedBottom;
-
-        final int bottomMargin = ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
-        final int layoutBottom = paddedBottom - bottomMargin;
-
-        return layoutBottom - mChallengeView.getHeight();
+        return getLayoutBottom() - ((mChallengeView == null) ? 0 : mChallengeView.getHeight());
     }
 
     private void moveChallengeBy(int delta) {
