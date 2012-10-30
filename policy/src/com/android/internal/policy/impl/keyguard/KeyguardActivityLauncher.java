@@ -17,11 +17,13 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
@@ -97,13 +99,13 @@ public abstract class KeyguardActivityLauncher {
                 // For now, we'll treat this like launching any other app from secure keyguard.
                 // When they do, user sees the system's ResolverActivity which lets them choose
                 // which secure camera to use.
-                launchActivity(SECURE_CAMERA_INTENT, false);
+                launchActivity(SECURE_CAMERA_INTENT, false, false);
             } else {
-                launchActivity(SECURE_CAMERA_INTENT, true);
+                launchActivity(SECURE_CAMERA_INTENT, true, false);
             }
         } else {
             // Launch the normal camera
-            launchActivity(INSECURE_CAMERA_INTENT, false);
+            launchActivity(INSECURE_CAMERA_INTENT, false, false);
         }
     }
 
@@ -113,8 +115,11 @@ public abstract class KeyguardActivityLauncher {
      * @param showsWhileLocked true if the activity can be run on top of keyguard.
      * See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
      */
-    public void launchActivity(final Intent intent, boolean showsWhileLocked) {
+    public void launchActivity(final Intent intent, boolean showsWhileLocked, boolean animate) {
         final Context context = getContext();
+        final Bundle animation = animate ? null :
+                ActivityOptions.makeCustomAnimation(context, com.android.internal.R.anim.fade_in,
+                        com.android.internal.R.anim.fade_out).toBundle();
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
@@ -128,7 +133,8 @@ public abstract class KeyguardActivityLauncher {
                 Log.w(TAG, "can't dismiss keyguard on launch");
             }
             try {
-                context.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                context.startActivityAsUser(intent, animation,
+                        new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }
@@ -139,7 +145,8 @@ public abstract class KeyguardActivityLauncher {
             callback.setOnDismissRunnable(new Runnable() {
                 @Override
                 public void run() {
-                    context.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                    context.startActivityAsUser(intent, animation,
+                            new UserHandle(UserHandle.USER_CURRENT));
                 }
             });
             callback.dismiss(false);

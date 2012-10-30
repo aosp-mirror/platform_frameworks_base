@@ -41,6 +41,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private final static PorterDuffXfermode sAddBlendMode =
             new PorterDuffXfermode(PorterDuff.Mode.ADD);
 
+    static final float OUTLINE_ALPHA_MULTIPLIER = 0.6f;
+
     private int mGradientColor;
     private LinearGradient mForegroundGradient;
     private LinearGradient mLeftToRightGradient;
@@ -319,7 +321,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     public void showFrame(Object caller) {
-        fadeFrame(caller, true, 1f, 150);
+        fadeFrame(caller, true, OUTLINE_ALPHA_MULTIPLIER, 150);
     }
 
     public void fadeFrame(Object caller, boolean takeControl, float alpha, int duration) {
