@@ -681,6 +681,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final View oldChallengeView = mChallengeView;
         mChallengeView = null;
         final int count = getChildCount();
+
+        // First iteration through the children finds special children and sets any associated
+        // state.
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -699,10 +702,22 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);
             }
-
             if (child.getVisibility() == GONE) continue;
+        }
 
-            measureChildWithMargins(child, widthSpec, 0, heightSpec, 0);
+        // We want to measure the challenge view first, for various reasons that I'd rather
+        // not get into here.
+        if (mChallengeView != null) {
+            measureChildWithMargins(mChallengeView, widthSpec, 0, heightSpec, 0);
+        }
+
+        // Measure the rest of the children
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            // Don't measure the challenge view twice!
+            if (child != mChallengeView) {
+                measureChildWithMargins(child, widthSpec, 0, heightSpec, 0);
+            }
         }
     }
 
@@ -747,14 +762,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
 
         if (!mHasLayout) {
-            // We want to trigger the initial listener updates outside of layout pass,
-            // in case the listeners trigger requestLayout().
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    sendInitialListenerUpdates();
-                }
-            });
             if (mFrameDrawable != null) {
                 mFrameDrawable.setAlpha(0);
             }
@@ -845,7 +852,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mChallengeView == null) return 0;
 
         final int layoutBottom = getLayoutBottom();
-        final int challengeHeight = mChallengeView.getHeight();
+        final int challengeHeight = mChallengeView.getMeasuredHeight();
         return layoutBottom - challengeHeight;
     }
 
@@ -895,7 +902,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int bottomMargin = (mChallengeView == null)
                 ? 0
                 : ((LayoutParams) mChallengeView.getLayoutParams()).bottomMargin;
-        final int layoutBottom = getHeight() - getPaddingBottom() - bottomMargin;
+        final int layoutBottom = getMeasuredHeight() - getPaddingBottom() - bottomMargin;
         return layoutBottom;
     }
 
