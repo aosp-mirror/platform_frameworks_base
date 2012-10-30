@@ -207,7 +207,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libicuuc \
 	libicui18n \
 	libmedia \
-	libmedia_native \
 	libwpa_client \
 	libjpeg \
 	libusbhost \

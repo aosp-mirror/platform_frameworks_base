@@ -39,8 +39,7 @@ LOCAL_SHARED_LIBRARIES := libstlport \
                           libutils \
                           libandroid \
                           libjnigraphics \
-                          libmedia \
-                          libmedia_native
+                          libmedia
 
 # Don't prelink this library.  For more efficient code, you may want
 # to add this library to the prelink map and set this to true. However,
