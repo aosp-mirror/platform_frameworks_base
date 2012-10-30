@@ -201,9 +201,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // We use the min scale to determine how much to expand the actually PagedView measured
     // dimensions such that when we are zoomed out, the view is not clipped
     private int REORDERING_DROP_REPOSITION_DURATION = 200;
-    protected int REORDERING_REORDER_REPOSITION_DURATION = 350;
+    protected int REORDERING_REORDER_REPOSITION_DURATION = 300;
     protected int REORDERING_ZOOM_IN_OUT_DURATION = 250;
-    private int REORDERING_SIDE_PAGE_HOVER_TIMEOUT = 500;
+    private int REORDERING_SIDE_PAGE_HOVER_TIMEOUT = 300;
     private float REORDERING_SIDE_PAGE_BUFFER_PERCENTAGE = 0.1f;
     private float mMinScale = 1f;
     protected View mDragView;
@@ -215,6 +215,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // This variable's scope is for the duration of startReordering() and after the zoomIn()
     // animation after endReordering()
     private boolean mIsReordering;
+    // The runnable that settles the page after snapToPage and animateDragViewToOriginalPosition
+    private int NUM_ANIMATIONS_RUNNING_BEFORE_ZOOM_OUT = 2;
+    private int mPostReorderingPreZoomInRemainingAnimationCount;
+    private Runnable mPostReorderingPreZoomInRunnable;
 
     // Edge swiping
     private boolean mOnlyAllowEdgeSwipes = false;
@@ -535,6 +539,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (mTouchState == TOUCH_STATE_REST) {
                 pageEndMoving();
             }
+
+            onPostReorderingAnimationCompleted();
 
             // Notify the user when the page changes
             AccessibilityManager accessibilityManager = (AccessibilityManager)
@@ -1971,13 +1977,19 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     // Animate the drag view back to the original position
-    void animateChildrenToOriginalPosition() {
+    void animateDragViewToOriginalPosition() {
         if (mDragView != null) {
             AnimatorSet anim = new AnimatorSet();
             anim.setDuration(REORDERING_DROP_REPOSITION_DURATION);
             anim.playTogether(
                     ObjectAnimator.ofFloat(mDragView, "translationX", 0f),
                     ObjectAnimator.ofFloat(mDragView, "translationY", 0f));
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onPostReorderingAnimationCompleted();
+                }
+            });
             anim.start();
         }
     }
@@ -2008,6 +2020,16 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         // We must invalidate to trigger a redraw to update the layers such that the drag view
         // is always drawn on top
         invalidate();
+    }
+
+    private void onPostReorderingAnimationCompleted() {
+        // Trigger the callback when reordering has settled
+        --mPostReorderingPreZoomInRemainingAnimationCount;
+        if (mPostReorderingPreZoomInRunnable != null &&
+                mPostReorderingPreZoomInRemainingAnimationCount == 0) {
+            mPostReorderingPreZoomInRunnable.run();
+            mPostReorderingPreZoomInRunnable = null;
+        }
     }
 
     protected void onEndReordering() {
@@ -2047,21 +2069,28 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         // In that case, we don't want to do anything.
         if (!mReorderingStarted) return;
         mReorderingStarted = false;
-        Runnable onCompleteRunnable = new Runnable() {
-            @Override
-            public void run() {
-                onEndReordering();
-            }
-        };
-        zoomIn(onCompleteRunnable);
 
         // If we haven't flung-to-delete the current child, then we just animate the drag view
         // back into position
         if (!mIsFlingingToDelete) {
-            // Snap to the current page
-            snapToDestination();
+            mPostReorderingPreZoomInRunnable = new Runnable() {
+                public void run() {
+                    Runnable onCompleteRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            onEndReordering();
+                        }
+                    };
+                    zoomIn(onCompleteRunnable);
+                };
+            };
 
-            animateChildrenToOriginalPosition();
+            mPostReorderingPreZoomInRemainingAnimationCount =
+                    NUM_ANIMATIONS_RUNNING_BEFORE_ZOOM_OUT;
+            // Snap to the current page
+            snapToPage(indexOfChild(mDragView), 0);
+            // Animate the drag view back to the front position
+            animateDragViewToOriginalPosition();
         }
     }
 
