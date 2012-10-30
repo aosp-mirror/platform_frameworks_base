@@ -2953,10 +2953,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean applyWindow = attrs.type >= FIRST_APPLICATION_WINDOW
                     && attrs.type <= LAST_APPLICATION_WINDOW;
             if (attrs.type == TYPE_DREAM) {
-                mShowingDream = true;
-                if (!mDreamingLockscreen) {
-                    applyWindow = true;
-                } else if (win.isVisibleLw() && win.hasDrawnLw()) {
+                // If the lockscreen was showing when the dream started then wait
+                // for the dream to draw before hiding the lockscreen.
+                if (!mDreamingLockscreen
+                        || (win.isVisibleLw() && win.hasDrawnLw())) {
+                    mShowingDream = true;
                     applyWindow = true;
                 }
             }
@@ -2992,8 +2993,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ? mTopFullscreenOpaqueWindowState.getAttrs()
                 : null;
 
-        // If we are not currently showing a dream, then update the lockscreen
-        // state that will apply if a dream is shown next time.
+        // If we are not currently showing a dream then remember the current
+        // lockscreen state.  We will use this to determine whether the dream
+        // started while the lockscreen was showing and remember this state
+        // while the dream is showing.
         if (!mShowingDream) {
             mDreamingLockscreen = mShowingLockscreen;
         }
