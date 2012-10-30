@@ -636,7 +636,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void readDockAudioSettings(ContentResolver cr)
     {
         mDockAudioMediaEnabled = Settings.Global.getInt(
-                                        cr, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED, 1) == 1;
+                                        cr, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED, 0) == 1;
 
         if (mDockAudioMediaEnabled) {
             mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
