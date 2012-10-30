@@ -61,7 +61,9 @@ public interface KeyguardSecurityView {
      */
     KeyguardSecurityCallback getCallback();
 
-    void setSecurityMessageDisplay(SecurityMessageDisplay display);
-
+    /**
+     * Instruct the view to show usability hints, if any.
+     *
+     */
     void showUsabilityHint();
 }

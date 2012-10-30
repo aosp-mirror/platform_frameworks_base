@@ -23,7 +23,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/keyguard_sim_puk_pin_account_navigation"/>
+    <include layout="@layout/keyguard_message_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     <RelativeLayout
         android:layout_width="match_parent"
