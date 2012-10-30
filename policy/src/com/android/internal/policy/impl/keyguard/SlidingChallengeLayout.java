@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -48,8 +47,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // The drag handle is measured in dp above & below the top edge of the
     // challenge view; these parameters change based on whether the challenge 
     // is open or closed.
-    private static final int DRAG_HANDLE_CLOSED_ABOVE = 32; // dp
-    private static final int DRAG_HANDLE_CLOSED_BELOW = 32; // dp
+    private static final int DRAG_HANDLE_CLOSED_ABOVE = 64; // dp
+    private static final int DRAG_HANDLE_CLOSED_BELOW = 0; // dp
     private static final int DRAG_HANDLE_OPEN_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_OPEN_BELOW = 0; // dp
 
@@ -243,13 +242,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        setWillNotDraw(false);
-    }
-
-    public void setDragDrawables(Drawable handle, Drawable icon) {
         final float density = getResources().getDisplayMetrics().density;
-        final int handleHeight = handle != null ? handle.getIntrinsicHeight() : 0;
-        final int iconHeight = icon != null ? icon.getIntrinsicHeight() : 0;
 
         // top half of the lock icon, plus another 25% to be sure
         mDragHandleClosedAbove = (int) (DRAG_HANDLE_CLOSED_ABOVE * density + 0.5f);
@@ -258,9 +251,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mDragHandleOpenBelow = (int) (DRAG_HANDLE_OPEN_BELOW * density + 0.5f);
 
         // how much space to account for in the handle when closed
-        mChallengeBottomBound =
-            (mDragHandleClosedBelow + mDragHandleClosedAbove + handleHeight) / 2;
+        mChallengeBottomBound = mDragHandleClosedBelow;
 
+        setWillNotDraw(false);
+    }
+
+    public void setDragDrawables(Drawable handle, Drawable icon) {
         mHandleDrawable = handle;
         mDragIconDrawable = icon;
     }
@@ -558,8 +554,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
         mVelocityTracker.addMovement(ev);
 
-        //Log.v(TAG, "onTouch: " + ev);
-
         final int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -827,10 +821,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             }
 
             if (mDragIconDrawable != null) {
+                final int closedTop = getLayoutBottom() - mChallengeBottomBound;
                 final int iconWidth = mDragIconDrawable.getIntrinsicWidth();
                 final int iconHeight = mDragIconDrawable.getIntrinsicHeight();
                 final int iconLeft = (challengeLeft + challengeRight - iconWidth) / 2;
-                final int iconTop = top + (handleHeight - iconHeight) / 2;
+                final int iconTop = closedTop +
+                        (mDragHandleClosedBelow - mDragHandleClosedAbove - iconHeight) / 2;
                 mDragIconDrawable.setBounds(iconLeft, iconTop, iconLeft + iconWidth,
                         iconTop + iconHeight);
                 mDragIconDrawable.setAlpha((int) (mHandleAlpha * 0xFF));

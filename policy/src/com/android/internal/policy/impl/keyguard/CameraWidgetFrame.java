@@ -169,11 +169,12 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     private void transitionToCamera() {
+        final View child = getChildAt(0);
         if (mTransitioning || mChallengeActive || mDown) return;
         if (DEBUG) Log.d(TAG, "Transitioning to camera...");
         mTransitioning = true;
-        int startWidth = getChildAt(0).getWidth();
-        int startHeight = getChildAt(0).getHeight();
+        int startWidth = child.getWidth();
+        int startHeight = child.getHeight();
 
         int finishWidth = getRootView().getWidth();
         int finishHeight = getRootView().getHeight();
@@ -182,9 +183,15 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         float scaleY = (float) finishHeight / startHeight;
 
         float scale = Math.max(scaleX, scaleY);
+        final int screenCenter = getResources().getDisplayMetrics().heightPixels / 2;
+
+        final int[] loc = new int[2];
+        child.getLocationInWindow(loc);
+        final int childCenter = loc[1] + startHeight / 2;
         animate()
             .scaleX(scale)
             .scaleY(scale)
+            .translationY(screenCenter - childCenter)
             .setDuration(WIDGET_ANIMATION_DURATION)
             .withEndAction(mLaunchCameraRunnable)
             .start();
@@ -284,6 +291,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         animate().cancel();
         setScaleX(1);
         setScaleY(1);
+        setTranslationY(0);
     }
 
     @Override

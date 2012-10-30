@@ -341,6 +341,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         return 1f;
     }
 
+    public float getOutlineAlphaForPage(int screenCenter, int index) {
+        return getAlphaForPage(screenCenter, index) * KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER;
+    }
+
     protected boolean isOverScrollChild(int index, float scrollProgress) {
         boolean isInOverscroll = mOverScrollX < 0 || mOverScrollX > mMaxScrollX;
         return (isInOverscroll && (index == 0 && scrollProgress < 0 ||
@@ -462,7 +466,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha);
             anims.add(a);
 
-            float finalOutlineAlpha = show ? getAlphaForPage(mScreenCenter, i) : 0f;
+            float finalOutlineAlpha = show ? getOutlineAlphaForPage(mScreenCenter, i) : 0f;
             child.fadeFrame(this, show, finalOutlineAlpha, duration);
         }
 
