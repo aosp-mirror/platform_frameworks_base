@@ -21,12 +21,14 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -49,10 +51,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final KeyguardActivityLauncher mActivityLauncher;
     private final Callbacks mCallbacks;
     private final WindowManager mWindowManager;
+    private final Point mRenderedSize = new Point();
 
     private View mWidgetView;
     private long mLaunchCameraStart;
-    private boolean mRendered;
     private boolean mActive;
     private boolean mChallengeActive;
     private boolean mTransitioning;
@@ -144,16 +146,22 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     public void render() {
-        if (mRendered) return;
-
         try {
             int width = getRootView().getWidth();
             int height = getRootView().getHeight();
-            if (DEBUG) Log.d(TAG, String.format("render [%sx%s] %s",
-                    width, height, Integer.toHexString(hashCode())));
+            if (mRenderedSize.x == width && mRenderedSize.y == height) {
+                if (DEBUG) Log.d(TAG, String.format("already rendered at size=%sx%s",
+                        width, height));
+                return;
+            }
             if (width == 0 || height == 0) {
                 return;
             }
+            if (DEBUG) Log.d(TAG, String.format("render size=%sx%s instance=%s at %s",
+                    width, height,
+                    Integer.toHexString(hashCode()),
+                    SystemClock.uptimeMillis()));
+
             Bitmap offscreen = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(offscreen);
             mWidgetView.measure(
@@ -162,7 +170,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
             mWidgetView.layout(0, 0, width, height);
             mWidgetView.draw(c);
             ((ImageView)getChildAt(0)).setImageBitmap(offscreen);
-            mRendered = true;
+            mRenderedSize.set(width, height);
         } catch (Throwable t) {
             Log.w(TAG, "Error rendering camera widget", t);
             removeAllViews();
@@ -313,18 +321,23 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (DEBUG) Log.d(TAG, String.format("onSizeChanged new=%sx%s old=%sx%s at %s",
+                w, h, oldw, oldh, SystemClock.uptimeMillis()));
         mHandler.post(mRenderRunnable);
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     private void enableWindowExitAnimation(boolean isEnabled) {
         View root = getRootView();
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) root.getLayoutParams();
+        ViewGroup.LayoutParams lp = root.getLayoutParams();
+        if (!(lp instanceof WindowManager.LayoutParams))
+            return;
+        WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) lp;
         int newWindowAnimations = isEnabled ? com.android.internal.R.style.Animation_LockScreen : 0;
-        if (newWindowAnimations != lp.windowAnimations) {
-            lp.windowAnimations = newWindowAnimations;
-            mWindowManager.updateViewLayout(root, lp);
+        if (newWindowAnimations != wlp.windowAnimations) {
+            wlp.windowAnimations = newWindowAnimations;
+            mWindowManager.updateViewLayout(root, wlp);
         }
     }
 }
