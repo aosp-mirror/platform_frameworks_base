@@ -169,32 +169,45 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     private void transitionToCamera() {
-        final View child = getChildAt(0);
         if (mTransitioning || mChallengeActive || mDown) return;
-        if (DEBUG) Log.d(TAG, "Transitioning to camera...");
+
         mTransitioning = true;
-        int startWidth = child.getWidth();
-        int startHeight = child.getHeight();
 
-        int finishWidth = getRootView().getWidth();
-        int finishHeight = getRootView().getHeight();
+        final View child = getChildAt(0);
+        final View root = getRootView();
 
-        float scaleX = (float) finishWidth / startWidth;
-        float scaleY = (float) finishHeight / startHeight;
+        final int startWidth = child.getWidth();
+        final int startHeight = child.getHeight();
 
-        float scale = Math.max(scaleX, scaleY);
-        final int screenCenter = getResources().getDisplayMetrics().heightPixels / 2;
+        final int finishWidth = root.getWidth();
+        final int finishHeight = root.getHeight();
+
+        final float scaleX = (float) finishWidth / startWidth;
+        final float scaleY = (float) finishHeight / startHeight;
+        final float scale = Math.round( Math.max(scaleX, scaleY) * 100) / 100f;
 
         final int[] loc = new int[2];
+        root.getLocationInWindow(loc);
+        final int finishCenter = loc[1] + finishHeight / 2;
+
         child.getLocationInWindow(loc);
-        final int childCenter = loc[1] + startHeight / 2;
+        final int startCenter = loc[1] + startHeight / 2;
+
+        if (DEBUG) Log.d(TAG, String.format("Transitioning to camera. " +
+                "(start=%sx%s, finish=%sx%s, scale=%s,%s, startCenter=%s, finishCenter=%s)",
+                startWidth, startHeight,
+                finishWidth, finishHeight,
+                scaleX, scaleY,
+                startCenter, finishCenter));
+
         animate()
             .scaleX(scale)
             .scaleY(scale)
-            .translationY(screenCenter - childCenter)
+            .translationY(finishCenter - startCenter)
             .setDuration(WIDGET_ANIMATION_DURATION)
             .withEndAction(mLaunchCameraRunnable)
             .start();
+
         mCallbacks.onLaunchingCamera();
     }
 
