@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -47,6 +48,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final Handler mHandler = new Handler();
     private final KeyguardActivityLauncher mActivityLauncher;
     private final Callbacks mCallbacks;
+    private final WindowManager mWindowManager;
 
     private View mWidgetView;
     private long mLaunchCameraStart;
@@ -81,6 +83,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
         mCallbacks = callbacks;
         mActivityLauncher = activityLauncher;
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
     public static CameraWidgetFrame create(Context context, Callbacks callbacks,
@@ -200,6 +203,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
                 scaleX, scaleY,
                 startCenter, finishCenter));
 
+        enableWindowExitAnimation(false);
         animate()
             .scaleX(scale)
             .scaleY(scale)
@@ -305,11 +309,22 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         setScaleX(1);
         setScaleY(1);
         setTranslationY(0);
+        enableWindowExitAnimation(true);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mHandler.post(mRenderRunnable);
+    }
+
+    private void enableWindowExitAnimation(boolean isEnabled) {
+        View root = getRootView();
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) root.getLayoutParams();
+        int newWindowAnimations = isEnabled ? com.android.internal.R.style.Animation_LockScreen : 0;
+        if (newWindowAnimations != lp.windowAnimations) {
+            lp.windowAnimations = newWindowAnimations;
+            mWindowManager.updateViewLayout(root, lp);
+        }
     }
 }
