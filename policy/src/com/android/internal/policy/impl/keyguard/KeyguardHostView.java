@@ -146,6 +146,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
+        mViewStateManager = new KeyguardViewStateManager();
+
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
@@ -157,7 +159,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         addWidgetsFromSettings();
         mSwitchPageRunnable.run();
 
-        mViewStateManager = new KeyguardViewStateManager();
         SlidingChallengeLayout slider =
                 (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
         if (slider != null) {
