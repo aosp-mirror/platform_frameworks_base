@@ -555,6 +555,7 @@
   <java-symbol type="string" name="keygaurd_accessibility_media_controls" />
   <java-symbol type="string" name="keyguard_accessibility_status" />
   <java-symbol type="string" name="keyguard_accessibility_user_selector" />
+  <java-symbol type="string" name="keyguard_accessibility_widget_changed" />
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
