@@ -24,6 +24,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:contentDescription="@string/keyguard_accessibility_pin_unlock"
     >
     <include layout="@layout/keyguard_message_area"
         android:layout_width="match_parent"

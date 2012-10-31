@@ -539,25 +539,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (mTouchState == TOUCH_STATE_REST) {
                 pageEndMoving();
             }
-
             onPostReorderingAnimationCompleted();
-
-            // Notify the user when the page changes
-            AccessibilityManager accessibilityManager = (AccessibilityManager)
-                    getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
-            if (accessibilityManager.isEnabled()) {
-                AccessibilityEvent ev =
-                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                ev.getText().add(getCurrentPageDescription());
-                sendAccessibilityEventUnchecked(ev);
-            }
             return true;
         }
         return false;
-    }
-
-    public String getCurrentPageDescription() {
-        return "";
     }
 
     @Override
@@ -1758,10 +1743,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
     protected void snapToPage(int whichPage, int delta, int duration, boolean immediate) {
         mNextPage = whichPage;
-
         View focusedChild = getFocusedChild();
-        if (focusedChild != null && whichPage != mCurrentPage &&
-                focusedChild == getPageAt(mCurrentPage)) {
+        if (focusedChild != null && focusedChild == getPageAt(mCurrentPage)) {
             focusedChild.clearFocus();
         }
 
@@ -2013,6 +1996,11 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void onStartReordering() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            announceForAccessibility(mContext.getString(
+                    R.string.keyguard_accessibility_widget_reorder_start));
+        }
+
         // Set the touch state to reordering (allows snapping to pages, dragging a child, etc.)
         mTouchState = TOUCH_STATE_REORDERING;
         mIsReordering = true;
@@ -2033,6 +2021,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     protected void onEndReordering() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            announceForAccessibility(mContext.getString(
+                    R.string.keyguard_accessibility_widget_reorder_end));
+        }
         mIsReordering = false;
     }
 
@@ -2298,6 +2290,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     /* Accessibility */
+
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);

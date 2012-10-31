@@ -21,7 +21,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
-import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -32,6 +31,8 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -134,10 +135,26 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             KeyguardWidgetFrame newWidgetPage = getWidgetPageAt(newPageIndex);
             if (newWidgetPage != null) {
                 newWidgetPage.onActive(true);
+                newWidgetPage.requestAccessibilityFocus();
             }
         }
         if (mViewStateManager != null) {
             mViewStateManager.onPageSwitch(newPage, newPageIndex);
+        }
+
+        if (mParent != null && AccessibilityManager.getInstance(mContext).isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_VIEW_SCROLLED);
+            onInitializeAccessibilityEvent(event);
+            onPopulateAccessibilityEvent(event);
+            mParent.requestSendAccessibilityEvent(this, event);
+        }
+    }
+
+    @Override
+    public void sendAccessibilityEvent(int eventType) {
+        if (eventType != AccessibilityEvent.TYPE_VIEW_SCROLLED || isPageMoving()) {
+            super.sendAccessibilityEvent(eventType);
         }
     }
 
@@ -227,10 +244,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             // The framework adds a default padding to AppWidgetHostView. We don't need this padding
             // for the Keyguard, so we override it to be 0.
             widget.setPadding(0,  0, 0, 0);
-            if (widget instanceof AppWidgetHostView) {
-                AppWidgetHostView awhv = (AppWidgetHostView) widget;
-                widget.setContentDescription(awhv.getAppWidgetInfo().label);
-            }
             frame.addView(widget, lp);
         } else {
             frame = (KeyguardWidgetFrame) widget;
@@ -245,6 +258,16 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         } else {
             addView(frame, pageIndex, pageLp);
         }
+
+        // Update the frame content description.
+        View content = (widget == frame) ?  frame.getContent() : widget;
+        if (content != null) {
+            String contentDescription = mContext.getString(
+                com.android.internal.R.string.keyguard_accessibility_widget,
+                content.getContentDescription());
+            frame.setContentDescription(contentDescription);
+        }
+        frame.setLongClickable(true);
     }
 
     /**
@@ -358,22 +381,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             return (1.0f - focalLength / (focalLength + input)) /
                 (1.0f - focalLength / (focalLength + 1.0f));
         }
-    }
-
-    @Override
-    public String getCurrentPageDescription() {
-        final int nextPageIndex = getNextPage();
-        if (nextPageIndex >= 0 && nextPageIndex < getChildCount()) {
-            KeyguardWidgetFrame frame = getWidgetPageAt(nextPageIndex);
-            CharSequence title = frame.getChildAt(0).getContentDescription();
-            if (title == null) {
-                title = "";
-            }
-            return mContext.getString(
-                    com.android.internal.R.string.keyguard_accessibility_widget_changed,
-                    title, nextPageIndex + 1, getChildCount());
-        }
-        return super.getCurrentPageDescription();
     }
 
     @Override

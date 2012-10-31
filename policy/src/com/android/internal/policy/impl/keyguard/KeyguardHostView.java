@@ -49,6 +49,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -115,8 +116,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         // The following enables the MENU key to work for testing automation
         mEnableMenuKey = shouldEnableMenuKey();
-        setFocusable(true);
-        setFocusableInTouchMode(true);
+        mViewStateManager = new KeyguardViewStateManager();
     }
 
     @Override
@@ -150,8 +150,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
-        mViewStateManager = new KeyguardViewStateManager();
-
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);

@@ -26,7 +26,8 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:contentDescription="@string/keyguard_accessibility_slide_unlock">
 
     <FrameLayout
         android:layout_width="match_parent"

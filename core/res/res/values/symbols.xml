@@ -555,10 +555,26 @@
   <java-symbol type="string" name="keyboardview_keycode_enter" />
   <java-symbol type="string" name="keyboardview_keycode_mode_change" />
   <java-symbol type="string" name="keyboardview_keycode_shift" />
+  <java-symbol type="string" name="keyguard_accessibility_add_widget" />
+  <java-symbol type="string" name="keyguard_accessibility_camera" />
+  <java-symbol type="string" name="keyguard_accessibility_expand_lock_area" />
+  <java-symbol type="string" name="keyguard_accessibility_face_unlock" />
   <java-symbol type="string" name="keygaurd_accessibility_media_controls" />
+  <java-symbol type="string" name="keyguard_accessibility_pattern_area" />
+  <java-symbol type="string" name="keyguard_accessibility_pattern_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_password_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_pin_unlock" />
+  <java-symbol type="string" name="keyguard_accessibility_slide_area" />
+  <java-symbol type="string" name="keyguard_accessibility_slide_unlock" />
   <java-symbol type="string" name="keyguard_accessibility_status" />
   <java-symbol type="string" name="keyguard_accessibility_user_selector" />
-  <java-symbol type="string" name="keyguard_accessibility_widget_changed" />
+  <java-symbol type="string" name="keyguard_accessibility_widget" />
+  <java-symbol type="string" name="keyguard_accessibility_widget_deleted" />
+  <java-symbol type="string" name="keyguard_accessibility_widget_empty_slot" />
+  <java-symbol type="string" name="keyguard_accessibility_widget_reorder_start" />
+  <java-symbol type="string" name="keyguard_accessibility_widget_reorder_end" />
+  <java-symbol type="string" name="keyguard_accessibility_unlock_area_collapsed" />
+  <java-symbol type="string" name="keyguard_accessibility_unlock_area_expanded" />
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />

@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
+import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
 
 public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
@@ -107,6 +108,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
         preview.setScaleType(ScaleType.FIT_CENTER);
+        preview.setContentDescription(preview.getContext().getString(
+                R.string.keyguard_accessibility_camera));
         CameraWidgetFrame cameraWidgetFrame = new CameraWidgetFrame(context, callbacks, launcher);
         cameraWidgetFrame.addView(preview);
         cameraWidgetFrame.mWidgetView = widgetView;

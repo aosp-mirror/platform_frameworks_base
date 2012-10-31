@@ -5800,12 +5800,10 @@
         <enum name="scrim" value="4" />
         <!-- The home for widgets. All widgets will be descendents of this. -->
         <enum name="widgets" value="5" />
+        <!-- This is a handle that is used for expanding the
+             security challenge container when it is collapsed. -->
+        <enum name="expandChallengeHandle" value="6" />
     </attr>
-
-    <declare-styleable name="SlidingChallengeLayout">
-        <attr name="dragHandle" format="reference" />
-        <attr name="dragIcon" format="reference" />
-    </declare-styleable>
 
     <declare-styleable name="SlidingChallengeLayout_Layout">
         <attr name="layout_childType" />

@@ -31,8 +31,7 @@
     <com.android.internal.policy.impl.keyguard.SlidingChallengeLayout
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        androidprv:dragIcon="@drawable/kg_security_lock">
+        android:layout_height="match_parent">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -68,6 +67,17 @@
                 android:gravity="center">
             </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
         </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>
+
+        <ImageButton
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              androidprv:layout_childType="expandChallengeHandle"
+              android:focusable="true"
+              android:background="@null"
+              android:src="@drawable/keyguard_expand_challenge_handle"
+              android:scaleType="center"
+              android:contentDescription="@string/keyguard_accessibility_expand_lock_area" />
+
     </com.android.internal.policy.impl.keyguard.SlidingChallengeLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardHostView>
 

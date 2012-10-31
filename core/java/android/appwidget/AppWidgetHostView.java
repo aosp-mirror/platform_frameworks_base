@@ -144,6 +144,7 @@ public class AppWidgetHostView extends FrameLayout {
             // We add padding to the AppWidgetHostView if necessary
             Rect padding = getDefaultPaddingForWidget(mContext, info.provider, null);
             setPadding(padding.left, padding.top, padding.right, padding.bottom);
+            setContentDescription(info.label);
         }
     }
 

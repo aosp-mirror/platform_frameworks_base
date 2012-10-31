@@ -26,7 +26,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:contentDescription="@string/keyguard_accessibility_pattern_unlock">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -55,7 +56,8 @@
                 android:layout_marginBottom="4dip"
                 android:layout_marginStart="8dip"
                 android:layout_gravity="center_horizontal"
-                android:gravity="center" />
+                android:gravity="center"
+                android:contentDescription="@string/keyguard_accessibility_pattern_area" />
 
             <include layout="@layout/keyguard_emergency_carrier_area"
                 android:id="@+id/keyguard_selector_fade_container"
