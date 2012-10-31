@@ -51,7 +51,12 @@ public class SerialService extends ISerialManager.Stub {
 
     public ParcelFileDescriptor openSerialPort(String path) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SERIAL_PORT, null);
-        return native_open(path);
+        for (int i = 0; i < mSerialPorts.length; i++) {
+            if (mSerialPorts[i].equals(path)) {
+                return native_open(path);
+            }
+        }
+        throw new IllegalArgumentException("Invalid serial port " + path);
     }
 
     private native ParcelFileDescriptor native_open(String path);
