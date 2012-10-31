@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,14 +50,13 @@ import java.lang.ref.WeakReference;
 /**
  * This is the widget responsible for showing music controls in keyguard.
  */
-public class KeyguardTransportControlView extends KeyguardWidgetFrame implements OnClickListener {
+public class KeyguardTransportControlView extends FrameLayout implements OnClickListener {
 
     private static final int MSG_UPDATE_STATE = 100;
     private static final int MSG_SET_METADATA = 101;
     private static final int MSG_SET_TRANSPORT_CONTROLS = 102;
     private static final int MSG_SET_ARTWORK = 103;
     private static final int MSG_SET_GENERATION_ID = 104;
-    private static final int MAXDIM = 512;
     private static final int DISPLAY_TIMEOUT_MS = 5000; // 5s
     protected static final boolean DEBUG = false;
     protected static final String TAG = "TransportControlView";
@@ -258,14 +258,6 @@ public class KeyguardTransportControlView extends KeyguardWidgetFrame implements
             mAudioManager.unregisterRemoteControlDisplay(mIRCD);
         }
         mAttached = false;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        int dim = Math.min(MAXDIM, Math.max(getWidth(), getHeight()));
-//        Log.v(TAG, "setting max bitmap size: " + dim + "x" + dim);
-//        mAudioManager.remoteControlDisplayUsesBitmapSize(mIRCD, dim, dim);
     }
 
     class Metadata {

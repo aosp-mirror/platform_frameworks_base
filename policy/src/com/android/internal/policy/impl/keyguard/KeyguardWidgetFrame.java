@@ -62,7 +62,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
-    private static int mSmallWidgetHeight;
+    private int mSmallWidgetHeight;
 
     // Multiple callers may try and adjust the alpha of the frame. When a caller shows
     // the outlines, we give that caller control, and nobody else can fade them out.

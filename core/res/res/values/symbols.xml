@@ -1269,6 +1269,7 @@
   <java-symbol type="id" name="option3" />
   <java-symbol type="id" name="password" />
   <java-symbol type="id" name="passwordEntry" />
+  <java-symbol type="id" name="pinEntry" />
   <java-symbol type="id" name="pinDel" />
   <java-symbol type="id" name="pinDisplay" />
   <java-symbol type="id" name="owner_info" />
