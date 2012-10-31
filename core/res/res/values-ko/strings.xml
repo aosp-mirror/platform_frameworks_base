@@ -585,8 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"앱이 사용자 사전에 새 단어를 입력할 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"보호된 저장소에 액세스 테스트"</string>
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
-    <skip />
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"앱이 미래의 기기에서 사용할 수 있는 USB 저장소의 권한을 테스트하도록 허용합니다."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"앱이 미래의 기기에서 사용할 수 있는 SD 카드의 권한을 테스트하도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB 저장소의 콘텐츠 수정 또는 삭제"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD 카드의 콘텐츠 수정 또는 삭제"</string>
@@ -811,9 +810,22 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"패턴 삭제"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"셀 추가됨"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"패턴 완료"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d의 위젯 %2$d."</string>
+    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
+    <skip />
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"사용자 선택기"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"상태"</string>
+    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
+    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"미디어 조정"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
