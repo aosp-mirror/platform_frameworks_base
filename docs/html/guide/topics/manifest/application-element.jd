@@ -23,6 +23,7 @@ parent.link=manifest-intro.html
              android:<a href="#persistent">persistent</a>=["true" | "false"]
              android:<a href="#proc">process</a>="<i>string</i>"
              android:<a href="#restoreany">restoreAnyVersion</a>=["true" | "false"]
+             android:<a href="#supportsrtl">supportsRtl</a>=["true" | "false"]
              android:<a href="#aff">taskAffinity</a>="<i>string</i>"
              android:<a href="#theme">theme</a>="<i>resource or theme</i>"
              android:<a href="#uioptions">uiOptions</a>=["none" | "splitActionBarWhenNarrow"] &gt;
@@ -271,7 +272,7 @@ applications, reducing resource usage.
 </p></dd>
 
 <dt><a name="restoreany"></a>{@code android:restoreAnyVersion}</dt>
-<dd>Indicate that the application is prepared to attempt a restore of any
+<dd>Indicates that the application is prepared to attempt a restore of any
 backed-up data set, even if the backup was stored by a newer version
 of the application than is currently installed on the device.  Setting
 this attribute to {@code true} will permit the Backup Manager to
@@ -280,6 +281,21 @@ incompatible.  <em>Use with caution!</em>
 
 <p>The default value of this attribute is {@code false}.
 </p></dd>
+
+<dt><a name="supportsrtl"></a>{@code android:supportsRtl}</dt>
+<dd>Declares whether your application is willing to support right-to-left (RTL) layouts.
+<p>If set to {@code true} and <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+>{@code targetSdkVersion}</a> is set to 17 or higher, various RTL APIs will be
+activated and used by the system so your app can display RTL layouts.
+If set to {@code false} or if <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+>{@code targetSdkVersion}</a> is set to 16 or lower, the RTL APIs will be ignored
+or will have no effect and your app will behave the same regardless of the layout
+direction associated to the user's Locale choice (your layouts will always be left-to-right).
+
+<p>The default value of this attribute is {@code false}.</p>
+
+<p>This attribute was added in API level 17.</p>
+</dd>
 
 <dt><a name="aff"></a>{@code android:taskAffinity}</dt>
 <dd>An affinity name that applies to all activities within the application,
