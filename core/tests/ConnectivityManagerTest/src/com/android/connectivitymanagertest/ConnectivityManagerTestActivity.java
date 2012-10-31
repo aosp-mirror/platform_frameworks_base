@@ -65,6 +65,8 @@ public class ConnectivityManagerTestActivity extends Activity {
     public static final long LONG_TIMEOUT = 50 * 1000;
     // 2 minutes timer between wifi stop and start
     public static final long  WIFI_STOP_START_INTERVAL = 2 * 60 * 1000;
+    // Set ping test timer to be 3 minutes
+    public static final long PING_TIMER = 3 * 60 *1000;
     public static final int SUCCESS = 0;  // for Wifi tethering state change
     public static final int FAILURE = 1;
     public static final int INIT = -1;
@@ -517,37 +519,36 @@ public class ConnectivityManagerTestActivity extends Activity {
      * @return true if the ping test is successful, false otherwise.
      */
     public boolean pingTest(String[] pingServerList) {
-        boolean result = false;
         String[] hostList = {"www.google.com", "www.yahoo.com",
                 "www.bing.com", "www.facebook.com", "www.ask.com"};
         if (pingServerList != null) {
             hostList = pingServerList;
         }
-        try {
-            // assume the chance that all servers are down is very small
-            for (int i = 0; i < hostList.length; i++ ) {
-                String host = hostList[i];
-                log("Start ping test, ping " + host);
-                Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
-                int status = p.waitFor();
-                if (status == 0) {
-                    // if any of the ping test is successful, return true
-                    result = true;
-                    break;
-                } else {
-                    result = false;
-                    log("ping " + host + " failed.");
+
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < PING_TIMER) {
+            try {
+                // assume the chance that all servers are down is very small
+                for (int i = 0; i < hostList.length; i++ ) {
+                    String host = hostList[i];
+                    log("Start ping test, ping " + host);
+                    Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
+                    int status = p.waitFor();
+                    if (status == 0) {
+                        // if any of the ping test is successful, return true
+                        return true;
+                    }
                 }
+            } catch (UnknownHostException e) {
+                log("Ping test Fail: Unknown Host");
+            } catch (IOException e) {
+                log("Ping test Fail:  IOException");
+            } catch (InterruptedException e) {
+                log("Ping test Fail: InterruptedException");
             }
-        } catch (UnknownHostException e) {
-            log("Ping test Fail: Unknown Host");
-        } catch (IOException e) {
-            log("Ping test Fail:  IOException");
-        } catch (InterruptedException e) {
-            log("Ping test Fail: InterruptedException");
         }
-        log("return");
-        return result;
+        // ping test timeout
+        return false;
     }
 
     /**
