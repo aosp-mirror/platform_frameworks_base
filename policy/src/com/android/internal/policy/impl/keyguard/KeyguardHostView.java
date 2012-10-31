@@ -146,6 +146,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
+        mViewStateManager = new KeyguardViewStateManager();
+
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
