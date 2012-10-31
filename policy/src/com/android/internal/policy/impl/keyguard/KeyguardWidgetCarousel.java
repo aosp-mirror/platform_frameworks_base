@@ -60,15 +60,13 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
         View child = getChildAt(index);
         if (child == null) return 0f;
 
-        float maxAlpha = KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER;
-
         float scrollProgress = getScrollProgress(screenCenter, child, index);
         if (!isOverScrollChild(index, scrollProgress)) {
             scrollProgress = getBoundedScrollProgress(screenCenter, child, index);
-            float alpha = maxAlpha - maxAlpha * Math.abs(scrollProgress / MAX_SCROLL_PROGRESS);
+            float alpha = 1.0f - 1.0f * Math.abs(scrollProgress / MAX_SCROLL_PROGRESS);
             return alpha;
         } else {
-            return maxAlpha;
+            return 1.0f;
         }
     }
 
@@ -81,9 +79,8 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
             for (int i = 0; i < getChildCount(); i++) {
                 KeyguardWidgetFrame child = getWidgetPageAt(i);
                 if (child != null) {
-                    float alpha = getAlphaForPage(screenCenter, i);
-                    child.setBackgroundAlpha(alpha);
-                    child.setContentAlpha(alpha);
+                    child.setBackgroundAlpha(getOutlineAlphaForPage(screenCenter, i));
+                    child.setContentAlpha(getAlphaForPage(screenCenter, i));
                 }
             }
         }
@@ -144,7 +141,8 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
                 child.setRotationY(0f);
             }
             alpha = PropertyValuesHolder.ofFloat("contentAlpha", 1.0f);
-            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha", 1.0f);
+            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha",
+                    KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
             rotationY = PropertyValuesHolder.ofFloat("rotationY", 0f);
             ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha, outlineAlpha, rotationY);
             child.setVisibility(VISIBLE);
@@ -212,13 +210,14 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             float finalAlpha = getAlphaForPage(mScreenCenter, i);
+            float finalOutlineAlpha = getOutlineAlphaForPage(mScreenCenter, i);
             getTransformForPage(mScreenCenter, i, mTmpTransform);
 
             boolean inVisibleRange = (i >= mCurrentPage - 1 && i <= mCurrentPage + 1);
 
             ObjectAnimator a;
             alpha = PropertyValuesHolder.ofFloat("contentAlpha", finalAlpha);
-            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha", finalAlpha);
+            outlineAlpha = PropertyValuesHolder.ofFloat("backgroundAlpha", finalOutlineAlpha);
             pivotX = PropertyValuesHolder.ofFloat("pivotX", mTmpTransform[0]);
             pivotY = PropertyValuesHolder.ofFloat("pivotY", mTmpTransform[1]);
             rotationY = PropertyValuesHolder.ofFloat("rotationY", mTmpTransform[2]);
