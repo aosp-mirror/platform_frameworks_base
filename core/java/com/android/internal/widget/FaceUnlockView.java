@@ -53,15 +53,17 @@ public class FaceUnlockView extends RelativeLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         final int minimumWidth = getSuggestedMinimumWidth();
         final int minimumHeight = getSuggestedMinimumHeight();
         int viewWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
         int viewHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
 
-        viewWidth = viewHeight = Math.min(viewWidth, viewHeight);
-        Log.v(TAG, "FaceUnlockView dimensions: " + viewWidth + "x" + viewHeight);
-        setMeasuredDimension(viewWidth, viewHeight);
+        final int chosenSize = Math.min(viewWidth, viewHeight);
+        final int newWidthMeasureSpec =
+                MeasureSpec.makeMeasureSpec(chosenSize, MeasureSpec.AT_MOST);
+        final int newHeightMeasureSpec =
+                MeasureSpec.makeMeasureSpec(chosenSize, MeasureSpec.AT_MOST);
+
+        super.onMeasure(newWidthMeasureSpec, newHeightMeasureSpec);
     }
 }
