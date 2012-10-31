@@ -344,8 +344,8 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许用户绑定到 VPN 服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许用户绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到窗口小部件服务"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许用户绑定到窗口小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
+    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许应用绑定到小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"允许用户将意向发送给设备管理员。普通应用绝不需要此权限。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"更改屏幕显示方向"</string>
@@ -495,8 +495,8 @@
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"允许应用启用/停用来自无线装置的位置更新通知。普通应用不能使用此权限。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不能使用此权限。"</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"选择窗口小部件"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些窗口小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人资料的访问权限。普通应用不能使用此权限。"</string>
+    <string name="permlab_bindGadget" msgid="776905339015863471">"选择小部件"</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人资料的访问权限。普通应用不应使用此权限。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允许应用控制设备的电话功能。拥有此权限的应用可在不通知您的情况下执行切换网络、开关手机无线装置等此类操作。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
@@ -585,8 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"测试对受保护存储空间的访问权限"</string>
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
-    <skip />
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"允许应用测试以后的设备将支持的 USB 存储设备权限。"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"允许该应用测试将对以后的设备开放的 SD 卡权限。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的 USB 存储设备中的内容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的 SD 卡中的内容"</string>
@@ -811,9 +810,22 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"图案已清除"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
+    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
+    <skip />
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用户选择器"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"状态"</string>
+    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
+    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒体控制"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1198,7 +1210,7 @@
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
-    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加窗口小部件。"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜索"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"发送"</string>
@@ -1224,9 +1236,9 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"“<xliff:g id="APP">%s</xliff:g>”已激活 VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"已连接到“<xliff:g id="SESSION">%s</xliff:g>”。触摸可管理网络。"</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终处于打开状态的 VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终处于打开状态的 VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终处于打开状态的 VPN 出现错误"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的 VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的 VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的 VPN 出现错误"</string>
     <string name="vpn_lockdown_reset" msgid="5365010427963548932">"触摸即可重置连接"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
