@@ -32,6 +32,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private static final int SCREEN_ON_RING_HINT_DELAY = 300;
     Handler mMainQueue = new Handler(Looper.myLooper());
 
+    // transport control states
+    static final int TRANSPORT_GONE = 0;
+    static final int TRANSPORT_INVISIBLE = 1;
+    static final int TRANSPORT_VISIBLE = 2;
+
+    private int mTransportState = TRANSPORT_GONE;
+
     int mLastScrollState = SlidingChallengeLayout.SCROLL_STATE_IDLE;
 
     // Paged view state
@@ -58,6 +65,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         return false;
     }
 
+    public boolean isChallengeOverlapping() {
+        if (mChallengeLayout != null) {
+            return mChallengeLayout.isChallengeOverlapping();
+        }
+        return false;
+    }
+
     public void setSecurityViewContainer(KeyguardSecurityView container) {
         mKeyguardSecurityContainer = container;
     }
@@ -77,6 +91,14 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     public void showBouncer(boolean show) {
         mChallengeLayout.showBouncer();
+    }
+
+    public void fadeOutSecurity(int duration) {
+        ((View) mKeyguardSecurityContainer).animate().alpha(0).setDuration(duration);
+    }
+
+    public void fadeInSecurity(int duration) {
+        ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration);
     }
 
     public void onPageSwitch(View newPage, int newPageIndex) {
@@ -206,5 +228,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         };
 
         mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
+    }
+
+    public void setTransportState(int state) {
+        mTransportState = state;
+    }
+
+    public int getTransportState() {
+        return mTransportState;
     }
 }

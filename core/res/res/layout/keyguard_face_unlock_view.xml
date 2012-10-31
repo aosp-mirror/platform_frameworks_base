@@ -30,10 +30,10 @@
         android:layout_height="wrap_content"
         />
 
-    <RelativeLayout
+    <com.android.internal.widget.FaceUnlockView
         android:id="@+id/face_unlock_area_view"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/face_unlock_height"
+        android:layout_height="0dp"
         android:background="@*android:drawable/intro_bg"
         android:gravity="center"
         android:layout_weight="1">
@@ -55,8 +55,7 @@
             android:background="#00000000"
             android:src="@*android:drawable/ic_facial_backup"
         />
-
-    </RelativeLayout>
+    </com.android.internal.widget.FaceUnlockView>
 
     <include layout="@layout/keyguard_emergency_carrier_area"
         android:id="@+id/keyguard_selector_fade_container"
