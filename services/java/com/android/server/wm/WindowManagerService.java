@@ -2773,7 +2773,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // TODO: Remove once b/7094175 is fixed
                     || ((String)win.mAttrs.getTitle()).contains("Keyguard")
                 ) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
-                    + " " + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
+                    + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
 
             win.mEnforceSizeCompat = (win.mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
 
@@ -3003,6 +3003,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mInputMonitor.updateInputWindowsLw(true /*force*/);
+
+            if (DEBUG_LAYOUT) {
+                Slog.v(TAG, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
+            }
         }
 
         if (configChanged) {
@@ -8379,7 +8383,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || (win.mAttrs.type == TYPE_KEYGUARD && win.isConfigChanged())
+                    || ((win.mAttrs.type == TYPE_KEYGUARD || win.mAttrs.type == TYPE_WALLPAPER) &&
+                        win.isConfigChanged())
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
@@ -9301,6 +9306,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             Surface.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
 
         final WindowList defaultWindows = defaultDisplay.getWindowList();
