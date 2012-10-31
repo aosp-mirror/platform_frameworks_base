@@ -24,7 +24,10 @@ import android.animation.TimeInterpolator;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,7 +36,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected static float OVERSCROLL_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
 
-    private KeyguardViewStateManager mViewStateManager;
+    protected KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
@@ -58,14 +60,19 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected int mScreenCenter;
     private boolean mHasLayout = false;
     private boolean mHasMeasure = false;
-    private boolean mShowHintsOnLayout = false;
+    boolean showHintsAfterLayout = false;
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
+    private static final String TAG = "KeyguardWidgetPager";
 
     private int mPage = 0;
     private Callbacks mCallbacks;
 
     private boolean mCameraWidgetEnabled;
+
+    // Background threads to deal with persistence
+    private HandlerThread mBgPersistenceWorkerThread;
+    private Handler mBgPersistenceWorkerHandler;
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -85,6 +92,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         Resources r = getResources();
         mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
+        mBgPersistenceWorkerThread = new HandlerThread("KeyguardWidgetPager Persistence");
+        mBgPersistenceWorkerThread.start();
+        mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
     }
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
@@ -179,17 +189,28 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
 
     public void onRemoveView(View v) {
-        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        mLockPatternUtils.removeAppWidget(appWidgetId);
+        final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        mBgPersistenceWorkerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLockPatternUtils.removeAppWidget(appWidgetId);
+            }
+        });
     }
 
-    public void onAddView(View v, int index) {
-        int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        getVisiblePages(mTempVisiblePagesRange);
-        boundByReorderablePages(true, mTempVisiblePagesRange);
+    public void onAddView(View v, final int index) {
+        final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
+        final int[] pagesRange = new int[mTempVisiblePagesRange.length];
+        getVisiblePages(pagesRange);
+        boundByReorderablePages(true, pagesRange);
         // Subtract from the index to take into account pages before the reorderable
         // pages (e.g. the "add widget" page)
-        mLockPatternUtils.addAppWidget(appWidgetId, index - mTempVisiblePagesRange[0]);
+        mBgPersistenceWorkerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLockPatternUtils.addAppWidget(appWidgetId, index - pagesRange[0]);
+            }
+        });
     }
 
     /*
@@ -226,25 +247,40 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
-    // We enforce that all children are KeyguardWidgetFrames
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, index);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int width, int height) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, width, height);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
         super.addView(child, params);
     }
 
+    /**
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
@@ -272,7 +308,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageBeginMoving();
         }
-        showOutlinesAndSidePages();
+        if (!isReordering(false)) {
+            showOutlinesAndSidePages();
+        }
         userActivity();
     }
 
@@ -281,17 +319,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mViewStateManager != null) {
             mViewStateManager.onPageEndMoving();
         }
-        hideOutlinesAndSidePages();
+
+        // In the reordering case, the pages will be faded appropriately on completion
+        // of the zoom in animation.
+        if (!isReordering(false)) {
+            hideOutlinesAndSidePages();
+        }
     }
 
-    private void enablePageLayers() {
+    protected void enablePageLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).enableHardwareLayersForContent();
         }
     }
 
-    private void disablePageLayers() {
+    protected void disablePageLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).disableHardwareLayersForContent();
@@ -414,17 +457,21 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         return true;
     }
     boolean isMusicWidgetVisible() {
-        // TODO: Make proper test once we have music in the list
-        return false;
+        return mViewStateManager.getTransportState() != KeyguardViewStateManager.TRANSPORT_GONE;
     }
     boolean isCameraWidgetVisible() {
         return mCameraWidgetEnabled;
     }
 
+    protected void reorderStarting() {
+        showOutlinesAndSidePages();
+    }
+
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
-        showOutlinesAndSidePages();
+        enablePageLayers();
+        reorderStarting();
     }
 
     @Override
@@ -434,7 +481,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void showOutlinesAndSidePages() {
-        enablePageLayers();
         animateOutlinesAndSidePages(true);
     }
 
@@ -447,7 +493,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             showOutlinesAndSidePages();
         } else {
             // The layout hints depend on layout being run once
-            mShowHintsOnLayout = true;
+            showHintsAfterLayout = true;
         }
     }
 
@@ -458,16 +504,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         mHasLayout = false;
     }
 
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (mShowHintsOnLayout) {
+        if (showHintsAfterLayout) {
             post(new Runnable() {
                 @Override
                 public void run() {
                     showOutlinesAndSidePages();
                 }
             });
-            mShowHintsOnLayout = false;
+            showHintsAfterLayout = false;
         }
         mHasLayout = true;
     }
@@ -504,17 +551,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     void animateOutlinesAndSidePages(final boolean show) {
+        animateOutlinesAndSidePages(show, -1);
+    }
+
+    void animateOutlinesAndSidePages(final boolean show, int duration) {
         if (mChildrenOutlineFadeAnimation != null) {
             mChildrenOutlineFadeAnimation.cancel();
             mChildrenOutlineFadeAnimation = null;
         }
-
         int count = getChildCount();
         PropertyValuesHolder alpha;
         ArrayList<Animator> anims = new ArrayList<Animator>();
 
-        int duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
-            CHILDREN_OUTLINE_FADE_OUT_DURATION;
+        if (duration == -1) {
+            duration = show ? CHILDREN_OUTLINE_FADE_IN_DURATION :
+                CHILDREN_OUTLINE_FADE_OUT_DURATION;
+        }
 
         int curPage = getNextPage();
         for (int i = 0; i < count; i++) {
@@ -540,6 +592,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         mChildrenOutlineFadeAnimation.setDuration(duration);
         mChildrenOutlineFadeAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (show) {
+                    enablePageLayers();
+                }
+            }
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!show) {
@@ -589,9 +647,37 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     public boolean onLongClick(View v) {
         // Disallow long pressing to reorder if the challenge is showing
-        if (!mViewStateManager.isChallengeShowing() && startReordering()) {
+        boolean isChallengeOverlapping = mViewStateManager.isChallengeShowing() &&
+                mViewStateManager.isChallengeOverlapping();
+        if (!isChallengeOverlapping && startReordering()) {
             return true;
         }
         return false;
+    }
+
+    public void removeWidget(View view) {
+        if (view instanceof KeyguardWidgetFrame) {
+            removeView(view);
+        } else {
+            // Assume view was wrapped by a KeyguardWidgetFrame in KeyguardWidgetPager#addWidget().
+            // This supports legacy hard-coded "widgets" like KeyguardTransportControlView.
+            int pos = getWidgetPageIndex(view);
+            if (pos != -1) {
+                KeyguardWidgetFrame frame = (KeyguardWidgetFrame) getChildAt(pos);
+                frame.removeView(view);
+                removeView(frame);
+            } else {
+                Slog.w(TAG, "removeWidget() can't find:" + view);
+            }
+        }
+    }
+
+    public int getWidgetPageIndex(View view) {
+        if (view instanceof KeyguardWidgetFrame) {
+            return indexOfChild(view);
+        } else {
+            // View was wrapped by a KeyguardWidgetFrame by KeyguardWidgetPager#addWidget()
+            return indexOfChild((KeyguardWidgetFrame)view.getParent());
+        }
     }
 }

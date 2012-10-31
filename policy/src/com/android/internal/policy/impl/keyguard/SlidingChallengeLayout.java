@@ -702,11 +702,13 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);
             }
+
             if (child.getVisibility() == GONE) continue;
         }
 
-        // We want to measure the challenge view first, for various reasons that I'd rather
-        // not get into here.
+        // We want to measure the challenge view first, since the KeyguardWidgetPager
+        // needs to do things its measure pass that are dependent on the challenge view
+        // having been measured.
         if (mChallengeView != null) {
             measureChildWithMargins(mChallengeView, widthSpec, 0, heightSpec, 0);
         }
