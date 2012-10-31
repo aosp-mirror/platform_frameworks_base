@@ -151,13 +151,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         }
 
         boolean mWasRunning = mIsRunning;
-        try {
-            if (mService != null) {
-                mService.makeInvisible();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Caught exception making Face Unlock invisible: " + e.toString());
-        }
 
         stopUi();
 
