@@ -2283,7 +2283,7 @@
     <!-- Accessibility description of the event of collapsing an unlock area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_unlock_area_collapsed">Unlock area collapsed.</string>
     <!-- Accessibility description of a lock screen widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget">%1$s widget.</string>
+    <string name="keyguard_accessibility_widget"><xliff:g id="widget_index">%1$s</xliff:g> widget.</string>
     <!-- Accessibility description of the lock screen user selector widget. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_user_selector">User selector</string>
     <!-- Accessibility description of the lock screen status widget. [CHAR_LIMIT=none] -->
@@ -2292,6 +2292,14 @@
     <string name="keyguard_accessibility_camera">Camera</string>
     <!-- Accessibility description of the lock media control widget. [CHAR_LIMIT=none] -->
     <string name="keygaurd_accessibility_media_controls">Media controls</string>
+    <!-- Accessibility description of widget reordering start. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_reorder_start">Widget reordering started.</string>
+    <!-- Accessibility description of widget reordering end. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_reorder_end">Widget reordering ended.</string>
+    <!-- Accessibility description of the a widget deletion event. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_widget_deleted">Widget <xliff:g id="widget_index">%1$s</xliff:g> deleted.</string>
+    <!-- Accessibility description of the button to expand the lock area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_expand_lock_area">Expand unlock area.</string>
 
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
