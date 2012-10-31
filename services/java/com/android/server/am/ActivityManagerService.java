@@ -4577,7 +4577,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int callingUid = Binder.getCallingUid();
             int origUserId = userId;
             userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
-                    type == ActivityManager.INTENT_SENDER_BROADCAST, true,
+                    type == ActivityManager.INTENT_SENDER_BROADCAST, false,
                     "getIntentSender", null);
             if (origUserId == UserHandle.USER_CURRENT) {
                 // We don't want to evaluate this until the pending intent is
