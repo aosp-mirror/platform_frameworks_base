@@ -43,9 +43,14 @@ import android.net.wifi.WpsInfo;
 import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
+import android.net.DhcpResults;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkUtils;
+import android.net.RouteInfo;
 import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -64,6 +69,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -923,10 +930,53 @@ public class WifiService extends IWifiManager.Stub {
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
+     * @deprecated
      */
     public DhcpInfo getDhcpInfo() {
         enforceAccessPermission();
-        return mWifiStateMachine.syncGetDhcpInfo();
+        DhcpResults dhcpResults = mWifiStateMachine.syncGetDhcpResults();
+        if (dhcpResults.linkProperties == null) return null;
+
+        DhcpInfo info = new DhcpInfo();
+        for (LinkAddress la : dhcpResults.linkProperties.getLinkAddresses()) {
+            InetAddress addr = la.getAddress();
+            if (addr instanceof Inet4Address) {
+                info.ipAddress = NetworkUtils.inetAddressToInt((Inet4Address)addr);
+                break;
+            }
+        }
+        for (RouteInfo r : dhcpResults.linkProperties.getRoutes()) {
+            if (r.isDefaultRoute()) {
+                InetAddress gateway = r.getGateway();
+                if (gateway instanceof Inet4Address) {
+                    info.gateway = NetworkUtils.inetAddressToInt((Inet4Address)gateway);
+                }
+            } else if (r.isHostRoute()) {
+                LinkAddress dest = r.getDestination();
+                if (dest.getAddress() instanceof Inet4Address) {
+                    info.netmask = NetworkUtils.prefixLengthToNetmaskInt(
+                            dest.getNetworkPrefixLength());
+                }
+            }
+        }
+        int dnsFound = 0;
+        for (InetAddress dns : dhcpResults.linkProperties.getDnses()) {
+            if (dns instanceof Inet4Address) {
+                if (dnsFound == 0) {
+                    info.dns1 = NetworkUtils.inetAddressToInt((Inet4Address)dns);
+                } else {
+                    info.dns2 = NetworkUtils.inetAddressToInt((Inet4Address)dns);
+                }
+                if (++dnsFound > 1) break;
+            }
+        }
+        InetAddress serverAddress = dhcpResults.serverAddress;
+        if (serverAddress instanceof Inet4Address) {
+            info.serverAddress = NetworkUtils.inetAddressToInt((Inet4Address)serverAddress);
+        }
+        info.leaseDuration = dhcpResults.leaseDuration;
+
+        return info;
     }
 
     /**

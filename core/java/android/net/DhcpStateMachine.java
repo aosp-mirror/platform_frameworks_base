@@ -26,7 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.DhcpInfoInternal;
+import android.net.DhcpResults;
 import android.net.NetworkUtils;
 import android.os.Message;
 import android.os.PowerManager;
@@ -64,7 +64,7 @@ public class DhcpStateMachine extends StateMachine {
     private static final String WAKELOCK_TAG = "DHCP";
 
     //Remember DHCP configuration from first request
-    private DhcpInfoInternal mDhcpInfo;
+    private DhcpResults mDhcpResults;
 
     private static final int DHCP_RENEW = 0;
     private static final String ACTION_DHCP_RENEW = "android.net.wifi.DHCP_RENEW";
@@ -348,21 +348,19 @@ public class DhcpStateMachine extends StateMachine {
 
     private boolean runDhcp(DhcpAction dhcpAction) {
         boolean success = false;
-        DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
+        DhcpResults dhcpResults = new DhcpResults();
 
         if (dhcpAction == DhcpAction.START) {
             if (DBG) Log.d(TAG, "DHCP request on " + mInterfaceName);
-            success = NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal);
-            mDhcpInfo = dhcpInfoInternal;
+            success = NetworkUtils.runDhcp(mInterfaceName, dhcpResults);
         } else if (dhcpAction == DhcpAction.RENEW) {
             if (DBG) Log.d(TAG, "DHCP renewal on " + mInterfaceName);
-            success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpInfoInternal);
-            dhcpInfoInternal.updateFromDhcpRequest(mDhcpInfo);
+            success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpResults);
+            dhcpResults.updateFromDhcpRequest(mDhcpResults);
         }
-
         if (success) {
             if (DBG) Log.d(TAG, "DHCP succeeded on " + mInterfaceName);
-            long leaseDuration = dhcpInfoInternal.leaseDuration; //int to long conversion
+            long leaseDuration = dhcpResults.leaseDuration; //int to long conversion
 
             //Sanity check for renewal
             if (leaseDuration >= 0) {
@@ -382,7 +380,8 @@ public class DhcpStateMachine extends StateMachine {
                 //infinite lease time, no renewal needed
             }
 
-            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, dhcpInfoInternal)
+            mDhcpResults = dhcpResults;
+            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, dhcpResults)
                 .sendToTarget();
         } else {
             Log.e(TAG, "DHCP failed on " + mInterfaceName + ": " +

@@ -18,7 +18,6 @@ package android.net.wifi;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.DhcpInfoInternal;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
@@ -502,45 +501,12 @@ class WifiConfigStore {
     }
 
     /**
-     * get IP configuration for a given network id
-     * TODO: We cannot handle IPv6 addresses for configuration
-     *       right now until NetworkUtils is fixed. When we do
-     *       that, we should remove handling DhcpInfo and move
-     *       to using LinkProperties
-     * @return DhcpInfoInternal for the given network id
-     */
-    DhcpInfoInternal getIpConfiguration(int netId) {
-        DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
-        LinkProperties linkProperties = getLinkProperties(netId);
-
-        if (linkProperties != null) {
-            Iterator<LinkAddress> iter = linkProperties.getLinkAddresses().iterator();
-            if (iter.hasNext()) {
-                LinkAddress linkAddress = iter.next();
-                dhcpInfoInternal.ipAddress = linkAddress.getAddress().getHostAddress();
-                for (RouteInfo route : linkProperties.getRoutes()) {
-                    dhcpInfoInternal.addRoute(route);
-                }
-                dhcpInfoInternal.prefixLength = linkAddress.getNetworkPrefixLength();
-                Iterator<InetAddress> dnsIterator = linkProperties.getDnses().iterator();
-                dhcpInfoInternal.dns1 = dnsIterator.next().getHostAddress();
-                if (dnsIterator.hasNext()) {
-                    dhcpInfoInternal.dns2 = dnsIterator.next().getHostAddress();
-                }
-            }
-        }
-        return dhcpInfoInternal;
-    }
-
-    /**
      * set IP configuration for a given network id
      */
-    void setIpConfiguration(int netId, DhcpInfoInternal dhcpInfo) {
-        LinkProperties linkProperties = dhcpInfo.makeLinkProperties();
-
+    void setLinkProperties(int netId, LinkProperties linkProperties) {
         WifiConfiguration config = mConfiguredNetworks.get(netId);
         if (config != null) {
-            // add old proxy details
+            // add old proxy details - TODO - is this still needed?
             if(config.linkProperties != null) {
                 linkProperties.setHttpProxy(config.linkProperties.getHttpProxy());
             }
@@ -552,7 +518,7 @@ class WifiConfigStore {
      * clear IP configuration for a given network id
      * @param network id
      */
-    void clearIpConfiguration(int netId) {
+    void clearLinkProperties(int netId) {
         WifiConfiguration config = mConfiguredNetworks.get(netId);
         if (config != null && config.linkProperties != null) {
             // Clear everything except proxy

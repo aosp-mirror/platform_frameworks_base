@@ -76,6 +76,10 @@ public class RouteInfo implements Parcelable {
         this(null, gateway);
     }
 
+    public RouteInfo(LinkAddress host) {
+        this(host, null);
+    }
+
     public static RouteInfo makeHostRoute(InetAddress host) {
         return makeHostRoute(host, null);
     }

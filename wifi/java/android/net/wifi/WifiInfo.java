@@ -23,7 +23,7 @@ import android.net.NetworkUtils;
 import android.text.TextUtils;
 
 import java.net.InetAddress;
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.EnumMap;
 
@@ -231,8 +231,11 @@ public class WifiInfo implements Parcelable {
     }
 
     public int getIpAddress() {
-        if (mIpAddress == null || mIpAddress instanceof Inet6Address) return 0;
-        return NetworkUtils.inetAddressToInt(mIpAddress);
+        int result = 0;
+        if (mIpAddress instanceof Inet4Address) {
+            result = NetworkUtils.inetAddressToInt((Inet4Address)mIpAddress);
+        }
+        return result;
     }
 
     /**

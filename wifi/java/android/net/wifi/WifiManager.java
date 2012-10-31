@@ -858,6 +858,7 @@ public class WifiManager {
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
+     * @deprecated - use ConnectivityManager.getLinkProperties instead.  TODO - remove 11/2013
      */
     public DhcpInfo getDhcpInfo() {
         try {
@@ -866,7 +867,6 @@ public class WifiManager {
             return null;
         }
     }
-
 
     /**
      * Enable or disable Wi-Fi.
