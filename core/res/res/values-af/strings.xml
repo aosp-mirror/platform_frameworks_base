@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"toets toegang tot beskermde berging"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Laat die program toe om \'n toestemming te toets vir USB-berging wat op toekomstige toestelle beskikbaar sal wees."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Laat die program toe om \'n toestemming vir USB-storing wat op toekomstige toestelle beskikbaar sal wees, te toets."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Laat die program toe om \'n toestemming vir die SD-kaart wat op toekomstige toestelle beskikbaar sal wees, te toets."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"verander of vee die inhoud van jou USB-berging uit"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"Verander of vee die inhoud van jou SD-kaart uit"</string>
@@ -810,22 +810,9 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Patroon uitgevee"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Sel bygevoeg"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Patroon klaar"</string>
-    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Legstuk %2$d van %3$d."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Gebruikerkieser"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
-    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
-    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Media-kontroles"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1438,5 +1425,4 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g> ."</string>
-    <string name="owner_name" msgid="2716755460376028154">"Eienaar"</string>
 </resources>

@@ -969,7 +969,7 @@
     <skip />
     <!-- no translation found for permlab_sdcardRead (8235341515605559677) -->
     <skip />
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
+    <!-- no translation found for permdesc_sdcardRead (5791957130190763289) -->
     <skip />
     <!-- no translation found for permdesc_sdcardRead (5914402684685848828) -->
     <skip />
@@ -1297,23 +1297,11 @@
     <skip />
     <!-- no translation found for lockscreen_access_pattern_detected (4988730895554057058) -->
     <skip />
-    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
+    <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
     <skip />
     <!-- no translation found for keyguard_accessibility_user_selector (1226798370913698896) -->
     <skip />
     <!-- no translation found for keyguard_accessibility_status (8008264603935930611) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
     <skip />
     <!-- no translation found for keygaurd_accessibility_media_controls (262209654292161806) -->
     <skip />
@@ -2315,8 +2303,5 @@
     <!-- no translation found for enable_accessibility_canceled (3833923257966635673) -->
     <skip />
     <!-- no translation found for user_switched (3768006783166984410) -->
-    <skip />
-    <!-- no translation found for owner_name (2716755460376028154) -->
-    <!-- no translation found for owner_name (3879126011135546571) -->
     <skip />
 </resources>

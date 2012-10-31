@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозвољава апликацији да уписује нове речи у кориснички речник."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"тестирање приступа заштићеној меморији"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Дозвољава апликацији да тестира дозволу за USB меморију која ће бити доступна на будућим уређајима."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Дозвољава апликацији да тестира дозволу за USB меморију која ће бити доступна на будућим уређајима."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Дозвољава апликацији да тестира дозволу за SD картицу која ће бити доступна на будућим уређајима."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"измена или брисање садржаја USB меморије"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"мењање или брисање садржаја SD картице"</string>
@@ -810,22 +810,9 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Образац је обрисан"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Ћелија је додата"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Образац је довршен"</string>
-    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Виџет %2$d од %3$d."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Избор корисника"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Статус"</string>
-    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
-    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Контроле за медије"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1438,5 +1425,4 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="owner_name" msgid="2716755460376028154">"Власник"</string>
 </resources>
