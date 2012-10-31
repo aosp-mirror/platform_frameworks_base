@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -247,12 +248,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mMinVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxVelocity = vc.getScaledMaximumFlingVelocity();
 
-        mDragHandleEdgeSlop = getResources().getDimensionPixelSize(
-                R.dimen.kg_edge_swipe_region_size);
+        final Resources res = getResources();
+        mDragHandleEdgeSlop = res.getDimensionPixelSize(R.dimen.kg_edge_swipe_region_size);
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-        final float density = getResources().getDisplayMetrics().density;
+        final float density = res.getDisplayMetrics().density;
 
         // top half of the lock icon, plus another 25% to be sure
         mDragHandleClosedAbove = (int) (DRAG_HANDLE_CLOSED_ABOVE * density + 0.5f);
@@ -261,7 +262,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mDragHandleOpenBelow = (int) (DRAG_HANDLE_OPEN_BELOW * density + 0.5f);
 
         // how much space to account for in the handle when closed
-        mChallengeBottomBound = mDragHandleClosedBelow;
+        mChallengeBottomBound = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
 
         setWillNotDraw(false);
     }
@@ -535,6 +536,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         return expanded && mHasGlowpad ? 0 : mDragHandleEdgeSlop;
     }
 
+    private float getChallengeAlpha() {
+        float x = mChallengeOffset - 1;
+        return x * x * x + 1.f;
+    }
+
     @Override
     public void requestDisallowInterceptTouchEvent(boolean allowIntercept) {
         // We'll intercept whoever we feel like! ...as long as it isn't a challenge view.
@@ -570,7 +576,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
                     if (!mIsBouncing &&
                             (isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
-                            (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING)) &&
+                            (isInChallengeView(x, y) &&
+                                (mScrollState == SCROLL_STATE_SETTLING || !mChallengeShowing))) &&
                             mActivePointerId == INVALID_POINTER) {
                         mActivePointerId = ev.getPointerId(i);
                         mGestureStartX = x;
@@ -860,7 +867,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 // we never want less than the handle size showing at the bottom.
                 final int bottom = layoutBottom + (int) ((childHeight - mChallengeBottomBound)
                         * (1 - mChallengeOffset));
-                child.setAlpha(mChallengeOffset / 2 + 0.5f);
+                child.setAlpha(getChallengeAlpha());
                 child.layout(left, bottom - childHeight, left + childWidth, bottom);
             } else {
                 // Non-challenge views lay out from the upper left, layered.
@@ -938,7 +945,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             }
 
             if (mDragIconDrawable != null) {
-                final int closedTop = getLayoutBottom() - mChallengeBottomBound;
+                final int closedTop = getLayoutBottom() - mDragHandleClosedBelow;
                 final int iconWidth = mDragIconDrawable.getIntrinsicWidth();
                 final int iconHeight = mDragIconDrawable.getIntrinsicHeight();
                 final int iconLeft = (challengeLeft + challengeRight - iconWidth) / 2;
@@ -996,7 +1003,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mChallengeView.layout(mChallengeView.getLeft(),
                 bottom - mChallengeView.getHeight(), mChallengeView.getRight(), bottom);
 
-        mChallengeView.setAlpha(offset / 2 + 0.5f);
+        mChallengeView.setAlpha(getChallengeAlpha());
         if (mScrollListener != null) {
             mScrollListener.onScrollPositionChanged(offset, mChallengeView.getTop());
         }
