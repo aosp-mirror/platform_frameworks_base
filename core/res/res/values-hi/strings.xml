@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"एप्लिकेशन को उपयोगकर्ता डिक्शनरी में नए शब्द लिखने देता है."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"संरक्ष‍ित संग्रहण पर पहुंच का परीक्षण करें"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"एप्लि. को USB संग्रहण अनुमति जांचने देता है जो भावी उपकरणों में उपलब्‍ध होगा."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"एप्लि. को USB संग्रहण अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"एप्लिकेशन को SD कार्ड के लिए किसी अनुमति का परीक्षण करने देता है जो भविष्‍य के उपकरणों में उपलब्‍ध होगा."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"अपने USB संग्रहण की सामग्री बदलें या हटाएं"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"अपने SD कार्ड की सामग्री बदलें या हटाएं"</string>
@@ -810,9 +810,22 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"प्रतिमान साफ़ किया गया"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"कक्ष जोड़ा गया"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"प्रतिमान पूरा किया गया"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d विजेट में से %2$d."</string>
+    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
+    <skip />
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"उपयोगकर्ता चयनकर्ता"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"स्थिति"</string>
+    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
+    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"मीडिया नियंत्रण"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1425,4 +1438,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुंच-योग्यता रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
 </resources>
