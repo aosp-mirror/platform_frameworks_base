@@ -16,6 +16,10 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -35,8 +39,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
     public static final int VERTICAL = LinearLayout.VERTICAL;
+    protected static final int ANIMATE_BOUNCE_DURATION = 750;
 
-    private View mChallengeView;
+    private KeyguardSecurityContainer mChallengeView;
     private View mUserSwitcherView;
     private View mScrimView;
     private OnBouncerStateChangedListener mBouncerListener;
@@ -87,7 +92,19 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         if (mIsBouncing) return;
         mIsBouncing = true;
         if (mScrimView != null) {
-            mScrimView.setVisibility(GONE);
+            if (mChallengeView != null) {
+                mChallengeView.showBouncer(ANIMATE_BOUNCE_DURATION);
+            }
+
+            Animator anim = ObjectAnimator.ofFloat(mScrimView, "alpha", 1f);
+            anim.setDuration(ANIMATE_BOUNCE_DURATION);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mScrimView.setVisibility(VISIBLE);
+                }
+            });
+            anim.start();
         }
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(true);
@@ -99,7 +116,19 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         if (!mIsBouncing) return;
         mIsBouncing = false;
         if (mScrimView != null) {
-            mScrimView.setVisibility(GONE);
+            if (mChallengeView != null) {
+                mChallengeView.hideBouncer(ANIMATE_BOUNCE_DURATION);
+            }
+
+            Animator anim = ObjectAnimator.ofFloat(mScrimView, "alpha", 0f);
+            anim.setDuration(ANIMATE_BOUNCE_DURATION);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mScrimView.setVisibility(INVISIBLE);
+                }
+            });
+            anim.start();
         }
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(false);
@@ -131,7 +160,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             mScrimView.setOnClickListener(null);
         }
         mScrimView = scrim;
-        mScrimView.setVisibility(mIsBouncing ? VISIBLE : GONE);
+        mScrimView.setAlpha(mIsBouncing ? 1.0f : 0.0f);
+        mScrimView.setVisibility(mIsBouncing ? VISIBLE : INVISIBLE);
         mScrimView.setFocusable(true);
         mScrimView.setOnClickListener(mScrimClickListener);
     }
@@ -165,7 +195,11 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                     throw new IllegalStateException(
                             "There may only be one child of type challenge");
                 }
-                mChallengeView = child;
+                if (!(child instanceof KeyguardSecurityContainer)) {
+                    throw new IllegalArgumentException(
+                            "Challenge must be a KeyguardSecurityContainer");
+                }
+                mChallengeView = (KeyguardSecurityContainer) child;
             } else if (lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER) {
                 if (mUserSwitcherView != null) {
                     throw new IllegalStateException(
