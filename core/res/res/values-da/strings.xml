@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillader, at appen kan skrive nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"test adgangen til beskyttet lagring"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"test adgangen til beskyttet lagring"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Tillader, at appen tester en tilladelse til USB-lagring, der vil være tilgængelig på fremtidige enheder."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Tillader, at appen tester en tilladelse til USB-lagring, der vil være tilgængelig på fremtidige enheder."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Tillader, at appen kan teste en tilladelse for SD-kortet, der vil være tilgængelig på fremtidige enheder."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ændre eller slette indhold på USB-lager"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ændre eller slette indholdet på dit SD-kort"</string>
@@ -810,22 +810,9 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Mønster er ryddet"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celle er tilføjet"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønster er afsluttet"</string>
-    <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget_empty_slot (1281505703307930757) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area (1881495568260351129) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_expanded (2278106022311170299) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_unlock_area_collapsed (6366992066936076396) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_widget (5322602529063040950) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d af %3$d."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Brugervælger"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
-    <!-- no translation found for keyguard_accessibility_camera (8904231194181114603) -->
-    <skip />
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediekontrolelementer"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1438,5 +1425,4 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgængelighed aktiveret."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgængelighed er annulleret."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
 </resources>
