@@ -326,7 +326,6 @@ class AppWidgetServiceImpl {
                 pw.print(" resizeMode=");
                 pw.print(info.resizeMode);
                 pw.print(info.widgetCategory);
-                pw.print(info.widgetFeatures);
                 pw.print(" autoAdvanceViewId=");
                 pw.print(info.autoAdvanceViewId);
                 pw.print(" initialLayout=#");
@@ -1412,9 +1411,6 @@ class AppWidgetServiceImpl {
             info.widgetCategory = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_widgetCategory,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
-            info.widgetFeatures = sa.getInt(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures,
-                    AppWidgetProviderInfo.WIDGET_FEATURES_NONE);
 
             sa.recycle();
         } catch (Exception e) {
