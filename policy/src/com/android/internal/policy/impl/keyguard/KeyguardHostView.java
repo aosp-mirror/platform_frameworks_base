@@ -153,10 +153,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
         mAppWidgetContainer.setMinScale(0.5f);
 
+        mViewStateManager = new KeyguardViewStateManager();
+
         addDefaultWidgets();
         addWidgetsFromSettings();
 
-        mViewStateManager = new KeyguardViewStateManager();
         SlidingChallengeLayout slider =
                 (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
         if (slider != null) {
