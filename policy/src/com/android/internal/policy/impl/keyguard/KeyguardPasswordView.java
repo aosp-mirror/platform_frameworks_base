@@ -60,6 +60,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected int getPasswordTextViewId() {
+        return R.id.passwordEntry;
+    }
+
+    @Override
     public boolean needsInput() {
         return true;
     }
