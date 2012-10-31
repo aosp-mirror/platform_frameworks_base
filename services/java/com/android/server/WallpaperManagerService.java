@@ -466,10 +466,13 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     onRemoveUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                             UserHandle.USER_NULL));
-                } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
-                    onStoppingUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                            UserHandle.USER_NULL));
                 }
+                // TODO: Race condition causing problems when cleaning up on stopping a user.
+                // Comment this out for now.
+                // else if (Intent.ACTION_USER_STOPPING.equals(action)) {
+                //     onStoppingUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                //             UserHandle.USER_NULL));
+                // }
             }
         }, userFilter);
 
