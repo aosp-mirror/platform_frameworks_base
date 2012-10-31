@@ -5798,6 +5798,8 @@
         <!-- Scrim. This will block access to child views that
              come before it in the child list in bouncer mode. -->
         <enum name="scrim" value="4" />
+        <!-- The home for widgets. All widgets will be descendents of this. -->
+        <enum name="widgets" value="5" />
     </attr>
 
     <declare-styleable name="SlidingChallengeLayout">
