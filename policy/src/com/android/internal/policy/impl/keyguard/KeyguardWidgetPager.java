@@ -119,7 +119,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     @Override
-    public void onPageSwitch(View newPage, int newPageIndex) {
+    public void onPageSwitching(View newPage, int newPageIndex) {
+        if (mViewStateManager != null) {
+            mViewStateManager.onPageSwitching(newPage, newPageIndex);
+        }
+    }
+
+    @Override
+    public void onPageSwitched(View newPage, int newPageIndex) {
         boolean showingStatusWidget = false;
         if (newPage instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) newPage;
@@ -158,7 +165,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             }
         }
         if (mViewStateManager != null) {
-            mViewStateManager.onPageSwitch(newPage, newPageIndex);
+            mViewStateManager.onPageSwitched(newPage, newPageIndex);
         }
     }
 
@@ -179,7 +186,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         KeyguardWidgetFrame currentWidgetPage = getWidgetPageAt(getCurrentPage());
-        if (currentWidgetPage != null && currentWidgetPage.onUserInteraction(ev.getAction())) {
+        if (currentWidgetPage != null && currentWidgetPage.onUserInteraction(ev)) {
             return true;
         }
         return super.onTouchEvent(ev);

@@ -239,7 +239,8 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private boolean mIsFlingingToDelete = false;
 
     public interface PageSwitchListener {
-        void onPageSwitch(View newPage, int newPageIndex);
+        void onPageSwitching(View newPage, int newPageIndex);
+        void onPageSwitched(View newPage, int newPageIndex);
     }
 
     public PagedView(Context context) {
@@ -356,7 +357,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     public void setPageSwitchListener(PageSwitchListener pageSwitchListener) {
         mPageSwitchListener = pageSwitchListener;
         if (mPageSwitchListener != null) {
-            mPageSwitchListener.onPageSwitch(getPageAt(mCurrentPage), mCurrentPage);
+            mPageSwitchListener.onPageSwitched(getPageAt(mCurrentPage), mCurrentPage);
         }
     }
 
@@ -415,6 +416,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
      * Sets the current page.
      */
     void setCurrentPage(int currentPage) {
+        notifyPageSwitching(currentPage);
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
         }
@@ -428,7 +430,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mCurrentPage = Math.max(0, Math.min(currentPage, getPageCount() - 1));
         updateCurrentPageScroll();
         updateScrollingIndicator();
-        notifyPageSwitchListener();
+        notifyPageSwitched();
         invalidate();
     }
 
@@ -436,9 +438,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mOnlyAllowEdgeSwipes = enable;
     }
 
-    protected void notifyPageSwitchListener() {
+    protected void notifyPageSwitching(int whichPage) {
         if (mPageSwitchListener != null) {
-            mPageSwitchListener.onPageSwitch(getPageAt(mCurrentPage), mCurrentPage);
+            mPageSwitchListener.onPageSwitching(getPageAt(whichPage), whichPage);
+        }
+    }
+
+    protected void notifyPageSwitched() {
+        if (mPageSwitchListener != null) {
+            mPageSwitchListener.onPageSwitched(getPageAt(mCurrentPage), mCurrentPage);
         }
     }
 
@@ -532,7 +540,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         } else if (mNextPage != INVALID_PAGE) {
             mCurrentPage = Math.max(0, Math.min(mNextPage, getPageCount() - 1));
             mNextPage = INVALID_PAGE;
-            notifyPageSwitchListener();
+            notifyPageSwitched();
 
             // We don't want to trigger a page end moving unless the page has settled
             // and the user has stopped scrolling
@@ -1743,7 +1751,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
     protected void snapToPage(int whichPage, int delta, int duration, boolean immediate) {
         mNextPage = whichPage;
-
+        notifyPageSwitching(whichPage);
         View focusedChild = getFocusedChild();
         if (focusedChild != null && whichPage != mCurrentPage &&
                 focusedChild == getPageAt(mCurrentPage)) {
@@ -1761,7 +1769,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         if (!mScroller.isFinished()) mScroller.abortAnimation();
         mScroller.startScroll(mUnboundedScrollX, 0, delta, 0, duration);
 
-        notifyPageSwitchListener();
+        notifyPageSwitched();
 
         // Trigger a compute() to finish switching pages if necessary
         if (immediate) {

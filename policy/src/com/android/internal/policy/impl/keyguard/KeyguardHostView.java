@@ -837,6 +837,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
                     mAppWidgetContainer.scrollLeft();
                 }
+                SlidingChallengeLayout slider = locateSlider();
+                if (slider != null) {
+                    slider.setHandleAlpha(1);
+                }
                 mShowSecurityWhenReturn = true;
             }
 

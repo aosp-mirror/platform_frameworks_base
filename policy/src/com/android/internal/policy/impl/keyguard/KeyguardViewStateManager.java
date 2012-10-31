@@ -101,7 +101,14 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration);
     }
 
-    public void onPageSwitch(View newPage, int newPageIndex) {
+    public void onPageSwitching(View newPage, int newPageIndex) {
+        if (mPagedView != null && mChallengeLayout instanceof SlidingChallengeLayout) {
+            boolean isCameraPage = newPage instanceof CameraWidgetFrame;
+            ((SlidingChallengeLayout) mChallengeLayout).setChallengeInteractive(!isCameraPage);
+        }
+    }
+
+    public void onPageSwitched(View newPage, int newPageIndex) {
         // Reset the previous page size and ensure the current page is sized appropriately.
         // We only modify the page state if it is not currently under control by the slider.
         // This prevents conflicts.
@@ -166,7 +173,6 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             if (!challengeOverlapping) {
                 frame.resetSize();
             }
-            frame.onChallengeActive(mChallengeLayout.isChallengeShowing());
             frame.hideFrame(this);
 
             if (challengeOverlapping) {
@@ -200,8 +206,6 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             }
             // View is on the move.  Pause the security view until it completes.
             mKeyguardSecurityContainer.onPause();
-
-            frame.onChallengeActive(true);
         }
         mLastScrollState = scrollState;
     }

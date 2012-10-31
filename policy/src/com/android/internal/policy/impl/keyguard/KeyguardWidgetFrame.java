@@ -418,12 +418,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
         // hook for subclasses
     }
 
-    public boolean onUserInteraction(int action) {
+    public boolean onUserInteraction(MotionEvent event) {
         // hook for subclasses
         return false;
-    }
-
-    public void onChallengeActive(boolean challengeActive) {
-        // hook for subclasses
     }
 }
