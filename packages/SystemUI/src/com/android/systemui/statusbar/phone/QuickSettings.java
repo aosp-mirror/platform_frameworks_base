@@ -202,21 +202,18 @@ class QuickSettings {
             Log.e(TAG, "Couldn't get user info", e);
         }
         final int userId = userInfo.id;
+        final String userName = userInfo.name;
 
         final Context context = currentUserContext;
         mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
             @Override
             protected Pair<String, Drawable> doInBackground(Void... params) {
-                final Cursor cursor = context.getContentResolver().query(
-                        Profile.CONTENT_URI, new String[] {Phone._ID, Phone.DISPLAY_NAME},
-                        null, null, null);
                 final UserManager um =
                         (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
                 // Fall back to the UserManager nickname if we can't read the name from the local
                 // profile below.
-                String nickName = um.getUserName();
-                String name = nickName;
+                String name = userName;
                 Drawable avatar = null;
                 Bitmap rawAvatar = um.getUserIcon(userId);
                 if (rawAvatar != null) {
@@ -225,17 +222,23 @@ class QuickSettings {
                     avatar = mContext.getResources().getDrawable(R.drawable.ic_qs_default_user);
                 }
 
-                // Try and read the display name from the local profile
-                if (cursor != null) {
-                    try {
-                        if (cursor.moveToFirst()) {
-                            name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                // If it's a single-user device, get the profile name, since the nickname is not
+                // usually valid
+                if (um.getUsers().size() <= 1) {
+                    // Try and read the display name from the local profile
+                    final Cursor cursor = context.getContentResolver().query(
+                            Profile.CONTENT_URI, new String[] {Phone._ID, Phone.DISPLAY_NAME},
+                            null, null, null);
+                    if (cursor != null) {
+                        try {
+                            if (cursor.moveToFirst()) {
+                                name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                            }
+                        } finally {
+                            cursor.close();
                         }
-                    } finally {
-                        cursor.close();
                     }
                 }
-
                 return new Pair<String, Drawable>(name, avatar);
             }
 
