@@ -1191,6 +1191,11 @@ public class GradientDrawable extends Drawable {
                 return;
             }
 
+            if (mRadius > 0 || mRadiusArray != null) {
+                mOpaque = false;
+                return;
+            }
+
             if (mStrokeWidth > 0 && !isOpaque(mStrokeColor)) {
                 mOpaque = false;
                 return;
