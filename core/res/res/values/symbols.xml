@@ -479,6 +479,9 @@
   <java-symbol type="string" name="emailTypeOther" />
   <java-symbol type="string" name="emailTypeWork" />
   <java-symbol type="string" name="emergency_call_dialog_number_for_display" />
+  <java-symbol type="string" name="widget_default" />
+  <java-symbol type="string" name="widget_default_package_name" />
+  <java-symbol type="string" name="widget_default_class_name" />
   <java-symbol type="string" name="emergency_calls_only" />
   <java-symbol type="string" name="enable_accessibility_canceled" />
   <java-symbol type="string" name="eventTypeAnniversary" />
