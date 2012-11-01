@@ -18,12 +18,14 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.TimeUtils;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
 import com.android.server.wm.WindowManagerService.AppWindowAnimParams;
+import com.android.server.wm.WindowManagerService.LayoutFields;
 import com.android.server.wm.WindowManagerService.LayoutToAnimatorParams;
 
 import java.io.PrintWriter;
@@ -197,6 +199,15 @@ public class WindowAnimator {
                 mWallpaperTokens = new ArrayList<WindowToken>(layoutToAnim.mWallpaperTokens);
             }
 
+            if (WindowManagerService.DEBUG_WALLPAPER_LIGHT) {
+                if (mWallpaperTarget != layoutToAnim.mWallpaperTarget
+                        || mLowerWallpaperTarget != layoutToAnim.mLowerWallpaperTarget
+                        || mUpperWallpaperTarget != layoutToAnim.mUpperWallpaperTarget) {
+                    Slog.d(TAG, "Updating anim wallpaper: target=" + mWallpaperTarget
+                            + " lower=" + mLowerWallpaperTarget + " upper="
+                            + mUpperWallpaperTarget);
+                }
+            }
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
             mWpAppAnimator = mWallpaperTarget == null
                     ? null : mWallpaperTarget.mAppToken == null
@@ -735,45 +746,143 @@ public class WindowAnimator {
         return dimParams != null && dimParams.mDimWinAnimator == winAnimator;
     }
 
+    static String bulkUpdateParamsToString(int bulkUpdateParams) {
+        StringBuilder builder = new StringBuilder(128);
+        if ((bulkUpdateParams & LayoutFields.SET_UPDATE_ROTATION) != 0) {
+            builder.append(" UPDATE_ROTATION");
+        }
+        if ((bulkUpdateParams & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
+            builder.append(" WALLPAPER_MAY_CHANGE");
+        }
+        if ((bulkUpdateParams & LayoutFields.SET_FORCE_HIDING_CHANGED) != 0) {
+            builder.append(" FORCE_HIDING_CHANGED");
+        }
+        if ((bulkUpdateParams & LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
+            builder.append(" ORIENTATION_CHANGE_COMPLETE");
+        }
+        if ((bulkUpdateParams & LayoutFields.SET_TURN_ON_SCREEN) != 0) {
+            builder.append(" TURN_ON_SCREEN");
+        }
+        return builder.toString();
+    }
+
     public void dumpLocked(PrintWriter pw, String prefix, boolean dumpAll) {
-        if (dumpAll) {
-            if (mWindowDetachedWallpaper != null) {
-                pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
-                    pw.println(mWindowDetachedWallpaper);
+        final String subPrefix = "  " + prefix;
+        final String subSubPrefix = "  " + subPrefix;
+
+        boolean needSep = false;
+        if (mAppAnimators.size() > 0) {
+            needSep = true;
+            pw.println("  App Animators:");
+            for (int i=mAppAnimators.size()-1; i>=0; i--) {
+                AppWindowAnimator anim = mAppAnimators.get(i);
+                pw.print(prefix); pw.print("App Animator #"); pw.print(i);
+                        pw.print(' '); pw.print(anim);
+                if (dumpAll) {
+                    pw.println(':');
+                    anim.dump(pw, subPrefix, dumpAll);
+                } else {
+                    pw.println();
+                }
             }
-            pw.print(prefix); pw.print("mAnimTransactionSequence=");
-                pw.print(mAnimTransactionSequence);
-                pw.println(" mForceHiding=" + forceHidingToString());
-            for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
-                pw.print(prefix); pw.print("DisplayContentsAnimator #");
-                    pw.println(mDisplayContentsAnimators.keyAt(i));
-                DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
-                final String subPrefix = "  " + prefix;
-                final String subSubPrefix = "  " + subPrefix;
-                if (displayAnimator.mWindowAnimationBackgroundSurface != null) {
-                    pw.println(subPrefix + "mWindowAnimationBackgroundSurface:");
+        }
+        if (mWallpaperTokens.size() > 0) {
+            if (needSep) {
+                pw.println();
+            }
+            needSep = true;
+            pw.print(prefix); pw.println("Wallpaper tokens:");
+            for (int i=mWallpaperTokens.size()-1; i>=0; i--) {
+                WindowToken token = mWallpaperTokens.get(i);
+                pw.print(prefix); pw.print("Wallpaper #"); pw.print(i);
+                        pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, subPrefix);
+                } else {
+                    pw.println();
+                }
+            }
+        }
+
+        if (needSep) {
+            pw.println();
+        }
+        for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
+            pw.print(prefix); pw.print("DisplayContentsAnimator #");
+                    pw.print(mDisplayContentsAnimators.keyAt(i));
+                    pw.println(":");
+            DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
+            for (int j=0; j<displayAnimator.mWinAnimators.size(); j++) {
+                WindowStateAnimator wanim = displayAnimator.mWinAnimators.get(j);
+                pw.print(subPrefix); pw.print("Window #"); pw.print(j);
+                        pw.print(": "); pw.println(wanim);
+            }
+            if (displayAnimator.mWindowAnimationBackgroundSurface != null) {
+                if (dumpAll || displayAnimator.mWindowAnimationBackgroundSurface.mDimShown) {
+                    pw.print(subPrefix); pw.println("mWindowAnimationBackgroundSurface:");
                     displayAnimator.mWindowAnimationBackgroundSurface.printTo(subSubPrefix, pw);
                 }
-                if (displayAnimator.mDimAnimator != null) {
-                    pw.println(subPrefix + "mDimAnimator:");
-                    displayAnimator.mDimAnimator.printTo(subSubPrefix, pw);
-                } else {
-                    pw.println(subPrefix + "no DimAnimator ");
-                }
-                if (displayAnimator.mDimParams != null) {
-                    pw.println(subPrefix + "mDimParams:");
-                    displayAnimator.mDimParams.printTo(subSubPrefix, pw);
-                } else {
-                    pw.println(subPrefix + "no DimParams ");
-                }
-                if (displayAnimator.mScreenRotationAnimation != null) {
-                    pw.println(subPrefix + "mScreenRotationAnimation:");
-                    displayAnimator.mScreenRotationAnimation.printTo(subSubPrefix, pw);
-                } else {
-                    pw.print(subPrefix + "no ScreenRotationAnimation ");
-                }
             }
-            pw.println();
+            if (displayAnimator.mDimAnimator != null) {
+                if (dumpAll || displayAnimator.mDimAnimator.mDimShown) {
+                    pw.print(subPrefix); pw.println("mDimAnimator:");
+                    displayAnimator.mDimAnimator.printTo(subSubPrefix, pw);
+                }
+            } else if (dumpAll) {
+                pw.print(subPrefix); pw.println("no DimAnimator ");
+            }
+            if (displayAnimator.mDimParams != null) {
+                pw.print(subPrefix); pw.println("mDimParams:");
+                displayAnimator.mDimParams.printTo(subSubPrefix, pw);
+            } else if (dumpAll) {
+                pw.print(subPrefix); pw.println("no DimParams ");
+            }
+            if (displayAnimator.mScreenRotationAnimation != null) {
+                pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
+                displayAnimator.mScreenRotationAnimation.printTo(subSubPrefix, pw);
+            } else if (dumpAll) {
+                pw.print(subPrefix); pw.println("no ScreenRotationAnimation ");
+            }
+        }
+
+        pw.println();
+
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mAnimTransactionSequence=");
+                    pw.print(mAnimTransactionSequence);
+                    pw.print(" mForceHiding="); pw.println(forceHidingToString());
+            pw.print(prefix); pw.print("mCurrentTime=");
+                    pw.println(TimeUtils.formatUptime(mCurrentTime));
+            pw.print(prefix); pw.print("mDw=");
+                    pw.print(mDw); pw.print(" mDh="); pw.print(mDh);
+                    pw.print(" mInnerDw="); pw.print(mInnerDw);
+                    pw.print(" mInnerDh="); pw.println(mInnerDh);
+        }
+        if (mBulkUpdateParams != 0) {
+            pw.print(prefix); pw.print("mBulkUpdateParams=0x");
+                    pw.print(Integer.toHexString(mBulkUpdateParams));
+                    pw.println(bulkUpdateParamsToString(mBulkUpdateParams));
+        }
+        if (mPendingActions != 0) {
+            pw.print(prefix); pw.print("mPendingActions=0x");
+                    pw.println(Integer.toHexString(mPendingActions));
+        }
+        if (mWindowDetachedWallpaper != null) {
+            pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
+                pw.println(mWindowDetachedWallpaper);
+        }
+        pw.print(prefix); pw.print("mWallpaperTarget="); pw.println(mWallpaperTarget);
+        pw.print(prefix); pw.print("mWpAppAnimator="); pw.println(mWpAppAnimator);
+        if (mLowerWallpaperTarget != null || mUpperWallpaperTarget != null) {
+            pw.print(prefix); pw.print("mLowerWallpaperTarget=");
+                    pw.println(mLowerWallpaperTarget);
+            pw.print(prefix); pw.print("mUpperWallpaperTarget=");
+                    pw.println(mUpperWallpaperTarget);
+        }
+        if (mUniverseBackground != null) {
+            pw.print(prefix); pw.print("mUniverseBackground="); pw.print(mUniverseBackground);
+                    pw.print(" mAboveUniverseLayer="); pw.println(mAboveUniverseLayer);
         }
     }
 
