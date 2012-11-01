@@ -18,6 +18,7 @@ page.title=Notifications
       <li><a href="#Actions">Notification actions</a></li>
       <li><a href="#SimpleNotification">Creating a simple notification</a></li>
       <li><a href="#ApplyStyle">Applying a big view style to a notification</a></li>
+      <li><a href="#Compatibility">Handling compatibility</a></li>
     </ol>
   </li>
   <li><a href="#Managing">Managing Notifications</a>
@@ -91,18 +92,36 @@ page.title=Notifications
     </p>
 </div>
 <p class="note">
-    <strong>Note:</strong> This guide refers to the
+    <strong>Note:</strong> Except where noted, this guide refers to the
     {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} class
     in the version 4 <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>.
-    The class {@link android.app.Notification.Builder Notification.Builder} was added in API
-    level 11.
+    The class {@link android.app.Notification.Builder Notification.Builder} was added in Android
+    3.0.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="NotificationUI">Notification Display Elements</h2>
 <p>
-    Notifications in the notification drawer appear in two main visual styles, normal view and
-    big view.
+    Notifications in the notification drawer can appear in one of two visual styles, depending on
+    the version and the state of the drawer:
+</p>
+<dl>
+    <dt>
+        Normal view
+    </dt>
+    <dd>
+        The standard view of the notifications in the notification drawer.
+    </dd>
+    <dt>
+        Big view
+    </dt>
+    <dd>
+        A large view that's visible when the notification is expanded. Big view is part of the
+        expanded notification feature available as of Android 4.1.
+    </dd>
+</dl>
+<p>
+    These styles are described in the following sections.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="NormalNotify">Normal view</h3>
@@ -139,7 +158,7 @@ page.title=Notifications
 <p>
     A notification's big view appears only when the notification is expanded, which happens when the
     notification is at the top of the notification drawer, or when the user expands the
-    notification with a gesture.
+    notification with a gesture. Expanded notifications are available starting with Android 4.1.
 </p>
 <p>
     The following screenshot shows an inbox-style notification:
@@ -246,10 +265,12 @@ page.title=Notifications
 </p>
 <p>
     A notification can provide multiple actions. You should always define the action that's
-    triggered when the user touches the notification; usually this action opens an
+    triggered when the user clicks the notification; usually this action opens an
     {@link android.app.Activity} in your application. You can also add buttons to the notification
     that perform additional actions such as snoozing an alarm or responding immediately to a text
-    message.
+    message; this feature is available as of Android 4.1. If you use additional action buttons, you
+    must also make their functionality available in an {@link android.app.Activity} in your app; see
+    the section <a href="#Compatibility">Handling compatibility</a> for more details.
 </p>
 <p>
     Inside a {@link android.app.Notification}, the action itself is defined by a
@@ -257,22 +278,22 @@ page.title=Notifications
     an {@link android.app.Activity} in your application. To associate the
     {@link android.app.PendingIntent} with a gesture, call the appropriate method of
     {@link android.support.v4.app.NotificationCompat.Builder}. For example, if you want to start
-    {@link android.app.Activity} when the user touches the notification text in
+    {@link android.app.Activity} when the user clicks the notification text in
     the notification drawer, you add the {@link android.app.PendingIntent} by calling
     {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}.
 </p>
 <p>
-    Starting an {@link android.app.Activity} when the user touches the notification is the most
+    Starting an {@link android.app.Activity} when the user clicks the notification is the most
     common action scenario. You can also start an {@link android.app.Activity} when the user
-    dismisses an {@link android.app.Activity}, and you can start an {@link android.app.Activity}
-    from an action button. To learn more, read the reference guide for
+    dismisses an {@link android.app.Activity}. In Android 4.1 and later, you can start an
+    {@link android.app.Activity} from an action button. To learn more, read the reference guide for
     {@link android.support.v4.app.NotificationCompat.Builder}.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="SimpleNotification">Creating a simple notification</h3>
 <p>
     The following snippet illustrates a simple notification that specifies an activity to open when
-    the user touches the notification. Notice that the code creates a
+    the user clicks the notification. Notice that the code creates a
     {@link android.support.v4.app.TaskStackBuilder} object and uses it to create the
     {@link android.app.PendingIntent} for the action. This pattern is explained in more detail
     in the section <a href="#NotificationResponse">
@@ -317,6 +338,11 @@ mNotificationManager.notify(mId, mBuilder.build());
     Builder.setStyle()} with a big view style object as its argument.
 </p>
 <p>
+    Remember that expanded notifications are not available on platforms prior to Android 4.1. To
+    learn how to handle notifications for Android 4.1 and for earlier platforms, read the
+    section <a href="#Compatibility">Handling compatibility</a>.
+</p>
+<p>
     For example, the following code snippet demonstrates how to alter the notification created
     in the previous snippet to use the Inbox big view style:
 </p>
@@ -341,6 +367,47 @@ mBuilder.setStyle(inBoxStyle);
 ...
 // Issue the notification here.
 </pre>
+<h3 id="Compatibility">Handling compatibility</h3>
+<p>
+    Not all notification features are available for a particular version, even though
+    the methods to set them are in the support library class
+    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+    For example, action buttons, which depend on expanded notifications, only appear on Android
+    4.1 and higher, because expanded notifications themselves are only available on
+    Android 4.1 and higher.
+</p>
+<p>
+    To ensure the best compatibility, create notifications with
+    {@link android.support.v4.app.NotificationCompat NotificationCompat} and its subclasses,
+    particularly {@link android.support.v4.app.NotificationCompat.Builder
+    NotificationCompat.Builder}. In addition, follow this process when you implement a notification:
+</p>
+<ol>
+    <li>
+        Provide all of the notification's functionality to all users, regardless of the version
+        they're using. To do this, verify that all of the functionality is available from an
+        {@link android.app.Activity} in your app. You may want to add a new
+        {@link android.app.Activity} to do this.
+        <p>
+            For example, if you want to use
+            {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} to
+            provide a control that stops and starts media playback, first implement this
+            control in an {@link android.app.Activity} in your app.
+        </p>
+    </li>
+    <li>
+        Ensure that all users can get to the functionality in the {@link android.app.Activity},
+        by having it start when users click the notification. To do this,
+        create a {@link android.app.PendingIntent} for the {@link android.app.Activity}. Call
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+        setContentIntent()} to add the {@link android.app.PendingIntent} to the notification.
+    </li>
+    <li>
+        Now add the expanded notification features you want to use to the notification. Remember
+        that any functionality you add also has to be available in the {@link android.app.Activity}
+        that starts when users click the notification.
+    </li>
+</ol>
 <!-- ------------------------------------------------------------------------------------------ -->
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="Managing">Managing Notifications</h2>
@@ -354,6 +421,10 @@ mBuilder.setStyle(inBoxStyle);
     unread messages and by adding a summary of each email to the notification. This is called
     "stacking" the notification; it's described in more detail in the
     <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design guide.
+</p>
+<p class="note">
+    <strong>Note:</strong> This Gmail feature requires the "inbox" big view style, which is
+    part of the expanded notification feature available starting in Android 4.1.
 </p>
 <p>
     The following section describes how to update notifications and also how to remove them.
@@ -417,7 +488,7 @@ numMessages = 0;
         the notification can be cleared).
     </li>
     <li>
-        The user touches the notification, and you called
+        The user clicks the notification, and you called
         {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()} when
         you created the notification.
     </li>
@@ -452,7 +523,7 @@ numMessages = 0;
         start a fresh task, and provide the {@link android.app.PendingIntent} with a back stack
         that reproduces the application's normal <i>Back</i> behavior.
         <p>
-            Notifications from the Gmail app demonstrate this. When you touch a notification for
+            Notifications from the Gmail app demonstrate this. When you click a notification for
             a single email message, you see the message itself. Touching <b>Back</b> takes you
             backwards through Gmail to the Home screen, just as if you had entered Gmail from the
             Home screen rather than entering it from a notification.
@@ -489,7 +560,7 @@ numMessages = 0;
         Define your application's {@link android.app.Activity} hierarchy in the manifest.
         <ol style="list-style-type: lower-alpha;">
             <li>
-                Add support for API versions 15 and earlier. To do this, specify the parent of the
+                Add support for Android 4.0.3 and earlier. To do this, specify the parent of the
                 {@link android.app.Activity} you're starting by adding a
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
                 element as the child of the
@@ -507,7 +578,7 @@ numMessages = 0;
                 </p>
             </li>
             <li>
-                Also add support for API versions 16 and later. To do this, add the
+                Also add support for Android 4.1 and later. To do this, add the
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
                 attribute to the
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
@@ -738,9 +809,14 @@ mNotificationManager.notify(id, builder.build());
     {@link android.widget.ProgressBar} class.
 </p>
 <p>
-    To use a progress indicator, call
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. The
-    determinate and indeterminate forms are described in the following sections.
+    To use a progress indicator on platforms starting with Android 4.0, call
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. For
+    previous versions, you must create your own custom notification layout that
+    includes a {@link android.widget.ProgressBar} view.
+</p>
+<p>
+    The following sections describe how to display progress in a notification using
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
 <h3 id="FixedProgress">Displaying a fixed-duration progress indicator</h3>
@@ -872,6 +948,10 @@ mNotifyManager.notify(0, mBuilder.build());
     {@link android.widget.RemoteViews} defined in a XML layout file.
 </p>
 <p>
+    The height available for a custom notification layout depends on the notification view. Normal
+    view layouts are limited to 64 dp, and expanded view layouts are limited to 256 dp.
+</p>
+<p>
     To define a custom notification layout, start by instantiating a
     {@link android.widget.RemoteViews} object that inflates an XML layout file. Then,
     instead of calling methods such as
@@ -911,8 +991,8 @@ mNotifyManager.notify(0, mBuilder.build());
 <h4>Using style resources for custom notification text</h4>
 <p>
     Always use style resources for the text of a custom notification. The background color of the
-    notification can vary across different devices and platform versions, and using style resources
-    helps you account for this. Starting in API level 9, the system defined a style for the
-    standard notification layout text. If you use the same style in applications that target API
-    level 9 or higher, you'll ensure that your text is visible against the display background.
+    notification can vary across different devices and versions, and using style resources
+    helps you account for this. Starting in Android 2.3, the system defined a style for the
+    standard notification layout text. If you use the same style in applications that target Android
+    2.3 or higher, you'll ensure that your text is visible against the display background.
 </p>
