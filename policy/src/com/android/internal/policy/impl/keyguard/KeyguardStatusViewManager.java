@@ -327,6 +327,14 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
     }
 
     @Override
+    public void showBouncer(int duration) {
+    }
+
+    @Override
+    public void hideBouncer(int duration) {
+    }
+
+    @Override
     public void setTimeout(int timeout_ms) {
     }
 
