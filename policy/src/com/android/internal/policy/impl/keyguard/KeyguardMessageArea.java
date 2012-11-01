@@ -16,6 +16,9 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
@@ -39,10 +42,14 @@ class KeyguardMessageArea extends TextView {
     static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
 
     static final int SECURITY_MESSAGE_DURATION = 5000;
-    static final String SEPARATOR = " ";
+    protected static final int FADE_DURATION = 750;
+    static final String SEPARATOR = "  ";
 
     // are we showing battery information?
     boolean mShowingBatteryInfo = false;
+
+    // is the bouncer up?
+    boolean mShowingBouncer = false;
 
     // last known plugged in state
     boolean mPluggedIn = false;
@@ -68,7 +75,11 @@ class KeyguardMessageArea extends TextView {
         public void run() {
             mMessage = null;
             mShowingMessage = false;
-            update();
+            if (mShowingBouncer) {
+                hideMessage(FADE_DURATION, true);
+            } else {
+                update();
+            }
         }
     };
 
@@ -100,6 +111,18 @@ class KeyguardMessageArea extends TextView {
                 mMessageArea.mMessage = mMessageArea.getContext().getString(resId, formatArgs);
                 mMessageArea.securityMessageChanged();
             }
+        }
+
+        @Override
+        public void showBouncer(int duration) {
+            mMessageArea.hideMessage(duration, false);
+            mMessageArea.mShowingBouncer = true;
+        }
+
+        @Override
+        public void hideBouncer(int duration) {
+            mMessageArea.showMessage(duration);
+            mMessageArea.mShowingBouncer = false;
         }
 
         @Override
@@ -139,6 +162,7 @@ class KeyguardMessageArea extends TextView {
     }
 
     public void securityMessageChanged() {
+        setAlpha(1f);
         mShowingMessage = true;
         update();
         mHandler.removeCallbacks(mClearMessageRunnable);
@@ -212,4 +236,23 @@ class KeyguardMessageArea extends TextView {
         return string;
     }
 
+    private void hideMessage(int duration, boolean thenUpdate) {
+        Animator anim = ObjectAnimator.ofFloat(this, "alpha", 0f);
+        anim.setDuration(duration);
+        if (thenUpdate) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                        public void onAnimationEnd(Animator animation) {
+                        update();
+                    }
+                });
+        }
+        anim.start();
+    }
+
+    private void showMessage(int duration) {
+        Animator anim = ObjectAnimator.ofFloat(this, "alpha", 1f);
+        anim.setDuration(duration);
+        anim.start();
+    }
 }
