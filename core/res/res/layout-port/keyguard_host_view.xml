@@ -69,8 +69,8 @@
         </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>
 
         <ImageButton
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
+              android:layout_width="match_parent"
+              android:layout_height="@dimen/kg_widget_pager_bottom_padding"
               androidprv:layout_childType="expandChallengeHandle"
               android:focusable="true"
               android:background="@null"
