@@ -581,11 +581,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
                     if (!mIsBouncing && mActivePointerId == INVALID_POINTER
-                            && ((isInDragHandle(x, y) && MathUtils.sq(x - mGestureStartX)
-                                    + MathUtils.sq(y - mGestureStartY) > mTouchSlopSquare)
-                               || crossedDragHandle(x, y, mGestureStartY)
-                               || (isInChallengeView(x, y) && (mScrollState == SCROLL_STATE_SETTLING
-                                       || !mChallengeShowing)))) {
+                                && ((isInDragHandle(x, y) && MathUtils.sq(x - mGestureStartX)
+                                        + MathUtils.sq(y - mGestureStartY) > mTouchSlopSquare)
+                                || crossedDragHandle(x, y, mGestureStartY)
+                                || (isInChallengeView(x, y) &&
+                                       mScrollState == SCROLL_STATE_SETTLING))) {
                         mActivePointerId = ev.getPointerId(i);
                         mGestureStartX = x;
                         mGestureStartY = y;
