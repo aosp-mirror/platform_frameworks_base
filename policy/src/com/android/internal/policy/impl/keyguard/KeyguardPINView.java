@@ -61,7 +61,9 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
                 @Override
                 public void onClick(View v) {
                     doHapticKeyClick();
-                    verifyPasswordAndUnlock();
+                    if (mPasswordEntry.isEnabled()) {
+                        verifyPasswordAndUnlock();
+                    }
                 }
             });
             ok.setOnHoverListener(new NumPadKey.LiftToActivateListener(getContext()));
@@ -74,16 +76,22 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
             pinDelete.setVisibility(View.VISIBLE);
             pinDelete.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    CharSequence str = mPasswordEntry.getText();
-                    if (str.length() > 0) {
-                        mPasswordEntry.setText(str.subSequence(0, str.length()-1));
+                    // check for time-based lockouts
+                    if (mPasswordEntry.isEnabled()) {
+                        CharSequence str = mPasswordEntry.getText();
+                        if (str.length() > 0) {
+                            mPasswordEntry.setText(str.subSequence(0, str.length()-1));
+                        }
                     }
                     doHapticKeyClick();
                 }
             });
             pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) {
-                    mPasswordEntry.setText("");
+                    // check for time-based lockouts
+                    if (mPasswordEntry.isEnabled()) {
+                        mPasswordEntry.setText("");
+                    }
                     doHapticKeyClick();
                     return true;
                 }

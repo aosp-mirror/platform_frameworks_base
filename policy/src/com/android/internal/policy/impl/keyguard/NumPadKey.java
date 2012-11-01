@@ -51,7 +51,8 @@ public class NumPadKey extends Button {
                     }
                 }
             }
-            if (mTextView != null) {
+            // check for time-based lockouts
+            if (mTextView != null && mTextView.isEnabled()) {
                 mTextView.append(String.valueOf(mDigit));
             }
             doHapticKeyClick();

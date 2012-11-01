@@ -164,6 +164,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
             @Override
             public void onFinish() {
+                mSecurityMessageDisplay.setMessage("", false);
                 resetState();
             }
         }.start();
