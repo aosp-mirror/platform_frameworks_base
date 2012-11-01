@@ -46,29 +46,6 @@ import com.android.internal.location.ProviderProperties;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.LOCATION_SERVICE)}.
  *
- * <p>At API version 17 the Location API's were simplified.
- * Previously applications would need to explicitly enumerate, select, and
- * track Location Providers (such as GPS or Network).
- * This has been replaced by the concept of
- * <em>Fused Location</em>. Now applications just specify the quality of service
- * required for location updates (using the new {@link LocationRequest} class),
- * and the system will fuse results from individual location providers
- * as necessary before returning the result to the application.
- *
- * <p>As a result of this change, the {@link LocationProvider} and
- * {@link Criteria} classes have been deprecated, in favor of
- * {@link LocationRequest}. Furthermore, all Location Manager
- * methods involving Criteria or explicitly named Providers have
- * been deprecated, in favor of new variants that use
- * {@link LocationRequest}.
- *
- * <p>A single {@link LocationRequest} object can trigger the use
- * of all providers (including GPS, Network, and the passive) provider
- * as necessary. This should result in a lot less work for your application. You
- * no longer need to track the status and availability of each
- * location provider. Just set the quality of locations required
- * in {@link LocationRequest}, and let the system manage the rest.
- *
  * <p class="note">Unless noted, all Location API methods require
  * the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} or
  * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permissions.
@@ -93,10 +70,7 @@ public class LocationManager {
      * <p>This provider determines location based on
      * availability of cell tower and WiFi access points. Results are retrieved
      * by means of a network lookup.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String NETWORK_PROVIDER = "network";
 
     /**
@@ -112,10 +86,7 @@ public class LocationManager {
      * <ul>
      * <li> satellites - the number of satellites used to derive the fix
      * </ul>
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String GPS_PROVIDER = "gps";
 
     /**
@@ -129,10 +100,7 @@ public class LocationManager {
      * the origin of the location update. Requires the permission
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}, although if the GPS is
      * not enabled this provider might only return coarse fixes.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String PASSIVE_PROVIDER = "passive";
 
     /**
@@ -156,19 +124,13 @@ public class LocationManager {
     /**
      * Key used for a Bundle extra holding an Integer status value
      * when a status change is broadcast using a PendingIntent.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String KEY_STATUS_CHANGED = "status";
 
     /**
      * Key used for a Bundle extra holding an Boolean status value
      * when a provider enabled/disabled event is broadcast using a PendingIntent.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
 
     /**
@@ -191,10 +153,7 @@ public class LocationManager {
     /**
      * Broadcast intent action when the configured location providers
      * change.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public static final String PROVIDERS_CHANGED_ACTION =
         "android.location.PROVIDERS_CHANGED";
 
@@ -338,10 +297,7 @@ public class LocationManager {
      * be accessed by the calling activity or are currently disabled.
      *
      * @return list of Strings containing names of the provider
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public List<String> getAllProviders() {
         try {
             return mService.getAllProviders();
@@ -357,10 +313,7 @@ public class LocationManager {
      * @param enabledOnly if true then only the providers which are currently
      * enabled are returned.
      * @return list of Strings containing names of the providers
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public List<String> getProviders(boolean enabledOnly) {
         try {
             return mService.getProviders(null, enabledOnly);
@@ -380,10 +333,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if name is null or does not exist
      * @throws SecurityException if the caller is not permitted to access the
      * given provider.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public LocationProvider getProvider(String name) {
         checkProvider(name);
         try {
@@ -407,10 +357,7 @@ public class LocationManager {
      * @param enabledOnly if true then only the providers which are currently
      * enabled are returned.
      * @return list of Strings containing names of the providers
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         checkCriteria(criteria);
         try {
@@ -442,10 +389,7 @@ public class LocationManager {
      * @param criteria the criteria that need to be matched
      * @param enabledOnly if true then only a provider that is currently enabled is returned
      * @return name of the provider that best matches the requirements
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public String getBestProvider(Criteria criteria, boolean enabledOnly) {
         checkCriteria(criteria);
         try {
@@ -461,7 +405,7 @@ public class LocationManager {
      * pending intent.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
@@ -475,9 +419,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws RuntimeException if the calling thread has no Looper
      * @throws SecurityException if no suitable permission is present
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             LocationListener listener) {
         checkProvider(provider);
@@ -493,7 +435,7 @@ public class LocationManager {
      * the specified looper thread.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
@@ -508,10 +450,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             LocationListener listener, Looper looper) {
         checkProvider(provider);
@@ -527,7 +466,7 @@ public class LocationManager {
      * on the specified looper thread.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param minTime minimum time interval between location updates, in milliseconds
      * @param minDistance minimum distance between location updates, in meters
@@ -543,10 +482,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
             LocationListener listener, Looper looper) {
         checkCriteria(criteria);
@@ -562,7 +498,7 @@ public class LocationManager {
      * pending intent.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param provider the name of the provider with which to register
      * @param minTime minimum time interval between location updates, in milliseconds
@@ -573,10 +509,7 @@ public class LocationManager {
      * on this device
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             PendingIntent intent) {
         checkProvider(provider);
@@ -591,11 +524,8 @@ public class LocationManager {
      * Register for location updates using a Criteria and pending intent.
      *
      * <p>The <code>requestLocationUpdates()</code> and
-     * <code>requestSingleUpdate()</code> methods involving
-     * an explicit String provider or {@link Criteria} are deprecated.
-     *
-     * <p>They register the current activity to be updated
-     * periodically by the named provider, or by the provider matching
+     * <code>requestSingleUpdate()</code> register the current activity to be
+     * updated periodically by the named provider, or by the provider matching
      * the specified {@link Criteria}, with location and status updates.
      *
      * <p> It may take a while to receive the first location update. If
@@ -680,10 +610,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
             PendingIntent intent) {
         checkCriteria(criteria);
@@ -699,7 +626,7 @@ public class LocationManager {
      * a callback.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param provider the name of the provider with which to register
      * @param listener a {@link LocationListener} whose
@@ -712,10 +639,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest#setNumUpdates} instead
      */
-    @Deprecated
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
         checkProvider(provider);
         checkListener(listener);
@@ -730,7 +654,7 @@ public class LocationManager {
      * a callback.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
@@ -744,10 +668,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if criteria is null
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest#setNumUpdates} instead
      */
-    @Deprecated
     public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
         checkCriteria(criteria);
         checkListener(listener);
@@ -761,7 +682,7 @@ public class LocationManager {
      * Register for a single location update using a named provider and pending intent.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param provider the name of the provider with which to register
      * @param intent a {@link PendingIntent} to be sent for the location update
@@ -769,10 +690,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest#setNumUpdates} instead
      */
-    @Deprecated
     public void requestSingleUpdate(String provider, PendingIntent intent) {
         checkProvider(provider);
         checkPendingIntent(intent);
@@ -786,7 +704,7 @@ public class LocationManager {
      * Register for a single location update using a Criteria and pending intent.
      *
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)}
-     * for more detail on how to use this (deprecated) method.
+     * for more detail on how to use this method.
      *
      * @param criteria contains parameters for the location manager to choose the
      * appropriate provider and parameters to compute the location
@@ -795,10 +713,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest#setNumUpdates} instead
      */
-    @Deprecated
     public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
         checkCriteria(criteria);
         checkPendingIntent(intent);
@@ -862,6 +777,8 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
      */
     public void requestLocationUpdates(LocationRequest request, LocationListener listener,
             Looper looper) {
@@ -887,6 +804,8 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
      */
     public void requestLocationUpdates(LocationRequest request, PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1011,10 +930,7 @@ public class LocationManager {
      *
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
-     *
-     * @deprecated Use {@link LocationRequest} and {@link Geofence} instead
      */
-    @Deprecated
     public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
             PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1062,6 +978,8 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
+     *
+     * @hide
      */
     public void addGeofence(LocationRequest request, Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1089,10 +1007,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
-     *
-     * @deprecated Use {@link LocationRequest} and {@link Geofence} instead
      */
-    @Deprecated
     public void removeProximityAlert(PendingIntent intent) {
         checkPendingIntent(intent);
         String packageName = mContext.getPackageName();
@@ -1117,6 +1032,8 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
+     *
+     * @hide
      */
     public void removeGeofence(Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1138,6 +1055,8 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
+     *
+     * @hide
      */
     public void removeAllGeofences(PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1161,10 +1080,7 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if provider is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public boolean isProviderEnabled(String provider) {
         checkProvider(provider);
 
@@ -1187,6 +1103,8 @@ public class LocationManager {
      *
      * @return The last known location, or null if not available
      * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
      */
     public Location getLastLocation() {
         String packageName = mContext.getPackageName();
@@ -1215,10 +1133,7 @@ public class LocationManager {
      *
      * @throws SecurityException if no suitable permission is present
      * @throws IllegalArgumentException if provider is null or doesn't exist
-     *
-     * @deprecated Use {@link #getLastLocation} instead
      */
-    @Deprecated
     public Location getLastKnownLocation(String provider) {
         checkProvider(provider);
         String packageName = mContext.getPackageName();
@@ -1246,10 +1161,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled
      * @throws IllegalArgumentException if a provider with the given name already exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
             boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
             boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
@@ -1276,10 +1188,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void removeTestProvider(String provider) {
         try {
             mService.removeTestProvider(provider);
@@ -1303,10 +1212,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      * @throws IllegalArgumentException if the location is incomplete
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void setTestProviderLocation(String provider, Location loc) {
         if (!loc.isComplete()) {
             IllegalArgumentException e = new IllegalArgumentException(
@@ -1337,10 +1243,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void clearTestProviderLocation(String provider) {
         try {
             mService.clearTestProviderLocation(provider);
@@ -1360,10 +1263,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void setTestProviderEnabled(String provider, boolean enabled) {
         try {
             mService.setTestProviderEnabled(provider, enabled);
@@ -1381,10 +1281,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void clearTestProviderEnabled(String provider) {
         try {
             mService.clearTestProviderEnabled(provider);
@@ -1406,10 +1303,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         try {
             mService.setTestProviderStatus(provider, status, extras, updateTime);
@@ -1427,10 +1321,7 @@ public class LocationManager {
      * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated requesting location providers by name is deprecated
      */
-    @Deprecated
     public void clearTestProviderStatus(String provider) {
         try {
             mService.clearTestProviderStatus(provider);
@@ -1673,10 +1564,7 @@ public class LocationManager {
      * The provider may optionally fill the extras Bundle with results from the command.
      *
      * @return true if the command succeeds.
-     *
-     * @deprecated Use {@link LocationRequest} instead, see notes on {@link LocationManager}
      */
-    @Deprecated
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
         try {
             return mService.sendExtraCommand(provider, command, extras);
