@@ -10329,6 +10329,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.dump("    ", pw, args);
     }
 
+    void dumpAnimatorLocked(PrintWriter pw, String[] args, boolean dumpAll) {
+        pw.println("WINDOW MANAGER ANIMATOR STATE (dumpsys window animator)");
+        mAnimator.dumpLocked(pw, "    ", dumpAll);
+    }
+
     void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         if (mTokenMap.size() > 0) {
@@ -10605,7 +10610,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
             }
             pw.print("  mWallpaperTarget="); pw.println(mWallpaperTarget);
-            if (mLowerWallpaperTarget != null && mUpperWallpaperTarget != null) {
+            if (mLowerWallpaperTarget != null || mUpperWallpaperTarget != null) {
                 pw.print("  mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
                 pw.print("  mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
             }
@@ -10689,8 +10694,32 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
-            pw.println("  Window Animator:");
-            mAnimator.dumpLocked(pw, "    ", dumpAll);
+            pw.println("  mLayoutToAnim:");
+            pw.print("    mParamsModified="); pw.print(mLayoutToAnim.mParamsModified);
+                    pw.print(" mAnimationScheduled="); pw.print(mLayoutToAnim.mAnimationScheduled);
+                    pw.print(" mChanges=0x");
+                    pw.println(Long.toHexString(mLayoutToAnim.mChanges));
+            pw.print("    mWallpaperTarget="); pw.println(mLayoutToAnim.mWallpaperTarget);
+            if (mLayoutToAnim.mLowerWallpaperTarget != null
+                    || mLayoutToAnim.mUpperWallpaperTarget != null) {
+                pw.print("    mLowerWallpaperTarget=");
+                        pw.println(mLayoutToAnim.mLowerWallpaperTarget);
+                pw.print("    mUpperWallpaperTarget=");
+                        pw.println(mLayoutToAnim.mUpperWallpaperTarget);
+            }
+            for (int i=0; i<mLayoutToAnim.mWinAnimatorLists.size(); i++) {
+                pw.print("    Win Animator List #");
+                        pw.print(mLayoutToAnim.mWinAnimatorLists.keyAt(i)); pw.println(":");
+                WinAnimatorList wanim = mLayoutToAnim.mWinAnimatorLists.valueAt(i);
+                for (int wi=0; wi<wanim.size(); wi++) {
+                    pw.print("      "); pw.println(wanim.get(wi));
+                }
+            }
+            for (int i=0; i<mLayoutToAnim.mWallpaperTokens.size(); i++) {
+                pw.print("    Wallpaper Token #"); pw.print(i); pw.print(": ");
+                        pw.println(mLayoutToAnim.mWallpaperTokens.get(i));
+            }
+            // XXX also need to print mDimParams and mAppWindowAnimParams.  I am lazy.
         }
     }
 
@@ -10800,6 +10829,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("  cmd may be one of:");
                 pw.println("    l[astanr]: last ANR information");
                 pw.println("    p[policy]: policy state");
+                pw.println("    a[animator]: animator state");
                 pw.println("    s[essions]: active sessions");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
@@ -10827,6 +10857,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("policy".equals(cmd) || "p".equals(cmd)) {
                 synchronized(mWindowMap) {
                     dumpPolicyLocked(pw, args, true);
+                }
+                return;
+            } else if ("animator".equals(cmd) || "a".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpAnimatorLocked(pw, args, true);
                 }
                 return;
             } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
@@ -10870,6 +10905,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpPolicyLocked(pw, args, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpAnimatorLocked(pw, args, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
