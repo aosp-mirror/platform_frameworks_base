@@ -250,7 +250,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // Used to improve performance of toString()
     String mStringNameCache;
     CharSequence mLastTitle;
-    boolean mWasPaused;
+    boolean mWasExiting;
 
     final WindowStateAnimator mWinAnimator;
 
@@ -1206,7 +1206,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" visible="); mLastVisibleInsets.printShortString(pw);
                     pw.println();
         }
-        mWinAnimator.dump(pw, prefix, dumpAll);
+        pw.print(prefix); pw.print(mWinAnimator); pw.println(":");
+        mWinAnimator.dump(pw, prefix + "  ", dumpAll);
         if (mExiting || mRemoveOnExit || mDestroying || mRemoved) {
             pw.print(prefix); pw.print("mExiting="); pw.print(mExiting);
                     pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
@@ -1241,9 +1242,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public String toString() {
         if (mStringNameCache == null || mLastTitle != mAttrs.getTitle()
-                || mWasPaused != mToken.paused) {
+                || mWasExiting != mExiting) {
             mLastTitle = mAttrs.getTitle();
-            mWasPaused = mToken.paused;
+            mWasExiting = mExiting;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
                     + " u" + UserHandle.getUserId(mSession.mUid)
                     + " " + mLastTitle + (mExiting ? " EXITING}" : "}");
