@@ -16,14 +16,15 @@
 * limitations under the License.
 */
 -->
+
 <resources>
     <string name="start_service_menu">Start Service</string>
     <string name="stop_service_menu">Stop Service</string>
     <string name="settings_menu">Settings</string>
     <string name="update_preference">Update frequency</string>
-    <string name="title_update_preference">Update Interval (seconds)</string>
-    <string name="summary_update_preference">The suggested time interval for location updates, in seconds</string>
-    <string name="dialog_update_preference">Update Interval (seconds)</string>
+    <string name="title_mintime_preference">Minimum update time</string>
+    <string name="summary_mintime_preference">The suggested minimum time interval for location updates, in seconds</string>
+    <string name="dialog_title_mintime_preference">Minimum update time</string>
     <string name="title_mindistance_preference">Minimum distance</string>
     <string name="summary_mindistance_preference">Minimum distance interval for location updates, in meters</string>
     <string name="dialog_title_mindistance_preference">Minimum distance</string>
@@ -44,17 +45,4 @@
     <string name="clear_data">Clear data</string>
     <string name="delete_confirm">All current tracking data will be deleted.</string>
     <string name="confirm_title">Clear data</string>
-    <string name="title_power_preference">Power Consumption</string>
-    <string name="summary_power_preference">Select "High" for high accuracy location updates. Select "Low" will avoid high power location work where possible. Select "None" will receive location updates triggered by other applications. </string>
-    <string name="dialog_power_preference">Power Consumption</string>
-    <string-array name="powerList">
-        <item >High</item>
-        <item >Low</item>
-        <item >None</item>
-    </string-array>
-        <string-array name="powerValues">
-        <item >203</item>
-        <item >201</item>
-        <item >200</item>
-    </string-array>
 </resources>
