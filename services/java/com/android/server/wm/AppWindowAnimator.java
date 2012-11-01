@@ -279,21 +279,21 @@ public class AppWindowAnimator {
         return isAnimating;
     }
 
-    void dump(PrintWriter pw, String prefix) {
-        if (freezingScreen) {
-            pw.print(prefix); pw.print(" freezingScreen="); pw.println(freezingScreen);
-        }
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+        pw.print(prefix); pw.print("mAnimator="); pw.println(mAnimator);
+        pw.print(prefix); pw.print("freezingScreen="); pw.print(freezingScreen);
+                pw.print(" allDrawn="); pw.print(allDrawn);
+                pw.print(" animLayerAdjustment="); pw.println(animLayerAdjustment);
         if (animating || animation != null) {
             pw.print(prefix); pw.print("animating="); pw.print(animating);
-                    pw.print(" animation="); pw.println(animation);
+                    pw.print(" animInitialized="); pw.println(animInitialized);
+            pw.print(prefix); pw.print("animation="); pw.println(animation);
         }
         if (hasTransformation) {
             pw.print(prefix); pw.print("XForm: ");
                     transformation.printShortString(pw);
                     pw.println();
-        }
-        if (animLayerAdjustment != 0) {
-            pw.print(prefix); pw.print("animLayerAdjustment="); pw.println(animLayerAdjustment);
         }
         if (thumbnail != null) {
             pw.print(prefix); pw.print("thumbnail="); pw.print(thumbnail);
@@ -303,6 +303,11 @@ public class AppWindowAnimator {
             pw.print(prefix); pw.print("thumbnailAnimation="); pw.println(thumbnailAnimation);
             pw.print(prefix); pw.print("thumbnailTransformation=");
                     pw.println(thumbnailTransformation.toShortString());
+        }
+        for (int i=0; i<mAllAppWinAnimators.size(); i++) {
+            WindowStateAnimator wanim = mAllAppWinAnimators.get(i);
+            pw.print(prefix); pw.print("App Win Anim #"); pw.print(i);
+                    pw.print(": "); pw.println(wanim);
         }
     }
 
