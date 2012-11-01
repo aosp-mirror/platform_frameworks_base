@@ -225,7 +225,7 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
             mLocalAnimating = false;
-            destroySurfaceLocked();
+            destroySurfaceLocked(true);
         }
     }
 
@@ -412,7 +412,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        mAnimator.hideWallpapersLocked(mWin);
+        mAnimator.hideWallpapersLocked(mWin, true);
     }
 
     void hide() {
@@ -500,17 +500,21 @@ class WindowStateAnimator {
         @Override
         public void setAlpha(float alpha) {
             super.setAlpha(alpha);
+            if (alpha != mSurfaceTraceAlpha) {
+                Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mSurfaceTraceAlpha = alpha;
-            Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
 
         @Override
         public void setLayer(int zorder) {
             super.setLayer(zorder);
+            if (zorder != mLayer) {
+                Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mLayer = zorder;
-            Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
-                    + Debug.getCallers(3));
 
             sSurfaces.remove(this);
             int i;
@@ -526,49 +530,61 @@ class WindowStateAnimator {
         @Override
         public void setPosition(float x, float y) {
             super.setPosition(x, y);
+            if (x != mPosition.x || y != mPosition.y) {
+                Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mPosition.set(x, y);
-            Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
 
         @Override
         public void setSize(int w, int h) {
             super.setSize(w, h);
+            if (w != mSize.x || h != mSize.y) {
+                Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mSize.set(w, h);
-            Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
 
         @Override
         public void setWindowCrop(Rect crop) {
             super.setWindowCrop(crop);
             if (crop != null) {
+                if (!crop.equals(mWindowCrop)) {
+                    Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
+                            + Debug.getCallers(3));
+                }
                 mWindowCrop.set(crop);
             }
-            Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
 
         @Override
         public void setLayerStack(int layerStack) {
             super.setLayerStack(layerStack);
+            if (layerStack != mLayerStack) {
+                Slog.v(SURFACE_TAG, "setLayerStack: " + this + ". Called by " + Debug.getCallers(3));
+            }
             mLayerStack = layerStack;
-            Slog.v(SURFACE_TAG, "setLayerStack: " + this + ". Called by " + Debug.getCallers(3));
         }
 
         @Override
         public void hide() {
             super.hide();
+            if (mShown) {
+                Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mShown = false;
-            Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
         @Override
         public void show() {
             super.show();
+            if (!mShown) {
+                Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
+                        + Debug.getCallers(3));
+            }
             mShown = true;
-            Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
-                    + Debug.getCallers(3));
         }
 
         @Override
@@ -728,7 +744,7 @@ class WindowStateAnimator {
         return mSurface;
     }
 
-    void destroySurfaceLocked() {
+    void destroySurfaceLocked(boolean fromAnimator) {
         if (mWin.mAppToken != null && mWin == mWin.mAppToken.startingWindow) {
             mWin.mAppToken.startingDisplayed = false;
         }
@@ -778,7 +794,7 @@ class WindowStateAnimator {
                     }
                     mSurface.destroy();
                 }
-                mAnimator.hideWallpapersLocked(mWin);
+                mAnimator.hideWallpapersLocked(mWin, fromAnimator);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurface + " session " + mSession
@@ -792,7 +808,7 @@ class WindowStateAnimator {
         }
     }
 
-    void destroyDeferredSurfaceLocked() {
+    void destroyDeferredSurfaceLocked(boolean fromAnimator) {
         try {
             if (mPendingDestroySurface != null) {
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
@@ -804,7 +820,7 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
                 }
                 mPendingDestroySurface.destroy();
-                mAnimator.hideWallpapersLocked(mWin);
+                mAnimator.hideWallpapersLocked(mWin, fromAnimator);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window "
@@ -1192,7 +1208,7 @@ class WindowStateAnimator {
             hide();
         } else if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             hide();
-            mAnimator.hideWallpapersLocked(w);
+            mAnimator.hideWallpapersLocked(w, true);
 
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
