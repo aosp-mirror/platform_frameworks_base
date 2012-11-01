@@ -1604,10 +1604,11 @@ class WindowStateAnimator {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer("WindowStateAnimator (");
-        sb.append(mWin.mLastTitle + "): ");
-        sb.append("mSurface " + mSurface);
-        sb.append(", mAnimation " + mAnimation);
+        StringBuffer sb = new StringBuffer("WindowStateAnimator{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(mWin.mAttrs.getTitle());
+        sb.append('}');
         return sb.toString();
     }
 }
