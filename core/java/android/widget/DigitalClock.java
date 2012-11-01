@@ -17,7 +17,6 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -32,14 +31,12 @@ import java.util.Calendar;
 /**
  * Like AnalogClock, but digital.  Shows seconds.
  *
- * FIXME: implement separate views for hours/minutes/seconds, so
- * proportional fonts don't shake rendering
- * 
- * @deprecated It is recommended you use a {@link TextView} and {@link DateFormat}
- * to implement the same behavior.
+ * @deprecated It is recommended you use {@link TextClock} instead.
  */
 @Deprecated
 public class DigitalClock extends TextView {
+    // FIXME: implement separate views for hours/minutes/seconds, so
+    // proportional fonts don't shake rendering
 
     Calendar mCalendar;
     private final static String m12 = "h:mm:ss aa";
@@ -86,16 +83,16 @@ public class DigitalClock extends TextView {
          * requests a tick on the next hard-second boundary
          */
         mTicker = new Runnable() {
-                public void run() {
-                    if (mTickerStopped) return;
-                    mCalendar.setTimeInMillis(System.currentTimeMillis());
-                    setText(DateFormat.format(mFormat, mCalendar));
-                    invalidate();
-                    long now = SystemClock.uptimeMillis();
-                    long next = now + (1000 - now % 1000);
-                    mHandler.postAtTime(mTicker, next);
-                }
-            };
+            public void run() {
+                if (mTickerStopped) return;
+                mCalendar.setTimeInMillis(System.currentTimeMillis());
+                setText(DateFormat.format(mFormat, mCalendar));
+                invalidate();
+                long now = SystemClock.uptimeMillis();
+                long next = now + (1000 - now % 1000);
+                mHandler.postAtTime(mTicker, next);
+            }
+        };
         mTicker.run();
     }
 
@@ -134,12 +131,14 @@ public class DigitalClock extends TextView {
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
+        //noinspection deprecation
         event.setClassName(DigitalClock.class.getName());
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        //noinspection deprecation
         info.setClassName(DigitalClock.class.getName());
     }
 }
