@@ -57,8 +57,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     private final int MSG_UNLOCK = 2;
     private final int MSG_CANCEL = 3;
     private final int MSG_REPORT_FAILED_ATTEMPT = 4;
-    private final int MSG_EXPOSE_FALLBACK = 5;
-    private final int MSG_POKE_WAKELOCK = 6;
+    private final int MSG_POKE_WAKELOCK = 5;
 
     // TODO: This was added for the purpose of adhering to what the biometric interface expects
     // the isRunning() function to return.  However, it is probably not necessary to have both
@@ -220,9 +219,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             case MSG_REPORT_FAILED_ATTEMPT:
                 handleReportFailedAttempt();
                 break;
-            case MSG_EXPOSE_FALLBACK:
-                handleExposeFallback();
-                break;
             case MSG_POKE_WAKELOCK:
                 handlePokeWakelock(msg.arg1);
                 break;
@@ -310,6 +306,10 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     void handleCancel() {
         if (DEBUG) Log.d(TAG, "handleCancel()");
+        // We are going to the backup method, so we don't want to see Face Unlock again until the
+        // next time the user visits keyguard.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
+
         mKeyguardScreenCallback.showBackupSecurity();
         stop();
         mKeyguardScreenCallback.userActivity(BACKUP_LOCK_TIMEOUT);
@@ -320,17 +320,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      */
     void handleReportFailedAttempt() {
         if (DEBUG) Log.d(TAG, "handleReportFailedAttempt()");
-        mKeyguardScreenCallback.reportFailedUnlockAttempt();
-    }
+        // We are going to the backup method, so we don't want to see Face Unlock again until the
+        // next time the user visits keyguard.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
 
-    /**
-     * Hides the Face Unlock view to expose the backup lock.  Called when the Face Unlock service UI
-     * is started, indicating there is no need to continue displaying the underlying view because
-     * the service UI is now covering the backup lock.
-     */
-    void handleExposeFallback() {
-        if (DEBUG) Log.d(TAG, "handleExposeFallback()");
-        // No longer required because face unlock doesn't cover backup unlock.
+        mKeyguardScreenCallback.reportFailedUnlockAttempt();
     }
 
     /**
@@ -440,16 +434,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         public void reportFailedAttempt() {
             if (DEBUG) Log.d(TAG, "reportFailedAttempt()");
             mHandler.sendEmptyMessage(MSG_REPORT_FAILED_ATTEMPT);
-        }
-
-        /**
-         * Called when the Face Unlock service starts displaying the UI, indicating that the backup
-         * unlock can be exposed because the Face Unlock service is now covering the backup with its
-         * UI.
-         */
-        public void exposeFallback() {
-            if (DEBUG) Log.d(TAG, "exposeFallback()");
-            mHandler.sendEmptyMessage(MSG_EXPOSE_FALLBACK);
         }
 
         /**
