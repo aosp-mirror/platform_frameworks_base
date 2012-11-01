@@ -36,7 +36,8 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            androidprv:layout_childType="widgets">
             <include layout="@layout/keyguard_widget_pager"
                 android:id="@+id/app_widget_container"
                 android:layout_width="match_parent"
@@ -51,12 +52,11 @@
 
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
-            android:layout_width="@dimen/keyguard_security_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/keyguard_security_height"
             androidprv:layout_childType="challenge"
-            android:layout_marginLeft="@dimen/kg_edge_swipe_region_size"
-            android:layout_marginRight="@dimen/kg_edge_swipe_region_size"
             android:background="@drawable/kg_bouncer_bg_white"
+            android:padding="0dp"
             android:gravity="bottom|center_horizontal">
             <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
                 android:id="@+id/view_flipper"
@@ -64,9 +64,7 @@
                 android:layout_height="match_parent"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:paddingLeft="@dimen/keyguard_security_view_margin"
                 android:paddingTop="@dimen/keyguard_security_view_margin"
-                android:paddingRight="@dimen/keyguard_security_view_margin"
                 android:gravity="center">
             </com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper>
         </com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer>
