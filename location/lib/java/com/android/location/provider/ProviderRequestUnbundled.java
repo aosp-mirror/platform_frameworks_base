@@ -16,6 +16,7 @@
 
 package com.android.location.provider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.location.LocationRequest;
@@ -47,8 +48,13 @@ public final class ProviderRequestUnbundled {
     /**
      * Never null.
      */
-    public List<LocationRequest> getLocationRequests() {
-        return mRequest.locationRequests;
+    public List<LocationRequestUnbundled> getLocationRequests() {
+        List<LocationRequestUnbundled> result = new ArrayList<LocationRequestUnbundled>(
+                mRequest.locationRequests.size());
+        for (LocationRequest r : mRequest.locationRequests) {
+          result.add(new LocationRequestUnbundled(r));
+        }
+        return result;
     }
 
     @Override

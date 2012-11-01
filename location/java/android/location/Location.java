@@ -466,17 +466,8 @@ public class Location implements Parcelable {
     /**
      * Returns the name of the provider that generated this fix.
      *
-     * <p class="note">At API version 17 we deprecated {@link LocationProvider}
-     * and all API methods that request a provider by name. The new API methods
-     * will produce locations that could come from different sources, and even
-     * locations that are fused from several sources. So you should generally
-     * not care what provider is associated with a location object.
-     *
      * @return the provider, or null if it has not been set
-     *
-     * @deprecated locations can now be sourced from many providers, or even fused
      */
-    @Deprecated
     public String getProvider() {
         return mProvider;
     }
