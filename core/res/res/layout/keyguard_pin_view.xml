@@ -59,6 +59,7 @@
             android:paddingLeft="24dp"
             android:paddingRight="24dp"
             android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/keyboardview_keycode_delete"
             />
     </LinearLayout>
     <View
@@ -196,6 +197,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/sym_keyboard_return_holo"
+            android:contentDescription="@string/keyboardview_keycode_enter"
             />
     </LinearLayout>
 

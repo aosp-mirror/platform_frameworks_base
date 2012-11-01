@@ -98,6 +98,9 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mPasswordEntry.setOnEditorActionListener(this);
         mPasswordEntry.addTextChangedListener(this);
 
+        // Set selected property on so the view can send accessibility events.
+        mPasswordEntry.setSelected(true);
+
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
