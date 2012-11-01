@@ -26,6 +26,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -54,13 +56,19 @@ class AppWidgetService extends IAppWidgetService.Stub
     Locale mLocale;
     PackageManager mPackageManager;
     boolean mSafeMode;
+    private final Handler mSaveStateHandler;
 
     private final SparseArray<AppWidgetServiceImpl> mAppWidgetServices;
 
     AppWidgetService(Context context) {
         mContext = context;
+
+        HandlerThread handlerThread = new HandlerThread("AppWidgetService -- Save state");
+        handlerThread.start();
+        mSaveStateHandler = new Handler(handlerThread.getLooper());
+
         mAppWidgetServices = new SparseArray<AppWidgetServiceImpl>(5);
-        AppWidgetServiceImpl primary = new AppWidgetServiceImpl(context, 0);
+        AppWidgetServiceImpl primary = new AppWidgetServiceImpl(context, 0, mSaveStateHandler);
         mAppWidgetServices.append(0, primary);
     }
 
@@ -229,7 +237,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             if (service == null) {
                 Slog.i(TAG, "Unable to find AppWidgetServiceImpl for user " + userId + ", adding");
                 // TODO: Verify that it's a valid user
-                service = new AppWidgetServiceImpl(mContext, userId);
+                service = new AppWidgetServiceImpl(mContext, userId, mSaveStateHandler);
                 service.systemReady(mSafeMode);
                 // Assume that BOOT_COMPLETED was received, as this is a non-primary user.
                 mAppWidgetServices.append(userId, service);
