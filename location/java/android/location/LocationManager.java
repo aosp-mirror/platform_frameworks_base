@@ -811,6 +811,10 @@ public class LocationManager {
     /**
      * Register for fused location updates using a LocationRequest and callback.
      *
+     * <p>Upon a location update, the system delivers the new {@link Location} to the
+     * provided {@link LocationListener}, by calling its {@link
+     * LocationListener#onLocationChanged} method.</p>
+     *
      * <p>The system will automatically select and enable the best providers
      * to compute a location for your application. It may use only passive
      * locations, or just a single location source, or it may fuse together
@@ -868,6 +872,10 @@ public class LocationManager {
 
     /**
      * Register for fused location updates using a LocationRequest and a pending intent.
+     *
+     * <p>Upon a location update, the system delivers the new {@link Location} with your provided
+     * {@link PendingIntent}, as the value for {@link LocationManager#KEY_LOCATION_CHANGED}
+     * in the intent's extras.</p>
      *
      * <p> To unregister for Location updates, use: {@link #removeUpdates(PendingIntent)}.
      *
