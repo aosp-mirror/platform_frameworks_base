@@ -672,13 +672,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Find and show this child.
         final int childCount = mSecurityViewContainer.getChildCount();
 
-        // Do flip animation to the next screen
-        if (false) {
-            mSecurityViewContainer.setInAnimation(
-                    AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_in));
-            mSecurityViewContainer.setOutAnimation(
-                    AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_animate_out));
-        }
+        mSecurityViewContainer.setInAnimation(
+                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_fade_in));
+        mSecurityViewContainer.setOutAnimation(
+                AnimationUtils.loadAnimation(mContext, R.anim.keyguard_security_fade_out));
         final int securityViewIdForMode = getSecurityViewIdForMode(securityMode);
         for (int i = 0; i < childCount; i++) {
             if (mSecurityViewContainer.getChildAt(i).getId() == securityViewIdForMode) {
