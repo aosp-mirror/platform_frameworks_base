@@ -38,7 +38,7 @@
             android:id="@+id/app_widget_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            androidprv:layout_centerWithinArea="0.55"
+            androidprv:layout_centerWithinArea="0.5"
             androidprv:layout_childType="widget"
             androidprv:layout_maxWidth="480dp"
             androidprv:layout_maxHeight="480dp" />
@@ -52,8 +52,11 @@
 
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+            androidprv:layout_maxHeight="@dimen/keyguard_security_height"
+            androidprv:layout_centerWithinArea="0.5"
             androidprv:layout_childType="challenge"
             android:layout_gravity="center_horizontal|bottom">
             <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
