@@ -218,7 +218,8 @@ separated by '{@code |}' &mdash; for example, "{@code locale|navigation|orientat
   <td>"{@code uiMode}"</td>
    <td>The user interface mode has changed &mdash; this can be caused when the user places the
 device into a desk/car dock or when the the night mode changes. See {@link
-android.app.UiModeManager}. <em>Introduced in API Level 8</em>.</td>
+android.app.UiModeManager}. 
+    <em>Added in API level 8</em>.</td>
   </tr><tr>
    <td>"{@code orientation}"</td>
    <td>The screen orientation has changed &mdash; the user has rotated the device. 
@@ -246,7 +247,12 @@ smallestWidth configuration</a>. However, if your application targets API level 
 your activity always handles this configuration change itself (this configuration change does not
 restart your activity, even when running on an Android 3.2 or higher device).
   <p><em>Added in API level 13.</em></p></td>
- </tr>
+ </tr><tr>
+  <td>"{@code layoutDirection}"</td>
+   <td>The layout direction has changed. For example, changing from left-to-right (LTR)
+    to right-to-left (RTL).
+   <em>Added in API level 17.</em></td>
+  </tr>
 </table>
 
 <p>
