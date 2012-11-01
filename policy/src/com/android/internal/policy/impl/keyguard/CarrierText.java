@@ -27,6 +27,8 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 
 public class CarrierText extends TextView {
+    private static CharSequence mSeparator;
+
     private LockPatternUtils mLockPatternUtils;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
@@ -82,6 +84,7 @@ public class CarrierText extends TextView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mSeparator = getResources().getString(R.string.kg_text_message_separator);
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mCallback);
         setSelected(true); // Allow marquee to work.
     }
@@ -202,7 +205,7 @@ public class CarrierText extends TextView {
         final boolean plmnValid = !TextUtils.isEmpty(plmn);
         final boolean spnValid = !TextUtils.isEmpty(spn);
         if (plmnValid && spnValid) {
-            return plmn + "|" + spn;
+            return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
         } else if (plmnValid) {
             return plmn;
         } else if (spnValid) {
