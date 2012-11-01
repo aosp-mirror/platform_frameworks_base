@@ -1901,6 +1901,13 @@
         android:description="@string/permdesc_bindGadget"
         android:protectionLevel="signature|system" />
 
+    <!-- Private permission, to restrict who can bring up a dialog to add a new
+         keyguard widget
+         @hide -->
+    <permission android:name="android.permission.BIND_KEYGUARD_APPWIDGET"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="signature|system" />
+
     <!-- Internal permission allowing an application to query/set which
          applications can bind AppWidgets.
          @hide -->

@@ -129,6 +129,11 @@ public class LockPatternUtils {
      */
     public static final int ID_DEFAULT_STATUS_WIDGET = -2;
 
+    /**
+     * Intent extra that's used to tag the default widget when using the picker
+     */
+    public static final String EXTRA_DEFAULT_WIDGET = "com.android.settings.DEFAULT_WIDGET";
+
     protected final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     protected final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     protected final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
