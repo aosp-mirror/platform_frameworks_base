@@ -20,6 +20,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import com.android.location.provider.LocationProviderBase;
 import com.android.location.provider.ProviderRequestUnbundled;
 
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.util.Log;
@@ -41,6 +43,7 @@ public class FusionEngine implements LocationListener {
     private static final String TAG = "FusedLocation";
     private static final String NETWORK = LocationManager.NETWORK_PROVIDER;
     private static final String GPS = LocationManager.GPS_PROVIDER;
+    private static final String FUSED = LocationProviderBase.FUSED_PROVIDER;
 
     public static final long SWITCH_ON_FRESHNESS_CLIFF_NS = 11 * 1000000000; // 11 seconds
 
@@ -72,6 +75,7 @@ public class FusionEngine implements LocationListener {
         mStats.get(GPS).available = mLocationManager.isProviderEnabled(GPS);
         mStats.put(NETWORK, new ProviderStats());
         mStats.get(NETWORK).available = mLocationManager.isProviderEnabled(NETWORK);
+
     }
 
     public void init(Callback callback) {
@@ -226,10 +230,24 @@ public class FusionEngine implements LocationListener {
         } else {
             mFusedLocation = new Location(mNetworkLocation);
         }
+        mFusedLocation.setProvider(FUSED);
         if (mNetworkLocation != null) {
-            mFusedLocation.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, mNetworkLocation);
+            // copy NO_GPS_LOCATION extra from mNetworkLocation into mFusedLocation
+            Bundle srcExtras = mNetworkLocation.getExtras();
+            if (srcExtras != null) {
+                Parcelable srcParcelable =
+                        srcExtras.getParcelable(LocationProviderBase.EXTRA_NO_GPS_LOCATION);
+                if (srcParcelable instanceof Location) {
+                    Bundle dstExtras = mFusedLocation.getExtras();
+                    if (dstExtras == null) {
+                        dstExtras = new Bundle();
+                        mFusedLocation.setExtras(dstExtras);
+                    }
+                    dstExtras.putParcelable(LocationProviderBase.EXTRA_NO_GPS_LOCATION,
+                            (Location) srcParcelable);
+                }
+            }
         }
-        mFusedLocation.setProvider(LocationManager.FUSED_PROVIDER);
 
         mCallback.reportLocation(mFusedLocation);
     }

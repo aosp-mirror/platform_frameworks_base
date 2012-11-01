@@ -23,6 +23,8 @@ import java.io.PrintWriter;
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -57,6 +59,21 @@ public abstract class LocationProviderBase {
     protected final ILocationManager mLocationManager;
     private final ProviderProperties mProperties;
     private final IBinder mBinder;
+
+    /**
+     * Bundle key for a version of the location containing no GPS data.
+     * Allows location providers to flag locations as being safe to
+     * feed to LocationFudger.
+     */
+    public static final String EXTRA_NO_GPS_LOCATION = Location.EXTRA_NO_GPS_LOCATION;
+
+    /**
+     * Name of the Fused location provider.
+     *
+     * <p>This provider combines inputs for all possible location sources
+     * to provide the best possible Location fix.
+     */
+    public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
     private final class Service extends ILocationProvider.Stub {
         @Override
