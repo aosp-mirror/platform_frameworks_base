@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -708,13 +709,18 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, "screen off, instance " + Integer.toHexString(hashCode()));
+        if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
+                Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
         // Once the screen turns off, we no longer consider this to be first boot and we want the
         // biometric unlock to start next time keyguard is shown.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         saveStickyWidgetIndex();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
+        CameraWidgetFrame cameraPage = findCameraPage();
+        if (cameraPage != null) {
+            cameraPage.onScreenTurnedOff();
+        }
     }
 
     @Override
@@ -1138,6 +1144,15 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         int pageToShow = getAppropriateWidgetPage(isMusicPlaying);
         mAppWidgetContainer.setCurrentPage(pageToShow);
+    }
+
+    private CameraWidgetFrame findCameraPage() {
+        for (int i = mAppWidgetContainer.getChildCount() - 1; i >= 0; i--) {
+            if (isCameraPage(i)) {
+                return (CameraWidgetFrame) mAppWidgetContainer.getChildAt(i);
+            }
+        }
+        return null;
     }
 
     private boolean isCameraPage(int pageIndex) {
