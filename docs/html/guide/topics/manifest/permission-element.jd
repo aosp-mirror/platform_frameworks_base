@@ -111,7 +111,7 @@ The value can be set to one of the following strings:
    <td>"{@code signatureOrSystem}"</td>
    <td>A permission that the system grants only to applications that are 
        in the Android system image <em>or</em> that are signed with the same
-       certificates as those in the system image.  Please avoid using this 
+       certificate as the application that declared the permission. Please avoid using this 
        option, as the {@code signature} protection level should be sufficient 
        for most needs and works regardless of exactly where applications are 
        installed.  The "{@code signatureOrSystem}"
