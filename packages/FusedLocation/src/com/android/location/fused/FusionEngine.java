@@ -21,13 +21,13 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 import com.android.location.provider.LocationProviderBase;
+import com.android.location.provider.LocationRequestUnbundled;
 import com.android.location.provider.ProviderRequestUnbundled;
 
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcelable;
@@ -161,10 +161,10 @@ public class FusionEngine implements LocationListener {
 
         long networkInterval = Long.MAX_VALUE;
         long gpsInterval = Long.MAX_VALUE;
-        for (LocationRequest request : mRequest.getLocationRequests()) {
+        for (LocationRequestUnbundled request : mRequest.getLocationRequests()) {
             switch (request.getQuality()) {
-                case LocationRequest.ACCURACY_FINE:
-                case LocationRequest.POWER_HIGH:
+                case LocationRequestUnbundled.ACCURACY_FINE:
+                case LocationRequestUnbundled.POWER_HIGH:
                     if (request.getInterval() < gpsInterval) {
                         gpsInterval = request.getInterval();
                     }
@@ -172,9 +172,9 @@ public class FusionEngine implements LocationListener {
                         networkInterval = request.getInterval();
                     }
                     break;
-                case LocationRequest.ACCURACY_BLOCK:
-                case LocationRequest.ACCURACY_CITY:
-                case LocationRequest.POWER_LOW:
+                case LocationRequestUnbundled.ACCURACY_BLOCK:
+                case LocationRequestUnbundled.ACCURACY_CITY:
+                case LocationRequestUnbundled.POWER_LOW:
                     if (request.getInterval() < networkInterval) {
                         networkInterval = request.getInterval();
                     }

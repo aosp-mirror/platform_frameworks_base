@@ -80,6 +80,8 @@ import android.util.TimeUtils;
  * <p>All location requests are considered hints, and you may receive
  * locations that are more accurate, less accurate, and slower
  * than requested.
+ *
+ * @hide
  */
 public final class LocationRequest implements Parcelable {
     /**

@@ -23,6 +23,8 @@ import android.os.Parcelable;
  * Represents a geographical boundary, also known as a geofence.
  *
  * <p>Currently only circular geofences are supported and they do not support altitude changes.
+ *
+ * @hide
  */
 public final class Geofence implements Parcelable {
     /** @hide */
