@@ -2020,6 +2020,9 @@
   <public type="attr" name="permissionFlags" id="0x010103c7" />
   <public type="attr" name="checkedTextViewStyle" id="0x010103c8" />
   <public type="attr" name="showOnLockScreen" id="0x010103c9" />
+  <public type="attr" name="format12Hour" id="0x010103ca" />
+  <public type="attr" name="format24Hour" id="0x010103cb" />
+  <public type="attr" name="timeZone" id="0x010103cc" />
 
   <public type="style" name="Widget.Holo.CheckedTextView" id="0x010301d9" />
   <public type="style" name="Widget.Holo.Light.CheckedTextView" id="0x010301da" />
