@@ -503,14 +503,16 @@
         android:permissionGroupFlags="personalInfo"
         android:priority="330" />
 
-    <!-- Allows an application to access fine (e.g., GPS) location -->
+    <!-- Allows an app to access precise location from location sources such
+         as GPS, cell towers, and Wi-Fi. -->
     <permission android:name="android.permission.ACCESS_FINE_LOCATION"
         android:permissionGroup="android.permission-group.LOCATION"
         android:protectionLevel="dangerous"
         android:label="@string/permlab_accessFineLocation"
         android:description="@string/permdesc_accessFineLocation" />
 
-    <!-- Allows an application to access coarse (e.g., Cell-ID, WiFi) location -->
+    <!-- Allows an app to access approximate location derived from network location
+         sources such as cell towers and Wi-Fi. -->
     <permission android:name="android.permission.ACCESS_COARSE_LOCATION"
         android:permissionGroup="android.permission-group.LOCATION"
         android:protectionLevel="dangerous"
