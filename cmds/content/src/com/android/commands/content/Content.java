@@ -433,7 +433,7 @@ public class Content {
                         System.out.println(builder);
                     } while (cursor.moveToNext());
                 } else {
-                    System.out.println("No reuslt found.");
+                    System.out.println("No result found.");
                 }
             } finally {
                 cursor.close();
