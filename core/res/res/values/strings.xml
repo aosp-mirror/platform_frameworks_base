@@ -2278,8 +2278,6 @@
     <string name="keyguard_accessibility_add_widget">Add widget.</string>
     <!-- Accessibility description of the empty sidget slot (place holder for a new widget). [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_widget_empty_slot">Empty</string>
-    <!-- Accessibility description of the unlock area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_unlock_area">Unlock area.</string>
     <!-- Accessibility description of the event of expanding an unlock area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_unlock_area_expanded">Unlock area expanded.</string>
     <!-- Accessibility description of the event of collapsing an unlock area. [CHAR_LIMIT=none] -->
@@ -2302,6 +2300,20 @@
     <string name="keyguard_accessibility_widget_deleted">Widget <xliff:g id="widget_index">%1$s</xliff:g> deleted.</string>
     <!-- Accessibility description of the button to expand the lock area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_expand_lock_area">Expand unlock area.</string>
+    <!-- Accessibility description of the slide unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
+    <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
+    <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
+    <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pin_unlock">Pin unlock.</string>
+    <!-- Accessibility description of the password lock. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
+    <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_pattern_area">Pattern area.</string>
+    <!-- Accessibility description of the unlock slide area. [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_slide_area">Slide area.</string>
 
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
