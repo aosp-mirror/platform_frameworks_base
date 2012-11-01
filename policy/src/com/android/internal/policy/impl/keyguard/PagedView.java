@@ -1743,8 +1743,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
     protected void snapToPage(int whichPage, int delta, int duration, boolean immediate) {
         mNextPage = whichPage;
+
         View focusedChild = getFocusedChild();
-        if (focusedChild != null && focusedChild == getPageAt(mCurrentPage)) {
+        if (focusedChild != null && whichPage != mCurrentPage &&
+                focusedChild == getPageAt(mCurrentPage)) {
             focusedChild.clearFocus();
         }
 

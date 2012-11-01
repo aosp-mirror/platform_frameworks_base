@@ -137,17 +137,16 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 newWidgetPage.onActive(true);
                 newWidgetPage.requestAccessibilityFocus();
             }
+            if (mParent != null && AccessibilityManager.getInstance(mContext).isEnabled()) {
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                onInitializeAccessibilityEvent(event);
+                onPopulateAccessibilityEvent(event);
+                mParent.requestSendAccessibilityEvent(this, event);
+            }
         }
         if (mViewStateManager != null) {
             mViewStateManager.onPageSwitch(newPage, newPageIndex);
-        }
-
-        if (mParent != null && AccessibilityManager.getInstance(mContext).isEnabled()) {
-            AccessibilityEvent event = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_VIEW_SCROLLED);
-            onInitializeAccessibilityEvent(event);
-            onPopulateAccessibilityEvent(event);
-            mParent.requestSendAccessibilityEvent(this, event);
         }
     }
 
@@ -267,7 +266,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 content.getContentDescription());
             frame.setContentDescription(contentDescription);
         }
-        frame.setLongClickable(true);
     }
 
     /**
