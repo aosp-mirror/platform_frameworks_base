@@ -29,12 +29,14 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
@@ -56,18 +58,15 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private static final int DRAG_HANDLE_OPEN_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_OPEN_BELOW = 0; // dp
 
-    private static final boolean OPEN_ON_CLICK = true;
-
     private static final int HANDLE_ANIMATE_DURATION = 200; // ms
 
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
-    private Drawable mHandleDrawable;
     private Drawable mFrameDrawable;
-    private Drawable mDragIconDrawable;
     private boolean mEdgeCaptured;
 
     // Initialized during measurement from child layoutparams
+    private View mExpandChallengeView;
     private View mChallengeView;
     private View mScrimView;
     private View mWidgetsView;
@@ -113,6 +112,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                                        // that should remain on-screen
 
     private int mTouchSlop;
+    private int mTouchSlopSquare;
 
     float mHandleAlpha;
     float mFrameAlpha;
@@ -184,6 +184,15 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
     };
 
+    private final OnClickListener mExpandChallengeClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (!isChallengeShowing()) {
+                showChallenge(true);
+            }
+        }
+    };
+
     /**
      * Listener interface that reports changes in scroll state of the challenge area.
      */
@@ -235,13 +244,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public SlidingChallengeLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.SlidingChallengeLayout, defStyle, 0);
-        setDragDrawables(a.getDrawable(R.styleable.SlidingChallengeLayout_dragHandle),
-                a.getDrawable(R.styleable.SlidingChallengeLayout_dragIcon));
-
-        a.recycle();
-
         mScroller = new Scroller(context, sMotionInterpolator);
 
         final ViewConfiguration vc = ViewConfiguration.get(context);
@@ -252,6 +254,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mDragHandleEdgeSlop = res.getDimensionPixelSize(R.dimen.kg_edge_swipe_region_size);
 
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mTouchSlopSquare = mTouchSlop * mTouchSlop;
 
         final float density = res.getDisplayMetrics().density;
 
@@ -265,15 +268,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mChallengeBottomBound = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
 
         setWillNotDraw(false);
-    }
-
-    public void setDragDrawables(Drawable handle, Drawable icon) {
-        mHandleDrawable = handle;
-        mDragIconDrawable = icon;
-    }
-
-    public void setDragIconDrawable(Drawable d) {
-        mDragIconDrawable = d;
     }
 
     public void showHandle(boolean visible) {
@@ -469,7 +463,27 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     private void setChallengeShowing(boolean showChallenge) {
+        if (mChallengeShowing == showChallenge) {
+            return;
+        }
         mChallengeShowing = showChallenge;
+        if (mChallengeShowing) {
+            mExpandChallengeView.setVisibility(View.INVISIBLE);
+            mChallengeView.setVisibility(View.VISIBLE);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                mChallengeView.requestAccessibilityFocus();
+                mChallengeView.announceForAccessibility(mContext.getString(
+                        R.string.keyguard_accessibility_unlock_area_expanded));
+            }
+        } else {
+            mExpandChallengeView.setVisibility(View.VISIBLE);
+            mChallengeView.setVisibility(View.INVISIBLE);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                mExpandChallengeView.requestAccessibilityFocus();
+                mChallengeView.announceForAccessibility(mContext.getString(
+                        R.string.keyguard_accessibility_unlock_area_collapsed));
+            }
+        }
     }
 
     /**
@@ -573,12 +587,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 for (int i = 0; i < count; i++) {
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
-
-                    if (!mIsBouncing &&
-                            (isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
-                            (isInChallengeView(x, y) &&
-                                (mScrollState == SCROLL_STATE_SETTLING || !mChallengeShowing))) &&
-                            mActivePointerId == INVALID_POINTER) {
+                    if (!mIsBouncing && mActivePointerId == INVALID_POINTER
+                            && ((isInDragHandle(x, y) && MathUtils.sq(x - mGestureStartX)
+                                    + MathUtils.sq(y - mGestureStartY) > mTouchSlopSquare)
+                               || crossedDragHandle(x, y, mGestureStartY)
+                               || (isInChallengeView(x, y) && (mScrollState == SCROLL_STATE_SETTLING
+                                       || !mChallengeShowing)))) {
                         mActivePointerId = ev.getPointerId(i);
                         mGestureStartX = x;
                         mGestureStartY = y;
@@ -634,12 +648,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     break;
                 }
             case MotionEvent.ACTION_UP:
-                if (OPEN_ON_CLICK
-                        && isInDragHandle(mGestureStartX, mGestureStartY)
-                        && Math.abs(ev.getX() - mGestureStartX) <= mTouchSlop
-                        && Math.abs(ev.getY() - mGestureStartY) <= mTouchSlop) {
-                    showChallenge(true);
-                } else if (mDragging) {
+                if (mDragging) {
                     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
                     showChallenge((int) mVelocityTracker.getYVelocity(mActivePointerId));
                 }
@@ -749,19 +758,19 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     private boolean isInChallengeView(float x, float y) {
-        if (mChallengeView == null) return false;
-
-        return x >= mChallengeView.getLeft() && y >= mChallengeView.getTop() &&
-                x < mChallengeView.getRight() && y < mChallengeView.getBottom();
+        return isPointInView(x, y, mChallengeView);
     }
 
     private boolean isInDragHandle(float x, float y) {
-        if (mChallengeView == null) return false;
+        return isPointInView(x, y, mExpandChallengeView);
+    }
 
-        return x >= mDragHandleEdgeSlop &&
-                y >= mChallengeView.getTop() - getDragHandleSizeAbove() &&
-                x < getWidth() - mDragHandleEdgeSlop &&
-                y < mChallengeView.getTop() + getDragHandleSizeBelow();
+    private boolean isPointInView(float x, float y, View view) {
+        if (view == null) {
+            return false;
+        }
+        return x >= view.getLeft() && y >= view.getTop()
+                && x < view.getRight() && y < view.getBottom();
     }
 
     private boolean crossedDragHandle(float x, float y, float initialY) {
@@ -786,7 +795,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
         // Find one and only one challenge view.
         final View oldChallengeView = mChallengeView;
+        final View oldExpandChallengeView = mChallengeView;
         mChallengeView = null;
+        mExpandChallengeView = null;
         final int count = getChildCount();
 
         // First iteration through the children finds special children and sets any associated
@@ -794,7 +805,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
             if (lp.childType == LayoutParams.CHILD_TYPE_CHALLENGE) {
                 if (mChallengeView != null) {
                     throw new IllegalStateException(
@@ -806,31 +816,42 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 }
                 // We're going to play silly games with the frame's background drawable later.
                 mFrameDrawable = mChallengeView.getBackground();
-
                 if (!mHasLayout) {
                     // Set up the margin correctly based on our content for the first run.
                     mHasGlowpad = child.findViewById(R.id.keyguard_selector_view) != null;
                     lp.leftMargin = lp.rightMargin = getChallengeMargin(true);
+                }
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
+                if (mExpandChallengeView != null) {
+                    throw new IllegalStateException(
+                            "There may only be one child with layout_childType"
+                            + "=\"expandChallengeHandle\"");
+                }
+                mExpandChallengeView = child;
+                if (mExpandChallengeView != oldExpandChallengeView) {
+                    mExpandChallengeView.setVisibility(mChallengeShowing ? INVISIBLE : VISIBLE);
+                    mExpandChallengeView.setOnClickListener(mExpandChallengeClickListener);
                 }
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);
             } else if (lp.childType == LayoutParams.CHILD_TYPE_WIDGETS) {
                 mWidgetsView = child;
             }
-
-            if (child.getVisibility() == GONE) continue;
         }
 
         // We want to measure the challenge view first, since the KeyguardWidgetPager
         // needs to do things its measure pass that are dependent on the challenge view
         // having been measured.
-        if (mChallengeView != null) {
+        if (mChallengeView != null && mChallengeView.getVisibility() != View.GONE) {
             measureChildWithMargins(mChallengeView, widthSpec, 0, heightSpec, 0);
         }
 
         // Measure the rest of the children
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
             // Don't measure the challenge view twice!
             if (child != mChallengeView) {
                 measureChildWithMargins(child, widthSpec, 0, heightSpec, 0);
@@ -869,6 +890,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         * (1 - mChallengeOffset));
                 child.setAlpha(getChallengeAlpha());
                 child.layout(left, bottom - childHeight, left + childWidth, bottom);
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
+                child.layout(0, b - mChallengeBottomBound, width, b);
             } else {
                 // Non-challenge views lay out from the upper left, layered.
                 child.layout(paddingLeft + lp.leftMargin,
@@ -883,6 +906,21 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 mFrameDrawable.setAlpha(0);
             }
             mHasLayout = true;
+        }
+    }
+
+    @Override
+    public void draw(Canvas c) {
+        super.draw(c);
+        if (DEBUG) {
+            final Paint debugPaint = new Paint();
+            debugPaint.setColor(0x40FF00CC);
+            // show the isInDragHandle() rect
+            c.drawRect(mDragHandleEdgeSlop,
+                    mChallengeView.getTop() - getDragHandleSizeAbove(),
+                    getWidth() - mDragHandleEdgeSlop,
+                    mChallengeView.getTop() + getDragHandleSizeBelow(),
+                    debugPaint);
         }
     }
 
@@ -902,65 +940,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
             if (mScroller.isFinished()) {
                 post(mEndScrollRunnable);
-            }
-        }
-    }
-
-    @Override
-    public void draw(Canvas c) {
-        super.draw(c);
-
-        final Paint debugPaint;
-        if (DEBUG) {
-            debugPaint = new Paint();
-            debugPaint.setColor(0x40FF00CC);
-            // show the isInDragHandle() rect
-            c.drawRect(mDragHandleEdgeSlop,
-                    mChallengeView.getTop() - getDragHandleSizeAbove(),
-                    getWidth() - mDragHandleEdgeSlop,
-                    mChallengeView.getTop() + getDragHandleSizeBelow(),
-                    debugPaint);
-        }
-
-        if (mChallengeView != null && mHandleAlpha > 0) {
-            final int top = mChallengeView.getTop();
-            final int handleHeight;
-            final int challengeLeft = mChallengeView.getLeft();
-            final int challengeRight = mChallengeView.getRight();
-            if (mHandleDrawable != null) {
-                handleHeight = mHandleDrawable.getIntrinsicHeight();
-                mHandleDrawable.setBounds(challengeLeft, top, challengeRight, top + handleHeight);
-                mHandleDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
-                mHandleDrawable.draw(c);
-            } else {
-                handleHeight = 0;
-            }
-
-            if (DEBUG) {
-                // now show the actual drag handle
-                debugPaint.setStyle(Paint.Style.STROKE);
-                debugPaint.setStrokeWidth(1);
-                debugPaint.setColor(0xFF80FF00);
-                c.drawRect(challengeLeft, top, challengeRight, top + handleHeight, debugPaint);
-            }
-
-            if (mDragIconDrawable != null) {
-                final int closedTop = getLayoutBottom() - mDragHandleClosedBelow;
-                final int iconWidth = mDragIconDrawable.getIntrinsicWidth();
-                final int iconHeight = mDragIconDrawable.getIntrinsicHeight();
-                final int iconLeft = (challengeLeft + challengeRight - iconWidth) / 2;
-                final int iconTop = closedTop +
-                        (mDragHandleClosedBelow - mDragHandleClosedAbove - iconHeight) / 2;
-                mDragIconDrawable.setBounds(iconLeft, iconTop, iconLeft + iconWidth,
-                        iconTop + iconHeight);
-                mDragIconDrawable.setAlpha((int) (mHandleAlpha * 0xFF));
-                mDragIconDrawable.draw(c);
-
-                if (DEBUG) {
-                    debugPaint.setColor(0xFF00FF00);
-                    c.drawRect(iconLeft, iconTop, iconLeft + iconWidth,
-                        iconTop + iconHeight, debugPaint);
-                }
             }
         }
     }
@@ -1096,6 +1075,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         public static final int CHILD_TYPE_CHALLENGE = 2;
         public static final int CHILD_TYPE_SCRIM = 4;
         public static final int CHILD_TYPE_WIDGETS = 5;
+        public static final int CHILD_TYPE_EXPAND_CHALLENGE_HANDLE = 6;
 
         public LayoutParams() {
             this(MATCH_PARENT, WRAP_CONTENT);
