@@ -48,6 +48,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
 import com.android.internal.R;
@@ -205,6 +206,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     protected int REORDERING_ZOOM_IN_OUT_DURATION = 250;
     private int REORDERING_SIDE_PAGE_HOVER_TIMEOUT = 300;
     private float REORDERING_SIDE_PAGE_BUFFER_PERCENTAGE = 0.1f;
+    private long REORDERING_DELETE_DROP_TARGET_FADE_DURATION = 150;
     private float mMinScale = 1f;
     protected View mDragView;
     private AnimatorSet mZoomInOutAnim;
@@ -228,15 +230,21 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // Convenience/caching
     private Matrix mTmpInvMatrix = new Matrix();
     private float[] mTmpPoint = new float[2];
+    private Rect mTmpRect = new Rect();
 
     // Fling to delete
     private int FLING_TO_DELETE_FADE_OUT_DURATION = 350;
     private float FLING_TO_DELETE_FRICTION = 0.035f;
     // The degrees specifies how much deviation from the up vector to still consider a fling "up"
-    private float FLING_TO_DELETE_MAX_FLING_DEGREES = 35f;
-    private int FLING_TO_DELETE_SLIDE_IN_SIDE_PAGE_DURATION = 250;
+    private float FLING_TO_DELETE_MAX_FLING_DEGREES = 65f;
     protected int mFlingToDeleteThresholdVelocity = -1400;
-    private boolean mIsFlingingToDelete = false;
+    // Drag to delete
+    private boolean mDeferringForDelete = false;
+    private int DELETE_SLIDE_IN_SIDE_PAGE_DURATION = 250;
+    private int DRAG_TO_DELETE_FADE_OUT_DURATION = 350;
+
+    // Drop to delete
+    private View mDeleteDropTarget;
 
     public interface PageSwitchListener {
         void onPageSwitching(View newPage, int newPageIndex);
@@ -294,19 +302,23 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         setOnHierarchyChangeListener(this);
     }
 
+    void setDeleteDropTarget(View v) {
+        mDeleteDropTarget = v;
+    }
+
     // Convenience methods to map points from self to parent and vice versa
-    float[] mapPointFromSelfToParent(float x, float y) {
+    float[] mapPointFromViewToParent(View v, float x, float y) {
         mTmpPoint[0] = x;
         mTmpPoint[1] = y;
-        getMatrix().mapPoints(mTmpPoint);
-        mTmpPoint[0] += getLeft();
-        mTmpPoint[1] += getTop();
+        v.getMatrix().mapPoints(mTmpPoint);
+        mTmpPoint[0] += v.getLeft();
+        mTmpPoint[1] += v.getTop();
         return mTmpPoint;
     }
-    float[] mapPointFromParentToSelf(float x, float y) {
-        mTmpPoint[0] = x - getLeft();
-        mTmpPoint[1] = y - getTop();
-        getMatrix().invert(mTmpInvMatrix);
+    float[] mapPointFromParentToView(View v, float x, float y) {
+        mTmpPoint[0] = x - v.getLeft();
+        mTmpPoint[1] = y - v.getTop();
+        v.getMatrix().invert(mTmpInvMatrix);
         mTmpInvMatrix.mapPoints(mTmpPoint);
         return mTmpPoint;
     }
@@ -329,7 +341,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     public void setScaleX(float scaleX) {
         super.setScaleX(scaleX);
         if (isReordering(true)) {
-            float[] p = mapPointFromParentToSelf(mParentDownMotionX, mParentDownMotionY);
+            float[] p = mapPointFromParentToView(this, mParentDownMotionX, mParentDownMotionY);
             mLastMotionX = p[0];
             mLastMotionY = p[1];
             updateDragViewTranslationDuringDrag();
@@ -519,7 +531,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
         // Update the last motion events when scrolling
         if (isReordering(true)) {
-            float[] p = mapPointFromParentToSelf(mParentDownMotionX, mParentDownMotionY);
+            float[] p = mapPointFromParentToView(this, mParentDownMotionX, mParentDownMotionY);
             mLastMotionX = p[0];
             mLastMotionY = p[1];
             updateDragViewTranslationDuringDrag();
@@ -547,6 +559,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             if (mTouchState == TOUCH_STATE_REST) {
                 pageEndMoving();
             }
+
             onPostReorderingAnimationCompleted();
             return true;
         }
@@ -640,7 +653,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         // ensure that the cache is filled with good values.
         invalidateCachedOffsets();
 
-        if (mChildCountOnLastMeasure != getChildCount() && !mIsFlingingToDelete) {
+        if (mChildCountOnLastMeasure != getChildCount() && !mDeferringForDelete) {
             setCurrentPage(mCurrentPage);
         }
         mChildCountOnLastMeasure = getChildCount();
@@ -864,7 +877,6 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         final int pageCount = getChildCount();
         if (pageCount > 0) {
             getVisiblePages(mTempVisiblePagesRange);
-            boundByReorderablePages(isReordering(false), mTempVisiblePagesRange);
             final int leftScreen = mTempVisiblePagesRange[0];
             final int rightScreen = mTempVisiblePagesRange[1];
             if (leftScreen != -1 && rightScreen != -1) {
@@ -1046,7 +1058,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 mDownScrollX = getScrollX();
                 mLastMotionX = x;
                 mLastMotionY = y;
-                float[] p = mapPointFromSelfToParent(x, y);
+                float[] p = mapPointFromViewToParent(this, x, y);
                 mParentDownMotionX = p[0];
                 mParentDownMotionY = p[1];
                 mLastMotionXRemainder = 0;
@@ -1278,7 +1290,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             mDownMotionX = mLastMotionX = ev.getX();
             mDownMotionY = mLastMotionY = ev.getY();
             mDownScrollX = getScrollX();
-            float[] p = mapPointFromSelfToParent(mLastMotionX, mLastMotionY);
+            float[] p = mapPointFromViewToParent(this, mLastMotionX, mLastMotionY);
             mParentDownMotionX = p[0];
             mParentDownMotionY = p[1];
             mLastMotionXRemainder = 0;
@@ -1330,7 +1342,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
                 // Update the parent down so that our zoom animations take this new movement into
                 // account
-                float[] pt = mapPointFromSelfToParent(mLastMotionX, mLastMotionY);
+                float[] pt = mapPointFromViewToParent(this, mLastMotionX, mLastMotionY);
                 mParentDownMotionX = pt[0];
                 mParentDownMotionY = pt[1];
                 updateDragViewTranslationDuringDrag();
@@ -1339,10 +1351,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 final int dragViewIndex = indexOfChild(mDragView);
                 int bufferSize = (int) (REORDERING_SIDE_PAGE_BUFFER_PERCENTAGE *
                     getViewportWidth());
-                int leftBufferEdge = (int) (mapPointFromSelfToParent(mViewport.left, 0)[0]
+                int leftBufferEdge = (int) (mapPointFromViewToParent(this, mViewport.left, 0)[0]
                         + bufferSize);
-                int rightBufferEdge = (int) (mapPointFromSelfToParent(mViewport.right, 0)[0]
+                int rightBufferEdge = (int) (mapPointFromViewToParent(this, mViewport.right, 0)[0]
                         - bufferSize);
+
+                // Change the drag view if we are hovering over the drop target
+                boolean isHoveringOverDelete = isHoveringOverDeleteDropTarget(
+                        (int) mParentDownMotionX, (int) mParentDownMotionY);
+                setPageHoveringOverDeleteDropTarget(dragViewIndex, isHoveringOverDelete);
 
                 if (DEBUG) Log.d(TAG, "leftBufferEdge: " + leftBufferEdge);
                 if (DEBUG) Log.d(TAG, "rightBufferEdge: " + rightBufferEdge);
@@ -1360,7 +1377,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 }
 
                 final int pageUnderPointIndex = pageIndexToSnapTo;
-                if (pageUnderPointIndex > -1) {
+                if (pageUnderPointIndex > -1 && !isHoveringOverDelete) {
                     mTempVisiblePagesRange[0] = 0;
                     mTempVisiblePagesRange[1] = getPageCount() - 1;
                     boundByReorderablePages(true, mTempVisiblePagesRange);
@@ -1493,12 +1510,28 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                     snapToDestination();
                 }
             } else if (mTouchState == TOUCH_STATE_REORDERING) {
+                // Update the last motion position
+                mLastMotionX = ev.getX();
+                mLastMotionY = ev.getY();
+
+                // Update the parent down so that our zoom animations take this new movement into
+                // account
+                float[] pt = mapPointFromViewToParent(this, mLastMotionX, mLastMotionY);
+                mParentDownMotionX = pt[0];
+                mParentDownMotionY = pt[1];
+                updateDragViewTranslationDuringDrag();
+                boolean handledFling = false;
                 if (!DISABLE_FLING_TO_DELETE) {
                     // Check the velocity and see if we are flinging-to-delete
                     PointF flingToDeleteVector = isFlingingToDelete();
                     if (flingToDeleteVector != null) {
                         onFlingToDelete(flingToDeleteVector);
+                        handledFling = true;
                     }
+                }
+                if (!handledFling && isHoveringOverDeleteDropTarget((int) mParentDownMotionX,
+                        (int) mParentDownMotionY)) {
+                    onDropToDelete();
                 }
             } else {
                 onUnhandledTap(ev);
@@ -1776,6 +1809,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             computeScroll();
         }
 
+        mForceScreenScrolled = true;
         invalidate();
     }
 
@@ -1999,6 +2033,23 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             mZoomInOutAnim.playTogether(
                     ObjectAnimator.ofFloat(this, "scaleX", mMinScale),
                     ObjectAnimator.ofFloat(this, "scaleY", mMinScale));
+            mZoomInOutAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    // Show the delete drop target
+                    if (mDeleteDropTarget != null) {
+                        mDeleteDropTarget.setVisibility(View.VISIBLE);
+                        mDeleteDropTarget.animate().alpha(1f)
+                            .setDuration(REORDERING_DELETE_DROP_TARGET_FADE_DURATION)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    mDeleteDropTarget.setAlpha(0f);
+                                }
+                            });
+                    }
+                }
+            });
             mZoomInOutAnim.start();
             return true;
         }
@@ -2014,6 +2065,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         // Set the touch state to reordering (allows snapping to pages, dragging a child, etc.)
         mTouchState = TOUCH_STATE_REORDERING;
         mIsReordering = true;
+
+        // Mark all the non-widget pages as invisible
+        getVisiblePages(mTempVisiblePagesRange);
+        boundByReorderablePages(true, mTempVisiblePagesRange);
+        for (int i = 0; i < getPageCount(); ++i) {
+            if (i < mTempVisiblePagesRange[0] || i > mTempVisiblePagesRange[1]) {
+                getPageAt(i).setAlpha(0f);
+            }
+        }
 
         // We must invalidate to trigger a redraw to update the layers such that the drag view
         // is always drawn on top
@@ -2036,6 +2096,15 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                     R.string.keyguard_accessibility_widget_reorder_end));
         }
         mIsReordering = false;
+
+        // Mark all the non-widget pages as visible again
+        getVisiblePages(mTempVisiblePagesRange);
+        boundByReorderablePages(true, mTempVisiblePagesRange);
+        for (int i = 0; i < getPageCount(); ++i) {
+            if (i < mTempVisiblePagesRange[0] || i > mTempVisiblePagesRange[1]) {
+                getPageAt(i).setAlpha(1f);
+            }
+        }
     }
 
     public boolean startReordering() {
@@ -2080,7 +2149,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 onEndReordering();
             }
         };
-        if (!mIsFlingingToDelete) {
+        if (!mDeferringForDelete) {
             mPostReorderingPreZoomInRunnable = new Runnable() {
                 public void run() {
                     zoomIn(onCompleteRunnable);
@@ -2094,7 +2163,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             // Animate the drag view back to the front position
             animateDragViewToOriginalPosition();
         } else {
-            zoomIn(onCompleteRunnable);
+            // Handled in post-delete-animation-callbacks
         }
     }
 
@@ -2110,6 +2179,20 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                     ObjectAnimator.ofFloat(this, "scaleX", 1f),
                     ObjectAnimator.ofFloat(this, "scaleY", 1f));
             mZoomInOutAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    // Hide the delete drop target
+                    if (mDeleteDropTarget != null) {
+                        mDeleteDropTarget.animate().alpha(0f)
+                            .setDuration(REORDERING_DELETE_DROP_TARGET_FADE_DURATION)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    mDeleteDropTarget.setVisibility(View.GONE);
+                                }
+                            });
+                    }
+                }
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mDragView = null;
@@ -2194,6 +2277,97 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         }
     };
 
+    private Runnable createPostDeleteAnimationRunnable(final View dragView) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                int dragViewIndex = indexOfChild(dragView);
+
+                // For each of the pages around the drag view, animate them from the previous
+                // position to the new position in the layout (as a result of the drag view moving
+                // in the layout)
+                // NOTE: We can make an assumption here because we have side-bound pages that we
+                //       will always have pages to animate in from the left
+                getVisiblePages(mTempVisiblePagesRange);
+                boundByReorderablePages(true, mTempVisiblePagesRange);
+                boolean isLastWidgetPage = (mTempVisiblePagesRange[0] == mTempVisiblePagesRange[1]);
+                boolean slideFromLeft = (isLastWidgetPage ||
+                        dragViewIndex > mTempVisiblePagesRange[0]);
+
+                // Setup the scroll to the correct page before we swap the views
+                if (slideFromLeft) {
+                    snapToPageImmediately(dragViewIndex - 1);
+                }
+
+                int firstIndex = (isLastWidgetPage ? 0 : mTempVisiblePagesRange[0]);
+                int lastIndex = Math.min(mTempVisiblePagesRange[1], getPageCount() - 1);
+                int lowerIndex = (slideFromLeft ? firstIndex : dragViewIndex + 1 );
+                int upperIndex = (slideFromLeft ? dragViewIndex - 1 : lastIndex);
+                ArrayList<Animator> animations = new ArrayList<Animator>();
+                for (int i = lowerIndex; i <= upperIndex; ++i) {
+                    View v = getChildAt(i);
+                    // dragViewIndex < pageUnderPointIndex, so after we remove the
+                    // drag view all subsequent views to pageUnderPointIndex will
+                    // shift down.
+                    int oldX = 0;
+                    int newX = 0;
+                    if (slideFromLeft) {
+                        if (i == 0) {
+                            // Simulate the page being offscreen with the page spacing
+                            oldX = getViewportOffsetX() + getChildOffset(i) - getChildWidth(i)
+                                    - mPageSpacing;
+                        } else {
+                            oldX = getViewportOffsetX() + getChildOffset(i - 1);
+                        }
+                        newX = getViewportOffsetX() + getChildOffset(i);
+                    } else {
+                        oldX = getChildOffset(i) - getChildOffset(i - 1);
+                        newX = 0;
+                    }
+
+                    // Animate the view translation from its old position to its new
+                    // position
+                    AnimatorSet anim = (AnimatorSet) v.getTag();
+                    if (anim != null) {
+                        anim.cancel();
+                    }
+
+                    // Note: Hacky, but we want to skip any optimizations to not draw completely
+                    // hidden views
+                    v.setAlpha(Math.max(v.getAlpha(), 0.01f));
+                    v.setTranslationX(oldX - newX);
+                    anim = new AnimatorSet();
+                    anim.playTogether(
+                            ObjectAnimator.ofFloat(v, "translationX", 0f),
+                            ObjectAnimator.ofFloat(v, "alpha", 1f));
+                    animations.add(anim);
+                    v.setTag(anim);
+                }
+
+                AnimatorSet slideAnimations = new AnimatorSet();
+                slideAnimations.playTogether(animations);
+                slideAnimations.setDuration(DELETE_SLIDE_IN_SIDE_PAGE_DURATION);
+                slideAnimations.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        final Runnable onCompleteRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                mDeferringForDelete = false;
+                                onEndReordering();
+                            }
+                        };
+                        zoomIn(onCompleteRunnable);
+                    }
+                });
+                slideAnimations.start();
+
+                removeView(dragView);
+                onRemoveView(dragView);
+            }
+        };
+    }
+
     public void onFlingToDelete(PointF vel) {
         final long startTime = AnimationUtils.currentAnimationTimeMillis();
 
@@ -2230,59 +2404,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         AnimatorUpdateListener updateCb = new FlingAlongVectorAnimatorUpdateListener(dragView, vel,
                 from, startTime, FLING_TO_DELETE_FRICTION);
 
-        final Runnable onAnimationEndRunnable = new Runnable() {
-            @Override
-            public void run() {
-                int dragViewIndex = indexOfChild(dragView);
-                // Setup the scroll to the correct page before we swap the views
-                snapToPageImmediately(dragViewIndex - 1);
-
-                // For each of the pages around the drag view, animate them from the previous
-                // position to the new position in the layout (as a result of the drag view moving
-                // in the layout)
-                // NOTE: We can make an assumption here because we have side-bound pages that we
-                //       will always have pages to animate in from the left
-                int lowerIndex = 0;
-                int upperIndex = dragViewIndex - 1;
-                for (int i = lowerIndex; i <= upperIndex; ++i) {
-                    View v = getChildAt(i);
-                    // dragViewIndex < pageUnderPointIndex, so after we remove the
-                    // drag view all subsequent views to pageUnderPointIndex will
-                    // shift down.
-                    int oldX = 0;
-                    if (i == 0) {
-                        oldX = -(getViewportOffsetX() + getChildOffset(i));
-                    } else {
-                        oldX = getViewportOffsetX() + getChildOffset(i - 1);
-                    }
-                    int newX = getViewportOffsetX() + getChildOffset(i);
-
-                    // Animate the view translation from its old position to its new
-                    // position
-                    AnimatorSet anim = (AnimatorSet) v.getTag();
-                    if (anim != null) {
-                        anim.cancel();
-                    }
-
-                    v.setTranslationX(oldX - newX);
-                    anim = new AnimatorSet();
-                    anim.setDuration(FLING_TO_DELETE_SLIDE_IN_SIDE_PAGE_DURATION);
-                    anim.playTogether(
-                            ObjectAnimator.ofFloat(v, "translationX", 0f));
-                    anim.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mIsFlingingToDelete = false;
-                        }
-                    });
-                    anim.start();
-                    v.setTag(anim);
-                }
-
-                removeView(dragView);
-                onRemoveView(dragView);
-            }
-        };
+        final Runnable onAnimationEndRunnable = createPostDeleteAnimationRunnable(dragView);
 
         // Create and start the animation
         ValueAnimator mDropAnim = new ValueAnimator();
@@ -2296,11 +2418,57 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             }
         });
         mDropAnim.start();
-        mIsFlingingToDelete = true;
+        mDeferringForDelete = true;
+    }
+
+    /* Drag to delete */
+    private boolean isHoveringOverDeleteDropTarget(int x, int y) {
+        if (mDeleteDropTarget != null) {
+            mDeleteDropTarget.getGlobalVisibleRect(mTmpRect);
+            return mTmpRect.contains(x, y);
+        }
+        return false;
+    }
+
+    protected void setPageHoveringOverDeleteDropTarget(int viewIndex, boolean isHovering) {}
+
+    private void onDropToDelete() {
+        final View dragView = mDragView;
+
+        final float toScale = 0f;
+        final float toAlpha = 0f;
+
+        // Create and start the complex animation
+        ArrayList<Animator> animations = new ArrayList<Animator>();
+        AnimatorSet motionAnim = new AnimatorSet();
+        motionAnim.setInterpolator(new DecelerateInterpolator(2));
+        motionAnim.playTogether(
+                ObjectAnimator.ofFloat(dragView, "scaleX", toScale),
+                ObjectAnimator.ofFloat(dragView, "scaleY", toScale));
+        animations.add(motionAnim);
+
+        AnimatorSet alphaAnim = new AnimatorSet();
+        alphaAnim.setInterpolator(new LinearInterpolator());
+        alphaAnim.playTogether(
+                ObjectAnimator.ofFloat(dragView, "alpha", toAlpha));
+        animations.add(alphaAnim);
+
+        final Runnable onAnimationEndRunnable = createPostDeleteAnimationRunnable(dragView);
+
+        AnimatorSet anim = new AnimatorSet();
+        anim.playTogether(animations);
+        anim.setDuration(DRAG_TO_DELETE_FADE_OUT_DURATION);
+        anim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                onAnimationEndRunnable.run();
+            }
+        });
+        anim.start();
+
+        mDeferringForDelete = true;
     }
 
     /* Accessibility */
-
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);

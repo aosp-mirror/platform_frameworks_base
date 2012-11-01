@@ -43,6 +43,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
             new PorterDuffXfermode(PorterDuff.Mode.ADD);
 
     static final float OUTLINE_ALPHA_MULTIPLIER = 0.6f;
+    static final int HOVER_OVER_DELETE_DROP_TARGET_OVERLAY_COLOR = 0x99FF0000;
+
+    // Temporarily disable this for the time being until we know why the gfx is messing up
+    static final boolean ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY = true;
 
     private int mGradientColor;
     private LinearGradient mForegroundGradient;
@@ -76,6 +80,8 @@ public class KeyguardWidgetFrame extends FrameLayout {
     // This will hold the width value before we've actually been measured
     private int mFrameHeight;
 
+    private boolean mIsHoveringOverDeleteDropTarget;
+
     // Multiple callers may try and adjust the alpha of the frame. When a caller shows
     // the outlines, we give that caller control, and nobody else can fade them out.
     // This prevents animation conflicts.
@@ -108,6 +114,15 @@ public class KeyguardWidgetFrame extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         cancelLongPress();
+    }
+
+    void setIsHoveringOverDeleteDropTarget(boolean isHovering) {
+        if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
+            if (mIsHoveringOverDeleteDropTarget != isHovering) {
+                mIsHoveringOverDeleteDropTarget = isHovering;
+                invalidate();
+            }
+        }
     }
 
     @Override
@@ -171,6 +186,12 @@ public class KeyguardWidgetFrame extends FrameLayout {
         c.drawRect(mForegroundRect, mGradientPaint);
     }
 
+    private void drawHoveringOverDeleteOverlay(Canvas c) {
+        if (mIsHoveringOverDeleteDropTarget) {
+            c.drawColor(HOVER_OVER_DELETE_DROP_TARGET_OVERLAY_COLOR);
+        }
+    }
+
     protected void drawBg(Canvas canvas) {
         if (mBackgroundAlpha > 0.0f) {
             Drawable bg = mBackgroundDrawable;
@@ -183,9 +204,16 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
+            canvas.save();
+        }
         drawBg(canvas);
         super.dispatchDraw(canvas);
         drawGradientOverlay(canvas);
+        if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
+            drawHoveringOverDeleteOverlay(canvas);
+            canvas.restore();
+        }
     }
 
     /**

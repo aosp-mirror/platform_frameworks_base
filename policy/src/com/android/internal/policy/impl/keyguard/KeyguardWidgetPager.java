@@ -717,4 +717,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             return indexOfChild((KeyguardWidgetFrame)view.getParent());
         }
     }
+
+    @Override
+    protected void setPageHoveringOverDeleteDropTarget(int viewIndex, boolean isHovering) {
+        KeyguardWidgetFrame child = getWidgetPageAt(viewIndex);
+        child.setIsHoveringOverDeleteDropTarget(isHovering);
+    }
 }

@@ -150,9 +150,11 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onFinishInflate() {
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
+        View deleteDropTarget = findViewById(R.id.keyguard_widget_pager_delete_target);
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
+        mAppWidgetContainer.setDeleteDropTarget(deleteDropTarget);
         mAppWidgetContainer.setMinScale(0.5f);
 
         SlidingChallengeLayout slider =
