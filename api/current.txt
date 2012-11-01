@@ -491,6 +491,8 @@ package android {
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
     field public static final int format = 16843013; // 0x1010105
+    field public static final int format12Hour = 16843722; // 0x10103ca
+    field public static final int format24Hour = 16843723; // 0x10103cb
     field public static final int fragment = 16843491; // 0x10102e3
     field public static final int fragmentCloseEnterAnimation = 16843495; // 0x10102e7
     field public static final int fragmentCloseExitAnimation = 16843496; // 0x10102e8
@@ -1074,6 +1076,7 @@ package android {
     field public static final int thumbTextPadding = 16843634; // 0x1010372
     field public static final int thumbnail = 16843429; // 0x10102a5
     field public static final int tileMode = 16843265; // 0x1010201
+    field public static final int timeZone = 16843724; // 0x10103cc
     field public static final int tint = 16843041; // 0x1010121
     field public static final int title = 16843233; // 0x10101e1
     field public static final int titleCondensed = 16843234; // 0x10101e2
@@ -22300,14 +22303,14 @@ package android.text.format {
 
   public class DateFormat {
     ctor public DateFormat();
-    method public static final java.lang.CharSequence format(java.lang.CharSequence, long);
-    method public static final java.lang.CharSequence format(java.lang.CharSequence, java.util.Date);
-    method public static final java.lang.CharSequence format(java.lang.CharSequence, java.util.Calendar);
-    method public static final java.text.DateFormat getDateFormat(android.content.Context);
-    method public static final char[] getDateFormatOrder(android.content.Context);
-    method public static final java.text.DateFormat getLongDateFormat(android.content.Context);
-    method public static final java.text.DateFormat getMediumDateFormat(android.content.Context);
-    method public static final java.text.DateFormat getTimeFormat(android.content.Context);
+    method public static java.lang.CharSequence format(java.lang.CharSequence, long);
+    method public static java.lang.CharSequence format(java.lang.CharSequence, java.util.Date);
+    method public static java.lang.CharSequence format(java.lang.CharSequence, java.util.Calendar);
+    method public static java.text.DateFormat getDateFormat(android.content.Context);
+    method public static char[] getDateFormatOrder(android.content.Context);
+    method public static java.text.DateFormat getLongDateFormat(android.content.Context);
+    method public static java.text.DateFormat getMediumDateFormat(android.content.Context);
+    method public static java.text.DateFormat getTimeFormat(android.content.Context);
     method public static boolean is24HourFormat(android.content.Context);
     field public static final char AM_PM = 97; // 0x0061 'a'
     field public static final char CAPITAL_AM_PM = 65; // 0x0041 'A'
@@ -29516,6 +29519,21 @@ package android.widget {
     ctor public TableRow.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
     field public int column;
     field public int span;
+  }
+
+  public class TextClock extends android.widget.TextView {
+    ctor public TextClock(android.content.Context);
+    ctor public TextClock(android.content.Context, android.util.AttributeSet);
+    ctor public TextClock(android.content.Context, android.util.AttributeSet, int);
+    method public java.lang.CharSequence getFormat12Hour();
+    method public java.lang.CharSequence getFormat24Hour();
+    method public java.lang.String getTimeZone();
+    method public boolean is24HourModeEnabled();
+    method public void setFormat12Hour(java.lang.CharSequence);
+    method public void setFormat24Hour(java.lang.CharSequence);
+    method public void setTimeZone(java.lang.String);
+    field public static final java.lang.CharSequence DEFAULT_FORMAT_12_HOUR;
+    field public static final java.lang.CharSequence DEFAULT_FORMAT_24_HOUR;
   }
 
   public class TextSwitcher extends android.widget.ViewSwitcher {

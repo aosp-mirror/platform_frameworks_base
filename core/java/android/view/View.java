@@ -17697,7 +17697,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mScalingRequired;
 
         /**
-         * If set, ViewAncestor doesn't use its lame animation for when the window resizes.
+         * If set, ViewRootImpl doesn't use its lame animation for when the window resizes.
          */
         boolean mTurnOffWindowResizeAnim;
 
