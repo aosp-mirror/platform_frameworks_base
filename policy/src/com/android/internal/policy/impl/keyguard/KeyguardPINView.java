@@ -108,4 +108,9 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     @Override
     public void showUsabilityHint() {
     }
+
+    @Override
+    public int getWrongPasswordStringId() {
+        return R.string.kg_wrong_pin;
+    }
 }
