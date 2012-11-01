@@ -421,8 +421,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     void showPrimarySecurityScreen(boolean turningOff) {
         SecurityMode securityMode = mSecurityModel.getSecurityMode();
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
-        if (!turningOff && KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()
-                && !KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
+        if (!turningOff &&
+                KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()) {
             // If we're not turning off, then allow biometric alternate.
             // We'll reload it when the device comes back on.
             securityMode = mSecurityModel.getAlternateFor(securityMode);
@@ -498,7 +498,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             // If the alternate unlock was suppressed, it can now be safely
             // enabled because the user has left keyguard.
             KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-            KeyguardUpdateMonitor.getInstance(mContext).setIsFirstBoot(false);
 
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
@@ -710,6 +709,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public void onScreenTurnedOff() {
         if (DEBUG) Log.d(TAG, "screen off, instance " + Integer.toHexString(hashCode()));
+        // Once the screen turns off, we no longer consider this to be first boot and we want the
+        // biometric unlock to start next time keyguard is shown.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         saveStickyWidgetIndex();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();

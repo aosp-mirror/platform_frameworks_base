@@ -522,7 +522,6 @@ public class KeyguardViewMediator {
 
             // Disable alternate unlock right after boot until things have settled.
             mUpdateMonitor.setAlternateUnlockEnabled(false);
-            mUpdateMonitor.setIsFirstBoot(true);
 
             doKeyguardLocked();
         }
