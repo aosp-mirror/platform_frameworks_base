@@ -25,7 +25,7 @@
     android:paddingLeft="25dp"
     android:paddingRight="25dp"
     android:paddingTop="25dp"
-    android:paddingBottom="64dp"
+    android:paddingBottom="@dimen/kg_widget_pager_bottom_padding"
     android:clipChildren="false"
     android:clipToPadding="false"
     androidprv:pageSpacing="10dp">
