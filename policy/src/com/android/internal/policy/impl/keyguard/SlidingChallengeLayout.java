@@ -884,7 +884,12 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 child.setAlpha(getChallengeAlpha());
                 child.layout(left, bottom - childHeight, left + childWidth, bottom);
             } else if (lp.childType == LayoutParams.CHILD_TYPE_EXPAND_CHALLENGE_HANDLE) {
-                child.layout(0, b - mChallengeBottomBound, width, b);
+                final int center = (paddingLeft + width - paddingRight) / 2;
+                final int left = center - child.getMeasuredWidth() / 2;
+                final int right = left + child.getMeasuredWidth();
+                final int bottom = height - paddingBottom - lp.bottomMargin;
+                final int top = bottom - child.getMeasuredHeight();
+                child.layout(left, top, right, bottom);
             } else {
                 // Non-challenge views lay out from the upper left, layered.
                 child.layout(paddingLeft + lp.leftMargin,
