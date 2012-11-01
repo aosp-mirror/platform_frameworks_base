@@ -584,6 +584,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     };
 
+    protected boolean mShowSecurityWhenReturn;
+
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
@@ -835,14 +837,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
                     mAppWidgetContainer.scrollLeft();
                 }
-                SlidingChallengeLayout slider = locateSlider();
-                if (slider != null) {
-                    slider.setHandleAlpha(1);
-                    slider.showChallenge(true);
-                }
+                mShowSecurityWhenReturn = true;
             }
 
-            private SlidingChallengeLayout locateSlider() {
+            public SlidingChallengeLayout locateSlider() {
                 return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
             }
         };
@@ -1139,6 +1137,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "Window is " + (hasWindowFocus ? "focused" : "unfocused"));
         if (!hasWindowFocus) {
             saveStickyWidgetIndex();
+        } else if (mShowSecurityWhenReturn) {
+            SlidingChallengeLayout slider =
+                (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+            if (slider != null) {
+                slider.setHandleAlpha(1);
+                slider.showChallenge(true);
+            }
+            mShowSecurityWhenReturn = false;
         }
     }
 
