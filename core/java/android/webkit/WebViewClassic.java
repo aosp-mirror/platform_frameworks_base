@@ -2500,6 +2500,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // Remove all pending messages because we are restoring previous
             // state.
             mWebViewCore.removeMessages();
+            if (isAccessibilityInjectionEnabled()) {
+                getAccessibilityInjector().addAccessibilityApisIfNecessary();
+            }
             // Send a restore state message.
             mWebViewCore.sendMessage(EventHub.RESTORE_STATE, index);
         }
