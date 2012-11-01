@@ -28,6 +28,7 @@ import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.view.KeyEvent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -289,6 +290,11 @@ public class WifiStressTest
 
             // Turn screen on again
             mAct.turnScreenOn();
+            // Wait for 2 seconds for the lock screen
+            sleep(2 * 1000, "wait 2 seconds for lock screen");
+            // Disable lock screen by inject menu key event
+            mRunner.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
+
             // Measure the time for Wi-Fi to get connected
             long startTime = System.currentTimeMillis();
             assertTrue("Wait for Wi-Fi enable timeout after wake up",
