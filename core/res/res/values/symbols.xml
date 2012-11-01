@@ -245,7 +245,7 @@
   <java-symbol type="bool" name="action_bar_embed_tabs_pre_jb" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_allowActionMenuItemTextWithIcon" />
-  <java-symbol type="bool" name="config_bluetooth_adapter_quick_switch" />
+  <java-symbol type="bool" name="config_bluetooth_address_validation" />
   <java-symbol type="bool" name="config_bluetooth_sco_off_call" />
   <java-symbol type="bool" name="config_cellBroadcastAppLinks" />
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
