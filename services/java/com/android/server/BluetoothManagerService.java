@@ -53,6 +53,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
     private static final String ACTION_SERVICE_STATE_CHANGED="com.android.bluetooth.btservice.action.STATE_CHANGED";
     private static final String EXTRA_ACTION="action";
+    private static final String SECURE_SETTINGS_BLUETOOTH_ADDR_VALID="bluetooth_addr_valid";
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDRESS="bluetooth_address";
     private static final String SECURE_SETTINGS_BLUETOOTH_NAME="bluetooth_name";
     private static final int TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
@@ -174,7 +175,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             //Enable
             if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
             enableHelper();
-        } else if (!isNameAndAddressSet()) {
+        }
+
+        if (!isNameAndAddressSet()) {
             //Sync the Bluetooth name and address from the Bluetooth Adapter
             if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
             getNameAndAddress();
@@ -222,11 +225,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private void loadStoredNameAndAddress() {
         if (DBG) Log.d(TAG, "Loading stored name and address");
+        if (mContext.getResources().getBoolean
+            (com.android.internal.R.bool.config_bluetooth_address_validation) &&
+             Settings.Secure.getInt(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 0) == 0) {
+            // if the valid flag is not set, don't load the address and name
+            if (DBG) Log.d(TAG, "invalid bluetooth name and address stored");
+            return;
+        }
         mName = Settings.Secure.getString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME);
         mAddress = Settings.Secure.getString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS);
-        if (mName == null || mAddress == null) {
-            if (DBG) Log.d(TAG, "Name or address not cached...");
-        }
+        if (DBG) Log.d(TAG, "Stored bluetooth Name=" + mName + ",Address=" + mAddress);
     }
 
     /**
@@ -248,6 +256,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mAddress=address;
             if (DBG)  Log.d(TAG,"Stored Bluetoothaddress: " +
                 Settings.Secure.getString(mContentResolver,SECURE_SETTINGS_BLUETOOTH_ADDRESS));
+        }
+
+        if ((name != null) && (address != null)) {
+            Settings.Secure.putInt(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 1);
         }
     }
 
@@ -560,7 +572,18 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     break;
                 }
                 case MESSAGE_SAVE_NAME_AND_ADDRESS: {
+                    boolean unbind = false;
                     if (DBG) Log.d(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
+                    synchronized(mConnection) {
+                        if (!mEnable && mBluetooth != null) {
+                            try {
+                                mBluetooth.enable();
+                            } catch (RemoteException e) {
+                                Log.e(TAG,"Unable to call enable()",e);
+                            }
+                        }
+                    }
+                    if (mBluetooth != null) waitForOnOff(true, false);
                     synchronized(mConnection) {
                         if (mBluetooth != null) {
                             String name =  null;
@@ -575,7 +598,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             if (name != null && address != null) {
                                 storeNameAndAddress(name,address);
                                 if (mConnection.isGetNameAddressOnly()) {
-                                    unbindAndFinish();
+                                    unbind = true;
                                 }
                             } else {
                                 if (msg.arg1 < MAX_SAVE_RETRIES) {
@@ -586,8 +609,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 } else {
                                     Log.w(TAG,"Maximum name/address remote retrieval retry exceeded");
                                     if (mConnection.isGetNameAddressOnly()) {
-                                        unbindAndFinish();
+                                        unbind = true;
                                     }
+                                }
+                            }
+                            if (!mEnable) {
+                                try {
+                                    mBluetooth.disable();
+                                } catch (RemoteException e) {
+                                    Log.e(TAG,"Unable to call disable()",e);
                                 }
                             }
                         } else {
@@ -597,6 +627,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
                             mHandler.sendMessage(getMsg);
                         }
+                    }
+                    if (!mEnable && mBluetooth != null) waitForOnOff(false, true);
+                    if (unbind) {
+                        unbindAndFinish();
                     }
                     break;
                 }
@@ -676,14 +710,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         }
                         //Inform BluetoothAdapter instances that service is up
                         sendBluetoothServiceUpCallback();
-
-                        //Check if name and address is loaded if not get it first.
-                        if (!isNameAndAddressSet()) {
-                            try {
-                                storeNameAndAddress(mBluetooth.getName(),
-                                                    mBluetooth.getAddress());
-                            } catch (RemoteException e) {Log.e(TAG, "", e);};
-                        }
 
                         //Do enable request
                         try {
@@ -871,14 +897,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
                     //Inform BluetoothAdapter instances that service is up
                     sendBluetoothServiceUpCallback();
-                }
-
-                //Check if name and address is loaded if not get it first.
-                if (!isNameAndAddressSet()) {
-                    try {
-                        if (DBG) Log.d(TAG,"Getting and storing Bluetooth name and address prior to enable.");
-                        storeNameAndAddress(mBluetooth.getName(),mBluetooth.getAddress());
-                    } catch (RemoteException e) {Log.e(TAG, "", e);};
                 }
 
                 //Enable bluetooth
