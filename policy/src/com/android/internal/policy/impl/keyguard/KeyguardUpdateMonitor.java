@@ -200,7 +200,6 @@ public class KeyguardUpdateMonitor {
             }
         }
     };
-    private boolean mIsFirstBoot;
 
     /**
      * When we receive a
@@ -777,13 +776,5 @@ public class KeyguardUpdateMonitor {
         return (simState == IccCardConstants.State.PIN_REQUIRED
                 || simState == IccCardConstants.State.PUK_REQUIRED
                 || simState == IccCardConstants.State.PERM_DISABLED);
-    }
-
-    public void setIsFirstBoot(boolean b) {
-        mIsFirstBoot = b;
-    }
-    
-    public boolean getIsFirstBoot() {
-        return mIsFirstBoot;
     }
 }
