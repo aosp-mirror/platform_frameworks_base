@@ -899,6 +899,7 @@ private:
     KeyEntry* synthesizeKeyRepeatLocked(nsecs_t currentTime);
 
     // Deferred command processing.
+    bool haveCommandsLocked() const;
     bool runCommandsLockedInterruptible();
     CommandEntry* postCommandLocked(Command command);
 
