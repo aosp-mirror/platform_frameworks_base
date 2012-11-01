@@ -64,7 +64,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
         public void run() {
+            if (!mTransitioning)
+                return;
             mLaunchCameraStart = SystemClock.uptimeMillis();
+            if (DEBUG) Log.d(TAG, "Launching camera at " + mLaunchCameraStart);
             mActivityLauncher.launchCamera();
         }};
 
@@ -274,7 +277,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     @Override
     protected void onFocusLost() {
-        Log.d(TAG, "onFocusLost");
+        if (DEBUG) Log.d(TAG, "onFocusLost");
         cancelTransitionToCamera();
         super.onFocusLost();
     }
@@ -291,6 +294,11 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
                 rescheduleTransitionToCamera();
             }
         }
+    }
+
+    public void onScreenTurnedOff() {
+        if (DEBUG) Log.d(TAG, "onScreenTurnedOff");
+        reset();
     }
 
     private void rescheduleTransitionToCamera() {

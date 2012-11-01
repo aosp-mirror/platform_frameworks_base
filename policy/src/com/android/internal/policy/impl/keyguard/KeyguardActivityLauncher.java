@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -132,6 +133,8 @@ public abstract class KeyguardActivityLauncher {
                 Log.w(TAG, "can't dismiss keyguard on launch");
             }
             try {
+                if (DEBUG) Log.d(TAG, String.format("Starting activity for intent %s at %s",
+                        intent, SystemClock.uptimeMillis()));
                 context.startActivityAsUser(intent, animation,
                         new UserHandle(UserHandle.USER_CURRENT));
             } catch (ActivityNotFoundException e) {
