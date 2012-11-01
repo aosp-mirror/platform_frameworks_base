@@ -224,10 +224,16 @@ void InputDispatcher::dispatchOnce() {
         AutoMutex _l(mLock);
         mDispatcherIsAliveCondition.broadcast();
 
-        dispatchOnceInnerLocked(&nextWakeupTime);
+        // Run a dispatch loop if there are no pending commands.
+        // The dispatch loop might enqueue commands to run afterwards.
+        if (!haveCommandsLocked()) {
+            dispatchOnceInnerLocked(&nextWakeupTime);
+        }
 
+        // Run all pending commands if there are any.
+        // If any commands were run then force the next poll to wake up immediately.
         if (runCommandsLockedInterruptible()) {
-            nextWakeupTime = LONG_LONG_MIN;  // force next poll to wake up immediately
+            nextWakeupTime = LONG_LONG_MIN;
         }
     } // release lock
 
@@ -560,6 +566,10 @@ void InputDispatcher::resetPendingAppSwitchLocked(bool handled) {
 
 bool InputDispatcher::isStaleEventLocked(nsecs_t currentTime, EventEntry* entry) {
     return currentTime - entry->eventTime >= STALE_EVENT_TIMEOUT;
+}
+
+bool InputDispatcher::haveCommandsLocked() const {
+    return !mCommandQueue.isEmpty();
 }
 
 bool InputDispatcher::runCommandsLockedInterruptible() {
@@ -3247,9 +3257,10 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
         }
 
         mLooper->addFd(fd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
-
-        runCommandsLockedInterruptible();
     } // release lock
+
+    // Wake the looper because some connections have changed.
+    mLooper->wake();
     return OK;
 }
 
@@ -3293,8 +3304,6 @@ status_t InputDispatcher::unregisterInputChannelLocked(const sp<InputChannel>& i
 
     nsecs_t currentTime = now();
     abortBrokenDispatchCycleLocked(currentTime, connection, notify);
-
-    runCommandsLockedInterruptible();
 
     connection->status = Connection::STATUS_ZOMBIE;
     return OK;
