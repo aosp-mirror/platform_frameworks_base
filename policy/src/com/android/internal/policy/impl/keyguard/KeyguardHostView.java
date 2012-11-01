@@ -25,19 +25,22 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -54,6 +57,7 @@ import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityM
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -880,14 +884,22 @@ public class KeyguardHostView extends KeyguardViewBase {
 
                     @Override
                     public void run() {
-                        Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
-                        intent.addFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                        mContext.startActivityAsUser(intent,
-                                new UserHandle(UserHandle.USER_CURRENT));
+                        int defaultIconId = 0;
+                        Resources res = KeyguardHostView.this.getContext().getResources();
+                        ComponentName clock = new ComponentName(
+                                res.getString(R.string.widget_default_package_name),
+                                res.getString(R.string.widget_default_class_name));
+                        try {
+                            ActivityInfo activityInfo =
+                                    mContext.getPackageManager().getActivityInfo(clock, 0);
+                            if (activityInfo != null) {
+                                defaultIconId = activityInfo.icon;
+                            }
+                        } catch (PackageManager.NameNotFoundException e) {
+                            defaultIconId = 0;
+                        }
+                        launchPickActivityIntent(R.string.widget_default, defaultIconId, clock,
+                                LockPatternUtils.EXTRA_DEFAULT_WIDGET);
                     }
                 });
                 mCallback.dismiss(false);
@@ -896,6 +908,58 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         enableUserSelectorIfNecessary();
         initializeTransportControl();
+    }
+
+    private void launchPickActivityIntent(int defaultLabelId, int defaultIconId,
+            ComponentName defaultComponentName, String defaultTag) {
+        // Create intent to pick widget
+        Intent pickIntent = new Intent(AppWidgetManager.ACTION_KEYGUARD_APPWIDGET_PICK);
+
+        int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+        if (appWidgetId != -1) {
+            pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_SORT, false);
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+
+            // Add an custom entry for the default
+            AppWidgetProviderInfo defaultInfo = new AppWidgetProviderInfo();
+            ArrayList<AppWidgetProviderInfo> extraInfos = new ArrayList<AppWidgetProviderInfo>();
+            defaultInfo.label = getResources().getString(defaultLabelId);
+            defaultInfo.icon = defaultIconId;
+            defaultInfo.provider = defaultComponentName;
+            extraInfos.add(defaultInfo);
+
+            ArrayList<Bundle> extraExtras = new ArrayList<Bundle>();
+            Bundle b = new Bundle();
+            b.putBoolean(defaultTag, true);
+            extraExtras.add(b);
+
+            // Launch the widget picker
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_INFO, extraInfos);
+            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_EXTRAS, extraExtras);
+            pickIntent.putExtra(Intent.EXTRA_INTENT, getBaseIntent());
+            pickIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            mContext.startActivityAsUser(pickIntent,
+                    new UserHandle(UserHandle.USER_CURRENT));
+        } else {
+            Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
+        }
+    }
+
+    private Intent getBaseIntent() {
+        Intent baseIntent = new Intent(Intent.ACTION_MAIN, null);
+        baseIntent.addCategory(Intent.CATEGORY_DEFAULT);
+
+        Bundle options = new Bundle();
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+        baseIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
+        return baseIntent;
     }
 
     private void removeTransportFromWidgetPager() {

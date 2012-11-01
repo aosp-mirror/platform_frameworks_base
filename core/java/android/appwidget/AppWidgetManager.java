@@ -80,6 +80,13 @@ public class AppWidgetManager {
     public static final String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
 
     /**
+     * Similar to ACTION_APPWIDGET_PICK, but used from keyguard
+     * @hide
+     */
+    public static final String
+            ACTION_KEYGUARD_APPWIDGET_PICK = "android.appwidget.action.KEYGUARD_APPWIDGET_PICK";
+
+    /**
      * Send this from your {@link AppWidgetHost} activity when you want to bind an AppWidget to
      * display and bindAppWidgetIdIfAllowed returns false.
      * <p>
@@ -222,13 +229,6 @@ public class AppWidgetManager {
      * @hide
      */
     public static final String EXTRA_CATEGORY_FILTER = "categoryFilter";
-
-    /**
-     * An intent extra to pass to the AppWidget picker which allows the picker to filter
-     * the list based on the {@link AppWidgetProviderInfo#widgetFeatures}.
-     * @hide
-     */
-    public static final String EXTRA_FEATURES_FILTER = "featuresFilter";
 
     /**
      * An intent extra to pass to the AppWidget picker to specify whether or not to sort
