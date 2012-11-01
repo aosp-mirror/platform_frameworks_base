@@ -2433,7 +2433,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     }
 
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
-    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || p->getStrokeCap() != SkPaint::kButt_Cap) {
+    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || p->getStrokeCap() != SkPaint::kButt_Cap || useCenter) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
