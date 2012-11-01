@@ -50,4 +50,10 @@
     <!-- Space reserved at the bottom of secure views (pin/pattern/password/SIM pin/SIM puk) -->
     <dimen name="kg_secure_padding_height">0dp</dimen>
 
+    <!-- Top padding for the widget pager -->
+    <dimen name="kg_widget_pager_top_padding">0dp</dimen>
+
+    <!-- Bottom padding for the widget pager -->
+    <dimen name="kg_widget_pager_bottom_padding">0dp</dimen>
+
 </resources>
