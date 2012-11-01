@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
@@ -159,7 +160,7 @@ class AccessibilityInjector {
      * <p>
      * This should only be called before a page loads.
      */
-    private void addAccessibilityApisIfNecessary() {
+    public void addAccessibilityApisIfNecessary() {
         if (!isAccessibilityEnabled() || !isJavaScriptEnabled()) {
             return;
         }
@@ -333,8 +334,9 @@ class AccessibilityInjector {
      */
     public void onPageStarted(String url) {
         mAccessibilityScriptInjected = false;
-        if (DEBUG)
+        if (DEBUG) {
             Log.w(TAG, "[" + mWebView.hashCode() + "] Started loading new page");
+        }
         addAccessibilityApisIfNecessary();
     }
 
@@ -348,30 +350,57 @@ class AccessibilityInjector {
      */
     public void onPageFinished(String url) {
         if (!isAccessibilityEnabled()) {
-            mAccessibilityScriptInjected = false;
             toggleFallbackAccessibilityInjector(false);
             return;
         }
 
-        if (!shouldInjectJavaScript(url)) {
-            mAccessibilityScriptInjected = false;
-            toggleFallbackAccessibilityInjector(true);
-            if (DEBUG)
-                Log.d(TAG, "[" + mWebView.hashCode() + "] Using fallback accessibility support");
-            return;
-        }
+        toggleFallbackAccessibilityInjector(true);
 
+        if (shouldInjectJavaScript(url)) {
+            // If we're supposed to use the JS screen reader, request a
+            // callback to confirm that CallbackHandler is working.
+            if (DEBUG) {
+                Log.d(TAG, "[" + mWebView.hashCode() + "] Request callback ");
+            }
+
+            mCallback.requestCallback(mWebView, mInjectScriptRunnable);
+        }
+    }
+
+    /**
+     * Runnable used to inject the JavaScript-based screen reader if the
+     * {@link CallbackHandler} API was successfully exposed to JavaScript.
+     */
+    private Runnable mInjectScriptRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) {
+                Log.d(TAG, "[" + mWebView.hashCode() + "] Received callback");
+            }
+
+            injectJavaScript();
+        }
+    };
+
+    /**
+     * Called by {@link #mInjectScriptRunnable} to inject the JavaScript-based
+     * screen reader after confirming that the {@link CallbackHandler} API is
+     * functional.
+     */
+    private void injectJavaScript() {
         toggleFallbackAccessibilityInjector(false);
 
         if (!mAccessibilityScriptInjected) {
             mAccessibilityScriptInjected = true;
             final String injectionUrl = getScreenReaderInjectionUrl();
             mWebView.loadUrl(injectionUrl);
-            if (DEBUG)
+            if (DEBUG) {
                 Log.d(TAG, "[" + mWebView.hashCode() + "] Loading screen reader into WebView");
+            }
         } else {
-            if (DEBUG)
+            if (DEBUG) {
                 Log.w(TAG, "[" + mWebView.hashCode() + "] Attempted to inject screen reader twice");
+            }
         }
     }
 
@@ -447,12 +476,10 @@ class AccessibilityInjector {
      * been done.
      */
     private void addTtsApis() {
-        if (mTextToSpeech != null) {
-            return;
+        if (mTextToSpeech == null) {
+            mTextToSpeech = new TextToSpeechWrapper(mContext);
         }
-        if (DEBUG)
-            Log.d(TAG, "[" + mWebView.hashCode() + "] Adding TTS APIs into WebView");
-        mTextToSpeech = new TextToSpeechWrapper(mContext);
+
         mWebView.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE);
     }
 
@@ -461,34 +488,29 @@ class AccessibilityInjector {
      * already been done.
      */
     private void removeTtsApis() {
-        if (mTextToSpeech == null) {
-            return;
+        if (mTextToSpeech != null) {
+            mTextToSpeech.stop();
+            mTextToSpeech.shutdown();
+            mTextToSpeech = null;
         }
 
-        if (DEBUG)
-            Log.d(TAG, "[" + mWebView.hashCode() + "] Removing TTS APIs from WebView");
         mWebView.removeJavascriptInterface(ALIAS_TTS_JS_INTERFACE);
-        mTextToSpeech.stop();
-        mTextToSpeech.shutdown();
-        mTextToSpeech = null;
     }
 
     private void addCallbackApis() {
-        if (mCallback != null) {
-            return;
+        if (mCallback == null) {
+            mCallback = new CallbackHandler(ALIAS_TRAVERSAL_JS_INTERFACE);
         }
 
-        mCallback = new CallbackHandler(ALIAS_TRAVERSAL_JS_INTERFACE);
         mWebView.addJavascriptInterface(mCallback, ALIAS_TRAVERSAL_JS_INTERFACE);
     }
 
     private void removeCallbackApis() {
-        if (mCallback == null) {
-            return;
+        if (mCallback != null) {
+            mCallback = null;
         }
 
         mWebView.removeJavascriptInterface(ALIAS_TRAVERSAL_JS_INTERFACE);
-        mCallback = null;
     }
 
     /**
@@ -638,9 +660,10 @@ class AccessibilityInjector {
         private volatile boolean mShutdown;
 
         public TextToSpeechWrapper(Context context) {
-            if (DEBUG)
+            if (DEBUG) {
                 Log.d(WRAP_TAG, "[" + hashCode() + "] Initializing text-to-speech on thread "
                         + Thread.currentThread().getId() + "...");
+            }
 
             final String pkgName = context.getPackageName();
 
@@ -672,12 +695,14 @@ class AccessibilityInjector {
         public int speak(String text, int queueMode, HashMap<String, String> params) {
             synchronized (mTextToSpeech) {
                 if (!mReady) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to speak before TTS init");
+                    }
                     return TextToSpeech.ERROR;
                 } else {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.i(WRAP_TAG, "[" + hashCode() + "] Speak called from JS binder");
+                    }
                 }
 
                 return mTextToSpeech.speak(text, queueMode, params);
@@ -689,12 +714,14 @@ class AccessibilityInjector {
         public int stop() {
             synchronized (mTextToSpeech) {
                 if (!mReady) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Attempted to stop before initialize");
+                    }
                     return TextToSpeech.ERROR;
                 } else {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.i(WRAP_TAG, "[" + hashCode() + "] Stop called from JS binder");
+                    }
                 }
 
                 return mTextToSpeech.stop();
@@ -705,12 +732,14 @@ class AccessibilityInjector {
         protected void shutdown() {
             synchronized (mTextToSpeech) {
                 if (!mReady) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(WRAP_TAG, "[" + hashCode() + "] Called shutdown before initialize");
+                    }
                 } else {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.i(WRAP_TAG, "[" + hashCode() + "] Shutting down text-to-speech from "
                                 + "thread " + Thread.currentThread().getId() + "...");
+                    }
                 }
                 mShutdown = true;
                 mReady = false;
@@ -723,14 +752,16 @@ class AccessibilityInjector {
             public void onInit(int status) {
                 synchronized (mTextToSpeech) {
                     if (!mShutdown && (status == TextToSpeech.SUCCESS)) {
-                        if (DEBUG)
+                        if (DEBUG) {
                             Log.d(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
                                     + "] Initialized successfully");
+                        }
                         mReady = true;
                     } else {
-                        if (DEBUG)
+                        if (DEBUG) {
                             Log.w(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
                                     + "] Failed to initialize");
+                        }
                         mReady = false;
                     }
                 }
@@ -745,9 +776,10 @@ class AccessibilityInjector {
 
             @Override
             public void onError(String utteranceId) {
-                if (DEBUG)
+                if (DEBUG) {
                     Log.w(WRAP_TAG, "[" + TextToSpeechWrapper.this.hashCode()
                             + "] Failed to speak utterance");
+                }
             }
 
             @Override
@@ -770,12 +802,16 @@ class AccessibilityInjector {
         private final AtomicInteger mResultIdCounter = new AtomicInteger();
         private final Object mResultLock = new Object();
         private final String mInterfaceName;
+        private final Handler mMainHandler;
+
+        private Runnable mCallbackRunnable;
 
         private boolean mResult = false;
         private int mResultId = -1;
 
         private CallbackHandler(String interfaceName) {
             mInterfaceName = interfaceName;
+            mMainHandler = new Handler();
         }
 
         /**
@@ -826,25 +862,29 @@ class AccessibilityInjector {
         private boolean waitForResultTimedLocked(int resultId) {
             final long startTimeMillis = SystemClock.uptimeMillis();
 
-            if (DEBUG)
+            if (DEBUG) {
                 Log.d(TAG, "Waiting for CVOX result with ID " + resultId + "...");
+            }
 
             while (true) {
                 // Fail if we received a callback from the future.
                 if (mResultId > resultId) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Aborted CVOX result");
+                    }
                     return false;
                 }
 
                 final long elapsedTimeMillis = (SystemClock.uptimeMillis() - startTimeMillis);
 
                 // Succeed if we received the callback we were expecting.
-                if (DEBUG)
+                if (DEBUG) {
                     Log.w(TAG, "Check " + mResultId + " versus expected " + resultId);
+                }
                 if (mResultId == resultId) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Received CVOX result after " + elapsedTimeMillis + " ms");
+                    }
                     return true;
                 }
 
@@ -852,18 +892,21 @@ class AccessibilityInjector {
 
                 // Fail if we've already exceeded the timeout.
                 if (waitTimeMillis <= 0) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Timed out while waiting for CVOX result");
+                    }
                     return false;
                 }
 
                 try {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Start waiting...");
+                    }
                     mResultLock.wait(waitTimeMillis);
                 } catch (InterruptedException ie) {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Interrupted while waiting for CVOX result");
+                    }
                 }
             }
         }
@@ -878,8 +921,9 @@ class AccessibilityInjector {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void onResult(String id, String result) {
-            if (DEBUG)
+            if (DEBUG) {
                 Log.w(TAG, "Saw CVOX result of '" + result + "' for ID " + id);
+            }
             final int resultId;
 
             try {
@@ -893,10 +937,33 @@ class AccessibilityInjector {
                     mResult = Boolean.parseBoolean(result);
                     mResultId = resultId;
                 } else {
-                    if (DEBUG)
+                    if (DEBUG) {
                         Log.w(TAG, "Result with ID " + resultId + " was stale vesus " + mResultId);
+                    }
                 }
                 mResultLock.notifyAll();
+            }
+        }
+
+        /**
+         * Requests a callback to ensure that the JavaScript interface for this
+         * object has been added successfully.
+         *
+         * @param webView The web view to request a callback from.
+         * @param callbackRunnable Runnable to execute if a callback is received.
+         */
+        public void requestCallback(WebView webView, Runnable callbackRunnable) {
+            mCallbackRunnable = callbackRunnable;
+
+            webView.loadUrl("javascript:(function() { " + mInterfaceName + ".callback(); })();");
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void callback() {
+            if (mCallbackRunnable != null) {
+                mMainHandler.post(mCallbackRunnable);
+                mCallbackRunnable = null;
             }
         }
     }
