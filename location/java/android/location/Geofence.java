@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * Represents a geographical boundary, also known as a geofence.
  *
- * <p>Currently only circular geofences are supported.
+ * <p>Currently only circular geofences are supported and they do not support altitude changes.
  */
 public final class Geofence implements Parcelable {
     /** @hide */
@@ -34,7 +34,7 @@ public final class Geofence implements Parcelable {
     private final float mRadius;
 
     /**
-     * Create a horizontal, circular geofence.
+     * Create a circular geofence (on a flat, horizontal plane).
      *
      * @param latitude latitude in degrees
      * @param longitude longitude in degrees
