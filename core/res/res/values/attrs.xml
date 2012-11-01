@@ -3046,6 +3046,24 @@
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="TextClock">
+        <!-- Specifies the formatting pattern used to show the time and/or date
+             in 12-hour mode. Please refer to {@link android.text.format.DateFormat}
+             for a complete description of accepted formatting patterns.
+             The default pattern is "h:mm aa". -->
+        <attr name="format12Hour" format="string"/>
+        <!-- Specifies the formatting pattern used to show the time and/or date
+             in 24-hour mode. Please refer to {@link android.text.format.DateFormat}
+             for a complete description of accepted formatting patterns.
+             The default pattern is "k:mm". -->
+        <attr name="format24Hour" format="string"/>
+        <!-- Specifies the time zone to use. When this attribute is specified, the
+             TextClock will ignore the time zone of the system. To use the user's
+             time zone, do not specify this attribute. The default value is the
+             user's time zone. Please refer to {@link java.util.TimeZone} for more
+             information about time zone ids. -->
+        <attr name="timeZone" format="string"/>
+    </declare-styleable>
     <declare-styleable name="TextSwitcher">
     </declare-styleable>
     <declare-styleable name="TextView">
