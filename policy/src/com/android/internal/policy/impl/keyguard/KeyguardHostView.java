@@ -824,7 +824,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             public void onLaunchingCamera() {
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
-                    slider.showHandle(false);
+                    slider.setHandleAlpha(0);
                 }
             }
 
@@ -835,7 +835,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 }
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
-                    slider.showHandle(true);
+                    slider.setHandleAlpha(1);
                     slider.showChallenge(true);
                 }
             }

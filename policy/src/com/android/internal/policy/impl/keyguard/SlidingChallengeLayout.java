@@ -270,16 +270,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         setWillNotDraw(false);
     }
 
-    public void showHandle(boolean visible) {
-        if (visible) {
-            if (mHandleAnimation != null) {
-                mHandleAnimation.cancel();
-                mHandleAnimation = null;
-            }
-            mHandleAlpha = 1.f;
-            invalidate();
-        } else {
-            animateHandle(false);
+    public void setHandleAlpha(float alpha) {
+        if (mExpandChallengeView != null) {
+            mExpandChallengeView.setAlpha(alpha);
         }
     }
 

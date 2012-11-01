@@ -118,8 +118,7 @@ public abstract class KeyguardActivityLauncher {
     public void launchActivity(final Intent intent, boolean showsWhileLocked, boolean animate) {
         final Context context = getContext();
         final Bundle animation = animate ? null :
-                ActivityOptions.makeCustomAnimation(context, com.android.internal.R.anim.fade_in,
-                        com.android.internal.R.anim.fade_out).toBundle();
+                ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
