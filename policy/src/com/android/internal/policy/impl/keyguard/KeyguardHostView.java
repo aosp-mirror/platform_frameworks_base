@@ -155,8 +155,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
         mAppWidgetContainer.setMinScale(0.5f);
 
-        mViewStateManager = new KeyguardViewStateManager();
-
         addDefaultWidgets();
         addWidgetsFromSettings();
         mSwitchPageRunnable.run();
