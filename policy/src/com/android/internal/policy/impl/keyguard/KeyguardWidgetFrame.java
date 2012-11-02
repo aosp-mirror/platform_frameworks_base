@@ -63,7 +63,18 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
+    private int mLastMeasuredWidth = -1;
+    private int mLastMeasuredHeight = 1;
+
+    // These variables are all needed in order to size things properly before we're actually
+    // measured.
     private int mSmallWidgetHeight;
+    private int mSmallFrameHeight;
+    private boolean mWidgetLockedSmall = false;
+    private int mMaxChallengeTop = -1;
+
+    // This will hold the width value before we've actually been measured
+    private int mFrameHeight;
 
     // Multiple callers may try and adjust the alpha of the frame. When a caller shows
     // the outlines, we give that caller control, and nobody else can fade them out.
@@ -97,10 +108,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         cancelLongPress();
-    }
-
-    public void setMaxChallengeTop(int top) {
-        mSmallWidgetHeight = top - getPaddingTop();
     }
 
     @Override
@@ -263,22 +270,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     /**
-     * Set the top location of the challenge.
-     *
-     * @param top The top of the challenge, in _local_ coordinates, or -1 to indicate the challenge
-     *              is down.
-     */
-    private void setChallengeTop(int top, boolean updateWidgetSize) {
-        // The widget starts below the padding, and extends to the top of the challengs.
-        int widgetHeight = top - getPaddingTop();
-        int frameHeight = top + getPaddingBottom();
-        setFrameHeight(frameHeight);
-        if (updateWidgetSize) {
-            setWidgetHeight(widgetHeight);
-        }
-    }
-
-    /**
      * Depending on whether the security is up, the widget size needs to change
      * 
      * @param height The height of the widget, -1 for full height
@@ -298,28 +289,49 @@ public class KeyguardWidgetFrame extends FrameLayout {
         }
     }
 
+    public void setMaxChallengeTop(int top) {
+        boolean dirty = mMaxChallengeTop != top;
+        mSmallWidgetHeight = top - getPaddingTop();
+        mSmallFrameHeight = top + getPaddingBottom();
+        if (dirty && mIsSmall) {
+            setWidgetHeight(mSmallWidgetHeight);
+            setFrameHeight(mSmallFrameHeight);
+        } else if (dirty && mWidgetLockedSmall) {
+            setWidgetHeight(mSmallWidgetHeight);
+        }
+    }
+
     public boolean isSmall() {
         return mIsSmall;
     }
 
     public void adjustFrame(int challengeTop) {
-        setChallengeTop(challengeTop, false);
+        int frameHeight = challengeTop + getPaddingBottom();
+        setFrameHeight(frameHeight);
     }
 
     public void shrinkWidget() {
         mIsSmall = true;
-        setChallengeTop(mSmallWidgetHeight, true);
+        setWidgetHeight(mSmallWidgetHeight);
+        setFrameHeight(mSmallFrameHeight);
+    }
+
+    public void setWidgetLockedSmall(boolean locked) {
+        setWidgetHeight(mSmallWidgetHeight);
+        mWidgetLockedSmall = locked;
     }
 
     public void resetSize() {
         mIsSmall = false;
+        if (!mWidgetLockedSmall) {
+            setWidgetHeight(LayoutParams.MATCH_PARENT);
+        }
         setFrameHeight(getMeasuredHeight());
-        setWidgetHeight(LayoutParams.MATCH_PARENT);
     }
 
     public void setFrameHeight(int height) {
-        height = Math.min(height, getMeasuredHeight());
-        mBackgroundRect.set(0, 0, getMeasuredWidth(), height);
+        mFrameHeight = height;
+        mBackgroundRect.set(0, 0, getMeasuredWidth(), Math.min(mFrameHeight, getMeasuredHeight()));
         invalidate();
     }
 
@@ -359,8 +371,36 @@ public class KeyguardWidgetFrame extends FrameLayout {
                 mGradientColor, 0, Shader.TileMode.CLAMP);
         mRightToLeftGradient = new LinearGradient(x1, 0f, x0, 0f,
                 mGradientColor, 0, Shader.TileMode.CLAMP);
-        mBackgroundRect.set(0, 0, w, h);
+
+        if (!mIsSmall) {
+            mFrameHeight = h;
+        }
+
+        mBackgroundRect.set(0, 0, getMeasuredWidth(), Math.min(h, mFrameHeight));
         invalidate();
+    }
+
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        performAppWidgetSizeCallbacksIfNecessary();
+    }
+
+    private void performAppWidgetSizeCallbacksIfNecessary() {
+        View content = getContent();
+        if (!(content instanceof AppWidgetHostView)) return;
+
+        boolean sizeDirty = content.getMeasuredWidth() != mLastMeasuredWidth ||
+                content.getMeasuredHeight() != mLastMeasuredHeight;
+        if (sizeDirty) {
+
+        }
+
+        AppWidgetHostView awhv = (AppWidgetHostView) content;
+        float density = getResources().getDisplayMetrics().density;
+
+        int width = (int) (content.getMeasuredWidth() / density);
+        int height = (int) (content.getMeasuredHeight() / density);
+        awhv.updateAppWidgetSize(null, width, height, width, height, true);
     }
 
     void setOverScrollAmount(float r, boolean left) {
