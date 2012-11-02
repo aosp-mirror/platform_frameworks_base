@@ -21,6 +21,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -31,9 +33,9 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
@@ -250,10 +252,23 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
             lp.gravity = Gravity.TOP;
+
             // The framework adds a default padding to AppWidgetHostView. We don't need this padding
             // for the Keyguard, so we override it to be 0.
             widget.setPadding(0,  0, 0, 0);
             frame.addView(widget, lp);
+
+            // We set whether or not this widget supports vertical resizing.
+            if (widget instanceof AppWidgetHostView) {
+                AppWidgetHostView awhv = (AppWidgetHostView) widget;
+                AppWidgetProviderInfo info = awhv.getAppWidgetInfo();
+                if ((info.resizeMode & AppWidgetProviderInfo.RESIZE_VERTICAL) != 0) {
+                    frame.setWidgetLockedSmall(false);
+                } else {
+                    // Lock the widget to be small.
+                    frame.setWidgetLockedSmall(true);
+                }
+            }
         } else {
             frame = (KeyguardWidgetFrame) widget;
         }
@@ -549,20 +564,20 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             // coordinate relative to our children, hence we subtract the top padding.s
             maxChallengeTop = top - getPaddingTop();
             challengeShowing = scl.isChallengeShowing();
-        }
 
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            KeyguardWidgetFrame frame = getWidgetPageAt(i);
-            frame.setMaxChallengeTop(maxChallengeTop);
-
-            // On the very first measure pass, if the challenge is showing, we need to make sure
-            // that the widget on the current page is small.
-            if (challengeShowing && i == mCurrentPage && !mHasMeasure) {
-                frame.shrinkWidget();
+            int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                KeyguardWidgetFrame frame = getWidgetPageAt(i);
+                frame.setMaxChallengeTop(maxChallengeTop);
+                // On the very first measure pass, if the challenge is showing, we need to make sure
+                // that the widget on the current page is small.
+                if (challengeShowing && i == mCurrentPage && !mHasMeasure) {
+                    frame.shrinkWidget();
+                }
             }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mHasMeasure = true;
     }
 
     void animateOutlinesAndSidePages(final boolean show) {

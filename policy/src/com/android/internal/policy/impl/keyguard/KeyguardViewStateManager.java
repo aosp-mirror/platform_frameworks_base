@@ -105,6 +105,10 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         // Reset the previous page size and ensure the current page is sized appropriately.
         // We only modify the page state if it is not currently under control by the slider.
         // This prevents conflicts.
+
+        // If the page hasn't switched, don't bother with any of this
+        if (mCurrentPage != newPageIndex) return;
+
         if (mPagedView != null && mChallengeLayout != null) {
             KeyguardWidgetFrame prevPage = mPagedView.getWidgetPageAt(mCurrentPage);
             if (prevPage != null && mCurrentPage != mPageListeningToSlider) {
