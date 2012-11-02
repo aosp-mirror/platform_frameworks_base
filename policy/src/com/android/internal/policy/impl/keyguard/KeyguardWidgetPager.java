@@ -98,6 +98,16 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        // Clean up the persistence worker thread
+        if (mBgPersistenceWorkerThread != null) {
+            mBgPersistenceWorkerThread.quit();
+        }
+    }
+
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
         mViewStateManager = viewStateManager;
     }
