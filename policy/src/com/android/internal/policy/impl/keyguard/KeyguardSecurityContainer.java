@@ -1,11 +1,13 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
@@ -51,18 +53,42 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     public void showBouncer(int duration) {
-        SecurityMessageDisplay message = new KeyguardMessageArea.Helper(this);
+        SecurityMessageDisplay message = new KeyguardMessageArea.Helper(getSecurityView());
         message.showBouncer(duration);
-        Animator anim = ObjectAnimator.ofFloat(this, "BackgroundAlpha", 1f);
+        AnimatorSet anim = new AnimatorSet();
+        anim.playTogether(ObjectAnimator.ofFloat(this, "backgroundAlpha", 1f), getEcaAnim(0f));
         anim.setDuration(duration);
         anim.start();
     }
 
     public void hideBouncer(int duration) {
-        SecurityMessageDisplay message = new KeyguardMessageArea.Helper(this);
+        SecurityMessageDisplay message = new KeyguardMessageArea.Helper(getSecurityView());
         message.hideBouncer(duration);
-        Animator anim = ObjectAnimator.ofFloat(this, "BackgroundAlpha", 0f);
+        AnimatorSet anim = new AnimatorSet();
+        anim.playTogether(ObjectAnimator.ofFloat(this, "backgroundAlpha", 0f), getEcaAnim(1f));
         anim.setDuration(duration);
         anim.start();
+    }
+
+    View getSecurityView() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof KeyguardSecurityViewFlipper) {
+                return (View) (((KeyguardSecurityViewFlipper) child).getSecurityView());
+            }
+        }
+        return null;
+    }
+
+    Animator getEcaAnim(float alpha) {
+        Animator anim = null;
+        View securityView = getSecurityView();
+        if (securityView != null) {
+            View ecaView = securityView.findViewById(R.id.keyguard_selector_fade_container);
+            if (ecaView != null) {
+                anim = ObjectAnimator.ofFloat(ecaView, "alpha", alpha);
+            }
+        }
+        return anim;
     }
 }

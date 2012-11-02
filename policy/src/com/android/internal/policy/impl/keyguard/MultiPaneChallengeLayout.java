@@ -47,6 +47,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     private OnBouncerStateChangedListener mBouncerListener;
 
     private final Rect mTempRect = new Rect();
+    private final Context mContext;
 
     private final OnClickListener mScrimClickListener = new OnClickListener() {
         @Override
@@ -65,6 +66,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     public MultiPaneChallengeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+        mContext = context;
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.MultiPaneChallengeLayout, defStyleAttr, 0);
@@ -173,6 +176,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             throw new IllegalArgumentException(
                     "MultiPaneChallengeLayout must be measured with an exact size");
         }
+        float squashedLayoutThreshold =
+                mContext.getResources().getDimension(R.dimen.kg_squashed_layout_threshold);
 
         final int width = MeasureSpec.getSize(widthSpec);
         final int height = MeasureSpec.getSize(heightSpec);
@@ -208,28 +213,32 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 mUserSwitcherView = child;
 
                 if (child.getVisibility() == GONE) continue;
+                if (height < squashedLayoutThreshold) {
+                    int zero = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
+                    measureChild(child, zero, zero);
+                } else {
+                    int adjustedWidthSpec = widthSpec;
+                    int adjustedHeightSpec = heightSpec;
+                    if (lp.maxWidth >= 0) {
+                        adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
+                                Math.min(lp.maxWidth, MeasureSpec.getSize(widthSpec)),
+                                MeasureSpec.EXACTLY);
+                    }
+                    if (lp.maxHeight >= 0) {
+                        adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
+                                Math.min(lp.maxHeight, MeasureSpec.getSize(heightSpec)),
+                                MeasureSpec.EXACTLY);
+                    }
+                    // measureChildWithMargins will resolve layout direction for the LayoutParams
+                    measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
 
-                int adjustedWidthSpec = widthSpec;
-                int adjustedHeightSpec = heightSpec;
-                if (lp.maxWidth >= 0) {
-                    adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                            Math.min(lp.maxWidth, MeasureSpec.getSize(widthSpec)),
-                            MeasureSpec.EXACTLY);
-                }
-                if (lp.maxHeight >= 0) {
-                    adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                            Math.min(lp.maxHeight, MeasureSpec.getSize(heightSpec)),
-                            MeasureSpec.EXACTLY);
-                }
-                // measureChildWithMargins will resolve layout direction for the LayoutParams
-                measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
-
-                // Only subtract out space from one dimension. Favor vertical.
-                // Offset by 1.5x to add some balance along the other edge.
-                if (Gravity.isVertical(lp.gravity)) {
-                    heightUsed += child.getMeasuredHeight() * 1.5f;
-                } else if (Gravity.isHorizontal(lp.gravity)) {
-                    widthUsed += child.getMeasuredWidth() * 1.5f;
+                    // Only subtract out space from one dimension. Favor vertical.
+                    // Offset by 1.5x to add some balance along the other edge.
+                    if (Gravity.isVertical(lp.gravity)) {
+                        heightUsed += child.getMeasuredHeight() * 1.5f;
+                    } else if (Gravity.isHorizontal(lp.gravity)) {
+                        widthUsed += child.getMeasuredWidth() * 1.5f;
+                    }
                 }
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);

@@ -19,98 +19,200 @@
 <!-- This is the SIM PIN view that allows the user to enter a SIM PIN to unlock the device. -->
 <com.android.internal.policy.impl.keyguard.KeyguardSimPinView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_sim_pin_view"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_lockscreen_sim"/>
+
+    <include layout="@layout/keyguard_message_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        >
+        <TextView android:id="@+id/pinEntry"
+            android:editable="true"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_marginStart="@*android:dimen/keyguard_lockscreen_pin_margin_left"
+            android:singleLine="true"
+            android:cursorVisible="false"
+            android:background="@null"
+            android:textAppearance="@style/TextAppearance.NumPadKey"
+            android:imeOptions="flagForceAscii|actionDone"
+            />
+        <ImageButton android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:src="@*android:drawable/ic_input_delete"
+            android:clickable="true"
+            android:paddingTop="8dip"
+            android:paddingBottom="8dip"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/keyboardview_keycode_delete"
+            />
+    </LinearLayout>
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="#55FFFFFF"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_height="0dip"
-            android:layout_width="match_parent"
+        android:orientation="horizontal"
+        >
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key1"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_lockscreen_sim"/>
-
-            <include layout="@layout/keyguard_message_area_large"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-         </LinearLayout>
-
-        <!-- Password entry field -->
-        <!-- Note: the entire container is styled to look like the edit field,
-             since the backspace/IME switcher looks better inside -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginEnd="4dip"
-            android:layout_marginStart="4dip"
-            android:gravity="center_vertical"
-            android:background="#70000000">
-
-            <!-- displays dots as user enters pin -->
-            <EditText android:id="@+id/sim_pin_entry"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:gravity="center_horizontal"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@*android:dimen/keyguard_lockscreen_pin_margin_left"
-                android:textStyle="normal"
-                android:inputType="textPassword"
-                android:textSize="36sp"
-                android:background="@null"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#ffffffff"
-                android:imeOptions="flagForceAscii|actionDone"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="1"
             />
-
-            <ImageButton android:id="@+id/delete_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:src="@android:drawable/ic_input_delete"
-                android:clickable="true"
-                android:padding="8dip"
-                android:background="?android:attr/selectableItemBackground"
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key2"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="2"
             />
-        </LinearLayout>
-
-        <!-- Numeric keyboard -->
-        <com.android.internal.widget.PasswordEntryKeyboardView android:id="@+id/keyboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dip"
-            android:layout_marginEnd="4dip"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip"
-            android:background="#40000000"
-            android:keyBackground="@*android:drawable/btn_keyboard_key_ics"
-            android:clickable="true"
-        />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key3"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="3"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key4"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="4"
+            />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key5"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="5"
+            />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key6"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="6"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        >
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key7"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="7"
+            />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key8"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="8"
+            />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key9"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="9"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        >
+        <Space
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+        <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+            android:id="@+id/key0"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            androidprv:textView="@+id/pinEntry"
+            androidprv:digit="0"
+            />
+        <ImageButton
+            android:id="@+id/key_enter"
+            style="@style/Widget.Button.NumPadKey"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+			android:paddingRight="30dp"
+            android:src="@drawable/sym_keyboard_return_holo"
+            android:contentDescription="@string/keyboardview_keycode_enter"
+            />
     </LinearLayout>
 
     <include layout="@layout/keyguard_emergency_carrier_area"
-        android:id="@+id/keyguard_selector_fade_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="bottom|center_horizontal"
-        android:gravity="center_horizontal" />
+                   android:id="@+id/keyguard_selector_fade_container"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical"
+                   android:layout_gravity="bottom|center_horizontal"
+                   android:gravity="center_horizontal" />
 
 </com.android.internal.policy.impl.keyguard.KeyguardSimPinView>

@@ -29,8 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -50,7 +48,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -59,7 +56,6 @@ import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityM
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
@@ -68,10 +64,10 @@ public class KeyguardHostView extends KeyguardViewBase {
     // Use this to debug all of keyguard
     public static boolean DEBUG = KeyguardViewMediator.DEBUG;
 
-    // also referenced in SecuritySettings.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
 
     private AppWidgetHost mAppWidgetHost;
+    private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;
     private KeyguardSecurityViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
@@ -113,6 +109,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mLockPatternUtils = new LockPatternUtils(context);
         mAppWidgetHost = new AppWidgetHost(
                 context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
+        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         mSecurityModel = new KeyguardSecurityModel(context);
 
         // The following enables the MENU key to work for testing automation
@@ -153,14 +150,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onFinishInflate() {
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
+        View deleteDropTarget = findViewById(R.id.keyguard_widget_pager_delete_target);
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
+        mAppWidgetContainer.setDeleteDropTarget(deleteDropTarget);
         mAppWidgetContainer.setMinScale(0.5f);
-
-        addDefaultWidgets();
-        addWidgetsFromSettings();
-        mSwitchPageRunnable.run();
 
         SlidingChallengeLayout slider =
                 (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
@@ -183,8 +178,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
         }
 
-        showPrimarySecurityScreen(false);
+        addDefaultWidgets();
+        addWidgetsFromSettings();
+        mSwitchPageRunnable.run();
 
+        showPrimarySecurityScreen(false);
         updateSecurityViews();
     }
 
@@ -549,8 +547,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         };
     };
 
-    private KeyguardStatusViewManager mKeyguardStatusViewManager;
-
     // Used to ignore callbacks from methods that are no longer current (e.g. face unlock).
     // This avoids unwanted asynchronous events from messing with the state.
     private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
@@ -589,6 +585,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         public void dismiss(boolean securityVerified) {
         }
     };
+
+    protected boolean mShowSecurityWhenReturn;
 
     @Override
     public void reset() {
@@ -715,6 +713,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // biometric unlock to start next time keyguard is shown.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         saveStickyWidgetIndex();
+        checkAppWidgetConsistency();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
         CameraWidgetFrame cameraPage = findCameraPage();
@@ -812,15 +811,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private void addWidget(int appId, int pageIndex) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
-        AppWidgetProviderInfo appWidgetInfo = appWidgetManager.getAppWidgetInfo(appId);
+    private boolean addWidget(int appId, int pageIndex) {
+        AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appId);
         if (appWidgetInfo != null) {
             AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
             addWidget(view, pageIndex);
+            return true;
         } else {
             Log.w(TAG, "AppWidgetInfo for app widget id " + appId + " was null, deleting");
             mLockPatternUtils.removeAppWidget(appId);
+            return false;
         }
     }
 
@@ -842,11 +842,11 @@ public class KeyguardHostView extends KeyguardViewBase {
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
                     slider.setHandleAlpha(1);
-                    slider.showChallenge(true);
                 }
+                mShowSecurityWhenReturn = true;
             }
 
-            private SlidingChallengeLayout locateSlider() {
+            public SlidingChallengeLayout locateSlider() {
                 return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
             }
         };
@@ -890,22 +890,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
                     @Override
                     public void run() {
-                        int defaultIconId = 0;
-                        Resources res = KeyguardHostView.this.getContext().getResources();
-                        ComponentName clock = new ComponentName(
-                                res.getString(R.string.widget_default_package_name),
-                                res.getString(R.string.widget_default_class_name));
-                        try {
-                            ActivityInfo activityInfo =
-                                    mContext.getPackageManager().getActivityInfo(clock, 0);
-                            if (activityInfo != null) {
-                                defaultIconId = activityInfo.icon;
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            defaultIconId = 0;
-                        }
-                        launchPickActivityIntent(R.string.widget_default, defaultIconId, clock,
-                                LockPatternUtils.EXTRA_DEFAULT_WIDGET);
+                        launchPickActivityIntent();
                     }
                 });
                 mCallback.dismiss(false);
@@ -916,8 +901,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         initializeTransportControl();
     }
 
-    private void launchPickActivityIntent(int defaultLabelId, int defaultIconId,
-            ComponentName defaultComponentName, String defaultTag) {
+    private void launchPickActivityIntent() {
         // Create intent to pick widget
         Intent pickIntent = new Intent(AppWidgetManager.ACTION_KEYGUARD_APPWIDGET_PICK);
 
@@ -928,22 +912,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
 
-            // Add an custom entry for the default
-            AppWidgetProviderInfo defaultInfo = new AppWidgetProviderInfo();
-            ArrayList<AppWidgetProviderInfo> extraInfos = new ArrayList<AppWidgetProviderInfo>();
-            defaultInfo.label = getResources().getString(defaultLabelId);
-            defaultInfo.icon = defaultIconId;
-            defaultInfo.provider = defaultComponentName;
-            extraInfos.add(defaultInfo);
-
-            ArrayList<Bundle> extraExtras = new ArrayList<Bundle>();
-            Bundle b = new Bundle();
-            b.putBoolean(defaultTag, true);
-            extraExtras.add(b);
-
-            // Launch the widget picker
-            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_INFO, extraInfos);
-            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_EXTRAS, extraExtras);
             pickIntent.putExtra(Intent.EXTRA_INTENT, getBaseIntent());
             pickIntent.addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK
@@ -1024,6 +992,22 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
+    private int getAddPageIndex() {
+        View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
+        int addPageIndex = mAppWidgetContainer.indexOfChild(addWidget);
+        // This shouldn't happen, but just to be safe!
+        if (addPageIndex < 0) {
+            addPageIndex = 0;
+        }
+        return addPageIndex;
+    }
+
+    private void addDefaultStatusWidget(int index) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
+        mAppWidgetContainer.addWidget(statusWidget, index);
+    }
+
     private void addWidgetsFromSettings() {
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -1036,23 +1020,17 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-        View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
-        int addPageIndex = mAppWidgetContainer.indexOfChild(addWidget);
-        // This shouldn't happen, but just to be safe!
-        if (addPageIndex < 0) {
-            addPageIndex = 0;
-        }
+        int addPageIndex = getAddPageIndex();
 
         // Add user-selected widget
         final int[] widgets = mLockPatternUtils.getAppWidgets();
+
         if (widgets == null) {
             Log.d(TAG, "Problem reading widgets");
         } else {
             for (int i = widgets.length -1; i >= 0; i--) {
                 if (widgets[i] == LockPatternUtils.ID_DEFAULT_STATUS_WIDGET) {
-                    LayoutInflater inflater = LayoutInflater.from(mContext);
-                    View statusWidget = inflater.inflate(R.layout.keyguard_status_view, null, true);
-                    mAppWidgetContainer.addWidget(statusWidget, addPageIndex + 1);
+                    addDefaultStatusWidget(addPageIndex + 1);
                 } else {
                     // We add the widgets from left to right, starting after the first page after
                     // the add page. We count down, since the order will be persisted from right
@@ -1060,6 +1038,42 @@ public class KeyguardHostView extends KeyguardViewBase {
                     addWidget(widgets[i], addPageIndex + 1);
                 }
             }
+        }
+        checkAppWidgetConsistency();
+    }
+
+    public void checkAppWidgetConsistency() {
+        final int childCount = mAppWidgetContainer.getChildCount();
+        boolean widgetPageExists = false;
+        for (int i = 0; i < childCount; i++) {
+            if (isWidgetPage(i)) {
+                widgetPageExists = true;
+                break;
+            }
+        }
+        if (!widgetPageExists) {
+            final int addPageIndex = getAddPageIndex();
+
+            Resources res = getContext().getResources();
+            ComponentName defaultAppWidget = new ComponentName(
+                    res.getString(R.string.widget_default_package_name),
+                    res.getString(R.string.widget_default_class_name));
+
+            // Note: we don't support configuring the widget
+            int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+            boolean bindSuccessful = false;
+            try {
+                mAppWidgetManager.bindAppWidgetId(appWidgetId, defaultAppWidget);
+                bindSuccessful = true;
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Error when trying to bind default AppWidget: " + e);
+            }
+            // Use the built-in status/clock view if we can't inflate the default widget
+            if (!(bindSuccessful && addWidget(appWidgetId, addPageIndex + 1))) {
+                addDefaultStatusWidget(addPageIndex + 1);
+            }
+            mAppWidgetContainer.onAddView(
+                    mAppWidgetContainer.getChildAt(addPageIndex + 1), addPageIndex + 1);
         }
     }
 
@@ -1129,6 +1143,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "Window is " + (hasWindowFocus ? "focused" : "unfocused"));
         if (!hasWindowFocus) {
             saveStickyWidgetIndex();
+        } else if (mShowSecurityWhenReturn) {
+            SlidingChallengeLayout slider =
+                (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+            if (slider != null) {
+                slider.setHandleAlpha(1);
+                slider.showChallenge(true);
+            }
+            mShowSecurityWhenReturn = false;
         }
     }
 
@@ -1153,6 +1175,15 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         return null;
+    }
+
+    private boolean isWidgetPage(int pageIndex) {
+        View v = mAppWidgetContainer.getChildAt(pageIndex);
+        if (v != null && v instanceof KeyguardWidgetFrame) {
+            KeyguardWidgetFrame kwf = (KeyguardWidgetFrame) v;
+            return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
+        }
+        return false;
     }
 
     private boolean isCameraPage(int pageIndex) {

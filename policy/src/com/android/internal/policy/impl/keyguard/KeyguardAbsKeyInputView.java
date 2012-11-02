@@ -130,6 +130,15 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
     }
 
+    /*
+     * Override this if you have a different string for "wrong password"
+     *
+     * Note that PIN/PUK have their own implementation of verifyPasswordAndUnlock and so don't need this
+     */
+    protected int getWrongPasswordStringId() {
+        return R.string.kg_wrong_password;
+    }
+
     protected void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText().toString();
         if (mLockPatternUtils.checkPassword(entry)) {
@@ -144,7 +153,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
-            mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pin, true);
+            mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
         }
         mPasswordEntry.setText("");
     }
@@ -164,6 +173,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
             @Override
             public void onFinish() {
+                mSecurityMessageDisplay.setMessage("", false);
                 resetState();
             }
         }.start();

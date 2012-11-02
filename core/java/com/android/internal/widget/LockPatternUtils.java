@@ -1073,11 +1073,7 @@ public class LockPatternUtils {
             }
             return appWidgetIds;
         }
-        if (appWidgetIdString == null) {
-            return new int[] { LockPatternUtils.ID_DEFAULT_STATUS_WIDGET };
-        } else {
-            return new int[0];
-        }
+        return new int[0];
     }
 
     private static String combineStrings(int[] list, String separator) {
