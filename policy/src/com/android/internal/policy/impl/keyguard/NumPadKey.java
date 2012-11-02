@@ -89,6 +89,7 @@ public class NumPadKey extends Button {
                 final String extra = sKlondike[mDigit];
                 final int extraLen = extra.length();
                 if (extraLen > 0) {
+                    builder.append(" ");
                     builder.append(extra);
                     builder.setSpan(
                         new TextAppearanceSpan(context, R.style.TextAppearance_NumPadKey_Klondike),
