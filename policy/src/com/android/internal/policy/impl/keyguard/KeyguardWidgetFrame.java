@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -220,8 +221,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
         View content = getContent();
         if (content instanceof AppWidgetHostView) {
             return ((AppWidgetHostView) content).getAppWidgetId();
-        } else {
+        } else if (content instanceof KeyguardStatusView) {
             return ((KeyguardStatusView) content).getAppWidgetId();
+        } else {
+            return AppWidgetManager.INVALID_APPWIDGET_ID;
         }
     }
 
