@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lehetővé teszi az alkalmazás számára, hogy új szavakat írjon a felhasználói szótárba."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"védett tárhelyhez való hozzáférés tesztelése"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"védett tárhelyhez való hozzáférés tesztelése"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Lehetővé teszi az alkalmazás számára egy olyan USB-háttértár engedélyének tesztelését, amely későbbi eszközökön lesz elérhető."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Lehetővé teszi az alkalmazás számára egy olyan USB-háttértár engedélyének tesztelését, amely későbbi eszközökön lesz elérhető."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Lehetővé teszi az alkalmazás számára egy olyan SD-kártya engedélyének tesztelését, amely későbbi eszközökön lesz elérhető."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB-tár törlése/módosítása"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-kártya tartalmának módosítása vagy törlése"</string>
@@ -750,6 +750,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Helytelen PIN kód."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"A feloldáshoz nyomja meg a Menü, majd a 0 gombot."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Segélyhívó szám"</string>
+    <string name="widget_default" msgid="1685115188448967291">"Óra"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nincs szolgáltatás."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"A képernyő le van zárva."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
@@ -811,9 +812,26 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cella hozzáadva"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Minta befejezve"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %3$d/%2$d"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Modul hozzáadása."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Üres"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Feloldási terület kiterjesztve."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Feloldási terület összecsukva."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Felhasználóválasztó"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Állapot"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Médiaelemek vezérlője"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"A modulátrendezés elkezdődött."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"A modulátrendezés véget ért."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul törölve."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"A feloldási terület kiterjesztése."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Feloldás csúsztatással"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Feloldás mintával"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Arcalapú feloldás"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Feloldás PIN kóddal"</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Feloldás jelszóval"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mintaterület"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Csúsztatási terület"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1425,4 +1443,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Tulajdonos"</string>
 </resources>

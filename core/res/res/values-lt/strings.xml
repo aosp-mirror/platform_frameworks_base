@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Leidžiama programai rašyti naujus žodžius į naudotojo žodyną."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"prieigos prie apsaugotos saugyklos tikrinimas"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"prieigos prie apsaugotos saugyklos tikrinimas"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Leidž. progr. tikr. USB atm., kuri bus pasiek. ateityje naud. kt. įreng., leidimą."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Leidžia progr. tikr. leidimą USB atm., kuri bus vėlesn. įreng."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Leidžiama programai tikrinti SD kortelės, kuri bus pasiekiama ateityje naudojant kitus įrenginius, leidimą."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"keisti / trinti USB atm. turinį"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"keisti arba trinti SD kortelės turinį"</string>
@@ -750,6 +750,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Neteisingas PIN kodas."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Jei norite atrakinti, paspauskite „Meniu“ ir 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Pagalbos numeris"</string>
+    <string name="widget_default" msgid="1685115188448967291">"Laikrodis"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nėra paslaugos."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekranas užrakintas."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Paspauskite „Meniu“, kad atrakintumėte ar skambintumėte pagalbos numeriu."</string>
@@ -811,9 +812,26 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Pridėtas langelis"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Šablonas užbaigtas"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d valdiklis iš %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Pridėti valdiklį."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tuščia"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Atrakinimo sritis išplėsta."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Atrakinimo sritis sutraukta."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Valdiklis <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Naudotojo pasirinkimo valdiklis"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Būsena"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Fotoaparatas"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Medijos valdikliai"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Valdiklių pertvarkymas pradėtas."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Valdiklių pertvarkymas baigtas."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Valdiklis <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ištrintas."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Išplėsti atrakinimo sritį."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Atrakinimas slystant."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Atrakinimas pagal piešinį."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Atrakinimas pagal veidą."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Atrakinimas įvedus PIN kodą."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Atrakinimas įvedus slaptažodį."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Atrakinimo pagal piešinį sritis."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Slydimo sritis."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1425,4 +1443,5 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pritaikymas neįgaliesiems įgalintas."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pritaikymo neįgaliesiems režimas atšauktas."</string>
     <string name="user_switched" msgid="3768006783166984410">"Dabartinis naudotojas: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Savininkas"</string>
 </resources>
