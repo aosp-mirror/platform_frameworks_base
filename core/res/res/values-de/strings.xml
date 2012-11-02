@@ -750,6 +750,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Falscher PIN-Code"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Drücken Sie zum Entsperren die Menütaste und dann auf \"0\"."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Notrufnummer"</string>
+    <string name="widget_default" msgid="1685115188448967291">"Uhr"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Kein Dienst"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Display gesperrt"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Drücken Sie die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
@@ -810,10 +811,33 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Muster gelöscht"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Zelle hinzugefügt"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Muster abgeschlossen"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d von %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget hinzufügen"</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Leer"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Entsperrter Bereich maximiert"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Entsperrten Bereich minimieren"</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Nutzerauswahl"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediensteuerelemente"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Neuordnung der Widgets gestartet"</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Neuordnung der Widgets abgeschlossen"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> gelöscht"</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Entsperrten Bereich maximieren"</string>
+    <!-- no translation found for keyguard_accessibility_slide_unlock (2959928478764697254) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_pattern_unlock (1490840706075246612) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_face_unlock (4817282543351718535) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_pin_unlock (2469687111784035046) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_password_unlock (7675777623912155089) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_pattern_area (7679891324509597904) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_slide_area (6736064494019979544) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
