@@ -830,26 +830,29 @@ public class KeyguardHostView extends KeyguardViewBase {
         new CameraWidgetFrame.Callbacks() {
             @Override
             public void onLaunchingCamera() {
-                SlidingChallengeLayout slider = locateSlider();
-                if (slider != null) {
-                    slider.setHandleAlpha(0);
-                }
+                setSliderHandleAlpha(0);
             }
 
             @Override
-            public void onCameraLaunched() {
+            public void onCameraLaunchedSuccessfully() {
                 if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
                     mAppWidgetContainer.scrollLeft();
                 }
-                SlidingChallengeLayout slider = locateSlider();
-                if (slider != null) {
-                    slider.setHandleAlpha(1);
-                }
+                setSliderHandleAlpha(1);
                 mShowSecurityWhenReturn = true;
             }
 
-            public SlidingChallengeLayout locateSlider() {
-                return (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+            @Override
+            public void onCameraLaunchedUnsuccessfully() {
+                setSliderHandleAlpha(1);
+            }
+
+            private void setSliderHandleAlpha(float alpha) {
+                SlidingChallengeLayout slider =
+                        (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+                if (slider != null) {
+                    slider.setHandleAlpha(alpha);
+                }
             }
         };
 
