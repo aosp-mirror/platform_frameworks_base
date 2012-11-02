@@ -1326,9 +1326,7 @@
   <java-symbol type="id" name="lockPatternView" />
   <java-symbol type="id" name="forgot_password_button" />
   <java-symbol type="id" name="glow_pad_view" />
-  <java-symbol type="id" name="sim_pin_entry" />
   <java-symbol type="id" name="delete_button" />
-  <java-symbol type="id" name="sim_pin_entry" />
   <java-symbol type="id" name="keyguard_user_avatar" />
   <java-symbol type="id" name="keyguard_user_name" />
   <java-symbol type="id" name="keyguard_transport_control" />
