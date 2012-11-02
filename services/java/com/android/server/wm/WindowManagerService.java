@@ -192,7 +192,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
-    static final boolean DEBUG_WALLPAPER_LIGHT = true || DEBUG_WALLPAPER;
+    static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
@@ -545,7 +545,7 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState mWallpaperTarget = null;
     // If non-null, we are in the middle of animating from one wallpaper target
     // to another, and this is the lower one in Z-order.
-    private WindowState mLowerWallpaperTarget = null;
+    WindowState mLowerWallpaperTarget = null;
     // If non-null, we are in the middle of animating from one wallpaper target
     // to another, and this is the higher one in Z-order.
     private WindowState mUpperWallpaperTarget = null;
@@ -2847,7 +2847,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
                     // To change the format, we need to re-build the surface.
-                    winAnimator.destroySurfaceLocked();
+                    winAnimator.destroySurfaceLocked(false);
                     toBeDisplayed = true;
                     surfaceChanged = true;
                 }
@@ -2928,7 +2928,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (mInputMethodWindow == win) {
                                 mInputMethodWindow = null;
                             }
-                            winAnimator.destroySurfaceLocked();
+                            winAnimator.destroySurfaceLocked(false);
                         }
                         scheduleNotifyWindowTranstionIfNeededLocked(win, transit);
                     }
@@ -3030,7 +3030,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win == null) {
                     return;
                 }
-                win.mWinAnimator.destroyDeferredSurfaceLocked();
+                win.mWinAnimator.destroyDeferredSurfaceLocked(false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -8136,7 +8136,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.flush();
                     Slog.w(TAG, "This window was lost: " + ws);
                     Slog.w(TAG, sw.toString());
-                    ws.mWinAnimator.destroySurfaceLocked();
+                    ws.mWinAnimator.destroySurfaceLocked(false);
                 }
             }
             Slog.w(TAG, "Current app token list:");
@@ -9443,7 +9443,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win == mWallpaperTarget) {
                     wallpaperDestroyed = true;
                 }
-                win.mWinAnimator.destroySurfaceLocked();
+                win.mWinAnimator.destroySurfaceLocked(false);
             } while (i > 0);
             mDestroySurface.clear();
         }
@@ -9692,6 +9692,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 allWinAnimatorLists.put(displayContent.getDisplayId(), winAnimatorList);
             }
 
+            if (WindowManagerService.DEBUG_WALLPAPER_LIGHT) {
+                if (mWallpaperTarget != layoutToAnim.mWallpaperTarget
+                        || mLowerWallpaperTarget != layoutToAnim.mLowerWallpaperTarget
+                        || mUpperWallpaperTarget != layoutToAnim.mUpperWallpaperTarget) {
+                    Slog.d(TAG, "Pushing anim wallpaper: target=" + layoutToAnim.mWallpaperTarget
+                            + " lower=" + layoutToAnim.mLowerWallpaperTarget + " upper="
+                            + layoutToAnim.mUpperWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
+                }
+            }
             layoutToAnim.mWallpaperTarget = mWallpaperTarget;
             layoutToAnim.mLowerWallpaperTarget = mLowerWallpaperTarget;
             layoutToAnim.mUpperWallpaperTarget = mUpperWallpaperTarget;
