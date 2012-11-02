@@ -88,6 +88,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected abstract int getPasswordTextViewId();
+    protected abstract int getWrongPasswordStringId();
     protected abstract void resetState();
 
     @Override
@@ -144,7 +145,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
-            mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pin, true);
+            mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
         }
         mPasswordEntry.setText("");
     }
@@ -164,6 +165,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
             @Override
             public void onFinish() {
+                mSecurityMessageDisplay.setMessage("", false);
                 resetState();
             }
         }.start();
