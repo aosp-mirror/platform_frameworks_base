@@ -2013,7 +2013,6 @@
   <public type="attr" name="presentationTheme" id="0x010103c0" />
   <public type="attr" name="subtypeId" id="0x010103c1" />
   <public type="attr" name="initialKeyguardLayout" id="0x010103c2" />
-  <public type="attr" name="widgetFeatures" id="0x010103c3" />
   <public type="attr" name="widgetCategory" id="0x010103c4" />
   <public type="attr" name="permissionGroupFlags" id="0x010103c5" />
   <public type="attr" name="labelFor" id="0x010103c6" />

@@ -182,7 +182,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         } else {
-            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
+            displayDefaultSecurityMessage();
         }
 
         // the footer depends on how many total attempts the user has failed
@@ -195,6 +195,14 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             updateFooter(FooterMode.Normal);
         }
 
+    }
+
+    private void displayDefaultSecurityMessage() {
+        if (KeyguardUpdateMonitor.getInstance(mContext).getMaxBiometricUnlockAttemptsReached()) {
+            mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
+        } else {
+            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
+        }
     }
 
     @Override
@@ -338,7 +346,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
-                mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
+                displayDefaultSecurityMessage();
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {

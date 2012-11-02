@@ -27,6 +27,7 @@
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/keyguard_accessibility_widget_empty_slot"
             >
         <ImageView
             android:id="@+id/keyguard_add_widget_view"
@@ -35,6 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="24dp"
-            android:src="@drawable/kg_add_widget" />
+            android:src="@drawable/kg_add_widget"
+            android:contentDescription="@string/keyguard_accessibility_add_widget"/>
     </FrameLayout>
 </com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>
