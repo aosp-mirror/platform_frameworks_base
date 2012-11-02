@@ -40,7 +40,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -62,6 +64,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.InputDevice;
@@ -137,6 +140,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList =
             new ArrayList<AccessibilityServiceInfo>();
 
+    private final Rect mTempRect = new Rect();
+
+    private final Point mTempPoint = new Point();
+
+    private final Display mDefaultDisplay;
+
     private final PackageManager mPackageManager;
 
     private final IWindowManager mWindowManagerService;
@@ -194,6 +203,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mWindowManagerService = (IWindowManager) ServiceManager.getService(Context.WINDOW_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
         mMainHandler = new MainHandler(mContext.getMainLooper());
+        //TODO: (multi-display) We need to support multiple displays.
+        DisplayManager displayManager = (DisplayManager)
+                mContext.getSystemService(Context.DISPLAY_SERVICE);
+        mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 context.getContentResolver());
@@ -582,6 +595,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param outBounds The output to which to write the focus bounds.
      * @return Whether accessibility focus was found and the bounds are populated.
      */
+    // TODO: (multi-display) Make sure this works for multiple displays. 
     boolean getAccessibilityFocusBoundsInActiveWindow(Rect outBounds) {
         // Instead of keeping track of accessibility focus events per
         // window to be able to find the focus in the active window,
@@ -603,6 +617,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return false;
             }
             focus.getBoundsInScreen(outBounds);
+            // Clip to the window rectangle.
+            Rect windowBounds = mTempRect;
+            getActiveWindowBounds(windowBounds);
+            outBounds.intersect(windowBounds);
+            // Clip to the screen rectangle.
+            mDefaultDisplay.getRealSize(mTempPoint);
+            outBounds.intersect(0,  0,  mTempPoint.x, mTempPoint.y);
             return true;
         } finally {
             client.removeConnection(connectionId);
