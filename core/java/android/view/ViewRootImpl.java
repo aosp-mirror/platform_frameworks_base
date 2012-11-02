@@ -2338,6 +2338,7 @@ public final class ViewRootImpl implements ViewParent,
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
         }
         bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
+        bounds.intersect(0, 0, mAttachInfo.mViewRootImpl.mWidth, mAttachInfo.mViewRootImpl.mHeight);
         drawable.setBounds(bounds);
         drawable.draw(canvas);
     }
