@@ -70,7 +70,7 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
                     }
                 }
             });
-            ok.setOnHoverListener(new NumPadKey.LiftToActivateListener(getContext()));
+            ok.setOnHoverListener(new LiftToActivateListener(getContext()));
         }
 
         // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
