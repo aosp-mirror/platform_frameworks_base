@@ -56,4 +56,9 @@
     <!-- Bottom padding for the widget pager -->
     <dimen name="kg_widget_pager_bottom_padding">0dp</dimen>
 
+    <!-- If the height if keyguard drops below this threshold (most likely
+    due to the appearance of the IME), then drop the multiuser selector.
+    Landscape's layout allows this to be smaller than for portrait. -->
+    <dimen name="kg_squashed_layout_threshold">400dp</dimen>
+
 </resources>
