@@ -93,6 +93,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     @Override
     public void onResume() {
         if (DEBUG) Log.d(TAG, "onResume()");
+        mIsShowing = KeyguardUpdateMonitor.getInstance(mContext).isKeyguardVisible();
         maybeStartBiometricUnlock();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
     }

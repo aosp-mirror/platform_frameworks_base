@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
+import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
 
 public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
@@ -63,7 +64,10 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
         public void run() {
+            if (!mTransitioning)
+                return;
             mLaunchCameraStart = SystemClock.uptimeMillis();
+            if (DEBUG) Log.d(TAG, "Launching camera at " + mLaunchCameraStart);
             mActivityLauncher.launchCamera();
         }};
 
@@ -107,6 +111,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
         preview.setScaleType(ScaleType.FIT_CENTER);
+        preview.setContentDescription(preview.getContext().getString(
+                R.string.keyguard_accessibility_camera));
         CameraWidgetFrame cameraWidgetFrame = new CameraWidgetFrame(context, callbacks, launcher);
         cameraWidgetFrame.addView(preview);
         cameraWidgetFrame.mWidgetView = widgetView;
@@ -271,7 +277,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     @Override
     protected void onFocusLost() {
-        Log.d(TAG, "onFocusLost");
+        if (DEBUG) Log.d(TAG, "onFocusLost");
         cancelTransitionToCamera();
         super.onFocusLost();
     }
@@ -288,6 +294,11 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
                 rescheduleTransitionToCamera();
             }
         }
+    }
+
+    public void onScreenTurnedOff() {
+        if (DEBUG) Log.d(TAG, "onScreenTurnedOff");
+        reset();
     }
 
     private void rescheduleTransitionToCamera() {

@@ -42,7 +42,11 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     }
 
     protected void resetState() {
-        mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);
+        if (KeyguardUpdateMonitor.getInstance(mContext).getMaxBiometricUnlockAttemptsReached()) {
+            mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
+        } else {
+            mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);
+        }
         mPasswordEntry.setEnabled(true);
     }
 

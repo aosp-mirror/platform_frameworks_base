@@ -584,6 +584,7 @@ class TouchExplorer implements EventStreamTransformation {
                             // a given distance perform a drag.
                             mCurrentState = STATE_DRAGGING;
                             mDraggingPointerId = pointerId;
+                            event.setEdgeFlags(receivedTracker.getLastReceivedDownEdgeFlags());
                             sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits,
                                     policyFlags);
                         } else {
@@ -1752,6 +1753,9 @@ class TouchExplorer implements EventStreamTransformation {
         // Which pointers are down.
         private int mReceivedPointersDown;
 
+        // The edge flags of the last received down event.
+        private int mLastReceivedDownEdgeFlags;
+
         // Which down pointers are active.
         private int mActivePointers;
 
@@ -1947,6 +1951,13 @@ class TouchExplorer implements EventStreamTransformation {
         }
 
         /**
+         * @return The edge flags of the last received down event.
+         */
+        public int getLastReceivedDownEdgeFlags() {
+            return mLastReceivedDownEdgeFlags;
+        }
+
+        /**
          * @return Whether the last received pointer that went up was active.
          */
         public boolean wasLastReceivedUpPointerActive() {
@@ -1994,6 +2005,8 @@ class TouchExplorer implements EventStreamTransformation {
             mLastReceivedUpPointerActive = false;
             mLastReceivedUpPointerDownX = 0;
             mLastReceivedUpPointerDownX = 0;
+
+            mLastReceivedDownEdgeFlags = event.getEdgeFlags();
 
             mReceivedPointersDown |= pointerFlag;
             mReceivedPointerDownX[pointerId] = event.getX(pointerIndex);

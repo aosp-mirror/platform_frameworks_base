@@ -61,7 +61,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     private final int MSG_UNLOCK = 4;
     private final int MSG_CANCEL = 5;
     private final int MSG_REPORT_FAILED_ATTEMPT = 6;
-    private final int MSG_EXPOSE_FALLBACK = 7;
+    //private final int MSG_EXPOSE_FALLBACK = 7;
     private final int MSG_POKE_WAKELOCK = 8;
 
     // TODO: This was added for the purpose of adhering to what the biometric interface expects
@@ -258,9 +258,9 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             case MSG_REPORT_FAILED_ATTEMPT:
                 handleReportFailedAttempt();
                 break;
-            case MSG_EXPOSE_FALLBACK:
-                handleExposeFallback();
-                break;
+                //case MSG_EXPOSE_FALLBACK:
+                //handleExposeFallback();
+                //break;
             case MSG_POKE_WAKELOCK:
                 handlePokeWakelock(msg.arg1);
                 break;
@@ -401,14 +401,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
      * is started, indicating there is no need to continue displaying the underlying view because
      * the service UI is now covering the backup lock.
      */
-    void handleExposeFallback() {
-        if (DEBUG) Log.d(TAG, "handleExposeFallback()");
-        if (mFaceUnlockView != null) {
-            mFaceUnlockView.setVisibility(View.INVISIBLE);
-        } else {
-            Log.e(TAG, "mFaceUnlockView is null in handleExposeFallback()");
-        }
-    }
+    //void handleExposeFallback() {
+    //    if (DEBUG) Log.d(TAG, "handleExposeFallback()");
+    //    if (mFaceUnlockView != null) {
+    //        mFaceUnlockView.setVisibility(View.INVISIBLE);
+    //    } else {
+    //        Log.e(TAG, "mFaceUnlockView is null in handleExposeFallback()");
+    //    }
+    //}
 
     /**
      * Pokes the wakelock to keep the screen alive and active for a specific amount of time.
@@ -534,11 +534,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
          * unlock can be exposed because the Face Unlock service is now covering the backup with its
          * UI.
          **/
-        @Override
-        public void exposeFallback() {
-            if (DEBUG) Log.d(TAG, "exposeFallback()");
-            mHandler.sendEmptyMessage(MSG_EXPOSE_FALLBACK);
-        }
+        //@Override
+        //public void exposeFallback() {
+        //    if (DEBUG) Log.d(TAG, "exposeFallback()");
+        //    mHandler.sendEmptyMessage(MSG_EXPOSE_FALLBACK);
+        //}
 
         /**
          * Called when Face Unlock wants to keep the screen alive and active for a specific amount

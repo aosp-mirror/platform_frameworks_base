@@ -72,7 +72,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     @Override
     public void onResume() {
         super.onResume();
-        mImm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        // XXX this is still not right because onResume is being called every time the page changes
+        mPasswordEntry.requestFocus();
+        mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Override
