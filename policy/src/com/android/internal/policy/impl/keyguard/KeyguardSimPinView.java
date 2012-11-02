@@ -39,13 +39,12 @@ import com.android.internal.R;
  * Displays a PIN pad for unlocking.
  */
 public class KeyguardSimPinView extends KeyguardAbsKeyInputView
-          implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
-  
-      private ProgressDialog mSimUnlockProgressDialog = null;
-      private volatile boolean mSimCheckInProgress;
-  
-      public KeyguardSimPinView(Context context) {
+        implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
+    private ProgressDialog mSimUnlockProgressDialog = null;
+    private volatile boolean mSimCheckInProgress;
+
+    public KeyguardSimPinView(Context context) {
         this(context, null);
     }
 
