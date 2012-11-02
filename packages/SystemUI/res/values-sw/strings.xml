@@ -136,8 +136,8 @@
     <string name="accessibility_settings_button" msgid="799583911231893380">"Mipangilio ya mfumo."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Arifa."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Futa arifa"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPRS imewezeshwa."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPRS inamiliki."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS imewashwa."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Kupata GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Kichapishaji cha Tele kimewezeshwa."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Mtetemo wa mlio"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mlio wa simu uko kimya."</string>
