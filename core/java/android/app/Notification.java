@@ -896,6 +896,9 @@ public class Notification implements Parcelable
 
     /** {@hide} */
     public void setUser(UserHandle user) {
+        if (user.getIdentifier() == UserHandle.USER_ALL) {
+            user = UserHandle.OWNER;
+        }
         if (tickerView != null) {
             tickerView.setUser(user);
         }
