@@ -1478,6 +1478,7 @@
   <java-symbol type="string" name="kg_failed_attempts_almost_at_login" />
   <java-symbol type="string" name="kg_enter_confirm_pin_hint" />
   <java-symbol type="string" name="kg_invalid_confirm_pin_hint" />
+  <java-symbol type="string" name="kg_text_message_separator" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />

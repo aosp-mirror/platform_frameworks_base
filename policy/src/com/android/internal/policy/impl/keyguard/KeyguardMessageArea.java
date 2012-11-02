@@ -43,7 +43,6 @@ class KeyguardMessageArea extends TextView {
 
     static final int SECURITY_MESSAGE_DURATION = 5000;
     protected static final int FADE_DURATION = 750;
-    static final String SEPARATOR = "  ";
 
     // are we showing battery information?
     boolean mShowingBatteryInfo = false;
@@ -143,6 +142,8 @@ class KeyguardMessageArea extends TextView {
         }
     };
 
+    private CharSequence mSeparator;
+
     public KeyguardMessageArea(Context context) {
         this(context, null);
     }
@@ -157,6 +158,8 @@ class KeyguardMessageArea extends TextView {
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(getContext());
         mUpdateMonitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
+
+        mSeparator = getResources().getString(R.string.kg_text_message_separator);
 
         update();
     }
@@ -186,22 +189,22 @@ class KeyguardMessageArea extends TextView {
         setText(status);
     }
 
-
-    private CharSequence concat(Object... args) {
+    private CharSequence concat(CharSequence... args) {
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < args.length; i++) {
-            final Object arg = args[i];
-            if (arg instanceof CharSequence) {
-                b.append((CharSequence)args[i]);
-                b.append(SEPARATOR);
-            } else if (arg instanceof String) {
-                b.append((String)args[i]);
-                b.append(SEPARATOR);
+        if (!TextUtils.isEmpty(args[0])) {
+            b.append(args[0]);
+        }
+        for (int i = 1; i < args.length; i++) {
+            CharSequence text = args[i];
+            if (!TextUtils.isEmpty(text)) {
+                if (b.length() > 0) {
+                    b.append(mSeparator);
+                }
+                b.append(text);
             }
         }
         return b.toString();
     }
-
 
     CharSequence getCurrentMessage() {
         return mShowingMessage ? mMessage : null;

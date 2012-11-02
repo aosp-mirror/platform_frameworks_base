@@ -3976,6 +3976,9 @@
        you will be asked to unlock your phone using an email account.\n\n
        Try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
+    <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
+         with spaces on either side. [CHAR LIMIT=3] -->
+    <string name="kg_text_message_separator" product="default"> \u2014 </string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
