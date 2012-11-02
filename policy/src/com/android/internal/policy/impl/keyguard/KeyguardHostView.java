@@ -72,7 +72,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
     private KeyguardTransportControlView mTransportControl;
-    private boolean mEnableMenuKey;
     private boolean mIsVerifyUnlockOnly;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
@@ -112,8 +111,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         mSecurityModel = new KeyguardSecurityModel(context);
 
-        // The following enables the MENU key to work for testing automation
-        mEnableMenuKey = shouldEnableMenuKey();
         mViewStateManager = new KeyguardViewStateManager();
     }
 
@@ -1292,18 +1289,19 @@ public class KeyguardHostView extends KeyguardViewBase {
         return !configDisabled || isTestHarness || fileOverride;
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU && mEnableMenuKey) {
-            showNextSecurityScreenOrFinish(false);
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-    }
+
 
     public void goToUserSwitcher() {
         mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
+    }
+
+    public boolean handleMenuKey() {
+        // The following enables the MENU key to work for testing automation
+        if (shouldEnableMenuKey()) {
+            showNextSecurityScreenOrFinish(false);
+            return true;
+        }
+        return false;
     }
 
     public boolean handleBackKey() {
