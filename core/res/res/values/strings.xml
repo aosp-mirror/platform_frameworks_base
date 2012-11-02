@@ -2065,15 +2065,6 @@
     <!-- This can be used in any application wanting to disable the text "Emergency number" -->
     <string name="emergency_call_dialog_number_for_display">Emergency number</string>
 
-    <!-- String to display if the clock status widget is selected (it is the default) [CHAR LIMIT=22] -->
-    <string name="widget_default" msgid="8269383575996003796">Clock</string>
-
-    <!-- Package name for default widget [DO NOT TRANSLATE] -->
-    <string name="widget_default_package_name">com.android.deskclock</string>
-
-    <!-- Class name for default widget [DO NOT TRANSLATE] -->
-    <string name="widget_default_class_name">com.android.deskclock.DeskClock</string>
-
     <!--
        *** touch based lock / unlock ***
                                           --> <skip />
@@ -3976,6 +3967,9 @@
        you will be asked to unlock your phone using an email account.\n\n
        Try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
+    <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
+         with spaces on either side. [CHAR LIMIT=3] -->
+    <string name="kg_text_message_separator" product="default"> \u2014 </string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->

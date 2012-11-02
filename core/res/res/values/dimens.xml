@@ -330,4 +330,9 @@
     <!-- Size of the region along the edge of the screen that will accept
          swipes to scroll the widget area. -->
     <dimen name="kg_edge_swipe_region_size">24dp</dimen>
+
+    <!-- If the height if keyguard drops below this threshold (most likely
+    due to the appearance of the IME), then drop the multiuser selector. -->
+    <dimen name="kg_squashed_layout_threshold">600dp</dimen>
+
 </resources>
