@@ -224,7 +224,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         // listen for settings changes
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true, 
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true,
                 new ContentObserver(mLocationHandler) {
            @Override
             public void onChange(boolean selfChange) {
@@ -1540,7 +1540,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
 
-    private static boolean shouldBroadcastSafe(Location loc, Location lastLoc, UpdateRecord record) {
+    private static boolean shouldBroadcastSafe(
+            Location loc, Location lastLoc, UpdateRecord record, long now) {
         // Always broadcast the first update
         if (lastLoc == null) {
             return true;
@@ -1559,6 +1560,16 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (loc.distanceTo(lastLoc) <= minDistance) {
                 return false;
             }
+        }
+
+        // Check whether sufficient number of udpates is left
+        if (record.mRequest.getNumUpdates() <= 0) {
+            return false;
+        }
+
+        // Check whether the expiry date has passed
+        if (record.mRequest.getExpireAt() < now) {
+            return false;
         }
 
         return true;
@@ -1640,7 +1651,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
             if (notifyLocation != null) {
                 Location lastLoc = r.mLastFixBroadcast;
-                if ((lastLoc == null) || shouldBroadcastSafe(notifyLocation, lastLoc, r)) {
+                if ((lastLoc == null) || shouldBroadcastSafe(notifyLocation, lastLoc, r, now)) {
                     if (lastLoc == null) {
                         lastLoc = new Location(notifyLocation);
                         r.mLastFixBroadcast = lastLoc;
@@ -1651,6 +1662,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         Slog.w(TAG, "RemoteException calling onLocationChanged on " + receiver);
                         receiverDead = true;
                     }
+                    r.mRequest.decrementNumUpdates();
                 }
             }
 
@@ -1666,7 +1678,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
 
             // track expired records
-            if (r.mRequest.getNumUpdates() == 0 || r.mRequest.getExpireAt() < now) {
+            if (r.mRequest.getNumUpdates() <= 0 || r.mRequest.getExpireAt() < now) {
                 if (deadUpdateRecords == null) {
                     deadUpdateRecords = new ArrayList<UpdateRecord>();
                 }
