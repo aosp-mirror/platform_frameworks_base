@@ -875,8 +875,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
-        mWinAnimator.destroyDeferredSurfaceLocked();
-        mWinAnimator.destroySurfaceLocked();
+        mWinAnimator.destroyDeferredSurfaceLocked(false);
+        mWinAnimator.destroySurfaceLocked(false);
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);

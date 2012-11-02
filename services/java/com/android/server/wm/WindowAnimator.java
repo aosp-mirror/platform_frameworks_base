@@ -13,6 +13,7 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENT
 import static com.android.server.wm.WindowManagerService.H.UPDATE_ANIM_PARAMETERS;
 
 import android.content.Context;
+import android.os.Debug;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
@@ -203,9 +204,9 @@ public class WindowAnimator {
                 if (mWallpaperTarget != layoutToAnim.mWallpaperTarget
                         || mLowerWallpaperTarget != layoutToAnim.mLowerWallpaperTarget
                         || mUpperWallpaperTarget != layoutToAnim.mUpperWallpaperTarget) {
-                    Slog.d(TAG, "Updating anim wallpaper: target=" + mWallpaperTarget
-                            + " lower=" + mLowerWallpaperTarget + " upper="
-                            + mUpperWallpaperTarget);
+                    Slog.d(TAG, "Pulling anim wallpaper: target=" + layoutToAnim.mWallpaperTarget
+                            + " lower=" + layoutToAnim.mLowerWallpaperTarget + " upper="
+                            + layoutToAnim.mUpperWallpaperTarget);
                 }
             }
             mWallpaperTarget = layoutToAnim.mWallpaperTarget;
@@ -259,11 +260,30 @@ public class WindowAnimator {
         }
     }
 
-    void hideWallpapersLocked(final WindowState w) {
-        if ((mWallpaperTarget == w && mLowerWallpaperTarget == null) || mWallpaperTarget == null) {
-            final int numTokens = mWallpaperTokens.size();
+    void hideWallpapersLocked(final WindowState w, boolean fromAnimator) {
+        // There is an issue where this function can be called either from
+        // the animation or the layout side of the window manager.  The problem
+        // is that if it is called from the layout side, we may not yet have
+        // propagated the current layout wallpaper state over into the animation
+        // state.  If that is the case, we can do bad things like hide the
+        // wallpaper when we had just made it shown because the animation side
+        // doesn't yet see that there is now a wallpaper target.  As a temporary
+        // work-around, we tell the function here which side of the window manager
+        // is calling so it can use the right state.
+        if (fromAnimator) {
+            hideWallpapersLocked(w, mWallpaperTarget, mLowerWallpaperTarget, mWallpaperTokens);
+        } else {
+            hideWallpapersLocked(w, mService.mWallpaperTarget,
+                    mService.mLowerWallpaperTarget, mService.mWallpaperTokens);
+        }
+    }
+
+    void hideWallpapersLocked(final WindowState w, final WindowState wallpaperTarget,
+            final WindowState lowerWallpaperTarget, final ArrayList<WindowToken> wallpaperTokens) {
+        if ((wallpaperTarget == w && lowerWallpaperTarget == null) || wallpaperTarget == null) {
+            final int numTokens = wallpaperTokens.size();
             for (int i = numTokens - 1; i >= 0; i--) {
-                final WindowToken token = mWallpaperTokens.get(i);
+                final WindowToken token = wallpaperTokens.get(i);
                 final int numWindows = token.windows.size();
                 for (int j = numWindows - 1; j >= 0; j--) {
                     final WindowState wallpaper = token.windows.get(j);
@@ -276,7 +296,8 @@ public class WindowAnimator {
                     }
                 }
                 if (WindowManagerService.DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG,
-                        "Hiding wallpaper " + token + " from " + w);
+                        "Hiding wallpaper " + token + " from " + w + "\n"
+                        + Debug.getCallers(5, "  "));
                 token.hidden = true;
             }
         }
