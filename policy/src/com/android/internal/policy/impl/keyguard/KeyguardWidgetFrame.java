@@ -317,7 +317,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     public void setWidgetLockedSmall(boolean locked) {
-        setWidgetHeight(mSmallWidgetHeight);
+        if (locked) {
+            setWidgetHeight(mSmallWidgetHeight);
+        }
         mWidgetLockedSmall = locked;
     }
 
