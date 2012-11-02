@@ -92,6 +92,7 @@ public class KeyguardUpdateMonitor {
     private CharSequence mTelephonySpn;
     private int mRingMode;
     private int mPhoneState;
+    private boolean mKeyguardIsVisible;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -200,7 +201,6 @@ public class KeyguardUpdateMonitor {
             }
         }
     };
-    private boolean mIsFirstBoot;
 
     /**
      * When we receive a
@@ -567,12 +567,18 @@ public class KeyguardUpdateMonitor {
      */
     private void handleKeyguardVisibilityChanged(int showing) {
         if (DEBUG) Log.d(TAG, "handleKeyguardVisibilityChanged(" + showing + ")");
+        boolean isShowing = (showing == 1);
+        mKeyguardIsVisible = isShowing;
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onKeyguardVisibilityChanged(showing == 1);
+                cb.onKeyguardVisibilityChanged(isShowing);
             }
         }
+    }
+
+    public boolean isKeyguardVisible() {
+        return mKeyguardIsVisible;
     }
 
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
@@ -777,13 +783,5 @@ public class KeyguardUpdateMonitor {
         return (simState == IccCardConstants.State.PIN_REQUIRED
                 || simState == IccCardConstants.State.PUK_REQUIRED
                 || simState == IccCardConstants.State.PERM_DISABLED);
-    }
-
-    public void setIsFirstBoot(boolean b) {
-        mIsFirstBoot = b;
-    }
-    
-    public boolean getIsFirstBoot() {
-        return mIsFirstBoot;
     }
 }

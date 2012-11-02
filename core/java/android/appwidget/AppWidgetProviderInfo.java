@@ -54,18 +54,6 @@ public class AppWidgetProviderInfo implements Parcelable {
     public static final int WIDGET_CATEGORY_KEYGUARD = 2;
 
     /**
-     * Indicates that the widget supports no special features.
-     */
-    public static final int WIDGET_FEATURES_NONE = 0;
-
-    /**
-     * Indicates that the widget is output only, ie. has nothing clickable. This may be enforced by
-     * the host. Presently, this flag is used by the keyguard to indicate that it can be placed
-     * in the first position.
-     */
-    public static final int WIDGET_FEATURES_STATUS = 1;
-
-    /**
      * Identity of this AppWidget component.  This component should be a {@link
      * android.content.BroadcastReceiver}, and it will be sent the AppWidget intents
      * {@link android.appwidget as described in the AppWidget package documentation}.
@@ -207,15 +195,6 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public int widgetCategory;
 
-    /**
-     * A field which specifies any special features that this widget supports. See
-     * {@link #WIDGET_FEATURES_NONE}, {@link #WIDGET_FEATURES_STATUS}.
-     *
-     * <p>This field corresponds to the <code>widgetFeatures</code> attribute in
-     * the AppWidget meta-data file.
-     */
-    public int widgetFeatures;
-
     public AppWidgetProviderInfo() {
     }
 
@@ -242,7 +221,6 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
         this.widgetCategory = in.readInt();
-        this.widgetFeatures = in.readInt();
     }
 
     public void writeToParcel(android.os.Parcel out, int flags) {
@@ -271,7 +249,6 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
         out.writeInt(this.widgetCategory);
-        out.writeInt(this.widgetFeatures);
     }
 
     @Override
@@ -292,7 +269,6 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.autoAdvanceViewId = this.autoAdvanceViewId;
         that.resizeMode = this.resizeMode;
         that.widgetCategory  = this.widgetCategory;
-        that.widgetFeatures = this.widgetFeatures;
         return that;
     }
 
