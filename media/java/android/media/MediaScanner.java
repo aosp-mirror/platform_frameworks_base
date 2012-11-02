@@ -310,6 +310,7 @@ public class MediaScanner
     private Uri mThumbsUri;
     private Uri mPlaylistsUri;
     private Uri mFilesUri;
+    private Uri mFilesUriNoNotify;
     private boolean mProcessPlaylists, mProcessGenres;
     private int mMtpObjectHandle;
 
@@ -1275,6 +1276,7 @@ public class MediaScanner
         mImagesUri = Images.Media.getContentUri(volumeName);
         mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
         mFilesUri = Files.getContentUri(volumeName);
+        mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
 
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media
@@ -1474,7 +1476,7 @@ public class MediaScanner
         try {
             where = Files.FileColumns.DATA + "=?";
             selectionArgs = new String[] { path };
-            c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
+            c = mMediaProvider.query(mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
             if (c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
