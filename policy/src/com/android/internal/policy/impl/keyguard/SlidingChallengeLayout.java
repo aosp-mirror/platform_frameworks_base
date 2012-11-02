@@ -122,7 +122,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private final Rect mTempRect = new Rect();
 
     private boolean mHasGlowpad;
-    private boolean mChallengeInteractive = true;
 
     static final Property<SlidingChallengeLayout, Float> HANDLE_ALPHA =
             new FloatProperty<SlidingChallengeLayout>("handleAlpha") {
@@ -187,7 +186,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private final OnClickListener mExpandChallengeClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (!isChallengeShowing() && mChallengeInteractive) {
+            if (!isChallengeShowing()) {
                 showChallenge(true);
             }
         }
@@ -277,7 +276,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     public void setChallengeInteractive(boolean interactive) {
-        mChallengeInteractive = interactive;
+        if (mExpandChallengeView != null) {
+            mExpandChallengeView.setEnabled(interactive);
+        }
     }
 
     void animateHandle(boolean visible) {
@@ -584,7 +585,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 for (int i = 0; i < count; i++) {
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
-                    if (!mIsBouncing && mChallengeInteractive && mActivePointerId == INVALID_POINTER
+                    if (!mIsBouncing && mActivePointerId == INVALID_POINTER
                                 && (crossedDragHandle(x, y, mGestureStartY)
                                 || (isInChallengeView(x, y) &&
                                         mScrollState == SCROLL_STATE_SETTLING))) {
@@ -632,7 +633,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                if (mDragging && mChallengeInteractive) {
+                if (mDragging) {
                     showChallenge(0);
                 }
                 resetTouch();
@@ -643,7 +644,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     break;
                 }
             case MotionEvent.ACTION_UP:
-                if (mDragging && mChallengeInteractive) {
+                if (mDragging) {
                     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
                     showChallenge((int) mVelocityTracker.getYVelocity(mActivePointerId));
                 }
@@ -659,8 +660,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
                         if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
                                 (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING))
-                                && mActivePointerId == INVALID_POINTER
-                                && mChallengeInteractive) {
+                                && mActivePointerId == INVALID_POINTER) {
                             mGestureStartX = x;
                             mGestureStartY = y;
                             mActivePointerId = ev.getPointerId(i);
