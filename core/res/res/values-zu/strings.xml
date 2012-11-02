@@ -585,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ivumela insiza ukuthi ibhale amagama amasha esichazinimazwi."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"ukufinyelela kokuhlola esilondolozini esivikelekile"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ivumela uhlelo lokusebenza ukuhlola imvume yokugciniwe okufinyeleleka nge-USB okuzotholakala kumadivayisi alandelayo."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Ivumela uhlelo lokusebenza ukuhlola imvume yesitoreji se-USB okuzotholakala kumadivayisi alandelayo."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Ivumela uhlelo lokusebenza ukuhlola imvume yekhadi le-SD okuzotholakala kumadivayisi alandelayo."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"guqula noma ususe okuqukethwe kwakho okugciniwe okufinyeleleka nge-USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"shintsha noma ususe okuqukethwe ekhadini lakho le-SD"</string>
@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Iphethini isusiwe"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kwengezwe"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Iphethini isiphelile"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. iwijethi %2$d ye-%3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Engeza iwijethi."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Akunalutho"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Indawo yokuvula inwetshisiwe."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Indawo yokuvula inciphisiwe."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> iwijethi."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Isikhethi somsebenzisi"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Isimo"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Ikhamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Izilawuli zemidiya"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Ukuhlelwa kabusha kwewijethi kuqalile"</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ukuhlelwa kabusha kwewijethi kuphelile."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Iwijethi <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> isusiwe."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Nwebisa indawo yokuvula."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Ukuvula ngokushelelisa."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ukuvula ngephethini."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ukuvula ngobuso."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Ukuvula ngephinikhodi."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ukuvula ngephasiwedi."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Indawo yephethini."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Indawo yokushelelisa."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Uzame ukuvula ngendlela engafanele ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Ifoni manje isizosethwa kabusha ibe yizimiso ezizenzakalelayo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g> kweminye imizamo engaphumelelanga, uzocelwa ukuvula ithebhulethi yakho usebenzisa ukungena ngemvume kwi-Google."\n\n" Sicela uzame futhi kwengu-<xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google"\n\n" Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Khulisa ivolomu ngaphezu kweleveli yokuphepha?"\n"Ukulalela ngevolomu ephezulu izikhathi ezide kungalimaza ukuzwa kwakho."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Gcina ucindezele iminwe yakho emibili ukuze unike amandla ukufinyelela."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ukufinyelela kunikwe amandla."</string>

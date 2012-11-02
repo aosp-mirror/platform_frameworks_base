@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Minta törölve"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cella hozzáadva"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Minta befejezve"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %3$d/%2$d"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Modul hozzáadása."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Üres"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Feloldási terület kiterjesztve."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Feloldási terület összecsukva."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Felhasználóválasztó"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Állapot"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Médiaelemek vezérlője"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"A modulátrendezés elkezdődött."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"A modulátrendezés véget ért."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul törölve."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"A feloldási terület kiterjesztése."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Feloldás csúsztatással"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Feloldás mintával"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Arcalapú feloldás"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Feloldás PIN kóddal"</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Feloldás jelszóval"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mintaterület"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Csúsztatási terület"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"A telefont <xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálta meg sikertelenül feloldani. A rendszer visszaállítja a telefon gyári alapértelmezett beállításait."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"A biztonságos szint fölé emeli a hangerőt?"\n"Ha hosszú ideig hangosan hallgatja a zenét, az károsíthatja a hallását."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>

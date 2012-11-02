@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Ruwaza imefutwa"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Kiini kimeongezwa"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Ruwaza imekamilika"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Wiji %2$d ya %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ongeza wijeti."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tupu"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Eneo la kufungua limepanuliwa."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Eneo la kufungua limekunjwa."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ya wijeti."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kiteuzi cha mtumiaji"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Hali"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya media"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wijeti umeanza."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Upangaji upya wa wijeti umekamilika."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Wijeti <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> imefutwa."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Panua eneo la kufungua."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Kufungua slaidi."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Kufungua kwa ruwaza."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Kufungua kwa uso."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Kufungua kwa PIN."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Kufungua kwa nenosiri."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Eneo la ruwaza."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Eneo la slaidi."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ongeza sauti zaidi ya kiwango salama? "\n"Kusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Endelea kushikilia chini kwa vidole vyako viwili ili kuwezesha ufikivu."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>
