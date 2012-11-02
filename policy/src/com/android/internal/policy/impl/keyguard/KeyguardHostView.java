@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -49,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -115,8 +117,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         // The following enables the MENU key to work for testing automation
         mEnableMenuKey = shouldEnableMenuKey();
-        setFocusable(true);
-        setFocusableInTouchMode(true);
+        mViewStateManager = new KeyguardViewStateManager();
     }
 
     @Override
@@ -150,8 +151,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     protected void onFinishInflate() {
-        mViewStateManager = new KeyguardViewStateManager();
-
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
@@ -423,8 +422,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     void showPrimarySecurityScreen(boolean turningOff) {
         SecurityMode securityMode = mSecurityModel.getSecurityMode();
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
-        if (!turningOff && KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()
-                && !KeyguardUpdateMonitor.getInstance(mContext).getIsFirstBoot()) {
+        if (!turningOff &&
+                KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()) {
             // If we're not turning off, then allow biometric alternate.
             // We'll reload it when the device comes back on.
             securityMode = mSecurityModel.getAlternateFor(securityMode);
@@ -500,7 +499,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             // If the alternate unlock was suppressed, it can now be safely
             // enabled because the user has left keyguard.
             KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-            KeyguardUpdateMonitor.getInstance(mContext).setIsFirstBoot(false);
 
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
@@ -711,10 +709,18 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     @Override
     public void onScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, "screen off, instance " + Integer.toHexString(hashCode()));
+        if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
+                Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
+        // Once the screen turns off, we no longer consider this to be first boot and we want the
+        // biometric unlock to start next time keyguard is shown.
+        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         saveStickyWidgetIndex();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
+        CameraWidgetFrame cameraPage = findCameraPage();
+        if (cameraPage != null) {
+            cameraPage.onScreenTurnedOff();
+        }
     }
 
     @Override
@@ -824,7 +830,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             public void onLaunchingCamera() {
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
-                    slider.showHandle(false);
+                    slider.setHandleAlpha(0);
                 }
             }
 
@@ -835,7 +841,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                 }
                 SlidingChallengeLayout slider = locateSlider();
                 if (slider != null) {
-                    slider.showHandle(true);
+                    slider.setHandleAlpha(1);
                     slider.showChallenge(true);
                 }
             }
@@ -1138,6 +1144,15 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         int pageToShow = getAppropriateWidgetPage(isMusicPlaying);
         mAppWidgetContainer.setCurrentPage(pageToShow);
+    }
+
+    private CameraWidgetFrame findCameraPage() {
+        for (int i = mAppWidgetContainer.getChildCount() - 1; i >= 0; i--) {
+            if (isCameraPage(i)) {
+                return (CameraWidgetFrame) mAppWidgetContainer.getChildAt(i);
+            }
+        }
+        return null;
     }
 
     private boolean isCameraPage(int pageIndex) {
