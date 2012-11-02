@@ -66,7 +66,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     // Initialized during measurement from child layoutparams
     private View mExpandChallengeView;
-    private View mChallengeView;
+    private KeyguardSecurityContainer mChallengeView;
     private View mScrimView;
     private View mWidgetsView;
 
@@ -511,7 +511,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrimView != null) {
             mScrimView.setVisibility(VISIBLE);
         }
-
+        if (mChallengeView != null) {
+            mChallengeView.showBouncer(HANDLE_ANIMATE_DURATION);
+        }
         // Mess with padding/margin to inset the bouncer frame.
         // We have more space available to us otherwise.
         if (mChallengeView != null) {
@@ -539,6 +541,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mIsBouncing = false;
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
+        }
+        if (mChallengeView != null) {
+            mChallengeView.hideBouncer(HANDLE_ANIMATE_DURATION);
         }
         animateFrame(false, true);
         if (mBouncerListener != null) {
@@ -817,7 +822,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     throw new IllegalStateException(
                             "There may only be one child with layout_isChallenge=\"true\"");
                 }
-                mChallengeView = child;
+                if (!(child instanceof KeyguardSecurityContainer)) {
+                            throw new IllegalArgumentException(
+                                    "Challenge must be a KeyguardSecurityContainer");
+                }
+                mChallengeView = (KeyguardSecurityContainer) child;
                 if (mChallengeView != oldChallengeView) {
                     mChallengeView.setVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
                 }
