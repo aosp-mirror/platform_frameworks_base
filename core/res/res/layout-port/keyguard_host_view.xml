@@ -35,6 +35,16 @@
 
         <FrameLayout
             android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <include layout="@layout/keyguard_widget_remove_drop_target"
+                android:id="@+id/keyguard_widget_pager_delete_target"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             androidprv:layout_childType="widgets">
             <include layout="@layout/keyguard_widget_pager"

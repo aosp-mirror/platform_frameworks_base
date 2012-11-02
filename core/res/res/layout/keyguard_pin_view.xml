@@ -193,10 +193,10 @@
         <ImageButton
             android:id="@+id/key_enter"
             style="@style/Widget.Button.NumPadKey"
-            android:gravity="center"
             android:layout_width="0px"
             android:layout_height="match_parent"
             android:layout_weight="1"
+			android:paddingRight="30dp"
             android:src="@drawable/sym_keyboard_return_holo"
             android:contentDescription="@string/keyboardview_keycode_enter"
             />

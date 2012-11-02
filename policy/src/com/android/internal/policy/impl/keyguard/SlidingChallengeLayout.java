@@ -16,6 +16,8 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -29,7 +31,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -39,8 +40,6 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
-
-import com.android.internal.R;
 
 /**
  * This layout handles interaction with the sliding security challenge views
@@ -53,7 +52,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // The drag handle is measured in dp above & below the top edge of the
     // challenge view; these parameters change based on whether the challenge 
     // is open or closed.
-    private static final int DRAG_HANDLE_CLOSED_ABOVE = 64; // dp
+    private static final int DRAG_HANDLE_CLOSED_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_CLOSED_BELOW = 0; // dp
     private static final int DRAG_HANDLE_OPEN_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_OPEN_BELOW = 0; // dp
@@ -67,7 +66,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     // Initialized during measurement from child layoutparams
     private View mExpandChallengeView;
-    private View mChallengeView;
+    private KeyguardSecurityContainer mChallengeView;
     private View mScrimView;
     private View mWidgetsView;
 
@@ -123,6 +122,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private final Rect mTempRect = new Rect();
 
     private boolean mHasGlowpad;
+    private boolean mChallengeInteractive = true;
 
     static final Property<SlidingChallengeLayout, Float> HANDLE_ALPHA =
             new FloatProperty<SlidingChallengeLayout>("handleAlpha") {
@@ -273,6 +273,13 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public void setHandleAlpha(float alpha) {
         if (mExpandChallengeView != null) {
             mExpandChallengeView.setAlpha(alpha);
+        }
+    }
+
+    public void setChallengeInteractive(boolean interactive) {
+        mChallengeInteractive = interactive;
+        if (mExpandChallengeView != null) {
+            mExpandChallengeView.setEnabled(interactive);
         }
     }
 
@@ -504,7 +511,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mScrimView != null) {
             mScrimView.setVisibility(VISIBLE);
         }
-
+        if (mChallengeView != null) {
+            mChallengeView.showBouncer(HANDLE_ANIMATE_DURATION);
+        }
         // Mess with padding/margin to inset the bouncer frame.
         // We have more space available to us otherwise.
         if (mChallengeView != null) {
@@ -532,6 +541,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mIsBouncing = false;
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
+        }
+        if (mChallengeView != null) {
+            mChallengeView.hideBouncer(HANDLE_ANIMATE_DURATION);
         }
         animateFrame(false, true);
         if (mBouncerListener != null) {
@@ -580,19 +592,17 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 for (int i = 0; i < count; i++) {
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
-                    if (!mIsBouncing && mActivePointerId == INVALID_POINTER
-                                && ((isInDragHandle(x, y) && MathUtils.sq(x - mGestureStartX)
-                                        + MathUtils.sq(y - mGestureStartY) > mTouchSlopSquare)
-                                || crossedDragHandle(x, y, mGestureStartY)
+                    if (!mIsBouncing && mChallengeInteractive && mActivePointerId == INVALID_POINTER
+                                && (crossedDragHandle(x, y, mGestureStartY)
                                 || (isInChallengeView(x, y) &&
-                                       mScrollState == SCROLL_STATE_SETTLING))) {
+                                        mScrollState == SCROLL_STATE_SETTLING))) {
                         mActivePointerId = ev.getPointerId(i);
                         mGestureStartX = x;
                         mGestureStartY = y;
                         mGestureStartChallengeBottom = getChallengeBottom();
                         mDragging = true;
                         mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
-                    } else if (isInChallengeView(x, y)) {
+                    } else if (mChallengeShowing && isInChallengeView(x, y)) {
                         mBlockDrag = true;
                     }
                 }
@@ -630,7 +640,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                if (mDragging) {
+                if (mDragging && mChallengeInteractive) {
                     showChallenge(0);
                 }
                 resetTouch();
@@ -641,7 +651,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     break;
                 }
             case MotionEvent.ACTION_UP:
-                if (mDragging) {
+                if (mDragging && mChallengeInteractive) {
                     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
                     showChallenge((int) mVelocityTracker.getYVelocity(mActivePointerId));
                 }
@@ -657,7 +667,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
                         if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
                                 (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING))
-                                && mActivePointerId == INVALID_POINTER) {
+                                && mActivePointerId == INVALID_POINTER
+                                && mChallengeInteractive) {
                             mGestureStartX = x;
                             mGestureStartY = y;
                             mActivePointerId = ev.getPointerId(i);
@@ -767,11 +778,19 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     private boolean crossedDragHandle(float x, float y, float initialY) {
+
         final int challengeTop = mChallengeView.getTop();
-        return  x >= 0 &&
-                x < getWidth() &&
-                initialY < (challengeTop - getDragHandleSizeAbove()) &&
-                y > challengeTop + getDragHandleSizeBelow();
+        final boolean horizOk = x >= 0 && x < getWidth();
+
+        final boolean vertOk;
+        if (mChallengeShowing) {
+            vertOk = initialY < (challengeTop - getDragHandleSizeAbove()) &&
+                    y > challengeTop + getDragHandleSizeBelow();
+        } else {
+            vertOk = initialY > challengeTop + getDragHandleSizeBelow() &&
+                    y < challengeTop - getDragHandleSizeAbove();
+        }
+        return horizOk && vertOk;
     }
 
     @Override
@@ -803,7 +822,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     throw new IllegalStateException(
                             "There may only be one child with layout_isChallenge=\"true\"");
                 }
-                mChallengeView = child;
+                if (!(child instanceof KeyguardSecurityContainer)) {
+                            throw new IllegalArgumentException(
+                                    "Challenge must be a KeyguardSecurityContainer");
+                }
+                mChallengeView = (KeyguardSecurityContainer) child;
                 if (mChallengeView != oldChallengeView) {
                     mChallengeView.setVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
                 }

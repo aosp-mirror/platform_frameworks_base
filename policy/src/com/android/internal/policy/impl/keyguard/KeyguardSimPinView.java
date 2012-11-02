@@ -16,47 +16,32 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import com.android.internal.telephony.ITelephony;
+
+import android.content.Context;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.PasswordEntryKeyboardHelper;
-import com.android.internal.widget.PasswordEntryKeyboardView;
-import com.android.internal.R;
-
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.internal.R;
+
 /**
- * Displays a dialer like interface to unlock the SIM PIN.
+ * Displays a PIN pad for unlocking.
  */
-public class KeyguardSimPinView extends LinearLayout
+public class KeyguardSimPinView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
-    private EditText mPinEntry;
     private ProgressDialog mSimUnlockProgressDialog = null;
-    private KeyguardSecurityCallback mCallback;
-    private PasswordEntryKeyboardView mKeyboardView;
-    private PasswordEntryKeyboardHelper mKeyboardHelper;
-    private LockPatternUtils mLockPatternUtils;
-    private SecurityMessageDisplay mSecurityMessageDisplay;
-
     private volatile boolean mSimCheckInProgress;
 
     public KeyguardSimPinView(Context context) {
@@ -65,68 +50,69 @@ public class KeyguardSimPinView extends LinearLayout
 
     public KeyguardSimPinView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLockPatternUtils = new LockPatternUtils(getContext());
     }
 
-    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
-        mCallback = callback;
+    public void resetState() {
+        mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
+        mPasswordEntry.setEnabled(true);
+    }
+
+    @Override
+    protected int getPasswordTextViewId() {
+        return R.id.pinEntry;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mPinEntry = (EditText) findViewById(R.id.sim_pin_entry);
-        mPinEntry.setOnEditorActionListener(this);
-        mPinEntry.addTextChangedListener(this);
-
-        mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
-        mKeyboardHelper = new PasswordEntryKeyboardHelper(mContext, mKeyboardView, this, false,
-                new int[] {
-                R.xml.kg_password_kbd_numeric,
-                com.android.internal.R.xml.password_kbd_qwerty,
-                com.android.internal.R.xml.password_kbd_qwerty_shifted,
-                com.android.internal.R.xml.password_kbd_symbols,
-                com.android.internal.R.xml.password_kbd_symbols_shift
-                });
-        mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
-        mKeyboardHelper.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
-
-        final View deleteButton = findViewById(R.id.delete_button);
-        if (deleteButton != null) {
-            deleteButton.setOnClickListener(new OnClickListener() {
+        final View ok = findViewById(R.id.key_enter);
+        if (ok != null) {
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
                 public void onClick(View v) {
-                    mKeyboardHelper.handleBackspace();
+                    doHapticKeyClick();
+                    verifyPasswordAndUnlock();
                 }
             });
         }
 
-        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
-        mSecurityMessageDisplay.setTimeout(0);
-        reset();
-    }
+        // The delete button is of the PIN keyboard itself in some (e.g. tablet) layouts,
+        // not a separate view
+        View pinDelete = findViewById(R.id.delete_button);
+        if (pinDelete != null) {
+            pinDelete.setVisibility(View.VISIBLE);
+            pinDelete.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    CharSequence str = mPasswordEntry.getText();
+                    if (str.length() > 0) {
+                        mPasswordEntry.setText(str.subSequence(0, str.length()-1));
+                    }
+                    doHapticKeyClick();
+                }
+            });
+            pinDelete.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    mPasswordEntry.setText("");
+                    doHapticKeyClick();
+                    return true;
+                }
+            });
+        }
 
-    @Override
-    protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
-        return mPinEntry.requestFocus(direction, previouslyFocusedRect);
-    }
+        mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
+        mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
+                | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 
-    public void reset() {
-        // start fresh
-        mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
-
-        // make sure that the number of entered digits is consistent when we
-        // erase the SIM unlock code, including orientation changes.
-        mPinEntry.setText("");
-        mPinEntry.requestFocus();
+        mPasswordEntry.requestFocus();
     }
 
     @Override
     public void showUsabilityHint() {
     }
 
-    /** {@inheritDoc} */
-    public void cleanUp() {
+    @Override
+    public void onPause() {
         // dismiss the dialog.
         if (mSimUnlockProgressDialog != null) {
             mSimUnlockProgressDialog.dismiss();
@@ -167,19 +153,6 @@ public class KeyguardSimPinView extends LinearLayout
         }
     }
 
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        // Check if this was the result of hitting the enter key
-        mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
-        if (event.getAction() == MotionEvent.ACTION_DOWN && (
-                actionId == EditorInfo.IME_NULL
-                || actionId == EditorInfo.IME_ACTION_DONE
-                || actionId == EditorInfo.IME_ACTION_NEXT)) {
-            checkPin();
-            return true;
-        }
-        return false;
-    }
-
     private Dialog getSimUnlockProgressDialog() {
         if (mSimUnlockProgressDialog == null) {
             mSimUnlockProgressDialog = new ProgressDialog(mContext);
@@ -195,11 +168,14 @@ public class KeyguardSimPinView extends LinearLayout
         return mSimUnlockProgressDialog;
     }
 
-    private void checkPin() {
-        if (mPinEntry.getText().length() < 4) {
+    @Override
+    protected void verifyPasswordAndUnlock() {
+        String entry = mPasswordEntry.getText().toString();
+        
+        if (entry.length() < 4) {
             // otherwise, display a message to the user, and don't submit.
             mSecurityMessageDisplay.setMessage(R.string.kg_invalid_sim_pin_hint, true);
-            mPinEntry.setText("");
+            mPasswordEntry.setText("");
             mCallback.userActivity(0);
             return;
         }
@@ -208,7 +184,7 @@ public class KeyguardSimPinView extends LinearLayout
 
         if (!mSimCheckInProgress) {
             mSimCheckInProgress = true; // there should be only one
-            new CheckSimPin(mPinEntry.getText().toString()) {
+            new CheckSimPin(mPasswordEntry.getText().toString()) {
                 void onSimCheckResponse(final boolean success) {
                     post(new Runnable() {
                         public void run() {
@@ -223,7 +199,7 @@ public class KeyguardSimPinView extends LinearLayout
                             } else {
                                 mSecurityMessageDisplay.setMessage
                                     (R.string.kg_password_wrong_pin_code, true);
-                                mPinEntry.setText("");
+                                mPasswordEntry.setText("");
                             }
                             mCallback.userActivity(0);
                             mSimCheckInProgress = false;
@@ -233,40 +209,5 @@ public class KeyguardSimPinView extends LinearLayout
             }.start();
         }
     }
-
-    public void setLockPatternUtils(LockPatternUtils utils) {
-        mLockPatternUtils = utils;
-    }
-
-    public boolean needsInput() {
-        return false; // This view provides its own keypad
-    }
-
-    public void onPause() {
-
-    }
-
-    public void onResume() {
-        reset();
-    }
-
-    public KeyguardSecurityCallback getCallback() {
-        return mCallback;
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        if (mCallback != null) {
-            mCallback.userActivity(KeyguardViewManager.DIGIT_PRESS_WAKE_MILLIS);
-        }
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-    }
-
 }
+

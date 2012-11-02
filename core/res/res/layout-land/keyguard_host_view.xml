@@ -33,6 +33,12 @@
         android:layout_height="match_parent"
         android:clipChildren="false">
 
+        <include layout="@layout/keyguard_widget_remove_drop_target"
+            android:id="@+id/keyguard_widget_pager_delete_target"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal" />
+
         <include layout="@layout/keyguard_widget_pager"
             android:id="@+id/app_widget_container"
             android:layout_width="match_parent"
