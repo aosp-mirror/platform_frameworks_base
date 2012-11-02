@@ -22,9 +22,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -51,7 +49,8 @@ public class NumPadKey extends Button {
                     }
                 }
             }
-            if (mTextView != null) {
+            // check for time-based lockouts
+            if (mTextView != null && mTextView.isEnabled()) {
                 mTextView.append(String.valueOf(mDigit));
             }
             doHapticKeyClick();
@@ -75,6 +74,7 @@ public class NumPadKey extends Button {
 
         setOnClickListener(mListener);
         setOnHoverListener(new LiftToActivateListener(context));
+        setAccessibilityDelegate(new ObscureSpeechDelegate(context));
 
         mEnableHaptics = new LockPatternUtils(context).isTactileFeedbackEnabled();
 
@@ -89,6 +89,7 @@ public class NumPadKey extends Button {
                 final String extra = sKlondike[mDigit];
                 final int extraLen = extra.length();
                 if (extraLen > 0) {
+                    builder.append(" ");
                     builder.append(extra);
                     builder.setSpan(
                         new TextAppearanceSpan(context, R.style.TextAppearance_NumPadKey_Klondike),
@@ -97,6 +98,14 @@ public class NumPadKey extends Button {
             }
         }
         setText(builder);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        // Reset the "announced headset" flag when detached.
+        ObscureSpeechDelegate.sAnnouncedHeadset = false;
     }
 
     public void setTextView(TextView tv) {
@@ -114,47 +123,6 @@ public class NumPadKey extends Button {
             performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-        }
-    }
-
-    /**
-     * Hover listener that implements lift-to-activate interaction for
-     * accessibility. May be added to multiple views.
-     */
-    static class LiftToActivateListener implements View.OnHoverListener {
-        /** Manager used to query accessibility enabled state. */
-        private final AccessibilityManager mAccessibilityManager;
-
-        public LiftToActivateListener(Context context) {
-            mAccessibilityManager = (AccessibilityManager) context.getSystemService(
-                    Context.ACCESSIBILITY_SERVICE);
-        }
-
-        @Override
-        public boolean onHover(View v, MotionEvent event) {
-            // When touch exploration is turned on, lifting a finger while
-            // inside the view bounds should perform a click action.
-            if (mAccessibilityManager.isEnabled()
-                    && mAccessibilityManager.isTouchExplorationEnabled()) {
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_HOVER_ENTER:
-                        // Lift-to-type temporarily disables double-tap
-                        // activation.
-                        v.setClickable(false);
-                        break;
-                    case MotionEvent.ACTION_HOVER_EXIT:
-                        final int x = (int) event.getX();
-                        final int y = (int) event.getY();
-                        if ((x > v.getPaddingLeft()) && (y > v.getPaddingTop())
-                                && (x < v.getWidth() - v.getPaddingRight())
-                                && (y < v.getHeight() - v.getPaddingBottom())) {
-                            v.performClick();
-                        }
-                        v.setClickable(true);
-                        break;
-                }
-            }
-            return false;
         }
     }
 }

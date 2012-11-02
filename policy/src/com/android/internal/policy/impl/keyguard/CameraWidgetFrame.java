@@ -53,13 +53,14 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private final Callbacks mCallbacks;
     private final WindowManager mWindowManager;
     private final Point mRenderedSize = new Point();
+    private final int[] mScreenLocation = new int[2];
 
     private View mWidgetView;
     private long mLaunchCameraStart;
     private boolean mActive;
-    private boolean mChallengeActive;
     private boolean mTransitioning;
     private boolean mDown;
+    private boolean mWindowFocused;
 
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
@@ -186,7 +187,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     private void transitionToCamera() {
-        if (mTransitioning || mChallengeActive || mDown) return;
+        if (mTransitioning || mDown) return;
 
         mTransitioning = true;
 
@@ -233,7 +234,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     public void onClick(View v) {
         if (DEBUG) Log.d(TAG, "clicked");
         if (mTransitioning) return;
-        if (mActive && !mChallengeActive) {
+        if (mActive) {
             cancelTransitionToCamera();
             transitionToCamera();
         }
@@ -242,6 +243,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
+        mWindowFocused = hasWindowFocus;
         if (DEBUG) Log.d(TAG, "onWindowFocusChanged: " + hasWindowFocus);
         if (!hasWindowFocus) {
             mTransitioning = false;
@@ -265,13 +267,29 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     @Override
-    public boolean onUserInteraction(int action) {
-        if (mTransitioning) return true;
-        if (DEBUG) Log.d(TAG, "onUserInteraction " + action);
+    public boolean onUserInteraction(MotionEvent event) {
+        if (!mWindowFocused) {
+            if (DEBUG) Log.d(TAG, "onUserInteraction eaten: !mWindowFocused");
+            return true;
+        }
+        if (mTransitioning) {
+            if (DEBUG) Log.d(TAG, "onUserInteraction eaten: mTransitioning");
+            return true;
+        }
+
+        getLocationOnScreen(mScreenLocation);
+        int rawBottom = mScreenLocation[1] + getHeight();
+        if (event.getRawY() > rawBottom) {
+            if (DEBUG) Log.d(TAG, "onUserInteraction eaten: below widget");
+            return true;
+        }
+
+        int action = event.getAction();
         mDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE;
-        if (mActive && !mChallengeActive) {
+        if (mActive) {
             rescheduleTransitionToCamera();
         }
+        if (DEBUG) Log.d(TAG, "onUserInteraction observed, not eaten");
         return false;
     }
 
@@ -280,20 +298,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         if (DEBUG) Log.d(TAG, "onFocusLost");
         cancelTransitionToCamera();
         super.onFocusLost();
-    }
-
-    @Override
-    public void onChallengeActive(boolean challengeActive) {
-        if (DEBUG) Log.d(TAG, "onChallengeActive: " + challengeActive);
-        mChallengeActive = challengeActive;
-        if (mTransitioning) return;
-        if (mActive) {
-            if (mChallengeActive) {
-                cancelTransitionToCamera();
-            } else {
-                rescheduleTransitionToCamera();
-            }
-        }
     }
 
     public void onScreenTurnedOff() {
@@ -321,7 +325,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         if (DEBUG) Log.d(TAG, "reset");
         mLaunchCameraStart = 0;
         mTransitioning = false;
-        mChallengeActive = false;
         mDown = false;
         cancelTransitionToCamera();
         animate().cancel();
@@ -347,6 +350,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) lp;
         int newWindowAnimations = isEnabled ? com.android.internal.R.style.Animation_LockScreen : 0;
         if (newWindowAnimations != wlp.windowAnimations) {
+            if (DEBUG) Log.d(TAG, "setting windowAnimations to: " + newWindowAnimations);
             wlp.windowAnimations = newWindowAnimations;
             mWindowManager.updateViewLayout(root, wlp);
         }

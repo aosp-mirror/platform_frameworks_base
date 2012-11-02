@@ -599,7 +599,7 @@ class AppWidgetServiceImpl {
     }
 
     public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET,
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BIND_APPWIDGET,
             "bindAppWidgetId appWidgetId=" + appWidgetId + " provider=" + provider);
         bindAppWidgetIdImpl(appWidgetId, provider, options);
     }
@@ -607,7 +607,7 @@ class AppWidgetServiceImpl {
     public boolean bindAppWidgetIdIfAllowed(
             String packageName, int appWidgetId, ComponentName provider, Bundle options) {
         try {
-            mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET, null);
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BIND_APPWIDGET, null);
         } catch (SecurityException se) {
             if (!callerHasBindAppWidgetPermission(packageName)) {
                 return false;

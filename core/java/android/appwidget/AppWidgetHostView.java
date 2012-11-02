@@ -244,14 +244,22 @@ public class AppWidgetHostView extends FrameLayout {
      *
      * @param newOptions The bundle of options, in addition to the size information,
      *          can be null.
-     * @param minWidth The minimum width that the widget will be displayed at.
-     * @param minHeight The maximum height that the widget will be displayed at.
-     * @param maxWidth The maximum width that the widget will be displayed at.
-     * @param maxHeight The maximum height that the widget will be displayed at.
+     * @param minWidth The minimum width in dips that the widget will be displayed at.
+     * @param minHeight The maximum height in dips that the widget will be displayed at.
+     * @param maxWidth The maximum width in dips that the widget will be displayed at.
+     * @param maxHeight The maximum height in dips that the widget will be displayed at.
      *
      */
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
+        updateAppWidgetSize(newOptions, minWidth, minHeight, maxWidth, maxHeight, false);
+    }
+
+    /**
+     * @hide
+     */
+    public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
+            int maxHeight, boolean ignorePadding) {
         if (newOptions == null) {
             newOptions = new Bundle();
         }
@@ -265,10 +273,10 @@ public class AppWidgetHostView extends FrameLayout {
         int xPaddingDips = (int) ((padding.left + padding.right) / density);
         int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
 
-        int newMinWidth = minWidth - xPaddingDips;
-        int newMinHeight = minHeight - yPaddingDips; 
-        int newMaxWidth = maxWidth - xPaddingDips;
-        int newMaxHeight = maxHeight - yPaddingDips;
+        int newMinWidth = minWidth - (ignorePadding ? 0 : xPaddingDips);
+        int newMinHeight = minHeight - (ignorePadding ? 0 : yPaddingDips);
+        int newMaxWidth = maxWidth - (ignorePadding ? 0 : xPaddingDips);
+        int newMaxHeight = maxHeight - (ignorePadding ? 0 : yPaddingDips);
 
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
 
