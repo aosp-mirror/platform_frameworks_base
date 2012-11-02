@@ -23,7 +23,6 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     private KeyguardWidgetPager mPagedView;
     private ChallengeLayout mChallengeLayout;
-    private Runnable mHideHintsRunnable;
     private int[] mTmpPoint = new int[2];
     private int[] mTmpLoc = new int[2];
 
@@ -219,6 +218,15 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         }
     }
 
+    private Runnable mHideHintsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mPagedView != null) {
+                mPagedView.hideOutlinesAndSidePages();
+            }
+        }
+    };
+
     public void showUsabilityHints() {
         mMainQueue.postDelayed( new Runnable() {
             @Override
@@ -227,15 +235,9 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             }
         } , SCREEN_ON_RING_HINT_DELAY);
         mPagedView.showInitialPageHints();
-        mHideHintsRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mPagedView.hideOutlinesAndSidePages();
-                mHideHintsRunnable = null;
-            }
-        };
-
-        mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
+        if (mHideHintsRunnable != null) {
+            mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
+        }
     }
 
     public void setTransportState(int state) {
