@@ -88,7 +88,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected abstract int getPasswordTextViewId();
-    protected abstract int getWrongPasswordStringId();
     protected abstract void resetState();
 
     @Override
@@ -129,6 +128,15 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
         // send focus to the password field
         return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
+    }
+
+    /*
+     * Override this if you have a different string for "wrong password"
+     *
+     * Note that PIN/PUK have their own implementation of verifyPasswordAndUnlock and so don't need this
+     */
+    protected int getWrongPasswordStringId() {
+        return R.string.kg_wrong_password;
     }
 
     protected void verifyPasswordAndUnlock() {
