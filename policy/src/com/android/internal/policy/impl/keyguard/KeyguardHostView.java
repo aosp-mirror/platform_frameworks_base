@@ -169,8 +169,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
         mViewStateManager.setSecurityViewContainer(mSecurityViewContainer);
 
-        mViewStateManager.showUsabilityHints();
-
         if (!(mContext instanceof Activity)) {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
         }
@@ -178,6 +176,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
         addWidgetsFromSettings();
         mSwitchPageRunnable.run();
+
+        // This needs to be called after the pages are all added.
+        mViewStateManager.showUsabilityHints();
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
