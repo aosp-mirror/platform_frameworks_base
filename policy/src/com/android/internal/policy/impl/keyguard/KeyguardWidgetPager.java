@@ -58,10 +58,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
     private static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 75;
     protected AnimatorSet mChildrenOutlineFadeAnimation;
-    private float mChildrenOutlineAlpha = 0;
-    private float mSidePagesAlpha = 1f;
     protected int mScreenCenter;
-    private boolean mHasLayout = false;
     private boolean mHasMeasure = false;
     boolean showHintsAfterLayout = false;
 
@@ -526,34 +523,33 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public void showInitialPageHints() {
-        if (mHasLayout) {
-            showOutlinesAndSidePages();
-        } else {
-            // The layout hints depend on layout being run once
-            showHintsAfterLayout = true;
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            KeyguardWidgetFrame child = getWidgetPageAt(i);
+            if (i != mCurrentPage) {
+                child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
+                        CHILDREN_OUTLINE_FADE_IN_DURATION);
+                child.setContentAlpha(0f);
+            } else {
+                child.setBackgroundAlpha(0f);
+                child.setContentAlpha(1f);
+            }
         }
+    }
+
+    public void showSidePageHints() {
+        animateOutlinesAndSidePages(true, -1);
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mHasMeasure = false;
-        mHasLayout = false;
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (showHintsAfterLayout) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    showOutlinesAndSidePages();
-                }
-            });
-            showHintsAfterLayout = false;
-        }
-        mHasLayout = true;
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -616,6 +612,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 finalContentAlpha = 0f;
             }
             KeyguardWidgetFrame child = getWidgetPageAt(i);
+
             alpha = PropertyValuesHolder.ofFloat("contentAlpha", finalContentAlpha);
             ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha);
             anims.add(a);
@@ -643,42 +640,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             }
         });
         mChildrenOutlineFadeAnimation.start();
-    }
-
-    public void setChildrenOutlineAlpha(float alpha) {
-        mChildrenOutlineAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            getWidgetPageAt(i).setBackgroundAlpha(alpha);
-        }
-    }
-
-    public void setSidePagesAlpha(float alpha) {
-        // This gives the current page, or the destination page if in transit.
-        int curPage = getNextPage();
-        mSidePagesAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            if (curPage != i) {
-                getWidgetPageAt(i).setContentAlpha(alpha);
-            } else {
-                // We lock the current page alpha to 1.
-                getWidgetPageAt(i).setContentAlpha(1.0f);
-            }
-        }
-    }
-
-    public void setChildrenOutlineMultiplier(float alpha) {
-        mChildrenOutlineAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            getWidgetPageAt(i).setBackgroundAlphaMultiplier(alpha);
-        }
-    }
-
-    public float getSidePagesAlpha() {
-        return mSidePagesAlpha;
-    }
-
-    public float getChildrenOutlineAlpha() {
-        return mChildrenOutlineAlpha;
     }
 
     @Override
