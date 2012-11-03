@@ -3324,6 +3324,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                 mBluetoothA2dpEnabled ?
                                         AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
                     }
+
+                    synchronized (mSettingsLock) {
+                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
+                                mDockAudioMediaEnabled ?
+                                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
+                    }
+
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
                     break;
