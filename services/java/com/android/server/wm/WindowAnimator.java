@@ -296,8 +296,9 @@ public class WindowAnimator {
                     }
                 }
                 if (WindowManagerService.DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG,
-                        "Hiding wallpaper " + token + " from " + w + "\n"
-                        + Debug.getCallers(5, "  "));
+                        "Hiding wallpaper " + token + " from " + w
+                        + " target=" + wallpaperTarget + " lower=" + lowerWallpaperTarget
+                        + "\n" + Debug.getCallers(5, "  "));
                 token.hidden = true;
             }
         }

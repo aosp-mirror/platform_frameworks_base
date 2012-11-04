@@ -1566,6 +1566,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int adjustWallpaperWindowsLocked() {
         mInnerFields.mWallpaperMayChange = false;
         int changed = 0;
+        boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
         final DisplayInfo displayInfo = getDefaultDisplayContentLocked().getDisplayInfo();
@@ -1608,7 +1609,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
                     && (mWallpaperTarget == w || w.isDrawnLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
-                        "Found wallpaper activity: #" + i + "=" + w);
+                        "Found wallpaper target: #" + i + "=" + w);
                 foundW = w;
                 foundI = i;
                 if (w == mWallpaperTarget && w.mWinAnimator.isAnimating()) {
@@ -1665,6 +1666,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             WindowState oldW = mWallpaperTarget;
             mWallpaperTarget = foundW;
+            targetChanged = true;
 
             // Now what is happening...  if the current and new targets are
             // animating, then we are in our super special mode!
@@ -1738,6 +1740,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mLowerWallpaperTarget = null;
                 mUpperWallpaperTarget = null;
+                mWallpaperTarget = foundW;
+                targetChanged = true;
             }
         }
 
@@ -1870,6 +1874,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWindowsChanged = true;
                 changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
+        }
+
+        if (targetChanged && DEBUG_WALLPAPER_LIGHT) {
+            Slog.d(TAG, "New wallpaper: target=" + mWallpaperTarget
+                    + " lower=" + mLowerWallpaperTarget + " upper="
+                    + mUpperWallpaperTarget);
         }
 
         return changed;
@@ -9696,9 +9706,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mWallpaperTarget != layoutToAnim.mWallpaperTarget
                         || mLowerWallpaperTarget != layoutToAnim.mLowerWallpaperTarget
                         || mUpperWallpaperTarget != layoutToAnim.mUpperWallpaperTarget) {
-                    Slog.d(TAG, "Pushing anim wallpaper: target=" + layoutToAnim.mWallpaperTarget
-                            + " lower=" + layoutToAnim.mLowerWallpaperTarget + " upper="
-                            + layoutToAnim.mUpperWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
+                    Slog.d(TAG, "Pushing anim wallpaper: target=" + mWallpaperTarget
+                            + " lower=" + mLowerWallpaperTarget + " upper="
+                            + mUpperWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
                 }
             }
             layoutToAnim.mWallpaperTarget = mWallpaperTarget;
@@ -10062,6 +10072,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayFrozen = true;
 
         mInputMonitor.freezeInputDispatchingLw();
+
+        // Clear the last input window -- that is just used for
+        // clean transitions between IMEs, and if we are freezing
+        // the screen then the whole world is changing behind the scenes.
+        mPolicy.setLastInputMethodWindowLw(null, null);
 
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
