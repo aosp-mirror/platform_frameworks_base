@@ -379,14 +379,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
-    protected void enablePageLayers() {
+    protected void enablePageContentLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).enableHardwareLayersForContent();
         }
     }
 
-    protected void disablePageLayers() {
+    protected void disablePageContentLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).disableHardwareLayersForContent();
@@ -506,7 +506,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
-        enablePageLayers();
+        enablePageContentLayers();
         reorderStarting();
     }
 
@@ -635,14 +635,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             @Override
             public void onAnimationStart(Animator animation) {
                 if (show) {
-                    enablePageLayers();
+                    enablePageContentLayers();
                 }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!show) {
-                    disablePageLayers();
+                    disablePageContentLayers();
                     if (mWidgetToResetAfterFadeOut != null) {
                         if (!(getWidgetPageAt(mCurrentPage) == mWidgetToResetAfterFadeOut &&
                                 mViewStateManager.isChallengeShowing())) {

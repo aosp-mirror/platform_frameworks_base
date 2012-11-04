@@ -76,6 +76,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private int mSmallFrameHeight;
     private boolean mWidgetLockedSmall = false;
     private int mMaxChallengeTop = -1;
+    private int mFrameStrokeAdjustment;
 
     // This will hold the width value before we've actually been measured
     private int mFrameHeight;
@@ -103,8 +104,11 @@ public class KeyguardWidgetFrame extends FrameLayout {
         Resources res = context.getResources();
         // TODO: this padding should really correspond to the padding embedded in the background
         // drawable (ie. outlines).
+        float density = res.getDisplayMetrics().density;
         int padding = (int) (res.getDisplayMetrics().density * 8);
         setPadding(padding, padding, padding, padding);
+
+        mFrameStrokeAdjustment = (int) (2 * density);
 
         mBackgroundDrawable = res.getDrawable(R.drawable.kg_bouncer_bg_white);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
@@ -394,8 +398,12 @@ public class KeyguardWidgetFrame extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mForegroundRect.set(getPaddingLeft(), getPaddingTop(),
-                w - getPaddingRight(), h - getPaddingBottom());
+
+        // mFrameStrokeAdjustment is a cludge to prevent the overlay from drawing outside the
+        // rounded rect background.
+        mForegroundRect.set(mFrameStrokeAdjustment, mFrameStrokeAdjustment,
+                w - mFrameStrokeAdjustment, h - mFrameStrokeAdjustment);
+
         float x0 = mLeftToRight ? 0 : mForegroundRect.width();
         float x1 = mLeftToRight ? mForegroundRect.width(): 0;
         mLeftToRightGradient = new LinearGradient(x0, 0f, x1, 0f,
@@ -438,7 +446,11 @@ public class KeyguardWidgetFrame extends FrameLayout {
         if (Float.compare(mOverScrollAmount, r) != 0) {
             mOverScrollAmount = r;
             mForegroundGradient = left ? mLeftToRightGradient : mRightToLeftGradient;
-            mForegroundAlpha = (int) Math.round((0.85f * r * 255));
+            mForegroundAlpha = (int) Math.round((0.5f * r * 255));
+
+            // We bump up the alpha of the outline to hide the fact that the overlay is drawing
+            // over the rounded part of the frame.
+            setBackgroundAlpha(OUTLINE_ALPHA_MULTIPLIER + r * (1 - OUTLINE_ALPHA_MULTIPLIER));
             invalidate();
         }
     }
