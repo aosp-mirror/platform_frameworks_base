@@ -60,7 +60,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private boolean mActive;
     private boolean mTransitioning;
     private boolean mDown;
-    private boolean mWindowFocused;
 
     private final Runnable mLaunchCameraRunnable = new Runnable() {
         @Override
@@ -243,7 +242,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        mWindowFocused = hasWindowFocus;
         if (DEBUG) Log.d(TAG, "onWindowFocusChanged: " + hasWindowFocus);
         if (!hasWindowFocus) {
             mTransitioning = false;
@@ -268,10 +266,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     @Override
     public boolean onUserInteraction(MotionEvent event) {
-        if (!mWindowFocused) {
-            if (DEBUG) Log.d(TAG, "onUserInteraction eaten: !mWindowFocused");
-            return true;
-        }
         if (mTransitioning) {
             if (DEBUG) Log.d(TAG, "onUserInteraction eaten: mTransitioning");
             return true;
