@@ -72,9 +72,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     private KeyguardWidgetFrame mWidgetToResetAfterFadeOut;
 
-    // Background threads to deal with persistence
-    private HandlerThread mBgPersistenceWorkerThread;
-    private Handler mBgPersistenceWorkerHandler;
+    // Background worker thread: used here for persistence, also made available to widget frames
+    private final HandlerThread mBackgroundWorkerThread;
+    private final Handler mBackgroundWorkerHandler;
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -94,19 +94,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         Resources r = getResources();
         mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
-        mBgPersistenceWorkerThread = new HandlerThread("KeyguardWidgetPager Persistence");
-        mBgPersistenceWorkerThread.start();
-        mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
+        mBackgroundWorkerThread = new HandlerThread("KeyguardWidgetPager Worker");
+        mBackgroundWorkerThread.start();
+        mBackgroundWorkerHandler = new Handler(mBackgroundWorkerThread.getLooper());
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        // Clean up the persistence worker thread
-        if (mBgPersistenceWorkerThread != null) {
-            mBgPersistenceWorkerThread.quit();
-        }
+        // Clean up the worker thread
+        mBackgroundWorkerThread.quit();
     }
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
@@ -230,7 +228,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     public void onRemoveView(View v) {
         final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        mBgPersistenceWorkerHandler.post(new Runnable() {
+        mBackgroundWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
                 mLockPatternUtils.removeAppWidget(appWidgetId);
@@ -245,7 +243,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         boundByReorderablePages(true, pagesRange);
         // Subtract from the index to take into account pages before the reorderable
         // pages (e.g. the "add widget" page)
-        mBgPersistenceWorkerHandler.post(new Runnable() {
+        mBackgroundWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
                 mLockPatternUtils.addAppWidget(appWidgetId, index - pagesRange[0]);
@@ -288,6 +286,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         ViewGroup.LayoutParams pageLp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         frame.setOnLongClickListener(this);
+        frame.setWorkerHandler(mBackgroundWorkerHandler);
 
         if (pageIndex == -1) {
             addView(frame, pageLp);

@@ -31,6 +31,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,6 +62,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private CheckLongPressHelper mLongPressHelper;
     private Animator mFrameFade;
     private boolean mIsSmall = false;
+    private Handler mWorkerHandler;
 
     private float mBackgroundAlpha;
     private float mContentAlpha;
@@ -464,5 +466,13 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public boolean onUserInteraction(MotionEvent event) {
         // hook for subclasses
         return false;
+    }
+
+    public void setWorkerHandler(Handler workerHandler) {
+        mWorkerHandler = workerHandler;
+    }
+
+    public Handler getWorkerHandler() {
+        return mWorkerHandler;
     }
 }
