@@ -450,7 +450,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
             // We bump up the alpha of the outline to hide the fact that the overlay is drawing
             // over the rounded part of the frame.
-            setBackgroundAlpha(OUTLINE_ALPHA_MULTIPLIER + r * (1 - OUTLINE_ALPHA_MULTIPLIER));
+            float bgAlpha = Math.min(OUTLINE_ALPHA_MULTIPLIER + r * (1 - OUTLINE_ALPHA_MULTIPLIER),
+                    1f);
+            setBackgroundAlpha(bgAlpha);
             invalidate();
         }
     }
