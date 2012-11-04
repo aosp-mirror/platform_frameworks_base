@@ -115,7 +115,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         // This prevents conflicts.
 
         // If the page hasn't switched, don't bother with any of this
-        if (mCurrentPage != newPageIndex) return;
+        if (mCurrentPage == newPageIndex) return;
 
         if (mPagedView != null && mChallengeLayout != null) {
             KeyguardWidgetFrame prevPage = mPagedView.getWidgetPageAt(mCurrentPage);
