@@ -21,7 +21,7 @@ import android.view.View;
 
 public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChallengeScrolledListener {
 
-    private KeyguardWidgetPager mPagedView;
+    private KeyguardWidgetPager mKeyguardWidgetPager;
     private ChallengeLayout mChallengeLayout;
     private int[] mTmpPoint = new int[2];
     private int[] mTmpLoc = new int[2];
@@ -50,11 +50,23 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     }
 
     public void setPagedView(KeyguardWidgetPager pagedView) {
-        mPagedView = pagedView;
+        mKeyguardWidgetPager = pagedView;
+        updateEdgeSwiping();
     }
 
     public void setChallengeLayout(ChallengeLayout layout) {
         mChallengeLayout = layout;
+        updateEdgeSwiping();
+    }
+
+    private void updateEdgeSwiping() {
+        if (mChallengeLayout != null && mKeyguardWidgetPager != null) {
+            if (mChallengeLayout.isChallengeOverlapping()) {
+                mKeyguardWidgetPager.setOnlyAllowEdgeSwipes(true);
+            } else {
+                mKeyguardWidgetPager.setOnlyAllowEdgeSwipes(false);
+            }
+        }
     }
 
     public boolean isChallengeShowing() {
@@ -103,7 +115,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     }
 
     public void onPageSwitching(View newPage, int newPageIndex) {
-        if (mPagedView != null && mChallengeLayout instanceof SlidingChallengeLayout) {
+        if (mKeyguardWidgetPager != null && mChallengeLayout instanceof SlidingChallengeLayout) {
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
             ((SlidingChallengeLayout) mChallengeLayout).setChallengeInteractive(!isCameraPage);
         }
@@ -117,13 +129,13 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         // If the page hasn't switched, don't bother with any of this
         if (mCurrentPage == newPageIndex) return;
 
-        if (mPagedView != null && mChallengeLayout != null) {
-            KeyguardWidgetFrame prevPage = mPagedView.getWidgetPageAt(mCurrentPage);
+        if (mKeyguardWidgetPager != null && mChallengeLayout != null) {
+            KeyguardWidgetFrame prevPage = mKeyguardWidgetPager.getWidgetPageAt(mCurrentPage);
             if (prevPage != null && mCurrentPage != mPageListeningToSlider) {
                 prevPage.resetSize();
             }
 
-            KeyguardWidgetFrame newCurPage = mPagedView.getWidgetPageAt(newPageIndex);
+            KeyguardWidgetFrame newCurPage = mKeyguardWidgetPager.getWidgetPageAt(newPageIndex);
             boolean challengeOverlapping = mChallengeLayout.isChallengeOverlapping();
             if (challengeOverlapping && !newCurPage.isSmall()
                     && mPageListeningToSlider != newPageIndex) {
@@ -164,27 +176,22 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     @Override
     public void onScrollStateChanged(int scrollState) {
-        if (mPagedView == null || mChallengeLayout == null) return;
+        if (mKeyguardWidgetPager == null || mChallengeLayout == null) return;
         boolean challengeOverlapping = mChallengeLayout.isChallengeOverlapping();
 
         if (scrollState == SlidingChallengeLayout.SCROLL_STATE_IDLE) {
-            KeyguardWidgetFrame frame = mPagedView.getWidgetPageAt(mPageListeningToSlider);
+            KeyguardWidgetFrame frame = mKeyguardWidgetPager.getWidgetPageAt(mPageListeningToSlider);
             if (frame == null) return;
 
             if (!challengeOverlapping) {
-                if (!mPagedView.isPageMoving()) {
+                if (!mKeyguardWidgetPager.isPageMoving()) {
                     frame.resetSize();
                 } else {
-                    mPagedView.resetWidgetSizeOnPagesFaded(frame);
+                    mKeyguardWidgetPager.resetWidgetSizeOnPagesFaded(frame);
                 }
             }
             frame.hideFrame(this);
-
-            if (challengeOverlapping) {
-                mPagedView.setOnlyAllowEdgeSwipes(true);
-            } else {
-                mPagedView.setOnlyAllowEdgeSwipes(false);
-            }
+            updateEdgeSwiping();
 
             if (mChallengeLayout.isChallengeShowing()) {
                 mKeyguardSecurityContainer.onResume();
@@ -196,8 +203,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             // Whether dragging or settling, if the last state was idle, we use this signal
             // to update the current page who will receive events from the sliding challenge.
             // We resize the frame as appropriate.
-            mPageListeningToSlider = mPagedView.getNextPage();
-            KeyguardWidgetFrame frame = mPagedView.getWidgetPageAt(mPageListeningToSlider);
+            mPageListeningToSlider = mKeyguardWidgetPager.getNextPage();
+            KeyguardWidgetFrame frame = mKeyguardWidgetPager.getWidgetPageAt(mPageListeningToSlider);
             if (frame == null) return;
 
             frame.showFrame(this);
@@ -206,7 +213,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             // small to begin with).
             if (!frame.isSmall()) {
                 // We need to fetch the final page, in case the pages are in motion.
-                mPageListeningToSlider = mPagedView.getNextPage();
+                mPageListeningToSlider = mKeyguardWidgetPager.getNextPage();
                 frame.shrinkWidget();
             }
             // View is on the move.  Pause the security view until it completes.
@@ -218,8 +225,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     @Override
     public void onScrollPositionChanged(float scrollPosition, int challengeTop) {
         mChallengeTop = challengeTop;
-        KeyguardWidgetFrame frame = mPagedView.getWidgetPageAt(mPageListeningToSlider);
-        if (frame != null && !mPagedView.isPageMoving()) {
+        KeyguardWidgetFrame frame = mKeyguardWidgetPager.getWidgetPageAt(mPageListeningToSlider);
+        if (frame != null && !mKeyguardWidgetPager.isPageMoving()) {
             frame.adjustFrame(getChallengeTopRelativeToFrame(frame, mChallengeTop));
         }
     }
@@ -227,8 +234,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     private Runnable mHideHintsRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mPagedView != null) {
-                mPagedView.hideOutlinesAndSidePages();
+            if (mKeyguardWidgetPager != null) {
+                mKeyguardWidgetPager.hideOutlinesAndSidePages();
             }
         }
     };
@@ -240,7 +247,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
                 mKeyguardSecurityContainer.showUsabilityHint();
             }
         } , SCREEN_ON_RING_HINT_DELAY);
-        mPagedView.showInitialPageHints();
+        mKeyguardWidgetPager.showInitialPageHints();
         if (mHideHintsRunnable != null) {
             mMainQueue.postDelayed(mHideHintsRunnable, SCREEN_ON_HINT_DURATION);
         }
