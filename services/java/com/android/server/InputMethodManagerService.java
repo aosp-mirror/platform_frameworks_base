@@ -730,7 +730,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!updateOnlyWhenLocaleChanged) {
                 hideCurrentInputLocked(0, null);
                 mCurMethodId = null;
-                unbindCurrentMethodLocked(true);
+                unbindCurrentMethodLocked(true, false);
             }
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
@@ -1201,7 +1201,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
         }
 
-        unbindCurrentMethodLocked(false);
+        unbindCurrentMethodLocked(false, true);
 
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
@@ -1257,7 +1257,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
-                    unbindCurrentMethodLocked(false);
+                    unbindCurrentMethodLocked(false, false);
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
@@ -1292,7 +1292,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void unbindCurrentMethodLocked(boolean reportToClient) {
+    void unbindCurrentMethodLocked(boolean reportToClient, boolean savePosition) {
         if (mVisibleBound) {
             mContext.unbindService(mVisibleConnection);
             mVisibleBound = false;
@@ -1306,7 +1306,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurToken != null) {
             try {
                 if (DEBUG) Slog.v(TAG, "Removing window token: " + mCurToken);
-                if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0) {
+                if ((mImeWindowVis & InputMethodService.IME_ACTIVE) != 0 && savePosition) {
                     // The current IME is shown. Hence an IME switch (transition) is happening.
                     mWindowManagerService.saveLastInputMethodWindowForTransition();
                 }
@@ -1589,13 +1589,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 mCurMethodId = null;
-                unbindCurrentMethodLocked(true);
+                unbindCurrentMethodLocked(true, false);
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
             mCurMethodId = null;
-            unbindCurrentMethodLocked(true);
+            unbindCurrentMethodLocked(true, false);
         }
     }
 
