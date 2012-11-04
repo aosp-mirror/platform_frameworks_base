@@ -553,7 +553,10 @@ public class AppWidgetHostView extends FrameLayout {
                 if (options.containsKey(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)) {
                     int category = options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY);
                     if (category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) {
-                        layoutId = mInfo.initialKeyguardLayout;
+                        int kgLayoutId = mInfo.initialKeyguardLayout;
+                        // If a default keyguard layout is not specified, use the standard
+                        // default layout.
+                        layoutId = kgLayoutId == 0 ? layoutId : kgLayoutId;
                     }
                 }
                 defaultView = inflater.inflate(layoutId, this, false);
