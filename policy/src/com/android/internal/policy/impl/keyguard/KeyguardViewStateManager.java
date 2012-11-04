@@ -76,8 +76,10 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     }
 
     public void onPageBeginMoving() {
-        if (mChallengeLayout.isChallengeShowing()) {
-            mChallengeLayout.showChallenge(false);
+        if (mChallengeLayout.isChallengeShowing() &&
+                mChallengeLayout instanceof SlidingChallengeLayout) {
+            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
+            scl.dismissChallengeWithFade();
         }
         if (mHideHintsRunnable != null) {
             mMainQueue.removeCallbacks(mHideHintsRunnable);
@@ -170,7 +172,11 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             if (frame == null) return;
 
             if (!challengeOverlapping) {
-                frame.resetSize();
+                if (!mPagedView.isPageMoving()) {
+                    frame.resetSize();
+                } else {
+                    mPagedView.resetWidgetSizeOnPagesFaded(frame);
+                }
             }
             frame.hideFrame(this);
 
@@ -213,7 +219,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     public void onScrollPositionChanged(float scrollPosition, int challengeTop) {
         mChallengeTop = challengeTop;
         KeyguardWidgetFrame frame = mPagedView.getWidgetPageAt(mPageListeningToSlider);
-        if (frame != null) {
+        if (frame != null && !mPagedView.isPageMoving()) {
             frame.adjustFrame(getChallengeTopRelativeToFrame(frame, mChallengeTop));
         }
     }

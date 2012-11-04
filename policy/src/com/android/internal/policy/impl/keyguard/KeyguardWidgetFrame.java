@@ -366,11 +366,12 @@ public class KeyguardWidgetFrame extends FrameLayout {
     }
 
     public void hideFrame(Object caller) {
-        fadeFrame(caller, false, 0f, 150);
+        fadeFrame(caller, false, 0f, KeyguardWidgetPager.CHILDREN_OUTLINE_FADE_OUT_DURATION);
     }
 
     public void showFrame(Object caller) {
-        fadeFrame(caller, true, OUTLINE_ALPHA_MULTIPLIER, 150);
+        fadeFrame(caller, true, OUTLINE_ALPHA_MULTIPLIER,
+                KeyguardWidgetPager.CHILDREN_OUTLINE_FADE_IN_DURATION);
     }
 
     public void fadeFrame(Object caller, boolean takeControl, float alpha, int duration) {

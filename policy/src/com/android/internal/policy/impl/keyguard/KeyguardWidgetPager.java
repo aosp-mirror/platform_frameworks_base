@@ -55,8 +55,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
-    private static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
-    private static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 75;
+    public static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
+    public static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 100;
     protected AnimatorSet mChildrenOutlineFadeAnimation;
     protected int mScreenCenter;
     private boolean mHasMeasure = false;
@@ -69,6 +69,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private Callbacks mCallbacks;
 
     private boolean mCameraWidgetEnabled;
+
+    private KeyguardWidgetFrame mWidgetToResetAfterFadeOut;
 
     // Background threads to deal with persistence
     private HandlerThread mBgPersistenceWorkerThread;
@@ -587,6 +589,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         animateOutlinesAndSidePages(show, -1);
     }
 
+    public void resetWidgetSizeOnPagesFaded(KeyguardWidgetFrame widget) {
+        mWidgetToResetAfterFadeOut = widget;
+    }
+
     void animateOutlinesAndSidePages(final boolean show, int duration) {
         if (mChildrenOutlineFadeAnimation != null) {
             mChildrenOutlineFadeAnimation.cancel();
@@ -632,10 +638,18 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                     enablePageLayers();
                 }
             }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!show) {
                     disablePageLayers();
+                    if (mWidgetToResetAfterFadeOut != null) {
+                        if (!(getWidgetPageAt(mCurrentPage) == mWidgetToResetAfterFadeOut &&
+                                mViewStateManager.isChallengeShowing())) {
+                            mWidgetToResetAfterFadeOut.resetSize();
+                        }
+                        mWidgetToResetAfterFadeOut = null;
+                    }
                 }
             }
         });
