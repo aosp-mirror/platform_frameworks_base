@@ -70,7 +70,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     private boolean mCameraWidgetEnabled;
 
-    private KeyguardWidgetFrame mWidgetToResetAfterFadeOut;
+    private int mWidgetToResetAfterFadeOut;
 
     // Background worker thread: used here for persistence, also made available to widget frames
     private final HandlerThread mBackgroundWorkerThread;
@@ -594,8 +594,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         animateOutlinesAndSidePages(show, -1);
     }
 
-    public void resetWidgetSizeOnPagesFaded(KeyguardWidgetFrame widget) {
+    public void setWidgetToResetOnPageFadeOut(int widget) {
         mWidgetToResetAfterFadeOut = widget;
+    }
+
+    public int getWidgetToResetOnPageFadeOut() {
+        return mWidgetToResetAfterFadeOut;
     }
 
     void animateOutlinesAndSidePages(final boolean show, int duration) {
@@ -648,13 +652,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             public void onAnimationEnd(Animator animation) {
                 if (!show) {
                     disablePageContentLayers();
-                    if (mWidgetToResetAfterFadeOut != null) {
-                        if (!(getWidgetPageAt(mCurrentPage) == mWidgetToResetAfterFadeOut &&
-                                mViewStateManager.isChallengeShowing())) {
-                            mWidgetToResetAfterFadeOut.resetSize();
-                        }
-                        mWidgetToResetAfterFadeOut = null;
+                    KeyguardWidgetFrame frame = getWidgetPageAt(mWidgetToResetAfterFadeOut);
+                    if (frame != null && !(frame == getWidgetPageAt(mCurrentPage) &&
+                            mViewStateManager.isChallengeOverlapping())) {
+                        frame.resetSize();
                     }
+                    mWidgetToResetAfterFadeOut = -1;
                 }
             }
         });
