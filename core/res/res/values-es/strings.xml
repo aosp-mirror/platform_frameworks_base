@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emergencia"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Reloj"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Sin servicio"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el tablet."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"¿Subir el volumen por encima del nivel de seguridad?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>

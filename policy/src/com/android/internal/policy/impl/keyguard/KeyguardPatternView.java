@@ -23,6 +23,7 @@ import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -84,6 +85,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     };
     private Rect mTempRect = new Rect();
     private SecurityMessageDisplay mSecurityMessageDisplay;
+    private View mEcaView;
+    private Drawable mBouncerFrame;
 
     enum FooterMode {
         Normal,
@@ -136,6 +139,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         maybeEnableFallback(mContext);
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mEcaView = findViewById(R.id.keyguard_selector_fade_container);
+        View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
+        if (bouncerFrameView != null) {
+            mBouncerFrame = bouncerFrameView.getBackground();
+        }
     }
 
     private void updateFooter(FooterMode mode) {
@@ -381,7 +389,16 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
     }
+
+    @Override
+    public void showBouncer(int duration) {
+        KeyguardSecurityViewHelper.
+                showBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
+
+    @Override
+    public void hideBouncer(int duration) {
+        KeyguardSecurityViewHelper.
+                hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
 }
-
-
-

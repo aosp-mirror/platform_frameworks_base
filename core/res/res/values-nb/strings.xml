@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Feil personlig kode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"For å låse opp, trykk på menyknappen og deretter 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Klokke"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Ingen tjeneste."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skjermen er låst"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Trykk på menyknappen for å låse opp eller ringe et nødnummer."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har oppgitt feil opplåsningspassord for telefonen <xliff:g id="NUMBER">%d</xliff:g> ganger. Telefonen tilbakestilles nå til fabrikkstandard."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp nettbrettet via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vil du øke lydnivået over trygt nivå?"\n"Lytting på høyt lydnivå i lange perioder kan skade hørselen din."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Fortsett å holde nede to fingre for å aktivere tilgjengelighet."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgjengelighet er aktivert."</string>

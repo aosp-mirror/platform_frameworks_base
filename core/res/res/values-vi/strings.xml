@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Mã PIN không chính xác."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Để mở khóa, hãy nhấn vào Trình đơn sau đó nhấn 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Số khẩn cấp"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Đồng hồ"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Không có dịch vụ nào."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Màn hình đã khóa."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nhấn vào Trình đơn để mở khóa hoặc thực hiện cuộc gọi khẩn cấp."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Bạn đã <xliff:g id="NUMBER">%d</xliff:g> lần mở khóa điện thoại không đúng cách. Bây giờ, điện thoại sẽ được đặt lại về mặc định ban đầu."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tăng âm lượng trên mức an toàn?"\n"Nghe ở âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Tiếp tục giữ hai ngón tay để bật trợ năng."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Trợ năng đã được bật."</string>

@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávny kód PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ak chcete telefón odomknúť, stlačte Menu a následne 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tiesňového volania"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Hodiny"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Žiadny signál"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Obrazovka je uzamknutá."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefón ste sa pokúsili odomknúť nesprávnym spôsobom <xliff:g id="NUMBER">%d</xliff:g>-krát. V telefóne sa teraz obnovia predvolené továrenské nastavenia."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu."\n\n" Skúste to znova o <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Chcete zvýšiť hlasitosť nad bezpečnú úroveň?"\n"Dlhodobé počúvanie pri vysokej hlasitosti môže viesť k poškodeniu vášho sluchu."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Zjednodušenie ovládania povolíte dlhým stlačením dvoma prstami."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>

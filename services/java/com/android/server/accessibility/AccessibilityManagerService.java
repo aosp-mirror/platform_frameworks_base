@@ -1351,6 +1351,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_ANNOUNCEMENT);
                     event.getText().add(message);
+                    event.setWindowId(mSecurityPolicy.getRetrievalAllowingWindowLocked());
                     sendAccessibilityEvent(event, mCurrentUserId);
                 }
             }

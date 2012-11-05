@@ -149,6 +149,9 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             Log.e(TAG, "stop() called from non-UI thread");
         }
 
+        // Clearing any old service connected messages.
+        mHandler.removeMessages(MSG_SERVICE_CONNECTED);
+
         boolean mWasRunning = mIsRunning;
 
         stopUi();

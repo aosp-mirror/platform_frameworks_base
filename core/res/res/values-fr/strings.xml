@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Le code PIN est erroné."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Pour déverrouiller le clavier, appuyez sur \"Menu\" puis sur 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numéro d\'urgence"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Horloge"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Aucun service"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Écran verrouillé"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Appuyez sur \"Menu\" pour déverrouiller le téléphone ou appeler un numéro d\'urgence"</string>
@@ -1444,6 +1443,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Augmenter le volume au-dessus du niveau de sécurité ?"\n"L\'écoute à un volume élevé pendant des périodes prolongées peut endommager votre audition."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Pour activer l\'accessibilité, appuyez de manière prolongée avec deux doigts."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>

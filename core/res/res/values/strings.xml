@@ -2101,7 +2101,7 @@
     <string name="lockscreen_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
-    <string name="lockscreen_charged">Charged.</string>
+    <string name="lockscreen_charged">Charged</string>
     <!-- A short representation of charging information, e.g "34%" -->
     <string name="lockscreen_battery_short"><xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
 
@@ -3969,7 +3969,7 @@
     </string>
     <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
          with spaces on either side. [CHAR LIMIT=3] -->
-    <string name="kg_text_message_separator" product="default"> \u2014 </string>
+    <string name="kg_text_message_separator" product="default">" \u2014 "</string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->

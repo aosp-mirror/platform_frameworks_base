@@ -55,13 +55,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private LockPatternUtils mLockPatternUtils;
 
     // Related to the fading in / out background outlines
-    private static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
-    private static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 75;
+    public static final int CHILDREN_OUTLINE_FADE_OUT_DURATION = 375;
+    public static final int CHILDREN_OUTLINE_FADE_IN_DURATION = 100;
     protected AnimatorSet mChildrenOutlineFadeAnimation;
-    private float mChildrenOutlineAlpha = 0;
-    private float mSidePagesAlpha = 1f;
     protected int mScreenCenter;
-    private boolean mHasLayout = false;
     private boolean mHasMeasure = false;
     boolean showHintsAfterLayout = false;
 
@@ -73,9 +70,11 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     private boolean mCameraWidgetEnabled;
 
-    // Background threads to deal with persistence
-    private HandlerThread mBgPersistenceWorkerThread;
-    private Handler mBgPersistenceWorkerHandler;
+    private int mWidgetToResetAfterFadeOut;
+
+    // Background worker thread: used here for persistence, also made available to widget frames
+    private final HandlerThread mBackgroundWorkerThread;
+    private final Handler mBackgroundWorkerHandler;
 
     public KeyguardWidgetPager(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -95,19 +94,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         Resources r = getResources();
         mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
-        mBgPersistenceWorkerThread = new HandlerThread("KeyguardWidgetPager Persistence");
-        mBgPersistenceWorkerThread.start();
-        mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
+        mBackgroundWorkerThread = new HandlerThread("KeyguardWidgetPager Worker");
+        mBackgroundWorkerThread.start();
+        mBackgroundWorkerHandler = new Handler(mBackgroundWorkerThread.getLooper());
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        // Clean up the persistence worker thread
-        if (mBgPersistenceWorkerThread != null) {
-            mBgPersistenceWorkerThread.quit();
-        }
+        // Clean up the worker thread
+        mBackgroundWorkerThread.quit();
     }
 
     public void setViewStateManager(KeyguardViewStateManager viewStateManager) {
@@ -185,11 +182,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        return captureUserInteraction(ev) || super.onTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return captureUserInteraction(ev) || super.onInterceptTouchEvent(ev);
+    }
+
+    private boolean captureUserInteraction(MotionEvent ev) {
         KeyguardWidgetFrame currentWidgetPage = getWidgetPageAt(getCurrentPage());
-        if (currentWidgetPage != null && currentWidgetPage.onUserInteraction(ev)) {
-            return true;
-        }
-        return super.onTouchEvent(ev);
+        return currentWidgetPage != null && currentWidgetPage.onUserInteraction(ev);
     }
 
     public void showPagingFeedback() {
@@ -225,7 +228,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     public void onRemoveView(View v) {
         final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
-        mBgPersistenceWorkerHandler.post(new Runnable() {
+        mBackgroundWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
                 mLockPatternUtils.removeAppWidget(appWidgetId);
@@ -240,7 +243,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         boundByReorderablePages(true, pagesRange);
         // Subtract from the index to take into account pages before the reorderable
         // pages (e.g. the "add widget" page)
-        mBgPersistenceWorkerHandler.post(new Runnable() {
+        mBackgroundWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
                 mLockPatternUtils.addAppWidget(appWidgetId, index - pagesRange[0]);
@@ -283,6 +286,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         ViewGroup.LayoutParams pageLp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         frame.setOnLongClickListener(this);
+        frame.setWorkerHandler(mBackgroundWorkerHandler);
 
         if (pageIndex == -1) {
             addView(frame, pageLp);
@@ -380,14 +384,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
-    protected void enablePageLayers() {
+    protected void enablePageContentLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).enableHardwareLayersForContent();
         }
     }
 
-    protected void disablePageLayers() {
+    protected void disablePageContentLayers() {
         int children = getChildCount();
         for (int i = 0; i < children; i++) {
             getWidgetPageAt(i).disableHardwareLayersForContent();
@@ -507,7 +511,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     protected void onStartReordering() {
         super.onStartReordering();
-        enablePageLayers();
+        enablePageContentLayers();
         reorderStarting();
     }
 
@@ -526,34 +530,33 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     public void showInitialPageHints() {
-        if (mHasLayout) {
-            showOutlinesAndSidePages();
-        } else {
-            // The layout hints depend on layout being run once
-            showHintsAfterLayout = true;
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            KeyguardWidgetFrame child = getWidgetPageAt(i);
+            if (i != mCurrentPage) {
+                child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
+                        CHILDREN_OUTLINE_FADE_IN_DURATION);
+                child.setContentAlpha(0f);
+            } else {
+                child.setBackgroundAlpha(0f);
+                child.setContentAlpha(1f);
+            }
         }
+    }
+
+    public void showSidePageHints() {
+        animateOutlinesAndSidePages(true, -1);
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mHasMeasure = false;
-        mHasLayout = false;
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (showHintsAfterLayout) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    showOutlinesAndSidePages();
-                }
-            });
-            showHintsAfterLayout = false;
-        }
-        mHasLayout = true;
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -591,6 +594,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         animateOutlinesAndSidePages(show, -1);
     }
 
+    public void setWidgetToResetOnPageFadeOut(int widget) {
+        mWidgetToResetAfterFadeOut = widget;
+    }
+
+    public int getWidgetToResetOnPageFadeOut() {
+        return mWidgetToResetAfterFadeOut;
+    }
+
     void animateOutlinesAndSidePages(final boolean show, int duration) {
         if (mChildrenOutlineFadeAnimation != null) {
             mChildrenOutlineFadeAnimation.cancel();
@@ -616,6 +627,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 finalContentAlpha = 0f;
             }
             KeyguardWidgetFrame child = getWidgetPageAt(i);
+
             alpha = PropertyValuesHolder.ofFloat("contentAlpha", finalContentAlpha);
             ObjectAnimator a = ObjectAnimator.ofPropertyValuesHolder(child, alpha);
             anims.add(a);
@@ -632,53 +644,24 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             @Override
             public void onAnimationStart(Animator animation) {
                 if (show) {
-                    enablePageLayers();
+                    enablePageContentLayers();
                 }
             }
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!show) {
-                    disablePageLayers();
+                    disablePageContentLayers();
+                    KeyguardWidgetFrame frame = getWidgetPageAt(mWidgetToResetAfterFadeOut);
+                    if (frame != null && !(frame == getWidgetPageAt(mCurrentPage) &&
+                            mViewStateManager.isChallengeOverlapping())) {
+                        frame.resetSize();
+                    }
+                    mWidgetToResetAfterFadeOut = -1;
                 }
             }
         });
         mChildrenOutlineFadeAnimation.start();
-    }
-
-    public void setChildrenOutlineAlpha(float alpha) {
-        mChildrenOutlineAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            getWidgetPageAt(i).setBackgroundAlpha(alpha);
-        }
-    }
-
-    public void setSidePagesAlpha(float alpha) {
-        // This gives the current page, or the destination page if in transit.
-        int curPage = getNextPage();
-        mSidePagesAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            if (curPage != i) {
-                getWidgetPageAt(i).setContentAlpha(alpha);
-            } else {
-                // We lock the current page alpha to 1.
-                getWidgetPageAt(i).setContentAlpha(1.0f);
-            }
-        }
-    }
-
-    public void setChildrenOutlineMultiplier(float alpha) {
-        mChildrenOutlineAlpha = alpha;
-        for (int i = 0; i < getChildCount(); i++) {
-            getWidgetPageAt(i).setBackgroundAlphaMultiplier(alpha);
-        }
-    }
-
-    public float getSidePagesAlpha() {
-        return mSidePagesAlpha;
-    }
-
-    public float getChildrenOutlineAlpha() {
-        return mChildrenOutlineAlpha;
     }
 
     @Override

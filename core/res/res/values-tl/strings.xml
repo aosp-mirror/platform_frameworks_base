@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Maling PIN code."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Upang i-unlock, pindutin ang Menu pagkatapos ay 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Pang-emergency na numero"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Orasan"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Walang serbisyo."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Naka-lock ang screen."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pindutin ang Menu upang i-unlock o magsagawa ng pang-emergency na tawag."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tinangka mo sa hindi tamang paraan na i-unlock ang telepono nang <xliff:g id="NUMBER">%d</xliff:g> (na) beses. Ire-reset na ngayon ang telepono sa factory default."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>

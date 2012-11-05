@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN 코드가 잘못되었습니다."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"잠금해제하려면 메뉴를 누른 다음 0을 누릅니다."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"비상 전화번호"</string>
-    <string name="widget_default" msgid="1685115188448967291">"시계"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"서비스 불가"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"화면 잠김"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 휴대전화가 초기화됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>

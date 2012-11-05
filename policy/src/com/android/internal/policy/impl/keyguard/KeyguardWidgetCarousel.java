@@ -86,6 +86,17 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
         }
     }
 
+    public void showInitialPageHints() {
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            KeyguardWidgetFrame child = getWidgetPageAt(i);
+            if (i >= mCurrentPage - 1 && i <= mCurrentPage + 1) {
+                child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
+                        CHILDREN_OUTLINE_FADE_IN_DURATION);
+            }
+        }
+    }
+
     @Override
     protected void screenScrolled(int screenCenter) {
         mScreenCenter = screenCenter;
