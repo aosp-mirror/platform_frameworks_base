@@ -86,7 +86,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public static final int SCROLL_STATE_SETTLING = 2;
     public static final int SCROLL_STATE_FADING = 3;
 
-    private static final int CHALLENGE_FADE_DURATION = 70;
+    private static final int CHALLENGE_FADE_OUT_DURATION = 100;
+    private static final int CHALLENGE_FADE_IN_DURATION = 160;
 
     private static final int MAX_SETTLE_DURATION = 600; // ms
 
@@ -442,9 +443,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             return;
         }
 
-        if (mFader != null) {
-            mFader.cancel();
-        }
+        cancelTransitionsInProgress();
 
         mChallengeInteractiveInternal = false;
         mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
@@ -984,6 +983,83 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
     }
 
+    private void cancelTransitionsInProgress() {
+        if (!mScroller.isFinished()) {
+            mScroller.abortAnimation();
+            completeChallengeScroll();
+        }
+        if (mFader != null) {
+            mFader.cancel();
+        }
+    }
+
+    public void fadeInChallenge() {
+        fadeChallenge(true);
+    }
+
+    public void fadeOutChallenge() {
+        fadeChallenge(false);
+    }
+
+    public void fadeChallenge(final boolean show) {
+        if (mChallengeView != null) {
+
+            cancelTransitionsInProgress();
+            float alpha = show ? 1f : 0f;
+            int duration = show ? CHALLENGE_FADE_IN_DURATION : CHALLENGE_FADE_OUT_DURATION;
+            mFader = ObjectAnimator.ofFloat(mChallengeView, "alpha", alpha);
+            mFader.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    onFadeStart(show);
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onFadeEnd(show);
+                }
+            });
+            mFader.setDuration(duration);
+            mFader.start();
+        }
+    }
+
+    private int getMaxChallengeBottom() {
+        if (mChallengeView == null) return 0;
+        final int layoutBottom = getLayoutBottom();
+        final int challengeHeight = mChallengeView.getMeasuredHeight();
+
+        return (layoutBottom + challengeHeight - mChallengeBottomBound);
+    }
+
+    private int getMinChallengeBottom() {
+        return getLayoutBottom();
+    }
+
+
+    private void onFadeStart(boolean show) {
+        mChallengeInteractiveInternal = false;
+        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+
+        if (show) {
+            moveChallengeTo(getMinChallengeBottom());
+        }
+
+        setScrollState(SCROLL_STATE_FADING);
+    }
+
+    private void onFadeEnd(boolean show) {
+        mChallengeInteractiveInternal = true;
+        setChallengeShowing(show);
+
+        if (!show) {
+            moveChallengeTo(getMaxChallengeBottom());
+        }
+
+        mChallengeView.setLayerType(LAYER_TYPE_NONE, null);
+        mFader = null;
+        setScrollState(SCROLL_STATE_IDLE);
+    }
+
     public int getMaxChallengeTop() {
         if (mChallengeView == null) return 0;
 
@@ -1009,8 +1085,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int layoutBottom = getLayoutBottom();
         final int challengeHeight = mChallengeView.getHeight();
 
-        bottom = Math.max(layoutBottom,
-                Math.min(bottom, layoutBottom + challengeHeight - mChallengeBottomBound));
+        bottom = Math.max(getMinChallengeBottom(),
+                Math.min(bottom, getMaxChallengeBottom()));
 
         float offset = 1.f - (float) (bottom - layoutBottom) /
                 (challengeHeight - mChallengeBottomBound);
@@ -1062,45 +1138,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             // for other touch interactions.
             mBlockDrag = true;
         }
-    }
-
-    public void dismissChallengeWithFade() {
-        if (mChallengeView != null) {
-            if (!mScroller.isFinished()) {
-                mScroller.abortAnimation();
-                completeChallengeScroll();
-            }
-
-            mFader = ObjectAnimator.ofFloat(mChallengeView, "alpha", 0f);
-            mFader.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    onFadeStart();
-                }
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    onFadeEnd();
-                }
-            });
-            mFader.setDuration(CHALLENGE_FADE_DURATION);
-            mFader.start();
-        }
-    }
-
-    private void onFadeStart() {
-        mChallengeInteractiveInternal = false;
-        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
-        setScrollState(SCROLL_STATE_FADING);
-    }
-
-    private void onFadeEnd() {
-        mChallengeInteractiveInternal = true;
-        setChallengeShowing(false);
-        moveChallengeTo(getLayoutBottom() + mChallengeView.getMeasuredHeight());
-        mChallengeView.setAlpha(1f);
-        mChallengeView.setLayerType(LAYER_TYPE_NONE, null);
-        mFader = null;
-        setScrollState(SCROLL_STATE_IDLE);
     }
 
     private void showChallenge(int velocity) {

@@ -43,6 +43,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     // Paged view state
     private int mPageListeningToSlider = -1;
     private int mCurrentPage = -1;
+    private int mPageIndexOnPageBeginMoving = -1;
 
     int mChallengeTop = 0;
 
@@ -87,21 +88,6 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         mKeyguardSecurityContainer = container;
     }
 
-    public void onPageBeginMoving() {
-        if (mChallengeLayout.isChallengeShowing() &&
-                mChallengeLayout instanceof SlidingChallengeLayout) {
-            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
-            scl.dismissChallengeWithFade();
-        }
-        if (mHideHintsRunnable != null) {
-            mMainQueue.removeCallbacks(mHideHintsRunnable);
-            mHideHintsRunnable = null;
-        }
-    }
-
-    public void onPageEndMoving() {
-    }
-
     public void showBouncer(boolean show) {
         mChallengeLayout.showBouncer();
     }
@@ -114,11 +100,38 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         ((View) mKeyguardSecurityContainer).animate().alpha(1f).setDuration(duration);
     }
 
+    public void onPageBeginMoving() {
+        if (mChallengeLayout.isChallengeOverlapping() &&
+                mChallengeLayout instanceof SlidingChallengeLayout) {
+            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
+            scl.fadeOutChallenge();
+            mPageIndexOnPageBeginMoving = mKeyguardWidgetPager.getCurrentPage();
+        }
+        if (mHideHintsRunnable != null) {
+            mMainQueue.removeCallbacks(mHideHintsRunnable);
+            mHideHintsRunnable = null;
+        }
+    }
+
+    public void onPageEndMoving() {
+        mPageIndexOnPageBeginMoving = -1;
+    }
+
     public void onPageSwitching(View newPage, int newPageIndex) {
         if (mKeyguardWidgetPager != null && mChallengeLayout instanceof SlidingChallengeLayout) {
             boolean isCameraPage = newPage instanceof CameraWidgetFrame;
             ((SlidingChallengeLayout) mChallengeLayout).setChallengeInteractive(!isCameraPage);
         }
+
+        // If the page we're settling to is the same as we started on, and the action of
+        // moving the page hid the security, we restore it immediately.
+        if (mPageIndexOnPageBeginMoving == mKeyguardWidgetPager.getNextPage() &&
+                mChallengeLayout instanceof SlidingChallengeLayout) {
+            SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
+            scl.fadeInChallenge();
+            mKeyguardWidgetPager.setWidgetToResetOnPageFadeOut(-1);
+        }
+        mPageIndexOnPageBeginMoving = -1;
     }
 
     public void onPageSwitched(View newPage, int newPageIndex) {
@@ -131,7 +144,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
         if (mKeyguardWidgetPager != null && mChallengeLayout != null) {
             KeyguardWidgetFrame prevPage = mKeyguardWidgetPager.getWidgetPageAt(mCurrentPage);
-            if (prevPage != null && mCurrentPage != mPageListeningToSlider) {
+            if (prevPage != null && mCurrentPage != mPageListeningToSlider && mCurrentPage
+                    != mKeyguardWidgetPager.getWidgetToResetOnPageFadeOut()) {
                 prevPage.resetSize();
             }
 
@@ -142,6 +156,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
                 newCurPage.shrinkWidget();
             }
         }
+
         mCurrentPage = newPageIndex;
     }
 
@@ -187,7 +202,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
                 if (!mKeyguardWidgetPager.isPageMoving()) {
                     frame.resetSize();
                 } else {
-                    mKeyguardWidgetPager.resetWidgetSizeOnPagesFaded(frame);
+                    mKeyguardWidgetPager.setWidgetToResetOnPageFadeOut(mPageListeningToSlider);
                 }
             }
             frame.hideFrame(this);
