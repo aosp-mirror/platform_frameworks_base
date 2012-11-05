@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Sequenza cancellata"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cella aggiunta"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Sequenza completata"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d di %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Aggiungi widget."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vuoto"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Area di sblocco estesa."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Area di sblocco compressa."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Selettore utente"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Stato"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Fotocamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Controlli media"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Riordino dei widget iniziato."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Riordino dei widget terminato."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminato."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Espandi area di sblocco."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Sblocco con scorrimento."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Sblocco con sequenza."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Sblocco col sorriso."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Sblocco con PIN."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Sblocco con password."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Area sequenza."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Area di scorrimento."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> tentativi errati di sblocco del telefono. Il telefono verrà sottoposto a un ripristino dei dati di fabbrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentare il volume oltre il livello di sicurezza?"\n"Ascoltare musica ad alto volume per lunghi periodi potrebbe danneggiare l\'udito."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Continua a tenere premuto con due dita per attivare l\'accessibilità."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accessibilità attivata."</string>

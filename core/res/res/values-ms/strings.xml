@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Corak dipadamkan"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Sel ditambahkan"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Corak siap"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d dari %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Tambah widget."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Kosong"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Bahagian buka kunci dikembangkan."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Bahagian buka kunci diruntuhkan."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Pemilih pengguna"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Kawalan media"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Penyusunan semula widget dimulakan."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Penyusunan semula widget tamat."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> dipadamkan."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Kembangkan bahagian buka kunci."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Buka kunci luncur."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Buka kunci corak."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Wajah Buka Kunci"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Buka kunci pin."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Buka kunci kata laluan."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Kawasan corak."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Kawasan luncur."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tingkatkan kelantangan di atas tahap selamat?"\n"Mendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Teruskan menahan dengan dua jari untuk mendayakan kebolehcapaian."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>

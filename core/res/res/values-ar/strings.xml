@@ -810,10 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"تم محو النمط"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"تمت إضافة الخلية"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"اكتمل النمط"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. الأداة %2$d من %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"إضافة أداة."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"فارغة"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"تم توسيع منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"تم تصغير منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"محدد المستخدم"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"الحالة"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"الكاميرا"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"أدوات التحكم في الوسائط"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"بدأت إعادة ترتيب الأدوات."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"انتهت إعادة ترتيب الأدوات."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"تم حذف أداة <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"توسيع منطقة إلغاء القفل."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"إلغاء القفل باستخدام التمرير."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"إلغاء القفل باستخدام النقش."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"تأمين الجهاز بالوجه."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"إلغاء القفل باستخدام رقم التعريف الشخصي."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"إلغاء القفل باستخدام كلمة المرور."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"منطقة النقش."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"منطقة التمرير."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ب ت ث"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1420,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"هل تريد رفع مستوى الصوت فوق المستوى الآمن؟"\n"قد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"اضغط بإصبعين لأسفل مع الاستمرار لتمكين تسهيل الدخول."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"تم تمكين إمكانية الدخول."</string>
