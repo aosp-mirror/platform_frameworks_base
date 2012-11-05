@@ -79,17 +79,16 @@ import android.util.TypedValue;
  * Here's how to use the media router to create and show a presentation on the preferred
  * presentation display using {@link android.media.MediaRouter.RouteInfo#getPresentationDisplay()}.
  * </p>
- * {@samplecode
+ * <pre>
  * MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
  * MediaRouter.RouteInfo route = mediaRouter.getSelectedRoute();
- * if (route != null) $&#123;
+ * if (route != null) {
  *     Display presentationDisplay = route.getPresentationDisplay();
- *     if (presentationDisplay != null) $&#123;
+ *     if (presentationDisplay != null) {
  *         Presentation presentation = new MyPresentation(context, presentationDisplay);
  *         presentation.show();
- *     $&#125;
- * $&#125;
- * }
+ *     }
+ * }</pre>
  * <p>
  * The following sample code from <code>ApiDemos</code> demonstrates how to use the media
  * router to automatically switch between showing content in the main activity and showing
@@ -114,18 +113,17 @@ import android.util.TypedValue;
  * {@link DisplayManager#getDisplays(String)} and the
  * {@link DisplayManager#DISPLAY_CATEGORY_PRESENTATION} category.
  * </p>
- * {@samplecode
+ * <pre>
  * DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
  * Display[] presentationDisplays = displayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
- * if (presentationDisplays.length > 0) $&#123;
+ * if (presentationDisplays.length > 0) {
  *     // If there is more than one suitable presentation display, then we could consider
  *     // giving the user a choice.  For this example, we simply choose the first display
  *     // which is the one the system recommends as the preferred presentation display.
  *     Display display = presentationDisplays[0];
  *     Presentation presentation = new MyPresentation(context, presentationDisplay);
  *     presentation.show();
- * $&#125;
- * }
+ * }</pre>
  * <p>
  * The following sample code from <code>ApiDemos</code> demonstrates how to use the display
  * manager to enumerate displays and show content on multiple presentation displays
