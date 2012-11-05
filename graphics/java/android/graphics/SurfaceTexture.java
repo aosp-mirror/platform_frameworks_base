@@ -66,9 +66,10 @@ public class SurfaceTexture {
     private OnFrameAvailableListener mOnFrameAvailableListener;
 
     /**
-     * This field is used by native code, do not access or modify.
+     * These fields are used by native code, do not access or modify.
      */
     private int mSurfaceTexture;
+    private int mFrameAvailableListener;
 
     /**
      * Callback interface for being notified that a new stream frame is available.

@@ -40,6 +40,7 @@ const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTextur
 
 struct fields_t {
     jfieldID  surfaceTexture;
+    jfieldID  frameAvailableListener;
     jmethodID postEvent;
 };
 static fields_t fields;
@@ -60,11 +61,25 @@ static void SurfaceTexture_setSurfaceTexture(JNIEnv* env, jobject thiz,
     env->SetIntField(thiz, fields.surfaceTexture, (int)surfaceTexture.get());
 }
 
-sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
+static void SurfaceTexture_setFrameAvailableListener(JNIEnv* env,
+        jobject thiz, sp<SurfaceTexture::FrameAvailableListener> listener)
 {
-    sp<SurfaceTexture> surfaceTexture(
-        (SurfaceTexture*)env->GetIntField(thiz, fields.surfaceTexture));
-    return surfaceTexture;
+    SurfaceTexture::FrameAvailableListener* const p =
+        (SurfaceTexture::FrameAvailableListener*)
+            env->GetIntField(thiz, fields.frameAvailableListener);
+    if (listener.get()) {
+        listener->incStrong(thiz);
+    }
+    if (p) {
+        p->decStrong(thiz);
+    }
+    env->SetIntField(thiz, fields.frameAvailableListener, (int)listener.get());
+}
+
+sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env,
+        jobject thiz)
+{
+    return (SurfaceTexture*)env->GetIntField(thiz, fields.surfaceTexture);
 }
 
 sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
@@ -168,6 +183,12 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
         ALOGE("can't find android/graphics/SurfaceTexture.%s",
                 ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID);
     }
+    fields.frameAvailableListener = env->GetFieldID(clazz,
+            ANDROID_GRAPHICS_FRAMEAVAILABLELISTENER_JNI_ID, "I");
+    if (fields.frameAvailableListener == NULL) {
+        ALOGE("can't find android/graphics/SurfaceTexture.%s",
+                ANDROID_GRAPHICS_FRAMEAVAILABLELISTENER_JNI_ID);
+    }
 
     fields.postEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
             "(Ljava/lang/Object;)V");
@@ -197,12 +218,14 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName,
     sp<JNISurfaceTextureContext> ctx(new JNISurfaceTextureContext(env, weakThiz,
             clazz));
     surfaceTexture->setFrameAvailableListener(ctx);
+    SurfaceTexture_setFrameAvailableListener(env, thiz, ctx);
 }
 
 static void SurfaceTexture_finalize(JNIEnv* env, jobject thiz)
 {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     surfaceTexture->setFrameAvailableListener(0);
+    SurfaceTexture_setFrameAvailableListener(env, thiz, 0);
     SurfaceTexture_setSurfaceTexture(env, thiz, 0);
 }
 
