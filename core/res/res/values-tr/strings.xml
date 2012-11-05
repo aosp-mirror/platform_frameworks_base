@@ -585,8 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Uygulamaya, kullanıcı sözlüğüne yeni kelimeler yazma izni verir."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
-    <!-- no translation found for permdesc_sdcardRead (3642473292348132072) -->
-    <skip />
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Uygulamaya, gelecekteki cihazlarda kullanılabilecek USB depolama birimi için bir izni test etme olanağı verir."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Uygulamaya gelecekteki cihazlarda kullanılabilecek SD karta ilişkin bir izni test etme olanağı verir."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB belleğimin içeriğini değiştir veya sil"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartın içeriğini değiştir veya sil"</string>
@@ -751,6 +750,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Yanlış PIN kodu."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Acil durum numarası"</string>
+    <string name="widget_default" msgid="1685115188448967291">"Saat"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Hizmet yok."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekran kilitli."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
@@ -811,10 +811,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Desen temizlendi"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Hücre eklendi"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Desen tamamlandı"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d / %3$d."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget ekleyin."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Boş"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Kilit açma alanı genişletildi."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Kilit açma alanı daraltıldı."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget\'ı."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kullanıcı seçici"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Durum"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Medya denetimleri"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Widget\'ları yeniden sıralama işlemi başladı."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Widget\'ları yeniden sıralama işlemi bitti."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget\'ı silindi."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Kilit açma alanını genişletin."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Kaydırarak kilit açma."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desenle kilit açma."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Yüzle kilit açma."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin koduyla kilit açma."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Şifreyle kilit açma."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Desen alanı."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Kaydırma alanı."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
