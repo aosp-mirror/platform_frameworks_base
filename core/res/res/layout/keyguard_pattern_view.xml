@@ -43,14 +43,17 @@
             android:orientation="vertical"
             android:layout_gravity="center">
 
-            <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
-            the pattern view for it to compute its size. This is an unusual case, caused by
-            LockPatternView's requirement to maintain a square aspect ratio based on the width
-            of the screen. -->
+          <FrameLayout
+             android:id="@+id/keyguard_bouncer_frame"
+             android:background="@*android:drawable/kg_bouncer_bg_white"
+             android:layout_width="match_parent"
+             android:layout_height="0dp"
+             android:layout_weight="1"
+             >
             <com.android.internal.widget.LockPatternView
                 android:id="@+id/lockPatternView"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dip"
                 android:layout_marginBottom="4dip"
@@ -58,15 +61,14 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
                 android:contentDescription="@string/keyguard_accessibility_pattern_area" />
-
-            <include layout="@layout/keyguard_emergency_carrier_area"
-                android:id="@+id/keyguard_selector_fade_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_gravity="bottom|center_horizontal"
-                android:gravity="center_horizontal" />
-
+          </FrameLayout>
+          <include layout="@layout/keyguard_emergency_carrier_area"
+              android:id="@+id/keyguard_selector_fade_container"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:layout_gravity="bottom|center_horizontal"
+              android:gravity="center_horizontal" />
         </LinearLayout>
     </FrameLayout>
 

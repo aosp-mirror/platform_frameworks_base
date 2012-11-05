@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"गलत पिन कोड."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"अनलॉक करने के लिए, मेनू दबाएं और फिर 0 दबाएं."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"आपातकालीन नंबर"</string>
-    <string name="widget_default" msgid="1685115188448967291">"घड़ी"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"कोई सेवा नहीं."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"स्‍क्रीन लॉक की गई है."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"अनलॉक करने के लिए मेनू दबाएं या आपातलकालीन कॉल करें."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"आप फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. फ़ोन अब फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"वॉल्यूम को सुरक्षित स्तर से अधिक करें?"\n"अधिक देर तक उच्च वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"पहुंच-योग्यता को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुंच-योग्यता सक्षम कर दी है."</string>

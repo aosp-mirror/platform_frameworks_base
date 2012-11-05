@@ -1228,7 +1228,7 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_SECURE_CAMERA = 1 << 1;
 
     /**
-     * Disable all current and future keyguard customizations
+     * Disable all current and future keyguard customizations.
      */
     public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
 
@@ -1381,8 +1381,9 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param which {@link DevicePolicyManager#KEYGUARD_DISABLE_WIDGETS_ALL} or
-     * {@link DevicePolicyManager#KEYGUARD_DISABLE_FEATURES_NONE} (the default).
+     * @param which {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
+     * {@link #KEYGUARD_DISABLE_WIDGETS_ALL}, {@link #KEYGUARD_DISABLE_SECURE_CAMERA},
+     * {@link #KEYGUARD_DISABLE_FEATURES_ALL}
      */
     public void setKeyguardDisabledFeatures(ComponentName admin, int which) {
         if (mService != null) {
@@ -1399,6 +1400,8 @@ public class DevicePolicyManager {
      * admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or null to check if any admins
      * have disabled features in keyguard.
+     * @return bitfield of flags. See {@link #setKeyguardDisabledFeatures(ComponentName, int)}
+     * for a list.
      */
     public int getKeyguardDisabledFeatures(ComponentName admin) {
         return getKeyguardDisabledFeatures(admin, UserHandle.myUserId());

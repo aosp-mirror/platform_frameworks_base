@@ -16,6 +16,7 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
@@ -37,6 +38,9 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     private BiometricSensorUnlock mBiometricUnlock;
     private View mFaceUnlockAreaView;
     private ImageButton mCancelButton;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
+    private View mEcaView;
+    private Drawable mBouncerFrame;
 
     private boolean mIsShowing = false;
     private final Object mIsShowingLock = new Object();
@@ -54,6 +58,13 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         super.onFinishInflate();
 
         initializeBiometricUnlockView();
+
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mEcaView = findViewById(R.id.keyguard_selector_fade_container);
+        View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
+        if (bouncerFrameView != null) {
+            mBouncerFrame = bouncerFrameView.getBackground();
+        }
     }
 
     @Override
@@ -217,4 +228,17 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     @Override
     public void showUsabilityHint() {
     }
+
+    @Override
+    public void showBouncer(int duration) {
+        KeyguardSecurityViewHelper.
+                showBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
+
+    @Override
+    public void hideBouncer(int duration) {
+        KeyguardSecurityViewHelper.
+                hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
+
 }

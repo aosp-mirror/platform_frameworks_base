@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN kods nav pareizs."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Lai atbloķētu, nospiediet Izvēlne, pēc tam 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Ārkārtas numurs"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Pulkstenis"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nav pakalpojuma."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekrāns ir bloķēts."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu."\n\n"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu."\n\n"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vai palielināt skaļumu virs drošības līmeņa?"\n"Ilgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Lai iespējotu pieejamību, turiet nospiestus divus pirkstus."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pieejamības režīms ir iespējots."</string>

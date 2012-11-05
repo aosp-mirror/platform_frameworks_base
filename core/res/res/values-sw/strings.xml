@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Msimbo wa PIN usio sahihi."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ili kufungua, bofya Menyu kisha 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nambari ya dharura"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Saa"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Hakuna huduma"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"skrini imefungwa."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Bonyeza Menyu ili kufungua au kupiga simu ya dharura."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ongeza sauti zaidi ya kiwango salama? "\n"Kusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Endelea kushikilia chini kwa vidole vyako viwili ili kuwezesha ufikivu."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>

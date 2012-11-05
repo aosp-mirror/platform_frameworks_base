@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorreto."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, prima Menu e, em seguida, 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emergência"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Relógio"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nenhum serviço"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ecrã bloqueado."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Prima Menu para desbloquear ou efectuar uma chamada de emergência."</string>
@@ -1437,6 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentar o volume acima do nível de segurança?"\n"Ouvir em volume alto durante longos períodos de tempo poderá prejudicar a sua audição."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantenha os dois dedos para ativar a acessibilidade."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Acessibilidade ativada."</string>
