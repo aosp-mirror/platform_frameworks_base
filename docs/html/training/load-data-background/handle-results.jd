@@ -1,0 +1,104 @@
+page.title=Handling the Results
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+  <div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li>
+    <a href="#HandleResults">Handle Query Results</a>
+  </li>
+  <li>
+    <a href="#HandleReset">Clear Out Old Data</a></li>
+</ol>
+  </div>
+</div>
+
+<p>
+    {@link android.support.v4.content.CursorLoader} returns its query results to your
+    implementation of
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished
+    LoaderCallbacks.onLoadFinished()}, in the form of a {@link android.database.Cursor}. In the
+    callback, you can update your data display, do further processing on the
+    {@link android.database.Cursor} data, and so forth.
+</p>
+<p>
+    When the loader framework detects changes to data associated with the query,
+    it resets the {@link android.support.v4.content.CursorLoader}, closes the current
+    {@link android.database.Cursor}, and then invokes your implementation of
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}.
+    Use this callback to delete references to the current {@link android.database.Cursor}; when the
+    loader framework destroys the {@link android.database.Cursor}, you won't have outstanding
+    references that cause memory leaks.
+</p>
+<h2 id="HandleFinished">Handle Query Results</h2>
+<p>
+    The following two snippets are an example of displaying the results of a query, using a
+    {@link android.widget.ListView} backed by a
+    {@link android.support.v4.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    The first snippet shows the {@link android.widget.ListView} and
+    {@link android.support.v4.widget.SimpleCursorAdapter}:
+</p>
+<pre>
+// Gets a handle to the Android built-in ListView widget
+mListView = ((ListView) findViewById(android.R.id.list));
+// Creates a CursorAdapter
+mAdapter =
+    new SimpleCursorAdapter(
+    this,                   // Current context
+    R.layout.logitem,       // View for each item in the list
+    null,                   // Don't provide the cursor yet
+    FROM_COLUMNS,           // List of cursor columns to display
+    TO_FIELDS,              // List of TextViews in each line
+    0                       // flags
+);
+// Links the adapter to the ListView
+mListView.setAdapter(mAdapter);
+</pre>
+<p>
+    The next snippet shows an implementation of
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+    that moves the query results in the returned {@link android.database.Cursor} to the
+    {@link android.support.v4.widget.SimpleCursorAdapter}. Changing the
+    {@link android.database.Cursor} in the
+    {@link android.support.v4.widget.SimpleCursorAdapter} triggers a refresh of the
+    {@link android.widget.ListView} with the new data:
+</p>
+<pre>
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor)
+{
+    /*
+     * Move the results into the adapter. This
+     * triggers the ListView to re-display.
+     */
+    mAdapter.swapCursor(cursor);
+}
+</pre>
+<h2 id="HandleReset">Handle a Loader Reset</h2>
+<p>
+    The loader framework resets the {@link android.support.v4.content.CursorLoader} whenever the
+    {@link android.database.Cursor} becomes invalid. This usually occurs because the data associated
+    with the {@link android.database.Cursor} has changed. Before re-running the query,
+    the framework calls your implementation of
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}. In
+    this callback, make sure to prevent memory leaks by deleting all references to the current
+    {@link android.database.Cursor}. Once you return from
+    {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()},
+    the loader framework re-runs the query.
+</p>
+<p>
+    For example:
+</p>
+<pre>
+public void onLoaderReset(Loader&lt;Cursor&gt; loader)
+{
+    // Remove the reference to the current Cursor
+    mAdapter.swapCursor(null);
+}
+</pre>
