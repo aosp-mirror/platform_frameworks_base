@@ -1,0 +1,117 @@
+page.title=Loading Data in the Background
+trainingnavtop=true
+startpage=true
+
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<h3>Dependencies</h3>
+<ul>
+    <li>
+        Android 1.6 or later
+    </li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+    <li>
+        <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> class
+    </li>
+    <li>
+        <a href="{@docRoot}training/basics/activity-lifecycle/index.html">
+        Managing the Activity Lifecycle</a> class
+    </li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/loaders.html">Loaders</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/data/data-storage.html#db">Using Databases</a>
+    </li>
+    <li>
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">Content Provider Basics</a>
+    </li>
+</ul>
+</div>
+</div>
+<p>
+    A {@link android.support.v4.content.CursorLoader} runs a query against a
+    {@link android.content.ContentProvider} on a background thread and returns a
+    {@link android.database.Cursor} to the main thread.
+</p>
+<p>
+    {@link android.support.v4.content.CursorLoader} has these advantages over alternate ways of
+    running a query:
+</p>
+<dl>
+    <dt>
+        Query on a background thread
+    </dt>
+    <dd>
+        A {@link android.support.v4.content.CursorLoader} query runs asynchronously on a
+        background thread, so it doesn't cause "Application Not Responding" (ANR) errors on the UI
+        thread. {@link android.support.v4.content.CursorLoader} creates and starts the
+        background thread; all you have to do is initialize the loader framework and handle the
+        results of the query.
+    </dd>
+    <dt>
+        Automatic re-query
+    </dt>
+    <dd>
+        A {@link android.support.v4.content.CursorLoader} automatically runs a new query when
+        the loader framework detects that the data underlying the {@link android.database.Cursor}
+        has changed.
+    </dd>
+    <dt>
+        Simple API
+    </dt>
+    <dd>
+        The {@link android.support.v4.content.CursorLoader} API provides the
+        query framework and cursor monitoring that you would have to define yourself if you used
+        {@link android.os.AsyncTask}.
+    </dd>
+</dl>
+<p>
+    A {@link android.support.v4.content.CursorLoader} is limited in that the query must be
+    against a {@link android.net.Uri} and must return a {@link android.database.Cursor}. Because of
+    this, a {@link android.support.v4.content.CursorLoader} can only run a query against a
+    {@link android.content.ContentProvider}.
+</p>
+<p>
+    This class describes how to define and use a {@link android.support.v4.content.CursorLoader}.
+    Examples in this class use the {@link android.support.v4 v4 support library} versions of
+    classes, which support platforms starting with Android 1.6.
+</p>
+<h2>Lessons</h2>
+<dl>
+    <dt>
+        <strong><a href="setup-loader.html">Setting Up the Loader</a></strong>
+    </dt>
+    <dd>
+        Learn how to set up an {@link android.app.Activity} that inherits the necessary classes
+        for running a {@link android.support.v4.content.CursorLoader} and returning results.
+    </dd>
+    <dt>
+        <strong><a href="define-launch-query.html">Defining and Launching the Query</a></strong>
+    </dt>
+    <dd>
+        Learn how to perform a query against a {@link android.content.ContentProvider} using
+        a {@link android.support.v4.content.CursorLoader}.
+    </dd>
+    <dt>
+        <strong>
+        <a href="handle-results.html">Handling the Results</a>
+        </strong>
+    </dt>
+    <dd>
+        Learn how to handle the {@link android.database.Cursor} returned from the query, and how
+        to remove references to the current {@link android.database.Cursor} when the loader
+        framework re-sets the {@link android.support.v4.content.CursorLoader}.
+    </dd>
+</dl>
