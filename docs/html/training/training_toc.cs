@@ -58,7 +58,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/basics/supporting-devices/index.html">
             <span class="en">Supporting Different Devices</span>
@@ -78,7 +78,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/basics/fragments/index.html">
             <span class="en">Building a Dynamic UI with Fragments</span>
@@ -143,9 +143,9 @@
         </ul>
       </li>
 
-      
+
     </ul>
-  </li><!-- end basic training -->    
+  </li><!-- end basic training -->
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/advanced.html">
@@ -193,7 +193,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
             <span class="en">Transferring Data Without Draining the Battery</span>
@@ -233,12 +233,12 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/multiscreen/index.html"
           zh-CN-lang="针对多种屏幕进行设计"
           ja-lang="複数画面のデザイン"
-          es-lang="Cómo diseñar aplicaciones para varias pantallas"               
+          es-lang="Cómo diseñar aplicaciones para varias pantallas"
           >Designing for Multiple Screens</a>
         </div>
         <ul>
@@ -246,24 +246,24 @@
             zh-CN-lang="支持各种屏幕尺寸"
             ko-lang="다양한 화면 크기 지원"
             ja-lang="さまざまな画面サイズのサポート"
-            es-lang="Cómo admitir varios tamaños de pantalla"               
+            es-lang="Cómo admitir varios tamaños de pantalla"
             >Designing for Multiple Screens</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/multiscreen/screendensities.html"
             zh-CN-lang="支持各种屏幕密度"
             ja-lang="さまざまな画面密度のサポート"
-            es-lang="Cómo admitir varias densidades de pantalla"               
+            es-lang="Cómo admitir varias densidades de pantalla"
             >Supporting Different Screen Densities</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/multiscreen/adaptui.html"
             zh-CN-lang="实施自适应用户界面流程"
             ja-lang="順応性のある UI フローの実装"
-            es-lang="Cómo implementar interfaces de usuario adaptables"               
+            es-lang="Cómo implementar interfaces de usuario adaptables"
             >Implementing Adaptive UI Flows</a>
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/improving-layouts/index.html">
             <span class="en">Improving Layout Performance</span>
@@ -335,37 +335,37 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/monitoring-device-state/index.html"
           zh-CN-lang="优化电池使用时间"
           ja-lang="電池消費量の最適化"
-          es-lang="Cómo optimizar la duración de la batería"               
+          es-lang="Cómo optimizar la duración de la batería"
           >Optimizing Battery Life</a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/battery-monitoring.html"
             zh-CN-lang="监控电池电量和充电状态"
             ja-lang="電池残量と充電状態の監視"
-            es-lang="Cómo controlar el nivel de batería y el estado de carga"               
+            es-lang="Cómo controlar el nivel de batería y el estado de carga"
             >Monitoring the Battery Level and Charging State</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/docking-monitoring.html"
             zh-CN-lang="确定和监控基座对接状态和类型"
             ja-lang="ホルダーの装着状態とタイプの特定と監視"
-            es-lang="Cómo determinar y controlar el tipo de conector y el estado de la conexión"               
+            es-lang="Cómo determinar y controlar el tipo de conector y el estado de la conexión"
             >Determining and Monitoring the Docking State and Type</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/connectivity-monitoring.html"
             zh-CN-lang="确定和监控网络连接状态"
             ja-lang="接続状態の特定と監視"
-            es-lang="Cómo determinar y controlar el estado de la conectividad"               
+            es-lang="Cómo determinar y controlar el estado de la conectividad"
             >Determining and Monitoring the Connectivity Status</a>
           </li>
           <li><a href="<?cs var:toroot ?>training/monitoring-device-state/manifest-receivers.html"
             zh-CN-lang="根据需要操作广播接收器"
             ja-lang="オンデマンドでのブロードキャスト レシーバ操作"
-            es-lang="Cómo manipular los receptores de emisión bajo demanda"               
+            es-lang="Cómo manipular los receptores de emisión bajo demanda"
             >Manipulating Broadcast Receivers On Demand</a>
           </li>
         </ul>
@@ -455,7 +455,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/camera/index.html">
             <span class="en">Capturing Photos</span>
@@ -475,7 +475,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/multiple-apks/index.html">
             <span class="en">Maintaining Multiple APKs</span>
@@ -535,7 +535,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/monetization/index.html">
             <span class="en">Monetizing Your App</span>
@@ -547,7 +547,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/design-navigation/index.html">
             <span class="en">Designing Effective Navigation</span>
@@ -620,7 +620,7 @@
           </li>
         </ul>
       </li>
-      
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/displaying-bitmaps/index.html">
             <span class="en">Displaying Bitmaps Efficiently</span>
@@ -717,6 +717,25 @@
         </ul>
       </li>
 
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>training/load-data-background/index.html">
+            <span class="en">Loading Data in the Background</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/setup-loader.html">
+            <span class="en">Setting Up the Loader</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/define-launch-query.html">
+            <span class="en">Defining and Launching the Query</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/handle-results.html">
+            <span class="en">Handling the Results</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
     </ul>
   </li>
