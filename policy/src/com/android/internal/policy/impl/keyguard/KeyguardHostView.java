@@ -537,7 +537,11 @@ public class KeyguardHostView extends KeyguardViewBase {
                     }
                 });
 
-                mCallback.dismiss(false);
+                if (mViewStateManager.isChallengeShowing()) {
+                    mViewStateManager.showBouncer(true);
+                } else {
+                    mCallback.dismiss(false);
+                }
                 return true;
             } else {
                 return super.onClickHandler(view, pendingIntent, fillInIntent);
