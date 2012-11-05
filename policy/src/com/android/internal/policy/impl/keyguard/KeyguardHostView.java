@@ -196,6 +196,11 @@ public class KeyguardHostView extends KeyguardViewBase {
             KeyguardSecurityView ksv = (KeyguardSecurityView) view;
             ksv.setKeyguardCallback(mCallback);
             ksv.setLockPatternUtils(mLockPatternUtils);
+            if (mViewStateManager.isBouncing()) {
+                ksv.showBouncer(0);
+            } else {
+                ksv.hideBouncer(0);
+            }
         } else {
             Log.w(TAG, "View " + view + " is not a KeyguardSecurityView");
         }

@@ -31,32 +31,39 @@
         android:layout_height="wrap_content"
         />
 
-    <com.android.internal.widget.FaceUnlockView
-        android:id="@+id/face_unlock_area_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@*android:drawable/intro_bg"
-        android:gravity="center"
-        android:layout_weight="1">
+    <FrameLayout
+       android:id="@+id/keyguard_bouncer_frame"
+       android:background="@*android:drawable/kg_bouncer_bg_white"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:layout_weight="1"
+       >
+       <com.android.internal.widget.FaceUnlockView
+           android:id="@+id/face_unlock_area_view"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:background="@*android:drawable/intro_bg"
+           android:gravity="center">
 
-        <View
-            android:id="@+id/spotlightMask"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@*android:color/facelock_spotlight_mask"
-        />
+           <View
+               android:id="@+id/spotlightMask"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:background="@*android:color/facelock_spotlight_mask"
+           />
 
-        <ImageButton
-            android:id="@+id/face_unlock_cancel_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dip"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:background="#00000000"
-            android:src="@*android:drawable/ic_facial_backup"
-        />
-    </com.android.internal.widget.FaceUnlockView>
+           <ImageButton
+               android:id="@+id/face_unlock_cancel_button"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:padding="5dip"
+               android:layout_alignParentTop="true"
+               android:layout_alignParentEnd="true"
+               android:background="#00000000"
+               android:src="@*android:drawable/ic_facial_backup"
+           />
+       </com.android.internal.widget.FaceUnlockView>
+    </FrameLayout>
 
     <include layout="@layout/keyguard_emergency_carrier_area"
         android:id="@+id/keyguard_selector_fade_container"

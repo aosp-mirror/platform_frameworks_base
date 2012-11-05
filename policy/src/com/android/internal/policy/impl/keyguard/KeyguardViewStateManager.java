@@ -92,6 +92,10 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         mChallengeLayout.showBouncer();
     }
 
+    public boolean isBouncing() {
+        return mChallengeLayout.isBouncing();
+    }
+
     public void fadeOutSecurity(int duration) {
         ((View) mKeyguardSecurityContainer).animate().alpha(0).setDuration(duration);
     }

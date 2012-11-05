@@ -261,4 +261,12 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     public KeyguardSecurityCallback getCallback() {
         return mCallback;
     }
+
+    @Override
+    public void showBouncer(int duration) {
+    }
+
+    @Override
+    public void hideBouncer(int duration) {
+    }
 }
