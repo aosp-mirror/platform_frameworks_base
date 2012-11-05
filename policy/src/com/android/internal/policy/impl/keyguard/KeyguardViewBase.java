@@ -260,4 +260,5 @@ public abstract class KeyguardViewBase extends FrameLayout {
             KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
     }
+
 }
