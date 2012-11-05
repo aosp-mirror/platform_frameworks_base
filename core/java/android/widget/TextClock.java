@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
+import android.view.RemotableViewMethod;
 
 import com.android.internal.R;
 
@@ -266,6 +267,7 @@ public class TextClock extends TextView {
      * 
      * @attr ref android.R.styleable#TextClock_format12Hour
      */
+    @RemotableViewMethod
     public void setFormat12Hour(CharSequence format) {
         mFormat12 = format;
 
@@ -307,6 +309,7 @@ public class TextClock extends TextView {
      *
      * @attr ref android.R.styleable#TextClock_format24Hour
      */
+    @RemotableViewMethod
     public void setFormat24Hour(CharSequence format) {
         mFormat24 = format;
 
@@ -366,6 +369,7 @@ public class TextClock extends TextView {
      *
      * @attr ref android.R.styleable#TextClock_timeZone
      */
+    @RemotableViewMethod
     public void setTimeZone(String timeZone) {
         mTimeZone = timeZone;
 
