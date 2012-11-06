@@ -68,6 +68,7 @@ void root(uchar4 *out, uint32_t x, uint32_t y) {
               + convert_float4(rsGetElementAt_uchar4(gIn, x4, y4)) * gCoeffs[24];
 
     p0 = clamp(p0 + p1 + p2 + p3 + p4, 0.f, 255.f);
+    p0.a = 255.f;
     *out = convert_uchar4(p0);
 }
 
