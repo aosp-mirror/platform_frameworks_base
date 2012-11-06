@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
@@ -63,6 +64,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // when challenge is fully visible
     private Drawable mFrameDrawable;
     private boolean mEdgeCaptured;
+
+    private DisplayMetrics mDisplayMetrics;
 
     // Initialized during measurement from child layoutparams
     private View mExpandChallengeView;
@@ -264,7 +267,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mTouchSlopSquare = mTouchSlop * mTouchSlop;
 
-        final float density = res.getDisplayMetrics().density;
+        mDisplayMetrics = res.getDisplayMetrics();
+        final float density = mDisplayMetrics.density;
 
         // top half of the lock icon, plus another 25% to be sure
         mDragHandleClosedAbove = (int) (DRAG_HANDLE_CLOSED_ABOVE * density + 0.5f);
@@ -887,9 +891,27 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 continue;
             }
             // Don't measure the challenge view twice!
-            if (child != mChallengeView) {
-                measureChildWithMargins(child, widthSpec, 0, heightSpec, 0);
+            if (child == mChallengeView) continue;
+
+            // Measure children. Widget frame measures special, so that we can ignore
+            // insets for the IME.
+            int parentWidthSpec = widthSpec, parentHeightSpec = heightSpec;
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (lp.childType == LayoutParams.CHILD_TYPE_WIDGETS) {
+                final View root = getRootView();
+                if (root != null) {
+                    // This calculation is super dodgy and relies on several assumptions.
+                    // Specifically that the root of the window will be padded in for insets
+                    // and that the window is LAYOUT_IN_SCREEN.
+                    final int windowWidth = mDisplayMetrics.widthPixels;
+                    final int windowHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
+                    parentWidthSpec = MeasureSpec.makeMeasureSpec(
+                            windowWidth, MeasureSpec.EXACTLY);
+                    parentHeightSpec = MeasureSpec.makeMeasureSpec(
+                            windowHeight, MeasureSpec.EXACTLY);
+                }
             }
+            measureChildWithMargins(child, parentWidthSpec, 0, parentHeightSpec, 0);
         }
     }
 
