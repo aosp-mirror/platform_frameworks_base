@@ -335,4 +335,9 @@
     due to the appearance of the IME), then drop the multiuser selector. -->
     <dimen name="kg_squashed_layout_threshold">600dp</dimen>
 
+    <!-- The height of widgets which do not support vertical resizing. This is only
+    used on tablets; on phones, this size is determined by the space left by the
+    security mode. -->
+    <dimen name="kg_small_widget_height">160dp</dimen>
+
 </resources>
