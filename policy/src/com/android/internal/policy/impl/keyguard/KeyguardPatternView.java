@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -295,7 +296,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         private AccountAnalyzer(AccountManager accountManager) {
             mAccountManager = accountManager;
-            mAccounts = accountManager.getAccountsByType("com.google");
+            mAccounts = accountManager.getAccountsByTypeAsUser("com.google",
+                    new UserHandle(mLockPatternUtils.getCurrentUser()));
         }
 
         private void next() {
@@ -306,7 +308,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             }
 
             // lookup the confirmCredentials intent for the current account
-            mAccountManager.confirmCredentials(mAccounts[mAccountIndex], null, null, this, null);
+            mAccountManager.confirmCredentialsAsUser(mAccounts[mAccountIndex], null, null, this,
+                    null, new UserHandle(mLockPatternUtils.getCurrentUser()));
         }
 
         public void start() {

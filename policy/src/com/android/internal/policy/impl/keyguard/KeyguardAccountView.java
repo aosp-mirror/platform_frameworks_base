@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
@@ -175,7 +176,8 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     Intent intent = new Intent();
                     intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
+                    mContext.startActivityAsUser(intent,
+                            new UserHandle(mLockPatternUtils.getCurrentUser()));
                     mCallback.reportSuccessfulUnlockAttempt();
 
                     // dismiss keyguard
@@ -220,7 +222,8 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
      * find a single best match.
      */
     private Account findIntendedAccount(String username) {
-        Account[] accounts = AccountManager.get(mContext).getAccountsByType("com.google");
+        Account[] accounts = AccountManager.get(mContext).getAccountsByTypeAsUser("com.google",
+                new UserHandle(mLockPatternUtils.getCurrentUser()));
 
         // Try to figure out which account they meant if they
         // typed only the username (and not the domain), or got
@@ -267,7 +270,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
         getProgressDialog().show();
         Bundle options = new Bundle();
         options.putString(AccountManager.KEY_PASSWORD, password);
-        AccountManager.get(mContext).confirmCredentials(account, options, null /* activity */,
+        AccountManager.get(mContext).confirmCredentialsAsUser(account, options, null /* activity */,
                 new AccountManagerCallback<Bundle>() {
             public void run(AccountManagerFuture<Bundle> future) {
                 try {
@@ -289,7 +292,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
                     });
                 }
             }
-        }, null /* handler */);
+        }, null /* handler */, new UserHandle(mLockPatternUtils.getCurrentUser()));
     }
 
     private Dialog getProgressDialog() {
