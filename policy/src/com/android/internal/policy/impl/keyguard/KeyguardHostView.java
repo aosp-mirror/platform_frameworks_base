@@ -917,7 +917,10 @@ public class KeyguardHostView extends KeyguardViewBase {
             pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
                     AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
 
-            pickIntent.putExtra(Intent.EXTRA_INTENT, getBaseIntent());
+            Bundle options = new Bundle();
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+            pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
             pickIntent.addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -928,17 +931,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         } else {
             Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
         }
-    }
-
-    private Intent getBaseIntent() {
-        Intent baseIntent = new Intent(Intent.ACTION_MAIN, null);
-        baseIntent.addCategory(Intent.CATEGORY_DEFAULT);
-
-        Bundle options = new Bundle();
-        options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
-        baseIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
-        return baseIntent;
     }
 
     private void removeTransportFromWidgetPager() {
