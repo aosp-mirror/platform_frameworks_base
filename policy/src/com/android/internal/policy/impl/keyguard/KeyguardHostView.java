@@ -82,6 +82,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
     private KeyguardViewStateManager mViewStateManager;
 
+    int mLocalStickyWidget = -1;
+    boolean mPersitentStickyWidgetLoaded = false;
+
     private Rect mTempRect = new Rect();
 
     /*package*/ interface TransportCallback {
@@ -109,7 +112,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         mSecurityModel = new KeyguardSecurityModel(context);
 
-        mViewStateManager = new KeyguardViewStateManager();
+        mViewStateManager = new KeyguardViewStateManager(this);
     }
 
     @Override
@@ -1169,6 +1172,37 @@ public class KeyguardHostView extends KeyguardViewBase {
         return v != null && v.getId() == R.id.keyguard_add_widget;
     }
 
+    private boolean isMusicPage(int pageIndex) {
+        return pageIndex >= 0 && pageIndex == getWidgetPosition(R.id.keyguard_transport_control);
+    }
+
+    private int getStickyWidget() {
+        // The first time we query the persistent state. From that point, we use a locally updated
+        // notion of the sticky widget page.
+        if (!mPersitentStickyWidgetLoaded) {
+            mLocalStickyWidget = mLockPatternUtils.getStickyAppWidgetIndex();
+            mPersitentStickyWidgetLoaded = true;
+        }
+        return mLocalStickyWidget;
+    }
+
+    public void updateStickyWidget(int index) {
+        if (index < 0 || index >= mAppWidgetContainer.getChildCount()) {
+            return;
+        }
+        if (isAddPage(index)) {
+            return;
+        }
+        if (isCameraPage(index)) {
+            return;
+        }
+        if (isMusicPage(index)) {
+            return;
+        }
+
+        mLocalStickyWidget = index;
+    }
+
     private int getAppropriateWidgetPage(boolean isMusicPlaying) {
         // assumes at least one widget (besides camera + add)
 
@@ -1179,7 +1213,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         // if we have a valid sticky widget, show it
-        int stickyWidgetIndex = mLockPatternUtils.getStickyAppWidgetIndex();
+        int stickyWidgetIndex = getStickyWidget();
         if (stickyWidgetIndex > -1
                 && stickyWidgetIndex < mAppWidgetContainer.getChildCount()
                 && !isAddPage(stickyWidgetIndex)
@@ -1198,18 +1232,10 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void saveStickyWidgetIndex() {
-        int stickyWidgetIndex = mAppWidgetContainer.getCurrentPage();
-        if (isAddPage(stickyWidgetIndex)) {
-            stickyWidgetIndex++;
+        if (DEBUG) Log.d(TAG, "saveStickyWidgetIndex: " + mLocalStickyWidget);
+        if (mPersitentStickyWidgetLoaded && mLocalStickyWidget >= 0) {
+            mLockPatternUtils.setStickyAppWidgetIndex(mLocalStickyWidget);
         }
-        if (isCameraPage(stickyWidgetIndex)) {
-            stickyWidgetIndex--;
-        }
-        if (stickyWidgetIndex < 0 || stickyWidgetIndex >= mAppWidgetContainer.getChildCount()) {
-            stickyWidgetIndex = -1;
-        }
-        if (DEBUG) Log.d(TAG, "saveStickyWidgetIndex: " + stickyWidgetIndex);
-        mLockPatternUtils.setStickyAppWidgetIndex(stickyWidgetIndex);
     }
 
     private void enableUserSelectorIfNecessary() {
