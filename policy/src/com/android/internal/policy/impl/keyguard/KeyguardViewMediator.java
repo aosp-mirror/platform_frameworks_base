@@ -881,7 +881,9 @@ public class KeyguardViewMediator {
      * Dismiss the keyguard through the security layers.
      */
     public void dismiss() {
-        mKeyguardViewManager.dismiss();
+        if (mShowing && !mHidden) {
+            mKeyguardViewManager.dismiss();
+        }
     }
 
     /**
