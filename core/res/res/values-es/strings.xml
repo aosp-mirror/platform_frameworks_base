@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emergencia"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Reloj"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Sin servicio"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
@@ -824,12 +823,12 @@
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Se ha empezado a cambiar el orden de los widgets."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Se ha terminado de cambiar el orden de los widgets."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminado"</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ampliar área desbloqueada"</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ampliar área de desbloqueo"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueo deslizando el dedo"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueo mediante patrón"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueo por patrón"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueo facial"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueo mediante PIN"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo mediante contraseña"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueo por PIN"</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo por contraseña"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área de patrón"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área para deslizar"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el tablet."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"¿Subir el volumen por encima del nivel de seguridad?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>

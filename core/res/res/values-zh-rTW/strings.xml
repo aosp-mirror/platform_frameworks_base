@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN 碼不正確。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急電話號碼"</string>
-    <string name="widget_default" msgid="1685115188448967291">"時鐘"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"沒有服務。"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"螢幕已鎖定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"按下 [Menu] 解鎖或撥打緊急電話。"</string>
@@ -822,7 +821,7 @@
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"相機"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒體控制項"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"已開始將小工具重新排序。"</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"小工具已重新排序完成。"</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"小工具重新排序已完成。"</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小工具已刪除。"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"展開解鎖區域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"滑動解鎖。"</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，手機現在將恢復原廠設定。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"要將音量調高到安全等級以上嗎？"\n"長時間聆聽偏高音量可能會損害您的聽力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持續用兩指按住即可啟用協助工具。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>

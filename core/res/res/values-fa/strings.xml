@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"پین کد اشتباه است."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"برای بازگشایی قفل، منو را فشار دهید و سپس 0 را فشار دهید."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"شماره اضطراری"</string>
-    <string name="widget_default" msgid="1685115188448967291">"ساعت"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"سرویسی وجود ندارد."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"صفحه قفل شد."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"برای بازگشایی قفل یا انجام تماس اضطراری روی منو فشار دهید."</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"صدا به بالاتر از سطح ایمن افزایش یابد؟"\n"گوش دادن به صدای بلند برای زمان‌های طولانی می‌تواند به شنوایی شما آسیب برساند."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"برای فعال کردن قابلیت دسترسی، با دو انگشت خود همچنان به طرف پایین فشار دهید."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"قابلیت دسترسی فعال شد."</string>

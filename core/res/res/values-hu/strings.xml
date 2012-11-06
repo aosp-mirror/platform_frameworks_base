@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Helytelen PIN kód."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"A feloldáshoz nyomja meg a Menü, majd a 0 gombot."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Segélyhívó szám"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Óra"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nincs szolgáltatás."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"A képernyő le van zárva."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"A telefont <xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálta meg sikertelenül feloldani. A rendszer visszaállítja a telefon gyári alapértelmezett beállításait."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját."\n\n" Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"A biztonságos szint fölé emeli a hangerőt?"\n"Ha hosszú ideig hangosan hallgatja a zenét, az károsíthatja a hallását."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>

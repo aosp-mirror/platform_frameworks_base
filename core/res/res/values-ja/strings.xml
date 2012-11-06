@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"MENU、0キーでロック解除"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急通報番号"</string>
-    <string name="widget_default" msgid="1685115188448967291">"時計"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"通信サービスはありません"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"画面ロック中"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"MENUキーでロック解除(または緊急通報)"</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"携帯端末のロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。端末は出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"安全レベルを超えるまで音量を上げますか？"\n"大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ユーザー補助機能を有効にするには2本の指で押し続けてください。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ユーザー補助が有効になりました。"</string>
