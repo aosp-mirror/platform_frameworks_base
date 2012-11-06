@@ -26,8 +26,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatProperty;
@@ -62,7 +60,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
 
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
-    private Drawable mFrameDrawable;
     private boolean mEdgeCaptured;
 
     private DisplayMetrics mDisplayMetrics;
@@ -127,8 +124,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private ObjectAnimator mHandleAnimation;
     private ObjectAnimator mFrameAnimation;
 
-    private final Rect mTempRect = new Rect();
-
     private boolean mHasGlowpad;
 
     // We have an internal and external version, and we and them together.
@@ -146,23 +141,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         @Override
         public Float get(SlidingChallengeLayout view) {
             return view.mHandleAlpha;
-        }
-    };
-
-    static final Property<SlidingChallengeLayout, Float> FRAME_ALPHA =
-            new FloatProperty<SlidingChallengeLayout>("frameAlpha") {
-        @Override
-        public void setValue(SlidingChallengeLayout view, float value) {
-            if (view.mFrameDrawable != null) {
-                view.mFrameAlpha = value;
-                view.mFrameDrawable.setAlpha((int) (value * 0xFF));
-                view.mFrameDrawable.invalidateSelf();
-            }
-        }
-
-        @Override
-        public Float get(SlidingChallengeLayout view) {
-            return view.mFrameAlpha;
         }
     };
 
@@ -310,46 +288,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mHandleAnimation.start();
     }
 
-    void animateFrame(final boolean visible, final boolean full) {
-        if (mFrameDrawable == null) return;
-
-        final float targetAlpha = visible ? (full ? 1.f : 0.5f) : 0.f;
-        if (mFrameAnimation != null && targetAlpha != mFrameAnimationTarget) {
-            mFrameAnimation.cancel();
-            mFrameAnimationTarget = Float.MIN_VALUE;
-        }
-        if (targetAlpha == mFrameAlpha || targetAlpha == mFrameAnimationTarget) {
-            return;
-        }
-        mFrameAnimationTarget = targetAlpha;
-
-        mFrameAnimation = ObjectAnimator.ofFloat(this, FRAME_ALPHA, targetAlpha);
-        mFrameAnimation.setInterpolator(sHandleFadeInterpolator);
-        mFrameAnimation.setDuration(HANDLE_ANIMATE_DURATION);
-        mFrameAnimation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mFrameAnimationTarget = Float.MIN_VALUE;
-
-                if (!visible && full && mChallengeView != null) {
-                    // Mess with padding/margin to remove insets on the bouncer frame.
-                    mChallengeView.setPadding(0, 0, 0, 0);
-                    LayoutParams lp = (LayoutParams) mChallengeView.getLayoutParams();
-                    lp.leftMargin = lp.rightMargin = getChallengeMargin(true);
-                    mChallengeView.setLayoutParams(lp);
-                }
-                mFrameAnimation = null;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mFrameAnimationTarget = Float.MIN_VALUE;
-                mFrameAnimation = null;
-            }
-        });
-        mFrameAnimation.start();
-    }
-
     private void sendInitialListenerUpdates() {
         if (mScrollListener != null) {
             int challengeTop = mChallengeView != null ? mChallengeView.getTop() : 0;
@@ -409,9 +347,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             mScrollState = state;
 
             animateHandle(state == SCROLL_STATE_IDLE && !mChallengeShowing);
-            if (!mIsBouncing) {
-                animateFrame(false, false);
-            }
             if (mScrollListener != null) {
                 mScrollListener.onScrollStateChanged(state);
             }
@@ -543,17 +478,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         // Mess with padding/margin to inset the bouncer frame.
         // We have more space available to us otherwise.
         if (mChallengeView != null) {
-            if (mFrameDrawable == null || !mFrameDrawable.getPadding(mTempRect)) {
-                mTempRect.set(0, 0, 0, 0);
-            }
-            mChallengeView.setPadding(mTempRect.left, mTempRect.top, mTempRect.right,
-                    mTempRect.bottom);
             final LayoutParams lp = (LayoutParams) mChallengeView.getLayoutParams();
             lp.leftMargin = lp.rightMargin = getChallengeMargin(false);
             mChallengeView.setLayoutParams(lp);
         }
-
-        animateFrame(true, true);
 
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(true);
@@ -571,7 +499,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mChallengeView != null) {
             mChallengeView.hideBouncer(HANDLE_ANIMATE_DURATION);
         }
-        animateFrame(false, true);
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(false);
         }
@@ -861,7 +788,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     mChallengeView.setVisibility(mChallengeShowing ? VISIBLE : INVISIBLE);
                 }
                 // We're going to play silly games with the frame's background drawable later.
-                mFrameDrawable = mChallengeView.getBackground();
                 if (!mHasLayout) {
                     // Set up the margin correctly based on our content for the first run.
                     mHasGlowpad = child.findViewById(R.id.keyguard_selector_view) != null;
@@ -971,9 +897,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
 
         if (!mHasLayout) {
-            if (mFrameDrawable != null) {
-                mFrameDrawable.setAlpha(0);
-            }
             mHasLayout = true;
         }
     }
