@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Yritä uudelleen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Face Unlock -yrityksiä tehty suurin sallittu määrä."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Ladataan (<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Ladattu."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Täynnä"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Kytke laturi."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ei SIM-korttia"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Nostetaanko äänenvoimakkuus turvallista tasoa voimakkaammaksi?"\n"Jos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Ota esteettömyystila käyttöön koskettamalla pitkään kahdella sormella."</string>

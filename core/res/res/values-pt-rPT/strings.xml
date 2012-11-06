@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Tentar novamente"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Excedido o n.º máximo de tentativas de Desbloqueio Através do Rosto"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"A carregar, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Carregado."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Cobrado"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Ligue o carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nenhum cartão SIM"</string>
@@ -813,14 +813,14 @@
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Adicionar widget."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vazio"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Área de desbloqueio expandida."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Área de desbloqueio comprimida."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Área de desbloqueio minimizada."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Seletor de utilizadores"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Estado"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Câmara"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Controlos de multimédia"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Reordenação de widget iniciada."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Reordenação de widget concluída."</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Reordenação de widgets iniciada."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Reordenação de widgets concluída."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminado."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Expandir área de desbloqueio."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueio através de deslize."</string>
@@ -1436,8 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentar o volume acima do nível de segurança?"\n"Ouvir em volume alto durante longos períodos de tempo poderá prejudicar a sua audição."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantenha os dois dedos para ativar a acessibilidade."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Acessibilidade ativada."</string>
