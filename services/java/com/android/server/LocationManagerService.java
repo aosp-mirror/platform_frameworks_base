@@ -1351,6 +1351,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         // geo-fence manager uses the public location API, need to clear identity
         int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != UserHandle.USER_OWNER) {
+            // temporary measure until geofences work for secondary users
+            Log.w(TAG, "proximity alerts are currently available only to the primary user");
+            return;
+        }
         long identity = Binder.clearCallingIdentity();
         try {
             mGeofenceManager.addFence(sanitizedRequest, geofence, intent, uid, packageName);
