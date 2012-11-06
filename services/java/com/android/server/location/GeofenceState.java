@@ -39,11 +39,12 @@ public class GeofenceState {
     public final PendingIntent mIntent;
 
     int mState;  // current state
-    double mDistance;  // current distance to center of fence
+    double mDistanceToCenter;  // current distance to center of fence
 
-    public GeofenceState(Geofence fence, Location prevLocation, long expireAt,
+    public GeofenceState(Geofence fence, long expireAt,
             String packageName, PendingIntent intent) {
         mState = STATE_UNKNOWN;
+        mDistanceToCenter = Double.MAX_VALUE;
 
         mFence = fence;
         mExpireAt = expireAt;
@@ -53,10 +54,6 @@ public class GeofenceState {
         mLocation = new Location("");
         mLocation.setLatitude(fence.getLatitude());
         mLocation.setLongitude(fence.getLongitude());
-
-        if (prevLocation != null) {
-            processLocation(prevLocation);
-        }
     }
 
     /**
@@ -64,26 +61,35 @@ public class GeofenceState {
      * @return FLAG_ENTER or FLAG_EXIT if the fence was crossed, 0 otherwise
      */
     public int processLocation(Location location) {
-        mDistance = mLocation.distanceTo(location);
+        mDistanceToCenter = mLocation.distanceTo(location);
 
         int prevState = mState;
         //TODO: inside/outside detection could be made more rigorous
-        boolean inside = mDistance <= Math.max(mFence.getRadius(), location.getAccuracy());
+        boolean inside = mDistanceToCenter <= Math.max(mFence.getRadius(), location.getAccuracy());
         if (inside) {
             mState = STATE_INSIDE;
+            if (prevState != STATE_INSIDE) {
+                return FLAG_ENTER; // return enter if previously exited or unknown
+            }
         } else {
             mState = STATE_OUTSIDE;
-        }
-
-        if (prevState != 0 && mState != prevState) {
-            if (mState == STATE_INSIDE) return FLAG_ENTER;
-            if (mState == STATE_OUTSIDE) return FLAG_EXIT;
+            if (prevState == STATE_INSIDE) {
+                return FLAG_EXIT; // return exit only if previously entered
+            }
         }
         return 0;
     }
 
-    public double getDistance() {
-        return mDistance;
+    /**
+     * Gets the distance from the current location to the fence's boundary.
+     * @return The distance or {@link Double#MAX_VALUE} if unknown.
+     */
+    public double getDistanceToBoundary() {
+        if (Double.compare(mDistanceToCenter, Double.MAX_VALUE) == 0) {
+            return Double.MAX_VALUE;
+        } else {
+            return Math.abs(mFence.getRadius() - mDistanceToCenter);
+        }
     }
 
     @Override
@@ -99,6 +105,6 @@ public class GeofenceState {
             default:
                 state = "?";
         }
-        return String.format("%s d=%.0f %s", mFence.toString(), mDistance, state);
+        return String.format("%s d=%.0f %s", mFence.toString(), mDistanceToCenter, state);
     }
 }
