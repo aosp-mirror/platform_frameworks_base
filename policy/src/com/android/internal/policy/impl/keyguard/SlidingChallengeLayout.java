@@ -73,6 +73,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // Range: 0 (fully hidden) to 1 (fully visible)
     private float mChallengeOffset = 1.f;
     private boolean mChallengeShowing = true;
+    private boolean mChallengeShowingTargetState = true;
     private boolean mWasChallengeShowing = true;
     private boolean mIsBouncing = false;
 
@@ -355,7 +356,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     void completeChallengeScroll() {
-        setChallengeShowing(mChallengeOffset != 0);
+        setChallengeShowing(mChallengeShowingTargetState);
+        mChallengeOffset = mChallengeShowing ? 1.f : 0.f;
         setScrollState(SCROLL_STATE_IDLE);
         mChallengeInteractiveInternal = true;
         mChallengeView.setLayerType(LAYER_TYPE_NONE, null);
@@ -1112,6 +1114,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
 
         if (mHasLayout) {
+            mChallengeShowingTargetState = show;
             final int layoutBottom = getLayoutBottom();
             animateChallengeTo(show ? layoutBottom :
                     layoutBottom + mChallengeView.getHeight() - mChallengeBottomBound, velocity);
