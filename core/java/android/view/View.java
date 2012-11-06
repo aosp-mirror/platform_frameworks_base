@@ -5088,24 +5088,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected boolean isVisibleToUser(Rect boundInView) {
         if (mAttachInfo != null) {
+            // Attached to invisible window means this view is not visible.
+            if (mAttachInfo.mWindowVisibility != View.VISIBLE) {
+                return false;
+            }
+            // An invisible predecessor or one with alpha zero means
+            // that this view is not visible to the user.
+            Object current = this;
+            while (current instanceof View) {
+                View view = (View) current;
+                // We have attach info so this view is attached and there is no
+                // need to check whether we reach to ViewRootImpl on the way up.
+                if (view.getAlpha() <= 0 || view.getVisibility() != VISIBLE) {
+                    return false;
+                }
+                current = view.mParent;
+            }
+            // Check if the view is entirely covered by its predecessors.
             Rect visibleRect = mAttachInfo.mTmpInvalRect;
             Point offset = mAttachInfo.mPoint;
-            // The first two checks are made also made by isShown() which
-            // however traverses the tree up to the parent to catch that.
-            // Therefore, we do some fail fast check to minimize the up
-            // tree traversal.
-            boolean isVisible = mAttachInfo.mWindowVisibility == View.VISIBLE
-                && getAlpha() > 0
-                && isShown()
-                && getGlobalVisibleRect(visibleRect, offset);
-            if (isVisible && boundInView != null) {
-                visibleRect.offset(-offset.x, -offset.y);
-                // isVisible is always true here, use a simple assignment
-                isVisible = boundInView.intersect(visibleRect);
+            if (!getGlobalVisibleRect(visibleRect, offset)) {
+                return false;
             }
-            return isVisible;
+            // Check if the visible portion intersects the rectangle of interest.
+            if (boundInView != null) {
+                visibleRect.offset(-offset.x, -offset.y);
+                return boundInView.intersect(visibleRect);
+            }
+            return true;
         }
-
         return false;
     }
 
