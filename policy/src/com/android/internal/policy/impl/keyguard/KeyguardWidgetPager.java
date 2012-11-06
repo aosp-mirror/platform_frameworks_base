@@ -67,6 +67,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     private static final long CUSTOM_WIDGET_USER_ACTIVITY_TIMEOUT = 30000;
     private static final String TAG = "KeyguardWidgetPager";
+    private boolean mCenterSmallWidgetsVertically;
 
     private int mPage = 0;
     private Callbacks mCallbacks;
@@ -95,6 +96,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         Resources r = getResources();
         mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
+        mCenterSmallWidgetsVertically =
+                r.getBoolean(com.android.internal.R.bool.kg_center_small_widgets_vertically);
         mBgPersistenceWorkerThread = new HandlerThread("KeyguardWidgetPager Persistence");
         mBgPersistenceWorkerThread.start();
         mBgPersistenceWorkerHandler = new Handler(mBgPersistenceWorkerThread.getLooper());
@@ -274,6 +277,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 } else {
                     // Lock the widget to be small.
                     frame.setWidgetLockedSmall(true);
+                    if (mCenterSmallWidgetsVertically) {
+                        lp.gravity = Gravity.CENTER;
+                    }
                 }
             }
         } else {
