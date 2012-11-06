@@ -167,6 +167,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    private void updateWidgetFramesImportantForAccessibility() {
+        final int pageCount = getPageCount();
+        for (int i = 0; i < pageCount; i++) {
+            KeyguardWidgetFrame frame = getWidgetPageAt(i);
+            updateWidgetFrameImportantForAccessibility(frame);
+        }
+    }
+
+    private void updateWidgetFrameImportantForAccessibility(KeyguardWidgetFrame frame) {
+        if (frame.getContentAlpha() <= 0) {
+            frame.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        } else {
+            frame.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+    }
+
     private void userActivity() {
         if (mCallbacks != null) {
             mCallbacks.onUserActivityTimeoutChanged();
@@ -276,6 +292,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 content.getContentDescription());
             frame.setContentDescription(contentDescription);
         }
+        updateWidgetFrameImportantForAccessibility(frame);
     }
 
     /**
@@ -513,6 +530,12 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     @Override
+    void setCurrentPage(int currentPage) {
+        super.setCurrentPage(currentPage);
+        updateWidgetFramesImportantForAccessibility();
+    }
+
+    @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         mHasMeasure = false;
@@ -618,6 +641,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 if (!show) {
                     disablePageLayers();
                 }
+                updateWidgetFramesImportantForAccessibility();
             }
         });
         mChildrenOutlineFadeAnimation.start();
