@@ -212,7 +212,8 @@ public final class ViewStub extends View {
     /**
      * When visibility is set to {@link #VISIBLE} or {@link #INVISIBLE},
      * {@link #inflate()} is invoked and this StubbedView is replaced in its parent
-     * by the inflated layout resource.
+     * by the inflated layout resource. After that calls to this function are passed
+     * through to the inflated view.
      *
      * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
      *
