@@ -106,6 +106,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
         int padding = (int) (res.getDisplayMetrics().density * 8);
         setPadding(padding, padding, padding, padding);
 
+        // This will be overriden on phones based on the current security mode, however on tablets
+        // we need to specify a height.
+        mSmallWidgetHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.kg_small_widget_height);
         mBackgroundDrawable = res.getDrawable(R.drawable.kg_bouncer_bg_white);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
