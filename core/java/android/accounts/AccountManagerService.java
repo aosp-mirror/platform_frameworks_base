@@ -1297,8 +1297,17 @@ public class AccountManagerService
         }
     }
 
-    public void confirmCredentials(IAccountManagerResponse response,
-            final Account account, final Bundle options, final boolean expectActivityLaunch) {
+    @Override
+    public void confirmCredentialsAsUser(IAccountManagerResponse response,
+            final Account account, final Bundle options, final boolean expectActivityLaunch,
+            int userId) {
+        // Only allow the system process to read accounts of other users
+        if (userId != UserHandle.getCallingUserId()
+                && Binder.getCallingUid() != android.os.Process.myUid()) {
+            throw new SecurityException("User " + UserHandle.getCallingUserId()
+                    + " trying to confirm account credentials for " + userId);
+        }
+
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "confirmCredentials: " + account
                     + ", response " + response
@@ -1309,7 +1318,7 @@ public class AccountManagerService
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
-        UserAccounts accounts = getUserAccountsForCaller();
+        UserAccounts accounts = getUserAccounts(userId);
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
@@ -1548,14 +1557,22 @@ public class AccountManagerService
         return runningAccounts.toArray(accountsArray);
     }
 
-    public Account[] getAccounts(String type) {
+    @Override
+    public Account[] getAccountsAsUser(String type, int userId) {
+        // Only allow the system process to read accounts of other users
+        if (userId != UserHandle.getCallingUserId()
+                && Binder.getCallingUid() != android.os.Process.myUid()) {
+            throw new SecurityException("User " + UserHandle.getCallingUserId()
+                    + " trying to get account for " + userId);
+        }
+
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAccounts: accountType " + type
                     + ", caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
         checkReadAccountsPermission();
-        UserAccounts accounts = getUserAccountsForCaller();
+        UserAccounts accounts = getUserAccounts(userId);
         long identityToken = clearCallingIdentity();
         try {
             synchronized (accounts.cacheLock) {
@@ -1564,6 +1581,11 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    @Override
+    public Account[] getAccounts(String type) {
+        return getAccountsAsUser(type, UserHandle.getCallingUserId());
     }
 
     public void getAccountsByFeatures(IAccountManagerResponse response,

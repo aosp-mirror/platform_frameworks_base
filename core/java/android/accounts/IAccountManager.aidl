@@ -31,6 +31,7 @@ interface IAccountManager {
     String getUserData(in Account account, String key);
     AuthenticatorDescription[] getAuthenticatorTypes();
     Account[] getAccounts(String accountType);
+    Account[] getAccountsAsUser(String accountType, int userId);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
     boolean addAccount(in Account account, String password, in Bundle extras);
@@ -53,8 +54,8 @@ interface IAccountManager {
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
     void editProperties(in IAccountManagerResponse response, String accountType,
         boolean expectActivityLaunch);
-    void confirmCredentials(in IAccountManagerResponse response, in Account account,
-        in Bundle options, boolean expectActivityLaunch);
+    void confirmCredentialsAsUser(in IAccountManagerResponse response, in Account account,
+        in Bundle options, boolean expectActivityLaunch, int userId);
     void getAuthTokenLabel(in IAccountManagerResponse response, String accountType,
         String authTokenType);
 }
