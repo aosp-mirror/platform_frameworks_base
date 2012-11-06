@@ -471,6 +471,14 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             return;
         }
         mChallengeShowing = showChallenge;
+
+        if (mExpandChallengeView == null || mChallengeView == null) {
+            // These might not be here yet if we haven't been through layout.
+            // If we haven't, the first layout pass will set everything up correctly
+            // based on mChallengeShowing as set above.
+            return;
+        }
+
         if (mChallengeShowing) {
             mExpandChallengeView.setVisibility(View.INVISIBLE);
             mChallengeView.setVisibility(View.VISIBLE);
