@@ -23,6 +23,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     private KeyguardWidgetPager mKeyguardWidgetPager;
     private ChallengeLayout mChallengeLayout;
+    private KeyguardHostView mKeyguardHostView;
     private int[] mTmpPoint = new int[2];
     private int[] mTmpLoc = new int[2];
 
@@ -47,7 +48,8 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     int mChallengeTop = 0;
 
-    public KeyguardViewStateManager() {
+    public KeyguardViewStateManager(KeyguardHostView hostView) {
+        mKeyguardHostView = hostView;
     }
 
     public void setPagedView(KeyguardWidgetPager pagedView) {
@@ -142,6 +144,10 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
         // Reset the previous page size and ensure the current page is sized appropriately.
         // We only modify the page state if it is not currently under control by the slider.
         // This prevents conflicts.
+
+        if (mKeyguardHostView != null) {
+            mKeyguardHostView.updateStickyWidget(newPageIndex);
+        }
 
         // If the page hasn't switched, don't bother with any of this
         if (mCurrentPage == newPageIndex) return;
