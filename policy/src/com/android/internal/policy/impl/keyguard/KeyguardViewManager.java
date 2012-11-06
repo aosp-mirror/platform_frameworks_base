@@ -122,6 +122,7 @@ public class KeyguardViewManager {
     class ViewManagerHost extends FrameLayout {
         public ViewManagerHost(Context context) {
             super(context);
+            setFitsSystemWindows(true);
         }
 
         @Override
@@ -163,7 +164,8 @@ public class KeyguardViewManager {
 
             mKeyguardHost = new ViewManagerHost(mContext);
 
-            int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
+            int flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                     | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
             if (!mNeedsInput) {
