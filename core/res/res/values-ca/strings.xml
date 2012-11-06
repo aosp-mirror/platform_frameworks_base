@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Torna-ho a provar"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S\'ha superat el nombre màxim d\'intents de desbloqueig facial"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"S\'està carregant, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Carregada."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Carregada"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Connecteu el carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No hi ha cap targeta SIM."</string>
@@ -813,7 +813,7 @@
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Afegeix un widget"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Buit"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"S\'ha ampliat l\'àrea de desbloqueig."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"L\'àrea de desbloqueig està col·lapsada."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"L\'àrea de desbloqueig està replegada."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Selector d\'usuaris"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Estat"</string>
@@ -823,13 +823,13 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ha finalitzat la reorganització del widget."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"S\'ha suprimit el widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Amplia l\'àrea de desbloqueig."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig per control lliscant."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig per patró."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueig per PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueig per contrasenya."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zona de patró."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Àrea de control lliscant."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig lliscant el dit"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig mitjançant patró"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial"</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueig mitjançant PIN"</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueig mitjançant contrasenya"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Àrea de patró"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Àrea per lliscar el dit"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1436,8 +1436,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. Ara el telèfon es restablirà a la configuració predeterminada de fàbrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic."\n\n" Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vols augmentar el volum per sobre del nivell de seguretat?"\n"Escoltar música a un volum alt durant períodes llargs pot perjudicar l\'oïda."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén premuts els dos dits per activar l\'accessibilitat."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"S\'ha activat l\'accessibilitat."</string>

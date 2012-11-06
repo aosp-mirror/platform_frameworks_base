@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Riprova"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Numero massimo di tentativi di Sblocco col sorriso superato"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Carico."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Carica"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Collegare il caricabatterie."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nessuna scheda SIM"</string>
@@ -1436,8 +1436,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> tentativi errati di sblocco del telefono. Il telefono verrà sottoposto a un ripristino dei dati di fabbrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentare il volume oltre il livello di sicurezza?"\n"Ascoltare musica ad alto volume per lunghi periodi potrebbe danneggiare l\'udito."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Continua a tenere premuto con due dita per attivare l\'accessibilità."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accessibilità attivata."</string>

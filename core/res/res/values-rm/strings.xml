@@ -1218,7 +1218,8 @@
     <skip />
     <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
     <skip />
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Chargià"</string>
+    <!-- no translation found for lockscreen_charged (321635745684060624) -->
+    <skip />
     <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
     <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Connectai Voss chargiader."</string>
@@ -2326,7 +2327,7 @@
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_login (1437638152015574839) -->
     <skip />
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <!-- no translation found for kg_text_message_separator (4160700433287233771) -->
     <skip />
     <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
