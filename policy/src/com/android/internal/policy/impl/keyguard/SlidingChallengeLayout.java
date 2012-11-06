@@ -73,6 +73,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     // Range: 0 (fully hidden) to 1 (fully visible)
     private float mChallengeOffset = 1.f;
     private boolean mChallengeShowing = true;
+    private boolean mWasChallengeShowing = true;
     private boolean mIsBouncing = false;
 
     private final Scroller mScroller;
@@ -467,8 +468,9 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public void showBouncer() {
         if (mIsBouncing) return;
-        mIsBouncing = true;
+        mWasChallengeShowing = mChallengeShowing;
         showChallenge(true);
+        mIsBouncing = true;
         if (mScrimView != null) {
             mScrimView.setVisibility(VISIBLE);
         }
@@ -491,7 +493,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     @Override
     public void hideBouncer() {
         if (!mIsBouncing) return;
-        showChallenge(false);
+        if (!mWasChallengeShowing) showChallenge(false);
         mIsBouncing = false;
         if (mScrimView != null) {
             mScrimView.setVisibility(GONE);
