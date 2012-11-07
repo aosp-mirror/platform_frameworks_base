@@ -843,7 +843,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
             @Override
             public void onCameraLaunchedSuccessfully() {
-                if (isCameraPage(mAppWidgetContainer.getCurrentPage())) {
+                if (mAppWidgetContainer.isCameraPage(mAppWidgetContainer.getCurrentPage())) {
                     mAppWidgetContainer.scrollLeft();
                 }
                 setSliderHandleAlpha(1);
@@ -932,7 +932,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             int lastWidget = mAppWidgetContainer.getChildCount() - 1;
             int position = 0; // handle no widget case
             if (lastWidget >= 0) {
-                position = isCameraPage(lastWidget) ? lastWidget : lastWidget + 1;
+                position = mAppWidgetContainer.isCameraPage(lastWidget) ?
+                        lastWidget : lastWidget + 1;
             }
             mAppWidgetContainer.addWidget(mTransportControl, position);
             mTransportControl.setVisibility(View.VISIBLE);
@@ -1146,7 +1147,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private CameraWidgetFrame findCameraPage() {
         for (int i = mAppWidgetContainer.getChildCount() - 1; i >= 0; i--) {
-            if (isCameraPage(i)) {
+            if (mAppWidgetContainer.isCameraPage(i)) {
                 return (CameraWidgetFrame) mAppWidgetContainer.getChildAt(i);
             }
         }
@@ -1160,20 +1161,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
         }
         return false;
-    }
-
-    private boolean isCameraPage(int pageIndex) {
-        View v = mAppWidgetContainer.getChildAt(pageIndex);
-        return v != null && v instanceof CameraWidgetFrame;
-    }
-
-    private boolean isAddPage(int pageIndex) {
-        View v = mAppWidgetContainer.getChildAt(pageIndex);
-        return v != null && v.getId() == R.id.keyguard_add_widget;
-    }
-
-    private boolean isMusicPage(int pageIndex) {
-        return pageIndex >= 0 && pageIndex == getWidgetPosition(R.id.keyguard_transport_control);
     }
 
     private int getStickyWidget() {
@@ -1190,10 +1177,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (index < 0 || index >= mAppWidgetContainer.getChildCount()) {
             return;
         }
-        if (isAddPage(index)) {
+        if (mAppWidgetContainer.isAddPage(index)) {
             return;
         }
-        if (isCameraPage(index)) {
+        if (mAppWidgetContainer.isCameraPage(index)) {
             return;
         }
         if (isMusicPage(index)) {
@@ -1201,6 +1188,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         mLocalStickyWidget = index;
+    }
+
+    boolean isMusicPage(int pageIndex) {
+        return pageIndex >= 0 && pageIndex == getWidgetPosition(R.id.keyguard_transport_control);
     }
 
     private int getAppropriateWidgetPage(boolean isMusicPlaying) {
@@ -1216,15 +1207,15 @@ public class KeyguardHostView extends KeyguardViewBase {
         int stickyWidgetIndex = getStickyWidget();
         if (stickyWidgetIndex > -1
                 && stickyWidgetIndex < mAppWidgetContainer.getChildCount()
-                && !isAddPage(stickyWidgetIndex)
-                && !isCameraPage(stickyWidgetIndex)) {
+                && !mAppWidgetContainer.isAddPage(stickyWidgetIndex)
+                && !mAppWidgetContainer.isCameraPage(stickyWidgetIndex)) {
             if (DEBUG) Log.d(TAG, "Valid sticky widget found, show page " + stickyWidgetIndex);
             return stickyWidgetIndex;
         }
 
         // else show the right-most widget (except for camera)
         int rightMost = mAppWidgetContainer.getChildCount() - 1;
-        if (isCameraPage(rightMost)) {
+        if (mAppWidgetContainer.isCameraPage(rightMost)) {
             rightMost--;
         }
         if (DEBUG) Log.d(TAG, "Show right-most page " + rightMost);

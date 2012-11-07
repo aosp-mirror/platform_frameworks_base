@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -577,6 +578,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         computeScrollHelper();
     }
 
+    protected boolean shouldSetTopAlignedPivotForWidget(int childIndex) {
+        return mTopAlignPageWhenShrinkingForBouncer;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (!mIsDataReady || getChildCount() == 0) {
@@ -593,8 +598,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         // NOTE: We multiply by 1.5f to account for the fact that depending on the offset of the
         // viewport, we can be at most one and a half screens offset once we scale down
-        int parentWidthSize = (int) (1.5f * parent.getMeasuredWidth());
-        int parentHeightSize = parent.getMeasuredHeight();
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int maxSize = Math.max(dm.widthPixels, dm.heightPixels);
+        int parentWidthSize = (int) (1.5f * maxSize);
+        int parentHeightSize = maxSize;
         int scaledWidthSize = (int) (parentWidthSize / mMinScale);
         int scaledHeightSize = (int) (parentHeightSize / mMinScale);
         mViewport.set(0, 0, widthSize, heightSize);
@@ -651,7 +658,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 MeasureSpec.makeMeasureSpec(heightSize - verticalPadding, childHeightMode);
 
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            if (mTopAlignPageWhenShrinkingForBouncer) {
+            if (shouldSetTopAlignedPivotForWidget(i)) {
                 child.setPivotX(child.getWidth() / 2);
                 child.setPivotY(0f);
             }
@@ -1015,6 +1022,17 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         return  (x > (getViewportOffsetX() + getViewportWidth() - getRelativeChildOffset(mCurrentPage) + mPageSpacing));
     }
 
+    /** Returns whether x and y originated within the buffered/unbuffered viewport */
+    private boolean isTouchPointInViewport(int x, int y, boolean buffer) {
+        if (buffer) {
+            mTmpRect.set(mViewport.left - mViewport.width() / 2, mViewport.top,
+                    mViewport.right + mViewport.width() / 2, mViewport.bottom);
+            return mTmpRect.contains(x, y);
+        } else {
+            return mViewport.contains(x, y);
+        }
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DISABLE_TOUCH_INTERACTION) {
@@ -1093,7 +1111,11 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                     mTouchState = TOUCH_STATE_REST;
                     mScroller.abortAnimation();
                 } else {
-                    mTouchState = TOUCH_STATE_SCROLLING;
+                    if (isTouchPointInViewport((int) mDownMotionX, (int) mDownMotionY, true)) {
+                        mTouchState = TOUCH_STATE_SCROLLING;
+                    } else {
+                        mTouchState = TOUCH_STATE_REST;
+                    }
                 }
 
                 // check if this can be the beginning of a tap on the side of the pages
@@ -1115,6 +1137,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 resetTouchState();
+                // Just intercept the touch event on up if we tap outside the strict viewport
+                if (!isTouchPointInViewport((int) mLastMotionX, (int) mLastMotionY, false)) {
+                    return true;
+                }
                 break;
 
             case MotionEvent.ACTION_POINTER_UP:
@@ -1139,24 +1165,19 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
      * user moves their touch point too far.
      */
     protected void determineScrollingStart(MotionEvent ev, float touchSlopScale) {
-        /*
-         * Locally do absolute value. mLastMotionX is set to the y value
-         * of the down event.
-         */
+        // Disallow scrolling if we don't have a valid pointer index
         final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+        if (pointerIndex == -1) return;
 
-        if (pointerIndex == -1) {
-            return;
-        }
+        // Disallow scrolling if we started the gesture from outside the viewport
+        final float x = ev.getX(pointerIndex);
+        final float y = ev.getY(pointerIndex);
+        if (!isTouchPointInViewport((int) x, (int) y, true)) return;
 
         // If we're only allowing edge swipes, we break out early if the down event wasn't
         // at the edge.
-        if (mOnlyAllowEdgeSwipes && !mDownEventOnEdge) {
-            return;
-        }
+        if (mOnlyAllowEdgeSwipes && !mDownEventOnEdge) return;
 
-        final float x = ev.getX(pointerIndex);
-        final float y = ev.getY(pointerIndex);
         final int xDiff = (int) Math.abs(x - mLastMotionX);
         final int yDiff = (int) Math.abs(y - mLastMotionY);
 
