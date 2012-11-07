@@ -35,6 +35,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.policy.impl.keyguard.KeyguardSecurityCallback.OnDismissAction;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
@@ -160,10 +161,8 @@ public abstract class KeyguardActivityLauncher {
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         boolean isSecure = lockPatternUtils.isSecure();
         if (!isSecure || showsWhileLocked) {
-            if (!isSecure) try {
-                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-            } catch (RemoteException e) {
-                Log.w(TAG, "can't dismiss keyguard on launch");
+            if (!isSecure) {
+                dismissKeyguardOnNextActivity();
             }
             try {
                 if (DEBUG) Log.d(TAG, String.format("Starting activity for intent %s at %s",
@@ -176,13 +175,23 @@ public abstract class KeyguardActivityLauncher {
             // Create a runnable to start the activity and ask the user to enter their
             // credentials.
             KeyguardSecurityCallback callback = getCallback();
-            callback.setOnDismissRunnable(new Runnable() {
+            callback.setOnDismissAction(new OnDismissAction() {
                 @Override
-                public void run() {
+                public boolean onDismiss() {
+                    dismissKeyguardOnNextActivity();
                     startActivityForCurrentUser(intent, animation, worker, onStarted);
+                    return true;
                 }
             });
             callback.dismiss(false);
+        }
+    }
+
+    private void dismissKeyguardOnNextActivity() {
+        try {
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+        } catch (RemoteException e) {
+            Log.w(TAG, "can't dismiss keyguard on launch");
         }
     }
 

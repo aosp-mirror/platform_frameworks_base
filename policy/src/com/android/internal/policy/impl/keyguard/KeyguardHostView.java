@@ -50,6 +50,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
+import com.android.internal.policy.impl.keyguard.KeyguardSecurityCallback.OnDismissAction;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -79,7 +80,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private boolean mBootCompleted = false;
     private boolean mCheckAppWidgetConsistencyOnBootCompleted = false;
 
-    protected Runnable mLaunchRunnable;
+    protected OnDismissAction mDismissAction;
 
     protected int mFailedAttempts;
     private LockPatternUtils mLockPatternUtils;
@@ -364,8 +365,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         @Override
-        public void setOnDismissRunnable(Runnable runnable) {
-            KeyguardHostView.this.setOnDismissRunnable(runnable);
+        public void setOnDismissAction(OnDismissAction action) {
+            KeyguardHostView.this.setOnDismissAction(action);
         }
 
     };
@@ -569,12 +570,17 @@ public class KeyguardHostView extends KeyguardViewBase {
 
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
-            if (mLaunchRunnable != null) {
-                mLaunchRunnable.run();
-                mLaunchRunnable = null;
+            boolean deferKeyguardDone = false;
+            if (mDismissAction != null) {
+                deferKeyguardDone = mDismissAction.onDismiss();
+                mDismissAction = null;
             }
             if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.keyguardDone(true);
+                if (deferKeyguardDone) {
+                    mViewMediatorCallback.keyguardDonePending();
+                } else {
+                    mViewMediatorCallback.keyguardDone(true);
+                }
             }
         } else {
             mViewStateManager.showBouncer(true);
@@ -587,8 +593,8 @@ public class KeyguardHostView extends KeyguardViewBase {
                 final android.app.PendingIntent pendingIntent,
                 final Intent fillInIntent) {
             if (pendingIntent.isActivity()) {
-                setOnDismissRunnable(new Runnable() {
-                    public void run() {
+                setOnDismissAction(new OnDismissAction() {
+                    public boolean onDismiss() {
                         try {
                               // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                               Context context = view.getContext();
@@ -599,12 +605,13 @@ public class KeyguardHostView extends KeyguardViewBase {
                                       pendingIntent.getIntentSender(), fillInIntent,
                                       Intent.FLAG_ACTIVITY_NEW_TASK,
                                       Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle());
-                          } catch (IntentSender.SendIntentException e) {
-                              android.util.Log.e(TAG, "Cannot send pending intent: ", e);
-                          } catch (Exception e) {
-                              android.util.Log.e(TAG, "Cannot send pending intent due to " +
-                                      "unknown exception: ", e);
-                          }
+                        } catch (IntentSender.SendIntentException e) {
+                            android.util.Log.e(TAG, "Cannot send pending intent: ", e);
+                        } catch (Exception e) {
+                            android.util.Log.e(TAG, "Cannot send pending intent due to " +
+                                    "unknown exception: ", e);
+                        }
+                        return false;
                     }
                 });
 
@@ -633,7 +640,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         @Override
-        public void setOnDismissRunnable(Runnable runnable) {
+        public void setOnDismissAction(OnDismissAction action) {
         }
 
         @Override
@@ -668,11 +675,11 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     /**
-     *  Sets a runnable to run when keyguard is dismissed
-     * @param runnable
+     * Sets an action to perform when keyguard is dismissed.
+     * @param action
      */
-    protected void setOnDismissRunnable(Runnable runnable) {
-        mLaunchRunnable = runnable;
+    protected void setOnDismissAction(OnDismissAction action) {
+        mDismissAction = action;
     }
 
     private KeyguardSecurityView getSecurityView(SecurityMode securityMode) {
@@ -757,7 +764,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         if (securityMode == SecurityMode.None) {
             // Discard current runnable if we're switching back to the selector view
-            setOnDismissRunnable(null);
+            setOnDismissAction(null);
         }
         mCurrentSecuritySelection = securityMode;
     }
