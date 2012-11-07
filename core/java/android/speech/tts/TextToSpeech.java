@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1276,9 +1277,11 @@ public class TextToSpeech {
         return mEnginesHelper.getEngines();
     }
 
-
     private class Connection implements ServiceConnection {
         private ITextToSpeechService mService;
+
+        private OnServiceConnectedAsyncTask mOnServiceConnectedAsyncTask;
+
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
             @Override
             public void onDone(String utteranceId) {
@@ -1305,23 +1308,59 @@ public class TextToSpeech {
             }
         };
 
+        private class OnServiceConnectedAsyncTask extends AsyncTask<Void, Void, Integer> {
+            private final ComponentName mName;
+            private final ITextToSpeechService mConnectedService;
+
+            public OnServiceConnectedAsyncTask(ComponentName name, IBinder service) {
+                mName = name;
+                mConnectedService = ITextToSpeechService.Stub.asInterface(service);
+            }
+
+            @Override
+            protected Integer doInBackground(Void... params) {
+                synchronized(mStartLock) {
+                    if (isCancelled()) {
+                        return null;
+                    }
+
+                    try {
+                        mConnectedService.setCallback(getCallerIdentity(), mCallback);
+                        Log.i(TAG, "Setuped connection to " + mName);
+                        return SUCCESS;
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Error connecting to service, setCallback() failed");
+                        return ERROR;
+                    }
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Integer result) {
+                synchronized(mStartLock) {
+                    if (mOnServiceConnectedAsyncTask == this) {
+                        mOnServiceConnectedAsyncTask = null;
+                    }
+
+                    mServiceConnection = Connection.this;
+                    mService = mConnectedService;
+
+                    dispatchOnInit(result);
+                }
+            }
+        }
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i(TAG, "Connected to " + name);
             synchronized(mStartLock) {
-                if (mServiceConnection != null) {
-                    // Disconnect any previous service connection
-                    mServiceConnection.disconnect();
+                Log.i(TAG, "Connected to " + name);
+
+                if (mOnServiceConnectedAsyncTask != null) {
+                    mOnServiceConnectedAsyncTask.cancel(false);
                 }
-                mServiceConnection = this;
-                mService = ITextToSpeechService.Stub.asInterface(service);
-                try {
-                    mService.setCallback(getCallerIdentity(), mCallback);
-                    dispatchOnInit(SUCCESS);
-                } catch (RemoteException re) {
-                    Log.e(TAG, "Error connecting to service, setCallback() failed");
-                    dispatchOnInit(ERROR);
-                }
+
+                mOnServiceConnectedAsyncTask = new OnServiceConnectedAsyncTask(name, service);
+                mOnServiceConnectedAsyncTask.execute();
             }
         }
 
@@ -1329,28 +1368,45 @@ public class TextToSpeech {
             return mCallback;
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
+        /**
+         * Clear connection related fields and cancel mOnServiceConnectedAsyncTask if set.
+         *
+         * @return true if we cancel mOnServiceConnectedAsyncTask in progress.
+         */
+        private boolean clearServiceConnection() {
             synchronized(mStartLock) {
+                boolean result = false;
+                if (mOnServiceConnectedAsyncTask != null) {
+                    result = mOnServiceConnectedAsyncTask.cancel(false);
+                    mOnServiceConnectedAsyncTask = null;
+                }
+
                 mService = null;
                 // If this is the active connection, clear it
                 if (mServiceConnection == this) {
                     mServiceConnection = null;
                 }
+                return result;
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Asked to disconnect from " + name);
+            if (clearServiceConnection()) {
+                /* We need to protect against a rare case where engine
+                 * dies just after successful connection - and we process onServiceDisconnected
+                 * before OnServiceConnectedAsyncTask.onPostExecute. onServiceDisconnected cancels
+                 * OnServiceConnectedAsyncTask.onPostExecute and we don't call dispatchOnInit
+                 * with ERROR as argument.
+                 */
+                dispatchOnInit(ERROR);
             }
         }
 
         public void disconnect() {
             mContext.unbindService(this);
-
-            synchronized (mStartLock) {
-                mService = null;
-                // If this is the active connection, clear it
-                if (mServiceConnection == this) {
-                    mServiceConnection = null;
-                }
-
-            }
+            clearServiceConnection();
         }
 
         public <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
