@@ -384,7 +384,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void onResume() {
+    public void onResume(int reason) {
         reset();
     }
 

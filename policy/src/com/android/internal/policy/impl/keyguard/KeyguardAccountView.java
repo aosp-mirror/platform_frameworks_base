@@ -314,7 +314,7 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void onResume() {
+    public void onResume(int reason) {
         reset();
     }
 
