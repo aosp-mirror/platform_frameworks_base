@@ -75,6 +75,9 @@ public class KeyguardHostView extends KeyguardViewBase {
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private int mAppWidgetToShow;
 
+    private boolean mBootCompleted = false;
+    private boolean mCheckAppWidgetConsistencyOnBootCompleted = false;
+
     protected Runnable mLaunchRunnable;
 
     protected int mFailedAttempts;
@@ -139,6 +142,19 @@ public class KeyguardHostView extends KeyguardViewBase {
             Log.v(TAG, "Keyguard secure camera disabled by DPM");
         }
     }
+
+    private KeyguardUpdateMonitorCallback mUpdateMonitorCallbacks =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onBootCompleted() {
+            mBootCompleted = true;
+            if (mCheckAppWidgetConsistencyOnBootCompleted) {
+                checkAppWidgetConsistency();
+                mSwitchPageRunnable.run();
+                mCheckAppWidgetConsistencyOnBootCompleted = false;
+            }
+        }
+    };
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -263,12 +279,14 @@ public class KeyguardHostView extends KeyguardViewBase {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAppWidgetHost.startListening();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallbacks);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAppWidgetHost.stopListening();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallbacks);
     }
 
     private AppWidgetHost getAppWidgetHost() {
@@ -1086,8 +1104,13 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         return appWidgetId;
     }
-
     public void checkAppWidgetConsistency() {
+        // Since this method may bind a widget (which we can't do until boot completed) we
+        // may have to defer it until after boot complete.
+        if (!mBootCompleted) {
+            mCheckAppWidgetConsistencyOnBootCompleted = true;
+            return;
+        }
         final int childCount = mAppWidgetContainer.getChildCount();
         boolean widgetPageExists = false;
         for (int i = 0; i < childCount; i++) {
