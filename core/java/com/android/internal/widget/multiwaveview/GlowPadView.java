@@ -113,6 +113,7 @@ public class GlowPadView extends View {
     private float mWaveCenterY;
     private int mMaxTargetHeight;
     private int mMaxTargetWidth;
+    private float mRingScaleFactor = 1f;
 
     private float mOuterRadius = 0.0f;
     private float mSnapMargin = 0.0f;
@@ -319,6 +320,22 @@ public class GlowPadView extends View {
         return (int) (Math.max(mOuterRing.getHeight(), 2 * mOuterRadius) + mMaxTargetHeight);
     }
 
+    /**
+     * This gets the suggested width accounting for the ring's scale factor.
+     */
+    protected int getScaledSuggestedMinimumWidth() {
+        return (int) (mRingScaleFactor * Math.max(mOuterRing.getWidth(), 2 * mOuterRadius)
+                + mMaxTargetWidth);
+    }
+
+    /**
+     * This gets the suggested height accounting for the ring's scale factor.
+     */
+    protected int getScaledSuggestedMinimumHeight() {
+        return (int) (mRingScaleFactor * Math.max(mOuterRing.getHeight(), 2 * mOuterRadius)
+                + mMaxTargetHeight);
+    }
+
     private int resolveMeasured(int measureSpec, int desired)
     {
         int result = 0;
@@ -335,16 +352,6 @@ public class GlowPadView extends View {
                 result = specSize;
         }
         return result;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int minimumWidth = getSuggestedMinimumWidth();
-        final int minimumHeight = getSuggestedMinimumHeight();
-        int computedWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
-        int computedHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
-        computeInsets((computedWidth - minimumWidth), (computedHeight - minimumHeight));
-        setMeasuredDimension(computedWidth, computedHeight);
     }
 
     private void switchToState(int state, float x, float y) {
@@ -504,8 +511,9 @@ public class GlowPadView extends View {
                     "onUpdate", mUpdateListener));
         }
 
-        final float ringScaleTarget = expanded ?
+        float ringScaleTarget = expanded ?
                 RING_SCALE_EXPANDED : RING_SCALE_COLLAPSED;
+        ringScaleTarget *= mRingScaleFactor;
         mTargetAnimations.add(Tweener.to(mOuterRing, duration,
                 "ease", interpolator,
                 "alpha", 0.0f,
@@ -535,11 +543,13 @@ public class GlowPadView extends View {
                     "delay", delay,
                     "onUpdate", mUpdateListener));
         }
+
+        float ringScale = mRingScaleFactor * RING_SCALE_EXPANDED;
         mTargetAnimations.add(Tweener.to(mOuterRing, duration,
                 "ease", Ease.Cubic.easeOut,
                 "alpha", 1.0f,
-                "scaleX", 1.0f,
-                "scaleY", 1.0f,
+                "scaleX", ringScale,
+                "scaleY", ringScale,
                 "delay", delay,
                 "onUpdate", mUpdateListener,
                 "onComplete", mTargetUpdateListener));
@@ -1018,6 +1028,74 @@ public class GlowPadView extends View {
         }
     }
 
+    /**
+     * Given the desired width and height of the ring and the allocated width and height, compute
+     * how much we need to scale the ring.
+     */
+    private float computeScaleFactor(int desiredWidth, int desiredHeight,
+            int actualWidth, int actualHeight) {
+        final int layoutDirection = getLayoutDirection();
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
+
+        float scaleX = 1f;
+        float scaleY = 1f;
+
+        // We use the gravity as a cue for whether we want to scale on a particular axis.
+        // We only scale to fit horizontally if we're not pinned to the left or right. Likewise,
+        // we only scale to fit vertically if we're not pinned to the top or bottom. In these
+        // cases, we want the ring to hang off the side or top/bottom, respectively.
+        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+            case Gravity.LEFT:
+            case Gravity.RIGHT:
+                break;
+            case Gravity.CENTER_HORIZONTAL:
+            default:
+                if (desiredWidth > actualWidth) {
+                    scaleX = (1f * actualWidth - mMaxTargetWidth) /
+                            (desiredWidth - mMaxTargetWidth);
+                }
+                break;
+        }
+        switch (absoluteGravity & Gravity.VERTICAL_GRAVITY_MASK) {
+            case Gravity.TOP:
+            case Gravity.BOTTOM:
+                break;
+            case Gravity.CENTER_VERTICAL:
+            default:
+                if (desiredHeight > actualHeight) {
+                    scaleY = (1f * actualHeight - mMaxTargetHeight) /
+                            (desiredHeight - mMaxTargetHeight);
+                }
+                break;
+        }
+        return Math.min(scaleX, scaleY);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int minimumWidth = getSuggestedMinimumWidth();
+        final int minimumHeight = getSuggestedMinimumHeight();
+        int computedWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
+        int computedHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
+
+        mRingScaleFactor = computeScaleFactor(minimumWidth, minimumHeight,
+                computedWidth, computedHeight);
+
+        int scaledWidth = getScaledSuggestedMinimumWidth();
+        int scaledHeight = getScaledSuggestedMinimumHeight();
+
+        computeInsets(computedWidth - scaledWidth, computedHeight - scaledHeight);
+        setMeasuredDimension(computedWidth, computedHeight);
+    }
+
+    private float getRingWidth() {
+        return mRingScaleFactor * Math.max(mOuterRing.getWidth(), 2 * mOuterRadius);
+    }
+
+    private float getRingHeight() {
+        return mRingScaleFactor * Math.max(mOuterRing.getHeight(), 2 * mOuterRadius);
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -1026,8 +1104,8 @@ public class GlowPadView extends View {
 
         // Target placement width/height. This puts the targets on the greater of the ring
         // width or the specified outer radius.
-        final float placementWidth = Math.max(mOuterRing.getWidth(), 2 * mOuterRadius);
-        final float placementHeight = Math.max(mOuterRing.getHeight(), 2 * mOuterRadius);
+        final float placementWidth = getRingWidth();
+        final float placementHeight = getRingHeight();
         float newWaveCenterX = mHorizontalInset
                 + Math.max(width, mMaxTargetWidth + placementWidth) / 2;
         float newWaveCenterY = mVerticalInset
@@ -1041,6 +1119,8 @@ public class GlowPadView extends View {
 
         mOuterRing.setPositionX(newWaveCenterX);
         mOuterRing.setPositionY(newWaveCenterY);
+
+        mPointCloud.setScale(mRingScaleFactor);
 
         mHandleDrawable.setPositionX(newWaveCenterX);
         mHandleDrawable.setPositionY(newWaveCenterY);
@@ -1061,13 +1141,15 @@ public class GlowPadView extends View {
     }
 
     private void updateTargetPosition(int i, float centerX, float centerY, float angle) {
+        final float placementRadiusX = getRingWidth() / 2;
+        final float placementRadiusY = getRingHeight() / 2;
         if (i >= 0) {
             ArrayList<TargetDrawable> targets = mTargetDrawables;
             final TargetDrawable targetIcon = targets.get(i);
             targetIcon.setPositionX(centerX);
             targetIcon.setPositionY(centerY);
-            targetIcon.setX(mOuterRadius * (float) Math.cos(angle));
-            targetIcon.setY(mOuterRadius * (float) Math.sin(angle));
+            targetIcon.setX(placementRadiusX * (float) Math.cos(angle));
+            targetIcon.setY(placementRadiusY * (float) Math.sin(angle));
         }
     }
 
