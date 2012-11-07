@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"እንደገና ሞክር"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"የመጨረሻውን  የገጽ ክፈት ሙከራዎችን አልፏል"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"ኃይል በመሙላት ላይ፣ <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"ኃይል ሞልቷል።"</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"ባትሪ ሞልቷል።"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"ኃይል መሙያዎን ያያይዙ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ምንም ሲም ካርድ የለም"</string>
@@ -1436,8 +1436,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ስልኩን <xliff:g id="NUMBER">%d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ለመክፈት ሞክረዋል። ስልኩ አሁን በፋብሪካ ነባሪ ቅንብር ዳግም ይጀመራል።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ጡባዊ ቱኮዎን እንዲከፍቱ ይጠየቃሉ።"\n\n" ከ<xliff:g id="NUMBER_2">%d</xliff:g> ከሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።"\n\n"እባክዎ ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"ድምጽ አደጋ ከሌለው መጠን በላይ ይጨመር??"\n"ለረጅም ጊዜ በከፍተኛ ድምጽ መስማት የመስማት ችሎታዎን ሊጎዳይ ይችላል።"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ተደራሽነትን ለማንቃት ሁለት ጣቶችዎን ባሉበት ያቆዩዋቸው።"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ተደራሽነት ነቅቷል።"</string>

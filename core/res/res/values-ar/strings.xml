@@ -628,7 +628,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"تعطيل الميزات في وضع حماية المفاتيح"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"يمكنك منع استخدام بعض الميزات في وضع حماية المفاتيح."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"الرئيسية"</item>
+    <item msgid="8901098336658710359">"المنزل"</item>
     <item msgid="869923650527136615">"الجوال"</item>
     <item msgid="7897544654242874543">"عمل"</item>
     <item msgid="1103601433382158155">"فاكس العمل"</item>
@@ -638,19 +638,19 @@
     <item msgid="9192514806975898961">"مخصص"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"الرئيسية"</item>
+    <item msgid="8073994352956129127">"المنزل"</item>
     <item msgid="7084237356602625604">"عمل"</item>
     <item msgid="1112044410659011023">"آخر"</item>
     <item msgid="2374913952870110618">"مخصص"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"الرئيسية"</item>
+    <item msgid="6880257626740047286">"المنزل"</item>
     <item msgid="5629153956045109251">"عمل"</item>
     <item msgid="4966604264500343469">"آخر"</item>
     <item msgid="4932682847595299369">"مخصص"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"الرئيسية"</item>
+    <item msgid="1738585194601476694">"المنزل"</item>
     <item msgid="1359644565647383708">"عمل"</item>
     <item msgid="7868549401053615677">"آخر"</item>
     <item msgid="3145118944639869809">"مخصص"</item>
@@ -671,7 +671,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"مخصص"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"الرئيسية"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"المنزل"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"الجوال"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"عمل"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"فاكس العمل"</string>
@@ -696,16 +696,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"الذكرى السنوية"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"غير ذلك"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"مخصص"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"الرئيسية"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"المنزل"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"عمل"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"آخر"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"الجوال"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"مخصص"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"الرئيسية"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"المنزل"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"عمل"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"آخر"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"مخصص"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"الرئيسية"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"المنزل"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"عمل"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"آخر"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"مخصص"</string>
@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"أعد المحاولة"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"تم تجاوز الحد الأقصى لعدد محاولات تأمين الجهاز بالوجه"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"جارٍ الشحن، <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"تم الشحن."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"تم الشحن"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"توصيل جهاز الشحن."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ليست هناك بطاقة SIM"</string>
@@ -1436,8 +1436,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف."\n\n" أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"هل تريد رفع مستوى الصوت فوق المستوى الآمن؟"\n"قد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"اضغط بإصبعين لأسفل مع الاستمرار لتمكين تسهيل الدخول."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"تم تمكين إمكانية الدخول."</string>

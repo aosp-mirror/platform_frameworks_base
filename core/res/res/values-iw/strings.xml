@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"נסה שוב"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"חרגת ממספר הניסיונות המרבי של זיהוי פרצוף"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"טוען (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"נטען."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"טעון"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"חבר את המטען."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"אין כרטיס SIM"</string>
@@ -825,7 +825,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"הרחב את אזור ביטול הנעילה."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ביטול נעילה באמצעות הסטה."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ביטול נעילה באמצעות ציור קו."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"זיהוי פרצוף."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ביטול נעילה באמצעות זיהוי פרצוף."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ביטול נעילה באמצעות מספר PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ביטול נעילה באמצעות סיסמה."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"אזור ציור קו."</string>
@@ -1436,8 +1436,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"האם להעלות את עוצמת הקול מעל לרמה הבטוחה?"\n"האזנה בעוצמת קול גבוהה למשך זמן ארוך עלולה לפגוע בשמיעה."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"המשך לגעת בשתי אצבעות כדי להפעיל נגישות."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"נגישות הופעלה."</string>
