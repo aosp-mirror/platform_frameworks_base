@@ -24,6 +24,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -209,7 +210,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private long REORDERING_DELETE_DROP_TARGET_FADE_DURATION = 150;
     private float mMinScale = 1f;
     protected View mDragView;
-    private AnimatorSet mZoomInOutAnim;
+    protected AnimatorSet mZoomInOutAnim;
     private Runnable mSidePageHoverRunnable;
     private int mSidePageHoverIndex = -1;
     // This variable's scope is only for the duration of startReordering() and endReordering()
@@ -246,6 +247,9 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     // Drop to delete
     private View mDeleteDropTarget;
 
+    // Bouncer
+    private boolean mTopAlignPageWhenShrinkingForBouncer = false;
+
     public interface PageSwitchListener {
         void onPageSwitching(View newPage, int newPageIndex);
         void onPageSwitched(View newPage, int newPageIndex);
@@ -270,8 +274,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 a.getDimensionPixelSize(R.styleable.PagedView_scrollIndicatorPaddingRight, 0);
         a.recycle();
 
-        mEdgeSwipeRegionSize =
-                getResources().getDimensionPixelSize(R.dimen.kg_edge_swipe_region_size);
+        Resources r = getResources();
+        mEdgeSwipeRegionSize = r.getDimensionPixelSize(R.dimen.kg_edge_swipe_region_size);
+        mTopAlignPageWhenShrinkingForBouncer =
+                r.getBoolean(R.bool.kg_top_align_page_shrink_on_bouncer_visible);
 
         setHapticFeedbackEnabled(false);
         init();
@@ -645,6 +651,10 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 MeasureSpec.makeMeasureSpec(heightSize - verticalPadding, childHeightMode);
 
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            if (mTopAlignPageWhenShrinkingForBouncer) {
+                child.setPivotX(child.getWidth() / 2);
+                child.setPivotY(0f);
+            }
         }
         setMeasuredDimension(scaledWidthSize, scaledHeightSize);
 
