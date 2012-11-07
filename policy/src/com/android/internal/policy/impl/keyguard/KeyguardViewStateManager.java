@@ -15,6 +15,7 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
+import android.appwidget.AppWidgetManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -114,6 +115,11 @@ public class KeyguardViewStateManager implements
             SlidingChallengeLayout scl = (SlidingChallengeLayout) mChallengeLayout;
             scl.fadeOutChallenge();
             mPageIndexOnPageBeginMoving = mKeyguardWidgetPager.getCurrentPage();
+        }
+        // We use mAppWidgetToShow to show a particular widget after you add it--
+        // once the user swipes a page we clear that behavior
+        if (mKeyguardHostView != null) {
+            mKeyguardHostView.clearAppWidgetToShow();
         }
         if (mHideHintsRunnable != null) {
             mMainQueue.removeCallbacks(mHideHintsRunnable);
