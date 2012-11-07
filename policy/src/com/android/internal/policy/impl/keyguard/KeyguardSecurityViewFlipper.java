@@ -128,22 +128,24 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
 
     @Override
     public void showBouncer(int duration) {
+        KeyguardSecurityView active = getSecurityView();
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             if (child instanceof KeyguardSecurityView) {
                 KeyguardSecurityView ksv = (KeyguardSecurityView) child;
-                ksv.showBouncer(child.getVisibility() == View.VISIBLE ? duration : 0);
+                ksv.showBouncer(ksv == active ? duration : 0);
             }
         }
     }
 
     @Override
     public void hideBouncer(int duration) {
+        KeyguardSecurityView active = getSecurityView();
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             if (child instanceof KeyguardSecurityView) {
                 KeyguardSecurityView ksv = (KeyguardSecurityView) child;
-                ksv.hideBouncer(child.getVisibility() == View.VISIBLE ? duration : 0);
+                ksv.hideBouncer(ksv == active ? duration : 0);
             }
         }
     }
