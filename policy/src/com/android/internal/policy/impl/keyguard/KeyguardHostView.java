@@ -37,8 +37,6 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -75,6 +73,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     private boolean mIsVerifyUnlockOnly;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
+    private int mAppWidgetToShow;
 
     protected Runnable mLaunchRunnable;
 
@@ -84,7 +83,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
     private KeyguardViewStateManager mViewStateManager;
 
-    int mLocalStickyWidget = -1;
     boolean mPersitentStickyWidgetLoaded = false;
 
     private Rect mTempRect = new Rect();
@@ -768,7 +766,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Once the screen turns off, we no longer consider this to be first boot and we want the
         // biometric unlock to start next time keyguard is shown.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-        saveStickyWidgetIndex();
         checkAppWidgetConsistency();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
@@ -967,7 +964,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         initializeTransportControl();
     }
 
-    private void removeTransportFromWidgetPager() {
+    private boolean removeTransportFromWidgetPager() {
         int page = getWidgetPosition(R.id.keyguard_transport_control);
         if (page != -1) {
             mAppWidgetContainer.removeWidget(mTransportControl);
@@ -976,8 +973,9 @@ public class KeyguardHostView extends KeyguardViewBase {
             KeyguardHostView.this.addView(mTransportControl);
             mTransportControl.setVisibility(View.GONE);
             mViewStateManager.setTransportState(KeyguardViewStateManager.TRANSPORT_GONE);
-            mTransportControl.post(mSwitchPageRunnable);
+            return true;
         }
+        return false;
     }
 
     private void addTransportToWidgetPager() {
@@ -1006,8 +1004,9 @@ public class KeyguardHostView extends KeyguardViewBase {
             mTransportControl.setKeyguardCallback(new TransportCallback() {
                 @Override
                 public void onListenerDetached() {
-                    removeTransportFromWidgetPager();
-                    mTransportControl.post(mSwitchPageRunnable);
+                    if (removeTransportFromWidgetPager()) {
+                        mTransportControl.post(mSwitchPageRunnable);
+                    }
                 }
 
                 @Override
@@ -1183,7 +1182,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     @Override
     public Parcelable onSaveInstanceState() {
         if (DEBUG) Log.d(TAG, "onSaveInstanceState");
-        saveStickyWidgetIndex();
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.transportState = mViewStateManager.getTransportState();
@@ -1207,9 +1205,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
         if (DEBUG) Log.d(TAG, "Window is " + (hasWindowFocus ? "focused" : "unfocused"));
-        if (!hasWindowFocus) {
-            saveStickyWidgetIndex();
-        } else if (mShowSecurityWhenReturn) {
+        if (hasWindowFocus && mShowSecurityWhenReturn) {
             SlidingChallengeLayout slider =
                 (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
             if (slider != null) {
@@ -1243,31 +1239,13 @@ public class KeyguardHostView extends KeyguardViewBase {
         return null;
     }
 
-    private int getStickyWidget() {
-        // The first time we query the persistent state. From that point, we use a locally updated
-        // notion of the sticky widget page.
-        if (!mPersitentStickyWidgetLoaded) {
-            mLocalStickyWidget = mLockPatternUtils.getStickyAppWidgetIndex();
-            mPersitentStickyWidgetLoaded = true;
+    private boolean isWidgetPage(int pageIndex) {
+        View v = mAppWidgetContainer.getChildAt(pageIndex);
+        if (v != null && v instanceof KeyguardWidgetFrame) {
+            KeyguardWidgetFrame kwf = (KeyguardWidgetFrame) v;
+            return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
         }
-        return mLocalStickyWidget;
-    }
-
-    public void updateStickyWidget(int index) {
-        if (index < 0 || index >= mAppWidgetContainer.getChildCount()) {
-            return;
-        }
-        if (mAppWidgetContainer.isAddPage(index)) {
-            return;
-        }
-        if (mAppWidgetContainer.isCameraPage(index)) {
-            return;
-        }
-        if (isMusicPage(index)) {
-            return;
-        }
-
-        mLocalStickyWidget = index;
+        return false;
     }
 
     boolean isMusicPage(int pageIndex) {
@@ -1276,21 +1254,21 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private int getAppropriateWidgetPage(boolean isMusicPlaying) {
         // assumes at least one widget (besides camera + add)
-
+        if (mAppWidgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            final int childCount = mAppWidgetContainer.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (mAppWidgetContainer.getWidgetPageAt(i).getContentAppWidgetId()
+                        == mAppWidgetToShow) {
+                    mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
+                    return i;
+                }
+            }
+            mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
+        }
         // if music playing, show transport
         if (isMusicPlaying) {
             if (DEBUG) Log.d(TAG, "Music playing, show transport");
             return mAppWidgetContainer.getWidgetPageIndex(mTransportControl);
-        }
-
-        // if we have a valid sticky widget, show it
-        int stickyWidgetIndex = getStickyWidget();
-        if (stickyWidgetIndex > -1
-                && stickyWidgetIndex < mAppWidgetContainer.getChildCount()
-                && !mAppWidgetContainer.isAddPage(stickyWidgetIndex)
-                && !mAppWidgetContainer.isCameraPage(stickyWidgetIndex)) {
-            if (DEBUG) Log.d(TAG, "Valid sticky widget found, show page " + stickyWidgetIndex);
-            return stickyWidgetIndex;
         }
 
         // else show the right-most widget (except for camera)
@@ -1300,13 +1278,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         if (DEBUG) Log.d(TAG, "Show right-most page " + rightMost);
         return rightMost;
-    }
-
-    private void saveStickyWidgetIndex() {
-        if (DEBUG) Log.d(TAG, "saveStickyWidgetIndex: " + mLocalStickyWidget);
-        if (mPersitentStickyWidgetLoaded && mLocalStickyWidget >= 0) {
-            mLockPatternUtils.setStickyAppWidgetIndex(mLocalStickyWidget);
-        }
     }
 
     private void enableUserSelectorIfNecessary() {
@@ -1378,6 +1349,11 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     public void goToUserSwitcher() {
         mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
+    }
+
+    public void goToWidget(int appWidgetId) {
+        mAppWidgetToShow = appWidgetId;
+        mSwitchPageRunnable.run();
     }
 
     public boolean handleMenuKey() {
