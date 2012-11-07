@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Poskusite znova"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Presegli ste dovoljeno število poskusov odklepanja z obrazom"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Polnjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Napolnjeno."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Napolnjeno"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite napajalnik."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ni kartice SIM"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat napačno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Želite povečati glasnost nad varno raven?"\n"Dolgotrajna izpostavljenost glasnim tonom lahko poškoduje sluh."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Če želite omogočiti pripomočke za ljudi s posebnimi potrebami, na zaslonu pridržite z dvema prstoma."</string>

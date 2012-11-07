@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Cuba lagi"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Telah melepasi had cubaan Buka Kunci Wajah"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Mengecas, (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Sudah dicas."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Sudah dicas"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Sambungkan pengecas anda."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Tiada kad SIM"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tingkatkan kelantangan di atas tahap selamat?"\n"Mendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Teruskan menahan dengan dua jari untuk mendayakan kebolehcapaian."</string>

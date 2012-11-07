@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Опитайте отново"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималният брой опити за отключване с лице е надвишен"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Зарежда се, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Зареден."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Заредена"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Свържете зарядното си устройство."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Няма SIM карта"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Да се увеличи ли силата на звука над безопасното ниво?"\n"Продължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Продължете да натискате с два пръста, за да активирате функцията за достъпност."</string>

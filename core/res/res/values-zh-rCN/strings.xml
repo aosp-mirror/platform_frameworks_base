@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"重试"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"正在充电，<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"已充满。"</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"充电完成"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
@@ -811,7 +811,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"已添加单元格"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"图案绘制完成"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空"</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"已展开解锁区域。"</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"已折叠解锁区域。"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小部件。"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。手机现在将重置为出厂默认设置。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"将音量调高到安全级别以上？"\n"长时间聆听高音量可能会损伤听力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>

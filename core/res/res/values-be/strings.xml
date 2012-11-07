@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Паўтарыце спробу"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Перавышана максімальная колькасць спроб разблакоўкі праз Фэйскантроль"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Зарадка, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Зараджаны."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Зараджаны"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Падлучыце зарадную прыладу."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Няма SIM-карты"</string>
@@ -1436,8 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Вы няправільна спрабавалі разблакiраваць тэлефон некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да завадскіх налад."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Выдалiць"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Павялiчыць гук больш за рэкамендаваны ўзровень?"\n"Доўгае слуханне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утрымлiвайце два пальцы, каб уключыць доступ."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Даступнасць уключана."</string>
