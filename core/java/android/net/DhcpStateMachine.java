@@ -351,6 +351,8 @@ public class DhcpStateMachine extends StateMachine {
         DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
 
         if (dhcpAction == DhcpAction.START) {
+            /* Stop any existing DHCP daemon before starting new */
+            NetworkUtils.stopDhcp(mInterfaceName);
             if (DBG) Log.d(TAG, "DHCP request on " + mInterfaceName);
             success = NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal);
             mDhcpInfo = dhcpInfoInternal;
