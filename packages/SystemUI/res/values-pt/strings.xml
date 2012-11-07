@@ -185,7 +185,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivos)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desativado"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brilho"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Girar automaticamente"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Girar automat."</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotação bloqueada"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de entrada"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"Local em uso"</string>
