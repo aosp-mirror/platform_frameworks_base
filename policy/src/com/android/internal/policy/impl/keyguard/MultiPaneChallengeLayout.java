@@ -363,7 +363,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             adjustedWidth = (int) (paddedWidth * lp.centerWithinArea + 0.5f);
             adjustedHeight = height;
         } else if (fixedLayoutVertical) {
-            final int paddedHeight = height - padding.top - padding.bottom;
+            final int paddedHeight = height - getPaddingTop() - getPaddingBottom();
             adjustedWidth = width;
             adjustedHeight = (int) (paddedHeight * lp.centerWithinArea + 0.5f);
         } else {

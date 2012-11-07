@@ -219,10 +219,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
 
             child.measure(childWidthSpec, childHeightSpec);
 
-            width = Math.max(width, Math.min(child.getMeasuredWidth(), widthSize));
-            height = Math.max(height, Math.min(child.getMeasuredHeight(), heightSize));
+            width = Math.max(width, Math.min(child.getMeasuredWidth(), widthSize - wPadding));
+            height = Math.max(height, Math.min(child.getMeasuredHeight(), heightSize - hPadding));
         }
-        setMeasuredDimension(width, height);
+        setMeasuredDimension(width + wPadding, height + hPadding);
     }
 
     private int makeChildMeasureSpec(int maxSize, int childDimen) {
