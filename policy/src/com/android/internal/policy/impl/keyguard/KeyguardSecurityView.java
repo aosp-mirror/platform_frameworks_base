@@ -18,6 +18,9 @@ package com.android.internal.policy.impl.keyguard;
 import com.android.internal.widget.LockPatternUtils;
 
 public interface KeyguardSecurityView {
+    static public final int SCREEN_ON = 1;
+    static public final int VIEW_REVEALED = 2;
+
     /**
      * Interface back to keyguard to tell it when security
      * @param callback
@@ -45,8 +48,9 @@ public interface KeyguardSecurityView {
     /**
      * Emulate activity life cycle within this view.  When called, the view should prepare itself
      * to be shown.
+     * @param reason the root cause of the event.
      */
-    void onResume();
+    void onResume(int reason);
 
     /**
      * Inquire whether this view requires IME (keyboard) interaction.

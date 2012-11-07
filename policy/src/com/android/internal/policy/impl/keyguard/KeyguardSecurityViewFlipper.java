@@ -107,10 +107,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
-    public void onResume() {
+    public void onResume(int reason) {
         KeyguardSecurityView ksv = getSecurityView();
         if (ksv != null) {
-            ksv.onResume();
+            ksv.onResume(reason);
         }
     }
 
