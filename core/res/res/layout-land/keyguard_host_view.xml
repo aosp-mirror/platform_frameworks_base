@@ -56,8 +56,8 @@
 
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
-            android:layout_width="@dimen/keyguard_security_width"
-            android:layout_height="@dimen/keyguard_security_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             androidprv:layout_childType="challenge"
             androidprv:layout_centerWithinArea="0.55">
             <com.android.internal.policy.impl.keyguard.KeyguardSecurityViewFlipper
