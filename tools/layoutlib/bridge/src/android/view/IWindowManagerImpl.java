@@ -446,6 +446,11 @@ public class IWindowManagerImpl implements IWindowManager {
     public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
+    
+    @Override
+    public boolean isSafeModeEnabled() {
+        return false;
+    }
 
     @Override
     public IBinder getFocusedWindowToken() {
