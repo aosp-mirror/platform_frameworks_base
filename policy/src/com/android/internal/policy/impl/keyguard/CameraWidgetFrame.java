@@ -152,6 +152,16 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         return iv;
     }
 
+    @Override
+    public void setPivotX(float pivotX) {
+        // don't pivot me
+    }
+
+    @Override
+    public void setPivotY(float pivotY) {
+        // don't pivot me
+    }
+
     public void render() {
         try {
             int width = getRootView().getWidth();
