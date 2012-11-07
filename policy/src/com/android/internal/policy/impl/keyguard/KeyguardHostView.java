@@ -1295,18 +1295,30 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (!UserManager.supportsMultipleUsers()) {
             return; // device doesn't support multi-user mode
         }
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (um == null) {
+            Throwable t = new Throwable();
+            t.fillInStackTrace();
+            Log.e(TAG, "user service is null.", t);
+            return;
+        }
 
         // if there are multiple users, we need to enable to multi-user switcher
-        UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> users = mUm.getUsers(true);
+        List<UserInfo> users = um.getUsers(true);
+        if (users == null) {
+            Throwable t = new Throwable();
+            t.fillInStackTrace();
+            Log.e(TAG, "list of users is null.", t);
+            return;
+        }
 
-        if (users != null && users.size() > 1) {
+        if (users.size() > 1) {
             View multiUserView = findViewById(R.id.keyguard_user_selector);
             if (multiUserView instanceof KeyguardMultiUserSelectorView) {
                 KeyguardMultiUserSelectorView multiUser =
                         (KeyguardMultiUserSelectorView) multiUserView;
                 multiUser.setVisibility(View.VISIBLE);
-                multiUser.addUsers(mUm.getUsers(true));
+                multiUser.addUsers(users);
                 UserSwitcherCallback callback = new UserSwitcherCallback() {
                     @Override
                     public void hideSecurityView(int duration) {
@@ -1333,6 +1345,14 @@ public class KeyguardHostView extends KeyguardViewBase {
                     }
                 };
                 multiUser.setCallback(callback);
+            } else {
+                Throwable t = new Throwable();
+                t.fillInStackTrace();
+                if (multiUserView == null) {
+                    Log.e(TAG, "could not find the user_selector.", t);
+                } else {
+                    Log.e(TAG, "user_selector is the wrong type.", t);
+                }
             }
         }
     }
