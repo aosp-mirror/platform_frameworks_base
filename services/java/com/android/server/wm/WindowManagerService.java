@@ -8365,7 +8365,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // soon won't be visible, to avoid wasting time and funky
             // changes while a window is animating away.
             final boolean gone = (behindDream && mPolicy.canBeForceHidden(win, win.mAttrs))
-                    || win.isGoneForLayoutLw();
+                    || (win.isGoneForLayoutLw() && !win.isOnScreen());
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
                 Slog.v(TAG, "1ST PASS " + win
@@ -8393,8 +8393,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || ((win.mAttrs.type == TYPE_KEYGUARD || win.mAttrs.type == TYPE_WALLPAPER) &&
-                        win.isConfigChanged())
+                    || (win.mAttrs.type == TYPE_KEYGUARD && win.isConfigChanged())
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
