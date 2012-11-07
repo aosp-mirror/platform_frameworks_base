@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторіть спробу"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейсконтроль\""</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Заряджається, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Заряджено."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Заряджено"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Підкл. заряд. пристрій."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Відсутня SIM-карта"</string>
@@ -823,13 +823,13 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Змінення порядку віджетів закінчено."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Віджет <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> видалено."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Розгорнути область розблокування."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Розблокування жестом."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Розблокування повзунком."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Розблокування ключем."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Фейсконтроль"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Розблокування PIN-кодом."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Розблокування паролем."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ключа."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область жесту."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область повзунка."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1436,7 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER">%d</xliff:g>. Налаштування телефону буде змінено на заводські за умовчанням."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати планшетний ПК за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти."\n\n" Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <!-- no translation found for kg_reordering_delete_drop_target_text (7899202978204438708) -->
     <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Збільшити гучність понад безпечний рівень?"\n"Надто гучне прослуховування впродовж тривалого періоду може пошкодити слух."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утримуйте двома пальцями, щоб увімкнути доступність."</string>

@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Försök igen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laddar (<xliff:g id="PERCENT">%%</xliff:g> <xliff:g id="NUMBER">%d</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Laddad."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Batteriet har laddats"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Inget SIM-kort"</string>
@@ -1436,8 +1436,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp surfplattan med ett e-postkonto."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ta bort"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vill du höja volymen över den säkra nivån?"\n"Om du lyssnar på hög volym under långa perioder kan din hörsel skadas."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Fortsätt trycka med två fingrar om du vill aktivera tillgänglighetsläget."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tillgänglighetsläget har aktiverats."</string>
