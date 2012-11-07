@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
+import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.IWindowManager;
 import android.view.View;
 import android.widget.Button;
 
@@ -1112,6 +1114,25 @@ public class LockPatternUtils {
         return sb.toString();
     }
 
+    // appwidget used when appwidgets are disabled (we make an exception for
+    // default clock widget)
+    public void writeFallbackAppWidgetId(int appWidgetId) {
+        Settings.Secure.putIntForUser(mContentResolver,
+                Settings.Secure.LOCK_SCREEN_FALLBACK_APPWIDGET_ID,
+                appWidgetId,
+                UserHandle.USER_CURRENT);
+    }
+
+    // appwidget used when appwidgets are disabled (we make an exception for
+    // default clock widget)
+    public int getFallbackAppWidgetId() {
+        return Settings.Secure.getIntForUser(
+                mContentResolver,
+                Settings.Secure.LOCK_SCREEN_FALLBACK_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID,
+                UserHandle.USER_CURRENT);
+    }
+
     private void writeAppWidgets(int[] appWidgetIds) {
         Settings.Secure.putStringForUser(mContentResolver,
                         Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
@@ -1324,6 +1345,16 @@ public class LockPatternUtils {
 
     public boolean getPowerButtonInstantlyLocks() {
         return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true);
+    }
+    
+    public static boolean isSafeModeEnabled() {
+        try {
+            return IWindowManager.Stub.asInterface(
+                    ServiceManager.getService("window")).isSafeModeEnabled();
+        } catch (RemoteException e) {
+            // Shouldn't happen!
+        }
+        return false;
     }
 
 }
