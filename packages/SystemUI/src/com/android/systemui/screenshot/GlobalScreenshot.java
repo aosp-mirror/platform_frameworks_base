@@ -91,6 +91,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private String mImageFilePath;
     private long mImageTime;
     private BigPictureStyle mNotificationStyle;
+    private int mImageWidth;
+    private int mImageHeight;
 
     // WORKAROUND: We want the same notification across screenshots that we update so that we don't
     // spam a user's notification drawer.  However, we only show the ticker for the saving state
@@ -113,11 +115,11 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 SCREENSHOTS_DIR_NAME, mImageFileName);
 
         // Create the large notification icon
-        int imageWidth = data.image.getWidth();
-        int imageHeight = data.image.getHeight();
+        mImageWidth = data.image.getWidth();
+        mImageHeight = data.image.getHeight();
         int iconSize = data.iconSize;
 
-        final int shortSide = imageWidth < imageHeight ? imageWidth : imageHeight;
+        final int shortSide = mImageWidth < mImageHeight ? mImageWidth : mImageHeight;
         Bitmap preview = Bitmap.createBitmap(shortSide, shortSide, data.image.getConfig());
         Canvas c = new Canvas(preview);
         Paint paint = new Paint();
@@ -125,8 +127,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         desat.setSaturation(0.25f);
         paint.setColorFilter(new ColorMatrixColorFilter(desat));
         Matrix matrix = new Matrix();
-        matrix.postTranslate((shortSide - imageWidth) / 2,
-                            (shortSide - imageHeight) / 2);
+        matrix.postTranslate((shortSide - mImageWidth) / 2,
+                            (shortSide - mImageHeight) / 2);
         c.drawBitmap(data.image, matrix, paint);
         c.drawColor(0x40FFFFFF);
 
@@ -183,6 +185,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.DATE_ADDED, mImageTime);
             values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, mImageTime);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
+            values.put(MediaStore.Images.ImageColumns.WIDTH, mImageWidth);
+            values.put(MediaStore.Images.ImageColumns.HEIGHT, mImageHeight);
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
             String subjectDate = new SimpleDateFormat("hh:mma, MMM dd, yyyy")
