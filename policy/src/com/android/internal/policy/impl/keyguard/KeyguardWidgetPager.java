@@ -22,9 +22,9 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.AttributeSet;
@@ -38,7 +38,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
-import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
@@ -69,8 +68,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private int mPage = 0;
     private Callbacks mCallbacks;
 
-    private boolean mCameraWidgetEnabled;
-
     private int mWidgetToResetAfterFadeOut;
 
     // Bouncer
@@ -97,10 +94,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
         setPageSwitchListener(this);
 
-        Resources r = getResources();
-        mCameraWidgetEnabled = r.getBoolean(R.bool.kg_enable_camera_default_widget);
-        mCenterSmallWidgetsVertically =
-                r.getBoolean(com.android.internal.R.bool.kg_center_small_widgets_vertically);
         mBackgroundWorkerThread = new HandlerThread("KeyguardWidgetPager Worker");
         mBackgroundWorkerThread.start();
         mBackgroundWorkerHandler = new Handler(mBackgroundWorkerThread.getLooper());
@@ -502,33 +495,29 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    public boolean isWidgetPage(int pageIndex) {
+        if (pageIndex < 0 || pageIndex >= getChildCount()) {
+            return false;
+        }
+        View v = getChildAt(pageIndex);
+        if (v != null && v instanceof KeyguardWidgetFrame) {
+            KeyguardWidgetFrame kwf = (KeyguardWidgetFrame) v;
+            return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
+        }
+        return false;
+    }
+
     @Override
     void boundByReorderablePages(boolean isReordering, int[] range) {
         if (isReordering) {
-            if (isAddWidgetPageVisible()) {
+            // Remove non-widget pages from the range
+            while (range[1] > range[0] && !isWidgetPage(range[1])) {
+                range[1]--;
+            }
+            while (range[0] < range[1] && !isWidgetPage(range[0])) {
                 range[0]++;
             }
-            if (isMusicWidgetVisible()) {
-                range[1]--;
-            }
-            if (isCameraWidgetVisible()) {
-                range[1]--;
-            }
         }
-    }
-
-    /*
-     * Special widgets
-     */
-    boolean isAddWidgetPageVisible() {
-        // TODO: Make proper test once we decide whether the add-page is always showing
-        return true;
-    }
-    boolean isMusicWidgetVisible() {
-        return mViewStateManager.getTransportState() != KeyguardViewStateManager.TRANSPORT_GONE;
-    }
-    boolean isCameraWidgetVisible() {
-        return mCameraWidgetEnabled;
     }
 
     protected void reorderStarting() {
@@ -785,7 +774,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     boolean isAddPage(int pageIndex) {
         View v = getChildAt(pageIndex);
-        return v != null && v.getId() == R.id.keyguard_add_widget;
+        return v != null && v.getId() == com.android.internal.R.id.keyguard_add_widget;
     }
 
     boolean isCameraPage(int pageIndex) {
