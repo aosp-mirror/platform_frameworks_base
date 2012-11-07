@@ -235,6 +235,7 @@ public class KeyguardViewMediator {
      */
     private boolean mWaitingUntilKeyguardVisible = false;
     private LockPatternUtils mLockPatternUtils;
+    private boolean mKeyguardDonePending = false;
 
     private SoundPool mLockSounds;
     private int mLockSoundId;
@@ -294,6 +295,11 @@ public class KeyguardViewMediator {
          * has changed and needs to be reapplied to the window.
          */
         void onUserActivityTimeoutChanged();
+
+        /**
+         * Report that the keyguard is dismissable, pending the next keyguardDone call.
+         */
+        void keyguardDonePending();
     }
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
@@ -435,6 +441,11 @@ public class KeyguardViewMediator {
         @Override
         public void onUserActivityTimeoutChanged() {
             mKeyguardViewManager.updateUserActivityTimeout();
+        }
+
+        @Override
+        public void keyguardDonePending() {
+            mKeyguardDonePending = true;
         }
     };
 
@@ -1044,6 +1055,7 @@ public class KeyguardViewMediator {
     }
 
     public void keyguardDone(boolean authenticated, boolean wakeup) {
+        mKeyguardDonePending = false;
         synchronized (this) {
             EventLog.writeEvent(70000, 2);
             if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
@@ -1375,6 +1387,10 @@ public class KeyguardViewMediator {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
             mKeyguardViewManager.onScreenTurnedOn(showListener);
         }
+    }
+
+    public boolean isDismissable() {
+        return mKeyguardDonePending || !isSecure();
     }
 
 }

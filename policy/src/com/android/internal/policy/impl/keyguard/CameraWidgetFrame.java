@@ -188,16 +188,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         return iv;
     }
 
-    @Override
-    public void setPivotX(float pivotX) {
-        // don't pivot me
-    }
-
-    @Override
-    public void setPivotY(float pivotY) {
-        // don't pivot me
-    }
-
     public void render() {
         final Throwable[] thrown = new Throwable[1];
         final Bitmap[] offscreen = new Bitmap[1];

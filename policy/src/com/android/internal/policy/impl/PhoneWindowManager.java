@@ -3899,7 +3899,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public void dismissKeyguardLw() {
-        if (!mKeyguardMediator.isSecure()) {
+        if (mKeyguardMediator.isDismissable()) {
             if (mKeyguardMediator.isShowing()) {
                 mHandler.post(new Runnable() {
                     public void run() {
