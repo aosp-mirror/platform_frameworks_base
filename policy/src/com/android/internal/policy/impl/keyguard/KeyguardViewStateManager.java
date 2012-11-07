@@ -147,10 +147,6 @@ public class KeyguardViewStateManager implements
         // We only modify the page state if it is not currently under control by the slider.
         // This prevents conflicts.
 
-        if (mKeyguardHostView != null) {
-            mKeyguardHostView.updateStickyWidget(newPageIndex);
-        }
-
         // If the page hasn't switched, don't bother with any of this
         if (mCurrentPage == newPageIndex) return;
 
