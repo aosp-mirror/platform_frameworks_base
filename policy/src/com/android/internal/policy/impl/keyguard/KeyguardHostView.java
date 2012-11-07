@@ -75,7 +75,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private int mAppWidgetToShow;
 
-    private boolean mBootCompleted = false;
     private boolean mCheckAppWidgetConsistencyOnBootCompleted = false;
 
     protected Runnable mLaunchRunnable;
@@ -147,7 +146,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             new KeyguardUpdateMonitorCallback() {
         @Override
         public void onBootCompleted() {
-            mBootCompleted = true;
             if (mCheckAppWidgetConsistencyOnBootCompleted) {
                 checkAppWidgetConsistency();
                 mSwitchPageRunnable.run();
@@ -1107,7 +1105,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void checkAppWidgetConsistency() {
         // Since this method may bind a widget (which we can't do until boot completed) we
         // may have to defer it until after boot complete.
-        if (!mBootCompleted) {
+        if (!KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
             mCheckAppWidgetConsistencyOnBootCompleted = true;
             return;
         }
