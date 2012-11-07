@@ -58,10 +58,8 @@
 
         <com.android.internal.policy.impl.keyguard.KeyguardSecurityContainer
             android:id="@+id/keyguard_security_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            androidprv:layout_maxWidth="@dimen/keyguard_security_width"
-            androidprv:layout_maxHeight="@dimen/keyguard_security_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             androidprv:layout_centerWithinArea="0.5"
             androidprv:layout_childType="challenge"
             android:layout_gravity="center_horizontal|bottom">

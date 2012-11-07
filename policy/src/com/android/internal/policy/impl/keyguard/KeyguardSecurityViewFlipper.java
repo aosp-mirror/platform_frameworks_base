@@ -17,13 +17,18 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
+import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 /**
@@ -32,6 +37,9 @@ import com.android.internal.widget.LockPatternUtils;
  *
  */
 public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
+    private static final String TAG = "KeyguardSecurityViewFlipper";
+    private static final boolean DEBUG = false;
+
     private Rect mTempRect = new Rect();
 
     public KeyguardSecurityViewFlipper(Context context) {
@@ -147,6 +155,121 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
                 KeyguardSecurityView ksv = (KeyguardSecurityView) child;
                 ksv.hideBouncer(ksv == active ? duration : 0);
             }
+        }
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams;
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams ? new LayoutParams((LayoutParams) p) : new LayoutParams(p);
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected void onMeasure(int widthSpec, int heightSpec) {
+        final int widthMode = MeasureSpec.getMode(widthSpec);
+        final int heightMode = MeasureSpec.getMode(heightSpec);
+        if (DEBUG && widthMode != MeasureSpec.AT_MOST) {
+            Log.w(TAG, "onMeasure: widthSpec " + MeasureSpec.toString(widthSpec) +
+                    " should be AT_MOST");
+        }
+        if (DEBUG && heightMode != MeasureSpec.AT_MOST) {
+            Log.w(TAG, "onMeasure: heightSpec " + MeasureSpec.toString(heightSpec) +
+                    " should be AT_MOST");
+        }
+
+        final int widthSize = MeasureSpec.getSize(widthSpec);
+        final int heightSize = MeasureSpec.getSize(heightSpec);
+        int maxWidth = widthSize;
+        int maxHeight = heightSize;
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+
+            if (lp.maxWidth > 0 && lp.maxWidth < maxWidth) {
+                maxWidth = lp.maxWidth;
+            }
+            if (lp.maxHeight > 0 && lp.maxHeight < maxHeight) {
+                maxHeight = lp.maxHeight;
+            }
+        }
+
+        final int wPadding = getPaddingLeft() + getPaddingRight();
+        final int hPadding = getPaddingTop() + getPaddingBottom();
+        maxWidth -= wPadding;
+        maxHeight -= hPadding;
+
+        int width = widthMode == MeasureSpec.EXACTLY ? widthSize : 0;
+        int height = heightMode == MeasureSpec.EXACTLY ? heightSize : 0;
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+
+            final int childWidthSpec = makeChildMeasureSpec(maxWidth, lp.width);
+            final int childHeightSpec = makeChildMeasureSpec(maxHeight, lp.height);
+
+            child.measure(childWidthSpec, childHeightSpec);
+
+            width = Math.max(width, Math.min(child.getMeasuredWidth(), widthSize));
+            height = Math.max(height, Math.min(child.getMeasuredHeight(), heightSize));
+        }
+        setMeasuredDimension(width, height);
+    }
+
+    private int makeChildMeasureSpec(int maxSize, int childDimen) {
+        final int mode;
+        final int size;
+        switch (childDimen) {
+            case LayoutParams.WRAP_CONTENT:
+                mode = MeasureSpec.AT_MOST;
+                size = maxSize;
+                break;
+            case LayoutParams.MATCH_PARENT:
+                mode = MeasureSpec.EXACTLY;
+                size = maxSize;
+                break;
+            default:
+                mode = MeasureSpec.EXACTLY;
+                size = Math.min(maxSize, childDimen);
+                break;
+        }
+        return MeasureSpec.makeMeasureSpec(size, mode);
+    }
+
+    public static class LayoutParams extends FrameLayout.LayoutParams {
+        public int maxWidth;
+        public int maxHeight;
+
+        public LayoutParams(ViewGroup.LayoutParams other) {
+            super(other);
+        }
+
+        public LayoutParams(LayoutParams other) {
+            super(other);
+
+            maxWidth = other.maxWidth;
+            maxHeight = other.maxHeight;
+        }
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            final TypedArray a = c.obtainStyledAttributes(attrs,
+                    R.styleable.KeyguardSecurityViewFlipper_Layout, 0, 0);
+            maxWidth = a.getDimensionPixelSize(
+                    R.styleable.KeyguardSecurityViewFlipper_Layout_layout_maxWidth, 0);
+            maxHeight = a.getDimensionPixelSize(
+                    R.styleable.KeyguardSecurityViewFlipper_Layout_layout_maxHeight, 0);
+            a.recycle();
         }
     }
 }

@@ -754,6 +754,26 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         return horizOk && vertOk;
     }
 
+    private int makeChildMeasureSpec(int maxSize, int childDimen) {
+        final int mode;
+        final int size;
+        switch (childDimen) {
+            case LayoutParams.WRAP_CONTENT:
+                mode = MeasureSpec.AT_MOST;
+                size = maxSize;
+                break;
+            case LayoutParams.MATCH_PARENT:
+                mode = MeasureSpec.EXACTLY;
+                size = maxSize;
+                break;
+            default:
+                mode = MeasureSpec.EXACTLY;
+                size = Math.min(maxSize, childDimen);
+                break;
+        }
+        return MeasureSpec.makeMeasureSpec(size, mode);
+    }
+
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         if (MeasureSpec.getMode(widthSpec) != MeasureSpec.EXACTLY ||
@@ -819,7 +839,25 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         // needs to do things its measure pass that are dependent on the challenge view
         // having been measured.
         if (mChallengeView != null && mChallengeView.getVisibility() != View.GONE) {
-            measureChildWithMargins(mChallengeView, widthSpec, 0, heightSpec, 0);
+            // This one's a little funny. If the IME is present - reported in the form
+            // of insets on the root view - we only give the challenge the space it would
+            // have had if the IME wasn't there in order to keep the rest of the layout stable.
+            // We base this on the layout_maxHeight on the challenge view. If it comes out
+            // negative or zero, either we didn't have a maxHeight or we're totally out of space,
+            // so give up and measure as if this rule weren't there.
+            int challengeHeightSpec = heightSpec;
+            final View root = getRootView();
+            if (root != null) {
+                final LayoutParams lp = (LayoutParams) mChallengeView.getLayoutParams();
+                final int specSize = MeasureSpec.getSize(heightSpec);
+                final int windowHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
+                final int diff = windowHeight - specSize;
+                final int maxChallengeHeight = lp.maxHeight - diff;
+                if (maxChallengeHeight > 0) {
+                    challengeHeightSpec = makeChildMeasureSpec(maxChallengeHeight, lp.height);
+                }
+            }
+            measureChildWithMargins(mChallengeView, widthSpec, 0, challengeHeightSpec, 0);
         }
 
         // Measure the rest of the children
@@ -1151,6 +1189,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         public static final int CHILD_TYPE_WIDGETS = 5;
         public static final int CHILD_TYPE_EXPAND_CHALLENGE_HANDLE = 6;
 
+        public int maxHeight;
+
         public LayoutParams() {
             this(MATCH_PARENT, WRAP_CONTENT);
         }
@@ -1180,6 +1220,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     R.styleable.SlidingChallengeLayout_Layout);
             childType = a.getInt(R.styleable.SlidingChallengeLayout_Layout_layout_childType,
                     CHILD_TYPE_NONE);
+            maxHeight = a.getDimensionPixelSize(
+                    R.styleable.SlidingChallengeLayout_Layout_layout_maxHeight, 0);
             a.recycle();
         }
     }
