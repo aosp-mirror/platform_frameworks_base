@@ -1808,7 +1808,7 @@ public class Notification implements Parcelable
      * 
      * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
      * <pre class="prettyprint">
-     * Notification noti = new Notification.BigPictureStyle(
+     * Notification noti = new Notification.BigTextStyle(
      *      new Notification.Builder()
      *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
      *         .setContentText(subject)
