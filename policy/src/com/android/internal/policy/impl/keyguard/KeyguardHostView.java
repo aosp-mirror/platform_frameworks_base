@@ -1300,37 +1300,40 @@ public class KeyguardHostView extends KeyguardViewBase {
         UserManager mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         List<UserInfo> users = mUm.getUsers(true);
 
-        if (users.size() > 1) {
-            KeyguardMultiUserSelectorView multiUser =
-                    (KeyguardMultiUserSelectorView) findViewById(R.id.keyguard_user_selector);
-            multiUser.setVisibility(View.VISIBLE);
-            multiUser.addUsers(mUm.getUsers(true));
-            UserSwitcherCallback callback = new UserSwitcherCallback() {
-                @Override
-                public void hideSecurityView(int duration) {
-                    mSecurityViewContainer.animate().alpha(0).setDuration(duration);
-                }
-
-                @Override
-                public void showSecurityView() {
-                    mSecurityViewContainer.setAlpha(1.0f);
-                }
-
-                @Override
-                public void showUnlockHint() {
-                    if (mKeyguardSelectorView != null) {
-                        mKeyguardSelectorView.showUsabilityHint();
+        if (users != null && users.size() > 1) {
+            View multiUserView = findViewById(R.id.keyguard_user_selector);
+            if (multiUserView instanceof KeyguardMultiUserSelectorView) {
+                KeyguardMultiUserSelectorView multiUser =
+                        (KeyguardMultiUserSelectorView) multiUserView;
+                multiUser.setVisibility(View.VISIBLE);
+                multiUser.addUsers(mUm.getUsers(true));
+                UserSwitcherCallback callback = new UserSwitcherCallback() {
+                    @Override
+                    public void hideSecurityView(int duration) {
+                        mSecurityViewContainer.animate().alpha(0).setDuration(duration);
                     }
-                }
 
-                @Override
-                public void userActivity() {
-                    if (mViewMediatorCallback != null) {
-                        mViewMediatorCallback.userActivity();
+                    @Override
+                    public void showSecurityView() {
+                        mSecurityViewContainer.setAlpha(1.0f);
                     }
-                }
-            };
-            multiUser.setCallback(callback);
+
+                    @Override
+                    public void showUnlockHint() {
+                        if (mKeyguardSelectorView != null) {
+                            mKeyguardSelectorView.showUsabilityHint();
+                        }
+                    }
+
+                    @Override
+                    public void userActivity() {
+                        if (mViewMediatorCallback != null) {
+                            mViewMediatorCallback.userActivity();
+                        }
+                    }
+                };
+                multiUser.setCallback(callback);
+            }
         }
     }
 
