@@ -44,7 +44,7 @@ import com.android.internal.widget.LockPatternUtils;
 import java.util.ArrayList;
 
 public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwitchListener,
-        OnLongClickListener {
+        OnLongClickListener, ChallengeLayout.OnBouncerStateChangedListener {
 
     ZInterpolator mZInterpolator = new ZInterpolator(0.5f);
     private static float CAMERA_DISTANCE = 10000;
@@ -73,6 +73,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private Callbacks mCallbacks;
 
     private boolean mCameraWidgetEnabled;
+
+    // Bouncer
+    protected int BOUNCER_ZOOM_IN_OUT_DURATION = 250;
+    private float BOUNCER_SCALE_FACTOR = 0.67f;
 
     // Background threads to deal with persistence
     private HandlerThread mBgPersistenceWorkerThread;
@@ -728,5 +732,47 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected void setPageHoveringOverDeleteDropTarget(int viewIndex, boolean isHovering) {
         KeyguardWidgetFrame child = getWidgetPageAt(viewIndex);
         child.setIsHoveringOverDeleteDropTarget(isHovering);
+    }
+
+    // ChallengeLayout.OnBouncerStateChangedListener
+    @Override
+    public void onBouncerStateChanged(boolean bouncerActive) {
+        if (bouncerActive) {
+            zoomOutToBouncer();
+        } else {
+            zoomInFromBouncer();
+        }
+    }
+
+    // Zoom in after the bouncer is dismissed
+    void zoomInFromBouncer() {
+        if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
+            mZoomInOutAnim.cancel();
+        }
+        final View currentPage = getPageAt(getCurrentPage());
+        if (currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f) {
+            mZoomInOutAnim = new AnimatorSet();
+            mZoomInOutAnim.setDuration(BOUNCER_ZOOM_IN_OUT_DURATION);
+            mZoomInOutAnim.playTogether(
+                    ObjectAnimator.ofFloat(currentPage, "scaleX", 1f),
+                    ObjectAnimator.ofFloat(currentPage , "scaleY", 1f));
+            mZoomInOutAnim.start();
+        }
+    }
+
+    // Zoom out after the bouncer is initiated
+    void zoomOutToBouncer() {
+        if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
+            mZoomInOutAnim.cancel();
+        }
+        View currentPage = getPageAt(getCurrentPage());
+        if (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f)) {
+            mZoomInOutAnim = new AnimatorSet();
+            mZoomInOutAnim.setDuration(BOUNCER_ZOOM_IN_OUT_DURATION);
+            mZoomInOutAnim.playTogether(
+                    ObjectAnimator.ofFloat(currentPage, "scaleX", BOUNCER_SCALE_FACTOR),
+                    ObjectAnimator.ofFloat(currentPage, "scaleY", BOUNCER_SCALE_FACTOR));
+            mZoomInOutAnim.start();
+        }
     }
 }

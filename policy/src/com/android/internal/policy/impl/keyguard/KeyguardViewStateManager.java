@@ -19,7 +19,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 
-public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChallengeScrolledListener {
+public class KeyguardViewStateManager implements
+        SlidingChallengeLayout.OnChallengeScrolledListener,
+        ChallengeLayout.OnBouncerStateChangedListener {
 
     private KeyguardWidgetPager mPagedView;
     private ChallengeLayout mChallengeLayout;
@@ -164,6 +166,7 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
     @Override
     public void onScrollStateChanged(int scrollState) {
         if (mPagedView == null || mChallengeLayout == null) return;
+
         boolean challengeOverlapping = mChallengeLayout.isChallengeOverlapping();
 
         if (scrollState == SlidingChallengeLayout.SCROLL_STATE_IDLE) {
@@ -195,15 +198,24 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
             KeyguardWidgetFrame frame = mPagedView.getWidgetPageAt(mPageListeningToSlider);
             if (frame == null) return;
 
-            frame.showFrame(this);
+            // Skip showing the frame and shrinking the widget if we are
+            if (!mChallengeLayout.isBouncing()) {
+                frame.showFrame(this);
 
-            // As soon as the security begins sliding, the widget becomes small (if it wasn't
-            // small to begin with).
-            if (!frame.isSmall()) {
-                // We need to fetch the final page, in case the pages are in motion.
-                mPageListeningToSlider = mPagedView.getNextPage();
-                frame.shrinkWidget();
+                // As soon as the security begins sliding, the widget becomes small (if it wasn't
+                // small to begin with).
+                if (!frame.isSmall()) {
+                    // We need to fetch the final page, in case the pages are in motion.
+                    mPageListeningToSlider = mPagedView.getNextPage();
+                    frame.shrinkWidget();
+                }
+            } else {
+                if (!frame.isSmall()) {
+                    // We need to fetch the final page, in case the pages are in motion.
+                    mPageListeningToSlider = mPagedView.getNextPage();
+                }
             }
+
             // View is on the move.  Pause the security view until it completes.
             mKeyguardSecurityContainer.onPause();
         }
@@ -244,5 +256,15 @@ public class KeyguardViewStateManager implements SlidingChallengeLayout.OnChalle
 
     public int getTransportState() {
         return mTransportState;
+    }
+
+    // ChallengeLayout.OnBouncerStateChangedListener
+    @Override
+    public void onBouncerStateChanged(boolean bouncerActive) {
+        if (bouncerActive) {
+            mPagedView.zoomOutToBouncer();
+        } else {
+            mPagedView.zoomInFromBouncer();
+        }
     }
 }

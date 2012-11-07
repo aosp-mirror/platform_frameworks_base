@@ -165,9 +165,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setViewStateManager(mViewStateManager);
         mAppWidgetContainer.setLockPatternUtils(mLockPatternUtils);
 
+        ChallengeLayout challenge = slider != null ? slider :
+            (ChallengeLayout) findViewById(R.id.multi_pane_challenge);
+        challenge.setOnBouncerStateChangedListener(mViewStateManager);
         mViewStateManager.setPagedView(mAppWidgetContainer);
-        mViewStateManager.setChallengeLayout(slider != null ? slider :
-                (ChallengeLayout) findViewById(R.id.multi_pane_challenge));
+        mViewStateManager.setChallengeLayout(challenge);
         mSecurityViewContainer = (KeyguardSecurityViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
         mViewStateManager.setSecurityViewContainer(mSecurityViewContainer);

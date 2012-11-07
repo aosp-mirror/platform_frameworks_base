@@ -1215,6 +1215,7 @@
   <java-symbol type="bool" name="kg_enable_camera_default_widget" />
   <java-symbol type="bool" name="kg_share_status_area" />
   <java-symbol type="bool" name="kg_sim_puk_account_full_screen" />
+  <java-symbol type="bool" name="kg_top_align_page_shrink_on_bouncer_visible" />
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
   <java-symbol type="bool" name="kg_center_small_widgets_vertically" />
   <java-symbol type="color" name="kg_multi_user_text_active" />

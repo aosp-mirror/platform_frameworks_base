@@ -3972,6 +3972,8 @@
     <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
          with spaces on either side. [CHAR LIMIT=3] -->
     <string name="kg_text_message_separator" product="default"> \u2014 </string>
+    <!-- The delete-widget drop target button text -->
+    <string name="kg_reordering_delete_drop_target_text">Remove</string>
 
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
