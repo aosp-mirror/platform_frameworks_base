@@ -790,6 +790,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Once the screen turns off, we no longer consider this to be first boot and we want the
         // biometric unlock to start next time keyguard is shown.
         KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
+        // We use mAppWidgetToShow to show a particular widget after you add it-- once the screen
+        // turns off we reset that behavior
+        clearAppWidgetToShow();
         checkAppWidgetConsistency();
         showPrimarySecurityScreen(true);
         getSecurityView(mCurrentSecuritySelection).onPause();
@@ -797,6 +800,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (cameraPage != null) {
             cameraPage.onScreenTurnedOff();
         }
+    }
+
+    public void clearAppWidgetToShow() {
+        mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
     }
 
     @Override
@@ -1176,6 +1183,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     static class SavedState extends BaseSavedState {
         int transportState;
+        int appWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -1184,12 +1192,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         private SavedState(Parcel in) {
             super(in);
             this.transportState = in.readInt();
+            this.appWidgetToShow = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
             out.writeInt(this.transportState);
+            out.writeInt(this.appWidgetToShow);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -1210,6 +1220,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.transportState = mViewStateManager.getTransportState();
+        ss.appWidgetToShow = mAppWidgetToShow;
         return ss;
     }
 
@@ -1223,6 +1234,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mViewStateManager.setTransportState(ss.transportState);
+        mAppWidgetToShow = ss.appWidgetToShow;
         post(mSwitchPageRunnable);
     }
 
@@ -1275,7 +1287,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             for (int i = 0; i < childCount; i++) {
                 if (mAppWidgetContainer.getWidgetPageAt(i).getContentAppWidgetId()
                         == mAppWidgetToShow) {
-                    mAppWidgetToShow = AppWidgetManager.INVALID_APPWIDGET_ID;
                     return i;
                 }
             }
