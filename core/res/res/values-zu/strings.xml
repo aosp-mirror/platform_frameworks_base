@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Ikhodi ye-PIN engalungile!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ukuvula, chofoza Menyu bese 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Inombolo ephuthumayo"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Iwashi"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Ayikho isevisi"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Isikrini sivaliwe."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Chofoza Menyu ukuvula noma ukwenza ikholi ephuthumayo."</string>
@@ -825,9 +824,9 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ukuhlelwa kabusha kwewijethi kuphelile."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Iwijethi <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> isusiwe."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Nwebisa indawo yokuvula."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Ukuvula ngokushelelisa."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Ukuvula ngokuslayida."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ukuvula ngephethini."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Ukuvula ngobuso."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Vula ngobuso"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Ukuvula ngephinikhodi."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ukuvula ngephasiwedi."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Indawo yephethini."</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Uzame ukuvula ngendlela engafanele ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Ifoni manje isizosethwa kabusha ibe yizimiso ezizenzakalelayo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g> kweminye imizamo engaphumelelanga, uzocelwa ukuvula ithebhulethi yakho usebenzisa ukungena ngemvume kwi-Google."\n\n" Sicela uzame futhi kwengu-<xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google"\n\n" Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> imizuzwana."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Khulisa ivolomu ngaphezu kweleveli yokuphepha?"\n"Ukulalela ngevolomu ephezulu izikhathi ezide kungalimaza ukuzwa kwakho."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Gcina ucindezele iminwe yakho emibili ukuze unike amandla ukufinyelela."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ukufinyelela kunikwe amandla."</string>

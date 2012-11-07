@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN 코드가 잘못되었습니다."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"잠금해제하려면 메뉴를 누른 다음 0을 누릅니다."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"비상 전화번호"</string>
-    <string name="widget_default" msgid="1685115188448967291">"시계"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"서비스 불가"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"화면 잠김"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
@@ -814,8 +813,8 @@
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d의 위젯 %2$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"위젯 추가"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"비어 있음"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"잠금 해제 지역 확장됨"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"잠금 해제 지역 축소됨"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"잠금 해제 영역 확장됨"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"잠금 해제 영역 축소됨"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> 위젯"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"사용자 선택기"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"상태"</string>
@@ -823,8 +822,8 @@
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"미디어 조정"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"위젯 재정렬 시작됨"</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"위젯 재정렬 완료됨"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"위젯 <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>이(가) 삭제됨"</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"잠금 해제 지역 확장"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> 위젯이 삭제됨"</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"잠금 해제 영역 확장"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"슬라이드하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"패턴을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"얼굴 인식을 사용하여 잠금해제합니다."</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 휴대전화가 초기화됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>

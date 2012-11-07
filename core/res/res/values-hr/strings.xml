@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Netočan PIN kôd."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Za otključavanje pritisnite Izbornik pa 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Broj hitne službe"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Sat"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nema usluge."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Zaslon zaključan."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pritisnite Izbornik za otključavanje ili pozivanje hitnih službi."</string>
@@ -825,13 +824,13 @@
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Završena je promjena redoslijeda widgeta."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> izbrisan je."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Proširivanje područja za otključavanje."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Otključavanje kliženjem."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Otključavanje klizanjem."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Uzorak za otključavanje."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Otključavanje licem."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Otključavanje PIN-om."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Otključavanje zaporkom."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Područje uzorka."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Područje kliženja."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Područje klizanja."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Netočno ste pokušali otključati telefon <xliff:g id="NUMBER">%d</xliff:g> puta. Sada će se vratiti na tvorničke postavke."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Pojačati iznad sigurne razine?"\n"Dulje slušanje preglasne glazbe može vam oštetiti sluh."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Nastavite držati s dva prsta kako biste omogućili pristupačnost."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Dostupnost je omogućena."</string>

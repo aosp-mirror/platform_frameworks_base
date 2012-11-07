@@ -750,7 +750,6 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Неправилен ПИН код."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"За да отключите, натиснете „Меню“ и после 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Спешен номер"</string>
-    <string name="widget_default" msgid="1685115188448967291">"Часовник"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Няма покритие."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екранът е заключен."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натиснете „Меню“, за да отключите или да извършите спешно обаждане."</string>
@@ -1438,6 +1437,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Да се увеличи ли силата на звука над безопасното ниво?"\n"Продължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Продължете да натискате с два пръста, за да активирате функцията за достъпност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Достъпността е активирана."</string>

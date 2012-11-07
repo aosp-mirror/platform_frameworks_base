@@ -1201,9 +1201,6 @@
     <skip />
     <string name="keyguard_label_text" msgid="861796461028298424">"Smatgai per debloccar sin la tasta Menu e lura sin 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numer d\'urgenza"</string>
-    <!-- no translation found for widget_default (1685115188448967291) -->
-    <!-- no translation found for widget_default (8269383575996003796) -->
-    <skip />
     <!-- no translation found for lockscreen_carrier_default (8963839242565653192) -->
     <skip />
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Visur bloccà."</string>
@@ -2330,6 +2327,8 @@
     <!-- no translation found for kg_failed_attempts_almost_at_login (3253575572118914370) -->
     <skip />
     <!-- no translation found for kg_failed_attempts_almost_at_login (1437638152015574839) -->
+    <skip />
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
     <skip />
     <!-- no translation found for safe_media_volume_warning (7382971871993371648) -->
     <skip />
