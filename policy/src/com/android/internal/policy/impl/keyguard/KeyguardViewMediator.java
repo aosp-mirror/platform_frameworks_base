@@ -175,7 +175,7 @@ public class KeyguardViewMediator {
      * Does not turn on screen, held while a call to {@link KeyguardViewManager#wakeWhenReadyTq(int)}
      * is called to make sure the device doesn't sleep before it has a chance to poke
      * the wake lock.
-     * @see #wakeWhenReadyLocked(int)
+     * @see #wakeWhenReady(int)
      */
     private PowerManager.WakeLock mWakeAndHandOff;
 
@@ -935,8 +935,8 @@ public class KeyguardViewMediator {
      * @see #handleWakeWhenReady
      * @see #onWakeKeyWhenKeyguardShowingTq(int)
      */
-    private void wakeWhenReadyLocked(int keyCode) {
-        if (DBG_WAKE) Log.d(TAG, "wakeWhenReadyLocked(" + keyCode + ")");
+    private void wakeWhenReady(int keyCode) {
+        if (DBG_WAKE) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
 
         /**
          * acquire the handoff lock that will keep the cpu running.  this will
@@ -1014,54 +1014,14 @@ public class KeyguardViewMediator {
      * action should be posted to a handler.
      *
      * @param keyCode The keycode of the key that woke the device
-     * @param isDocked True if the device is in the dock
-     * @return Whether we poked the wake lock (and turned the screen on)
      */
-    public boolean onWakeKeyWhenKeyguardShowingTq(int keyCode, boolean isDocked) {
+    public void onWakeKeyWhenKeyguardShowingTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKeyWhenKeyguardShowing(" + keyCode + ")");
 
-        if (isWakeKeyWhenKeyguardShowing(keyCode, isDocked)) {
-            // give the keyguard view manager a chance to adjust the state of the
-            // keyguard based on the key that woke the device before poking
-            // the wake lock
-            wakeWhenReadyLocked(keyCode);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * When the keyguard is showing we ignore some keys that might otherwise typically
-     * be considered wake keys.  We filter them out here.
-     *
-     * {@link KeyEvent#KEYCODE_POWER} is notably absent from this list because it
-     * is always considered a wake key.
-     */
-    private boolean isWakeKeyWhenKeyguardShowing(int keyCode, boolean isDocked) {
-        switch (keyCode) {
-            // ignore volume keys unless docked
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                return isDocked;
-
-            // ignore media and camera keys
-            case KeyEvent.KEYCODE_MUTE:
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_STOP:
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-            case KeyEvent.KEYCODE_MEDIA_RECORD:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-            case KeyEvent.KEYCODE_CAMERA:
-                return false;
-        }
-        return true;
+        // give the keyguard view manager a chance to adjust the state of the
+        // keyguard based on the key that woke the device before poking
+        // the wake lock
+        wakeWhenReady(keyCode);
     }
 
     /**
@@ -1073,17 +1033,14 @@ public class KeyguardViewMediator {
      * The 'Tq' suffix is per the documentation in {@link WindowManagerPolicy}.
      * Be sure not to take any action that takes a long time; any significant
      * action should be posted to a handler.
-     *
-     * @return Whether we poked the wake lock (and turned the screen on)
      */
-    public boolean onWakeMotionWhenKeyguardShowingTq() {
+    public void onWakeMotionWhenKeyguardShowingTq() {
         if (DEBUG) Log.d(TAG, "onWakeMotionWhenKeyguardShowing()");
 
         // give the keyguard view manager a chance to adjust the state of the
         // keyguard based on the key that woke the device before poking
         // the wake lock
-        wakeWhenReadyLocked(KeyEvent.KEYCODE_UNKNOWN);
-        return true;
+        wakeWhenReady(KeyEvent.KEYCODE_UNKNOWN);
     }
 
     public void keyguardDone(boolean authenticated, boolean wakeup) {
@@ -1350,7 +1307,7 @@ public class KeyguardViewMediator {
     }
 
     /**
-     * Handle message sent by {@link #wakeWhenReadyLocked(int)}
+     * Handle message sent by {@link #wakeWhenReady(int)}
      * @param keyCode The key that woke the device.
      * @see #WAKE_WHEN_READY
      */
