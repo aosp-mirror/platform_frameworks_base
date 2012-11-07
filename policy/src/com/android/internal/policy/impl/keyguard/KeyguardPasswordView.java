@@ -44,14 +44,18 @@ import java.util.List;
 public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
+    private final boolean mShowImeAtScreenOn;
+
     InputMethodManager mImm;
 
     public KeyguardPasswordView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public KeyguardPasswordView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mShowImeAtScreenOn = context.getResources().
+                getBoolean(R.bool.kg_show_ime_at_screen_on);
     }
 
     protected void resetState() {
@@ -70,11 +74,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // XXX this is still not right because onResume is being called every time the page changes
+    public void onResume(int reason) {
+        super.onResume(reason);
         mPasswordEntry.requestFocus();
-        mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+        if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
+            mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     @Override

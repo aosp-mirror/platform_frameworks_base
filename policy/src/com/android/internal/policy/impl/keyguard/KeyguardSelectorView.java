@@ -253,7 +253,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     }
 
     @Override
-    public void onResume() {
+    public void onResume(int reason) {
         KeyguardUpdateMonitor.getInstance(getContext()).registerCallback(mInfoCallback);
     }
 
