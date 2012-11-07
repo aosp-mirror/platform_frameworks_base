@@ -466,9 +466,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       kEMDefault,
       kEMIntPortable,
       kEMIntFast,
-#if defined(WITH_JIT)
       kEMJitCompiler,
-#endif
     } executionMode = kEMDefault;
 
 
@@ -488,10 +486,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         executionMode = kEMIntPortable;
     } else if (strcmp(propBuf, "int:fast") == 0) {
         executionMode = kEMIntFast;
-#if defined(WITH_JIT)
     } else if (strcmp(propBuf, "int:jit") == 0) {
         executionMode = kEMJitCompiler;
-#endif
     }
 
     property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
@@ -640,7 +636,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       mOptions.add(opt);
     }
 
-#if defined(WITH_JIT)
     /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
     char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.op", propBuf, "");
@@ -660,7 +655,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = jitMethodBuf;
         mOptions.add(opt);
     }
-#endif
 
     if (executionMode == kEMIntPortable) {
         opt.optionString = "-Xint:portable";
@@ -668,11 +662,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     } else if (executionMode == kEMIntFast) {
         opt.optionString = "-Xint:fast";
         mOptions.add(opt);
-#if defined(WITH_JIT)
     } else if (executionMode == kEMJitCompiler) {
         opt.optionString = "-Xint:jit";
         mOptions.add(opt);
-#endif
     }
 
     if (checkDexSum) {
