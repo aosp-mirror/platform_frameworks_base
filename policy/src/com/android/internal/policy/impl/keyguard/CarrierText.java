@@ -85,8 +85,19 @@ public class CarrierText extends TextView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSeparator = getResources().getString(R.string.kg_text_message_separator);
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mCallback);
         setSelected(true); // Allow marquee to work.
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mCallback);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mCallback);
     }
 
     /**
