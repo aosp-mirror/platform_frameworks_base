@@ -207,6 +207,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         ChallengeLayout challenge = slider != null ? slider :
             (ChallengeLayout) findViewById(R.id.multi_pane_challenge);
         challenge.setOnBouncerStateChangedListener(mViewStateManager);
+        mAppWidgetContainer.setBouncerAnimationDuration(challenge.getBouncerAnimationDuration());
         mViewStateManager.setPagedView(mAppWidgetContainer);
         mViewStateManager.setChallengeLayout(challenge);
         mSecurityViewContainer = (KeyguardSecurityViewFlipper) findViewById(R.id.view_flipper);
