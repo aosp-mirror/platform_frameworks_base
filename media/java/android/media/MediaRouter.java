@@ -862,7 +862,7 @@ public class MediaRouter {
     private static WifiDisplay findMatchingDisplay(WifiDisplay d, WifiDisplay[] displays) {
         for (int i = 0; i < displays.length; i++) {
             final WifiDisplay other = displays[i];
-            if (d.getDeviceAddress().equals(other.getDeviceAddress())) {
+            if (d.hasSameAddress(other)) {
                 return other;
             }
         }
