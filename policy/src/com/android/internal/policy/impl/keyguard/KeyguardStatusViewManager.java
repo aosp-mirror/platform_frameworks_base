@@ -169,7 +169,7 @@ class KeyguardStatusViewManager implements SecurityMessageDisplay {
     }
 
     /** {@inheritDoc} */
-    public void onResume() {
+    public void onResume(int reason) {
         if (DEBUG) Log.v(TAG, "onResume()");
 
         // Force-update the time when we show this view.
