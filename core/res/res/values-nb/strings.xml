@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har oppgitt feil opplåsningspassord for telefonen <xliff:g id="NUMBER">%d</xliff:g> ganger. Telefonen tilbakestilles nå til fabrikkstandard."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp nettbrettet via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto."\n\n" Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vil du øke lydnivået over trygt nivå?"\n"Lytting på høyt lydnivå i lange perioder kan skade hørselen din."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

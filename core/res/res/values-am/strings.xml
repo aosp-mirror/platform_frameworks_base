@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ስልኩን <xliff:g id="NUMBER">%d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ለመክፈት ሞክረዋል። ስልኩ አሁን በፋብሪካ ነባሪ ቅንብር ዳግም ይጀመራል።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ጡባዊ ቱኮዎን እንዲከፍቱ ይጠየቃሉ።"\n\n" ከ<xliff:g id="NUMBER_2">%d</xliff:g> ከሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።"\n\n"እባክዎ ከ<xliff:g id="NUMBER_2">%d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"ድምጽ አደጋ ከሌለው መጠን በላይ ይጨመር??"\n"ለረጅም ጊዜ በከፍተኛ ድምጽ መስማት የመስማት ችሎታዎን ሊጎዳይ ይችላል።"</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

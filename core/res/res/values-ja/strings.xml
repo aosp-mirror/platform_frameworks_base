@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"携帯端末のロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。端末は出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"安全レベルを超えるまで音量を上げますか？"\n"大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

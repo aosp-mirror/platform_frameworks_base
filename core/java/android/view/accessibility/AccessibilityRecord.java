@@ -168,6 +168,17 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Sets the window id.
+     *
+     * @param windowId The window id.
+     *
+     * @hide
+     */
+    public void setWindowId(int windowId) {
+        mSourceWindowId = windowId;
+    }
+
+    /**
      * Gets the id of the window from which the event comes from.
      *
      * @return The window id.

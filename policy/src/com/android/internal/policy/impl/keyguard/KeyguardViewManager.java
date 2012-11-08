@@ -137,10 +137,11 @@ public class KeyguardViewManager {
 
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                    && mKeyguardView != null) {
-                if (mKeyguardView.handleBackKey()) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN && mKeyguardView != null) {
+                int keyCode = event.getKeyCode();
+                if (keyCode == KeyEvent.KEYCODE_BACK && mKeyguardView.handleBackKey()) {
+                    return true;
+                } else if (keyCode == KeyEvent.KEYCODE_MENU && mKeyguardView.handleMenuKey()) {
                     return true;
                 }
             }

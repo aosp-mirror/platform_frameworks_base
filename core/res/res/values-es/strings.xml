@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el tablet."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono."\n\n" Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"¿Subir el volumen por encima del nivel de seguridad?"\n"Escuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

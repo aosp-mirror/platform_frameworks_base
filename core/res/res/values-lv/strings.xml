@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jūs nepareizi veicāt tālruņa atbloķēšanu <xliff:g id="NUMBER">%d</xliff:g> reizes. Tālrunī tiks atiestatīti rūpnīcas noklusējuma iestatījumi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu."\n\n"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu."\n\n"Mēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Vai palielināt skaļumu virs drošības līmeņa?"\n"Ilgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

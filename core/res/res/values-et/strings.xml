@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Olete püüdnud telefoni <xliff:g id="NUMBER">%d</xliff:g> korda valesti avada. Telefon lähtestatakse nüüd tehase vaikeseadetele."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil tahvelarvuti avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga."\n\n" Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Kas suurendada helitugevust üle ohutu piiri?"\n"Pikaajaline suure helitugevusega muusika kuulamine võib kahjustada kuulmist."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

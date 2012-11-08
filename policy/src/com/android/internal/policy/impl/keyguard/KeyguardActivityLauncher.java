@@ -18,12 +18,14 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.IActivityManager.WaitResult;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -91,7 +93,7 @@ public abstract class KeyguardActivityLauncher {
         return info;
     }
 
-    public void launchCamera() {
+    public void launchCamera(Handler worker, Runnable onSecureCameraStarted) {
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         if (lockPatternUtils.isSecure()) {
             // Launch the secure version of the camera
@@ -100,26 +102,33 @@ public abstract class KeyguardActivityLauncher {
                 // For now, we'll treat this like launching any other app from secure keyguard.
                 // When they do, user sees the system's ResolverActivity which lets them choose
                 // which secure camera to use.
-                launchActivity(SECURE_CAMERA_INTENT, false, false);
+                launchActivity(SECURE_CAMERA_INTENT, false, false, null, null);
             } else {
-                launchActivity(SECURE_CAMERA_INTENT, true, false);
+                launchActivity(SECURE_CAMERA_INTENT, true, false, worker, onSecureCameraStarted);
             }
         } else {
             // Launch the normal camera
-            launchActivity(INSECURE_CAMERA_INTENT, false, false);
+            launchActivity(INSECURE_CAMERA_INTENT, false, false, null, null);
         }
     }
 
     /**
      * Launches the said intent for the current foreground user.
+     *
      * @param intent
      * @param showsWhileLocked true if the activity can be run on top of keyguard.
-     * See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
+     *   See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
+     * @param useDefaultAnimations true if default transitions should be used, else suppressed.
+     * @param worker if supplied along with onStarted, used to launch the blocking activity call.
+     * @param onStarted if supplied along with worker, called after activity is started.
      */
-    public void launchActivity(final Intent intent, boolean showsWhileLocked, boolean animate) {
+    public void launchActivity(final Intent intent,
+            boolean showsWhileLocked,
+            boolean useDefaultAnimations,
+            final Handler worker,
+            final Runnable onStarted) {
         final Context context = getContext();
-        final Bundle animation = animate ? null :
-                ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
+        final Bundle animation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
@@ -135,8 +144,7 @@ public abstract class KeyguardActivityLauncher {
             try {
                 if (DEBUG) Log.d(TAG, String.format("Starting activity for intent %s at %s",
                         intent, SystemClock.uptimeMillis()));
-                context.startActivityAsUser(intent, animation,
-                        new UserHandle(UserHandle.USER_CURRENT));
+                startActivityForCurrentUser(intent, animation, worker, onStarted);
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Activity not found for intent + " + intent.getAction());
             }
@@ -147,12 +155,50 @@ public abstract class KeyguardActivityLauncher {
             callback.setOnDismissRunnable(new Runnable() {
                 @Override
                 public void run() {
-                    context.startActivityAsUser(intent, animation,
-                            new UserHandle(UserHandle.USER_CURRENT));
+                    startActivityForCurrentUser(intent, animation, worker, onStarted);
                 }
             });
             callback.dismiss(false);
         }
+    }
+
+    private void startActivityForCurrentUser(final Intent intent, final Bundle options,
+            Handler worker, final Runnable onStarted) {
+        final UserHandle user = new UserHandle(UserHandle.USER_CURRENT);
+        if (worker == null || onStarted == null) {
+            getContext().startActivityAsUser(intent, options, user);
+            return;
+        }
+        // if worker + onStarted are supplied, run blocking activity launch call in the background
+        worker.post(new Runnable(){
+            @Override
+            public void run() {
+                try {
+                    WaitResult result = ActivityManagerNative.getDefault().startActivityAndWait(
+                            null /*caller*/,
+                            intent,
+                            intent.resolveTypeIfNeeded(getContext().getContentResolver()),
+                            null /*resultTo*/,
+                            null /*resultWho*/,
+                            0 /*requestCode*/,
+                            Intent.FLAG_ACTIVITY_NEW_TASK,
+                            null /*profileFile*/,
+                            null /*profileFd*/,
+                            options,
+                            user.getIdentifier());
+                    if (DEBUG) Log.d(TAG, String.format("waitResult[%s,%s,%s,%s] at %s",
+                            result.result, result.thisTime, result.totalTime, result.who,
+                            SystemClock.uptimeMillis()));
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error starting activity", e);
+                    return;
+                }
+                try {
+                    onStarted.run();
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error running onStarted callback", t);
+                }
+            }});
     }
 
     private Intent getCameraIntent() {
