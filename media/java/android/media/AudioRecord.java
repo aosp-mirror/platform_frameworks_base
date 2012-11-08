@@ -618,6 +618,8 @@ public class AudioRecord
     /**
      * Reads audio data from the audio hardware for recording into a direct buffer. If this buffer
      * is not a direct buffer, this method will always return 0.
+     * Note that the value returned by {@link java.nio.Buffer#position()} on this buffer is
+     * unchanged after a call to this method.
      * @param audioBuffer the direct buffer to which the recorded audio data is written.
      * @param sizeInBytes the number of requested bytes.
      * @return the number of bytes that were read or or {@link #ERROR_INVALID_OPERATION}
