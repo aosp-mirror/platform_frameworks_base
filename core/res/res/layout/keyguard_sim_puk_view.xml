@@ -219,7 +219,7 @@
        </LinearLayout>
     </LinearLayout>
 
-    <include layout="@layout/keyguard_emergency_carrier_area"
+    <include layout="@layout/keyguard_eca"
                    android:id="@+id/keyguard_selector_fade_container"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
