@@ -658,10 +658,6 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 MeasureSpec.makeMeasureSpec(heightSize - verticalPadding, childHeightMode);
 
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            if (shouldSetTopAlignedPivotForWidget(i)) {
-                child.setPivotX(child.getWidth() / 2);
-                child.setPivotY(0f);
-            }
         }
         setMeasuredDimension(scaledWidthSize, scaledHeightSize);
 

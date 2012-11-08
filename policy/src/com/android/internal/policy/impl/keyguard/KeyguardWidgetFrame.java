@@ -110,13 +110,13 @@ public class KeyguardWidgetFrame extends FrameLayout {
         int padding = (int) (res.getDisplayMetrics().density * 8);
         setPadding(padding, padding, padding, padding);
 
-        mFrameStrokeAdjustment = (int) (2 * density);
+        mFrameStrokeAdjustment = 2 + (int) (2 * density);
 
         // This will be overriden on phones based on the current security mode, however on tablets
         // we need to specify a height.
         mSmallWidgetHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.kg_small_widget_height);
-        mBackgroundDrawable = res.getDrawable(R.drawable.kg_bouncer_bg_white);
+        mBackgroundDrawable = res.getDrawable(R.drawable.kg_widget_bg_padded);
         mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
@@ -372,6 +372,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public void setFrameHeight(int height) {
         mFrameHeight = height;
         mBackgroundRect.set(0, 0, getMeasuredWidth(), Math.min(mFrameHeight, getMeasuredHeight()));
+        mForegroundRect.set(mFrameStrokeAdjustment, mFrameStrokeAdjustment,getMeasuredWidth() -
+                mFrameStrokeAdjustment, Math.min(getMeasuredHeight(), mFrameHeight) -
+                mFrameStrokeAdjustment);
+        updateGradient();
         invalidate();
     }
 
@@ -401,27 +405,30 @@ public class KeyguardWidgetFrame extends FrameLayout {
         mFrameFade.start();
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        // mFrameStrokeAdjustment is a cludge to prevent the overlay from drawing outside the
-        // rounded rect background.
-        mForegroundRect.set(mFrameStrokeAdjustment, mFrameStrokeAdjustment,
-                w - mFrameStrokeAdjustment, h - mFrameStrokeAdjustment);
-
+    private void updateGradient() {
         float x0 = mLeftToRight ? 0 : mForegroundRect.width();
         float x1 = mLeftToRight ? mForegroundRect.width(): 0;
         mLeftToRightGradient = new LinearGradient(x0, 0f, x1, 0f,
                 mGradientColor, 0, Shader.TileMode.CLAMP);
         mRightToLeftGradient = new LinearGradient(x1, 0f, x0, 0f,
                 mGradientColor, 0, Shader.TileMode.CLAMP);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
 
         if (!mIsSmall) {
             mFrameHeight = h;
         }
 
+        // mFrameStrokeAdjustment is a cludge to prevent the overlay from drawing outside the
+        // rounded rect background.
+        mForegroundRect.set(mFrameStrokeAdjustment, mFrameStrokeAdjustment,
+                w - mFrameStrokeAdjustment, Math.min(h, mFrameHeight) - mFrameStrokeAdjustment);
+
         mBackgroundRect.set(0, 0, getMeasuredWidth(), Math.min(h, mFrameHeight));
+        updateGradient();
         invalidate();
     }
 
