@@ -36,6 +36,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -71,7 +72,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private int mWidgetToResetAfterFadeOut;
 
     // Bouncer
-    protected int BOUNCER_ZOOM_IN_OUT_DURATION = 250;
+    private int mBouncerZoomInOutDuration = 250;
     private float BOUNCER_SCALE_FACTOR = 0.67f;
 
     // Background worker thread: used here for persistence, also made available to widget frames
@@ -747,6 +748,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
     }
 
+    void setBouncerAnimationDuration(int duration) {
+        mBouncerZoomInOutDuration = duration;
+    }
+
     // Zoom in after the bouncer is dismissed
     void zoomInFromBouncer() {
         if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
@@ -755,10 +760,11 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         final View currentPage = getPageAt(getCurrentPage());
         if (currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f) {
             mZoomInOutAnim = new AnimatorSet();
-            mZoomInOutAnim.setDuration(BOUNCER_ZOOM_IN_OUT_DURATION);
             mZoomInOutAnim.playTogether(
                     ObjectAnimator.ofFloat(currentPage, "scaleX", 1f),
                     ObjectAnimator.ofFloat(currentPage , "scaleY", 1f));
+            mZoomInOutAnim.setDuration(mBouncerZoomInOutDuration);
+            mZoomInOutAnim.setInterpolator(new DecelerateInterpolator(1.5f));
             mZoomInOutAnim.start();
         }
     }
@@ -768,18 +774,22 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (mZoomInOutAnim != null && mZoomInOutAnim.isRunning()) {
             mZoomInOutAnim.cancel();
         }
-        View currentPage = getPageAt(getCurrentPage());
-        currentPage.setPivotY(0);
-        // Note: we are working around the issue that setting the x-pivot to the same value as it
-        //       was does not actually work.
-        currentPage.setPivotX(0);
-        currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
+        int curPage = getCurrentPage();
+        View currentPage = getPageAt(curPage);
+        if (shouldSetTopAlignedPivotForWidget(curPage)) {
+            currentPage.setPivotY(0);
+            // Note: we are working around the issue that setting the x-pivot to the same value as it
+            //       was does not actually work.
+            currentPage.setPivotX(0);
+            currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
+        }
         if (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f)) {
             mZoomInOutAnim = new AnimatorSet();
-            mZoomInOutAnim.setDuration(BOUNCER_ZOOM_IN_OUT_DURATION);
             mZoomInOutAnim.playTogether(
                     ObjectAnimator.ofFloat(currentPage, "scaleX", BOUNCER_SCALE_FACTOR),
                     ObjectAnimator.ofFloat(currentPage, "scaleY", BOUNCER_SCALE_FACTOR));
+            mZoomInOutAnim.setDuration(mBouncerZoomInOutDuration);
+            mZoomInOutAnim.setInterpolator(new DecelerateInterpolator(1.5f));
             mZoomInOutAnim.start();
         }
     }
