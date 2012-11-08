@@ -44,6 +44,7 @@
            android:id="@+id/face_unlock_area_view"
            android:layout_width="match_parent"
            android:layout_height="match_parent"
+           android:layout_gravity="center_horizontal"
            android:background="@*android:drawable/intro_bg"
            android:gravity="center">
 
