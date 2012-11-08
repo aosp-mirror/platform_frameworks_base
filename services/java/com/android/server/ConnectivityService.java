@@ -629,7 +629,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 wimaxStateTrackerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxStateTrackerClassname);
 
-                log("wimaxJarLocation: " + wimaxJarLocation);
+                if (DBG) log("wimaxJarLocation: " + wimaxJarLocation);
                 wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
                         new ContextWrapper(context).getCacheDir().getAbsolutePath(),
                         wimaxLibLocation, ClassLoader.getSystemClassLoader());
@@ -648,7 +648,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
 
             try {
-                log("Starting Wimax Service... ");
+                if (DBG) log("Starting Wimax Service... ");
 
                 Constructor wmxStTrkrConst = wimaxStateTrackerClass.getConstructor
                         (new Class[] {Context.class, Handler.class});
