@@ -120,6 +120,7 @@ public class KeyguardViewStateManager implements
         // once the user swipes a page we clear that behavior
         if (mKeyguardHostView != null) {
             mKeyguardHostView.clearAppWidgetToShow();
+            mKeyguardHostView.setOnDismissAction(null);
         }
         if (mHideHintsRunnable != null) {
             mMainQueue.removeCallbacks(mHideHintsRunnable);
@@ -316,6 +317,9 @@ public class KeyguardViewStateManager implements
             mKeyguardWidgetPager.zoomOutToBouncer();
         } else {
             mKeyguardWidgetPager.zoomInFromBouncer();
+            if (mKeyguardHostView != null) {
+                mKeyguardHostView.setOnDismissAction(null);
+            }
         }
     }
 }
