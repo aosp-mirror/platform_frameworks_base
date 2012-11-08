@@ -1167,6 +1167,10 @@ public class LockPatternUtils {
     public boolean removeAppWidget(int widgetId) {
         int[] widgets = getAppWidgets();
 
+        if (widgets.length == 0) {
+            return false;
+        }
+
         int[] newWidgets = new int[widgets.length - 1];
         for (int i = 0, j = 0; i < widgets.length; i++) {
             if (widgets[i] == widgetId) {
@@ -1331,7 +1335,7 @@ public class LockPatternUtils {
     public boolean getPowerButtonInstantlyLocks() {
         return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true);
     }
-    
+
     public static boolean isSafeModeEnabled() {
         try {
             return IWindowManager.Stub.asInterface(
