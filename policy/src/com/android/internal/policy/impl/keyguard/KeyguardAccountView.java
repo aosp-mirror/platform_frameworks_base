@@ -321,5 +321,13 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     @Override
     public void showUsabilityHint() {
     }
+
+    @Override
+    public void showBouncer(int duration) {
+    }
+
+    @Override
+    public void hideBouncer(int duration) {
+    }
 }
 

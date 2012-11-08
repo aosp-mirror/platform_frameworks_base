@@ -260,7 +260,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.minResizeWidth = this.minResizeHeight;
         that.minResizeHeight = this.minResizeHeight;
         that.updatePeriodMillis = this.updatePeriodMillis;
-        that.initialLayout = that.initialLayout;
+        that.initialLayout = this.initialLayout;
         that.initialKeyguardLayout = this.initialKeyguardLayout;
         that.configure = this.configure == null ? null : this.configure.clone();
         that.label = this.label == null ? null : this.label.substring(0);
