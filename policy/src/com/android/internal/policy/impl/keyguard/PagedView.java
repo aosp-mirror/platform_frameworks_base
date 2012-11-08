@@ -233,6 +233,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     private Matrix mTmpInvMatrix = new Matrix();
     private float[] mTmpPoint = new float[2];
     private Rect mTmpRect = new Rect();
+    private Rect mAltTmpRect = new Rect();
 
     // Fling to delete
     private int FLING_TO_DELETE_FADE_OUT_DURATION = 350;
@@ -2455,7 +2456,13 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     /* Drag to delete */
     private boolean isHoveringOverDeleteDropTarget(int x, int y) {
         if (mDeleteDropTarget != null) {
+            mAltTmpRect.set(0, 0, 0, 0);
+            View parent = (View) mDeleteDropTarget.getParent();
+            if (parent != null) {
+                parent.getGlobalVisibleRect(mAltTmpRect);
+            }
             mDeleteDropTarget.getGlobalVisibleRect(mTmpRect);
+            mTmpRect.offset(-mAltTmpRect.left, -mAltTmpRect.top);
             return mTmpRect.contains(x, y);
         }
         return false;

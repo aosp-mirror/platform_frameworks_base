@@ -19,9 +19,9 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:gravity="center"
-    android:padding="20dp"
-    android:paddingLeft="40dp"
-    android:paddingRight="40dp"
+    android:padding="30dp"
+    android:paddingLeft="60dp"
+    android:paddingRight="60dp"
     android:drawableLeft="@drawable/kg_widget_delete_drop_target"
     android:drawablePadding="4dp"
     android:text="@string/kg_reordering_delete_drop_target_text"

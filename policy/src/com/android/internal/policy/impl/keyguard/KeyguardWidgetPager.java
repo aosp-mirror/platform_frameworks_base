@@ -507,14 +507,17 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         return false;
     }
 
+    /**
+     * Returns the bounded set of pages that are re-orderable.  The range is fully inclusive.
+     */
     @Override
     void boundByReorderablePages(boolean isReordering, int[] range) {
         if (isReordering) {
             // Remove non-widget pages from the range
-            while (range[1] > range[0] && !isWidgetPage(range[1])) {
+            while (range[1] >= range[0] && !isWidgetPage(range[1])) {
                 range[1]--;
             }
-            while (range[0] < range[1] && !isWidgetPage(range[0])) {
+            while (range[0] <= range[1] && !isWidgetPage(range[0])) {
                 range[0]++;
             }
         }
