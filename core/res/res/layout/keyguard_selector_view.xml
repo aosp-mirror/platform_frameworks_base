@@ -45,7 +45,7 @@
 
         <include layout="@layout/keyguard_glow_pad_container" />
 
-        <include layout="@layout/keyguard_emergency_carrier_area"
+        <include layout="@layout/keyguard_eca"
             android:id="@+id/keyguard_selector_fade_container"
             android:layout_width="match_parent"
             android:layout_height="48dp"
