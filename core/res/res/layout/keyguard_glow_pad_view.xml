@@ -42,4 +42,5 @@
     prvandroid:feedbackCount="1"
     prvandroid:vibrationDuration="20"
     prvandroid:glowRadius="@*android:dimen/glowpadview_glow_radius"
-    prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot" />
+    prvandroid:pointDrawable="@*android:drawable/ic_lockscreen_glowdot"
+    prvandroid:allowScaling="true" />

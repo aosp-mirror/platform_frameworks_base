@@ -114,6 +114,7 @@ public class GlowPadView extends View {
     private int mMaxTargetHeight;
     private int mMaxTargetWidth;
     private float mRingScaleFactor = 1f;
+    private boolean mAllowScaling;
 
     private float mOuterRadius = 0.0f;
     private float mSnapMargin = 0.0f;
@@ -222,6 +223,7 @@ public class GlowPadView extends View {
                 mVibrationDuration);
         mFeedbackCount = a.getInt(R.styleable.GlowPadView_feedbackCount,
                 mFeedbackCount);
+        mAllowScaling = a.getBoolean(R.styleable.GlowPadView_allowScaling, false);
         TypedValue handle = a.peekValue(R.styleable.GlowPadView_handleDrawable);
         mHandleDrawable = new TargetDrawable(res, handle != null ? handle.resourceId : 0);
         mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
@@ -793,8 +795,12 @@ public class GlowPadView extends View {
     }
 
     private void updateGlowPosition(float x, float y) {
-        mPointCloud.glowManager.setX(x);
-        mPointCloud.glowManager.setY(y);
+        float dx = x - mOuterRing.getX();
+        float dy = y - mOuterRing.getY();
+        dx *= 1f / mRingScaleFactor;
+        dy *= 1f / mRingScaleFactor;
+        mPointCloud.glowManager.setX(mOuterRing.getX() + dx);
+        mPointCloud.glowManager.setY(mOuterRing.getY() + dy);
     }
 
     private void handleDown(MotionEvent event) {
@@ -863,7 +869,7 @@ public class GlowPadView extends View {
 
             if (mDragging) {
                 // For multiple targets, snap to the one that matches
-                final float snapRadius = mOuterRadius - mSnapMargin;
+                final float snapRadius = mRingScaleFactor * mOuterRadius - mSnapMargin;
                 final float snapDistance2 = snapRadius * snapRadius;
                 // Find first target in range
                 for (int i = 0; i < ntargets; i++) {
@@ -1034,6 +1040,10 @@ public class GlowPadView extends View {
      */
     private float computeScaleFactor(int desiredWidth, int desiredHeight,
             int actualWidth, int actualHeight) {
+
+        // Return unity if scaling is not allowed.
+        if (!mAllowScaling) return 1f;
+
         final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
 
