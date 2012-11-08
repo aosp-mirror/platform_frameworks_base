@@ -668,9 +668,9 @@ public class UsbDeviceManager {
                     id = com.android.internal.R.string.usb_accessory_notification_title;
                 } else {
                     // There is a different notification for USB tethering so we don't need one here
-                    if (!containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_RNDIS)) {
-                        Slog.e(TAG, "No known USB function in updateUsbNotification");
-                    }
+                    //if (!containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_RNDIS)) {
+                    //    Slog.e(TAG, "No known USB function in updateUsbNotification");
+                    //}
                 }
             }
             if (id != mUsbNotificationId) {
