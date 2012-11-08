@@ -1214,8 +1214,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             throw new IllegalArgumentException("provider doesn't exisit: " + provider);
         }
 
-        Log.i(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver)) + " " +
-                name + " " + request + " from " + packageName + "(" + uid + ")");
+        if (D) Log.d(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver))
+                + " " + name + " " + request + " from " + packageName + "(" + uid + ")");
 
         UpdateRecord record = new UpdateRecord(name, request, receiver);
         UpdateRecord oldRecord = receiver.mUpdateRecords.put(name, record);
@@ -1253,7 +1253,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private void removeUpdatesLocked(Receiver receiver) {
-        Log.i(TAG, "remove " + Integer.toHexString(System.identityHashCode(receiver)));
+        if (D) Log.i(TAG, "remove " + Integer.toHexString(System.identityHashCode(receiver)));
 
         if (mReceivers.remove(receiver.mKey) != null && receiver.isListener()) {
             receiver.getListener().asBinder().unlinkToDeath(receiver, 0);

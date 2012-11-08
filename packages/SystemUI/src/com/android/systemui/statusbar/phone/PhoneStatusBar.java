@@ -279,7 +279,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void onAnimationEnd(Animator animation) {
             // double-check to avoid races
             if (mStatusBarContents.getAlpha() == 0) {
-                Slog.d(TAG, "makeIconsInvisible");
+                if (DEBUG) Slog.d(TAG, "makeIconsInvisible");
                 mStatusBarContents.setVisibility(View.INVISIBLE);
             }
         }
@@ -518,7 +518,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
         mShowCarrierInPanel = (mCarrierLabel != null);
-        Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
+        if (DEBUG) Slog.v(TAG, "carrierlabel=" + mCarrierLabel + " show=" + mShowCarrierInPanel);
         if (mShowCarrierInPanel) {
             mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
 
@@ -853,7 +853,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
-        /* if (DEBUG) */ Slog.d(TAG, "addNotification score=" + notification.score);
+        if (DEBUG) Slog.d(TAG, "addNotification score=" + notification.score);
         StatusBarIconView iconView = addNotificationViews(key, notification);
         if (iconView == null) return;
 
@@ -908,7 +908,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             awakenDreams();
 
             // not immersive & a full-screen alert should be shown
-            Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+            if (DEBUG) Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
                 notification.notification.fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
@@ -2248,7 +2248,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            Slog.v(TAG, "onReceive: " + intent);
+            if (DEBUG) Slog.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 int flags = CommandQueue.FLAG_EXCLUDE_NONE;
