@@ -37,6 +37,8 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -57,7 +59,7 @@ import java.io.File;
 import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
-    private static final String TAG = "KeyguardViewHost";
+    private static final String TAG = "KeyguardHostView";
 
     // Use this to debug all of keyguard
     public static boolean DEBUG = KeyguardViewMediator.DEBUG;
@@ -87,6 +89,12 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private Rect mTempRect = new Rect();
 
+    private int mDisabledFeatures;
+
+    private boolean mCameraDisabled;
+
+    private boolean mSafeModeEnabled;
+
     /*package*/ interface TransportCallback {
         void onListenerDetached();
         void onListenerAttached();
@@ -113,6 +121,25 @@ public class KeyguardHostView extends KeyguardViewBase {
         mSecurityModel = new KeyguardSecurityModel(context);
 
         mViewStateManager = new KeyguardViewStateManager(this);
+
+        DevicePolicyManager dpm =
+            (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        if (dpm != null) {
+            mDisabledFeatures = getDisabledFeatures(dpm);
+            mCameraDisabled = dpm.getCameraDisabled(null);
+        }
+
+        mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
+
+        if (mSafeModeEnabled) {
+            Log.v(TAG, "Keyguard widgets disabled by safe mode");
+        }
+        if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0) {
+            Log.v(TAG, "Keyguard widgets disabled by DPM");
+        }
+        if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0) {
+            Log.v(TAG, "Keyguard secure camera disabled by DPM");
+        }
     }
 
     @Override
@@ -177,14 +204,33 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         addDefaultWidgets();
-        addWidgetsFromSettings();
-        mSwitchPageRunnable.run();
 
+        addWidgetsFromSettings();
+        checkAppWidgetConsistency();
+        mSwitchPageRunnable.run();
         // This needs to be called after the pages are all added.
         mViewStateManager.showUsabilityHints();
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
+    }
+
+    private int getDisabledFeatures(DevicePolicyManager dpm) {
+        int disabledFeatures = DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+        if (dpm != null) {
+            final int currentUser = mLockPatternUtils.getCurrentUser();
+            disabledFeatures = dpm.getKeyguardDisabledFeatures(null, currentUser);
+        }
+        return disabledFeatures;
+    }
+
+    private boolean widgetsDisabledByDpm() {
+        return (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0;
+    }
+
+    private boolean cameraDisabledByDpm() {
+        return mCameraDisabled
+                || (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0;
     }
 
     private void updateSecurityViews() {
@@ -821,15 +867,18 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private boolean addWidget(int appId, int pageIndex) {
+    private boolean addWidget(int appId, int pageIndex, boolean updateDbIfFailed) {
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appId);
         if (appWidgetInfo != null) {
             AppWidgetHostView view = getAppWidgetHost().createView(mContext, appId, appWidgetInfo);
             addWidget(view, pageIndex);
             return true;
         } else {
-            Log.w(TAG, "AppWidgetInfo for app widget id " + appId + " was null, deleting");
-            mLockPatternUtils.removeAppWidget(appId);
+            if (updateDbIfFailed) {
+                Log.w(TAG, "AppWidgetInfo for app widget id " + appId + " was null, deleting");
+                mAppWidgetHost.deleteAppWidgetId(appId);
+                mLockPatternUtils.removeAppWidget(appId);
+            }
             return false;
         }
     }
@@ -885,28 +934,34 @@ public class KeyguardHostView extends KeyguardViewBase {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
 
-        View addWidget = inflater.inflate(R.layout.keyguard_add_widget, null, true);
-        mAppWidgetContainer.addWidget(addWidget);
-        if (mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
+        if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
+            View addWidget = inflater.inflate(R.layout.keyguard_add_widget, this, false);
+            mAppWidgetContainer.addWidget(addWidget);
+            View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
+            addWidgetButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+                    if (appWidgetId != -1) {
+                        mActivityLauncher.launchWidgetPicker(appWidgetId);
+                    } else {
+                        Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
+                    }
+                }
+            });
+        }
+
+        // We currently disable cameras in safe mode because we support loading 3rd party
+        // cameras we can't trust.  TODO: plumb safe mode into camera creation code and only
+        // inflate system-provided camera?
+        if (!mSafeModeEnabled && !cameraDisabledByDpm()
+                && mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
             View cameraWidget =
                     CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
             if (cameraWidget != null) {
                 mAppWidgetContainer.addWidget(cameraWidget);
             }
         }
-
-        View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
-        addWidgetButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-                if (appWidgetId != -1) {
-                    mActivityLauncher.launchWidgetPicker(appWidgetId);
-                } else {
-                    Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
-                }
-            }
-        });
 
         enableUserSelectorIfNecessary();
         initializeTransportControl();
@@ -969,14 +1024,15 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    private int getAddPageIndex() {
+    private int getInsertPageIndex() {
         View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
-        int addPageIndex = mAppWidgetContainer.indexOfChild(addWidget);
-        // This shouldn't happen, but just to be safe!
-        if (addPageIndex < 0) {
-            addPageIndex = 0;
+        int insertionIndex = mAppWidgetContainer.indexOfChild(addWidget);
+        if (insertionIndex < 0) {
+            insertionIndex = 0; // no add widget page found
+        } else {
+            insertionIndex++; // place after add widget
         }
-        return addPageIndex;
+        return insertionIndex;
     }
 
     private void addDefaultStatusWidget(int index) {
@@ -986,18 +1042,11 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void addWidgetsFromSettings() {
-        DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null) {
-            final int currentUser = mLockPatternUtils.getCurrentUser();
-            final int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, currentUser);
-            if ((disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0) {
-                Log.v(TAG, "Keyguard widgets disabled because of device policy admin");
-                return;
-            }
+        if (mSafeModeEnabled || widgetsDisabledByDpm()) {
+            return;
         }
 
-        int addPageIndex = getAddPageIndex();
+        int insertionIndex = getInsertPageIndex();
 
         // Add user-selected widget
         final int[] widgets = mLockPatternUtils.getAppWidgets();
@@ -1007,50 +1056,90 @@ public class KeyguardHostView extends KeyguardViewBase {
         } else {
             for (int i = widgets.length -1; i >= 0; i--) {
                 if (widgets[i] == LockPatternUtils.ID_DEFAULT_STATUS_WIDGET) {
-                    addDefaultStatusWidget(addPageIndex + 1);
+                    addDefaultStatusWidget(insertionIndex);
                 } else {
                     // We add the widgets from left to right, starting after the first page after
                     // the add page. We count down, since the order will be persisted from right
                     // to left, starting after camera.
-                    addWidget(widgets[i], addPageIndex + 1);
+                    addWidget(widgets[i], insertionIndex, true);
                 }
             }
         }
-        checkAppWidgetConsistency();
+    }
+
+    private int allocateIdForDefaultAppWidget() {
+        int appWidgetId;
+        Resources res = getContext().getResources();
+        ComponentName defaultAppWidget = new ComponentName(
+                res.getString(R.string.widget_default_package_name),
+                res.getString(R.string.widget_default_class_name));
+
+        // Note: we don't support configuring the widget
+        appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+
+        try {
+            mAppWidgetManager.bindAppWidgetId(appWidgetId, defaultAppWidget);
+
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Error when trying to bind default AppWidget: " + e);
+            mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+            appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+        }
+        return appWidgetId;
     }
 
     public void checkAppWidgetConsistency() {
         final int childCount = mAppWidgetContainer.getChildCount();
         boolean widgetPageExists = false;
         for (int i = 0; i < childCount; i++) {
-            if (isWidgetPage(i)) {
+            if (mAppWidgetContainer.isWidgetPage(i)) {
                 widgetPageExists = true;
                 break;
             }
         }
         if (!widgetPageExists) {
-            final int addPageIndex = getAddPageIndex();
+            final int insertPageIndex = getInsertPageIndex();
 
-            Resources res = getContext().getResources();
-            ComponentName defaultAppWidget = new ComponentName(
-                    res.getString(R.string.widget_default_package_name),
-                    res.getString(R.string.widget_default_class_name));
+            final boolean userAddedWidgetsEnabled = !widgetsDisabledByDpm();
+            boolean addedDefaultAppWidget = false;
 
-            // Note: we don't support configuring the widget
-            int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-            boolean bindSuccessful = false;
-            try {
-                mAppWidgetManager.bindAppWidgetId(appWidgetId, defaultAppWidget);
-                bindSuccessful = true;
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Error when trying to bind default AppWidget: " + e);
+            if (!mSafeModeEnabled) {
+                if (userAddedWidgetsEnabled) {
+                    int appWidgetId = allocateIdForDefaultAppWidget();
+                    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                        addedDefaultAppWidget = addWidget(appWidgetId, insertPageIndex, true);
+                    }
+                } else {
+                    // note: even if widgetsDisabledByDpm() returns true, we still bind/create
+                    // the default appwidget if possible
+                    int appWidgetId = mLockPatternUtils.getFallbackAppWidgetId();
+                    if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+                        appWidgetId = allocateIdForDefaultAppWidget();
+                        if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                            mLockPatternUtils.writeFallbackAppWidgetId(appWidgetId);
+                        }
+                    }
+                    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                        addedDefaultAppWidget = addWidget(appWidgetId, insertPageIndex, false);
+                        if (!addedDefaultAppWidget) {
+                            mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+                            mLockPatternUtils.writeFallbackAppWidgetId(
+                                    AppWidgetManager.INVALID_APPWIDGET_ID);
+                        }
+                    }
+                }
             }
+
             // Use the built-in status/clock view if we can't inflate the default widget
-            if (!(bindSuccessful && addWidget(appWidgetId, addPageIndex + 1))) {
-                addDefaultStatusWidget(addPageIndex + 1);
+            if (!addedDefaultAppWidget) {
+                addDefaultStatusWidget(insertPageIndex);
             }
-            mAppWidgetContainer.onAddView(
-                    mAppWidgetContainer.getChildAt(addPageIndex + 1), addPageIndex + 1);
+
+            // trigger DB updates only if user-added widgets are enabled
+            if (!mSafeModeEnabled && userAddedWidgetsEnabled) {
+                mAppWidgetContainer.onAddView(
+                        mAppWidgetContainer.getChildAt(insertPageIndex), insertPageIndex);
+            }
         }
     }
 
@@ -1152,15 +1241,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         return null;
-    }
-
-    private boolean isWidgetPage(int pageIndex) {
-        View v = mAppWidgetContainer.getChildAt(pageIndex);
-        if (v != null && v instanceof KeyguardWidgetFrame) {
-            KeyguardWidgetFrame kwf = (KeyguardWidgetFrame) v;
-            return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
-        }
-        return false;
     }
 
     private int getStickyWidget() {
