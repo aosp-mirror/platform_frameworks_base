@@ -69,6 +69,8 @@ public class KeyguardHostView extends KeyguardViewBase {
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
 
+    private final int MAX_WIDGETS = 5;
+
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;
@@ -225,6 +227,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
 
         addWidgetsFromSettings();
+        if (numWidgets() >= MAX_WIDGETS) {
+            setAddWidgetEnabled(false);
+        }
         checkAppWidgetConsistency();
         mSwitchPageRunnable.run();
         // This needs to be called after the pages are all added.
@@ -312,6 +317,13 @@ public class KeyguardHostView extends KeyguardViewBase {
         @Override
         public void onUserActivityTimeoutChanged() {
             KeyguardHostView.this.onUserActivityTimeoutChanged();
+        }
+
+        @Override
+        public void onRemoveView(View v) {
+            if (numWidgets() < MAX_WIDGETS) {
+                setAddWidgetEnabled(true);
+            }
         }
     };
 
@@ -975,13 +987,33 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     };
 
+    private int numWidgets() {
+        final int childCount = mAppWidgetContainer.getChildCount();
+        int widgetCount = 0;
+        for (int i = 0; i < childCount; i++) {
+            if (mAppWidgetContainer.isWidgetPage(i)) {
+                widgetCount++;
+            }
+        }
+        return widgetCount;
+    }
+
+
+    private void setAddWidgetEnabled(boolean clickable) {
+        View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
+        if (addWidget != null) {
+            View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
+            addWidgetButton.setEnabled(clickable);
+        }
+    }
+
     private void addDefaultWidgets() {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.keyguard_transport_control_view, this, true);
 
         if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
             View addWidget = inflater.inflate(R.layout.keyguard_add_widget, this, false);
-            mAppWidgetContainer.addWidget(addWidget);
+            mAppWidgetContainer.addWidget(addWidget, 0);
             View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
             addWidgetButton.setOnClickListener(new OnClickListener() {
                 @Override
