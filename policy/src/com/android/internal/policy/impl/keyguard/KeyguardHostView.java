@@ -20,11 +20,13 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +39,7 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -1441,5 +1444,32 @@ public class KeyguardHostView extends KeyguardViewBase {
      */
     public void dismiss() {
         showNextSecurityScreenOrFinish(false);
+    }
+
+    public void showAssistant() {
+        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+          .getAssistIntent(mContext, UserHandle.USER_CURRENT);
+
+        if (intent == null) return;
+
+        final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                R.anim.keyguard_action_assist_enter, R.anim.keyguard_action_assist_exit,
+                getHandler(), null);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        setOnDismissAction(new OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                try {
+                    mContext.startActivityAsUser(intent, opts.toBundle(),
+                                new UserHandle(UserHandle.USER_CURRENT));
+                    } catch (ActivityNotFoundException e) {
+                        Slog.w(TAG, "Activity not found for " + intent.getAction());
+                    }
+                return false;
+            }
+        });
+
+        mViewStateManager.showBouncer(true);
     }
 }

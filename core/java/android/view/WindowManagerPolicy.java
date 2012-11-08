@@ -1136,4 +1136,10 @@ public interface WindowManagerPolicy {
      * @param args additional arguments to the dump request.
      */
     public void dump(String prefix, PrintWriter writer, String[] args);
+
+    /**
+     * Ask keyguard to invoke the assist intent after dismissing keyguard
+     * {@link android.content.Intent#ACTION_ASSIST}
+     */
+    public void showAssistant();
 }

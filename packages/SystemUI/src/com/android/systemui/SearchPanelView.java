@@ -26,11 +26,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +64,7 @@ public class SearchPanelView extends FrameLayout implements
     private boolean mShowing;
     private View mSearchTargetsContainer;
     private GlowPadView mGlowPadView;
+    private IWindowManager mWm;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -70,6 +73,7 @@ public class SearchPanelView extends FrameLayout implements
     public SearchPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
+        mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
     }
 
     private void startAssistActivity() {
@@ -77,28 +81,13 @@ public class SearchPanelView extends FrameLayout implements
 
         // Close Recent Apps if needed
         mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
-        // Launch Assist
-        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, UserHandle.USER_CURRENT);
-        if (intent == null) return;
 
-        // Dismiss the keyguard if possible. XXX: TODO: invoke bouncer.
         try {
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            mWm.showAssistant();
         } catch (RemoteException e) {
+            // too bad, so sad...
         }
-
-        try {
-            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                    R.anim.search_launch_enter, R.anim.search_launch_exit,
-                    getHandler(), this);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivityAsUser(intent, opts.toBundle(),
-                    new UserHandle(UserHandle.USER_CURRENT));
-        } catch (ActivityNotFoundException e) {
-            Slog.w(TAG, "Activity not found for " + intent.getAction());
-            onAnimationStarted();
-        }
+        onAnimationStarted();
     }
 
     class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
