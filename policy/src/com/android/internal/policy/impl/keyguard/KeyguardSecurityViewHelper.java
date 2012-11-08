@@ -42,7 +42,7 @@ public class KeyguardSecurityViewHelper {
         }
         if (bouncerFrame != null) {
             if (duration > 0) {
-                Animator anim = ObjectAnimator.ofInt(bouncerFrame, "alpha", 255);
+                Animator anim = ObjectAnimator.ofInt(bouncerFrame, "alpha", 0, 255);
                 anim.setDuration(duration);
                 anim.start();
             } else {
@@ -67,7 +67,7 @@ public class KeyguardSecurityViewHelper {
         }
         if (bouncerFrame != null) {
             if (duration > 0) {
-                Animator anim = ObjectAnimator.ofInt(bouncerFrame, "alpha", 0);
+                Animator anim = ObjectAnimator.ofInt(bouncerFrame, "alpha", 255, 0);
                 anim.setDuration(duration);
                 anim.start();
             } else {
