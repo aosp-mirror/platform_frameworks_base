@@ -53,29 +53,4 @@
         android:drawablePadding="4dip"
         />
 
-    <TextView
-        android:id="@+id/owner_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearance"
-        android:textSize="@dimen/kg_status_line_font_size"
-        />
-
-    <TextView
-        android:id="@+id/status1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="@dimen/kg_status_line_font_right_margin"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearance"
-        android:textSize="@dimen/kg_status_line_font_size"
-        />
 </LinearLayout>
