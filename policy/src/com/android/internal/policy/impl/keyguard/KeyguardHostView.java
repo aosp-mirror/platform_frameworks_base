@@ -306,18 +306,26 @@ public class KeyguardHostView extends KeyguardViewBase {
             = new KeyguardWidgetPager.Callbacks() {
         @Override
         public void userActivity() {
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.userActivity();
-            }
+            KeyguardHostView.this.userActivity();
         }
 
         @Override
         public void onUserActivityTimeoutChanged() {
-            if (mViewMediatorCallback != null) {
-                mViewMediatorCallback.onUserActivityTimeoutChanged();
-            }
+            KeyguardHostView.this.onUserActivityTimeoutChanged();
         }
     };
+
+    public void userActivity() {
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.userActivity();
+        }
+    }
+
+    public void onUserActivityTimeoutChanged() {
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.onUserActivityTimeoutChanged();
+        }
+    }
 
     @Override
     public long getUserActivityTimeout() {
