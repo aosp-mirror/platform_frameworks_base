@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -209,7 +210,7 @@ public class PowerUI extends SystemUI {
                         new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mContext.startActivity(intent);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                         dismissLowBatteryWarning();
                     }
                 });
