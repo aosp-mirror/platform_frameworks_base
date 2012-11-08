@@ -392,8 +392,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 break;
             case Gravity.BOTTOM:
                 bottom = fixedLayoutVertical
-                        ? height - padding.bottom - (adjustedHeight - childHeight) / 2
-                        : height - padding.bottom;
+                        ? padding.top + height - (adjustedHeight - childHeight) / 2
+                        : padding.top + height;
                 top = bottom - childHeight;
                 if (adjustPadding && isVertical) {
                     padding.bottom = height - top;

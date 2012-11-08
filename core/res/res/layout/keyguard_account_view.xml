@@ -21,6 +21,8 @@
     android:id="@+id/keyguard_account_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_maxWidth="@dimen/keyguard_security_width"
+    android:layout_maxHeight="@dimen/keyguard_security_height"
     android:orientation="vertical">
 
     <include layout="@layout/keyguard_message_area"
