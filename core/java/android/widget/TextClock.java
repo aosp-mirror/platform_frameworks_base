@@ -135,13 +135,11 @@ public class TextClock extends TextView {
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mTimeZone == null) {
-                if (intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
-                    final String timeZone = intent.getStringExtra("time-zone");
-                    createTime(timeZone);
-                }
-                onTimeChanged();
+            if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+                final String timeZone = intent.getStringExtra("time-zone");
+                createTime(timeZone);
             }
+            onTimeChanged();
         }
     };
 
@@ -406,11 +404,9 @@ public class TextClock extends TextView {
         boolean hadSeconds = mHasSeconds;
         mHasSeconds = DateFormat.hasSeconds(mFormat);
 
-        if (handleTicker) {
-            if (hadSeconds != mHasSeconds) {
-                if (hadSeconds) getHandler().removeCallbacks(mTicker);
-                else mTicker.run();
-            }
+        if (handleTicker && mAttached && hadSeconds != mHasSeconds) {
+            if (hadSeconds) getHandler().removeCallbacks(mTicker);
+            else mTicker.run();
         }
     }
 
