@@ -21,6 +21,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -45,9 +46,12 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private GlowPadView mGlowPadView;
     private ObjectAnimator mAnim;
     private View mFadeView;
+    private boolean mIsBouncing;
     private boolean mCameraDisabled;
     private boolean mSearchDisabled;
     private LockPatternUtils mLockPatternUtils;
+    private SecurityMessageDisplay mSecurityMessageDisplay;
+    private Drawable mBouncerFrame;
 
     OnTriggerListener mOnTriggerListener = new OnTriggerListener() {
 
@@ -80,7 +84,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         public void onReleased(View v, int handle) {
-            doTransition(mFadeView, 1.0f);
+            if (!mIsBouncing) {
+                doTransition(mFadeView, 1.0f);
+            }
         }
 
         public void onGrabbed(View v, int handle) {
@@ -143,6 +149,10 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         updateTargets();
+
+        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        View bouncerFrameView = findViewById(R.id.keyguard_selector_view_frame);
+        mBouncerFrame = bouncerFrameView.getBackground();
     }
 
     public void setCarrierArea(View carrierArea) {
@@ -264,9 +274,15 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     @Override
     public void showBouncer(int duration) {
+        mIsBouncing = true;
+        KeyguardSecurityViewHelper.
+                showBouncer(mSecurityMessageDisplay, mFadeView, mBouncerFrame, duration);
     }
 
     @Override
     public void hideBouncer(int duration) {
+        mIsBouncing = false;
+        KeyguardSecurityViewHelper.
+                hideBouncer(mSecurityMessageDisplay, mFadeView, mBouncerFrame, duration);
     }
 }
