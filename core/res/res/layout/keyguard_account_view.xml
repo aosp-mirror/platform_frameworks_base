@@ -51,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/login"
+            android:layout_toLeftOf="@+id/ok"
             android:layout_marginTop="15dip"
             android:layout_marginStart="7dip"
             android:layout_marginEnd="7dip"
@@ -67,12 +68,13 @@
             android:layout_height="wrap_content"
             android:layout_margin="7dip"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@id/login"
             android:text="@string/kg_login_submit_button"
             />
 
     </RelativeLayout>
 
+    <!--  no room for ECA on this screen right now
     <include layout="@layout/keyguard_emergency_carrier_area"
         android:id="@+id/keyguard_selector_fade_container"
         android:layout_width="match_parent"
@@ -80,5 +82,6 @@
         android:orientation="vertical"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal" />
+    -->
 
 </com.android.internal.policy.impl.keyguard.KeyguardAccountView>
