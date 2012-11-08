@@ -436,6 +436,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private boolean mDockAudioMediaEnabled = true;
 
+    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -3758,13 +3760,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         config = AudioSystem.FORCE_BT_CAR_DOCK;
                         break;
                     case Intent.EXTRA_DOCK_STATE_LE_DESK:
-                        synchronized (mSettingsLock) {
-                            if (mDockAudioMediaEnabled) {
-                                config = AudioSystem.FORCE_ANALOG_DOCK;
-                            } else {
-                                config = AudioSystem.FORCE_NONE;
-                            }
-                        }
+                        config = AudioSystem.FORCE_ANALOG_DOCK;
                         break;
                     case Intent.EXTRA_DOCK_STATE_HE_DESK:
                         config = AudioSystem.FORCE_DIGITAL_DOCK;
@@ -3773,8 +3769,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     default:
                         config = AudioSystem.FORCE_NONE;
                 }
-
-                AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
+                // Low end docks have a menu to enable or disable audio
+                // (see mDockAudioMediaEnabled)
+                if (!((dockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                      ((dockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) &&
+                       (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK)))) {
+                    AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
+                }
+                mDockState = dockState;
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
