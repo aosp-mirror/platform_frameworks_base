@@ -3899,14 +3899,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public void dismissKeyguardLw() {
-        if (mKeyguardMediator.isDismissable()) {
-            if (mKeyguardMediator.isShowing()) {
-                mHandler.post(new Runnable() {
-                    public void run() {
+        if (mKeyguardMediator.isShowing()) {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    if (mKeyguardMediator.isDismissable()) {
+                        // Can we just finish the keyguard straight away?
                         mKeyguardMediator.keyguardDone(false, true);
+                    } else {
+                        // ask the keyguard to prompt the user to authenticate if necessary
+                        mKeyguardMediator.dismiss();
                     }
-                });
-            }
+                }
+            });
         }
     }
 
