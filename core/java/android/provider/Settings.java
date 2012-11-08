@@ -3229,6 +3229,13 @@ public final class Settings {
             "lock_screen_appwidget_ids";
 
         /**
+         * Id of the appwidget shown on the lock screen when appwidgets are disabled.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_FALLBACK_APPWIDGET_ID =
+            "lock_screen_fallback_appwidget_id";
+
+        /**
          * Index of the lockscreen appwidget to restore, -1 if none.
          * @hide
          */
