@@ -329,6 +329,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     public void setMaxChallengeTop(int top) {
         boolean dirty = mMaxChallengeTop != top;
+        mMaxChallengeTop = top;
         mSmallWidgetHeight = top - getPaddingTop();
         mSmallFrameHeight = top + getPaddingBottom();
         if (dirty && mIsSmall) {
@@ -348,10 +349,21 @@ public class KeyguardWidgetFrame extends FrameLayout {
         setFrameHeight(frameHeight);
     }
 
-    public void shrinkWidget() {
+    public void shrinkWidget(boolean alsoShrinkFrame) {
         mIsSmall = true;
         setWidgetHeight(mSmallWidgetHeight);
-        setFrameHeight(mSmallFrameHeight);
+
+        if (alsoShrinkFrame) {
+            setFrameHeight(mSmallFrameHeight);
+        }
+    }
+
+    public int getSmallFrameHeight() {
+        return mSmallFrameHeight;
+    }
+
+    public void shrinkWidget() {
+        shrinkWidget(true);
     }
 
     public void setWidgetLockedSmall(boolean locked) {

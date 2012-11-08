@@ -214,6 +214,11 @@ public class KeyguardViewStateManager implements
                     mKeyguardWidgetPager.setWidgetToResetOnPageFadeOut(mPageListeningToSlider);
                 }
             }
+            if (frame.isSmall()) {
+                // This is to make sure that if the scroller animation gets cut off midway
+                // that the frame doesn't stay in a partial down position.
+                frame.setFrameHeight(frame.getSmallFrameHeight());
+            }
             if (scrollState != SlidingChallengeLayout.SCROLL_STATE_FADING) {
                 frame.hideFrame(this);
             }
@@ -244,7 +249,7 @@ public class KeyguardViewStateManager implements
                 if (!frame.isSmall()) {
                     // We need to fetch the final page, in case the pages are in motion.
                     mPageListeningToSlider = mKeyguardWidgetPager.getNextPage();
-                    frame.shrinkWidget();
+                    frame.shrinkWidget(false);
                 }
             } else {
                 if (!frame.isSmall()) {
@@ -263,7 +268,7 @@ public class KeyguardViewStateManager implements
     public void onScrollPositionChanged(float scrollPosition, int challengeTop) {
         mChallengeTop = challengeTop;
         KeyguardWidgetFrame frame = mKeyguardWidgetPager.getWidgetPageAt(mPageListeningToSlider);
-        if (frame != null && !mKeyguardWidgetPager.isPageMoving()) {
+        if (frame != null && mLastScrollState != SlidingChallengeLayout.SCROLL_STATE_FADING) {
             frame.adjustFrame(getChallengeTopRelativeToFrame(frame, mChallengeTop));
         }
     }
