@@ -567,6 +567,8 @@ public class KeyguardViewMediator {
             mScreenOn = false;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
 
+            mKeyguardDonePending = false;
+
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
             // camera while preventing unwanted input.
@@ -1226,6 +1228,7 @@ public class KeyguardViewMediator {
 
             mKeyguardViewManager.show(options);
             mShowing = true;
+            mKeyguardDonePending = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
@@ -1261,6 +1264,7 @@ public class KeyguardViewMediator {
 
             mKeyguardViewManager.hide();
             mShowing = false;
+            mKeyguardDonePending = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
         }

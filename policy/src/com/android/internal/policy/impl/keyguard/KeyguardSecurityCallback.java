@@ -15,13 +15,9 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
+import com.android.internal.policy.impl.keyguard.KeyguardHostView.OnDismissAction;
+
 public interface KeyguardSecurityCallback {
-
-    /*package*/ interface OnDismissAction {
-
-        /* returns true if the dismiss should be deferred */
-        boolean onDismiss();
-    }
 
     /**
      * Dismiss the given security screen.
