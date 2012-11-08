@@ -415,7 +415,7 @@ class QuickSettings {
         });
         parent.addView(wifiTile);
 
-        if (mModel.deviceSupportsTelephony()) {
+        if (mModel.deviceHasMobileData()) {
             // RSSI
             QuickSettingsTileView rssiTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
