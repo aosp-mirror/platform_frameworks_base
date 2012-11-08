@@ -81,6 +81,8 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_USER_SWITCHED = 310;
     private static final int MSG_USER_REMOVED = 311;
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
+    protected static final int MSG_BOOT_COMPLETED = 313;
+
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -152,6 +154,9 @@ public class KeyguardUpdateMonitor {
                 case MSG_KEYGUARD_VISIBILITY_CHANGED:
                     handleKeyguardVisibilityChanged(msg.arg1);
                     break;
+                case MSG_BOOT_COMPLETED:
+                    handleBootCompleted();
+                    break;
 
             }
         }
@@ -198,6 +203,8 @@ public class KeyguardUpdateMonitor {
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
+            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_BOOT_COMPLETED));
             }
         }
     };
@@ -340,6 +347,7 @@ public class KeyguardUpdateMonitor {
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         try {
@@ -416,6 +424,18 @@ public class KeyguardUpdateMonitor {
         try {
             reply.sendResult(null);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Handle {@link #MSG_BOOT_COMPLETED}
+     */
+    protected void handleBootCompleted() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onBootCompleted();
+            }
         }
     }
 

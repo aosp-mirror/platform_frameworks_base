@@ -99,4 +99,12 @@ class KeyguardUpdateMonitorCallback {
      * Called when a user is removed.
      */
     void onUserRemoved(int userId) { }
+
+    /**
+     * Called when boot completed.
+     *
+     * Note, this callback will only be received if boot complete occurs after registering with
+     * KeyguardUpdateMonitor.
+     */
+    void onBootCompleted() { }
 }
