@@ -476,6 +476,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 v.setCameraDistance(mDensity * CAMERA_DISTANCE);
 
                 if (isOverScrollChild(i, scrollProgress) && PERFORM_OVERSCROLL_ROTATION) {
+                    float pivotX = v.getMeasuredWidth() / 2;
+                    float pivotY = v.getMeasuredHeight() / 2;
+                    v.setPivotX(pivotX);
+                    v.setPivotY(pivotY);
                     v.setRotationY(- OVERSCROLL_MAX_ROTATION * scrollProgress);
                     v.setOverScrollAmount(Math.abs(scrollProgress), scrollProgress < 0);
                 } else {
@@ -762,6 +766,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             mZoomInOutAnim.cancel();
         }
         View currentPage = getPageAt(getCurrentPage());
+        currentPage.setPivotY(0);
+        currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
         if (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f)) {
             mZoomInOutAnim = new AnimatorSet();
             mZoomInOutAnim.setDuration(BOUNCER_ZOOM_IN_OUT_DURATION);
