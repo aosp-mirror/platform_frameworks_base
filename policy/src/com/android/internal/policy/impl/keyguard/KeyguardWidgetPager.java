@@ -782,4 +782,19 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             mZoomInOutAnim.start();
         }
     }
+
+    boolean isAddPage(int pageIndex) {
+        View v = getChildAt(pageIndex);
+        return v != null && v.getId() == R.id.keyguard_add_widget;
+    }
+
+    boolean isCameraPage(int pageIndex) {
+        View v = getChildAt(pageIndex);
+        return v != null && v instanceof CameraWidgetFrame;
+    }
+
+    @Override
+    protected boolean shouldSetTopAlignedPivotForWidget(int childIndex) {
+        return !isCameraPage(childIndex) && super.shouldSetTopAlignedPivotForWidget(childIndex);
+    }
 }

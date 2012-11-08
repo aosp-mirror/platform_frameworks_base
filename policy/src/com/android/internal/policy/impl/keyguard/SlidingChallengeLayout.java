@@ -469,8 +469,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public void showBouncer() {
         if (mIsBouncing) return;
         mWasChallengeShowing = mChallengeShowing;
-        showChallenge(true);
         mIsBouncing = true;
+        showChallenge(true);
         if (mScrimView != null) {
             mScrimView.setVisibility(VISIBLE);
         }
