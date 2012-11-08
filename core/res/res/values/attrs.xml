@@ -5492,6 +5492,11 @@
         <attr name="magneticTargets" format="boolean" />
 
         <attr name="gravity" />
+
+        <!-- Determine whether the glow pad is allowed to scale to fit the bounds indicated
+            by its parent. If this is set to false, no scaling will occur. If this is set to true
+            scaling will occur to fit for any axis in which gravity is set to center. -->
+        <attr name="allowScaling" format="boolean" />
     </declare-styleable>
 
     <!-- =============================== -->
