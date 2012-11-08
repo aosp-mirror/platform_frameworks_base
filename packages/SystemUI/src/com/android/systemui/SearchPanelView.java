@@ -81,13 +81,45 @@ public class SearchPanelView extends FrameLayout implements
 
         // Close Recent Apps if needed
         mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
-
+        boolean isKeyguardShowing = false;
         try {
-            mWm.showAssistant();
+            isKeyguardShowing = mWm.isKeyguardLocked();
         } catch (RemoteException e) {
-            // too bad, so sad...
+
         }
-        onAnimationStarted();
+
+        if (isKeyguardShowing) {
+            // Have keyguard show the bouncer and launch the activity if the user succeeds.
+            try {
+                mWm.showAssistant();
+            } catch (RemoteException e) {
+                // too bad, so sad...
+            }
+            onAnimationStarted();
+        } else {
+            // Otherwise, keyguard isn't showing so launch it from here.
+            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                    .getAssistIntent(mContext, UserHandle.USER_CURRENT);
+            if (intent == null) return;
+
+            try {
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+                // too bad, so sad...
+            }
+
+            try {
+                ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
+                        R.anim.search_launch_enter, R.anim.search_launch_exit,
+                        getHandler(), this);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivityAsUser(intent, opts.toBundle(),
+                        new UserHandle(UserHandle.USER_CURRENT));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "Activity not found for " + intent.getAction());
+                onAnimationStarted();
+            }
+        }
     }
 
     class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
