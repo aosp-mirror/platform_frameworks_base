@@ -289,13 +289,7 @@ public class Editor {
     public void setError(CharSequence error, Drawable icon) {
         mError = TextUtils.stringOrSpannedString(error);
         mErrorWasChanged = true;
-        final Drawables dr = mTextView.mDrawables;
-        if (dr != null) {
-            mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
-                    dr.mDrawableBottom);
-        } else {
-            mTextView.setCompoundDrawables(null, null, icon, null);
-        }
+
         if (mError == null) {
             if (mErrorPopup != null) {
                 if (mErrorPopup.isShowing()) {
@@ -304,10 +298,21 @@ public class Editor {
 
                 mErrorPopup = null;
             }
+
+            setErrorIcon(null);
+        } else if (mTextView.isFocused()) {
+            showError();
+            setErrorIcon(icon);
+        }
+    }
+
+    private void setErrorIcon(Drawable icon) {
+        final Drawables dr = mTextView.mDrawables;
+        if (dr != null) {
+            mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
+                    dr.mDrawableBottom);
         } else {
-            if (mTextView.isFocused()) {
-                showError();
-            }
+            mTextView.setCompoundDrawables(null, null, icon, null);
         }
     }
 
@@ -316,6 +321,8 @@ public class Editor {
             if (mErrorPopup.isShowing()) {
                 mErrorPopup.dismiss();
             }
+
+            setErrorIcon(null);
         }
 
         mShowErrorAfterAttach = false;
