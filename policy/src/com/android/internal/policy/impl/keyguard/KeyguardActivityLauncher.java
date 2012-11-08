@@ -35,7 +35,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.android.internal.policy.impl.keyguard.KeyguardSecurityCallback.OnDismissAction;
+import com.android.internal.policy.impl.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
