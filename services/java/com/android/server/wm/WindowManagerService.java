@@ -10351,6 +10351,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return mSafeMode;
     }
 
+    public void showAssistant() {
+        // TODO: What permission?
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mPolicy.showAssistant();
+    }
+
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);

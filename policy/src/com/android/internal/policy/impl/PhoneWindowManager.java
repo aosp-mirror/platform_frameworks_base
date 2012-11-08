@@ -4540,6 +4540,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void showAssistant() {
+        mKeyguardMediator.showAssistant();
+    }
+
+    @Override
     public void dump(String prefix, PrintWriter pw, String[] args) {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
                 pw.print(" mSystemReady="); pw.print(mSystemReady);
