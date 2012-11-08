@@ -680,6 +680,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void showSearchPanel() {
         super.showSearchPanel();
+        mHandler.removeCallbacks(mShowSearchPanel);
 
         // we want to freeze the sysui state wherever it is
         mSearchPanelView.setSystemUiVisibility(mSystemUiVisibility);
