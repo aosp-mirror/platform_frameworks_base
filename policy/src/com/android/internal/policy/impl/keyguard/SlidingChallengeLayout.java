@@ -493,13 +493,6 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (mChallengeView != null) {
             mChallengeView.showBouncer(HANDLE_ANIMATE_DURATION);
         }
-        // Mess with padding/margin to inset the bouncer frame.
-        // We have more space available to us otherwise.
-        if (mChallengeView != null) {
-            final LayoutParams lp = (LayoutParams) mChallengeView.getLayoutParams();
-            lp.leftMargin = lp.rightMargin = getChallengeMargin(false);
-            mChallengeView.setLayoutParams(lp);
-        }
 
         if (mBouncerListener != null) {
             mBouncerListener.onBouncerStateChanged(true);

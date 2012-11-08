@@ -43,6 +43,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <View
+            android:id="@+id/keyguard_selector_view_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@*android:drawable/kg_bouncer_bg_white"/>
+
         <include layout="@layout/keyguard_glow_pad_container" />
 
         <include layout="@layout/keyguard_emergency_carrier_area"
