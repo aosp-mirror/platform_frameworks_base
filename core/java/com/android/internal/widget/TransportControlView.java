@@ -23,7 +23,6 @@ import com.android.internal.widget.LockScreenWidgetInterface;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -193,7 +192,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
 
     public TransportControlView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Log.v(TAG, "Create TCV " + this);
+        if (DEBUG) Log.v(TAG, "Create TCV " + this);
         mAudioManager = new AudioManager(mContext);
         mCurrentPlayState = RemoteControlClient.PLAYSTATE_NONE; // until we get a callback
         mIRCD = new IRemoteControlDisplayWeak(mHandler);
