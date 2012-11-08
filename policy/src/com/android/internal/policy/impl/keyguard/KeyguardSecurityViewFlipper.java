@@ -16,6 +16,9 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -23,13 +26,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
-
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so
@@ -246,7 +247,10 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     public static class LayoutParams extends FrameLayout.LayoutParams {
+        @ViewDebug.ExportedProperty(category = "layout")
         public int maxWidth;
+
+        @ViewDebug.ExportedProperty(category = "layout")
         public int maxHeight;
 
         public LayoutParams(ViewGroup.LayoutParams other) {
