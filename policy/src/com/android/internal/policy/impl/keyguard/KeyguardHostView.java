@@ -1311,7 +1311,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (!UserManager.supportsMultipleUsers()) {
             return; // device doesn't support multi-user mode
         }
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         if (um == null) {
             Throwable t = new Throwable();
             t.fillInStackTrace();
@@ -1320,7 +1320,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         // if there are multiple users, we need to enable to multi-user switcher
-        List<UserInfo> users = um.getUsers(true);
+        final List<UserInfo> users = um.getUsers(true);
         if (users == null) {
             Throwable t = new Throwable();
             t.fillInStackTrace();
@@ -1328,8 +1328,15 @@ public class KeyguardHostView extends KeyguardViewBase {
             return;
         }
 
+        final View multiUserView = findViewById(R.id.keyguard_user_selector);
+        if (multiUserView == null) {
+            Throwable t = new Throwable();
+            t.fillInStackTrace();
+            Log.e(TAG, "can't find user_selector in layout.", t);
+            return;
+        }
+
         if (users.size() > 1) {
-            View multiUserView = findViewById(R.id.keyguard_user_selector);
             if (multiUserView instanceof KeyguardMultiUserSelectorView) {
                 KeyguardMultiUserSelectorView multiUser =
                         (KeyguardMultiUserSelectorView) multiUserView;
