@@ -127,7 +127,7 @@ class SimulatedTrackball {
         // Store what time the touchpad event occurred
         final long time = SystemClock.uptimeMillis();
         switch (event.getAction()) {
-            case MotionEvent.ACTION_HOVER_ENTER:
+            case MotionEvent.ACTION_DOWN:
                 mLastTouchPadStartTimeMs = time;
                 mAlwaysInTapRegion = true;
                 mTouchpadEnterXPosition = event.getX();
@@ -145,7 +145,7 @@ class SimulatedTrackball {
                 mHandler.removeMessages(FLICK_MSG_ID);
 
                 break;
-            case MotionEvent.ACTION_HOVER_MOVE:
+            case MotionEvent.ACTION_MOVE:
                 // Determine whether the move is slop or an intentional move
                 float deltaX = event.getX() - mTouchpadEnterXPosition;
                 float deltaY = event.getY() - mTouchpadEnterYPosition;
@@ -214,19 +214,19 @@ class SimulatedTrackball {
                     mLastTouchPadKeySendTimeMs = time;
                 }
                 break;
-            case MotionEvent.ACTION_HOVER_EXIT:
+            case MotionEvent.ACTION_UP:
                 if (time - mLastTouchPadStartTimeMs < MAX_TAP_TIME && mAlwaysInTapRegion) {
                     // Trackball Down
                     MotionEvent trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
                             MotionEvent.ACTION_DOWN, 0, 0, 0, 0, event.getMetaState(),
                             10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_CLASS_TRACKBALL);
+                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
                     viewroot.enqueueInputEvent(trackballEvent);
                     // Trackball Release
                     trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
                             MotionEvent.ACTION_UP, 0, 0, 0, 0, event.getMetaState(),
                             10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_CLASS_TRACKBALL);
+                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
                     viewroot.enqueueInputEvent(trackballEvent);
                 } else {
                     float xMoveSquared = mLastMoveX * mLastMoveX;
