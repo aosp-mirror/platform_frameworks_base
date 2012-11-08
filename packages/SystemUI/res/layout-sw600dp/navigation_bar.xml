@@ -146,7 +146,7 @@
             android:id="@+id/search_light"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_sysbar_lights_out_dot_large"
+            android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
             />
@@ -287,7 +287,7 @@
             android:id="@+id/search_light"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_sysbar_lights_out_dot_large"
+            android:src="@drawable/search_light"
             android:scaleType="center"
             android:visibility="gone"
             />
