@@ -53,7 +53,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.KeyguardSecurityCallback.OnDismissAction;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -113,6 +112,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         void showSecurityView();
         void showUnlockHint();
         void userActivity();
+    }
+
+    /*package*/ interface OnDismissAction {
+        /* returns true if the dismiss should be deferred */
+        boolean onDismiss();
     }
 
     public KeyguardHostView(Context context) {
