@@ -17,6 +17,12 @@ package com.android.internal.policy.impl.keyguard;
 
 public interface KeyguardSecurityCallback {
 
+    /*package*/ interface OnDismissAction {
+
+        /* returns true if the dismiss should be deferred */
+        boolean onDismiss();
+    }
+
     /**
      * Dismiss the given security screen.
      * @param securityVerified true if the user correctly entered credentials for the given screen.
@@ -58,9 +64,9 @@ public interface KeyguardSecurityCallback {
     void showBackupSecurity();
 
     /**
-     * Sets a runnable to launch after the user successfully enters their credentials.
-     * @param runnable
+     * Sets an action to perform after the user successfully enters their credentials.
+     * @param action
      */
-    void setOnDismissRunnable(Runnable runnable);
+    void setOnDismissAction(OnDismissAction action);
 
 }
