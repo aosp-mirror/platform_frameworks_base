@@ -348,8 +348,12 @@ public class KeyguardUpdateMonitor {
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        final IntentFilter bootCompleteFilter = new IntentFilter();
+        bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        context.registerReceiver(mBroadcastReceiver, bootCompleteFilter);
 
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
