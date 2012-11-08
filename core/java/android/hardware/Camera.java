@@ -3495,25 +3495,29 @@ public class Camera {
         }
 
         /**
-         * Returns true if video snapshot is supported. That is, applications
+         * <p>Returns true if video snapshot is supported. That is, applications
          * can call {@link #takePicture(Camera.ShutterCallback,
-         * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}
-         * during recording. Applications do not need to call {@link
-         * #startPreview()} after taking a picture. The preview will be still
-         * active. Other than that, taking a picture during recording is
-         * identical to taking a picture normally. All settings and methods
-         * related to takePicture work identically. Ex: {@link
-         * #getPictureSize()}, {@link #getSupportedPictureSizes()}, {@link
-         * #setJpegQuality(int)}, {@link #setRotation(int)}, and etc. The
-         * picture will have an EXIF header. {@link #FLASH_MODE_AUTO} and {@link
-         * #FLASH_MODE_ON} also still work, but the video will record the flash.
+         * Camera.PictureCallback, Camera.PictureCallback,
+         * Camera.PictureCallback)} during recording. Applications do not need
+         * to call {@link #startPreview()} after taking a picture. The preview
+         * will be still active. Other than that, taking a picture during
+         * recording is identical to taking a picture normally. All settings and
+         * methods related to takePicture work identically. Ex:
+         * {@link #getPictureSize()}, {@link #getSupportedPictureSizes()},
+         * {@link #setJpegQuality(int)}, {@link #setRotation(int)}, and etc. The
+         * picture will have an EXIF header. {@link #FLASH_MODE_AUTO} and
+         * {@link #FLASH_MODE_ON} also still work, but the video will record the
+         * flash.</p>
          *
-         * Applications can set shutter callback as null to avoid the shutter
+         * <p>Applications can set shutter callback as null to avoid the shutter
          * sound. It is also recommended to set raw picture and post view
-         * callbacks to null to avoid the interrupt of preview display.
+         * callbacks to null to avoid the interrupt of preview display.</p>
          *
-         * Field-of-view of the recorded video may be different from that of the
-         * captured pictures.
+         * <p>Field-of-view of the recorded video may be different from that of the
+         * captured pictures. The maximum size of a video snapshot may be
+         * smaller than that for regular still captures. If the current picture
+         * size is set higher than can be supported by video snapshot, the
+         * picture will be captured at the maximum supported size instead.</p>
          *
          * @return true if video snapshot is supported.
          */
