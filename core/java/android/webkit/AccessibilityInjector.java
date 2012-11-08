@@ -351,7 +351,7 @@ class AccessibilityInjector {
             return;
         }
         mTextToSpeech = new TextToSpeechWrapper(mContext);
-        mWebViewClassic.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE, false);
+        mWebViewClassic.addJavascriptInterface(mTextToSpeech, ALIAS_TTS_JS_INTERFACE, true);
     }
 
     /**
@@ -375,7 +375,7 @@ class AccessibilityInjector {
         }
 
         mCallback = new CallbackHandler(ALIAS_TRAVERSAL_JS_INTERFACE);
-        mWebViewClassic.addJavascriptInterface(mCallback, ALIAS_TRAVERSAL_JS_INTERFACE, false);
+        mWebViewClassic.addJavascriptInterface(mCallback, ALIAS_TRAVERSAL_JS_INTERFACE, true);
     }
 
     private void removeCallbackApis() {
