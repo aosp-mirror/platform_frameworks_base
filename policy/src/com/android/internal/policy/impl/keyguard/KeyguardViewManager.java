@@ -215,7 +215,7 @@ public class KeyguardViewManager {
             mKeyguardHost.removeView(v);
         }
         // TODO: Remove once b/7094175 is fixed
-        Slog.d(TAG, "inflateKeyguardView: b/7094175 mContext.config="
+        if (false) Slog.d(TAG, "inflateKeyguardView: b/7094175 mContext.config="
                 + mContext.getResources().getConfiguration());
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(R.layout.keyguard_host_view, mKeyguardHost, true);
