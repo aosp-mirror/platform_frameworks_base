@@ -260,6 +260,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         mChallengeBottomBound = res.getDimensionPixelSize(R.dimen.kg_widget_pager_bottom_padding);
 
         setWillNotDraw(false);
+        setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
 
     public void setHandleAlpha(float alpha) {

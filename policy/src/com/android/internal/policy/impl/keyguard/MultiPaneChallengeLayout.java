@@ -77,6 +77,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
         final Resources res = getResources();
         mDisplayMetrics = res.getDisplayMetrics();
+
+        setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
 
     @Override
