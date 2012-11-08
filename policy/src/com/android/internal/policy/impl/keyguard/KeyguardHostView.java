@@ -62,6 +62,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     // Use this to debug all of keyguard
     public static boolean DEBUG = KeyguardViewMediator.DEBUG;
 
+    // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
 
     private AppWidgetHost mAppWidgetHost;
@@ -956,12 +957,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             addWidgetButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-                    if (appWidgetId != -1) {
-                        mActivityLauncher.launchWidgetPicker(appWidgetId);
-                    } else {
-                        Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
-                    }
+                    // Pass in an invalid widget id... the picker will allocate an ID for us
+                    mActivityLauncher.launchWidgetPicker(AppWidgetManager.INVALID_APPWIDGET_ID);
                 }
             });
         }
@@ -1260,15 +1257,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         return null;
-    }
-
-    private boolean isWidgetPage(int pageIndex) {
-        View v = mAppWidgetContainer.getChildAt(pageIndex);
-        if (v != null && v instanceof KeyguardWidgetFrame) {
-            KeyguardWidgetFrame kwf = (KeyguardWidgetFrame) v;
-            return kwf.getContentAppWidgetId() != AppWidgetManager.INVALID_APPWIDGET_ID;
-        }
-        return false;
     }
 
     boolean isMusicPage(int pageIndex) {
