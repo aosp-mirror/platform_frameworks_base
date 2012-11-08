@@ -56,7 +56,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private static final int DRAG_HANDLE_OPEN_ABOVE = 8; // dp
     private static final int DRAG_HANDLE_OPEN_BELOW = 0; // dp
 
-    private static final int HANDLE_ANIMATE_DURATION = 200; // ms
+    private static final int HANDLE_ANIMATE_DURATION = 250; // ms
 
     // Drawn to show the drag handle in closed state; crossfades to the challenge view
     // when challenge is fully visible
@@ -469,13 +469,26 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     @Override
+    public int getBouncerAnimationDuration() {
+        return HANDLE_ANIMATE_DURATION;
+    }
+
+    @Override
     public void showBouncer() {
         if (mIsBouncing) return;
         mWasChallengeShowing = mChallengeShowing;
         mIsBouncing = true;
         showChallenge(true);
         if (mScrimView != null) {
-            mScrimView.setVisibility(VISIBLE);
+            Animator anim = ObjectAnimator.ofFloat(mScrimView, "alpha", 1f);
+            anim.setDuration(HANDLE_ANIMATE_DURATION);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mScrimView.setVisibility(VISIBLE);
+                }
+            });
+            anim.start();
         }
         if (mChallengeView != null) {
             mChallengeView.showBouncer(HANDLE_ANIMATE_DURATION);
@@ -498,8 +511,17 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         if (!mIsBouncing) return;
         if (!mWasChallengeShowing) showChallenge(false);
         mIsBouncing = false;
+
         if (mScrimView != null) {
-            mScrimView.setVisibility(GONE);
+            Animator anim = ObjectAnimator.ofFloat(mScrimView, "alpha", 0f);
+            anim.setDuration(HANDLE_ANIMATE_DURATION);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mScrimView.setVisibility(GONE);
+                }
+            });
+            anim.start();
         }
         if (mChallengeView != null) {
             mChallengeView.hideBouncer(HANDLE_ANIMATE_DURATION);

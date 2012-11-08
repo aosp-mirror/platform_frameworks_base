@@ -40,7 +40,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
     public static final int VERTICAL = LinearLayout.VERTICAL;
-    protected static final int ANIMATE_BOUNCE_DURATION = 750;
+    public static final int ANIMATE_BOUNCE_DURATION = 350;
 
     private KeyguardSecurityContainer mChallengeView;
     private View mUserSwitcherView;
@@ -94,6 +94,11 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
     @Override
     public void showChallenge(boolean b) {
+    }
+
+    @Override
+    public int getBouncerAnimationDuration() {
+        return ANIMATE_BOUNCE_DURATION;
     }
 
     @Override

@@ -59,6 +59,11 @@ public interface ChallengeLayout {
     boolean isBouncing();
 
     /**
+     * Returns the duration of the bounce animation.
+     */
+    int getBouncerAnimationDuration();
+
+    /**
      * Set a listener that will respond to changes in bouncer state.
      *
      * @param listener listener to register
