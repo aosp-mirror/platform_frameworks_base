@@ -18,6 +18,9 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.IActivityManager.WaitResult;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -110,6 +113,27 @@ public abstract class KeyguardActivityLauncher {
         }
     }
 
+    public void launchWidgetPicker(int appWidgetId) {
+        Intent pickIntent = new Intent(AppWidgetManager.ACTION_KEYGUARD_APPWIDGET_PICK);
+
+        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_SORT, false);
+        pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+
+        Bundle options = new Bundle();
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
+        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
+        pickIntent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        launchActivity(pickIntent, false, false);
+    }
+
     /**
      * Launches the said intent for the current foreground user.
      * @param intent
@@ -118,8 +142,8 @@ public abstract class KeyguardActivityLauncher {
      */
     public void launchActivity(final Intent intent, boolean showsWhileLocked, boolean animate) {
         final Context context = getContext();
-        final Bundle animation = animate ? null :
-                ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
+        final Bundle animation = animate ? null
+                : ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
