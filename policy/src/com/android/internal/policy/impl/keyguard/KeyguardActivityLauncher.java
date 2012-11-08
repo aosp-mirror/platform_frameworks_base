@@ -151,9 +151,19 @@ public abstract class KeyguardActivityLauncher {
             boolean useDefaultAnimations,
             final Handler worker,
             final Runnable onStarted) {
+
         final Context context = getContext();
         final Bundle animation = useDefaultAnimations ? null
                 : ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle();
+        launchActivityWithAnimation(intent, showsWhileLocked, animation, worker, onStarted);
+    }
+
+    public void launchActivityWithAnimation(final Intent intent,
+            boolean showsWhileLocked,
+            final Bundle animation,
+            final Handler worker,
+            final Runnable onStarted) {
+
         LockPatternUtils lockPatternUtils = getLockPatternUtils();
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
