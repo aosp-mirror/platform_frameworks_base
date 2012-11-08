@@ -1,16 +1,16 @@
 /*
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -107,7 +107,7 @@ interface IWindowManager
     Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
             IBinder freezeThisOneIfNeeded);
     void setNewConfiguration(in Configuration config);
-    
+
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
 
@@ -121,13 +121,13 @@ interface IWindowManager
     void dismissKeyguard();
 
     void closeSystemDialogs(String reason);
-    
+
     // These can only be called with the SET_ANIMATON_SCALE permission.
     float getAnimationScale(int which);
     float[] getAnimationScales();
     void setAnimationScale(int which, float scale);
     void setAnimationScales(in float[] scales);
-    
+
     // For testing
     void setInTouchMode(boolean showFocus);
 
@@ -161,7 +161,7 @@ interface IWindowManager
      * {@link android.view.Surface}.
      */
     int getRotation();
-    
+
     /**
      * Watch the rotation of the screen.  Returns the current rotation,
      * calls back when it changes.
@@ -175,24 +175,24 @@ interface IWindowManager
      */
     int getPreferredOptionsPanelGravity();
 
-	/**
-	 * Lock the device orientation to the specified rotation, or to the
-	 * current rotation if -1.  Sensor input will be ignored until
-	 * thawRotation() is called.
-	 * @hide
-	 */
-	void freezeRotation(int rotation);
+    /**
+     * Lock the device orientation to the specified rotation, or to the
+     * current rotation if -1.  Sensor input will be ignored until
+     * thawRotation() is called.
+     * @hide
+     */
+    void freezeRotation(int rotation);
 
-	/**
-	 * Release the orientation lock imposed by freezeRotation().
-	 * @hide
-	 */
-	void thawRotation();
+    /**
+     * Release the orientation lock imposed by freezeRotation().
+     * @hide
+     */
+    void thawRotation();
 
-	/**
-	 * Create a screenshot of the applications currently displayed.
-	 */
-	Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
+    /**
+     * Create a screenshot of the applications currently displayed.
+     */
+    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
@@ -259,4 +259,10 @@ interface IWindowManager
      * Device is in safe mode.
      */
     boolean isSafeModeEnabled();
+
+    /**
+     * Tell keyguard to show the assistant (Intent.ACTION_ASSIST) after asking for the user's
+     * credentials.
+     */
+    void showAssistant();
 }

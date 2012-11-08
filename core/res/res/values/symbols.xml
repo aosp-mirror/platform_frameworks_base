@@ -1189,6 +1189,9 @@
   <java-symbol type="anim" name="keyguard_security_animate_out" />
   <java-symbol type="anim" name="keyguard_security_fade_in" />
   <java-symbol type="anim" name="keyguard_security_fade_out" />
+  <java-symbol type="anim" name="keyguard_action_assist_exit" />
+  <java-symbol type="anim" name="keyguard_action_assist_enter" />
+
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />

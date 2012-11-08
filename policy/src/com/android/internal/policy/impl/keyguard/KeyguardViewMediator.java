@@ -116,6 +116,7 @@ public class KeyguardViewMediator {
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
     private static final int SET_HIDDEN = 12;
     private static final int KEYGUARD_TIMEOUT = 13;
+    private static final int SHOW_ASSISTANT = 14;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -1130,6 +1131,9 @@ public class KeyguardViewMediator {
                         doKeyguardLocked((Bundle) msg.obj);
                     }
                     break;
+                case SHOW_ASSISTANT:
+                    handleShowAssistant();
+                    break;
             }
         }
     };
@@ -1391,6 +1395,15 @@ public class KeyguardViewMediator {
 
     public boolean isDismissable() {
         return mKeyguardDonePending || !isSecure();
+    }
+
+    public void showAssistant() {
+        Message msg = mHandler.obtainMessage(SHOW_ASSISTANT);
+        mHandler.sendMessage(msg);
+    }
+
+    public void handleShowAssistant() {
+        mKeyguardViewManager.showAssistant();
     }
 
 }

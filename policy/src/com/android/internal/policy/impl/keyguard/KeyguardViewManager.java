@@ -424,4 +424,10 @@ public class KeyguardViewManager {
     public synchronized boolean isShowing() {
         return (mKeyguardHost != null && mKeyguardHost.getVisibility() == View.VISIBLE);
     }
+
+    public void showAssistant() {
+        if (mKeyguardView != null) {
+            mKeyguardView.showAssistant();
+        }
+    }
 }
