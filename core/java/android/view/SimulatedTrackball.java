@@ -16,12 +16,14 @@
 
 package android.view;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.util.Log;
 
 /**
  * This class creates trackball events from touchpad events.
@@ -29,6 +31,8 @@ import android.os.SystemProperties;
  * @see ViewRootImpl
  */
 class SimulatedTrackball {
+
+    private static final String TAG = "SimulatedTrackball";
 
     // Maximum difference in milliseconds between the down and up of a touch
     // event for it to be considered a tap
@@ -159,7 +163,11 @@ class SimulatedTrackball {
                     mEdgeSwipePossible = false;
                     Intent intent = new Intent("android.search.action.GLOBAL_SEARCH");
                     intent.addCategory("android.intent.category.DEFAULT");
-                    viewroot.mView.getContext().startActivity(intent);
+                    try {
+                        viewroot.mView.getContext().startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.e(TAG,"Search activity not found.");
+                    }
                 }
                 // Find the difference in position between the two most recent
                 // touchpad events
