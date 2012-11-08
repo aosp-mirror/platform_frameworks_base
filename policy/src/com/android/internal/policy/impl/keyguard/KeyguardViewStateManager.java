@@ -214,7 +214,9 @@ public class KeyguardViewStateManager implements
                     mKeyguardWidgetPager.setWidgetToResetOnPageFadeOut(mPageListeningToSlider);
                 }
             }
-            frame.hideFrame(this);
+            if (scrollState != SlidingChallengeLayout.SCROLL_STATE_FADING) {
+                frame.hideFrame(this);
+            }
             updateEdgeSwiping();
 
             if (mChallengeLayout.isChallengeShowing()) {
@@ -233,7 +235,9 @@ public class KeyguardViewStateManager implements
 
             // Skip showing the frame and shrinking the widget if we are
             if (!mChallengeLayout.isBouncing()) {
-                frame.showFrame(this);
+                if (scrollState != SlidingChallengeLayout.SCROLL_STATE_FADING) {
+                    frame.showFrame(this);
+                }
 
                 // As soon as the security begins sliding, the widget becomes small (if it wasn't
                 // small to begin with).
