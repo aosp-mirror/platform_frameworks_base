@@ -739,7 +739,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             oldView.onPause();
             oldView.setKeyguardCallback(mNullCallback); // ignore requests from old view
         }
-        newView.onResume();
+        newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
         newView.setKeyguardCallback(mCallback);
 
         final boolean needsInput = newView.needsInput();
@@ -773,7 +773,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void onScreenTurnedOn() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
         showPrimarySecurityScreen(false);
-        getSecurityView(mCurrentSecuritySelection).onResume();
+        getSecurityView(mCurrentSecuritySelection).onResume(KeyguardSecurityView.SCREEN_ON);
 
         // This is a an attempt to fix bug 7137389 where the device comes back on but the entire
         // layout is blank but forcing a layout causes it to reappear (e.g. with with

@@ -218,7 +218,7 @@ public class KeyguardViewStateManager implements
             updateEdgeSwiping();
 
             if (mChallengeLayout.isChallengeShowing()) {
-                mKeyguardSecurityContainer.onResume();
+                mKeyguardSecurityContainer.onResume(KeyguardSecurityView.VIEW_REVEALED);
             } else {
                 mKeyguardSecurityContainer.onPause();
             }
