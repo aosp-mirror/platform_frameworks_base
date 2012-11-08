@@ -35,15 +35,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/keyguard_message_area"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center">
+
+            <include layout="@layout/keyguard_message_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+               />
 
           <FrameLayout
              android:id="@+id/keyguard_bouncer_frame"
