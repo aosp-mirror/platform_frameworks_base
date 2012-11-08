@@ -95,6 +95,7 @@ public class KeyguardUpdateMonitor {
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
+    private boolean mBootCompleted;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -431,12 +432,21 @@ public class KeyguardUpdateMonitor {
      * Handle {@link #MSG_BOOT_COMPLETED}
      */
     protected void handleBootCompleted() {
+        mBootCompleted = true;
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onBootCompleted();
             }
         }
+    }
+
+    /**
+     * We need to store this state in the KeyguardUpdateMonitor since this class will not be 
+     * destroyed.
+     */
+    public boolean hasBootCompleted() {
+        return mBootCompleted;
     }
 
     /**
