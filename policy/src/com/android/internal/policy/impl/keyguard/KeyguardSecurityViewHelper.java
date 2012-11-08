@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -27,7 +28,7 @@ import android.view.View;
 public class KeyguardSecurityViewHelper {
 
     public static void showBouncer(SecurityMessageDisplay securityMessageDisplay,
-            View ecaView, Drawable bouncerFrame, int duration) {
+            final View ecaView, Drawable bouncerFrame, int duration) {
         if (securityMessageDisplay != null) {
             securityMessageDisplay.showBouncer(duration);
         }
@@ -35,9 +36,23 @@ public class KeyguardSecurityViewHelper {
             if (duration > 0) {
                 Animator anim = ObjectAnimator.ofFloat(ecaView, "alpha", 0f);
                 anim.setDuration(duration);
+                anim.addListener(new AnimatorListenerAdapter() {
+                    private boolean mCanceled;
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        // Fail safe and show the emergency button in onAnimationEnd()
+                        mCanceled = true;
+                        ecaView.setAlpha(1f);
+                    }
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        ecaView.setVisibility(mCanceled ? View.VISIBLE : View.INVISIBLE);
+                    }
+                });
                 anim.start();
             } else {
                 ecaView.setAlpha(0f);
+                ecaView.setVisibility(View.INVISIBLE);
             }
         }
         if (bouncerFrame != null) {
@@ -57,6 +72,7 @@ public class KeyguardSecurityViewHelper {
             securityMessageDisplay.hideBouncer(duration);
         }
         if (ecaView != null) {
+            ecaView.setVisibility(View.VISIBLE);
             if (duration > 0) {
                 Animator anim = ObjectAnimator.ofFloat(ecaView, "alpha", 1f);
                 anim.setDuration(duration);
