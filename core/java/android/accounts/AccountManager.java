@@ -28,6 +28,8 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Parcelable;
 import android.os.Build;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 import android.text.TextUtils;
 
@@ -42,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 /**
@@ -396,8 +397,13 @@ public class AccountManager {
      *     (never null) if no accounts of the specified type have been added.
      */
     public Account[] getAccountsByType(String type) {
+        return getAccountsByTypeAsUser(type, Process.myUserHandle());
+    }
+
+    /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
+    public Account[] getAccountsByTypeAsUser(String type, UserHandle userHandle) {
         try {
-            return mService.getAccounts(type);
+            return mService.getAccountsAsUser(type, userHandle.getIdentifier());
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -1175,10 +1181,26 @@ public class AccountManager {
             final Activity activity,
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
+        return confirmCredentialsAsUser(account, options, activity, callback, handler,
+                Process.myUserHandle());
+    }
+
+    /**
+     * @hide
+     * Same as {@link #confirmCredentials(Account, Bundle, Activity, AccountManagerCallback, Handler)}
+     * but for the specified user.
+     */
+    public AccountManagerFuture<Bundle> confirmCredentialsAsUser(final Account account,
+            final Bundle options,
+            final Activity activity,
+            final AccountManagerCallback<Bundle> callback,
+            final Handler handler, UserHandle userHandle) {
         if (account == null) throw new IllegalArgumentException("account is null");
+        final int userId = userHandle.getIdentifier();
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
-                mService.confirmCredentials(mResponse, account, options, activity != null);
+                mService.confirmCredentialsAsUser(mResponse, account, options, activity != null,
+                        userId);
             }
         }.start();
     }
