@@ -204,6 +204,13 @@ public class KeyguardViewStateManager implements
         pt[1] += y - vY;
     }
 
+    private void userActivity() {
+        if (mKeyguardHostView != null) {
+            mKeyguardHostView.onUserActivityTimeoutChanged();
+            mKeyguardHostView.userActivity();
+        }
+    }
+
     @Override
     public void onScrollStateChanged(int scrollState) {
         if (mKeyguardWidgetPager == null || mChallengeLayout == null) return;
@@ -217,6 +224,7 @@ public class KeyguardViewStateManager implements
             if (!challengeOverlapping) {
                 if (!mKeyguardWidgetPager.isPageMoving()) {
                     frame.resetSize();
+                    userActivity();
                 } else {
                     mKeyguardWidgetPager.setWidgetToResetOnPageFadeOut(mPageListeningToSlider);
                 }
