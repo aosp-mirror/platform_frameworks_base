@@ -33,12 +33,10 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -888,46 +886,17 @@ public class KeyguardHostView extends KeyguardViewBase {
         addWidgetButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.setOnDismissRunnable(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        launchPickActivityIntent();
-                    }
-                });
-                mCallback.dismiss(false);
+                int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
+                if (appWidgetId != -1) {
+                    mActivityLauncher.launchWidgetPicker(appWidgetId);
+                } else {
+                    Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
+                }
             }
         });
 
         enableUserSelectorIfNecessary();
         initializeTransportControl();
-    }
-
-    private void launchPickActivityIntent() {
-        // Create intent to pick widget
-        Intent pickIntent = new Intent(AppWidgetManager.ACTION_KEYGUARD_APPWIDGET_PICK);
-
-        int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-        if (appWidgetId != -1) {
-            pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_SORT, false);
-            pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
-
-            Bundle options = new Bundle();
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
-            pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
-            pickIntent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            mContext.startActivityAsUser(pickIntent,
-                    new UserHandle(UserHandle.USER_CURRENT));
-        } else {
-            Log.e(TAG, "Unable to allocate an AppWidget id in lock screen");
-        }
     }
 
     private void removeTransportFromWidgetPager() {
