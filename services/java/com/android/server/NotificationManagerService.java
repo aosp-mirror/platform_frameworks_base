@@ -1261,6 +1261,10 @@ public class NotificationManagerService extends INotificationManager.Stub
                 if (!notificationMatchesUserId(r, userId)) {
                     continue;
                 }
+                // Don't remove notifications to all, if there's no package name specified
+                if (r.userId == UserHandle.USER_ALL && pkg == null) {
+                    continue;
+                }
                 if ((r.notification.flags & mustHaveFlags) != mustHaveFlags) {
                     continue;
                 }
