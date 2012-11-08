@@ -240,22 +240,33 @@ class KeyguardMessageArea extends TextView {
     }
 
     private void hideMessage(int duration, boolean thenUpdate) {
-        Animator anim = ObjectAnimator.ofFloat(this, "alpha", 0f);
-        anim.setDuration(duration);
-        if (thenUpdate) {
-            anim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                        public void onAnimationEnd(Animator animation) {
-                        update();
-                    }
+        if (duration > 0) {
+            Animator anim = ObjectAnimator.ofFloat(this, "alpha", 0f);
+            anim.setDuration(duration);
+            if (thenUpdate) {
+                anim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                            public void onAnimationEnd(Animator animation) {
+                            update();
+                        }
                 });
+            }
+            anim.start();
+        } else {
+            setAlpha(0f);
+            if (thenUpdate) {
+                update();
+            }
         }
-        anim.start();
     }
 
     private void showMessage(int duration) {
-        Animator anim = ObjectAnimator.ofFloat(this, "alpha", 1f);
-        anim.setDuration(duration);
-        anim.start();
+        if (duration > 0) {
+            Animator anim = ObjectAnimator.ofFloat(this, "alpha", 1f);
+            anim.setDuration(duration);
+            anim.start();
+        } else {
+            setAlpha(1f);
+        }
     }
 }

@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"صدا به بالاتر از سطح ایمن افزایش یابد؟"\n"گوش دادن به صدای بلند برای زمان‌های طولانی می‌تواند به شنوایی شما آسیب برساند."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

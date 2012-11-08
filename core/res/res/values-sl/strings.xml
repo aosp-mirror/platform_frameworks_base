@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat napačno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Želite povečati glasnost nad varno raven?"\n"Dolgotrajna izpostavljenost glasnim tonom lahko poškoduje sluh."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

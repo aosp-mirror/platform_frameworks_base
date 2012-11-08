@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 휴대전화가 초기화됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

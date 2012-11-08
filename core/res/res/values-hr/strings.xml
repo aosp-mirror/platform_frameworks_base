@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Netočno ste pokušali otključati telefon <xliff:g id="NUMBER">%d</xliff:g> puta. Sada će se vratiti na tvorničke postavke."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Pojačati iznad sigurne razine?"\n"Dulje slušanje preglasne glazbe može vam oštetiti sluh."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

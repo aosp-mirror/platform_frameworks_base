@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Bạn đã <xliff:g id="NUMBER">%d</xliff:g> lần mở khóa điện thoại không đúng cách. Bây giờ, điện thoại sẽ được đặt lại về mặc định ban đầu."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tăng âm lượng trên mức an toàn?"\n"Nghe ở âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

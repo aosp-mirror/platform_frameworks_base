@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"आप फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से प्रयास कर चुके हैं. फ़ोन अब फ़ैक्टरी डिफ़ॉल्ट पर रीसेट हो जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने टेबलेट को किसी ईमेल खाते के उपयोग से अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक प्रतिमान को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"वॉल्यूम को सुरक्षित स्तर से अधिक करें?"\n"अधिक देर तक उच्च वॉल्यूम पर सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

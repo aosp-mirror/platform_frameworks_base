@@ -40,12 +40,14 @@ import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.Camera
 public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
-    private static final int WIDGET_ANIMATION_DURATION = 250;
-    private static final int WIDGET_WAIT_DURATION = 650;
+    private static final int WIDGET_ANIMATION_DURATION = 250; // ms
+    private static final int WIDGET_WAIT_DURATION = 650; // ms
+    private static final int RECOVERY_DELAY = 1000; // ms
 
     interface Callbacks {
         void onLaunchingCamera();
-        void onCameraLaunched();
+        void onCameraLaunchedSuccessfully();
+        void onCameraLaunchedUnsuccessfully();
     }
 
     private final Handler mHandler = new Handler();
@@ -59,17 +61,39 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private long mLaunchCameraStart;
     private boolean mActive;
     private boolean mTransitioning;
+    private boolean mRecovering;
     private boolean mDown;
-    private boolean mWindowFocused;
 
-    private final Runnable mLaunchCameraRunnable = new Runnable() {
+    private final Runnable mTransitionToCameraRunnable = new Runnable() {
+        @Override
+        public void run() {
+            transitionToCamera();
+        }};
+
+    private final Runnable mTransitionToCameraEndAction = new Runnable() {
         @Override
         public void run() {
             if (!mTransitioning)
                 return;
+            Handler worker =  getWorkerHandler() != null ? getWorkerHandler() : mHandler;
             mLaunchCameraStart = SystemClock.uptimeMillis();
             if (DEBUG) Log.d(TAG, "Launching camera at " + mLaunchCameraStart);
-            mActivityLauncher.launchCamera();
+            mActivityLauncher.launchCamera(worker, mSecureCameraActivityStartedRunnable);
+        }};
+
+    private final Runnable mRecoverRunnable = new Runnable() {
+        @Override
+        public void run() {
+            recover();
+        }};
+
+    private final Runnable mRecoverEndAction = new Runnable() {
+        @Override
+        public void run() {
+            if (!mRecovering)
+                return;
+            mCallbacks.onCameraLaunchedUnsuccessfully();
+            reset();
         }};
 
     private final Runnable mRenderRunnable = new Runnable() {
@@ -78,19 +102,31 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
             render();
         }};
 
-    private final Runnable mTransitionToCameraRunnable = new Runnable() {
+    private final Runnable mSecureCameraActivityStartedRunnable = new Runnable() {
         @Override
         public void run() {
-            transitionToCamera();
-        }};
+            onSecureCameraActivityStarted();
+        }
+    };
+
+    private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
+        private boolean mShowing;
+        void onKeyguardVisibilityChanged(boolean showing) {
+            if (mShowing == showing)
+                return;
+            mShowing = showing;
+            CameraWidgetFrame.this.onKeyguardVisibilityChanged(mShowing);
+        };
+    };
 
     private CameraWidgetFrame(Context context, Callbacks callbacks,
             KeyguardActivityLauncher activityLauncher) {
         super(context);
-
         mCallbacks = callbacks;
         mActivityLauncher = activityLauncher;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(mCallback);
+        if (DEBUG) Log.d(TAG, "new CameraWidgetFrame instance " + instanceId());
     }
 
     public static CameraWidgetFrame create(Context context, Callbacks callbacks,
@@ -153,37 +189,62 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     public void render() {
+        final Throwable[] thrown = new Throwable[1];
+        final Bitmap[] offscreen = new Bitmap[1];
         try {
-            int width = getRootView().getWidth();
-            int height = getRootView().getHeight();
+            final int width = getRootView().getWidth();
+            final int height = getRootView().getHeight();
             if (mRenderedSize.x == width && mRenderedSize.y == height) {
-                if (DEBUG) Log.d(TAG, String.format("already rendered at size=%sx%s",
+                if (DEBUG) Log.d(TAG, String.format("Already rendered at size=%sx%s",
                         width, height));
                 return;
             }
             if (width == 0 || height == 0) {
                 return;
             }
-            if (DEBUG) Log.d(TAG, String.format("render size=%sx%s instance=%s at %s",
-                    width, height,
-                    Integer.toHexString(hashCode()),
-                    SystemClock.uptimeMillis()));
-
-            Bitmap offscreen = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(offscreen);
+            final long start = SystemClock.uptimeMillis();
+            offscreen[0] = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            final Canvas c = new Canvas(offscreen[0]);
             mWidgetView.measure(
                     MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             mWidgetView.layout(0, 0, width, height);
             mWidgetView.draw(c);
-            ((ImageView)getChildAt(0)).setImageBitmap(offscreen);
+
+            final long end = SystemClock.uptimeMillis();
+            if (DEBUG) Log.d(TAG, String.format(
+                    "Rendered camera widget in %sms size=%sx%s instance=%s at %s",
+                    end - start,
+                    width, height,
+                    instanceId(),
+                    end));
             mRenderedSize.set(width, height);
         } catch (Throwable t) {
-            Log.w(TAG, "Error rendering camera widget", t);
-            removeAllViews();
-            View genericView = inflateGenericWidgetView(mContext);
-            addView(genericView);
+            thrown[0] = t;
         }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (thrown[0] == null) {
+                    try {
+                        ((ImageView) getChildAt(0)).setImageBitmap(offscreen[0]);
+                    } catch (Throwable t) {
+                        thrown[0] = t;
+                    }
+                }
+                if (thrown[0] == null)
+                    return;
+
+                Log.w(TAG, "Error rendering camera widget", thrown[0]);
+                try {
+                    removeAllViews();
+                    final View genericView = inflateGenericWidgetView(mContext);
+                    addView(genericView);
+                } catch (Throwable t) {
+                    Log.w(TAG, "Error inflating generic camera widget", t);
+                }
+            }});
     }
 
     private void transitionToCamera() {
@@ -224,10 +285,22 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
             .scaleY(scale)
             .translationY(finishCenter - startCenter)
             .setDuration(WIDGET_ANIMATION_DURATION)
-            .withEndAction(mLaunchCameraRunnable)
+            .withEndAction(mTransitionToCameraEndAction)
             .start();
 
         mCallbacks.onLaunchingCamera();
+    }
+
+    private void recover() {
+        if (DEBUG) Log.d(TAG, "recovering at " + SystemClock.uptimeMillis());
+        mRecovering = true;
+        animate()
+            .scaleX(1)
+            .scaleY(1)
+            .translationY(0)
+            .setDuration(WIDGET_ANIMATION_DURATION)
+            .withEndAction(mRecoverEndAction)
+            .start();
     }
 
     @Override
@@ -241,19 +314,13 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        mWindowFocused = hasWindowFocus;
-        if (DEBUG) Log.d(TAG, "onWindowFocusChanged: " + hasWindowFocus);
-        if (!hasWindowFocus) {
-            mTransitioning = false;
-            if (mLaunchCameraStart > 0) {
-                long launchTime = SystemClock.uptimeMillis() - mLaunchCameraStart;
-                if (DEBUG) Log.d(TAG, String.format("Camera took %sms to launch", launchTime));
-                mLaunchCameraStart = 0;
-                onCameraLaunched();
-            }
-        }
+    protected void onDetachedFromWindow() {
+        if (DEBUG) Log.d(TAG, "onDetachedFromWindow: instance " + instanceId()
+                + " at " + SystemClock.uptimeMillis());
+        super.onDetachedFromWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mCallback);
+        cancelTransitionToCamera();
+        mHandler.removeCallbacks(mRecoverRunnable);
     }
 
     @Override
@@ -268,10 +335,6 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     @Override
     public boolean onUserInteraction(MotionEvent event) {
-        if (!mWindowFocused) {
-            if (DEBUG) Log.d(TAG, "onUserInteraction eaten: !mWindowFocused");
-            return true;
-        }
         if (mTransitioning) {
             if (DEBUG) Log.d(TAG, "onUserInteraction eaten: mTransitioning");
             return true;
@@ -295,7 +358,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
 
     @Override
     protected void onFocusLost() {
-        if (DEBUG) Log.d(TAG, "onFocusLost");
+        if (DEBUG) Log.d(TAG, "onFocusLost at " + SystemClock.uptimeMillis());
         cancelTransitionToCamera();
         super.onFocusLost();
     }
@@ -317,16 +380,18 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     }
 
     private void onCameraLaunched() {
-        mCallbacks.onCameraLaunched();
+        mCallbacks.onCameraLaunchedSuccessfully();
         reset();
     }
 
     private void reset() {
-        if (DEBUG) Log.d(TAG, "reset");
+        if (DEBUG) Log.d(TAG, "reset at " + SystemClock.uptimeMillis());
         mLaunchCameraStart = 0;
         mTransitioning = false;
+        mRecovering = false;
         mDown = false;
         cancelTransitionToCamera();
+        mHandler.removeCallbacks(mRecoverRunnable);
         animate().cancel();
         setScaleX(1);
         setScaleY(1);
@@ -338,7 +403,8 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (DEBUG) Log.d(TAG, String.format("onSizeChanged new=%sx%s old=%sx%s at %s",
                 w, h, oldw, oldh, SystemClock.uptimeMillis()));
-        mHandler.post(mRenderRunnable);
+        final Handler worker =  getWorkerHandler();
+        (worker != null ? worker : mHandler).post(mRenderRunnable);
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
@@ -350,9 +416,35 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) lp;
         int newWindowAnimations = isEnabled ? com.android.internal.R.style.Animation_LockScreen : 0;
         if (newWindowAnimations != wlp.windowAnimations) {
-            if (DEBUG) Log.d(TAG, "setting windowAnimations to: " + newWindowAnimations);
+            if (DEBUG) Log.d(TAG, "setting windowAnimations to: " + newWindowAnimations
+                    + " at " + SystemClock.uptimeMillis());
             wlp.windowAnimations = newWindowAnimations;
             mWindowManager.updateViewLayout(root, wlp);
         }
+    }
+
+    private void onKeyguardVisibilityChanged(boolean showing) {
+        if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged " + showing
+                + " at " + SystemClock.uptimeMillis());
+        if (mTransitioning && !showing) {
+          mTransitioning = false;
+          mRecovering = false;
+          mHandler.removeCallbacks(mRecoverRunnable);
+          if (mLaunchCameraStart > 0) {
+              long launchTime = SystemClock.uptimeMillis() - mLaunchCameraStart;
+              if (DEBUG) Log.d(TAG, String.format("Camera took %sms to launch", launchTime));
+              mLaunchCameraStart = 0;
+              onCameraLaunched();
+          }
+        }
+    }
+
+    private void onSecureCameraActivityStarted() {
+        if (DEBUG) Log.d(TAG, "onSecureCameraActivityStarted at " + SystemClock.uptimeMillis());
+        mHandler.postDelayed(mRecoverRunnable, RECOVERY_DELAY);
+    }
+
+    private String instanceId() {
+        return Integer.toHexString(hashCode());
     }
 }

@@ -150,6 +150,11 @@ class KeyguardMultiUserAvatar extends FrameLayout {
             if (active) {
                 KeyguardLinearLayout parent = (KeyguardLinearLayout) getParent();
                 parent.setTopChild(this);
+                // TODO: Create an appropriate asset when string changes are possible.
+                setContentDescription(mUserName.getText()
+                        + ". " + mContext.getString(R.string.user_switched, ""));
+            } else {
+                setContentDescription(mUserName.getText());
             }
         }
         updateVisualsForActive(mActive, animate, SWITCH_ANIMATION_DURATION, onComplete);

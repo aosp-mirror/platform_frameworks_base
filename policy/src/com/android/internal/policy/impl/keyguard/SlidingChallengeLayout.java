@@ -79,6 +79,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private boolean mIsBouncing = false;
 
     private final Scroller mScroller;
+    private ObjectAnimator mFader;
     private int mScrollState;
     private OnChallengeScrolledListener mScrollListener;
     private OnBouncerStateChangedListener mBouncerListener;
@@ -86,6 +87,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     public static final int SCROLL_STATE_IDLE = 0;
     public static final int SCROLL_STATE_DRAGGING = 1;
     public static final int SCROLL_STATE_SETTLING = 2;
+    public static final int SCROLL_STATE_FADING = 3;
+
+    private static final int CHALLENGE_FADE_OUT_DURATION = 100;
+    private static final int CHALLENGE_FADE_IN_DURATION = 160;
 
     private static final int MAX_SETTLE_DURATION = 600; // ms
 
@@ -125,7 +130,10 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     private final Rect mTempRect = new Rect();
 
     private boolean mHasGlowpad;
-    private boolean mChallengeInteractive = true;
+
+    // We have an internal and external version, and we and them together.
+    private boolean mChallengeInteractiveExternal = true;
+    private boolean mChallengeInteractiveInternal = true;
 
     static final Property<SlidingChallengeLayout, Float> HANDLE_ALPHA =
             new FloatProperty<SlidingChallengeLayout>("handleAlpha") {
@@ -281,7 +289,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     }
 
     public void setChallengeInteractive(boolean interactive) {
-        mChallengeInteractive = interactive;
+        mChallengeInteractiveExternal = interactive;
         if (mExpandChallengeView != null) {
             mExpandChallengeView.setEnabled(interactive);
         }
@@ -413,6 +421,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
     void completeChallengeScroll() {
         setChallengeShowing(mChallengeOffset != 0);
         setScrollState(SCROLL_STATE_IDLE);
+        mChallengeInteractiveInternal = true;
         mChallengeView.setLayerType(LAYER_TYPE_NONE, null);
     }
 
@@ -437,6 +446,11 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
             // Nothing to do.
             return;
         }
+
+        cancelTransitionsInProgress();
+
+        mChallengeInteractiveInternal = false;
+        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
         final int sy = mChallengeView.getBottom();
         final int dy = y - sy;
         if (dy == 0) {
@@ -596,7 +610,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 for (int i = 0; i < count; i++) {
                     final float x = ev.getX(i);
                     final float y = ev.getY(i);
-                    if (!mIsBouncing && mChallengeInteractive && mActivePointerId == INVALID_POINTER
+                    if (!mIsBouncing && mActivePointerId == INVALID_POINTER
                                 && (crossedDragHandle(x, y, mGestureStartY)
                                 || (isInChallengeView(x, y) &&
                                         mScrollState == SCROLL_STATE_SETTLING))) {
@@ -613,12 +627,16 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 break;
         }
 
-        if (mBlockDrag) {
+        if (mBlockDrag || isChallengeInteractionBlocked()) {
             mActivePointerId = INVALID_POINTER;
             mDragging = false;
         }
 
         return mDragging;
+    }
+
+    private boolean isChallengeInteractionBlocked() {
+        return !mChallengeInteractiveExternal || !mChallengeInteractiveInternal;
     }
 
     private void resetTouch() {
@@ -644,7 +662,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                if (mDragging && mChallengeInteractive) {
+                if (mDragging && !isChallengeInteractionBlocked()) {
                     showChallenge(0);
                 }
                 resetTouch();
@@ -655,7 +673,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                     break;
                 }
             case MotionEvent.ACTION_UP:
-                if (mDragging && mChallengeInteractive) {
+                if (mDragging && !isChallengeInteractionBlocked()) {
                     mVelocityTracker.computeCurrentVelocity(1000, mMaxVelocity);
                     showChallenge((int) mVelocityTracker.getYVelocity(mActivePointerId));
                 }
@@ -672,7 +690,7 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
                         if ((isInDragHandle(x, y) || crossedDragHandle(x, y, mGestureStartY) ||
                                 (isInChallengeView(x, y) && mScrollState == SCROLL_STATE_SETTLING))
                                 && mActivePointerId == INVALID_POINTER
-                                && mChallengeInteractive) {
+                                && !isChallengeInteractionBlocked()) {
                             mGestureStartX = x;
                             mGestureStartY = y;
                             mActivePointerId = ev.getPointerId(i);
@@ -987,6 +1005,83 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         }
     }
 
+    private void cancelTransitionsInProgress() {
+        if (!mScroller.isFinished()) {
+            mScroller.abortAnimation();
+            completeChallengeScroll();
+        }
+        if (mFader != null) {
+            mFader.cancel();
+        }
+    }
+
+    public void fadeInChallenge() {
+        fadeChallenge(true);
+    }
+
+    public void fadeOutChallenge() {
+        fadeChallenge(false);
+    }
+
+    public void fadeChallenge(final boolean show) {
+        if (mChallengeView != null) {
+
+            cancelTransitionsInProgress();
+            float alpha = show ? 1f : 0f;
+            int duration = show ? CHALLENGE_FADE_IN_DURATION : CHALLENGE_FADE_OUT_DURATION;
+            mFader = ObjectAnimator.ofFloat(mChallengeView, "alpha", alpha);
+            mFader.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    onFadeStart(show);
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onFadeEnd(show);
+                }
+            });
+            mFader.setDuration(duration);
+            mFader.start();
+        }
+    }
+
+    private int getMaxChallengeBottom() {
+        if (mChallengeView == null) return 0;
+        final int layoutBottom = getLayoutBottom();
+        final int challengeHeight = mChallengeView.getMeasuredHeight();
+
+        return (layoutBottom + challengeHeight - mChallengeBottomBound);
+    }
+
+    private int getMinChallengeBottom() {
+        return getLayoutBottom();
+    }
+
+
+    private void onFadeStart(boolean show) {
+        mChallengeInteractiveInternal = false;
+        mChallengeView.setLayerType(LAYER_TYPE_HARDWARE, null);
+
+        if (show) {
+            moveChallengeTo(getMinChallengeBottom());
+        }
+
+        setScrollState(SCROLL_STATE_FADING);
+    }
+
+    private void onFadeEnd(boolean show) {
+        mChallengeInteractiveInternal = true;
+        setChallengeShowing(show);
+
+        if (!show) {
+            moveChallengeTo(getMaxChallengeBottom());
+        }
+
+        mChallengeView.setLayerType(LAYER_TYPE_NONE, null);
+        mFader = null;
+        setScrollState(SCROLL_STATE_IDLE);
+    }
+
     public int getMaxChallengeTop() {
         if (mChallengeView == null) return 0;
 
@@ -1012,8 +1107,8 @@ public class SlidingChallengeLayout extends ViewGroup implements ChallengeLayout
         final int layoutBottom = getLayoutBottom();
         final int challengeHeight = mChallengeView.getHeight();
 
-        bottom = Math.max(layoutBottom,
-                Math.min(bottom, layoutBottom + challengeHeight - mChallengeBottomBound));
+        bottom = Math.max(getMinChallengeBottom(),
+                Math.min(bottom, getMaxChallengeBottom()));
 
         float offset = 1.f - (float) (bottom - layoutBottom) /
                 (challengeHeight - mChallengeBottomBound);

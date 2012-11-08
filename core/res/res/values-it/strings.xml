@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> tentativi errati di sblocco del telefono. Il telefono verrà sottoposto a un ripristino dei dati di fabbrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email."\n\n" Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentare il volume oltre il livello di sicurezza?"\n"Ascoltare musica ad alto volume per lunghi periodi potrebbe danneggiare l\'udito."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto."\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Skal lydstyrken være over det sikre niveau?"\n"Du kan skade din hørelse ved at lytte ved høj lydstyrke i længere tid."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

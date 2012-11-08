@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> k. bandėte netinkamai atrakinti telefoną. Telefone bus iš naujo nustatyti numatytieji gamyklos nustatymai."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Padidinti garsumą viršijant saugų lygį?"\n"Ilgai klausantis dideliu garsumu gali sutrikti klausa."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

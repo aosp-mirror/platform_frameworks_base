@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The phone will now be reset to factory default."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using an email account."\n\n" Try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account."\n\n" Try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Raise volume above safe level?"\n"Listening at high volume for long periods may damage your hearing."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

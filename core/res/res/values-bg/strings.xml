@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес."\n\n" Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Да се увеличи ли силата на звука над безопасното ниво?"\n"Продължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />

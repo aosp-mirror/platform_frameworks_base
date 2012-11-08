@@ -1412,6 +1412,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah <xliff:g id="NUMBER">%d</xliff:g> kali gagal saat berusaha untuk membuka kunci ponsel. Kini ponsel akan disetel ulang ke setelan default pabrik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
+    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Naikkan volume di atas tingkat aman?"\n"Mendengarkan volume tinggi dalam jangka waktu yang lama dapat merusak pendengaran Anda."</string>
     <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
     <skip />
