@@ -1497,19 +1497,8 @@ public class KeyguardHostView extends KeyguardViewBase {
                 getHandler(), null);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        setOnDismissAction(new OnDismissAction() {
-            @Override
-            public boolean onDismiss() {
-                try {
-                    mContext.startActivityAsUser(intent, opts.toBundle(),
-                                new UserHandle(UserHandle.USER_CURRENT));
-                    } catch (ActivityNotFoundException e) {
-                        Slog.w(TAG, "Activity not found for " + intent.getAction());
-                    }
-                return false;
-            }
-        });
 
-        mViewStateManager.showBouncer(true);
+        mActivityLauncher.launchActivityWithAnimation(
+                intent, false, opts.toBundle(), null, null);
     }
 }
