@@ -48,6 +48,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     private OnBouncerStateChangedListener mBouncerListener;
 
     private final Rect mTempRect = new Rect();
+    private final Rect mZeroPadding = new Rect();
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -187,6 +188,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             // on the window. We want to avoid resizing widgets when possible as it can
             // be ugly/expensive. This lets us simply clip them instead.
             return virtualHeight - heightUsed;
+        } else if (lp.childType == LayoutParams.CHILD_TYPE_PAGE_DELETE_DROP_TARGET) {
+            return height;
         }
         return Math.min(virtualHeight - heightUsed, height);
     }
@@ -330,12 +333,16 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
             // We did the user switcher above if we have one.
             if (child == mUserSwitcherView || child.getVisibility() == GONE) continue;
 
             if (child == mScrimView) {
                 child.layout(0, 0, width, height);
+                continue;
+            } else if (lp.childType == LayoutParams.CHILD_TYPE_PAGE_DELETE_DROP_TARGET) {
+                layoutWithGravity(width, height, child, mZeroPadding, false);
                 continue;
             }
 
@@ -467,6 +474,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         public static final int CHILD_TYPE_CHALLENGE = 2;
         public static final int CHILD_TYPE_USER_SWITCHER = 3;
         public static final int CHILD_TYPE_SCRIM = 4;
+        public static final int CHILD_TYPE_PAGE_DELETE_DROP_TARGET = 7;
 
         public int gravity = Gravity.NO_GRAVITY;
 
