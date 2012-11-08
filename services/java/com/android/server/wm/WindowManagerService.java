@@ -10346,6 +10346,10 @@ public class WindowManagerService extends IWindowManager.Stub
     public void lockNow(Bundle options) {
         mPolicy.lockNow(options);
     }
+    
+    public boolean isSafeModeEnabled() {
+        return mSafeMode;
+    }
 
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");

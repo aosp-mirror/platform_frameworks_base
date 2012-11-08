@@ -254,4 +254,9 @@ interface IWindowManager
      * Gets the infos for all visible windows.
      */
     void getVisibleWindowsForDisplay(int displayId, out List<WindowInfo> outInfos);
+
+    /**
+     * Device is in safe mode.
+     */
+    boolean isSafeModeEnabled();
 }
