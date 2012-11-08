@@ -770,6 +770,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
         View currentPage = getPageAt(getCurrentPage());
         currentPage.setPivotY(0);
+        // Note: we are working around the issue that setting the x-pivot to the same value as it
+        //       was does not actually work.
+        currentPage.setPivotX(0);
         currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
         if (!(currentPage.getScaleX() < 1f || currentPage.getScaleY() < 1f)) {
             mZoomInOutAnim = new AnimatorSet();
