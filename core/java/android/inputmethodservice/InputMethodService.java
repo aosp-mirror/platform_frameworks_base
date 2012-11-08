@@ -930,11 +930,13 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onConfigureWindow(Window win, boolean isFullscreen,
             boolean isCandidatesOnly) {
-        if (isFullscreen) {
-            mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
-        } else {
-            mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
+        final int currentHeight = mWindow.getWindow().getAttributes().height;
+        final int newHeight = isFullscreen ? MATCH_PARENT : WRAP_CONTENT;
+        if (mIsInputViewShown && currentHeight != newHeight) {
+            Log.w(TAG, "Window size has been changed. This may cause jankiness of resizing window: "
+                    + currentHeight + " -> " + newHeight);
         }
+        mWindow.getWindow().setLayout(MATCH_PARENT, newHeight);
     }
     
     /**
@@ -997,10 +999,11 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     void updateExtractFrameVisibility() {
-        int vis;
+        final int vis;
         if (isFullscreenMode()) {
             vis = mExtractViewHidden ? View.INVISIBLE : View.VISIBLE;
-            mExtractFrame.setVisibility(View.VISIBLE);
+            // "vis" should be applied for the extract frame as well in the fullscreen mode.
+            mExtractFrame.setVisibility(vis);
         } else {
             vis = View.VISIBLE;
             mExtractFrame.setVisibility(View.GONE);
