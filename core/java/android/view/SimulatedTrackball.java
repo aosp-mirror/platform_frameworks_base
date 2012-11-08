@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
@@ -33,6 +34,8 @@ class SimulatedTrackball {
     // event for it to be considered a tap
     // TODO:Read this value from a configuration file
     private static final int MAX_TAP_TIME = 250;
+    // Where the cutoff is for determining an edge swipe
+    private static final float EDGE_SWIPE_THRESHOLD = 0.9f;
     private static final int FLICK_MSG_ID = 313;
 
     // The position of the previous touchpad event
@@ -47,6 +50,8 @@ class SimulatedTrackball {
     private long mLastTouchPadKeySendTimeMs = 0;
     // When the most recent touch event of any type occurred
     private long mLastTouchPadEventTimeMs = 0;
+    // Did the swipe begin in a valid region
+    private boolean mEdgeSwipePossible;
 
     // How quickly keys were sent;
     private int mKeySendRateMs = 0;
@@ -122,7 +127,7 @@ class SimulatedTrackball {
         // Store what time the touchpad event occurred
         final long time = SystemClock.uptimeMillis();
         switch (event.getAction()) {
-            case MotionEvent.ACTION_HOVER_ENTER:
+            case MotionEvent.ACTION_DOWN:
                 mLastTouchPadStartTimeMs = time;
                 mAlwaysInTapRegion = true;
                 mTouchpadEnterXPosition = event.getX();
@@ -131,17 +136,31 @@ class SimulatedTrackball {
                 mAccumulatedY = 0;
                 mLastMoveX = 0;
                 mLastMoveY = 0;
+                if (event.getDevice().getMotionRange(MotionEvent.AXIS_Y).getMax()
+                        * EDGE_SWIPE_THRESHOLD < event.getY()) {
+                    // Did the swipe begin in a valid region
+                    mEdgeSwipePossible = true;
+                }
                 // Clear any flings
                 mHandler.removeMessages(FLICK_MSG_ID);
+
                 break;
-            case MotionEvent.ACTION_HOVER_MOVE:
+            case MotionEvent.ACTION_MOVE:
                 // Determine whether the move is slop or an intentional move
                 float deltaX = event.getX() - mTouchpadEnterXPosition;
                 float deltaY = event.getY() - mTouchpadEnterYPosition;
                 if (mTouchSlopSquared < deltaX * deltaX + deltaY * deltaY) {
                     mAlwaysInTapRegion = false;
                 }
-
+                // Checks if the swipe has crossed the midpoint
+                // and if our swipe gesture is complete
+                if (event.getY() < (event.getDevice().getMotionRange(MotionEvent.AXIS_Y).getMax()
+                        * .5) && mEdgeSwipePossible) {
+                    mEdgeSwipePossible = false;
+                    Intent intent = new Intent("android.search.action.GLOBAL_SEARCH");
+                    intent.addCategory("android.intent.category.DEFAULT");
+                    viewroot.mView.getContext().startActivity(intent);
+                }
                 // Find the difference in position between the two most recent
                 // touchpad events
                 mLastMoveX = event.getX() - mLastTouchpadXPosition;
@@ -195,19 +214,19 @@ class SimulatedTrackball {
                     mLastTouchPadKeySendTimeMs = time;
                 }
                 break;
-            case MotionEvent.ACTION_HOVER_EXIT:
+            case MotionEvent.ACTION_UP:
                 if (time - mLastTouchPadStartTimeMs < MAX_TAP_TIME && mAlwaysInTapRegion) {
                     // Trackball Down
                     MotionEvent trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
                             MotionEvent.ACTION_DOWN, 0, 0, 0, 0, event.getMetaState(),
                             10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_CLASS_TRACKBALL);
+                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
                     viewroot.enqueueInputEvent(trackballEvent);
                     // Trackball Release
                     trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
                             MotionEvent.ACTION_UP, 0, 0, 0, 0, event.getMetaState(),
                             10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_CLASS_TRACKBALL);
+                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
                     viewroot.enqueueInputEvent(trackballEvent);
                 } else {
                     float xMoveSquared = mLastMoveX * mLastMoveX;
@@ -222,6 +241,7 @@ class SimulatedTrackball {
                         mHandler.sendMessageDelayed(message, mKeySendRateMs);
                     }
                 }
+                mEdgeSwipePossible = false;
                 break;
         }
         // Store touch event position and time
