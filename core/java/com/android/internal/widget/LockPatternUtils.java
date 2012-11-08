@@ -111,6 +111,11 @@ public class LockPatternUtils {
     public static final String KEYGUARD_SHOW_SECURITY_CHALLENGE = "showsecuritychallenge";
 
     /**
+     * Tells the keyguard to show the widget with the specified id when the keyguard is created.
+     */
+    public static final String KEYGUARD_SHOW_APPWIDGET = "showappwidget";
+
+    /**
      * Options used to lock the device upon user switch.
      */
     public static final Bundle USER_SWITCH_LOCK_OPTIONS = new Bundle();
@@ -1181,21 +1186,6 @@ public class LockPatternUtils {
         }
         writeAppWidgets(newWidgets);
         return true;
-    }
-
-    public int getStickyAppWidgetIndex() {
-        return Settings.Secure.getIntForUser(
-                mContentResolver,
-                Settings.Secure.LOCK_SCREEN_STICKY_APPWIDGET,
-                -1,
-                UserHandle.USER_CURRENT);
-    }
-
-    public void setStickyAppWidgetIndex(int value) {
-        Settings.Secure.putIntForUser(mContentResolver,
-                Settings.Secure.LOCK_SCREEN_STICKY_APPWIDGET,
-                value,
-                UserHandle.USER_CURRENT);
     }
 
     private long getLong(String secureSettingKey, long defaultValue) {

@@ -18,6 +18,7 @@ package com.android.internal.policy.impl.keyguard;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -239,6 +240,11 @@ public class KeyguardViewManager {
             }
             if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE)) {
                 mKeyguardView.showNextSecurityScreenIfPresent();
+            }
+            int widgetToShow = options.getInt(LockPatternUtils.KEYGUARD_SHOW_APPWIDGET,
+                    AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (widgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                mKeyguardView.goToWidget(widgetToShow);
             }
         }
     }
