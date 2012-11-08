@@ -156,6 +156,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     };
 
+    private SlidingChallengeLayout mSlidingChallengeLayout;
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean result = super.onTouchEvent(ev);
@@ -196,15 +198,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         mAppWidgetContainer.setDeleteDropTarget(deleteDropTarget);
         mAppWidgetContainer.setMinScale(0.5f);
 
-        SlidingChallengeLayout slider =
-                (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
-        if (slider != null) {
-            slider.setOnChallengeScrolledListener(mViewStateManager);
+        mSlidingChallengeLayout = (SlidingChallengeLayout) findViewById(R.id.sliding_layout);
+        if (mSlidingChallengeLayout != null) {
+            mSlidingChallengeLayout.setOnChallengeScrolledListener(mViewStateManager);
         }
         mAppWidgetContainer.setViewStateManager(mViewStateManager);
         mAppWidgetContainer.setLockPatternUtils(mLockPatternUtils);
 
-        ChallengeLayout challenge = slider != null ? slider :
+        ChallengeLayout challenge = mSlidingChallengeLayout != null ? mSlidingChallengeLayout :
             (ChallengeLayout) findViewById(R.id.multi_pane_challenge);
         challenge.setOnBouncerStateChangedListener(mViewStateManager);
         mAppWidgetContainer.setBouncerAnimationDuration(challenge.getBouncerAnimationDuration());
@@ -732,6 +733,10 @@ public class KeyguardHostView extends KeyguardViewBase {
                 || securityMode == SecurityMode.Account;
         mAppWidgetContainer.setVisibility(
                 isSimOrAccount && fullScreenEnabled ? View.GONE : View.VISIBLE);
+
+        if (mSlidingChallengeLayout != null) {
+            mSlidingChallengeLayout.setChallengeInteractive(!fullScreenEnabled);
+        }
 
         // Emulate Activity life cycle
         if (oldView != null) {
