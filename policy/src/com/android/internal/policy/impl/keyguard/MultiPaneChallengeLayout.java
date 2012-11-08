@@ -16,20 +16,21 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
-import com.android.internal.R;
 
 public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayout {
     private static final String TAG = "MultiPaneChallengeLayout";
@@ -47,7 +48,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     private OnBouncerStateChangedListener mBouncerListener;
 
     private final Rect mTempRect = new Rect();
-    private final Context mContext;
+
+    private final DisplayMetrics mDisplayMetrics;
 
     private final OnClickListener mScrimClickListener = new OnClickListener() {
         @Override
@@ -67,13 +69,14 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
     public MultiPaneChallengeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        mContext = context;
-
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.MultiPaneChallengeLayout, defStyleAttr, 0);
         mOrientation = a.getInt(R.styleable.MultiPaneChallengeLayout_orientation,
                 HORIZONTAL);
         a.recycle();
+
+        final Resources res = getResources();
+        mDisplayMetrics = res.getDisplayMetrics();
     }
 
     @Override
@@ -169,15 +172,32 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
         mScrimView.setOnClickListener(mScrimClickListener);
     }
 
+    private int getVirtualHeight(LayoutParams lp, int height, int heightUsed) {
+        int virtualHeight = height;
+        final View root = getRootView();
+        if (root != null) {
+            // This calculation is super dodgy and relies on several assumptions.
+            // Specifically that the root of the window will be padded in for insets
+            // and that the window is LAYOUT_IN_SCREEN.
+            virtualHeight = mDisplayMetrics.heightPixels - root.getPaddingTop();
+        }
+        if (lp.childType == LayoutParams.CHILD_TYPE_WIDGET ||
+                lp.childType == LayoutParams.CHILD_TYPE_USER_SWITCHER) {
+            // Always measure the widget pager/user switcher as if there were no IME insets
+            // on the window. We want to avoid resizing widgets when possible as it can
+            // be ugly/expensive. This lets us simply clip them instead.
+            return virtualHeight - heightUsed;
+        }
+        return Math.min(virtualHeight - heightUsed, height);
+    }
+
     @Override
-    protected void onMeasure(int widthSpec, int heightSpec) {
+    protected void onMeasure(final int widthSpec, final int heightSpec) {
         if (MeasureSpec.getMode(widthSpec) != MeasureSpec.EXACTLY ||
                 MeasureSpec.getMode(heightSpec) != MeasureSpec.EXACTLY) {
             throw new IllegalArgumentException(
                     "MultiPaneChallengeLayout must be measured with an exact size");
         }
-        float squashedLayoutThreshold =
-                mContext.getResources().getDimension(R.dimen.kg_squashed_layout_threshold);
 
         final int width = MeasureSpec.getSize(widthSpec);
         final int height = MeasureSpec.getSize(heightSpec);
@@ -213,32 +233,26 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 mUserSwitcherView = child;
 
                 if (child.getVisibility() == GONE) continue;
-                if (height < squashedLayoutThreshold) {
-                    int zero = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
-                    measureChild(child, zero, zero);
-                } else {
-                    int adjustedWidthSpec = widthSpec;
-                    int adjustedHeightSpec = heightSpec;
-                    if (lp.maxWidth >= 0) {
-                        adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                                Math.min(lp.maxWidth, MeasureSpec.getSize(widthSpec)),
-                                MeasureSpec.EXACTLY);
-                    }
-                    if (lp.maxHeight >= 0) {
-                        adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                                Math.min(lp.maxHeight, MeasureSpec.getSize(heightSpec)),
-                                MeasureSpec.EXACTLY);
-                    }
-                    // measureChildWithMargins will resolve layout direction for the LayoutParams
-                    measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
 
-                    // Only subtract out space from one dimension. Favor vertical.
-                    // Offset by 1.5x to add some balance along the other edge.
-                    if (Gravity.isVertical(lp.gravity)) {
-                        heightUsed += child.getMeasuredHeight() * 1.5f;
-                    } else if (Gravity.isHorizontal(lp.gravity)) {
-                        widthUsed += child.getMeasuredWidth() * 1.5f;
-                    }
+                int adjustedWidthSpec = widthSpec;
+                int adjustedHeightSpec = heightSpec;
+                if (lp.maxWidth >= 0) {
+                    adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
+                            Math.min(lp.maxWidth, width), MeasureSpec.EXACTLY);
+                }
+                if (lp.maxHeight >= 0) {
+                    adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
+                            Math.min(lp.maxHeight, height), MeasureSpec.EXACTLY);
+                }
+                // measureChildWithMargins will resolve layout direction for the LayoutParams
+                measureChildWithMargins(child, adjustedWidthSpec, 0, adjustedHeightSpec, 0);
+
+                // Only subtract out space from one dimension. Favor vertical.
+                // Offset by 1.5x to add some balance along the other edge.
+                if (Gravity.isVertical(lp.gravity)) {
+                    heightUsed += child.getMeasuredHeight() * 1.5f;
+                } else if (Gravity.isHorizontal(lp.gravity)) {
+                    widthUsed += child.getMeasuredWidth() * 1.5f;
                 }
             } else if (lp.childType == LayoutParams.CHILD_TYPE_SCRIM) {
                 setScrimView(child);
@@ -258,6 +272,8 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 continue;
             }
 
+            final int virtualHeight = getVirtualHeight(lp, height, heightUsed);
+
             int adjustedWidthSpec;
             int adjustedHeightSpec;
             if (lp.centerWithinArea > 0) {
@@ -266,19 +282,19 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                             (int) ((width - widthUsed) * lp.centerWithinArea + 0.5f),
                             MeasureSpec.EXACTLY);
                     adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                            MeasureSpec.getSize(heightSpec) - heightUsed, MeasureSpec.EXACTLY);
+                            virtualHeight, MeasureSpec.EXACTLY);
                 } else {
                     adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                            MeasureSpec.getSize(widthSpec) - widthUsed, MeasureSpec.EXACTLY);
+                            width - widthUsed, MeasureSpec.EXACTLY);
                     adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                            (int) ((height - heightUsed) * lp.centerWithinArea + 0.5f),
+                            (int) (virtualHeight * lp.centerWithinArea + 0.5f),
                             MeasureSpec.EXACTLY);
                 }
             } else {
                 adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
-                        MeasureSpec.getSize(widthSpec) - widthUsed, MeasureSpec.EXACTLY);
+                        width - widthUsed, MeasureSpec.EXACTLY);
                 adjustedHeightSpec = MeasureSpec.makeMeasureSpec(
-                        MeasureSpec.getSize(heightSpec) - heightUsed, MeasureSpec.EXACTLY);
+                        virtualHeight, MeasureSpec.EXACTLY);
             }
             if (lp.maxWidth >= 0) {
                 adjustedWidthSpec = MeasureSpec.makeMeasureSpec(
@@ -331,6 +347,9 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
             boolean adjustPadding) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
+        final int heightUsed = padding.top + padding.bottom - getPaddingTop() - getPaddingBottom();
+        height = getVirtualHeight(lp, height, heightUsed);
+
         final int gravity = Gravity.getAbsoluteGravity(lp.gravity, getLayoutDirection());
 
         final boolean fixedLayoutSize = lp.centerWithinArea > 0;
@@ -382,8 +401,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
                 }
                 break;
             case Gravity.CENTER_VERTICAL:
-                final int paddedHeight = height - padding.top - padding.bottom;
-                top = padding.top + (paddedHeight - childHeight) / 2;
+                top = padding.top + (height - childHeight) / 2;
                 bottom = top + childHeight;
                 break;
         }
