@@ -129,12 +129,15 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
         mForgotPatternButton = (Button) findViewById(R.id.forgot_password_button);
-        mForgotPatternButton.setText(R.string.kg_forgot_pattern_button_text);
-        mForgotPatternButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                mCallback.showBackupSecurity();
-            }
-        });
+        // note: some configurations don't have an emergency call area
+        if (mForgotPatternButton != null) {
+            mForgotPatternButton.setText(R.string.kg_forgot_pattern_button_text);
+            mForgotPatternButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    mCallback.showBackupSecurity();
+                }
+            });
+        }
 
         setFocusableInTouchMode(true);
 
@@ -148,6 +151,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     private void updateFooter(FooterMode mode) {
+        if (mForgotPatternButton == null) return; // no ECA? no footer
+
         switch (mode) {
             case Normal:
                 if (DEBUG) Log.d(TAG, "mode normal");
