@@ -5827,6 +5827,7 @@
 
     <declare-styleable name="SlidingChallengeLayout_Layout">
         <attr name="layout_childType" />
+        <attr name="layout_maxHeight" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>
@@ -5848,6 +5849,11 @@
         <attr name="layout_childType" />
         <attr name="layout_gravity" />
         <attr name="layout_maxWidth" format="dimension" />
+        <attr name="layout_maxHeight" />
+    </declare-styleable>
+
+    <declare-styleable name="KeyguardSecurityViewFlipper_Layout">
+        <attr name="layout_maxWidth" />
         <attr name="layout_maxHeight" />
     </declare-styleable>
 

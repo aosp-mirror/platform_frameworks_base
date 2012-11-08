@@ -246,7 +246,7 @@
     <dimen name="kg_security_panel_height">600dp</dimen>
 
     <!-- Height of security view in keyguard. -->
-    <dimen name="kg_security_view_height">0dp</dimen>
+    <dimen name="kg_security_view_height">480dp</dimen>
 
     <!-- Width of widget view in keyguard. -->
     <dimen name="kg_widget_view_width">0dp</dimen>
