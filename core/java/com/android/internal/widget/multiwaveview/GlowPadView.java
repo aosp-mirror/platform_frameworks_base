@@ -954,7 +954,8 @@ public class GlowPadView extends View {
             onTouchEvent(event);
             event.setAction(action);
         }
-        return super.onHoverEvent(event);
+        super.onHoverEvent(event);
+        return true;
     }
 
     /**
