@@ -1049,7 +1049,8 @@ public class TextToSpeech {
                 // the available parts.
                 // Note that the language is not actually set here, instead it is cached so it
                 // will be associated with all upcoming utterances.
-                int result = service.loadLanguage(language, country, variant);
+
+                int result = service.loadLanguage(getCallerIdentity(), language, country, variant);
                 if (result >= LANG_AVAILABLE){
                     if (result < LANG_COUNTRY_VAR_AVAILABLE) {
                         variant = "";

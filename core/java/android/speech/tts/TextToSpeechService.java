@@ -128,6 +128,8 @@ public abstract class TextToSpeechService extends Service {
      *
      * Can be called on multiple threads.
      *
+     * Its return values HAVE to be consistent with onLoadLanguage.
+     *
      * @param lang ISO-3 language code.
      * @param country ISO-3 country code. May be empty or null.
      * @param variant Language variant. May be empty or null.
@@ -162,6 +164,8 @@ public abstract class TextToSpeechService extends Service {
      * at some point in the future.
      *
      * Can be called on multiple threads.
+     * In <= Android 4.2 (<= API 17) can be called on main and service binder threads.
+     * In > Android 4.2 (> API 17) can be called on main and synthesis threads.
      *
      * @param lang ISO-3 language code.
      * @param country ISO-3 country code. May be empty or null.
@@ -255,7 +259,6 @@ public abstract class TextToSpeechService extends Service {
     }
 
     private class SynthHandler extends Handler {
-
         private SpeechItem mCurrentSpeechItem = null;
 
         public SynthHandler(Looper looper) {
@@ -274,7 +277,7 @@ public abstract class TextToSpeechService extends Service {
 
         private synchronized SpeechItem maybeRemoveCurrentSpeechItem(Object callerIdentity) {
             if (mCurrentSpeechItem != null &&
-                    mCurrentSpeechItem.getCallerIdentity() == callerIdentity) {
+                    (mCurrentSpeechItem.getCallerIdentity() == callerIdentity)) {
                 SpeechItem current = mCurrentSpeechItem;
                 mCurrentSpeechItem = null;
                 return current;
@@ -295,7 +298,6 @@ public abstract class TextToSpeechService extends Service {
             if (current != null) {
                 current.stop();
             }
-
             // The AudioPlaybackHandler will be destroyed by the caller.
         }
 
@@ -305,8 +307,15 @@ public abstract class TextToSpeechService extends Service {
          * Called on a service binder thread.
          */
         public int enqueueSpeechItem(int queueMode, final SpeechItem speechItem) {
+            UtteranceProgressDispatcher utterenceProgress = null;
+            if (speechItem instanceof UtteranceProgressDispatcher) {
+                utterenceProgress = (UtteranceProgressDispatcher) speechItem;
+            }
+
             if (!speechItem.isValid()) {
-                speechItem.dispatchOnError();
+                if (utterenceProgress != null) {
+                    utterenceProgress.dispatchOnError();
+                }
                 return TextToSpeech.ERROR;
             }
 
@@ -324,6 +333,7 @@ public abstract class TextToSpeechService extends Service {
                 }
             };
             Message msg = Message.obtain(this, runnable);
+
             // The obj is used to remove all callbacks from the given app in
             // stopForApp(String).
             //
@@ -333,7 +343,9 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.SUCCESS;
             } else {
                 Log.w(TAG, "SynthThread has quit");
-                speechItem.dispatchOnError();
+                if (utterenceProgress != null) {
+                    utterenceProgress.dispatchOnError();
+                }
                 return TextToSpeech.ERROR;
             }
         }
@@ -369,7 +381,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         public int stopAll() {
-            // Stop the current speech item unconditionally.
+            // Stop the current speech item unconditionally .
             SpeechItem current = setCurrentSpeechItem(null);
             if (current != null) {
                 current.stop();
@@ -392,7 +404,7 @@ public abstract class TextToSpeechService extends Service {
     /**
      * An item in the synth thread queue.
      */
-    private abstract class SpeechItem implements UtteranceProgressDispatcher {
+    private abstract class SpeechItem {
         private final Object mCallerIdentity;
         protected final Bundle mParams;
         private final int mCallerUid;
@@ -409,6 +421,15 @@ public abstract class TextToSpeechService extends Service {
 
         public Object getCallerIdentity() {
             return mCallerIdentity;
+        }
+
+
+        public int getCallerUid() {
+            return mCallerUid;
+        }
+
+        public int getCallerPid() {
+            return mCallerPid;
         }
 
         /**
@@ -435,6 +456,8 @@ public abstract class TextToSpeechService extends Service {
             return playImpl();
         }
 
+        protected abstract int playImpl();
+
         /**
          * Stops the speech item.
          * Must not be called more than once.
@@ -449,6 +472,23 @@ public abstract class TextToSpeechService extends Service {
                 mStopped = true;
             }
             stopImpl();
+        }
+
+        protected abstract void stopImpl();
+
+        protected synchronized boolean isStopped() {
+             return mStopped;
+        }
+    }
+
+    /**
+     * An item in the synth thread queue that process utterance.
+     */
+    private abstract class UtteranceSpeechItem extends SpeechItem
+        implements UtteranceProgressDispatcher  {
+
+        public UtteranceSpeechItem(Object caller, int callerUid, int callerPid, Bundle params) {
+            super(caller, callerUid, callerPid, params);
         }
 
         @Override
@@ -474,22 +514,6 @@ public abstract class TextToSpeechService extends Service {
                 mCallbacks.dispatchOnError(getCallerIdentity(), utteranceId);
             }
         }
-
-        public int getCallerUid() {
-            return mCallerUid;
-        }
-
-        public int getCallerPid() {
-            return mCallerPid;
-        }
-
-        protected synchronized boolean isStopped() {
-             return mStopped;
-        }
-
-        protected abstract int playImpl();
-
-        protected abstract void stopImpl();
 
         public int getStreamType() {
             return getIntParam(Engine.KEY_PARAM_STREAM, Engine.DEFAULT_STREAM);
@@ -518,9 +542,10 @@ public abstract class TextToSpeechService extends Service {
         protected float getFloatParam(String key, float defaultValue) {
             return mParams == null ? defaultValue : mParams.getFloat(key, defaultValue);
         }
+
     }
 
-    class SynthesisSpeechItem extends SpeechItem {
+    class SynthesisSpeechItem extends UtteranceSpeechItem {
         // Never null.
         private final String mText;
         private final SynthesisRequest mSynthesisRequest;
@@ -657,7 +682,7 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class AudioSpeechItem extends SpeechItem {
+    private class AudioSpeechItem extends UtteranceSpeechItem {
         private final AudioPlaybackQueueItem mItem;
         public AudioSpeechItem(Object callerIdentity, int callerUid, int callerPid,
                 Bundle params, Uri uri) {
@@ -683,7 +708,7 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class SilenceSpeechItem extends SpeechItem {
+    private class SilenceSpeechItem extends UtteranceSpeechItem {
         private final long mDuration;
 
         public SilenceSpeechItem(Object callerIdentity, int callerUid, int callerPid,
@@ -707,6 +732,41 @@ public abstract class TextToSpeechService extends Service {
         @Override
         protected void stopImpl() {
             // Do nothing, handled by AudioPlaybackHandler#stopForApp
+        }
+    }
+
+    private class LoadLanguageItem extends SpeechItem {
+        private final String mLanguage;
+        private final String mCountry;
+        private final String mVariant;
+
+        public LoadLanguageItem(Object callerIdentity, int callerUid, int callerPid,
+                Bundle params, String language, String country, String variant) {
+            super(callerIdentity, callerUid, callerPid, params);
+            mLanguage = language;
+            mCountry = country;
+            mVariant = variant;
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        protected int playImpl() {
+            int result = TextToSpeechService.this.onLoadLanguage(mLanguage, mCountry, mVariant);
+            if (result == TextToSpeech.LANG_AVAILABLE ||
+                    result == TextToSpeech.LANG_COUNTRY_AVAILABLE ||
+                    result == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+                return TextToSpeech.SUCCESS;
+            }
+            return TextToSpeech.ERROR;
+        }
+
+        @Override
+        protected void stopImpl() {
+            // No-op
         }
     }
 
@@ -821,12 +881,25 @@ public abstract class TextToSpeechService extends Service {
          * are enforced.
          */
         @Override
-        public int loadLanguage(String lang, String country, String variant) {
+        public int loadLanguage(IBinder caller, String lang, String country, String variant) {
             if (!checkNonNull(lang)) {
                 return TextToSpeech.ERROR;
             }
+            int retVal = onIsLanguageAvailable(lang, country, variant);
 
-            return onLoadLanguage(lang, country, variant);
+            if (retVal == TextToSpeech.LANG_AVAILABLE ||
+                    retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE ||
+                    retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+
+                SpeechItem item = new LoadLanguageItem(caller, Binder.getCallingUid(),
+                    Binder.getCallingPid(), null, lang, country, variant);
+
+                if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item) !=
+                        TextToSpeech.SUCCESS) {
+                    return TextToSpeech.ERROR;
+                }
+            }
+            return retVal;
         }
 
         @Override

@@ -131,6 +131,8 @@ interface ITextToSpeechService {
     /**
      * Notifies the engine that it should load a speech synthesis language.
      *
+     * @param caller a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param lang ISO-3 language code.
      * @param country ISO-3 country code. May be empty or null.
      * @param variant Language variant. May be empty or null.
@@ -141,13 +143,14 @@ interface ITextToSpeechService {
      *         {@link TextToSpeech#LANG_MISSING_DATA}
      *         {@link TextToSpeech#LANG_NOT_SUPPORTED}.
      */
-    int loadLanguage(in String lang, in String country, in String variant);
+    int loadLanguage(in IBinder caller, in String lang, in String country, in String variant);
 
     /**
      * Sets the callback that will be notified when playback of utterance from the
      * given app are completed.
      *
-     * @param callingApp Package name for the app whose utterance the callback will handle.
+     * @param caller Instance a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param cb The callback.
      */
     void setCallback(in IBinder caller, ITextToSpeechCallback cb);
