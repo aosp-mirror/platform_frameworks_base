@@ -858,6 +858,9 @@ public class SearchManager
      */
     public Intent getAssistIntent(Context context, int userHandle) {
         try {
+            if (mService == null) {
+                return null;
+            }
             ComponentName comp = mService.getAssistIntent(userHandle);
             if (comp == null) {
                 return null;
