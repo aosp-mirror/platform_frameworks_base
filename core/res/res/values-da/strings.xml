@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Prøv igen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Det maksimale antal forsøg på at bruge Ansigtslås er overskredet"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Oplader, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Opladt."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Opladet"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Tilslut din oplader."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Intet SIM-kort"</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto."\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Skal lydstyrken være over det sikre niveau?"\n"Du kan skade din hørelse ved at lytte ved høj lydstyrke i længere tid."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hold fortsat to fingre nede for at aktivere tilgængelighed."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgængelighed aktiveret."</string>
