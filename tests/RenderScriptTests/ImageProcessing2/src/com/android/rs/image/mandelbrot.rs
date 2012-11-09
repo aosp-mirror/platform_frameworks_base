@@ -43,7 +43,7 @@ void root(uchar4 *v_out, uint32_t x, uint32_t y) {
     // write a non-transparent black pixel
     *v_out = (uchar4){0, 0, 0, 0xff};
   } else {
-    float mi3 = gMaxIteration / 3.;
+    float mi3 = gMaxIteration / 3.f;
     if (iter <= (gMaxIteration / 3))
       *v_out = (uchar4){0xff * (iter / mi3), 0, 0, 0xff};
     else if (iter <= (((gMaxIteration / 3) * 2)))
