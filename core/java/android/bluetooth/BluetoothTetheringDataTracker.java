@@ -21,7 +21,6 @@ import android.os.ServiceManager;
 import android.os.INetworkManagementService;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfoInternal;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;

@@ -34,7 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.IConnectivityManager;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfoInternal;
+import android.net.DhcpResults;
 import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -86,6 +86,7 @@ import com.android.internal.util.StateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1479,7 +1480,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
             //DHCP server has already been started if I am a group owner
             if (mGroup.isGroupOwner()) {
-                setWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
+                setWifiP2pInfoOnGroupFormation(NetworkUtils.numericToInetAddress(SERVER_ADDRESS));
             }
 
             // In case of a negotiation group, connection changed is sent
@@ -1543,11 +1544,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     break;
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
-                    DhcpInfoInternal dhcpInfo = (DhcpInfoInternal) message.obj;
+                    DhcpResults dhcpResults = (DhcpResults) message.obj;
                     if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS &&
-                            dhcpInfo != null) {
-                        if (DBG) logd("DhcpInfo: " + dhcpInfo);
-                        setWifiP2pInfoOnGroupFormation(dhcpInfo.serverAddress);
+                            dhcpResults != null) {
+                        if (DBG) logd("DhcpResults: " + dhcpResults);
+                        setWifiP2pInfoOnGroupFormation(dhcpResults.serverAddress);
                         sendP2pConnectionChangedBroadcast();
                         //Turn on power save on client
                         mWifiNative.setP2pPowerSave(mGroup.getInterface(), true);
@@ -2221,10 +2222,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         return true;
     }
 
-    private void setWifiP2pInfoOnGroupFormation(String serverAddress) {
+    private void setWifiP2pInfoOnGroupFormation(InetAddress serverInetAddress) {
         mWifiP2pInfo.groupFormed = true;
         mWifiP2pInfo.isGroupOwner = mGroup.isGroupOwner();
-        mWifiP2pInfo.groupOwnerAddress = NetworkUtils.numericToInetAddress(serverAddress);
+        mWifiP2pInfo.groupOwnerAddress = serverInetAddress;
     }
 
     private void resetWifiP2pInfo() {

@@ -43,8 +43,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfo;
-import android.net.DhcpInfoInternal;
+import android.net.DhcpResults;
 import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -87,6 +86,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
@@ -196,7 +196,8 @@ public class WifiStateMachine extends StateMachine {
 
     private Context mContext;
 
-    private DhcpInfoInternal mDhcpInfoInternal;
+    private final Object mDhcpResultsLock = new Object();
+    private DhcpResults mDhcpResults;
     private WifiInfo mWifiInfo;
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
@@ -585,7 +586,6 @@ public class WifiStateMachine extends StateMachine {
         mWifiNative = new WifiNative(mInterfaceName);
         mWifiConfigStore = new WifiConfigStore(context, mWifiNative);
         mWifiMonitor = new WifiMonitor(this, mWifiNative);
-        mDhcpInfoInternal = new DhcpInfoInternal();
         mWifiInfo = new WifiInfo();
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, mWifiConfigStore,
                 getHandler());
@@ -858,9 +858,9 @@ public class WifiStateMachine extends StateMachine {
         return mWifiInfo;
     }
 
-    public DhcpInfo syncGetDhcpInfo() {
-        synchronized (mDhcpInfoInternal) {
-            return mDhcpInfoInternal.makeDhcpInfo();
+    public DhcpResults syncGetDhcpResults() {
+        synchronized (mDhcpResultsLock) {
+            return new DhcpResults(mDhcpResults);
         }
     }
 
@@ -1169,7 +1169,7 @@ public class WifiStateMachine extends StateMachine {
         sb.append("current HSM state: ").append(getCurrentState().getName()).append(LS);
         sb.append("mLinkProperties ").append(mLinkProperties).append(LS);
         sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
-        sb.append("mDhcpInfoInternal ").append(mDhcpInfoInternal).append(LS);
+        sb.append("mDhcpResults ").append(mDhcpResults).append(LS);
         sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
         sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
@@ -1607,16 +1607,15 @@ public class WifiStateMachine extends StateMachine {
         if (mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
             mLinkProperties = mWifiConfigStore.getLinkProperties(mLastNetworkId);
         } else {
-            synchronized (mDhcpInfoInternal) {
-                mLinkProperties = mDhcpInfoInternal.makeLinkProperties();
+            synchronized (mDhcpResultsLock) {
+                if ((mDhcpResults != null) && (mDhcpResults.linkProperties != null)) {
+                    mLinkProperties = mDhcpResults.linkProperties;
+                }
             }
             mLinkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
         }
         mLinkProperties.setInterfaceName(mInterfaceName);
-        if (DBG) {
-            log("netId=" + mLastNetworkId  + " Link configured: " +
-                    mLinkProperties.toString());
-        }
+        if (DBG) log("netId=" + mLastNetworkId  + " Link configured: " + mLinkProperties);
     }
 
     private int getMaxDhcpRetries() {
@@ -1751,9 +1750,10 @@ public class WifiStateMachine extends StateMachine {
 
         /* Clear network properties */
         mLinkProperties.clear();
+
         /* Clear IP settings if the network used DHCP */
         if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-            mWifiConfigStore.clearIpConfiguration(mLastNetworkId);
+            mWifiConfigStore.clearLinkProperties(mLastNetworkId);
         }
 
         mLastBssid= null;
@@ -1802,21 +1802,21 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
     }
 
-    private void handleSuccessfulIpConfiguration(DhcpInfoInternal dhcpInfoInternal) {
-        synchronized (mDhcpInfoInternal) {
-            mDhcpInfoInternal = dhcpInfoInternal;
-        }
+    private void handleSuccessfulIpConfiguration(DhcpResults dhcpResults) {
         mLastSignalLevel = -1; // force update of signal strength
         mReconnectCount = 0; //Reset IP failure tracking
-        mWifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
-        InetAddress addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
+        LinkProperties linkProperties = dhcpResults.linkProperties;
+        mWifiConfigStore.setLinkProperties(mLastNetworkId, linkProperties);
+        InetAddress addr = null;
+        Iterator<InetAddress> addrs = linkProperties.getAddresses().iterator();
+        if (addrs.hasNext()) {
+            addr = addrs.next();
+        }
         mWifiInfo.setInetAddress(addr);
-        mWifiInfo.setMeteredHint(dhcpInfoInternal.hasMeteredHint());
+        mWifiInfo.setMeteredHint(dhcpResults.hasMeteredHint());
         if (getNetworkDetailedState() == DetailedState.CONNECTED) {
             //DHCP renewal in connected state
-            LinkProperties linkProperties = dhcpInfoInternal.makeLinkProperties();
             linkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
-            linkProperties.setInterfaceName(mInterfaceName);
             if (!linkProperties.equals(mLinkProperties)) {
                 if (DBG) {
                     log("Link configuration changed for netId: " + mLastNetworkId
@@ -1826,6 +1826,7 @@ public class WifiStateMachine extends StateMachine {
                 sendLinkConfigurationChangedBroadcast();
             }
         } else {
+            mLinkProperties = linkProperties;
             configureLinkProperties();
         }
     }
@@ -3247,7 +3248,7 @@ public class WifiStateMachine extends StateMachine {
                   handlePostDhcpSetup();
                   if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS) {
                       if (DBG) log("DHCP successful");
-                      handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
+                      handleSuccessfulIpConfiguration((DhcpResults) message.obj);
                       transitionTo(mVerifyingLinkState);
                   } else if (message.arg1 == DhcpStateMachine.DHCP_FAILURE) {
                       if (DBG) log("DHCP failed");
@@ -3375,21 +3376,29 @@ public class WifiStateMachine extends StateMachine {
                 mDhcpStateMachine.registerForPreDhcpNotification();
                 mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
             } else {
-                DhcpInfoInternal dhcpInfoInternal = mWifiConfigStore.getIpConfiguration(
-                        mLastNetworkId);
+                DhcpResults dhcpResults = new DhcpResults(
+                        mWifiConfigStore.getLinkProperties(mLastNetworkId));
+                dhcpResults.linkProperties.setInterfaceName(mInterfaceName);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
-                ifcg.setLinkAddress(dhcpInfoInternal.makeLinkAddress());
-                ifcg.setInterfaceUp();
-                try {
-                    mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-                    if (DBG) log("Static IP configuration succeeded");
-                    sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
-                } catch (RemoteException re) {
-                    loge("Static IP configuration failed: " + re);
+                Iterator<LinkAddress> addrs =
+                        dhcpResults.linkProperties.getLinkAddresses().iterator();
+                if (!addrs.hasNext()) {
+                    loge("Static IP lacks address");
                     sendMessage(CMD_STATIC_IP_FAILURE);
-                } catch (IllegalStateException e) {
-                    loge("Static IP configuration failed: " + e);
-                    sendMessage(CMD_STATIC_IP_FAILURE);
+                } else {
+                    ifcg.setLinkAddress(addrs.next());
+                    ifcg.setInterfaceUp();
+                    try {
+                        mNwService.setInterfaceConfig(mInterfaceName, ifcg);
+                        if (DBG) log("Static IP configuration succeeded");
+                        sendMessage(CMD_STATIC_IP_SUCCESS, dhcpResults);
+                    } catch (RemoteException re) {
+                        loge("Static IP configuration failed: " + re);
+                        sendMessage(CMD_STATIC_IP_FAILURE);
+                    } catch (IllegalStateException e) {
+                        loge("Static IP configuration failed: " + e);
+                        sendMessage(CMD_STATIC_IP_FAILURE);
+                    }
                 }
             }
         }
@@ -3398,7 +3407,7 @@ public class WifiStateMachine extends StateMachine {
           if (DBG) log(getName() + message.toString() + "\n");
           switch(message.what) {
             case CMD_STATIC_IP_SUCCESS:
-                  handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
+                  handleSuccessfulIpConfiguration((DhcpResults) message.obj);
                   transitionTo(mVerifyingLinkState);
                   break;
               case CMD_STATIC_IP_FAILURE:

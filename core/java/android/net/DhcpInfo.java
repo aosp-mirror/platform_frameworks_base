@@ -22,16 +22,17 @@ import java.net.InetAddress;
 
 /**
  * A simple object for retrieving the results of a DHCP request.
+ * @deprecated - use LinkProperties - To be removed 11/2013
+ * STOPSHIP - make sure we expose LinkProperties through ConnectivityManager
  */
 public class DhcpInfo implements Parcelable {
     public int ipAddress;
     public int gateway;
     public int netmask;
-
     public int dns1;
     public int dns2;
-
     public int serverAddress;
+
     public int leaseDuration;
 
     public DhcpInfo() {

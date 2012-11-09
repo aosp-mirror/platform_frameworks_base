@@ -170,13 +170,12 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private void runDhcp() {
         Thread dhcpThread = new Thread(new Runnable() {
             public void run() {
-                DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
-                if (!NetworkUtils.runDhcp(mIface, dhcpInfoInternal)) {
+                DhcpResults dhcpResults = new DhcpResults();
+                if (!NetworkUtils.runDhcp(mIface, dhcpResults)) {
                     Log.e(TAG, "DHCP request error:" + NetworkUtils.getDhcpError());
                     return;
                 }
-                mLinkProperties = dhcpInfoInternal.makeLinkProperties();
-                mLinkProperties.setInterfaceName(mIface);
+                mLinkProperties = dhcpResults.linkProperties;
 
                 mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, mHwAddr);
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);

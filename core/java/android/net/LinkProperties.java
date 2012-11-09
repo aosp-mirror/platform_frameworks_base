@@ -51,7 +51,7 @@ import java.util.Collections;
  */
 public class LinkProperties implements Parcelable {
 
-    String mIfaceName;
+    private String mIfaceName;
     private Collection<LinkAddress> mLinkAddresses = new ArrayList<LinkAddress>();
     private Collection<InetAddress> mDnses = new ArrayList<InetAddress>();
     private Collection<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
@@ -181,7 +181,7 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Compares this {@code LinkProperties} interface name against the target
+     * Compares this {@code LinkProperties} interface addresses against the target
      *
      * @param target LinkProperties to compare.
      * @return {@code true} if both are identical, {@code false} otherwise.
@@ -365,7 +365,6 @@ public class LinkProperties implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getInterfaceName());
@@ -394,19 +393,15 @@ public class LinkProperties implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public static final Creator<LinkProperties> CREATOR =
         new Creator<LinkProperties>() {
             public LinkProperties createFromParcel(Parcel in) {
                 LinkProperties netProp = new LinkProperties();
+
                 String iface = in.readString();
                 if (iface != null) {
-                    try {
-                        netProp.setInterfaceName(iface);
-                    } catch (Exception e) {
-                        return null;
-                    }
+                    netProp.setInterfaceName(iface);
                 }
                 int addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
