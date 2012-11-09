@@ -69,8 +69,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private float mBackgroundAlphaMultiplier = 1.0f;
     private Drawable mBackgroundDrawable;
     private Rect mBackgroundRect = new Rect();
-    private int mLastMeasuredWidth = -1;
-    private int mLastMeasuredHeight = 1;
 
     // These variables are all needed in order to size things properly before we're actually
     // measured.
@@ -79,6 +77,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     private boolean mWidgetLockedSmall = false;
     private int mMaxChallengeTop = -1;
     private int mFrameStrokeAdjustment;
+    private boolean mPerformAppWidgetSizeUpdateOnBootComplete;
 
     // This will hold the width value before we've actually been measured
     private int mFrameHeight;
@@ -123,8 +122,28 @@ public class KeyguardWidgetFrame extends FrameLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
         cancelLongPress();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallbacks);
+
     }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallbacks);
+    }
+
+    private KeyguardUpdateMonitorCallback mUpdateMonitorCallbacks =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onBootCompleted() {
+            if (mPerformAppWidgetSizeUpdateOnBootComplete) {
+                performAppWidgetSizeCallbacksIfNecessary();
+                mPerformAppWidgetSizeUpdateOnBootComplete = false;
+            }
+        }
+    };
 
     void setIsHoveringOverDeleteDropTarget(boolean isHovering) {
         if (ENABLE_HOVER_OVER_DELETE_DROP_TARGET_OVERLAY) {
@@ -453,12 +472,14 @@ public class KeyguardWidgetFrame extends FrameLayout {
         View content = getContent();
         if (!(content instanceof AppWidgetHostView)) return;
 
-        boolean sizeDirty = content.getMeasuredWidth() != mLastMeasuredWidth ||
-                content.getMeasuredHeight() != mLastMeasuredHeight;
-        if (sizeDirty) {
-
+        if (!KeyguardUpdateMonitor.getInstance(mContext).hasBootCompleted()) {
+            mPerformAppWidgetSizeUpdateOnBootComplete = true;
+            return;
         }
 
+        // TODO: there's no reason to force the AppWidgetHostView to catch duplicate size calls.
+        // We can do that even more cheaply here. It's not an issue right now since we're in the
+        // system process and hence no binder calls.
         AppWidgetHostView awhv = (AppWidgetHostView) content;
         float density = getResources().getDisplayMetrics().density;
 
