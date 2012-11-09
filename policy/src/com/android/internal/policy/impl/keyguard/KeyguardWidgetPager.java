@@ -236,6 +236,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     public interface Callbacks {
         public void userActivity();
         public void onUserActivityTimeoutChanged();
+        public void onAddView(View v);
         public void onRemoveView(View v);
     }
 
@@ -262,6 +263,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         final int[] pagesRange = new int[mTempVisiblePagesRange.length];
         getVisiblePages(pagesRange);
         boundByReorderablePages(true, pagesRange);
+        if (mCallbacks != null) {
+            mCallbacks.onAddView(v);
+        }
         // Subtract from the index to take into account pages before the reorderable
         // pages (e.g. the "add widget" page)
         mBackgroundWorkerHandler.post(new Runnable() {
