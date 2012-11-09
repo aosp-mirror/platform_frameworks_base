@@ -351,7 +351,7 @@ interface INetworkManagementService
     /**
      * Bind name servers to an interface in the DNS resolver.
      */
-    void setDnsServersForInterface(String iface, in String[] servers);
+    void setDnsServersForInterface(String iface, in String[] servers, String domains);
 
     /**
      * Flush the DNS cache associated with the default interface.

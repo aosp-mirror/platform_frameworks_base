@@ -238,4 +238,7 @@ public class DhcpResults implements Parcelable {
         vendorInfo = info;
     }
 
+    public void setDomains(String domains) {
+        linkProperties.setDomains(domains);
+    }
 }

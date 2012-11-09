@@ -1398,10 +1398,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDnsServersForInterface(String iface, String[] servers) {
+    public void setDnsServersForInterface(String iface, String[] servers, String domains) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("resolver", "setifdns", iface);
+        final Command cmd = new Command("resolver", "setifdns", iface,
+                (domains == null ? "" : domains));
+
         for (String s : servers) {
             InetAddress a = NetworkUtils.numericToInetAddress(s);
             if (a.isAnyLocalAddress() == false) {
