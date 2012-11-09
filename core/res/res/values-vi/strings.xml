@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Thử lại"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Đã vượt quá số lần Mở khóa bằng khuôn mặt tối đa"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Đang sạc, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Đã sạc."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Bị tính phí"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Kết nối bộ sạc của bạn."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Không có thẻ SIM nào"</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Bạn đã <xliff:g id="NUMBER">%d</xliff:g> lần mở khóa điện thoại không đúng cách. Bây giờ, điện thoại sẽ được đặt lại về mặc định ban đầu."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email."\n\n" Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Xóa"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Tăng âm lượng trên mức an toàn?"\n"Nghe ở âm lượng cao trong thời gian dài có thể gây hại cho thính giác của bạn."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Tiếp tục giữ hai ngón tay để bật trợ năng."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Trợ năng đã được bật."</string>

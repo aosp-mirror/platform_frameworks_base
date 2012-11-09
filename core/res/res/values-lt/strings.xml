@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Bandykite dar kartą"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Viršijote maksimalų atrakinimo pagal veidą bandymų skaičių"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Įkraunama, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Įkrauta."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Įkrauta"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Prijunkite kroviklį."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nėra SIM kortelės"</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> k. bandėte netinkamai atrakinti telefoną. Telefone bus iš naujo nustatyti numatytieji gamyklos nustatymai."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Pašalinti"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Padidinti garsumą viršijant saugų lygį?"\n"Ilgai klausantis dideliu garsumu gali sutrikti klausa."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Laikykite palietę dviem pirštais, kad įgalintumėte pritaikymo neįgaliesiems režimą."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pritaikymas neįgaliesiems įgalintas."</string>

@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Nogmaals proberen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Face Unlock overschreden"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Opladen, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Opgeladen."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Opgeladen"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Sluit de oplader aan."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Geen simkaart"</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"U heeft <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de telefoon."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw tablet te ontgrendelen via een e-mailaccount."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw telefoon te ontgrendelen via een e-mailaccount."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"-"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Wilt u het volume verhogen tot boven het aanbevolen geluidsniveau?"\n"Te lang luisteren op een te hoog volume kan leiden tot gehoorbeschadiging."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Blijf het scherm met twee vingers aanraken om toegankelijkheid in te schakelen."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toegankelijkheid ingeschakeld."</string>

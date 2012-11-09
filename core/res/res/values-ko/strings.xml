@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"다시 시도"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"얼굴 인식 잠금해제 최대 시도 횟수를 초과했습니다."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"충전 중(<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"충전되었습니다."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"충전됨"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"충전기를 연결하세요."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM 카드가 없습니다."</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 휴대전화가 초기화됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"—"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>

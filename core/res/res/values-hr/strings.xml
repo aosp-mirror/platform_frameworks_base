@@ -762,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Pokušajte ponovo"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Premašen je maksimalni broj Otključavanja licem"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Punjenje, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Napunjeno."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Napunjeno"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite punjač."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nema SIM kartice"</string>
@@ -1437,7 +1437,8 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Netočno ste pokušali otključati telefon <xliff:g id="NUMBER">%d</xliff:g> puta. Sada će se vratiti na tvorničke postavke."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="kg_text_message_separator" product="default" msgid="2639217074783293687">"–"</string>
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Pojačati iznad sigurne razine?"\n"Dulje slušanje preglasne glazbe može vam oštetiti sluh."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Nastavite držati s dva prsta kako biste omogućili pristupačnost."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Dostupnost je omogućena."</string>
