@@ -324,6 +324,13 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         @Override
+        public void onAddView(View v) {
+            if (numWidgets() >= MAX_WIDGETS) {
+                setAddWidgetEnabled(false);
+            }
+        };
+
+        @Override
         public void onRemoveView(View v) {
             if (numWidgets() < MAX_WIDGETS) {
                 setAddWidgetEnabled(true);
