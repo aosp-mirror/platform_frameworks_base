@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Permite que o aplicativo recupere o estado interno do sistema. Aplicativos maliciosos podem obter uma grande variedade de informações privadas e seguras que eles normalmente não precisariam."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"recuperar conteúdo da tela"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Permite que o aplicativo recupere o conteúdo da janela ativa. Aplicativos maliciosos podem recuperar o conteúdo da janela inteira e examinar todo o texto, exceto as senhas."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ativar temporariamente a acessibilidade"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Permite que um aplicativo ative temporariamente a acessibilidade no dispositivo. Aplicativos maliciosos podem ativar a acessibilidade sem o consentimento do usuário."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"recuperar informações de janelas"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Permite que o aplicativo recupere informações sobre as janelas do gerenciador de janelas. Aplicativos mal-intencionados podem recuperar informações destinadas ao uso interno do sistema."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"filtrar eventos"</string>
@@ -587,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite que o aplicativo grave novas palavras no dicionário do usuário."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"testar o acesso ao armazenamento protegido"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testar o acesso ao armazenamento protegido"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Permite que o aplicativo teste uma permissão para o armazenamento USB que estará disponível em dispositivos futuros."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Permite que o aplicativo teste uma permissão para o armazenamento USB que estará disponível em dispositivos futuros."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Permite que o aplicativo teste uma permissão para o cartão SD que estará disponível em dispositivos futuros."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modif ou excl cont. armaz USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modificar ou excluir o conteúdo do cartão SD"</string>
@@ -764,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Tente novamente"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Carregando, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Carregado."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Carregado"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecte o seu carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sem cartão SIM"</string>
@@ -812,6 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Padrão apagado"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Célula adicionada"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Padrão concluído"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Adicionar widget"</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vazio"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Área de desbloqueio expandida."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Área de desbloqueio recolhida."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Seletor de usuários"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Câmera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Controles de mídia"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Reordenação de widgets iniciada."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Reordenação de widgets concluída."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> excluído."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Expandir a área de desbloqueio."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueio com deslize."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueio com padrão."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueio facial."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueio com PIN."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueio com senha."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área do padrão."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslize."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1101,11 +1119,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Permitir"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Negar"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; deseja enviar uma mensagem para &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Isto pode gerar cobranças em sua conta de celular."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Isto poderá gerar cobranças em sua conta de celular."</string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Isto "<font fgcolor="#ffffb060">"poderá gerar cobranças"</font>" em sua conta de celular."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Isto irá gerar cobranças em sua conta de celular."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Lembrar minha escolha"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"P/ alterar: Configurações &gt; Aplicativos"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Sempre permitir"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Nunca permitir"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Cartão SIM removido"</string>
@@ -1365,11 +1384,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefone"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fones de ouvido"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes do dock"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"Áudio HDMI"</string>
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Áudio Bluetooth"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Concluído"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Saída de mídia"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Verificando..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Conectando..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"Disponível"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Não disponível"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Tela integrada"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Tela HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição nº <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1387,14 +1410,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Digite o PIN do cartão SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Digite o PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Digite a senha"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"Código PUK"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Novo código PIN"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"O SIM foi desativado. Insira o código PUK para continuar. Entre em contato com a operadora para obter mais detalhes."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Digite o código PIN desejado"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirme o código PIN desejado"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Desbloqueando o cartão SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Código PIN incorreto."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Digite um PIN com quatro a oito números."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"Digite um PUK com oito números ou mais."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"Insira o PUK e o novo código PIN"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"O PUK digitado está incorreto."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"O código PUK deve ter 8 números ou mais."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Introduza novamente o código PUK correto. Muitas tentativas malsucedidas desativarão permanentemente o SIM."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Os códigos PIN não coincidem"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Muitas tentativas de padrão"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Para desbloquear, faça login usando sua Conta do Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nome de usuário (e-mail)"</string>
@@ -1402,7 +1426,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Fazer login"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nome de usuário ou senha inválidos."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Esqueceu seu nome de usuário ou senha?"\n"Acesse "<b>"google.com.br/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Verificando..."</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Verificando a conta..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Você digitou seu PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
@@ -1412,15 +1436,12 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Você tentou desbloquear incorretamente o telefone <xliff:g id="NUMBER">%d</xliff:g> vezes. O telefone será redefinido para o padrão de fábrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear seu tablet."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Aumentar o volume acima do nível seguro?"\n"A audição em volume elevado por períodos longos pode prejudicar sua audição."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
-    <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
-    <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantenha pressionado com dois dedos para ativar a acessibilidade."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Acessibilidade ativada."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Acessibilidade cancelada."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Proprietário"</string>
 </resources>

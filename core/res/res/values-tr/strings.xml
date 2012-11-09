@@ -287,10 +287,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"Uygulamaya, sistemin iç durumunu alma izni verir. Kötü amaçlı uygulamalar normalde gerek duymadıkları çok çeşitli özel ve güvenli bilgilerini alabilir."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ekran içeriğini al"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Uygulamaya, etkin pencerenin içeriğini alma izni verir. Kötü amaçlı uygulamalar tüm pencere içeriğini alabilir ve şifreleri hariç tüm metni inceleyebilir."</string>
-    <!-- no translation found for permlab_temporary_enable_accessibility (2312612135127310254) -->
-    <skip />
-    <!-- no translation found for permdesc_temporary_enable_accessibility (8079456293182975464) -->
-    <skip />
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"erişilebilirliği geçici olarak etkinleştir"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Uygulamaya, cihazda erişilebilirliği geçici olarak etkinleştirme izni verir. Kötü amaçlı uygulamalar, kullanıcının izni olmadan erişilebilirliği etkinleştirebilirler."</string>
     <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"pencere bilgilerini al"</string>
     <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Uygulamaya, pencere yöneticisinden pencerelerle ilgili bilgi alma izni verir. Zararlı uygulamalar dahili sistem kullanımına yönelik bilgileri alabilir."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"etkinlikleri filtrele"</string>
@@ -587,7 +585,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Uygulamaya, kullanıcı sözlüğüne yeni kelimeler yazma izni verir."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"korumalı depolama birimine erişimi test et"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="5791957130190763289">"Uygulamaya gelecekteki cihazlarda kullanılabilecek USB belleğe ilişkin bir izni test etme izni verir."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Uygulamaya, gelecekteki cihazlarda kullanılabilecek USB depolama birimi için bir izni test etme olanağı verir."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Uygulamaya gelecekteki cihazlarda kullanılabilecek SD karta ilişkin bir izni test etme olanağı verir."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB belleğimin içeriğini değiştir veya sil"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kartın içeriğini değiştir veya sil"</string>
@@ -764,7 +762,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Tekrar deneyin"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yüz Tanıma Kilidi için maksimum deneme sayısı aşıldı"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
+    <string name="lockscreen_charged" msgid="321635745684060624">"Şarj oldu"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM kart yok"</string>
@@ -812,6 +810,26 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Desen temizlendi"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Hücre eklendi"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Desen tamamlandı"</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Widget ekleyin."</string>
+    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Boş"</string>
+    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Kilit açma alanı genişletildi."</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Kilit açma alanı daraltıldı."</string>
+    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget\'ı."</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kullanıcı seçici"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Durum"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Medya denetimleri"</string>
+    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Widget\'ları yeniden sıralama işlemi başladı."</string>
+    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Widget\'ları yeniden sıralama işlemi bitti."</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget\'ı silindi."</string>
+    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Kilit açma alanını genişletin."</string>
+    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Kaydırarak kilit açma."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desenle kilit açma."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Yüzle kilit açma."</string>
+    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin koduyla kilit açma."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Şifreyle kilit açma."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Desen alanı."</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Kaydırma alanı."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1101,11 +1119,12 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"İzin ver"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Reddet"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; adresine bir mesaj göndermek istiyor."</string>
-    <string name="sms_short_code_details" msgid="4992814738863678373">"Bu işlem, mobil hesabınızdan ücret alınmasına neden olabilir."</string>
-    <string name="sms_premium_short_code_details" msgid="4291752905667807485">"Bu, mobil hesabınızdan ücret alınmasına neden olacaktır."</string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"Bu işlem, mobil hesabınızdan "<font fgcolor="#ffffb060">"ücret alınmasına neden olabilir"</font>"."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Bu işlem, mobil hesabınızdan ücret alınmasına neden olacaktır."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Gönder"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"İptal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Seçimimi hatırla"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Bu ayarı daha sonra Ayarlar &gt; Uygulamalar\'dan değiştirebilirsiniz."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Her Zaman İzin Ver"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Asla İzin Verme"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kart çıkarıldı"</string>
@@ -1365,11 +1384,15 @@
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kulaklıklar"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Yuva hoparlörleri"</string>
-    <string name="default_audio_route_name_hdmi" msgid="7986404173839007682">"HDMI ses"</string>
+    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ses"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Tamamlandı"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"Medya çıkışı"</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Taranıyor..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Bağlanılıyor..."</string>
+    <string name="media_route_status_available" msgid="6983258067194649391">"Kullanılabilir"</string>
+    <string name="media_route_status_not_available" msgid="6739899962681886401">"Yok"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Yerleşik Ekran"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI Ekran"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Yer Paylaşımı No. <xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1387,14 +1410,15 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN kodunu girin"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN\'i girin"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Şifreyi Girin"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="5183097160254244459">"PUK kodu"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="597821135578014901">"Yeni PIN kodu"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM kart artık devre dışı bırakıldı. Devam etmek için PUK kodunu girin. Ayrıntılı bilgi için operatörle bağlantı kurun."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"İstenen PIN kodunu girin"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"İstenen PIN kodunu onaylayın"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM kart kilidi açılıyor…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Yanlış PIN kodu."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-8 rakamdan oluşan bir PIN girin."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="5216603185442368307">"8 veya daha uzun basamaklı bir PUK kodu yazın."</string>
-    <string name="kg_sim_puk_recovery_hint" msgid="5577753137718442566">"PUK ve yeni PIN kodunu yazın"</string>
-    <string name="kg_invalid_puk" msgid="5809955359950817326">"Yazdığınız PUK doğru değil."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kodu 8 veya daha çok basamaklı bir sayı olmalıdır."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Doğru PUK kodunu tekrar girin. Çok sayıda deneme yapılırsa SIM kart kalıcı olarak devre dışı bırakılır."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodları eşleşmiyor"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Çok fazla sayıda desen denemesi yapıldı"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Kilidi açmak için Google hesabınızla oturum açın."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Kullanıcı adı (e-posta)"</string>
@@ -1402,7 +1426,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Oturum aç"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Geçersiz kullanıcı adı veya şifre."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Kullanıcı adınızı veya şifrenizi mi unuttunuz?"\n<b>"google.com/accounts/recovery"</b>" adresini ziyaret edin."</string>
-    <string name="kg_login_checking_password" msgid="8849589033659332457">"Kontrol ediliyor…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Hesap denetleniyor…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodunuzu <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Şifrenizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış yazdınız. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde tekrar deneyin."</string>
@@ -1412,15 +1436,12 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Telefon şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra, tabletinizi bir e-posta hesabı kullanarak açmanız istenir."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu bir e-posta hesabı kullanarak açmanız istenir."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde tekrar deneyin."</string>
-    <!-- no translation found for kg_text_message_separator (2639217074783293687) -->
-    <skip />
+    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kaldır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"Ses düzeyi güvenli seviyenin üzerine çıkarılsın mı?"\n"Yüksek sesle uzun süre dinlemek işitme yetinize zarar verebilir."</string>
-    <!-- no translation found for continue_to_enable_accessibility (7763028886898319514) -->
-    <skip />
-    <!-- no translation found for accessibility_enabled (1381972048564547685) -->
-    <skip />
-    <!-- no translation found for enable_accessibility_canceled (6820851401471507415) -->
-    <skip />
-    <!-- no translation found for user_switched (1030428084901139446) -->
-    <skip />
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Erişilebilirliği etkinleştirmek için iki parmağınızı basılı tutmaya devam edin."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Erişilebilirlik etkinleştirildi."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erişilebilirlik iptal edildi."</string>
+    <string name="user_switched" msgid="3768006783166984410">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="owner_name" msgid="2716755460376028154">"Sahibi"</string>
 </resources>
