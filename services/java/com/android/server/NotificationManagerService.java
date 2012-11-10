@@ -1086,8 +1086,17 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
 
                 // vibrate
+                // new in 4.2: if there was supposed to be a sound and we're in vibrate mode,
+                // we always vibrate, even if no vibration was specified
+                final boolean convertSoundToVibration =
+                           notification.vibrate == null
+                        && (useDefaultSound || notification.sound != null)
+                        && (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
+
                 final boolean useDefaultVibrate =
-                    (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
+                    (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
+                    || convertSoundToVibration;
+
                 if ((useDefaultVibrate || notification.vibrate != null)
                         && !(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)) {
                     mVibrateNotification = r;
