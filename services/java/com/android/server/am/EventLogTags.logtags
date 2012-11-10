@@ -83,3 +83,6 @@ option java_package com.android.server.am
 30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5)
 # Log.wtf() called
 30040 am_wtf (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Tag|3),(Message|3)
+
+# User switched
+30041 am_switch_user (id|1|5)
