@@ -17,68 +17,87 @@ page.title=Developer Tools
 
 <div style="margin-top:20px;"></div>
 
-<div class="col-6">
+<div class="col-7" style="margin-left:0">
 <h3>Full Java IDE</h3>
 
   <ul>
-    <li>Android-specific refactoring, quick fixes, integrated navigation between Java and Android XML resources.</li> 
-    <li>Enhanced XML editors for Android XML resources</li> 
-    <li>Static analysis tools to catch performance, usability, and correctness problems</li> 
+    <li>Android-specific refactoring, quick fixes, integrated navigation between Java and XML resources.</li> 
+    <li>Enhanced XML editors for Android XML resources.</li> 
+    <li>Static analysis tools to catch performance, usability, and correctness problems.</li> 
     <li>Build support for complex projects, command-line support for CI through Ant. Includes ProGuard and app-signing. </li> 
     <li>Template-based wizard to create standard Android projects and components.</li> 
   </ul>
 </div>
 
-<div class="col-6">
+
+<div class="col-6" style="margin-right:0">
+
 <h3>Graphical UI Builders</h3>
-    
   <ul>
     <li>Build rich Android UI with drag and drop. 
     <li>Visualize your UI on tablets, phones, and other devices. Switch themes, locales, even platform versions instantly, without building.</li>
-    <li>Visual refactoring lets you extracts layout for inclusion, convert layouts, extract styles</li>
-    <li>Editor support for working with custom UI components</li>
+    <li>Visual refactoring lets you extracts layout for inclusion, convert layouts, extract styles.</li>
+    <li>Editor support for working with custom UI components.</li>
   </ul>
+
 </div>
 
-<div class="col-6" style="clear:both">
+
+<div class="col-7" style="clear:both;margin-left:0;">
+
+<h3>On-device Developer Options</h3>
+<ul>
+  <li>Enable debugging over USB.</li>
+  <li>Quickly capture bug reports onto the device.</li>
+  <li>Show CPU usage on screen.</li>
+  <li>Draw debugging information on screen such as layout bounds,
+    updates on GPU views and hardware layers, touch location, and others.</li>
+  <li>Plus many more options to simulate app stresses or enable debugging options.</li>
+</ul>
+<p>To access these on your device, open <em>Developer options</em> in the system Settings.
+If your device is running Android 4.2 or higher, you can access the settings with the
+<a href="http://play.google.com/store/apps/details?id=com.android.development_settings">Developer
+Settings</a> app.</p>
+
+</div>
+
+<div class="col-6" style="margin-right:0">
+  <img src="{@docRoot}images/tools/dev-options-inmilk.png" alt="" style="margin:-10px 0 0;">
+</div>
+
+
+<div class="col-7" style="clear:both;margin-left:0;">
 <h3>Develop on Hardware Devices</h3>
 
   <ul>
     <li>Use any commercial Android hardware device or multiple devices.</li> 
-    <li>Deploy your app to connected devices directy from the IDE</li> 
-    <li>Live, on-device debugging, testing, and profiling</li> 
+    <li>Deploy your app to connected devices directy from the IDE.</li> 
+    <li>Live, on-device debugging, testing, and profiling.</li> 
   </ul>
 </div>
 
-<div class="col-6">
+<div class="col-6" style="margin-right:0">
 <h3>Develop on Virtual Devices</h3>
   <ul>
     <li>Emulate any device. Use custom screen sizes, keyboards, and other hardware components. </li>
     <li>Advanced hardware emulation, including camera, sensors, multitouch, telephony.</li>
-    <li>Develop and test for broadest compatibility at lowest cost.</li>
+    <li>Develop and test for broad device compatibility.</li>
   </ul>
 
 </div>
 
 <div style="margin-top:20px;"></div>
 
-<div class="col-5">
+<div class="col-7" style="margin-left:0">
 <h3>Powerful Debugging</h3>
 
   <ul>
-    <li>Full Java debugger with on-device debugging and Android-specific tools</li>
+    <li>Full Java debugger with on-device debugging and Android-specific tools.</li>
     <li>Built-in memory analysis, performance/CPU profiling, OpenGL ES tracing.</li>
     <li>Graphical tools for debugging and optimizing UI, runtime inspecton of UI structure and performance.</li>
-    <li>Runtime graphical analysis of your app's network bandwidth usage.</li> 
+    <li>Runtime graphical analysis of your app's network bandwidth usage.</li>
   </ul>
-</div>
 
-<div style="float:right;width:360px;padding-top:1em;">
-  <img src="{@docRoot}images/debugging-tall.png" align="left">
-</div>
-
-
-<div class="col-6">
 <h3>Testing</h3>
     
   <ul>
@@ -94,4 +113,9 @@ page.title=Developer Tools
     <li>Support for packaging multiple architectures in a single binary, for broad compatibility.</li>
   </ul>
 </div>
+
+<div class="col-6" style="margin-right:0">
+  <img src="{@docRoot}images/debugging-tall.png" align="left" style="margin-top:10px">
+</div>
+
 
