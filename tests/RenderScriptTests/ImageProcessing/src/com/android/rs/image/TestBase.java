@@ -45,8 +45,21 @@ public class TestBase  {
     protected Allocation mInPixelsAllocation;
     protected Allocation mInPixelsAllocation2;
     protected Allocation mOutPixelsAllocation;
+    protected ScriptC_msg mMessageScript;
 
     protected ImageProcessingActivity act;
+
+    private class MessageProcessor extends RenderScript.RSMessageHandler {
+        ImageProcessingActivity mAct;
+
+        MessageProcessor(ImageProcessingActivity act) {
+            mAct = act;
+        }
+
+        public void run() {
+            mAct.updateDisplay();
+        }
+    }
 
     // Override to use UI elements
     public void onBar1Changed(int progress) {
@@ -96,6 +109,8 @@ public class TestBase  {
     public final void createBaseTest(ImageProcessingActivity ipact, Bitmap b, Bitmap b2) {
         act = ipact;
         mRS = RenderScript.create(act);
+        mRS.setMessageHandler(new MessageProcessor(act));
+        mMessageScript = new ScriptC_msg(mRS);
         mInPixelsAllocation = Allocation.createFromBitmap(mRS, b,
                                                           Allocation.MipmapControl.MIPMAP_NONE,
                                                           Allocation.USAGE_SCRIPT);
@@ -115,6 +130,11 @@ public class TestBase  {
 
     // Must override
     public void runTest() {
+    }
+
+    final public void runTestSendMessage() {
+        runTest();
+        mMessageScript.invoke_sendMsg();
     }
 
     public void finish() {
