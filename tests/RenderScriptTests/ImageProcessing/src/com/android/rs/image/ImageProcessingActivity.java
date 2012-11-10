@@ -18,6 +18,8 @@ package com.android.rs.image;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -82,11 +84,37 @@ public class ImageProcessingActivity extends Activity
     private boolean mDoingBenchmark;
 
     private TestBase mTest;
+    private int mRunCount;
 
     public void updateDisplay() {
+        mHandler.sendMessage(Message.obtain());
+    }
+
+    private Handler mHandler = new Handler() {
+        // Allow the filter to complete without blocking the UI
+        // thread.  When the message arrives that the op is complete
+        // we will either mark completion or start a new filter if
+        // more work is ready.  Either way, display the result.
+        @Override
+        public void handleMessage(Message msg) {
             mTest.updateBitmap(mBitmapOut);
             mDisplayView.invalidate();
-    }
+
+            boolean doTest = false;
+            synchronized(this) {
+                if (mRunCount > 0) {
+                    mRunCount--;
+                    if (mRunCount > 0) {
+                        doTest = true;
+                    }
+                }
+            }
+            if (doTest) {
+                mTest.runTestSendMessage();
+            }
+        }
+
+    };
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
@@ -103,8 +131,18 @@ public class ImageProcessingActivity extends Activity
                 mTest.onBar5Changed(progress);
             }
 
-            mTest.runTest();
-            updateDisplay();
+            boolean doTest = false;
+            synchronized(this) {
+                if (mRunCount == 0) {
+                    doTest = true;
+                    mRunCount = 1;
+                } else {
+                    mRunCount = 2;
+                }
+            }
+            if (doTest) {
+                mTest.runTestSendMessage();
+            }
         }
     }
 
