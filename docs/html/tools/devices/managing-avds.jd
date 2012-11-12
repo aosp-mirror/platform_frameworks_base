@@ -20,8 +20,9 @@ parent.link=index.html
   <p>The AVD Manager is an easy to use user interface to manage your AVD (Android Virtual Device)
   configurations. An AVD is a device configuration for the Android emulator that allows you to
   model different configurations of Android-powered devices. When you start the AVD Manager in Eclipse 
-  or run the <code>android</code> tool on the command line, you will see the AVD Manager as shown in
-  figure 1:</p>
+  or navigate to your SDK's {@code tools/} directory and execute
+  <code>android avd</code>. You will see the AVD Manager as shown in
+  figure 1.</p>
   
   <img src="{@docRoot}images/avd-manager.png">
   
