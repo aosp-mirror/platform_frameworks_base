@@ -2652,6 +2652,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 }
                                 InputMethodInfo im = mIms[which];
                                 int subtypeId = mSubtypeIds[which];
+                                adapter.mCheckedItem = which;
+                                adapter.notifyDataSetChanged();
                                 hideInputMethodMenu();
                                 if (im != null) {
                                     if ((subtypeId < 0)
@@ -2749,7 +2751,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private final LayoutInflater mInflater;
         private final int mTextViewResourceId;
         private final List<ImeSubtypeListItem> mItemsList;
-        private final int mCheckedItem;
+        public int mCheckedItem;
         public ImeSubtypeListAdapter(Context context, int textViewResourceId,
                 List<ImeSubtypeListItem> itemsList, int checkedItem) {
             super(context, textViewResourceId, itemsList);
