@@ -41,6 +41,8 @@ class SimulatedTrackball {
     // Where the cutoff is for determining an edge swipe
     private static final float EDGE_SWIPE_THRESHOLD = 0.9f;
     private static final int FLICK_MSG_ID = 313;
+    // TODO: Pass touch slop from the input device
+    private static final int TOUCH_SLOP = 30;
 
     // The position of the previous touchpad event
     private float mLastTouchpadXPosition;
@@ -95,7 +97,7 @@ class SimulatedTrackball {
         mMinFlickDistanceSquared *= mMinFlickDistanceSquared;
         mFlickDecay = Float.parseFloat(SystemProperties.get(
                 "persist.sys.vr_flick_decay", "1.3"));
-        mTouchSlop = ViewConfiguration.getTouchSlop();
+        mTouchSlop = TOUCH_SLOP;
         mTouchSlopSquared = mTouchSlop * mTouchSlop;
     }
 
