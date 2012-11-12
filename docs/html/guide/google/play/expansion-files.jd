@@ -114,9 +114,10 @@ yourself or be able to distinguish between the two files.</p>
 
 <h3 id="Filename">File name format</h3>
 
-<p>Each expansion file you upload can be any format you choose (ZIP, PDF, MP4, etc.). Regardless of
-the file type, Google Play considers them opaque binary blobs and renames the files
-using the following scheme:</p>
+<p>Each expansion file you upload can be any format you choose (ZIP, PDF, MP4, etc.). You can also
+use the <a href="{@docRoot}tools/help/jobb.html">JOBB</a> tool to encapsulate and encrypt a set
+of resource files and subsequent patches for that set. Regardless of the file type, Google Play
+considers them opaque binary blobs and renames the files using the following scheme:</p>
 
 <pre class="classic no-pretty-print">
 [main|patch].&lt;expansion-version&gt;.&lt;package-name&gt;.obb
@@ -136,7 +137,7 @@ value).
     <p>"First" is emphasized because although the Developer Console allows you to
 re-use an uploaded expansion file with a new APK, the expansion file's name does not change&mdash;it
 retains the version applied to it when you first uploaded the file.</p></dd>
-  <dt>{@code &lt;package-name&gt;}</dt> 
+  <dt>{@code &lt;package-name&gt;}</dt>
     <dd>Your application's Java-style package name.</dd>
 </dl>
 
@@ -253,7 +254,7 @@ expansion file, you can use the patch file for the rest of your assets.</p>
   <li>Develop your application such that it uses the resources from your expansion files in the
 device's <a href="#StorageLocation">shared storage location</a>.
     <p>Remember that you must not delete, move, or rename the expansion files.</p>
-    <p>If your application doesn't demand a specific format, we suggest you create ZIP files for 
+    <p>If your application doesn't demand a specific format, we suggest you create ZIP files for
 your expansion files, then read them using the <a href="#ZipLib">APK Expansion Zip
 Library</a>.</p>
   </li>
@@ -347,7 +348,7 @@ href="#StorageLocation">shared storage location</a> (in the
         <ol>
           <li>Perform a request using Google Play's <a
 href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> to get your
-app's expansion file names, sizes, and URLs.</li> 
+app's expansion file names, sizes, and URLs.</li>
           <li>Use the URLs provided by Google Play to download the expansion files and save
 the expansion files. You <strong>must</strong> save the files to the <a
 href="#StorageLocation">shared storage location</a>
@@ -651,7 +652,7 @@ public class SampleAlarmReceiver extends BroadcastReceiver {
                     SampleDownloaderService.class);
         } catch (NameNotFoundException e) {
             e.printStackTrace();
-        }      
+        }
     }
 }
 </pre>
@@ -698,7 +699,7 @@ boolean expansionFilesDelivered() {
             return false;
     }
     return true;
-}        
+}
 </pre>
     <p>In this case, each {@code XAPKFile} object holds the version number and file size of a known
 expansion file and a boolean as to whether it's the main expansion file. (See the sample
@@ -749,7 +750,7 @@ public void onCreate(Bundle savedInstanceState) {
         ...
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notifierIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        
+
         // Start the download service (if required)
         int startResult = DownloaderClientMarshaller.startDownloadServiceIfRequired(this,
                         pendingIntent, SampleDownloaderService.class);
@@ -1050,9 +1051,9 @@ your ZIP expansion files as a virtual file system.</p>
 <dl>
   <dt>{@code APKExpansionSupport}</dt>
     <dd>Provides some methods to access expansion file names and ZIP files:
-      
+
       <dl style="margin-top:1em">
-        <dt>{@code getAPKExpansionFiles()}</dt> 
+        <dt>{@code getAPKExpansionFiles()}</dt>
           <dd>The same method shown above that returns the complete file path to both expansion
 files.</dd>
         <dt>{@code getAPKExpansionZipFile(Context ctx, int mainVersion, int
@@ -1063,7 +1064,7 @@ patch file. That is, if you specify both the <code>mainVersion</code> and the
 all the data, with the patch file's data merged on top of the main file.</dd>
       </dl>
     </dd>
-    
+
   <dt>{@code ZipResourceFile}</dt>
     <dd>Represents a ZIP file on the shared storage and performs all the work to provide a virtual
 file system based on your ZIP files. You can get an instance using {@code
@@ -1083,7 +1084,7 @@ the root of the ZIP file contents. This is useful for certain Android APIs that 
 android.content.res.AssetFileDescriptor}, such as some {@link android.media.MediaPlayer} APIs.</dd>
       </dl>
     </dd>
-    
+
   <dt>{@code APEZProvider}</dt>
     <dd>Most applications don't need to use this class. This class defines a {@link
 android.content.ContentProvider} that marshals the data from the ZIP files through a content
@@ -1101,7 +1102,7 @@ following:</p>
 // Get a ZipResourceFile representing a merger of both the main and patch files
 ZipResourceFile expansionFile = APKExpansionSupport.getAPKExpansionZipFile(appContext,
         mainVersion, patchVersion);
-        
+
 // Get an input stream for a known file inside the expansion file ZIPs
 InputStream fileStream = expansionFile.getInputStream(pathToFileInsideZip);
 </pre>
@@ -1254,7 +1255,7 @@ you can easily read all the expansion file data.</li>
 
 
 <!-- Tools are not ready.
-     
+
 <h3>Using OBB tool and APIs</h3>
 
 <pre>
