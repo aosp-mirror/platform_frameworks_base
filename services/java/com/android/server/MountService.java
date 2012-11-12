@@ -57,6 +57,8 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -181,13 +183,13 @@ class MountService extends IMountService.Stub
     /** When defined, base template for user-specific {@link StorageVolume}. */
     private StorageVolume mEmulatedTemplate;
 
-    // @GuardedBy("mVolumesLock")
+    @GuardedBy("mVolumesLock")
     private final ArrayList<StorageVolume> mVolumes = Lists.newArrayList();
     /** Map from path to {@link StorageVolume} */
-    // @GuardedBy("mVolumesLock")
+    @GuardedBy("mVolumesLock")
     private final HashMap<String, StorageVolume> mVolumesByPath = Maps.newHashMap();
     /** Map from path to state */
-    // @GuardedBy("mVolumesLock")
+    @GuardedBy("mVolumesLock")
     private final HashMap<String, String> mVolumeStates = Maps.newHashMap();
 
     private volatile boolean mSystemReady = false;
@@ -2571,7 +2573,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public static String buildObbPath(final String canonicalPath, int userId, boolean forVold) {
         // TODO: allow caller to provide Environment for full testing
 

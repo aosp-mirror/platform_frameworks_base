@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class UsbService extends IUsbManager.Stub {
     private final Object mLock = new Object();
 
     /** Map from {@link UserHandle} to {@link UsbSettingsManager} */
-    // @GuardedBy("mLock")
+    @GuardedBy("mLock")
     private final SparseArray<UsbSettingsManager>
             mSettingsByUser = new SparseArray<UsbSettingsManager>();
 
