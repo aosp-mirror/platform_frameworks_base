@@ -135,12 +135,8 @@ option java_package com.android.server
 # ---------------------------
 # ConnectivityService.java
 # ---------------------------
-# Connectivity state changed:
-# [31-14] Reserved for future use
-# [13-10] Network subtype (for mobile network, as defined by TelephonyManager)
-# [ 9- 4] Detailed state ordinal (as defined by NetworkInfo.DetailedState)
-# [ 3- 0] Network type (as defined by ConnectivityManager)
-50020 connectivity_state_changed (custom|1|5)
+# Connectivity state changed
+50020 connectivity_state_changed (type|1),(subtype|1),(state|1)
 
 
 # ---------------------------
