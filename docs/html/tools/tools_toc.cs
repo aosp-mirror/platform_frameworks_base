@@ -93,6 +93,10 @@
             <a href="<?cs var:toroot?>tools/testing/testing_accessibility.html">
             <span class="en">Accessibility Testing</span></a>
           </li>
+           <li>
+            <a href="<?cs var:toroot?>tools/testing/testing_ui.html">
+            <span class="en">UI Testing</span></a>
+          </li>
           <li>
             <a href="<?cs var:toroot ?>tools/testing/what_to_test.html">
             <span class="en">What To Test</span></a>
@@ -166,6 +170,20 @@ class="en">MonkeyRunner</span></a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
+       <li class="nav-section">
+          <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/uiautomator/index.html"><span class="en">uiautomator</span></a></div>
+          <ul>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/IAutomationSupport.html"><span class="en">IAutomationSupport</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiAutomatorTestCase.html"><span class="en">UiAutomatorTestCase</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiCollection.html"><span class="en">UiCollection</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiDevice.html"><span class="en">UiDevice</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiObject.html"><span class="en">UiObject</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiObjectNotFoundException.html"><span class="en">UiObjectNotFoundException</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiScrollable.html"><span class="en">UiScrollable</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiSelector.html"><span class="en">UiSelector</span></a></li>
+             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiWatcher.html"><span class="en">UiWatcher</span></a></li>
+          </ul>
+       </li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>
   </li>

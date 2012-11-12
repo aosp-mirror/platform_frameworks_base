@@ -1,0 +1,1271 @@
+page.title=UiCollection
+parent.title=uiautomator
+parent.link=index.html
+@jd:body
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+<p>Used to enumerate a container's user interface (UI) elements for the purpose of counting,
+ or targeting a sub elements by a child's text or description.
+</p>
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#UiCollection(com.android.uiautomator.core.UiSelector)">UiCollection</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
+        
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiObject.html">UiObject</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
+        
+        <div class="jd-descrdiv">Searches for child UI element within the constraints of this  <code><a href="UiSelector.html">UiSelector</a></code>
+ selector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiObject.html">UiObject</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getChildByInstance(com.android.uiautomator.core.UiSelector, int)">getChildByInstance</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)
+        
+        <div class="jd-descrdiv">Searches for child UI element within the constraints of this  <code><a href="UiSelector.html">UiSelector</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiObject.html">UiObject</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
+        
+        <div class="jd-descrdiv">Searches for child UI element within the constraints of this  <code><a href="UiSelector.html">UiSelector</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getChildCount(com.android.uiautomator.core.UiSelector)">getChildCount</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern)
+        
+        <div class="jd-descrdiv">Counts child UI element instances matching the <code>childPattern</code>
+ argument.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.android.uiautomator.core.UiObject" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.android.uiautomator.core.UiObject-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  <a href="UiObject.html">com.android.uiautomator.core.UiObject</a>
+
+<div id="inherited-methods-com.android.uiautomator.core.UiObject">
+  <div id="inherited-methods-com.android.uiautomator.core.UiObject-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.android.uiautomator.core.UiObject-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#clearTextField()">clearTextField</a></span>()
+        
+        <div class="jd-descrdiv">Clears the existing text contents in an editable field.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#click()">click</a></span>()
+        
+        <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
+ by this UiObject.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow</a></span>(long timeout)
+        
+        <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
+ by this UiObject and waits for window transitions.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow()">clickAndWaitForNewWindow</a></span>()
+        
+        <div class="jd-descrdiv">See <code><a href="UiObject.html#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow(long)</a></code>
+ This method is intended to reliably wait for window transitions that would typically take
+ longer than the usual default timeouts.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#clickBottomRight()">clickBottomRight</a></span>()
+        
+        <div class="jd-descrdiv">Clicks the bottom and right corner of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#clickTopLeft()">clickTopLeft</a></span>()
+        
+        <div class="jd-descrdiv">Clicks the top and left corner of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#exists()">exists</a></span>()
+        
+        <div class="jd-descrdiv">Check if UI element exists.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            Rect
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getBounds()">getBounds</a></span>()
+        
+        <div class="jd-descrdiv">Returns the UI element's <code>bounds</code> property.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiObject.html">UiObject</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getChild(com.android.uiautomator.core.UiSelector)">getChild</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
+        
+        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element of the element currently represented
+ by this UiObject.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getChildCount()">getChildCount</a></span>()
+        
+        <div class="jd-descrdiv">Counts the child UI elements immediately under the UI element currently represented by
+ this UiObject.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getContentDescription()">getContentDescription</a></span>()
+        
+        <div class="jd-descrdiv">Reads the <code>content_desc</code> property of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiObject.html">UiObject</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getFromParent(com.android.uiautomator.core.UiSelector)">getFromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
+        
+        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element from the parent element currently
+ represented by this object.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getPackageName()">getPackageName</a></span>()
+        
+        <div class="jd-descrdiv">Reads the UI element's <code>package</code> property</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getSelector()">getSelector</a></span>()
+        
+        <div class="jd-descrdiv">Debugging helper.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getText()">getText</a></span>()
+        
+        <div class="jd-descrdiv">Reads the <code>text</code> property of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            Rect
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#getVisibleBounds()">getVisibleBounds</a></span>()
+        
+        <div class="jd-descrdiv">Returns the visible bounds of the UI element.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isCheckable()">isCheckable</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>checkable</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isChecked()">isChecked</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>checked</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isClickable()">isClickable</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>clickable</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isEnabled()">isEnabled</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>enabled</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isFocusable()">isFocusable</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>focusable</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isFocused()">isFocused</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>focused</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isLongClickable()">isLongClickable</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>long-clickable</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isScrollable()">isScrollable</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>scrollable</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#isSelected()">isSelected</a></span>()
+        
+        <div class="jd-descrdiv">Check if the UI element's <code>selected</code> property is currently true</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#longClick()">longClick</a></span>()
+        
+        <div class="jd-descrdiv">Long clicks the center of the visible bounds of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#longClickBottomRight()">longClickBottomRight</a></span>()
+        
+        <div class="jd-descrdiv">Long clicks bottom and right corner of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#longClickTopLeft()">longClickTopLeft</a></span>()
+        
+        <div class="jd-descrdiv">Long clicks on the top and left corner of the UI element</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#setText(java.lang.String)">setText</a></span>(String text)
+        
+        <div class="jd-descrdiv">Sets the text in an editable field, after clearing the field's content.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#swipeDown(int)">swipeDown</a></span>(int steps)
+        
+        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object, Also see
+ #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
+ #scrollForward().</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#swipeLeft(int)">swipeLeft</a></span>(int steps)
+        
+        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#swipeRight(int)">swipeRight</a></span>(int steps)
+        
+        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#swipeUp(int)">swipeUp</a></span>(int steps)
+        
+        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this UiObject.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#waitForExists(long)">waitForExists</a></span>(long timeout)
+        
+        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become visible.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="UiObject.html#waitUntilGone(long)">waitUntilGone</a></span>(long timeout)
+        
+        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become undetectable.</div>
+  
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">equals</span>(Object arg0)
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">getClass</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">hashCode</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notify</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notifyAll</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">toString</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0, int arg1)
+        
+  </td></tr>
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0)
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+<a id="UiCollection(com.android.uiautomator.core.UiSelector)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">UiCollection</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+<a id="getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="UiObject.html">UiObject</a>
+      </span>
+      <span class="sympad">getChildByDescription</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this <code><a href="UiSelector.html">UiSelector</a></code>
+ selector.
+
+ It looks for any child matching the <code>childPattern</code> argument that has
+ a child UI element anywhere within its sub hierarchy that has content-description text.
+ The returned UiObject will point at the <code>childPattern</code> instance that matched the
+ search and not at the identifying child element that matched the content description.</p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>childPattern</th>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+        </tr>
+        <tr>
+          <th>text</th>
+          <td>String of the identifying child contents of of the <code>childPattern</code></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getChildByInstance(com.android.uiautomator.core.UiSelector, int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="UiObject.html">UiObject</a>
+      </span>
+      <span class="sympad">getChildByInstance</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this <code><a href="UiSelector.html">UiSelector</a></code>.
+
+ It looks for any child matching the <code>childPattern</code> argument that has
+ a child UI element anywhere within its sub hierarchy that is at the <code>instance</code>
+ specified. The operation is performed only on the visible items and no scrolling is performed
+ in this case.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>childPattern</th>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+        </tr>
+        <tr>
+          <th>instance</th>
+          <td>int the desired matched instance of this <code>childPattern</code></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code>
+</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="UiObject.html">UiObject</a>
+      </span>
+      <span class="sympad">getChildByText</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this <code><a href="UiSelector.html">UiSelector</a></code>
+ selector.
+
+ It looks for any child matching the <code>childPattern</code> argument that has
+ a child UI element anywhere within its sub hierarchy that has a text attribute equal to 
+ <code>text</code>. The returned UiObject will point at the <code>childPattern</code>
+ instance that matched the search and not at the identifying child element that matched the
+ text attribute.</p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>childPattern</th>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+        </tr>
+        <tr>
+          <th>text</th>
+          <td>String of the identifying child contents of of the <code>childPattern</code></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getChildCount(com.android.uiautomator.core.UiSelector)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        int
+      </span>
+      <span class="sympad">getChildCount</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern)</span>
+    </h4>
+      <div class="api-level">
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Counts child UI element instances matching the <code>childPattern</code>
+ argument. The method returns the number of matching UI elements that are
+ currently visible.  The count does not include items of a scrollable list
+ that are off-screen.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>childPattern</th>
+          <td>a <code><a href="UiSelector.html">UiSelector</a></code> that represents the matching child UI
+ elements to count</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the number of matched childPattern under the current <code><a href="UiCollection.html">UiCollection</a></code>
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
