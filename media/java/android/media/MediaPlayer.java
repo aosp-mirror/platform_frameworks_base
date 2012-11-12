@@ -1361,13 +1361,26 @@ public class MediaPlayer
      * within an application. Unless you are writing an application to
      * control user settings, this API should be used in preference to
      * {@link AudioManager#setStreamVolume(int, int, int)} which sets the volume of ALL streams of
-     * a particular type. Note that the passed volume values are raw scalars.
+     * a particular type. Note that the passed volume values are raw scalars in range 0.0 to 1.0.
      * UI controls should be scaled logarithmically.
      *
      * @param leftVolume left volume scalar
      * @param rightVolume right volume scalar
      */
+    /*
+     * FIXME: Merge this into javadoc comment above when setVolume(float) is not @hide.
+     * The single parameter form below is preferred if the channel volumes don't need
+     * to be set independently.
+     */
     public native void setVolume(float leftVolume, float rightVolume);
+
+    /**
+     * Similar, excepts sets volume of all channels to same value.
+     * @hide
+     */
+    public void setVolume(float volume) {
+        setVolume(volume, volume);
+    }
 
     /**
      * Currently not implemented, returns null.

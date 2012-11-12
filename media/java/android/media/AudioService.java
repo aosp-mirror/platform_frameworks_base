@@ -3178,7 +3178,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         mediaPlayer.setDataSource(filePath);
                         mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
                         mediaPlayer.prepare();
-                        mediaPlayer.setVolume(volFloat, volFloat);
+                        mediaPlayer.setVolume(volFloat);
                         mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
                             public void onCompletion(MediaPlayer mp) {
                                 cleanupPlayer(mp);
