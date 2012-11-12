@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r8b-windows.zip
-ndk.win_bytes=188724991
-ndk.win_checksum=6d290d4f2729ef2063c5ae5b1e335622
+ndk.win_download=android-ndk-r8c-windows.zip
+ndk.win_bytes=233787657
+ndk.win_checksum=3ff1570fa4ea865b7702507ea43dbae4
 
-ndk.mac_download=android-ndk-r8b-darwin-x86.tar.bz2
-ndk.mac_bytes=181255568
-ndk.mac_checksum=94fe392194ea41f8a70cfce0dee3870f
+ndk.mac_download=android-ndk-r8c-darwin-x86.tar.bz2
+ndk.mac_bytes=214270840
+ndk.mac_checksum=74a23e9e058512121835e0d6932e72d5
 
-ndk.linux_download=android-ndk-r8b-linux-x86.tar.bz2
-ndk.linux_bytes=160466240
-ndk.linux_checksum=6694ccc04d543500f0661a75f6c46526
+ndk.linux_download=android-ndk-r8c-linux-x86.tar.bz2
+ndk.linux_bytes=179945337
+ndk.linux_checksum=b0851346ff90c9266bc050016a228319
 
 page.title=Android NDK
 
@@ -73,51 +73,325 @@ $('#Downloads').after($('#download-table'));
 <p>The sections below provide information and notes about successive releases of
 the NDK, as denoted by revision number. </p>
 
-<script type="text/javascript">
-function toggleDiv(link) {
-  var toggleable = $(link).parent();
-  if (toggleable.hasClass("closed")) {
-    //$(".toggleme", toggleable).slideDown("fast");
-    toggleable.removeClass("closed");
-    toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", "{@docRoot}assets/images/triangle-opened.png");
-  } else {
-    //$(".toggleme", toggleable).slideUp("fast");
-    toggleable.removeClass("open");
-    toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", "/assets/images/triangle-closed.png");
-  }
-  return false;
-}
-</script>
 
-<style>
-.toggleable {
-padding: 5px 0 0;
-}
-.toggleme {
-  padding: 10px 0 0 20px;
-}
-.toggleable a {
-  text-decoration:none;
-}
-.toggleme a {
-  text-decoration:underline;
-}
-.toggleable.closed .toggleme {
-  display:none;
-}
-#jd-content .toggle-img {
-  margin:0 5px 3px 0;
-}
-</style>
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8c</a> <em>(November 2012)</em>
+  </p>
 
-<div class="toggleable open">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 8b</a> <em>(July 2012)</em>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
 
-  <div class="toggleme">
+      <dd>
+        <ul>
+          <li>Added the Clang 3.1 compiler to the NDK. The GNU Compiler Collection (GCC) 4.6 is
+          still the default, so you must explicitly enable the Clang compiler option as follows:
+            <ul>
+              <li>For {@code ndk-build}, export {@code NDK_TOOLCHAIN_VERSION=clang3.1} <em>or</em>
+                add this environment variable setting to {@code Application.mk}.</li>
+              <li>For standalone builds, add {@code --llvm-version=3.1} to
+                {@code make-standalone-toolchain.sh} and replace {@code CC} and {@code CXX} in your
+                makefile with {@code &lt;tool-path&gt;/bin/clang} and
+                {@code &lt;tool-path&gt;/bin/clang++}. See {@code STANDALONE-TOOLCHAIN.html} for
+                details.</li>
+            </ul>
+            <p class="note"><strong>Note:</strong> This feature is experimental. Please try it and
+            <a href="http://code.google.com/p/android/issues/list">report any issues</a>.</p></li>
+          <li>Added Gold linker {@code ld.gold} for the Windows toolchain. Gold linker is also the
+            default for ARM and X86 on all hosts. You may override it to use the {@code ld.bfd}
+            linker by adding {@code LOCAL_LDFLAGS += -fuse-ld=bfd} to {@code Android.mk}, or by passing
+            {@code -fuse-ld=bfd} to the g++/clang++ command line that does the linking.</li>
+          <li>Added checks for spaces in the NDK path to the {@code ndk-build[.cmd]} and
+            {@code ndk-gdb} scripts, to prevent build errors that are difficult to diagnose.</li>
+          <li>Made the following changes to API level handling:
+            <ul>
+              <li>Modified build logic so that projects that specify {@code android-10} through
+                {@code android-13} in {@code APP_PLATFORM}, {@code project.properties} or
+                {@code default.properties} link against {@code android-9} instead of
+                {@code android-14}.
+              <li>Updated build so that executables using android-16 (Jelly Bean) or higher are
+                compiled with the {@code -fPIE} option for position-independent executables (PIE).
+                A new {@code APP_PIE} option allows you to control this behavior. See {@code
+                APPLICATION-MK.html} for details.
+                <p class="note">
+                  <strong>Note:</strong> All API levels above 14 still link against {@code
+                  platforms/android-14} and no new {@code platforms/android-N} have been added.
+                </p></li>
+              <li>Modified {@code ndk-build} to provide warnings if the adjusted API level is larger
+              than {@code android:minSdkVersion} in the project's {@code AndroidManifest.xml}.</li>
+            </ul>
+          </li>
+          <li>Updated the {@code cpu-features} helper library to include more ARM-specific features.
+          See {@code sources/android/cpufeatures/cpu-features.h} for details.</li>
+          <li>Modified the long double on the X86 platform to be 8 bytes. This data type is now the
+          same size as a double, but is still treated as a distinct type.</li>
+          <li>Updated build for {@code APP_ABI=armeabi-v7a}:
+            <ul>
+              <li>Modified this build type to pass the {@code -march=armv7-a} parameter
+              to the linker. This change ensures that v7-specific libraries and {@code crt*.o} are
+              linked correctly.</li>
+              <li>Added {@code -mfpu=vfpv3-d16} to {@code ndk-build} instead of the
+              {@code -mfpu=vfp} option used in previous releases.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Important bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue where running {@code make-standalone-toolchain.sh} with root privileges
+            resulted in the stand alone tool chain being inaccessible to some users.
+            (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+            <ul>
+              <li>All files and executables in the NDK release package are set to have read and
+                execute permissions for all.</li>
+              <li>The ownership/group of {@code libstdc++.a} is now preserved when copied.</li>
+            </ul>
+          </li>
+          <li>Removed redundant {@code \r} from Windows prebuilt {@code echo.exe}. The redundant
+          {@code \r} caused {@code gdb.setup} to fail in the GNU Debugger (GDB) because it
+          incorrectly became part of the path.
+          (<a href="http://code.google.com/p/android/issues/detail?id=36054">Issue 36054</a>)</li>
+          <li>Fixed Windows parallel builds that sometimes failed due to timing issues in the
+          {@code host-mkdir} implementation.
+          (<a href="http://code.google.com/p/android/issues/detail?id=25875">Issue 25875</a>)</li>
+          <li>Fixed GCC 4.4.3 GNU {@code libstdc++} to <em>not</em> merge {@code typeinfo} names by
+          default. For more details, see
+          {@code toolchain repo gcc/gcc-4.4.3/libstdc++-v3/libsupc++/typeinfo}.
+          (<a href="http://code.google.com/p/android/issues/detail?id=22165">Issue 22165</a>)</li>
+          <li>Fixed problem on {@code null} context in GCC 4.6
+          {@code cp/mangle.c::write_unscoped_name}, where GCC may crash when the context is
+          {@code null} and dereferenced in {@code TREE_CODE}.</li>
+          <li>Fixed GCC 4.4.3 crashes on ARM NEON-specific type definitions for floats.
+          (<a href="http://code.google.com/p/android/issues/detail?id=34613">Issue 34613</a>)</li>
+          <li>Fixed the {@code STLport} internal {@code _IteWrapper::operator*()} implementation
+          where a stale stack location holding the dereferenced value was returned and caused
+          runtime crashes.
+          (<a href="http://code.google.com/p/android/issues/detail?id=38630">Issue 38630</a>)</li>
+
+          <li>ARM-specific fixes:
+            <ul>
+              <li>Fixed ARM GCC 4.4.3/4.6 {@code g++} to not warn that the <em>mangling of
+              &lt;va_list&gt; was changed in GCC 4.4</em>. The workaround using the
+              {@code -Wno-psabi} switch to avoid this warning is no longer required.</li>
+              <li>Fixed an issue when a project with {@code .arm} or {@code .neon} suffixes in
+              {@code LOCAL_SRC_FILES} also used {@code APP_STL}. With {@code APP_STL}, the
+              {@code ndk-build} script searches for C++ files in {@code LOCAL_SRC_FILES} before
+              adding STL {@code header/lib} paths to compilation. Modified {@code ndk-build} to
+              filter out {@code .arm} and {@code .neon} suffixes before the search, otherwise items
+              in {@code LOCAL_SRC_FILES} like {@code myfile.cpp.arm.neon} won't be compiled as C++
+              code.</li>
+              <li>Fixed {@code binutils-2.21/ld.bfd} to be capable of linking object from older
+              binutils without {@code tag_FP_arch}, which was producing <em>assertion fail</em>
+              error messages in GNU Binutils.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35209">Issue 35209</a>)
+              </li>
+              <li>Removed <em>Unknown EABI object attribute 44</em> warning when
+              {@code binutils-2.19/ld} links prebuilt object by newer {@code binutils-2.21}</li>
+              <li>Fixed an issue in GNU {@code stdc++} compilation with both {@code -mthumb} and
+              {@code -march=armv7-a}, by modifying {@code make-standalone-toolchain.sh} to populate
+              {@code headers/libs} in sub-directory {@code armv7-a/thumb}.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35616">Issue 35616</a>)
+              </li>
+              <li>Fixed <em>unresolvable R_ARM_THM_CALL relocation</em> error.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35342">Issue 35342</a>)
+              </li>
+              <li>Fixed internal compiler error at {@code reload1.c:3633}, caused by the ARM
+              back-end expecting the wrong operand type when sign-extend from {@code char}.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50099">GCC Issue 50099</a>)</li>
+              <li>Fixed internal compiler error with negative shift amount.
+              (<a href="http://gcc.gnu.org/ml/gcc-patches/2011-10/msg00594.html">GCC Issue</a>)</li>
+            </ul>
+          </li>
+
+          <li>Fixed {@code -fstack-protector} for X86, which is also the default for the
+          {@code ndk-build} x86 ABI target.</li>
+
+          <li>MIPS-specific fixes:
+            <ul>
+              <li>Fixed {@code STLport} endian-ness by setting {@code _STLP_LITTLE_ENDIAN} to 1 when
+              compiling MIPS {@code libstlport_*}.</li>
+              <li>Fixed GCC {@code __builtin_unreachable} issue when compiling LLVM.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54369">GCC Issue 54369</a>)</li>
+              <li>Backported fix for {@code cc1} compile process consuming 100% CPU.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50380">GCC Issue 50380</a>)</li>
+            </ul>
+          </li>
+
+          <li>GNU Debugger-specific fixes:
+            <ul>
+              <li>Disabled Python support in gdb-7.x at build, otherwise the gdb-7.x configure
+              function may pick up whatever Python version is available on the host and build
+              {@code gdb} with a hard-wired dependency on a specific version of Python.
+              (<a href="http://code.google.com/p/android/issues/detail?id=36120">Issue 36120</a>)
+              </li>
+              <li>Fixed {@code ndk-gdb} when {@code APP_ABI} contains {@code all} and matchs none
+              of the known architectures.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35392">Issue 35392</a>)
+              </li>
+              <li>Fixed Windows pathname support, by keeping the {@code :} character if it looks
+              like it could be part of a Windows path starting with a drive letter.
+              (<a href="http://sourceware.org/bugzilla/show_bug.cgi?id=12843">GDB Issue 12843</a>)
+              </li>
+              <li>Fixed adding of hardware breakpoint support for ARM in {@code gdbserver}.
+              (<a href="http://sourceware.org/ml/gdb-patches/2011-09/msg00200.html">GDB Issue</a>)
+              </li>
+              <li>Added fix to only read the current {@code solibs} when the linker is consistent.
+              This change speeds up {@code solib} event handling.
+              (<a href="http://code.google.com/p/android/issues/detail?id=37677">Issue 37677</a>)
+              </li>
+              <li>Added fix to make repeated attempts to find {@code solib} breakpoints. GDB now
+              retries {@code enable_break()} during every call to {@code svr4_current_sos()} until
+              it succeeds.
+              (<a href="https://android-review.googlesource.com/#/c/43563">Change 43563</a>)</li>
+              <li>Fixed an issue where {@code gdb} would not stop on breakpoints placed in
+              {@code dlopen-ed} libraries.
+              (<a href="http://code.google.com/p/android/issues/detail?id=34856">Issue 34856</a>)
+              </li>
+              <li>Fixed {@code SIGILL} in dynamic linker when calling {@code dlopen()}, on system
+              where {@code /system/bin/linker} is stripped of symbols and
+              {@code rtld_db_dlactivity()} is implemented as {@code Thumb}, due to not preserving
+              {@code LSB} of {@code sym_addr}.
+              (<a href="http://code.google.com/p/android/issues/detail?id=37147">Issue 37147</a>)
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed NDK headers:
+            <ul>
+              <li>Fixed {@code arch-mips/include/asm/*} code that was incorrectly removed from
+              original kernel. (<a href="https://android-review.googlesource.com/#/c/43335">Change
+              43335</a>)</li>
+              <li>Replaced struct member data {@code __unused} with {@code __linux_unused} in
+              {@code linux/sysctl.h} and {@code linux/icmp.h} to avoid conflict with
+              {@code #define __unused} in {@code sys/cdefs.h}.</li>
+              <li>Fixed {@code fenv.h} for enclosed C functions with {@code __BEGIN_DECLS} and
+              {@code __END_DECLS}.</li>
+              <li>Removed unimplemented functions in {@code malloc.h}.</li>
+              <li>Fixed {@code stdint.h} defintion of {@code uint64_t} for ANSI compilers.
+              (<a href="http://code.google.com/p/android/issues/detail?id=1952">Issue 1952</a>)</li>
+              <li>Fixed preprocessor macros in {@code &lt;arch&gt;/include/machine/*}.</li>
+              <li>Replaced {@code link.h} for MIPS with new version supporting all platforms.</li>
+              <li>Removed {@code linux-unistd.h}</li>
+              <li>Move GLibc-specific macros {@code LONG_LONG_MIN}, {@code LONG_LONG_MAX} and
+              {@code ULONG_LONG_MAX} from {@code &lt;pthread.h&gt;} to {@code &lt;limits.h&gt;}.</li>
+            </ul>
+          </li>
+          <li>Fixed a buffer overflow in {@code ndk-stack-parser}.</li>
+          <li>Fixed {@code _STLP_USE_EXCEPTIONS}, when not defined, to omit all declarations
+          and uses of {@code __Named_exception}. Compiling and use of {@code __Named_exception}
+          settings only occurs when {@code STLport} is allowed to use exceptions.</li>
+          <li>Fixed building of Linux-only NDK packages without also building Windows code. Use the
+          following settings to perform this type of build:
+          <pre>./build/tools/make-release.sh --force --systems=linux-x86</pre></li>
+          <li>Fixed {@code libc.so} so it does not export {@code atexit()} and {@code __do_handler}.
+          These symbols are exported for ARM builds by the system version of the C library to
+          support legacy native libraries. NDK-generated should never reference them directly.
+          Instead, each shared library or executable should embed its own version of these symbols,
+          provided by {@code crtbegin_*.o}.
+          <p>If your project is linked with the {@code -nostdlib -Wl,--no-undefined} options, you
+          must provide your own {@code __dso_handle} because {@code crtbegin_so.o} is not linked in
+          this case. The content of {@code __dso_handle} does not matter, as shown in the following
+          example code:</p>
+<pre>
+extern "C" {
+  extern void *__dso_handle __attribute__((__visibility__ ("hidden")));
+  void *__dso_handle;
+}
+</pre>
+          </li>
+          <li>Fixed symbol decoder for ARM used in {@code objdump} for {@code plt} entries to
+          generate a more readable form {@code function@plt}.</li>
+          <li>Removed the following symbols, introduced in GCC 4.6 {@code libgcc.a}, from
+          the X86 platform {@code libc.so} library: {@code __aeabi_idiv0}, {@code __aeabi_ldiv0},
+          {@code __aeabi_unwind_cpp_pr1}, and {@code __aeabi_unwind_cpp_pr2}.</li>
+          <li>Removed unused {@code .ctors}, {@code .dtors}, and {@code .eh_frame} in MIPS
+          {@code crt*_so.S}.</li>
+          <li>Updated {@code ndk-gdb} so that it only takes the last line of output for
+          {@code ndk-build} {@code DUMP_XXXX}. This change ensures that if {@code Application.mk} or
+          {@code Android.mk} print something with {@code $(info ...)} syntax, it does not get
+          injected into the result of {@code DUMP_XXXX}.
+          (<a href="https://groups.google.com/d/msg/android-ndk/-/ew0lTWGr1UEJ">More info</a>)</li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other changes:</dt>
+
+      <dd>
+        <ul>
+          <li>Removed {@code arch-x86} and {@code arch-mips} headers from
+          {@code platforms/android-[3,4,5,8]}. Those headers were incomplete, since both X86 and
+          MIPS ABIs are only supported at API 9 or higher.</li>
+          <li>Simplified c++ include path in standalone packages, as shown below.
+          (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+<pre>
+&lt;path&gt;/arm-linux-androideabi/include/c++/4.6.x-google
+  to:
+&lt;path&gt;/include/c++/4.6/
+</pre></li>
+          <li>Fixed {@code ndk-build} to recognize more C++ file extensions by default:
+          {@code .cc .cp .cxx .cpp .CPP .c++ .C}. You may still use {@code LOCAL_CPP_EXTENSION} to
+          overwrite these extension settings.</li>
+          <li>Fixed an issue in {@code samples/san-angeles} that caused a black screen or freeze
+          frame on re-launch.</li>
+          <li>Replaced deprecated APIs in NDK samples.
+          (<a href="http://code.google.com/p/android/issues/detail?id=20017">Issue 20017</a>)
+            <ul>
+              <li>{@code hello-gl2} from android-5 to android-7</li>
+              <li>{@code native-activity} from android-9 to android-10</li>
+              <li>{@code native-audio} from android-9 to android-10</li>
+              <li>{@code native-plasma} from android-9 to android-10</li>
+            </ul>
+          </li>
+          <li>Added new branding for Android executables with a simpler scheme in section
+          {@code .note.android.ident} (defined in {@code crtbegin_static/dynamic.o}) so that
+          debugging tools can act accordingly. The structure member and values are defined as
+          follows:
+<pre>
+static const struct {
+  int32_t namesz;  /* = 8,  sizeof ("Android") */
+  int32_t descsz;  /* = 1 * sizeof(int32_t) */
+  int32_t type;    /* = 1, ABI_NOTETYPE */
+  char name[sizeof "Android"];  /* = "Android" */
+  int32_t android_api; /* = 3, 4, 5, 8, 9, 14 */
+}
+</pre>
+            <p>The previous branding options in section {@code .note.ABI-tag} are deprecated.</p>
+          </li>
+          <li>Added a new script {@code run-tests-all.sh} which calls {@code run-tests.sh} and
+          {@code standalone/run.sh} with various conditions. The script {@code run-tests.sh} runs
+          without the {@code --abi} option, and is enhanced to compile most of the tests for all
+          supported ABIs and run on all attached devices</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8b</a> <em>(July 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
     <p>The main features of this release are a new GNU Compiler Collection (GCC) 4.6 toolchain and
 GNU Debugger (GDB) 7.3.x which adds debugging support for the Android 4.1 (API Level 16) system
 image.</p>
@@ -304,12 +578,13 @@ in Linux).</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 8</a> <em>(May 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8</a> <em>(May 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes support for MIPS ABI and a few additional fixes.</p>
 
     <dl>
@@ -376,12 +651,13 @@ is compiled for the device's CPU architecture.</p>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7c</a> <em>(April 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7c</a> <em>(April 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes an important fix for Tegra2-based devices, and a few
 additional fixes and improvements:</p>
 
@@ -429,12 +705,13 @@ was called, rather than the total number of <em>physically available</em> cores.
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7b</a> <em>(February 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7b</a> <em>(February 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes fixes for native Windows builds, Cygwin and many other
       improvements:</p>
 
@@ -500,7 +777,7 @@ was called, rather than the total number of <em>physically available</em> cores.
             first process listed by {@code ps}, which is usually a service process.</li>
           <li>Fixed a rare bug where NDK r7 would fail to honor the {@code LOCAL_ARM_MODE} value
             and always compile certain source files (but not all) to 32-bit instructions.</li>
-          <li>{@code stlport}: Refresh the sources to match the Android platform version. This
+          <li>{@code STLport}: Refresh the sources to match the Android platform version. This
             update fixes a few minor bugs:
             <ul>
                <li>Fixed instantiation of an incomplete type</li>
@@ -511,7 +788,7 @@ was called, rather than the total number of <em>physically available</em> cores.
              </ul>
              <p>For complete details, see the commit log.</p>
           </li>
-          <li>{@code stlport}: Removed 5 unnecessary static initializers from the library.</li>
+          <li>{@code STLport}: Removed 5 unnecessary static initializers from the library.</li>
           <li>The GNU libstdc++ libraries for armeabi-v7a were mistakenly compiled for
             armeabi instead. This change had no impact on correctness, but using the right
             ABI should provide slightly better performance.</li>
@@ -539,12 +816,13 @@ was called, rather than the total number of <em>physically available</em> cores.
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7</a> <em>(November 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7</a> <em>(November 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes new features to support the Android 4.0 platform as well
     as many other additions and improvements:</p>
 
@@ -842,13 +1120,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
 </div>
 
 
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 6b</a> <em>(August 2011)</em>
+  </p>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 6b</a> <em>(August 2011)</em>
-
-   <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK does not include any new features compared to r6. The r6b release
       addresses the following issues in the r6 release:</p>
       <dl>
@@ -876,12 +1154,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 6</a> <em>(July 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 6</a> <em>(July 2011)</em>
+  </p>
 
-   <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK includes support for the x86 ABI and other minor changes.
       For detailed information describing the changes in this release, read the
       <code>CHANGES.HTML</code> document included in the NDK package.
@@ -928,12 +1207,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
     </div>
   </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 5c</a> <em>(June 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5c</a> <em>(June 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK does not include any new features compared to r5b. The r5c release
     addresses the following problems in the r5b release:</p>
     <dl>
@@ -1011,14 +1291,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
   </div>
 </div>
 
-<div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 5b</a> <em>(January 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5b</a> <em>(January 2011)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK does not include any new features compared to r5. The r5b release addresses the
       following problems in the r5 release:
       </p>
@@ -1063,14 +1342,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
   </div>
   </div>
 
-<div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 5</a> <em>(December 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5</a> <em>(December 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK includes many new APIs, most of which are introduced to
          support the development of games and similar applications that make extensive use
          of native code. Using the APIs, developers have direct native access to events, audio,
@@ -1142,14 +1420,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 4b</a> <em>(June 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 4b</a> <em>(June 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <dl>
         <dt>NDK r4b notes:</dt>
 
@@ -1216,14 +1493,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 3</a> <em>(March 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 3</a> <em>(March 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <dl>
         <dt>General notes:</dt>
 
@@ -1244,14 +1520,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 2</a> <em>(September 2009)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 2</a> <em>(September 2009)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>Originally released as "Android 1.6 NDK, Release 1".</p>
 
       <dl>
@@ -1270,14 +1545,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 1</a> <em>(June 2009)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 1</a> <em>(June 2009)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>Originally released as "Android 1.5 NDK, Release 1".</p>
 
       <dl>
