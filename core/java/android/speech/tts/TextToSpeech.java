@@ -1067,21 +1067,30 @@ public class TextToSpeech {
     }
 
     /**
-     * Returns a Locale instance describing the language currently being used by the TextToSpeech
-     * engine.
+     * Returns a Locale instance describing the language currently being used for synthesis
+     * requests sent to the TextToSpeech engine.
      *
-     * @return language, country (if any) and variant (if any) used by the engine stored in a Locale
-     *     instance, or {@code null} on error.
+     * In Android 4.2 and before (API <= 17) this function returns the language that is currently
+     * being used by the TTS engine. That is the last language set by this or any other
+     * client by a {@link TextToSpeech#setLanguage} call to the same engine.
+     *
+     * In Android versions after 4.2 this function returns the language that is currently being
+     * used for the synthesis requests sent from this client. That is the last language set
+     * by a {@link TextToSpeech#setLanguage} call on this instance.
+     *
+     * @return language, country (if any) and variant (if any) used by the client stored in a
+     *     Locale instance, or {@code null} on error.
      */
     public Locale getLanguage() {
         return runAction(new Action<Locale>() {
             @Override
-            public Locale run(ITextToSpeechService service) throws RemoteException {
-                String[] locStrings = service.getLanguage();
-                if (locStrings != null && locStrings.length == 3) {
-                    return new Locale(locStrings[0], locStrings[1], locStrings[2]);
-                }
-                return null;
+            public Locale run(ITextToSpeechService service) {
+                /* No service call, but we're accessing mParams, hence need for
+                   wrapping it as an Action instance */
+                String lang = mParams.getString(Engine.KEY_PARAM_LANGUAGE, "");
+                String country = mParams.getString(Engine.KEY_PARAM_COUNTRY, "");
+                String variant = mParams.getString(Engine.KEY_PARAM_VARIANT, "");
+                return new Locale(lang, country, variant);
             }
         }, null, "getLanguage");
     }
