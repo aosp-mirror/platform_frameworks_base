@@ -257,7 +257,7 @@ registerReceiver(mRetryReceiver, filter);
 
 <h2 id="multi-senders">Receiving Messages from Multiple Senders</h2>
 <p>GCM allows multiple parties to send messages to the same application. For example, suppose your application is an articles aggregator with multiple contributors, and you want each of them to be able to send a message when they publish a new article. This message might contain a URL so that the application can download the article. Instead of having to centralize all sending activity in one location, GCM gives you the ability to let each of these contributors send its own messages.</p>
-<p>To make this possible, all you need to do is have each sender generate its own project ID. Then include those IDs in the sender field, separated by commas, when requesting a registration. Finally, share the registration ID with your partners, and they'll be able to send messages to your application using their own authentication keys.</p>
+<p>To make this possible, all you need to do is have each sender generate its own project number. Then include those IDs in the sender field, separated by commas, when requesting a registration. Finally, share the registration ID with your partners, and they'll be able to send messages to your application using their own authentication keys.</p>
 <p>This code snippet illustrates this feature. Senders are passed as an intent extra in a comma-separated list:</p>
 <pre class="prettyprint pretty-java">Intent intent = new Intent(GCMConstants.INTENT_TO_GCM_REGISTRATION);
 intent.setPackage(GSF_PACKAGE);
