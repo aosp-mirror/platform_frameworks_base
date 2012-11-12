@@ -1,0 +1,19 @@
+page.title=AVD Manager
+@jd:body
+
+
+<p>The AVD Manager provides a graphical user interface in which you can create
+and manage Android Virtual Devices (AVDs), which are required by the
+<a href="{@docRoot}tools/help/emulator.html">Android Emulator</a>.</p>
+
+<p>You can launch the AVD Manager in one of the following ways:</p>
+<ul>
+  <li>In Eclipse: select <strong>Window &gt; AVD Manager</strong>, or click
+  the AVD Manager icon in the Eclipse toolbar.</li>
+
+  <li>In other IDEs: Navigate to your SDK's <code>tools/</code> directory and execute
+  <code>android avd</code>.</li>
+</ul>
+
+<p>For more information, see <a href="{@docRoot}tools/devices/managing-avds.html">Managing
+AVDs with AVD Manager</a>.
