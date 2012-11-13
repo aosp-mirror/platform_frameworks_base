@@ -26,7 +26,8 @@ Differences Report &raquo;</a> </li>
 
 <p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android 4.0 is a major platform release that adds a variety of new features for users and app
+<p>Android 4.0 ({@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH})
+is a major platform release that adds a variety of new features for users and app
 developers. Besides all the new features and APIs discussed below, Android 4.0 is an important
 platform release because it brings the extensive set of APIs and Holographic themes from Android 3.x
 to smaller screens. As an app developer, you now have a single platform and unified API framework

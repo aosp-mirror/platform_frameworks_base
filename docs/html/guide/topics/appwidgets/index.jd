@@ -2,15 +2,7 @@ page.title=App Widgets
 @jd:body
 
 <div id="qv-wrapper">
-  <div id="qv">re
-    <h2>Quickview</h2>
-    <ul>
-      <li>App Widgets provide users access to some of your application features
-directly from the Home screen (without the need to launch an activity)</li>
-      <li>App Widgets are backed by a special kind of broadcast receiver that
-handles the App
-Widget lifecycle</li>
-    </ul>
+  <div id="qv">
     
     <h2>In this document</h2>
     <ol>
@@ -55,18 +47,6 @@ collections
       <li>{@link android.appwidget.AppWidgetProviderInfo}</li>
       <li>{@link android.appwidget.AppWidgetManager}</li>
     </ol>
-    
-    <h2>See also</h2>
-    <ol>
-      <li><a
-href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">App Widget
-Design 
-        Guidelines</a></li>
-      <li><a
-href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-
-widgets-and.html">Introducing
-        home screen widgets and the AppWidget framework &raquo;</a></li>
-    </ol>
   </div>
 </div>
 
@@ -86,6 +66,12 @@ the Music App Widget.</p>
 
 <p>This document describes how to publish an App Widget using an App Widget
 provider.</p>
+
+<div class="note design">
+<p><strong>Widget Design</strong></p>
+  <p>For information about how to design your app widget, read the <a
+href="{@docRoot}design/patterns/widgets.html">Widgets</a> design guide.</p>
+</div>
 
 
 <h2 id="Basics">The Basics</h2>

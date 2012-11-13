@@ -26,7 +26,7 @@ Differences Report &raquo;</a> </li>
 
 <p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android 3.2 is an incremental platform release that adds new
+<p>Android 3.2 ({@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}) is an incremental platform release that adds new
 capabilities for users and developers. The sections below provide an overview
 of the new features and developer APIs.</p>
 
