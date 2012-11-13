@@ -23,6 +23,7 @@ page.title=Android Developer Tools
         </li>
 
         <li><a href="#refactoring">Layout Factoring Support</a></li>
+        <li><a href="#Updating">Updating the ADT Plugin</h2>
 
       </ol>
 
@@ -525,3 +526,46 @@ of the more important refactoring features.</p>
     as a string, place the text cursor in the string and press Ctrl-1 to see the refactoring context
     menu.</dd>
   </dl>
+
+
+
+
+
+<h2 id="Updating">Updating the ADT Plugin</h2>
+
+<p>From time to time, a new revision of the ADT Plugin becomes available, with
+new features and bug fixes. Generally, when a new revision of ADT is available,
+you should update to it as soon as convenient. </p>
+
+<p>In some cases, a new revision of ADT will have a dependency on a specific
+revision of the Android SDK Tools. If such dependencies exist, you will need to
+update the SDK Tools package of the SDK after installing the new revision of
+ADT. To update the SDK Tools package, use the Android SDK Manager, as
+described in <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+
+<p>To learn about new features of each ADT revision and also any dependencies on
+the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
+section. To determine the version currently installed, open the
+Eclipse Installed Software window using <strong>Help</strong>
+&gt; <strong>Software Updates</strong> and refer to the version listed for
+"Android Development Tools".</p>
+
+<p>Follow the steps below to check whether an update is available and, if so,
+to install it. </p>
+
+<ol>
+    <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>.
+      <p>If there are no updates available, a dialog will say so and you're done.</p></li>
+    <li>If there are updates available, select Android DDMS, Android Development Tools,
+      and Android Hierarchy Viewer, then click <strong>Next</strong>.</li>
+    <li>In the Update Details dialog, click <strong>Next</strong>.</li>
+    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
+      This will download and install the latest version of Android DDMS and
+      Android Development Tools.</li>
+    <li>Restart Eclipse.</li>
+</ol>
+
+
+<p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
+perform a fresh installation, using the instructions for <a href="#installing">Installing the ADT
+Plugin</a>.</p>
