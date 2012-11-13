@@ -81,6 +81,15 @@ final class PersistentDataStore {
         }
     }
 
+    public WifiDisplay getRememberedWifiDisplay(String deviceAddress) {
+        loadIfNeeded();
+        int index = findRememberedWifiDisplay(deviceAddress);
+        if (index >= 0) {
+            return mRememberedWifiDisplays.get(index);
+        }
+        return null;
+    }
+
     public WifiDisplay[] getRememberedWifiDisplays() {
         loadIfNeeded();
         return mRememberedWifiDisplays.toArray(new WifiDisplay[mRememberedWifiDisplays.size()]);
@@ -135,22 +144,6 @@ final class PersistentDataStore {
         }
         setDirty();
         return true;
-    }
-
-    public boolean renameWifiDisplay(String deviceAddress, String alias) {
-        int index = findRememberedWifiDisplay(deviceAddress);
-        if (index >= 0) {
-            WifiDisplay display = mRememberedWifiDisplays.get(index);
-            if (Objects.equal(display.getDeviceAlias(), alias)) {
-                return false; // already has this alias
-            }
-            WifiDisplay renamedDisplay = new WifiDisplay(deviceAddress,
-                    display.getDeviceName(), alias);
-            mRememberedWifiDisplays.set(index, renamedDisplay);
-            setDirty();
-            return true;
-        }
-        return false;
     }
 
     public boolean forgetWifiDisplay(String deviceAddress) {
