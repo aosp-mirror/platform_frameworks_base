@@ -775,8 +775,18 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         // Send BT state broadcast to update
                         // the BT icon correctly
-                        bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
-                                                    BluetoothAdapter.STATE_TURNING_OFF);
+                        if ((mState == BluetoothAdapter.STATE_TURNING_ON) ||
+                            (mState == BluetoothAdapter.STATE_ON)) {
+                            bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
+                                                        BluetoothAdapter.STATE_TURNING_OFF);
+                            mState = BluetoothAdapter.STATE_TURNING_OFF;
+                        }
+                        if (mState == BluetoothAdapter.STATE_TURNING_OFF) {
+                            bluetoothStateChangeHandler(BluetoothAdapter.STATE_TURNING_OFF,
+                                                        BluetoothAdapter.STATE_OFF);
+                        }
+
+                        mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
                         mState = BluetoothAdapter.STATE_OFF;
                     }
                     break;
@@ -820,20 +830,33 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 }
                             }
                         }
-                        mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+
+                        if (mState == BluetoothAdapter.STATE_TURNING_OFF) {
+                            // MESSAGE_USER_SWITCHED happened right after MESSAGE_ENABLE
+                            bluetoothStateChangeHandler(mState, BluetoothAdapter.STATE_OFF);
+                            mState = BluetoothAdapter.STATE_OFF;
+                        }
+                        if (mState == BluetoothAdapter.STATE_OFF) {
+                            bluetoothStateChangeHandler(mState, BluetoothAdapter.STATE_TURNING_ON);
+                            mState = BluetoothAdapter.STATE_TURNING_ON;
+                        }
 
                         waitForOnOff(true, false);
 
-                        bluetoothStateChangeHandler(mState, BluetoothAdapter.STATE_ON);
+                        if (mState == BluetoothAdapter.STATE_TURNING_ON) {
+                            bluetoothStateChangeHandler(mState, BluetoothAdapter.STATE_ON);
+                        }
 
                         // disable
                         handleDisable(false);
+                        // Pbap service need receive STATE_TURNING_OFF intent to close
+                        bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
+                                                    BluetoothAdapter.STATE_TURNING_OFF);
 
                         waitForOnOff(false, true);
 
-                        bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
+                        bluetoothStateChangeHandler(BluetoothAdapter.STATE_TURNING_OFF,
                                                     BluetoothAdapter.STATE_OFF);
-                        mState = BluetoothAdapter.STATE_OFF;
                         sendBluetoothServiceDownCallback();
                         synchronized (mConnection) {
                             if (mBluetooth != null) {
@@ -844,6 +867,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         }
                         SystemClock.sleep(100);
 
+                        mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+                        mState = BluetoothAdapter.STATE_OFF;
                         // enable
                         handleEnable(false, mQuietEnable);
 		    } else if (mBinding || mBluetooth != null) {
