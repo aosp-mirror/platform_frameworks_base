@@ -4425,6 +4425,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setAppWillBeHidden(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppWillBeHidden()")) {
@@ -4548,6 +4549,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return delayed;
     }
 
+    @Override
     public void setAppVisibility(IBinder token, boolean visible) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppVisibility()")) {
@@ -4700,6 +4702,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void startAppFreezingScreen(IBinder token, int configChanges) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppFreezingScreen()")) {
@@ -4723,6 +4726,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void stopAppFreezingScreen(IBinder token, boolean force) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppFreezingScreen()")) {
@@ -5583,7 +5587,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!mSystemBooted && !haveBootMsg) {
                     return;
                 }
-    
+
                 // If we are turning on the screen after the boot is completed
                 // normally, don't do so until we have the application and
                 // wallpaper.
@@ -5733,7 +5737,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
      * of the target image.
-     * 
+     *
      * @param displayId the Display to take a screenshot of.
      * @param width the width of the target bitmap
      * @param height the height of the target bitmap
@@ -5808,7 +5812,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (maxLayer < ws.mWinAnimator.mSurfaceLayer) {
                     maxLayer = ws.mWinAnimator.mSurfaceLayer;
                 }
-                
+
                 // Don't include wallpaper in bounds calculation
                 if (!ws.mIsWallpaper) {
                     final Rect wf = ws.mFrame;
@@ -8953,27 +8957,29 @@ public class WindowManagerService extends IWindowManager.Stub
             // so we want to leave all of them as undimmed (for
             // performance reasons).
             mInnerFields.mObscured = true;
-        } else if (canBeSeen && (attrFlags & FLAG_DIM_BEHIND) != 0
-                && !(w.mAppToken != null && w.mAppToken.hiddenRequested)
+        }
+    }
+
+    private void handleFlagDimBehind(WindowState w, int innerDw, int innerDh) {
+        final WindowManager.LayoutParams attrs = w.mAttrs;
+        if ((attrs.flags & FLAG_DIM_BEHIND) != 0
+                && w.isDisplayedLw()
                 && !w.mExiting) {
-            if (localLOGV) Slog.v(TAG, "Win " + w + " obscured=" + mInnerFields.mObscured);
-            if (!mInnerFields.mDimming) {
-                //Slog.i(TAG, "DIM BEHIND: " + w);
-                mInnerFields.mDimming = true;
-                final WindowStateAnimator winAnimator = w.mWinAnimator;
-                if (!mAnimator.isDimmingLocked(winAnimator)) {
-                    final int width, height;
-                    if (attrs.type == TYPE_BOOT_PROGRESS) {
-                        final DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
-                        width = displayInfo.logicalWidth;
-                        height = displayInfo.logicalHeight;
-                    } else {
-                        width = innerDw;
-                        height = innerDh;
-                    }
-                    startDimmingLocked(
-                        winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
+            mInnerFields.mDimming = true;
+            final WindowStateAnimator winAnimator = w.mWinAnimator;
+            if (!mAnimator.isDimmingLocked(winAnimator)) {
+                final int width, height;
+                if (attrs.type == TYPE_BOOT_PROGRESS) {
+                    final DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
+                    width = displayInfo.logicalWidth;
+                    height = displayInfo.logicalHeight;
+                } else {
+                    width = innerDw;
+                    height = innerDh;
                 }
+                if (localLOGV) Slog.v(TAG, "Win " + w + " start dimming.");
+                startDimmingLocked(
+                        winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
             }
         }
     }
@@ -9150,6 +9156,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mObscured = mInnerFields.mObscured;
                     if (!mInnerFields.mObscured) {
                         handleNotObscuredLocked(w, currentTime, innerDw, innerDh);
+                    }
+
+                    if (!mInnerFields.mDimming) {
+                        handleFlagDimBehind(w, innerDw, innerDh);
                     }
 
                     if (isDefaultDisplay && obscuredChanged && (mWallpaperTarget == w)
