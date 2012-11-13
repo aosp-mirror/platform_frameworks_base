@@ -9,7 +9,7 @@ adt.zip.checksum=7db4eaae5df6a34fd853317a2bd8250b
 
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
-Development Tools (ADT). This plugin is designed to give you a powerful, integrated
+Development Tools (ADT). This plugin provides a powerful, integrated
 environment in which to develop Android apps. It extends the capabilities
 of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
