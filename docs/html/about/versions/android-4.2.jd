@@ -9,7 +9,7 @@ sdk.platform.apiLevel=17
 <h2>In this document</h2>
 <ol>
   <li><a href="#Behaviors">Important Behavior Changes</a></li>
-  <li><a href="#Daydream">Android Daydream</a></li>
+  <li><a href="#Daydream">Daydream</a></li>
   <li><a href="#SecondaryDisplays">Secondary Displays</a></li>
   <li><a href="#Lockscreen">Lockscreen Widgets</a></li>
   <li><a href="#MultipleUsers">Multiple Users</a></li>
@@ -32,9 +32,16 @@ Differences Report &raquo;</a> </li>
 <p>API Level: 17</p>
 
 <p>Android 4.2 ({@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1})
-is an incremental release for Jelly Bean that offers new features for users and app
+is an update to the Jelly Bean release that offers new features for users and app
 developers. This document provides an introduction to the most notable and
-useful new APIs for app developers.</p>
+useful new APIs for developers.</p>
+
+<p>As an app developer, you should download the Android 4.2 system image and SDK platform from
+the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> as soon as possible. If you
+don’t have a device running Android 4.2 on which to test your app, use the Android 4.2 system
+image to test your app on the <a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>.
+Then build your apps against the Android 4.2 platform to begin using the latest APIs.</p>
+
 
 
 <div class="sidebox-wrapper">
@@ -66,19 +73,12 @@ Level?</a></p>
 </div>
 
 
-<p>As an app developer, you should download the Android 4.2 system image and SDK platform from
-the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> as soon as possible. If you
-don’t have a device running Android 4.2 on which to test your app, use the Android 4.2 system
-image to test your app on the <a href="{@docRoot}tools/devices/emulator.html">Android emulator</a>.
-Then build your apps against the Android 4.2 platform to begin using the latest APIs.</p>
-
-
 
 
 <h2 id="Behaviors">Important Behavior Changes</h2>
 
-<p>If you have previously published an app for Android, be aware of the following changes
-to some APIs that may affect your app’s behavior:</p>
+<p>If you have previously published an app for Android, be aware of the following
+changes that might affect your app’s behavior:</p>
 
 <ul>
   <li><b>Content providers</b> are no longer exported by default. That is, the default value
@@ -95,9 +95,9 @@ even when running on Android 4.2 and higher.</p>
   </li>
   
   <li>Compared to previous versions of Android, <b>user location</b> results may be less accurate
-if your app uses the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission and
-not the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
-    <p>In order to meet the privacy expectations of users when your app requests permission for
+if your app requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission but
+does not request the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
+    <p>To meet the privacy expectations of users when your app requests permission for
 coarse location (and not fine location), the system will not provide a user location estimate
 that’s more accurate than a city block.</p>
   </li>
@@ -118,12 +118,12 @@ moved to {@link android.provider.Settings.Global} when running on Android 4.2 an
 
 
 
-<h2 id="Daydream">Android Daydream</h2>
+<h2 id="Daydream">Daydream</h2>
 
 <p>Daydream is a new interactive screensaver mode for Android devices. It activates automatically
 when the device is inserted into a dock or when the device is left idle while plugged in to a
 charger (instead of turning the screen off). Daydream displays one dream at a time, which may
-each be purely visual, passive displays that dismiss at a touch, or interactive and responsive
+be a purely visual, passive display that dismisses upon touch, or interactive and responsive
 to the full suite of input events. Your dreams run in your app’s process and have full access to
 the Android UI toolkit, including views, layouts, and animations, so they are more flexible and
 powerful than either live wallpapers or app widgets.</p>
@@ -533,7 +533,8 @@ the default signature of the <code>root()</code> function defines.</p>
 
 </dl>
 
-
+<p class="note"><strong>Note:</strong> Although Filterscript support is in the platform, developer
+support will be available in ADT and SDK Tools Release 21.0.1. </p>
 
 
 <p>For a detailed view of all API changes in Android 4.2, see the
