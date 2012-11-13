@@ -44,8 +44,8 @@ page.title=Android NDK
 
   <p>The NDK is a toolset that allows you to implement parts
   of your app using native-code languages such as C and C++. For certain types of apps,
-  this can be helpful so that you may reuse existing code libraries written in these
-  languages and possibly increased performance.</p>
+  this can be helpful so you can reuse existing code libraries written in these
+  languages, but most apps do not need the Android NDK.</p>
 
   <p>Before downloading the NDK, you should understand that <strong>the NDK
    will not benefit most apps</strong>. As a developer, you need to balance its benefits
