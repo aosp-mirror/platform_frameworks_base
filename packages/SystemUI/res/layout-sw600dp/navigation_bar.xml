@@ -141,7 +141,7 @@
                 />
         </LinearLayout>
 
-        <ImageView
+        <com.android.systemui.statusbar.policy.KeyButtonView
             android:layout_width="128dp"
             android:id="@+id/search_light"
             android:layout_height="match_parent"
@@ -282,7 +282,7 @@
                 />
         </LinearLayout>
 
-        <ImageView
+        <com.android.systemui.statusbar.policy.KeyButtonView
             android:layout_width="162dp"
             android:id="@+id/search_light"
             android:layout_height="match_parent"
