@@ -450,7 +450,6 @@ http://developer.android.com/reference/org/apache/http/message/AbstractHttpMessa
 http://developer.android.com/sdk/installing/index.html
 http://developer.android.com/sdk/installing/adding-packages.html
 http://developer.android.com/sdk/installing/installing-adt.html
-http://developer.android.com/sdk/installing/next.html
 http://developer.android.com/sdk/exploring.html
 http://developer.android.com/tools/sdk/ndk/index.html
 http://developer.android.com/tools/workflow/index.html
