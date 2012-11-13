@@ -75,7 +75,7 @@ document for a detailed look at the new developer APIs.</p>
 href="http://www.android.com/whatsnew">www.android.com</a>.</p>
 
 
-<h2 id="42-performance">Faster, Smoother, More Responsive</h2>
+<h2 id="42-performance" style="line-height:1.25em;">Faster, Smoother, More Responsive</h2>
 
 <p>Android 4.2 builds on the performance improvements already included in Jelly Bean
 &mdash; <strong>vsync timing</strong>, <strong>triple buffering</strong>,
