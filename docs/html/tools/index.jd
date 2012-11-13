@@ -51,11 +51,11 @@ page.title=Developer Tools
   <li>Quickly capture bug reports onto the device.</li>
   <li>Show CPU usage on screen.</li>
   <li>Draw debugging information on screen such as layout bounds,
-    updates on GPU views and hardware layers, touch location, and others.</li>
+    updates on GPU views and hardware layers, and other information.</li>
   <li>Plus many more options to simulate app stresses or enable debugging options.</li>
 </ul>
-<p>To access these on your device, open the <em>Developer options</em> in the
-system Settings. Note that on Android 4.2 and higher, the Developer options screen is
+<p>To access these settings, open the <em>Developer options</em> in the
+system Settings. On Android 4.2 and higher, the Developer options screen is
 hidden by default. To make it available, go to
 <b>Settings > About phone</b> and tap <b>Build number</b> seven times. Return to the previous
 screen to find Developer options.</p>
