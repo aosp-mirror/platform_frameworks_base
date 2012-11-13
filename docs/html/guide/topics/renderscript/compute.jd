@@ -10,12 +10,11 @@ parent.link=index.html
 
     <ol>
       <li><a href="#overview">Renderscript System Overview</a></li>
+      <li><a href="#filterscript">Filterscript</a></li>
       <li>
         <a href="#creating-renderscript">Creating a Computation Renderscript</a>
-
         <ol>
           <li><a href="#creating-rs-file">Creating the Renderscript file</a></li>
-
           <li><a href="#calling">Calling the Renderscript code</a></li>
         </ol>
       </li>
@@ -111,16 +110,34 @@ code, like with the NDK.</li>
 <p>For a more detailed explanation of how all of these layers work together, see
   <a href="{@docRoot}guide/topics/renderscript/advanced.html">Advanced Renderscript</a>.<p>
 
+<h2 id="filterscript">Filterscript</h2>
+
+<p>Introduced in Android 4.2 (API Level 17), Filterscript defines a subset of Renderscript
+that focuses on image processing operations, such as those
+that you would typically write with an OpenGL ES fragment shader. You still write your scripts
+using the standard Renderscript runtime APIs, but within stricter
+constraints that ensure wider compatibility and improved optimization across
+CPUs, GPUs, and DSPs. At compile time, the precompiler evaluates Filterscript files and
+applies a more stringent set of warnings and errors than
+it does for standard Renderscript files. The following list describes the major constraints
+of Filterscript when compared to Renderscript:</p>
+
+<ul>
+<li>Inputs and return values of root functions cannot contain pointers. The default root function
+signature contains pointers, so you must use the <code>__attribute__((kernel))</code> attribute to declare a custom
+root function when using Filterscript.</li>
+<li>Built-in types cannot exceed 32-bits.</li>
+<li>Filterscript must always use relaxed floating point precision by using the
+<code>rs_fp_relaxed</code> pragma.</li>
+<li>Filterscript files must end with an <code>.fs</code> extension, instead of an <code>.rs</code> extension.</li>
+</ul>
 
 <h2 id="creating-renderscript">Creating a Renderscript</h2>
 
-<p>Renderscripts scale to the amount of
+<p>Renderscript scales to the amount of
 processing cores available on the device. This is enabled through a function named
 <code>rsForEach()</code> (or the <code>forEach_root()</code> method at the Android framework level).
-that automatically partitions work across available processing cores on the device. 
-For now, Renderscript can only take advantage of CPU
-cores, but in the future, they can potentially run on other types of processors such as GPUs and
-DSPs.</p>
+that automatically partitions work across available processing cores on the device.</p>
 
 <p>Implementing a Renderscript involves creating a <code>.rs</code> file that contains
 your Renderscript code and calling it at the Android framework level with the
@@ -149,10 +166,9 @@ Every <code>.rs</code> file generally contains the following items:</p>
 
   <li>A pragma declaration (<code>#pragma version(1)</code>) that declares the version of
   Renderscript that you are using (1 is the only value for now).</li>
-
-  <li><p>A <code>root()</code> function that is the main worker function. The root function is
-  called by the <code>rsForEach</code> function, which allows the Renderscript code to be called and
-  executed on multiple cores if they are available. The <code>root()</code> function must return
+  
+  <li><p>A root function (or kernel) that is the main entry point to your Renderscript.
+  The default <code>root()</code> function must return
   <code>void</code> and accept the following arguments:</p>
 
     <ul>
@@ -172,10 +188,22 @@ Every <code>.rs</code> file generally contains the following items:</p>
 
       <li>The size of the user-defined data.</li>
     </ul>
+
+  <p>Starting in Android 4.1 (API Level 16), you can choose to define your own root function arguments
+  without adhering to the default root function signature described previously. In addition,
+  you can declare multiple root functions in the same Renderscript. To do this, use the <code>__attribute__((kernel))</code>
+  attribute to define a custom root function. For example, here's a root function
+  that returns a <code>uchar4</code> and accepts two <code>uint32_t</code> types: </p>
+
+  <pre>
+  uchar4 __attribute__((kernel)) root(uint32_t x, uint32_t y) {
+    ...
+  }
+  </pre>
   </li>
 
   <li>An optional <code>init()</code> function. This allows you to do any initialization 
-  before the <code>root()</code> function runs, such as initializing variables. This
+  before the root function runs, such as initializing variables. This
   function runs once and is called automatically when the Renderscript starts, before anything
   else in your Renderscript.</li>
 
@@ -202,6 +230,46 @@ void root(const uchar4 *v_in, uchar4 *v_out) {
   *v_out = rsPackColorTo8888(mono);
 }
 </pre>
+
+<h4>Setting floating point precision</h4>
+<p>You can define the floating point precision required by your compute algorithms. This is useful if you
+ require less precision than the IEEE 754-2008 standard (used by default). You can define
+the floating-point precision level of your script with the following pragmas:</p>
+
+<ul>
+  <li><code>#pragma rs_fp_full</code> (default if nothing is specified): For apps that
+    require floating point precision as outlined by the IEEE 754-2008 standard.
+</li>
+  <li><code>#pragma rs_fp_relaxed</code> - For apps that don’t require
+    strict IEEE 754-2008 compliance and can tolerate less precision. This mode enables
+    flush-to-zero for denorms and round-towards-zero.
+</li>
+  <li><code>#pragma rs_fp_imprecise</code> - For apps that don’t have stringent precision requirements. This mode enables
+    everything in <code>rs_fp_relaxed</code> along with the following:
+<ul>
+  <li>Operations resulting in -0.0 can return +0.0 instead.</li>
+  <li>Operations on INF and NAN are undefined.</li>
+</ul>
+</li>
+</ul>
+
+<h4>Script intrinsics</h4>
+<p>Renderscript adds support for a set of script intrinsics, which are pre-implemented
+filtering primitives that reduce the amount of
+code that you need to write. They also are implemented to ensure that your app gets the
+maximum performance gain possible.</p>
+
+<p>
+Intrinsics are available for the following:
+<ul>
+  <li>{@link android.renderscript.ScriptIntrinsicBlend Blends}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicBlur Blur}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicColorMatrix Color matrix}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicConvolve3x3 3x3 convolve}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicConvolve5x5 5x5 convolve}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicLUT Per-channel lookup table}</li>
+  <li>{@link android.renderscript.ScriptIntrinsicYuvToRGB Converting an Android YUV buffer to RGB}</li>
+</ul>
 
 <h3 id="calling">Calling the Renderscript code</h3>
 
@@ -317,24 +385,15 @@ declared previously. Passing a pointer to a struct and the size of the struct to
 is optional, but useful if your Renderscript requires additional information other than
 the necessary memory allocations.</p>
 
-<h3>Setting floating point precision</h3>
-<p>You can define the floating point precision required by your compute algorithms. This is useful if you
- require less precision than the IEEE 754-2008 standard (used by default). You can define
-the floating-point precision level of your script with the following pragmas:</p>
 
-<ul>
-  <li><code>#pragma rs_fp_full</code> (default if nothing is specified): For apps that
-    require floating point precision as outlined by the IEEE 754-2008 standard.
-</li>
-  <li><code>#pragma rs_fp_relaxed</code> - For apps that don’t require
-    strict IEEE 754-2008 compliance and can tolerate less precision. This mode enables
-    flush-to-zero for denorms and round-towards-zero.
-</li>
-  <li><code>#pragma rs_fp_imprecise</code> - For apps that don’t have stringent precision requirements. This mode enables
-    everything in <code>rs_fp_relaxed</code> along with the following:
-<ul>
-  <li>Operations resulting in -0.0 can return +0.0 instead.</li>
-  <li>Operations on INF and NAN are undefined.</li>
-</ul>
-</li>
-</ul>
+<h4>Script groups</h4>
+
+<p>You can group Renderscript scripts together and execute them all with a single call as though
+they were part of a single script. This allows Renderscript to optimize execution of the scripts
+in ways that it could not do if the scripts were executed individually.</p>
+
+<p>To build a script groupm, use the {@link android.renderscript.ScriptGroup.Builder} class to create a {@link android.renderscript.ScriptGroup}
+defining the operations. At execution time, Renderscript optimizes the run order and the connections between these
+operations for best performance.
+
+<p class="note"><strong>Important:</strong> The script group must be a direct acyclic graph for this feature to work.</p>
