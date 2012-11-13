@@ -46,52 +46,75 @@ by the directory name, such as {@code v4/} and {@code v13/}.</p>
 <p>The sections below provide notes about successive releases of
 the Support Package, as denoted by revision number.</p>
 
-<script type="text/javascript">
-function toggleDiv(link) {
-  var toggleable = $(link).parent();
-  if (toggleable.hasClass("closed")) {
-    //$(".toggleme", toggleable).slideDown("fast");
-    toggleable.removeClass("closed");
-    toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot +
-"assets/images/triangle-opened.png"));
-  } else {
-    //$(".toggleme", toggleable).slideUp("fast");
-    toggleable.removeClass("open");
-    toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot +
-"assets/images/triangle-closed.png"));
-  }
-  return false;
-}
-</script>
 
-<style>
-.toggleable {
-padding: 5px 0 0;
-}
-.toggleme {
-  padding: 10px 0 0 20px;
-}
-.toggleable a {
-  text-decoration:none;
-}
-.toggleme a {
-  text-decoration:underline;
-}
-.toggleable.closed .toggleme {
-  display:none;
-}
-#jd-content .toggle-img {
-  margin:0 5px 3px 0;
-}
-</style>
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Support Package, revision 11</a> <em>(November 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>User Interface
+            <ul>
+              <li>Added support for nested {@link android.support.v4.app.Fragment} classes.</li>
+              <li>Added improvements to {@link android.support.v4.app.FragmentManager} debugging.
+                </li>
+              <li>Fixed problem in {@link android.support.v4.app.FragmentTabHost} where fragment
+                and tab interaction could result in a {@link android.widget.ListView} state loss.
+                </li>
+              <li>Fixed issue with user-visible hint in
+                {@link android.support.v4.app.FragmentStatePagerAdapter}.</li>
+              <li>Added {@link android.support.v4.view.ViewPager.PageTransformer PageTransformer}
+                interface to {@link android.support.v4.view.ViewPager} to allow applications to
+                supply a custom transition behavior for scrolling.</li>
+              <li>Added new features and fixes to {@link android.support.v4.app.TaskStackBuilder}
+                from current release.</li>
+              <li>Fixed {@link android.support.v4.view.PagerTitleStrip} to correctly track the
+                {@link android.support.v4.view.PagerAdapter} currently in use.</li>
+              <li>Fixed display flickering, positioning, and text clipping problems with
+                {@link android.support.v4.view.PagerTitleStrip}.</li>
+              <li>Fixed {@link android.support.v4.view.PagerTabStrip} to properly respect padding
+                when drawing an underline.</li>
+            </ul>
+          </li>
+          <li>Accessibility
+            <ul>
+              <li>Added support for new accessibility gesture and touch event types in
+                {@link android.support.v4.view.accessibility.AccessibilityEventCompat}.</li>
+              <li>Added support for new accessibility APIs in
+                {@link android.support.v4.view.ViewCompat}.</li>
+              <li>Added support for {@link android.support.v4.view.ViewCompat#performAccessibilityAction
+                performAccessibilityAction()} method to {@link android.support.v4.view.ViewCompat}.
+                </li>
+            </ul>
+          </li>
+          <li>Added support for gestures with {@link android.support.v4.view.GestureDetectorCompat}.
+            </li>
+          <li>Added support for performing atomic operations on files using a new
+            {@link android.support.v4.util.AtomicFile} class.</li>
+          <li>Added support for the full set of {@code make} methods in
+            {@link android.support.v4.content.IntentCompat}.</li>
+          <li>Added {@link android.support.v4.util.LruCache#trimToSize trimToSize()} method in
+            {@link android.support.v4.util.LruCache} utility class.</li>
+          <li>Updated {@link android.support.v4.net.ConnectivityManagerCompat} to get NetworkInfo
+            from a {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}
+            broadcast.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
 
-<div class="toggleable opened">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px"
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 10</a> <em>(August 2012)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -105,11 +128,12 @@ padding: 5px 0 0;
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 9</a> <em>(June 2012)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -173,11 +197,12 @@ isActiveNetworkMetered()} method.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 8</a> <em>(April 2012)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -194,11 +219,12 @@ isActiveNetworkMetered()} method.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 7</a> <em>(March 2012)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -209,7 +235,7 @@ attributing shared data to the source app. This class also provides compatible i
 new {@link android.widget.ShareActionProvider} in Android 4.0.</li>
           <li>Added {@link android.support.v4.app.NavUtils} and {@link
 android.support.v4.app.TaskStackBuilder} to provide support for implementing the
-<a href="{@docRoot}design/index.html">Android Design</a> guidelines for navigation. These 
+<a href="{@docRoot}design/index.html">Android Design</a> guidelines for navigation. These
 additions include a way to implement the action bar's <em>Up</em> button across versions.
 For an example implementation of this pattern, see the AppNavigation sample in
 ({@code <em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/AppNavigation}).</li>
@@ -222,11 +248,12 @@ for creating standardized system notifications.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 6</a> <em>(December 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
 
     <p class="note"><strong>Note:</strong> Reference for support library APIs are now available with
     the framework references, for example: {@link android.support.v4.app}.</p>
@@ -274,11 +301,12 @@ for creating standardized system notifications.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 5</a> <em>(December 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -332,11 +360,12 @@ for creating standardized system notifications.</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Support Package, revision 4</a> <em>(October 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -373,11 +402,12 @@ for creating standardized system notifications.</li>
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Compatibility Package, revision 3</a> <em>(July 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
       <dt>Changes for v4 support library:</dt>
       <dd>
@@ -423,11 +453,12 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Compatibility Package, revision 2</a> <em>(May 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
     <dl>
     <dt>Changes for v4 library:</dt>
     <dd>
@@ -442,11 +473,12 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px"
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Compatibility Package, revision 1</a> <em>(March 2011)</em>
-  <div class="toggleme">
+  </p>
+  <div class="toggle-content-toggleme">
       <p>Initial release with the v4 library.</p>
   </div>
 </div>
