@@ -291,6 +291,7 @@ public class Editor {
         mErrorWasChanged = true;
 
         if (mError == null) {
+            setErrorIcon(null);
             if (mErrorPopup != null) {
                 if (mErrorPopup.isShowing()) {
                     mErrorPopup.dismiss();
@@ -299,10 +300,11 @@ public class Editor {
                 mErrorPopup = null;
             }
 
-            setErrorIcon(null);
-        } else if (mTextView.isFocused()) {
-            showError();
+        } else {
             setErrorIcon(icon);
+            if (mTextView.isFocused()) {
+                showError();
+            }
         }
     }
 
@@ -321,8 +323,6 @@ public class Editor {
             if (mErrorPopup.isShowing()) {
                 mErrorPopup.dismiss();
             }
-
-            setErrorIcon(null);
         }
 
         mShowErrorAfterAttach = false;
