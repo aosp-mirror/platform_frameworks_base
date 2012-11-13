@@ -149,7 +149,7 @@ public class MediaController extends FrameLayout {
     private void initFloatingWindowLayout() {
         mDecorLayoutParams = new WindowManager.LayoutParams();
         WindowManager.LayoutParams p = mDecorLayoutParams;
-        p.gravity = Gravity.TOP;
+        p.gravity = Gravity.TOP | Gravity.LEFT;
         p.height = LayoutParams.WRAP_CONTENT;
         p.x = 0;
         p.format = PixelFormat.TRANSLUCENT;
@@ -167,9 +167,15 @@ public class MediaController extends FrameLayout {
         int [] anchorPos = new int[2];
         mAnchor.getLocationOnScreen(anchorPos);
 
+        // we need to know the size of the controller so we can properly position it
+        // within its space
+        mDecor.measure(MeasureSpec.makeMeasureSpec(mAnchor.getWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(mAnchor.getHeight(), MeasureSpec.AT_MOST));
+
         WindowManager.LayoutParams p = mDecorLayoutParams;
         p.width = mAnchor.getWidth();
-        p.y = anchorPos[1] + mAnchor.getHeight();
+        p.x = anchorPos[0] + (mAnchor.getWidth() - p.width) / 2;
+        p.y = anchorPos[1] + mAnchor.getHeight() - mDecor.getMeasuredHeight();
     }
 
     // This is called whenever mAnchor's layout bound changes
@@ -204,6 +210,8 @@ public class MediaController extends FrameLayout {
     /**
      * Set the view that acts as the anchor for the control view.
      * This can for example be a VideoView, or your Activity's main view.
+     * When VideoView calls this method, it will use the VideoView's parent
+     * as the anchor.
      * @param view The view to which to anchor the controller when it is visible.
      */
     public void setAnchorView(View view) {
