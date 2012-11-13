@@ -25,7 +25,8 @@ Differences Report &raquo;</a> </li>
 
 <p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android {@sdkPlatformVersion} is an incremental release of the Android 4.x
+<p>Android {@sdkPlatformVersion} ({@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1})
+is an incremental release of the Android 4.x
 (Ice Cream Sandwich) platform family. This release includes new features for
 users and developers, API changes, and various bug fixes.</p>
 

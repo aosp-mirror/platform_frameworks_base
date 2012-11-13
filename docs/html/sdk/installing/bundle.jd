@@ -4,7 +4,8 @@ page.title=Setting Up the ADT Bundle
 
 
 <p>The ADT Bundle provides everything you need to start developing apps, including
-a powerful IDE based on Eclipse called ADT (Android Developer Tools).
+a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b> to
+streamline your Android app development.
 If you haven't already, go download the <a href="{@docRoot}sdk/index.html"
 >Android ADT Bundle</a>. (If you downloaded the SDK Tools only, for use with an
 existing IDE, you should instead read
