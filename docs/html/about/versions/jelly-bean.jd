@@ -97,7 +97,7 @@ in a single-user environment. </p>
 
 <div style="float:right;margin:22px 0px 0px 24px;width:280px;">
 <div>
-<img src="{@docRoot}images/jb-lock-calendar.png" alt="Calendar lock screen widget" height="462" style="padding-left:1em;margin-bottom:0">
+<img src="{@docRoot}images/jb-lock-calendar.png" alt="Calendar lock screen widget" width="280" style="padding-left:1em;margin-bottom:0">
 </div>
 <p class="image-caption" style="padding:1.5em">You can extend <strong>app widgets</strong> to run on the lock screen, for instant access to your content.</p>
 </div>
