@@ -7,6 +7,8 @@ page.title=Platforms
 
 <h2>See Also</h2>
 <ol>
+  <li><a href="{@docRoot}about/versions/jelly-bean.html">Jelly Bean
+Highlights and APIs</a></li>
   <li><a href="{@docRoot}about/versions/android-4.0-highlights.html">Ice Cream Sandwich
 Highlights and APIs</a></li>
   <li><a href="{@docRoot}about/versions/android-3.0-highlights.html">Honeycomb
@@ -34,6 +36,97 @@ version.</p>
 
 
 
+<h2 id="4.2">Android 4.2</h2>
+
+
+<p class="caution"><strong>Important:</strong> To download the new Android
+4.2.x system components from the Android SDK Manager, you must first update the
+SDK tools to revision 20 or later and restart the Android SDK Manager. If you do not,
+the Android 4.2 system components will not be available for download.</p>
+
+
+<div class="toggle-content opened">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(November 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release. The system version is 4.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r20 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<h3>Device Definitions</h3>
+
+<p>The platform includes the following device definitions for use in creating Android Virtual
+Devices in the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>:</p>
+
+<ul>
+  <li>
+    Nexus 7 (7.3", 800 x 1280, Large tvdpi screen)
+  </li>
+  <li>
+    Galaxy Nexus (4.7", 720 x 1280, Normal xhdpi screen)
+  </li>
+  <li>
+    Nexus S (4.0", 480 x 800, Normal hdpi screen)
+  </li>
+  <li>
+    Nexus One (3.7", 480 x 720, Normal hdpi screen)
+  </li>
+  <li>
+    10.1" WXGA Tablet (1280 x 800, X-Large mdpi screen)
+  </li>
+  <li>
+    7.0" WSVGA Tablet (1024 x 600, Large mdpi screen)
+  </li>
+  <li>
+    5.4" FWVGA (480 x 854, Large mdpi screen)
+  </li>
+  <li>
+    5.1" WVGA (480 x 800, Large mdpi screen)
+  </li>
+  <li>
+    4.7" WXGA (1280 x 720, Normal xhdpi screen)
+  </li>
+  <li>
+    4.65" 720p (720 x 1280, Normal xhdpi screen)
+  </li>
+  <li>
+    4.0" WVGA (480 x 800, Normal hdpi screen)
+  </li>
+  <li>
+    3.7" WVGA (480 x 800, Normal hdpi screen)
+  </li>
+  <li>
+    3.7" FWVGA slider (480 x 854, Normal hdpi screen)
+  </li>
+  <li>
+    3.4" WQVGA (240 x 432, Normal ldpi screen)
+  </li>
+  <li>
+    3.3" WQVGA (240 x 400, Normal ldpi screen)
+  </li>
+  <li>
+    3.2" QVGA ADP2 (320 x 480, Normal mdpi screen)
+  </li>
+  <li>
+    3.2" HVGA slider ADP1 (320 x 480, Normal mdpi screen)
+  </li>
+  <li>
+    2.7" QVGA slider (240 x 320, Small ldpi screen)
+  </li>
+  <li>
+    2.7" QVGA (240 x 320, Small ldpi screen)
+  </li>
+</ul>
 
 
 
@@ -41,15 +134,15 @@ version.</p>
 
 
 <p class="caution"><strong>Important:</strong> To download the new Android
-4.0.x system components from the Android SDK Manager, you must first update the
+4.1.x system components from the Android SDK Manager, you must first update the
 SDK tools to revision 20 or later and restart the Android SDK Manager. If you do not,
 the Android 4.1 system components will not be available for download.</p>
 
 
-<div class="toggle-content opened">
+<div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png"
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 3</a> <em>(October 2012)</em>
   </p>
 
