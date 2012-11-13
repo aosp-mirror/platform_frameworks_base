@@ -31,6 +31,7 @@ public class WebViewClient {
      * proper handler for the url. If WebViewClient is provided, return true
      * means the host application handles the url, while return false means the
      * current WebView handles the url.
+     * This method is not called for requests using the POST "method".
      *
      * @param view The WebView that is initiating the callback.
      * @param url The url to be loaded.
