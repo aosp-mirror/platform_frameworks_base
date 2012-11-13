@@ -107,6 +107,15 @@ public final class WifiDisplay implements Parcelable {
                 && Objects.equal(mDeviceAlias, other.mDeviceAlias);
     }
 
+    /**
+     * Returns true if the other display is not null and has the same address as this one.
+     * Can be used to perform identity comparisons on displays ignoring properties
+     * that might change during a connection such as the name or alias.
+     */
+    public boolean hasSameAddress(WifiDisplay other) {
+        return other != null && mDeviceAddress.equals(other.mDeviceAddress);
+    }
+
     @Override
     public int hashCode() {
         // The address on its own should be sufficiently unique for hashing purposes.
