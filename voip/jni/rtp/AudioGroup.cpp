@@ -785,8 +785,8 @@ bool AudioGroup::DeviceThread::threadLoop()
     int deviceSocket = mGroup->mDeviceSocket;
 
     // Find out the frame count for AudioTrack and AudioRecord.
-    int output = 0;
-    int input = 0;
+    size_t output = 0;
+    size_t input = 0;
     if (AudioTrack::getMinFrameCount(&output, AUDIO_STREAM_VOICE_CALL,
         sampleRate) != NO_ERROR || output <= 0 ||
         AudioRecord::getMinFrameCount(&input, sampleRate,
