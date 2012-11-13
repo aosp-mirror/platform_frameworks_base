@@ -35,7 +35,8 @@ Differences Report &raquo;</a> </li>
 
 <p>API Level: 16</p>
 
-<p>Android 4.1 (Jelly Bean) is a progression of the platform that offers improved
+<p>Android 4.1 ({@link android.os.Build.VERSION_CODES#JELLY_BEAN})
+is a progression of the platform that offers improved
 performance and enhanced user experience. It adds new features for users and app
 developers. This document provides an introduction to the most notable and
 useful new APIs for app developers.</p>
@@ -70,11 +71,12 @@ Level?</a></p>
 </div>
 
 
-<p>As an app developer, Android 4.1 is available to you with an SDK platform you can use to build
-your app against Android 4.1 and with a system image you can run in the Android emulator. You
-should download download the platform and system image as soon as possible to build and test your
-app on Android 4.1. To get started developing and testing against Android
-4.1, use the Android SDK Manager to download the platform into your SDK.</p>
+
+<p>As an app developer, Android 4.1 is available to you from the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> as a system image you can
+run in the Android emulator and an SDK platform against which you can build your app. You should
+download the system image and platform as soon as possible to build and test your
+app on Android 4.1.</p>
 
 
 
