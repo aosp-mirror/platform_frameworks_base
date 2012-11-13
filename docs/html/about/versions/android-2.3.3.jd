@@ -27,7 +27,8 @@ Differences Report &raquo;</a> </li>
 <p>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android 2.3.3 is a small feature release that adds several improvements
+<p>Android 2.3.3 ({@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1})
+is a small feature release that adds several improvements
 and APIs to the Android 2.3 platform.</p>
 
 <p>For developers, the Android {@sdkPlatformVersion} platform is available as a
