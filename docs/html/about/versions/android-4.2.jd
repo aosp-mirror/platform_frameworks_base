@@ -123,7 +123,7 @@ moved to {@link android.provider.Settings.Global} when running on Android 4.2 an
 <p>Daydream is a new interactive screensaver mode for Android devices. It activates automatically
 when the device is inserted into a dock or when the device is left idle while plugged in to a
 charger (instead of turning the screen off). Daydream displays one dream at a time, which may
-be a purely visual, passive display that dismisses upon touch, or interactive and responsive
+be a purely visual, passive display that dismisses upon touch, or may be interactive and responsive
 to the full suite of input events. Your dreams run in your app’s process and have full access to
 the Android UI toolkit, including views, layouts, and animations, so they are more flexible and
 powerful than either live wallpapers or app widgets.</p>
@@ -133,25 +133,26 @@ android.service.dreams.DreamService}. The {@link android.service.dreams.DreamSer
 designed to be similar to those of {@link android.app.Activity}. To specify the UI for your
 dream, pass a layout resource ID or {@link android.view.View} to {@link
 android.service.dreams.DreamService#setContentView setContentView()} at any point after you have
-a window (such as from the {@link android.service.dreams.DreamService#onAttachedToWindow()}
-callback). You cannot initiate a {@link android.service.dreams.DreamService} from your
-app&mdash;it is launched automatically by the system.</p>
+a window, such as from the {@link android.service.dreams.DreamService#onAttachedToWindow()}
+callback.</p>
 
 <p>The {@link android.service.dreams.DreamService} class provides other important lifecycle callback
 methods on top of the base {@link android.app.Service} APIs, such as {@link
 android.service.dreams.DreamService#onDreamingStarted()}, {@link
 android.service.dreams.DreamService#onDreamingStopped()}, and {@link
-android.service.dreams.DreamService#onDetachedFromWindow()}.</p>
+android.service.dreams.DreamService#onDetachedFromWindow()}.
+You cannot initiate a {@link android.service.dreams.DreamService} from your
+app&mdash;it is launched automatically by the system.</p>
 
 <p>If your dream is interactive, you can start an activity from the dream to send the user into
-your full app’s UI for more detail or control. (Use {@link
+your app’s full UI for more detail or control. You can use {@link
 android.service.dreams.DreamService#finish()} to end the dream so the user can see the
-new Activity.)</p>
+new Activity.</p>
 
-<p>To make your daydream available to the system, in your manifest file, declare your {@link
+<p>To make your daydream available to the system, declare your {@link
 android.service.dreams.DreamService} with a <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service>}</a> element.
-You must then include an intent filter with the action {@code
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service>}</a> element
+in your manifest file. You must then include an intent filter with the action {@code
 "android.service.dreams.DreamService"}. For example:</p>
 
 <pre>
@@ -169,12 +170,12 @@ to be aware of:</p>
 
 <ul>
   <li>{@link android.service.dreams.DreamService#setInteractive(boolean)} controls whether
-the daydream receives input events or exits immediately upon user input. If the dream is
-interactive, the user may use the back or home buttons to exit the dream or you can call
+the dream receives input events or exits immediately upon user input. If the dream is
+interactive, the user may use the <em>Back</em> or <em>Home</em> buttons to exit the dream or you can call
 {@link android.service.dreams.DreamService#finish()} to stop the dream.</li>
-  <li>If you need a fully immersive display, calling {@link
+  <li>If you want a fully immersive display, you can call {@link
 android.service.dreams.DreamService#setFullscreen
-setFullscreen()} is a quick way to hide the status bar.</li>
+setFullscreen()} to hide the status bar.</li>
   <li>Before Daydream starts, the display dims to signal to the user that the idle timeout
 is approaching. Calling {@link android.service.dreams.DreamService#setScreenBright
 setScreenBright(true)} allows you to instead set the display at its usual brightness.</li>
@@ -195,14 +196,14 @@ setScreenBright(true)} allows you to instead set the display at its usual bright
 <h2 id="SecondaryDisplays">Secondary Displays</h2>
 
 <p>Android now allows your app to display unique content on additional screens that are connected
-to the user’s device. As an extension of {@link android.app.Dialog} class, the new {@link
-android.app.Presentation} class provides a region for your app to display customized UI on a
-secondary display rather than simply mirroring the UI from the device.</p>
-
-<p>To create unique content for a secondary display, extend the {@link android.app.Presentation}
+to the user’s device over either a wired connection or Wi-Fi.
+ To create unique content for a secondary display, extend the {@link android.app.Presentation}
 class and implement the {@link android.app.Presentation#onCreate onCreate()} callback. Within
 {@link android.app.Presentation#onCreate onCreate()}, specify your UI for the secondary display
-by calling {@link android.app.Presentation#setContentView setContentView()}.</p>
+by calling {@link android.app.Presentation#setContentView setContentView()}.
+As an extension of the {@link android.app.Dialog} class, the {@link
+android.app.Presentation} class provides the region in which your app can display a unique UI on the
+secondary display.</p>
 
 <p>To detect secondary displays where you can display your {@link android.app.Presentation},
 use either the {@link android.hardware.display.DisplayManager} or {@link android.media.MediaRouter}
@@ -211,7 +212,7 @@ multiple displays that may be connected at once, you should usually use {@link
 android.media.MediaRouter} instead to quickly access the system’s default display for
 presentations.</p>
 
-<p>To get the default display for presentations, call {@link
+<p>To get the default display for your presentation, call {@link
 android.media.MediaRouter#getSelectedRoute MediaRouter.getSelectedRoute()} and pass it
 {@link android.media.MediaRouter#ROUTE_TYPE_LIVE_VIDEO}. This returns a {@link
 android.media.MediaRouter.RouteInfo} object that describes the system’s currently selected route
