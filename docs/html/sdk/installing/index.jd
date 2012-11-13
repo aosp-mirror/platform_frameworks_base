@@ -23,7 +23,7 @@ use to download the rest of the SDK packages (such as the latest system image).<
 <li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will need to
 refer to the SDK directory later, when setting up the ADT plugin and when using
 the SDK tools from the command line.</li>
-<li>Once the installation completes. the installer offers to start the Android SDK Manager.
+<li>Once the installation completes, the installer offers to start the Android SDK Manager.
 If you'll be using Eclipse, <strong>do not</strong> start the Android SDK Manager,
 and instead move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
 >Installing the Eclipse Plugin</a>.

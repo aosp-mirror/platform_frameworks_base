@@ -311,7 +311,7 @@ the ADT plugin to it.</p>
   onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax,.myide');return false;"
   >SYSTEM REQUIREMENTS</a></h4>
 
-<div class="col-6 reqs" style="margin:0 0 15px;display:none;font-size:12px">
+<div class="col-6 reqs" style="margin:0 0 15px;display:none;">
 <h5>Operating Systems</h5>
 <ul>
   <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
@@ -326,7 +326,7 @@ the ADT plugin to it.</p>
 </ul>
 </div>
 
-<div class="col-7 reqs" style="margin:0 0 15px;display:none;font-size:12px">
+<div class="col-6 reqs" style="margin:0 0 15px 20px;display:none;">
 <h5>Eclipse IDE</h5>
     <ul>
       <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.6.2 (Helios) or greater
@@ -338,7 +338,7 @@ in most Eclipse IDE packages) </li>
         (JRE alone is not sufficient)</li>
       <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Development Tools plugin</a>
 (recommended)</li>
-      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
+      <li><strong>Not</strong> compatible with GNU Compiler for Java (gcj)</li>
     </ul>
 
 
@@ -349,26 +349,9 @@ in most Eclipse IDE packages) </li>
       <li><a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>
-  </li>
-</ul>
 
 <p class="note"><strong>Note:</strong> Some Linux distributions may include JDK 1.4 or Gnu Compiler
 for Java, both of which are <em>not</em> supported for Android development. </p>
 </div><!-- end col-7 reqs -->
 
-
-
-<h4><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.pax');hideExpandable('.myide,.reqs');return false;"
-  >DOWNLOAD FOR OTHER PLATFORMS</a></h4>
-
-</div><!-- end col-13 for lower-half content -->
-
-<script>
-  if (location.hash == "#Requirements") {
-    $('.reqs').show();
-  } else if (location.hash == "#ExistingIDE") {
-	 $('.ide').show();
-  }
-</script>
 
