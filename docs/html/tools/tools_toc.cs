@@ -10,22 +10,22 @@
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
+	    <li><a href="<?cs var:toroot ?>sdk/installing/bundle.html">
+	        <span class="en">Setting Up the ADT Bundle</span></a></li>
       <li class="nav-section">
         <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>sdk/installing/index.html"><span class="en">Installing
-    the SDK</span></a></div>
+          <a href="<?cs var:toroot ?>sdk/installing/index.html"><span class="en">Setting Up
+    an Existing IDE</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
-              <span class="en">Adding Platforms and Packages</span></a></li>
           <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
               <span class="en">Installing the Eclipse Plugin</span></a></li>
-          <li><a href="<?cs var:toroot ?>sdk/installing/next.html">
-              <span class="en">Next Steps</span></a></li>
+		    <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
+		        <span class="en">Adding Platforms and Packages</span></a></li>
         </ul>
       </li>
-          <li><a href="<?cs var:toroot ?>sdk/exploring.html">
-              <span class="en">Exploring the SDK</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">NDK</a>
+	    <li><a href="<?cs var:toroot ?>sdk/exploring.html">
+	        <span class="en">Exploring the SDK</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">Download the NDK</a>
       </li>
     </ul>
   </li>
