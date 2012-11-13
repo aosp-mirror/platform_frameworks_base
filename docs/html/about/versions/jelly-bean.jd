@@ -1,37 +1,13 @@
 page.title=Jelly Bean
+tab1=Android 4.2
+tab1.link=#android-42
+tab2=Android 4.1
+tab2.link=#android-41
+
 @jd:body
 
 
 <style>
-h1 {
-  margin-bottom:0;
-}
-ul#version-tabs {
-  list-style:none;
-  border-bottom: 1px solid #93C;
-  padding:0;
-  height:29px;
-  margin:0 0 20px;
-  font-size:16px;
-  line-height:26px;
-}
-ul#version-tabs li {
-  display:block;
-  float:left;
-  margin-right:60px;
-  border-bottom: 3px solid transparent;
-}
-ul#version-tabs li.selected {
-  border-bottom: 3px solid #93C;
-}
-ul#version-tabs li a {
-  color:#333;
-}
-ul#version-tabs li a:hover,
-ul#version-tabs li a:active {
-  color:#93C !important;
-}
-
 #android-41 {display:none;}
 </style>
 
@@ -39,7 +15,7 @@ ul#version-tabs li a:active {
 function revealSection(hashy) {
   if (hashy != "" && !$(hashy).is(":visible")) {
     sectionId = $(hashy).closest(".version-section").attr("id");
-    link = $("#version-tabs a[href$="+sectionId+"]");
+    link = $("#title-tabs a[href$="+sectionId+"]");
     link.parent().addClass("selected");
     link.parent().siblings().removeClass("selected");
     
@@ -56,7 +32,7 @@ function revealSection(hashy) {
 }
 
 $(document).ready(function() {
-  $("#version-tabs li a").each(function() {
+  $("#title-tabs li a").each(function() {
     $(this).click(function(){
       $(this).parent().addClass("selected");
       $(this).parent().siblings().removeClass("selected");
@@ -75,13 +51,6 @@ window.onhashchange = function () {
 }
 
 </script>
-
-
-
-<ul id="version-tabs">
-  <li class="selected"><a href="#android-42">Android 4.2</a></li>
-  <li><a href="#android-41">Android 4.1</a></li>
-</ul>
 
 
 
