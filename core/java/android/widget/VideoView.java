@@ -183,6 +183,10 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         info.setClassName(VideoView.class.getName());
     }
 
+    public int resolveAdjustedSize(int desiredSize, int measureSpec) {
+        return getDefaultSize(desiredSize, measureSpec);
+    }
+
     private void initVideoView() {
         mVideoWidth = 0;
         mVideoHeight = 0;
