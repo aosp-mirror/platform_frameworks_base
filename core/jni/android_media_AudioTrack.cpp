@@ -206,7 +206,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 {
     ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
         sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
-    int afSampleRate;
+    uint32_t afSampleRate;
     int afFrameCount;
 
     if (AudioSystem::getOutputFrameCount(&afFrameCount, (audio_stream_type_t) streamType) != NO_ERROR) {
@@ -750,7 +750,7 @@ static jint android_media_AudioTrack_reload(JNIEnv *env,  jobject thiz) {
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobject thiz,
         jint javaStreamType) {
-    int afSamplingRate;
+    uint32_t afSamplingRate;
     // convert the stream type from Java to native value
     // FIXME: code duplication with android_media_AudioTrack_native_setup()
     audio_stream_type_t nativeStreamType;
