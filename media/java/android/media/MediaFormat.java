@@ -50,7 +50,7 @@ import java.util.Map;
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_CHANNEL_COUNT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_SAMPLE_RATE}</td><td>Integer</td><td></td></tr>
- * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if content is AAC audio, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
+ * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if <em>decoding</em> AAC audio content, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
  * <tr><td>{@link #KEY_AAC_PROFILE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired profile.</td></tr>
  * <tr><td>{@link #KEY_CHANNEL_MASK}</td><td>Integer</td><td>A mask of audio channel assignments</td></tr>
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
@@ -140,6 +140,8 @@ public final class MediaFormat {
      * A key mapping to a value of 1 if the content is AAC audio and
      * audio frames are prefixed with an ADTS header.
      * The associated value is an integer (0 or 1).
+     * This key is only supported when _decoding_ content, it cannot
+     * be used to configure an encoder to emit ADTS output.
      */
     public static final String KEY_IS_ADTS = "is-adts";
 
