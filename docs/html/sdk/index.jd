@@ -43,6 +43,32 @@ sdk.linux_checksum=7f8d73b629f808cdcfc9f9900bbd7580
 </style>
 
 
+<div id="naMessage" style="display:none">
+<div><p><strong>Sorry, the Eclipse IDE with ADT currently requires a 64-bit OS</strong></p>
+<p>It looks like you're running a 32-bit operating system. You can continue with the download if you'd like,
+but be aware the version of Eclipse included in this download <strong>will not work</strong>
+on a 32-bit OS, although the rest of the Android SDK tools and platforms <strong>will work</strong>
+normally on their own or with another IDE.</p>
+<p>If you'll be developing on a 32-bit OS, you can download a 32-bit version of Eclipse
+from <a href="http://eclipse.org/mobile/">http://eclipse.org/mobile/</a>. You should then
+instead download the stand-alone Android SDK Tools and separately
+set up Eclipse with the ADT plugin.</p>
+
+<input id="warningCancel" style="margin-top:1em;padding:5px;white-space:pre" type="button"
+   value="Continue download anyway" style="cursor:pointer">
+<input id="warningOk" class="button" style="margin-top:1em;padding:5px;white-space:pre;float:right" type="button"
+    value="Download SDK Tools instead">
+</div>
+</div>
+
+
+
+
+
+
+
+
+
 <div style="position:relative;height:660px;">
 
 
