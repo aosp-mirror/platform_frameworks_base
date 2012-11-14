@@ -1606,7 +1606,10 @@ From class
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>product name of the device</li></ul>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
@@ -1715,7 +1718,10 @@ From class
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is in natural orientation</li></ul>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
@@ -2493,7 +2499,10 @@ From class
         </tr>
       </table>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
@@ -2541,7 +2550,10 @@ From class
         </tr>
       </table>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
@@ -2589,7 +2601,10 @@ From class
         </tr>
       </table>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 

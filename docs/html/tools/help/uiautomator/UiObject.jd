@@ -1376,7 +1376,6 @@ From class
         </tr>
       </table>
   </div>
-
     </div>
 </div>
 
@@ -1753,6 +1752,10 @@ From class
         </tr>
       </table>
   </div>
+   <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
