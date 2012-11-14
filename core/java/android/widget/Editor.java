@@ -309,13 +309,15 @@ public class Editor {
     }
 
     private void setErrorIcon(Drawable icon) {
-        final Drawables dr = mTextView.mDrawables;
-        if (dr != null) {
-            mTextView.setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
-                    dr.mDrawableBottom);
-        } else {
-            mTextView.setCompoundDrawables(null, null, icon, null);
+        Drawables dr = mTextView.mDrawables;
+        if (dr == null) {
+            mTextView.mDrawables = dr = new Drawables();
         }
+        dr.setErrorDrawable(icon, mTextView);
+
+        mTextView.resetResolvedDrawables();
+        mTextView.invalidate();
+        mTextView.requestLayout();
     }
 
     private void hideError() {
@@ -329,7 +331,7 @@ public class Editor {
     }
 
     /**
-     * Returns the Y offset to make the pointy top of the error point
+     * Returns the X offset to make the pointy top of the error point
      * at the middle of the error icon.
      */
     private int getErrorX() {
@@ -340,8 +342,23 @@ public class Editor {
         final float scale = mTextView.getResources().getDisplayMetrics().density;
 
         final Drawables dr = mTextView.mDrawables;
-        return mTextView.getWidth() - mErrorPopup.getWidth() - mTextView.getPaddingRight() -
-                (dr != null ? dr.mDrawableSizeRight : 0) / 2 + (int) (25 * scale + 0.5f);
+
+        final int layoutDirection = mTextView.getLayoutDirection();
+        int errorX;
+        int offset;
+        switch (layoutDirection) {
+            default:
+            case View.LAYOUT_DIRECTION_LTR:
+                offset = - (dr != null ? dr.mDrawableSizeRight : 0) / 2 + (int) (25 * scale + 0.5f);
+                errorX = mTextView.getWidth() - mErrorPopup.getWidth() -
+                        mTextView.getPaddingRight() + offset;
+                break;
+            case View.LAYOUT_DIRECTION_RTL:
+                offset = (dr != null ? dr.mDrawableSizeLeft : 0) / 2 - (int) (25 * scale + 0.5f);
+                errorX = mTextView.getPaddingLeft() + offset;
+                break;
+        }
+        return errorX;
     }
 
     /**
@@ -358,16 +375,27 @@ public class Editor {
                 mTextView.getCompoundPaddingBottom() - compoundPaddingTop;
 
         final Drawables dr = mTextView.mDrawables;
-        int icontop = compoundPaddingTop +
-                (vspace - (dr != null ? dr.mDrawableHeightRight : 0)) / 2;
+
+        final int layoutDirection = mTextView.getLayoutDirection();
+        int height;
+        switch (layoutDirection) {
+            default:
+            case View.LAYOUT_DIRECTION_LTR:
+                height = (dr != null ? dr.mDrawableHeightRight : 0);
+                break;
+            case View.LAYOUT_DIRECTION_RTL:
+                height = (dr != null ? dr.mDrawableHeightLeft : 0);
+                break;
+        }
+
+        int icontop = compoundPaddingTop + (vspace - height) / 2;
 
         /*
          * The "2" is the distance between the point and the top edge
          * of the background.
          */
         final float scale = mTextView.getResources().getDisplayMetrics().density;
-        return icontop + (dr != null ? dr.mDrawableHeightRight : 0) - mTextView.getHeight() -
-                (int) (2 * scale + 0.5f);
+        return icontop + height - mTextView.getHeight() - (int) (2 * scale + 0.5f);
     }
 
     void createInputContentTypeIfNeeded() {
@@ -3726,7 +3754,7 @@ public class Editor {
             super(v, width, height);
             mView = v;
             // Make sure the TextView has a background set as it will be used the first time it is
-            // shown and positionned. Initialized with below background, which should have
+            // shown and positioned. Initialized with below background, which should have
             // dimensions identical to the above version for this to work (and is more likely).
             mPopupInlineErrorBackgroundId = getResourceId(mPopupInlineErrorBackgroundId,
                     com.android.internal.R.styleable.Theme_errorMessageBackground);
