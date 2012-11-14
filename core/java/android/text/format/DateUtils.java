@@ -607,6 +607,30 @@ public class DateUtils
     }
 
     /**
+     * Return given duration in a human-friendly format. For example, "4
+     * minutes" or "1 second". Returns only largest meaningful unit of time,
+     * from seconds up to hours.
+     *
+     * @hide
+     */
+    public static CharSequence formatDuration(long millis) {
+        final Resources res = Resources.getSystem();
+        if (millis >= HOUR_IN_MILLIS) {
+            final int hours = (int) ((millis + 1800000) / HOUR_IN_MILLIS);
+            return res.getQuantityString(
+                    com.android.internal.R.plurals.duration_hours, hours, hours);
+        } else if (millis >= MINUTE_IN_MILLIS) {
+            final int minutes = (int) ((millis + 30000) / MINUTE_IN_MILLIS);
+            return res.getQuantityString(
+                    com.android.internal.R.plurals.duration_minutes, minutes, minutes);
+        } else {
+            final int seconds = (int) ((millis + 500) / SECOND_IN_MILLIS);
+            return res.getQuantityString(
+                    com.android.internal.R.plurals.duration_seconds, seconds, seconds);
+        }
+    }
+
+    /**
      * Formats an elapsed time in the form "MM:SS" or "H:MM:SS"
      * for display on the call-in-progress screen.
      * @param elapsedSeconds the elapsed time in seconds.
