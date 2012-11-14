@@ -1,0 +1,65 @@
+page.title=Google+
+page.landing=true
+page.landing.intro=Create an engaging social experience and connect with more users by integrating G+ into your app.
+page.landing.link=https://developers.google.com/+/mobile/android/
+page.landing.link.text=developers.google.com/+
+page.landing.image=images/gps-plus.png
+
+@jd:body
+
+<div class="landing-docs">
+  <div class="col-6">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+    <a href="https://developers.google.com/+/mobile/android/share">
+      <h4>Share to Google+</h4>
+      Display a Share dialog that lets your users share rich content from your app, including text,
+      photos, URL attachments, and location, into the Google+ stream.
+    </a>
+
+    <a href="https://developers.google.com/+/mobile/android/recommend">
+      <h4>Recommend content</h4>
+      Add a native +1 button so users can recommend content from your app. When users +1, they can
+      also share content with their circles. These endorsements can give your app more
+      credibility and help it grow faster.
+    </a>
+
+    <a href="https://developers.google.com/+/mobile/android/sign-in">
+      <h4>Sign in with Google+</h4>
+      Allow users to easily and securely sign in to your app using their Google+ credentials.
+      This allows you to know who they are on Google+ and to build a more personalized experience in your app.
+    </a>
+    <a href="https://developers.google.com/+/mobile/android/write-moments">
+      <h4>Save moments</h4>
+       Save user actions from your app such as check-ins, reviews, video views, comments, and more,
+       to your users' private Google+ history. From there, users can share these moments with others.
+    </a>
+  </div>
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>Get the Google Play services SDK</h4>
+    <p>The Google+ Android APIs are part of the Google Play services platform.</p>
+    <p><a href="{@docRoot}google/play-services/download.html">Download and configure</a>
+      the SDK to begin integrating Google+ into your app.
+    </p>
+            
+    <h4>Run the sample</h4>
+    <p>
+      The Google+ sample is located in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/plus</code> and shows you
+      how to use the major components of the Google+ Android APIs.
+    </p>
+    
+    <h4>Visit the Google+ developer site</h4>
+    <p>For instructions on how to fully integrate Google+ into your app, with code snippets, visit the
+      <a href="https://developers.google.com/+/mobile/android/">Google+ developer documentation</a> located at
+      developers.google.com.
+    </p>
+    
+    <h4>See the reference documentation</h4>
+    <p>The <a href="{@docRoot}google/play-services/reference/com/google/android/gms/plus/package-summary.html">Google+ API reference</a>
+      as well as the entire <a href="{@docRoot}google/play-services/reference/packages.html">Google Play services platform reference</a>
+      is provided for you on this site.
+    </p>
+  </div>
+</div>
