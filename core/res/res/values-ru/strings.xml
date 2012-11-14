@@ -759,7 +759,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторите попытку"</string>
-    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторить попытку"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторите попытку"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Все попытки войти с помощью Фейсконтроля использованы"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Заряжено"</string>
@@ -829,7 +829,7 @@
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-код"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Пароль"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ввода графического ключа"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область прокрутки"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область слайдера"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
