@@ -512,6 +512,10 @@ public class KeyguardWidgetFrame extends FrameLayout {
         return false;
     }
 
+    public void onBouncerShowing(boolean showing) {
+        // hook for subclasses
+    }
+
     public void setWorkerHandler(Handler workerHandler) {
         mWorkerHandler = workerHandler;
     }
@@ -519,4 +523,5 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public Handler getWorkerHandler() {
         return mWorkerHandler;
     }
+
 }
