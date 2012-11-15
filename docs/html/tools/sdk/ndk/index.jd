@@ -24,8 +24,8 @@ page.title=Android NDK
 <div class="ndk" style="
 z-index: 99;
 width: 720px;
-position: fixed;
-margin: -20px 0;
+position: absolute;
+margin: -70px 0;
 padding: 14px;
 background: white;
 border: 1px solid #999;
