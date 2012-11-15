@@ -31,7 +31,7 @@ import android.util.Log;
 public final class Trace {
     private static final String TAG = "Trace";
 
-    // These tags must be kept in sync with frameworks/native/include/utils/Trace.h.
+    // These tags must be kept in sync with system/core/include/cutils/trace.h.
     public static final long TRACE_TAG_NEVER = 0;
     public static final long TRACE_TAG_ALWAYS = 1L << 0;
     public static final long TRACE_TAG_GRAPHICS = 1L << 1;
@@ -44,12 +44,13 @@ public final class Trace {
     public static final long TRACE_TAG_AUDIO = 1L << 8;
     public static final long TRACE_TAG_VIDEO = 1L << 9;
     public static final long TRACE_TAG_CAMERA = 1L << 10;
+    public static final long TRACE_TAG_HAL = 1L << 11;
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
 
     public static final int TRACE_FLAGS_START_BIT = 1;
     public static final String[] TRACE_TAGS = {
         "Graphics", "Input", "View", "WebView", "Window Manager",
-        "Activity Manager", "Sync Manager", "Audio", "Video", "Camera",
+        "Activity Manager", "Sync Manager", "Audio", "Video", "Camera", "HAL",
     };
 
     public static final String PROPERTY_TRACE_TAG_ENABLEFLAGS = "debug.atrace.tags.enableflags";
