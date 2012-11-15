@@ -557,15 +557,6 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_HSPAP = 15;
 
     /**
-     * Returns the NETWORK_TYPE_xxxx for data transmission
-     *
-     * @Deprecated to be removed Q3 2013 use {@link #getDataNetworkType}.
-     */
-    public int getNetworkType() {
-        return getDataNetworkType();
-    }
-
-    /**
      * Returns a constant indicating the radio technology (network type)
      * currently in use on the device for data transmission.
      * @return the network type
@@ -587,32 +578,11 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      */
-    public int getDataNetworkType() {
+    public int getNetworkType() {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getDataNetworkType();
-            } else {
-                // This can happen when the ITelephony interface is not up yet.
-                return NETWORK_TYPE_UNKNOWN;
-            }
-        } catch(RemoteException ex) {
-            // This shouldn't happen in the normal case
-            return NETWORK_TYPE_UNKNOWN;
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            return NETWORK_TYPE_UNKNOWN;
-        }
-    }
-
-    /**
-     * Returns the NETWORK_TYPE_xxxx for voice
-     */
-    public int getVoiceNetworkType() {
-        try{
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getVoiceNetworkType();
+                return telephony.getNetworkType();
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;

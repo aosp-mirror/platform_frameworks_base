@@ -20855,22 +20855,18 @@ package android.telephony {
     ctor public ServiceState(android.os.Parcel);
     method protected void copyFrom(android.telephony.ServiceState);
     method public int describeContents();
-    method public int getDataRegState();
     method public boolean getIsManualSelection();
     method public java.lang.String getOperatorAlphaLong();
     method public java.lang.String getOperatorAlphaShort();
     method public java.lang.String getOperatorNumeric();
     method public boolean getRoaming();
     method public int getState();
-    method public int getVoiceState();
-    method public void setDataRegState(int);
     method public void setIsManualSelection(boolean);
     method public void setOperatorName(java.lang.String, java.lang.String, java.lang.String);
     method public void setRoaming(boolean);
     method public void setState(int);
     method public void setStateOff();
     method public void setStateOutOfService();
-    method public void setVoiceState(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int STATE_EMERGENCY_ONLY = 2; // 0x2
@@ -20972,7 +20968,6 @@ package android.telephony {
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
-    method public int getDataNetworkType();
     method public int getDataState();
     method public java.lang.String getDeviceId();
     method public java.lang.String getDeviceSoftwareVersion();
@@ -20991,7 +20986,6 @@ package android.telephony {
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
-    method public int getVoiceNetworkType();
     method public boolean hasIccCard();
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
