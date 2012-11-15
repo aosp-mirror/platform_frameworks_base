@@ -87,6 +87,8 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
               standard size and Nexus virtual devices.</li>
             <li>Improved emulators so that they launch with a skin that is dynamically generated and
               reflects the actual hardware configured in the AVD Manager.</li>
+            <li>Improved support for developing Android apps on MIPS-based devices with new MIPS
+              System Images for Android Virtual Devices.</li>
           </ul>
         </li>
         <li>Added {@code jobb} tool for creating and encrypting
