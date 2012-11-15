@@ -36,7 +36,6 @@ import android.util.Log;
 public class ServiceState implements Parcelable {
 
     static final String LOG_TAG = "PHONE";
-    static final boolean DBG = true;
 
     /**
      * Normal operation condition, the phone is registered
@@ -62,46 +61,6 @@ public class ServiceState implements Parcelable {
      */
     public static final int STATE_POWER_OFF = 3;
 
-    /**
-     * RIL level registration state values from ril.h
-     * ((const char **)response)[0] is registration state 0-6,
-     *              0 - Not registered, MT is not currently searching
-     *                  a new operator to register
-     *              1 - Registered, home network
-     *              2 - Not registered, but MT is currently searching
-     *                  a new operator to register
-     *              3 - Registration denied
-     *              4 - Unknown
-     *              5 - Registered, roaming
-     *             10 - Same as 0, but indicates that emergency calls
-     *                  are enabled.
-     *             12 - Same as 2, but indicates that emergency calls
-     *                  are enabled.
-     *             13 - Same as 3, but indicates that emergency calls
-     *                  are enabled.
-     *             14 - Same as 4, but indicates that emergency calls
-     *                  are enabled.
-     * @hide
-     */
-    public static final int RIL_REG_STATE_NOT_REG = 0;
-    /** @hide */
-    public static final int RIL_REG_STATE_HOME = 1;
-    /** @hide */
-    public static final int RIL_REG_STATE_SEARCHING = 2;
-    /** @hide */
-    public static final int RIL_REG_STATE_DENIED = 3;
-    /** @hide */
-    public static final int RIL_REG_STATE_UNKNOWN = 4;
-    /** @hide */
-    public static final int RIL_REG_STATE_ROAMING = 5;
-    /** @hide */
-    public static final int RIL_REG_STATE_NOT_REG_EMERGENCY_CALL_ENABLED = 10;
-    /** @hide */
-    public static final int RIL_REG_STATE_SEARCHING_EMERGENCY_CALL_ENABLED = 12;
-    /** @hide */
-    public static final int RIL_REG_STATE_DENIED_EMERGENCY_CALL_ENABLED = 13;
-    /** @hide */
-    public static final int RIL_REG_STATE_UNKNOWN_EMERGENCY_CALL_ENABLED = 14;
 
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
@@ -163,8 +122,7 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public static final int REGISTRATION_STATE_ROAMING = 5;
 
-    private int mVoiceRegState = STATE_OUT_OF_SERVICE;
-    private int mDataRegState = STATE_OUT_OF_SERVICE;
+    private int mState = STATE_OUT_OF_SERVICE;
     private boolean mRoaming;
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
@@ -173,9 +131,8 @@ public class ServiceState implements Parcelable {
 
     private boolean mIsEmergencyOnly;
 
-    private int mRilVoiceRadioTechnology;
-    private int mRilDataRadioTechnology;
-
+    //***** CDMA
+    private int mRadioTechnology;
     private boolean mCssIndicator;
     private int mNetworkId;
     private int mSystemId;
@@ -217,15 +174,13 @@ public class ServiceState implements Parcelable {
     }
 
     protected void copyFrom(ServiceState s) {
-        mVoiceRegState = s.mVoiceRegState;
-        mDataRegState = s.mDataRegState;
+        mState = s.mState;
         mRoaming = s.mRoaming;
         mOperatorAlphaLong = s.mOperatorAlphaLong;
         mOperatorAlphaShort = s.mOperatorAlphaShort;
         mOperatorNumeric = s.mOperatorNumeric;
         mIsManualNetworkSelection = s.mIsManualNetworkSelection;
-        mRilVoiceRadioTechnology = s.mRilVoiceRadioTechnology;
-        mRilDataRadioTechnology = s.mRilDataRadioTechnology;
+        mRadioTechnology = s.mRadioTechnology;
         mCssIndicator = s.mCssIndicator;
         mNetworkId = s.mNetworkId;
         mSystemId = s.mSystemId;
@@ -240,15 +195,13 @@ public class ServiceState implements Parcelable {
      * Construct a ServiceState object from the given parcel.
      */
     public ServiceState(Parcel in) {
-        mVoiceRegState = in.readInt();
-        mDataRegState = in.readInt();
+        mState = in.readInt();
         mRoaming = in.readInt() != 0;
         mOperatorAlphaLong = in.readString();
         mOperatorAlphaShort = in.readString();
         mOperatorNumeric = in.readString();
         mIsManualNetworkSelection = in.readInt() != 0;
-        mRilVoiceRadioTechnology = in.readInt();
-        mRilDataRadioTechnology = in.readInt();
+        mRadioTechnology = in.readInt();
         mCssIndicator = (in.readInt() != 0);
         mNetworkId = in.readInt();
         mSystemId = in.readInt();
@@ -260,15 +213,13 @@ public class ServiceState implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mVoiceRegState);
-        out.writeInt(mDataRegState);
+        out.writeInt(mState);
         out.writeInt(mRoaming ? 1 : 0);
         out.writeString(mOperatorAlphaLong);
         out.writeString(mOperatorAlphaShort);
         out.writeString(mOperatorNumeric);
         out.writeInt(mIsManualNetworkSelection ? 1 : 0);
-        out.writeInt(mRilVoiceRadioTechnology);
-        out.writeInt(mRilDataRadioTechnology);
+        out.writeInt(mRadioTechnology);
         out.writeInt(mCssIndicator ? 1 : 0);
         out.writeInt(mNetworkId);
         out.writeInt(mSystemId);
@@ -295,36 +246,15 @@ public class ServiceState implements Parcelable {
     };
 
     /**
-     * Get current voice service state
+     * Get current service state of phone
      *
-     * @Deprecate remove 3Q 2013, use {@link #getVoiceState}
+     * @see #STATE_IN_SERVICE
+     * @see #STATE_OUT_OF_SERVICE
+     * @see #STATE_EMERGENCY_ONLY
+     * @see #STATE_POWER_OFF
      */
     public int getState() {
-        return getVoiceState();
-    }
-
-    /**
-     * Get current voice service state
-     *
-     * @see #STATE_IN_SERVICE
-     * @see #STATE_OUT_OF_SERVICE
-     * @see #STATE_EMERGENCY_ONLY
-     * @see #STATE_POWER_OFF
-     */
-    public int getVoiceState() {
-        return mVoiceRegState;
-    }
-
-    /**
-     * Get current data service state
-     *
-     * @see #STATE_IN_SERVICE
-     * @see #STATE_OUT_OF_SERVICE
-     * @see #STATE_EMERGENCY_ONLY
-     * @see #STATE_POWER_OFF
-     */
-    public int getDataRegState() {
-        return mDataRegState;
+        return mState;
     }
 
     /**
@@ -424,8 +354,7 @@ public class ServiceState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return ((mVoiceRegState * 31)
-                + (mDataRegState * 37)
+        return ((mState * 0x1234)
                 + (mRoaming ? 1 : 0)
                 + (mIsManualNetworkSelection ? 1 : 0)
                 + ((null == mOperatorAlphaLong) ? 0 : mOperatorAlphaLong.hashCode())
@@ -450,15 +379,13 @@ public class ServiceState implements Parcelable {
             return false;
         }
 
-        return (mVoiceRegState == s.mVoiceRegState
-                && mDataRegState == s.mDataRegState
+        return (mState == s.mState
                 && mRoaming == s.mRoaming
                 && mIsManualNetworkSelection == s.mIsManualNetworkSelection
                 && equalsHandlesNulls(mOperatorAlphaLong, s.mOperatorAlphaLong)
                 && equalsHandlesNulls(mOperatorAlphaShort, s.mOperatorAlphaShort)
                 && equalsHandlesNulls(mOperatorNumeric, s.mOperatorNumeric)
-                && equalsHandlesNulls(mRilVoiceRadioTechnology, s.mRilVoiceRadioTechnology)
-                && equalsHandlesNulls(mRilDataRadioTechnology, s.mRilDataRadioTechnology)
+                && equalsHandlesNulls(mRadioTechnology, s.mRadioTechnology)
                 && equalsHandlesNulls(mCssIndicator, s.mCssIndicator)
                 && equalsHandlesNulls(mNetworkId, s.mNetworkId)
                 && equalsHandlesNulls(mSystemId, s.mSystemId)
@@ -541,16 +468,14 @@ public class ServiceState implements Parcelable {
 
     @Override
     public String toString() {
-        String radioTechnology = rilRadioTechnologyToString(mRilVoiceRadioTechnology);
-        String dataRadioTechnology = rilRadioTechnologyToString(mRilDataRadioTechnology);
+        String radioTechnology = rilRadioTechnologyToString(mRadioTechnology);
 
-        return (mVoiceRegState + " " + mDataRegState + " " + (mRoaming ? "roaming" : "home")
+        return (mState + " " + (mRoaming ? "roaming" : "home")
                 + " " + mOperatorAlphaLong
                 + " " + mOperatorAlphaShort
                 + " " + mOperatorNumeric
                 + " " + (mIsManualNetworkSelection ? "(manual)" : "")
                 + " " + radioTechnology
-                + " " + dataRadioTechnology
                 + " " + (mCssIndicator ? "CSS supported" : "CSS not supported")
                 + " " + mNetworkId
                 + " " + mSystemId
@@ -560,16 +485,13 @@ public class ServiceState implements Parcelable {
     }
 
     private void setNullState(int state) {
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setNullState=" + state);
-        mVoiceRegState = state;
-        mDataRegState = state;
+        mState = state;
         mRoaming = false;
         mOperatorAlphaLong = null;
         mOperatorAlphaShort = null;
         mOperatorNumeric = null;
         mIsManualNetworkSelection = false;
-        mRilVoiceRadioTechnology = 0;
-        mRilDataRadioTechnology = 0;
+        mRadioTechnology = 0;
         mCssIndicator = false;
         mNetworkId = -1;
         mSystemId = -1;
@@ -588,20 +510,8 @@ public class ServiceState implements Parcelable {
         setNullState(STATE_POWER_OFF);
     }
 
-    /** @Deprecated to be removed Q3 2013, use {@link #getVoiceState} */
     public void setState(int state) {
-        setVoiceState(state);
-        if (DBG) Log.e(LOG_TAG, "[ServiceState] setState deprecated use getVoiceState()");
-    }
-
-    public void setVoiceState(int state) {
-        mVoiceRegState = state;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setState=" + mVoiceRegState);
-    }
-
-    public void setDataRegState(int state) {
-        mDataRegState = state;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
+        mState = state;
     }
 
     public void setRoaming(boolean roaming) {
@@ -682,15 +592,13 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     private void setFromNotifierBundle(Bundle m) {
-        mVoiceRegState = m.getInt("voiceRegState");
-        mDataRegState = m.getInt("dataRegState");
+        mState = m.getInt("state");
         mRoaming = m.getBoolean("roaming");
         mOperatorAlphaLong = m.getString("operator-alpha-long");
         mOperatorAlphaShort = m.getString("operator-alpha-short");
         mOperatorNumeric = m.getString("operator-numeric");
         mIsManualNetworkSelection = m.getBoolean("manual");
-        mRilVoiceRadioTechnology = m.getInt("radioTechnology");
-        mRilVoiceRadioTechnology = m.getInt("dataRadioTechnology");
+        mRadioTechnology = m.getInt("radioTechnology");
         mCssIndicator = m.getBoolean("cssIndicator");
         mNetworkId = m.getInt("networkId");
         mSystemId = m.getInt("systemId");
@@ -706,15 +614,13 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public void fillInNotifierBundle(Bundle m) {
-        m.putInt("voiceRegState", mVoiceRegState);
-        m.putInt("dataRegState", mDataRegState);
+        m.putInt("state", mState);
         m.putBoolean("roaming", Boolean.valueOf(mRoaming));
         m.putString("operator-alpha-long", mOperatorAlphaLong);
         m.putString("operator-alpha-short", mOperatorAlphaShort);
         m.putString("operator-numeric", mOperatorNumeric);
         m.putBoolean("manual", Boolean.valueOf(mIsManualNetworkSelection));
-        m.putInt("radioTechnology", mRilVoiceRadioTechnology);
-        m.putInt("dataRadioTechnology", mRilDataRadioTechnology);
+        m.putInt("radioTechnology", mRadioTechnology);
         m.putBoolean("cssIndicator", mCssIndicator);
         m.putInt("networkId", mNetworkId);
         m.putInt("systemId", mSystemId);
@@ -723,15 +629,10 @@ public class ServiceState implements Parcelable {
         m.putBoolean("emergencyOnly", Boolean.valueOf(mIsEmergencyOnly));
     }
 
+    //***** CDMA
     /** @hide */
-    public void setRilVoiceRadioTechnology(int rt) {
-        this.mRilVoiceRadioTechnology = rt;
-    }
-
-    /** @hide */
-    public void setRilDataRadioTechnology(int rt) {
-        this.mRilDataRadioTechnology = rt;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setDataRadioTechnology=" + mRilDataRadioTechnology);
+    public void setRadioTechnology(int state) {
+        this.mRadioTechnology = state;
     }
 
     /** @hide */
@@ -746,25 +647,17 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public int getRilVoiceRadioTechnology() {
-        return this.mRilVoiceRadioTechnology;
+    public int getRilRadioTechnology() {
+        return this.mRadioTechnology;
     }
     /** @hide */
-    public int getRilDataRadioTechnology() {
-        return this.mRilDataRadioTechnology;
-    }
-    /**
-     * @hide
-     * @Deprecated to be removed Q3 2013 use {@link #getRilDataRadioTechnology} or
-     * {@link #getRilVoiceRadioTechnology}
-     */
     public int getRadioTechnology() {
-        Log.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
-        return getRilDataRadioTechnology();
+        return getRilRadioTechnology();
     }
 
-    private int rilRadioTechnologyToNetworkType(int rt) {
-        switch(rt) {
+    /** @hide */
+    public int getNetworkType() {
+        switch(mRadioTechnology) {
         case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
             return TelephonyManager.NETWORK_TYPE_GPRS;
         case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE:
@@ -797,25 +690,6 @@ public class ServiceState implements Parcelable {
         default:
             return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
-    }
-
-    /**
-     * @Deprecated to be removed Q3 2013 use {@link #getVoiceNetworkType}
-     * @hide
-     */
-    public int getNetworkType() {
-        Log.e(LOG_TAG, "ServiceState.getNetworkType() DEPRECATED will be removed *******");
-        return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
-    }
-
-    /** @hide */
-    public int getDataNetworkType() {
-        return rilRadioTechnologyToNetworkType(mRilDataRadioTechnology);
-    }
-
-    /** @hide */
-    public int getVoiceNetworkType() {
-        return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
     }
 
     /** @hide */
