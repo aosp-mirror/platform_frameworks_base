@@ -181,7 +181,7 @@
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Laddat"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> enheter)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Inaktivera Bluetooth"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth inaktivt"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Ljusstyrka"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotera automatiskt"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotationen har låsts"</string>
