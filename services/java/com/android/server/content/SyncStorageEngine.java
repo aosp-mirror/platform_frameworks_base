@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package android.content;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
+package com.android.server.content;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ISyncStatusObserver;
+import android.content.PeriodicSync;
+import android.content.SyncInfo;
+import android.content.SyncStatusInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -39,9 +37,17 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.Xml;
-import android.util.Pair;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,9 +56,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.List;
 
 /**
  * Singleton that tracks the sync data and overall sync
@@ -106,9 +112,6 @@ public class SyncStorageEngine extends Handler {
     public static final int SOURCE_PERIODIC = 4;
 
     public static final long NOT_IN_BACKOFF_MODE = -1;
-
-    public static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
-            new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
 
     // TODO: i18n -- grab these out of resources.
     /** String names for the sync source types. */
@@ -710,7 +713,7 @@ public class SyncStorageEngine extends Handler {
                     for (int i = 0, N = authority.periodicSyncs.size(); i < N; i++) {
                         Pair<Bundle, Long> syncInfo = authority.periodicSyncs.get(i);
                         final Bundle existingExtras = syncInfo.first;
-                        if (equals(existingExtras, extras)) {
+                        if (PeriodicSync.syncExtrasEquals(existingExtras, extras)) {
                             if (syncInfo.second == period) {
                                 return;
                             }
@@ -734,7 +737,7 @@ public class SyncStorageEngine extends Handler {
                     int i = 0;
                     while (iterator.hasNext()) {
                         Pair<Bundle, Long> syncInfo = iterator.next();
-                        if (equals(syncInfo.first, extras)) {
+                        if (PeriodicSync.syncExtrasEquals(syncInfo.first, extras)) {
                             iterator.remove();
                             changed = true;
                             // if we removed an entry from the periodicSyncs array also
@@ -800,7 +803,7 @@ public class SyncStorageEngine extends Handler {
                     new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
-        mContext.sendBroadcast(SYNC_CONNECTION_SETTING_CHANGED_INTENT);
+        mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
     }
 
     public boolean getMasterSyncAutomatically(int userId) {
@@ -1093,24 +1096,6 @@ public class SyncStorageEngine extends Handler {
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
         return id;
-    }
-
-    public static boolean equals(Bundle b1, Bundle b2) {
-        if (b1.size() != b2.size()) {
-            return false;
-        }
-        if (b1.isEmpty()) {
-            return true;
-        }
-        for (String key : b1.keySet()) {
-            if (!b2.containsKey(key)) {
-                return false;
-            }
-            if (!b1.get(key).equals(b2.get(key))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public void stopSyncEvent(long historyId, long elapsedTime, String resultMessage,

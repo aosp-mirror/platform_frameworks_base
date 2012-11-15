@@ -31,7 +31,7 @@ import java.io.IOException;
  * A cache of services that export the {@link android.content.ISyncAdapter} interface.
  * @hide
  */
-/* package private */ class SyncAdaptersCache extends RegisteredServicesCache<SyncAdapterType> {
+public class SyncAdaptersCache extends RegisteredServicesCache<SyncAdapterType> {
     private static final String TAG = "Account";
 
     private static final String SERVICE_INTERFACE = "android.content.SyncAdapter";
@@ -39,7 +39,7 @@ import java.io.IOException;
     private static final String ATTRIBUTES_NAME = "sync-adapter";
     private static final MySerializer sSerializer = new MySerializer();
 
-    SyncAdaptersCache(Context context) {
+    public SyncAdaptersCache(Context context) {
         super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME, sSerializer);
     }
 

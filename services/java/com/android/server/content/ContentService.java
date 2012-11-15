@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.app.ActivityManager;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.IContentService;
+import android.content.ISyncStatusObserver;
+import android.content.PeriodicSync;
+import android.content.SyncAdapterType;
+import android.content.SyncInfo;
+import android.content.SyncStatusInfo;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -30,7 +39,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.Manifest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

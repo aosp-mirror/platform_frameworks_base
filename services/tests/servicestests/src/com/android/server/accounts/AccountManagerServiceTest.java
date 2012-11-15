@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package android.accounts;
+package com.android.server.accounts;
 
+import android.accounts.Account;
+import android.accounts.AuthenticatorDescription;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;

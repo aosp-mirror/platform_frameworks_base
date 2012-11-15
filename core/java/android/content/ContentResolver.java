@@ -116,6 +116,10 @@ public abstract class ContentResolver {
      */
     public static final String SYNC_EXTRAS_INITIALIZE = "initialize";
 
+    /** @hide */
+    public static final Intent ACTION_SYNC_CONN_STATUS_CHANGED =
+            new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
+
     public static final String SCHEME_CONTENT = "content";
     public static final String SCHEME_ANDROID_RESOURCE = "android.resource";
     public static final String SCHEME_FILE = "file";
@@ -181,7 +185,7 @@ public abstract class ContentResolver {
     };
 
     /** @hide */
-    static String syncErrorToString(int error) {
+    public static String syncErrorToString(int error) {
         if (error < 1 || error > SYNC_ERROR_NAMES.length) {
             return String.valueOf(error);
         }

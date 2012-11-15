@@ -33,7 +33,7 @@ public class AccountAuthenticatorResponse implements Parcelable {
     /**
      * @hide
      */
-    /* package private */ AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
+    public AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
         mAccountAuthenticatorResponse = response;
     }
 

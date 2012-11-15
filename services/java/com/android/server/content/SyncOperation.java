@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
 import android.accounts.Account;
 import android.content.pm.PackageManager;
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.os.SystemClock;
 

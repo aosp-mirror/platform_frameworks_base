@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
 import android.accounts.Account;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
+import android.content.SyncAdapterType;
+import android.content.SyncAdaptersCache;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
