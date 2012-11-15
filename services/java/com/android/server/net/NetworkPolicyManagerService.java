@@ -131,6 +131,7 @@ import android.util.TrustedTime;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;
@@ -184,9 +185,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_LATEST = VERSION_SWITCH_UID;
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
+    @VisibleForTesting
     public static final int TYPE_LIMIT = 0x2;
+    @VisibleForTesting
     public static final int TYPE_LIMIT_SNOOZED = 0x3;
 
     private static final String TAG_POLICY_LIST = "policy-list";
@@ -214,10 +217,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final String TAG_ALLOW_BACKGROUND = TAG + ":allowBackground";
 
-    // @VisibleForTesting
-    public static final String ACTION_ALLOW_BACKGROUND =
+    private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
-    public static final String ACTION_SNOOZE_WARNING =
+    private static final String ACTION_SNOOZE_WARNING =
             "com.android.server.net.action.SNOOZE_WARNING";
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
@@ -2063,7 +2065,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return intent;
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public void addIdleHandler(IdleHandler handler) {
         mHandler.getLooper().getQueue().addIdleHandler(handler);
     }

@@ -25,6 +25,7 @@ import android.net.NetworkStats;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ProcFileReader;
 
 import java.io.File;
@@ -53,7 +54,7 @@ public class NetworkStatsFactory {
         this(new File("/proc/"));
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public NetworkStatsFactory(File procRoot) {
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");

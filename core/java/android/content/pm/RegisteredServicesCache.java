@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastXmlSerializer;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -77,15 +78,15 @@ public abstract class RegisteredServicesCache<V> {
 
     private final Object mServicesLock = new Object();
 
-    // @GuardedBy("mServicesLock")
+    @GuardedBy("mServicesLock")
     private boolean mPersistentServicesFileDidNotExist;
-    // @GuardedBy("mServicesLock")
+    @GuardedBy("mServicesLock")
     private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>();
 
     private static class UserServices<V> {
-        // @GuardedBy("mServicesLock")
+        @GuardedBy("mServicesLock")
         public final Map<V, Integer> persistentServices = Maps.newHashMap();
-        // @GuardedBy("mServicesLock")
+        @GuardedBy("mServicesLock")
         public Map<V, ServiceInfo<V>> services = null;
     }
 
