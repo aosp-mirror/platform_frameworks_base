@@ -63,9 +63,9 @@ option java_package com.android.server.am
 30024 am_broadcast_discard_filter (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
 30025 am_broadcast_discard_app (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)
 # A service is being created
-30030 am_create_service (User|1|5),(Service Record|1|5),(Name|3),(Intent|3),(PID|1|5)
+30030 am_create_service (User|1|5),(Service Record|1|5),(Name|3),(PID|1|5)
 # A service is being destroyed
-30031 am_destroy_service (User|1|5),(Service Record|1|5),(Name|3),(PID|1|5)
+30031 am_destroy_service (User|1|5),(Service Record|1|5),(PID|1|5)
 # A process has crashed too many times, it is being cleared
 30032 am_process_crashed_too_much (User|1|5),(Name|3),(PID|1|5)
 # An unknown process is trying to attach to the activity manager
