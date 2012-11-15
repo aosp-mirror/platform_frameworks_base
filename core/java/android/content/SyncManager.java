@@ -58,6 +58,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -155,7 +156,7 @@ public class SyncManager {
 
     private SyncStorageEngine mSyncStorageEngine;
 
-    // @GuardedBy("mSyncQueue")
+    @GuardedBy("mSyncQueue")
     private final SyncQueue mSyncQueue;
 
     protected final ArrayList<ActiveSyncContext> mActiveSyncContexts = Lists.newArrayList();

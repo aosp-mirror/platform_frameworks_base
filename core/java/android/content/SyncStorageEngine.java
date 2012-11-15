@@ -16,6 +16,7 @@
 
 package android.content;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -74,7 +75,7 @@ public class SyncStorageEngine extends Handler {
 
     private static final long DEFAULT_POLL_FREQUENCY_SECONDS = 60 * 60 * 24; // One day
 
-    // @VisibleForTesting
+    @VisibleForTesting
     static final long MILLIS_IN_4WEEKS = 1000L * 60 * 60 * 24 * 7 * 4;
 
     /** Enum value for a sync start event. */

@@ -115,6 +115,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
@@ -165,7 +166,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private IConnectivityManager mConnManager;
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
     public static final String ACTION_NETWORK_STATS_UPDATED =
