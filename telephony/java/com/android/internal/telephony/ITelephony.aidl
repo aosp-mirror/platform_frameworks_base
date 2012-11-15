@@ -261,9 +261,21 @@ interface ITelephony {
     int getVoiceMessageCount();
 
     /**
-      * Returns the network type
+      * Returns the network type for data transmission
+      *
+      * @Deprecated to be removed Q3 2013 use {@link #getDataNetwork}.
       */
     int getNetworkType();
+
+    /**
+      * Returns the network type for data transmission
+      */
+    int getDataNetworkType();
+
+    /**
+      * Returns the network type for voice
+      */
+    int getVoiceNetworkType();
 
     /**
      * Return true if an ICC card is present
