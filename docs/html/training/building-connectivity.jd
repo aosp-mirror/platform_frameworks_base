@@ -1,0 +1,10 @@
+page.title=Building Apps with Connectivity &amp; the Cloud
+page.trainingcourse=true
+
+@jd:body
+
+
+
+<p>These classes teach you how to connect your app to the world beyond the user's device.
+You'll learn how to connect to other devices in the area, connect to the Internet, backup and
+sync your app's data, and more.</p>

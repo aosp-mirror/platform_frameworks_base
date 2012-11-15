@@ -1,0 +1,9 @@
+page.title=Building Apps with User Info &amp; Location
+page.trainingcourse=true
+
+@jd:body
+
+
+<p>These classes teach you how to add user personalization to your app. Some of the ways
+you can do this is by identifying users, providing
+information that's relevant to them, and providing information about the world around them.</p>
