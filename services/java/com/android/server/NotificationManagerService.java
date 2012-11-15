@@ -1077,16 +1077,27 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                 final AudioManager audioManager = (AudioManager) mContext
                 .getSystemService(Context.AUDIO_SERVICE);
+
                 // sound
                 final boolean useDefaultSound =
                     (notification.defaults & Notification.DEFAULT_SOUND) != 0;
-                if (useDefaultSound || notification.sound != null) {
-                    Uri uri;
-                    if (useDefaultSound) {
-                        uri = Settings.System.DEFAULT_NOTIFICATION_URI;
-                    } else {
-                        uri = notification.sound;
-                    }
+
+                Uri soundUri = null;
+                boolean hasValidSound = false;
+
+                if (useDefaultSound) {
+                    soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+
+                    // check to see if the default notification sound is silent
+                    ContentResolver resolver = mContext.getContentResolver();
+                    hasValidSound = Settings.System.getString(resolver,
+                           Settings.System.NOTIFICATION_SOUND) != null;
+                } else if (notification.sound != null) {
+                    soundUri = notification.sound;
+                    hasValidSound = (soundUri != null);
+                }
+
+                if (hasValidSound) {
                     boolean looping = (notification.flags & Notification.FLAG_INSISTENT) != 0;
                     int audioStreamType;
                     if (notification.audioStreamType >= 0) {
@@ -1103,7 +1114,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         try {
                             final IRingtonePlayer player = mAudioService.getRingtonePlayer();
                             if (player != null) {
-                                player.playAsync(uri, user, looping, audioStreamType);
+                                player.playAsync(soundUri, user, looping, audioStreamType);
                             }
                         } catch (RemoteException e) {
                         } finally {
@@ -1120,7 +1131,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 // and no other vibration is specified, we apply the default vibration anyway
                 final boolean convertSoundToVibration =
                            !hasCustomVibrate
-                        && (useDefaultSound || notification.sound != null)
+                        && hasValidSound
                         && (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
 
                 // The DEFAULT_VIBRATE flag trumps any custom vibration.
