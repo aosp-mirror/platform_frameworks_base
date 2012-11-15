@@ -22,6 +22,8 @@ import android.os.storage.StorageVolume;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.File;
 
 /**
@@ -47,7 +49,7 @@ public class Environment {
 
     private static final Object sLock = new Object();
 
-    // @GuardedBy("sLock")
+    @GuardedBy("sLock")
     private static volatile StorageVolume sPrimaryVolume;
 
     private static StorageVolume getPrimaryVolume() {

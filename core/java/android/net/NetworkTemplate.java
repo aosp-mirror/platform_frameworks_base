@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Objects;
 
 /**
@@ -63,7 +64,7 @@ public class NetworkTemplate implements Parcelable {
 
     private static boolean sForceAllNetworkTypes = false;
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public static void forceAllNetworkTypes() {
         sForceAllNetworkTypes = true;
     }

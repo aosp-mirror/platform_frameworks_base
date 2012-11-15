@@ -26,6 +26,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -46,7 +48,7 @@ public class UsbHostManager {
     private final Context mContext;
     private final Object mLock = new Object();
 
-    // @GuardedBy("mLock")
+    @GuardedBy("mLock")
     private UsbSettingsManager mCurrentSettings;
 
     public UsbHostManager(Context context) {
