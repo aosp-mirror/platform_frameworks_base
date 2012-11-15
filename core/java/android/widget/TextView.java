@@ -8229,9 +8229,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     TextDirectionHeuristic getTextDirectionHeuristic() {
         if (hasPasswordTransformationMethod()) {
-            // TODO: take care of the content direction to show the password text and dots justified
-            // to the left or to the right
-            return TextDirectionHeuristics.LOCALE;
+            // passwords fields should be LTR
+            return TextDirectionHeuristics.LTR;
         }
 
         // Always need to resolve layout direction first
