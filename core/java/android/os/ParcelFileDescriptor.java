@@ -15,6 +15,9 @@
  */
 
 package android.os;
+
+import dalvik.system.CloseGuard;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -31,12 +34,16 @@ import java.net.Socket;
  */
 public class ParcelFileDescriptor implements Parcelable, Closeable {
     private final FileDescriptor mFileDescriptor;
-    private boolean mClosed;
-    //this field is to create wrapper for ParcelFileDescriptor using another
-    //PartialFileDescriptor but avoid invoking close twice
-    //consider ParcelFileDescriptor A(fileDescriptor fd),  ParcelFileDescriptor B(A)
-    //in this particular case fd.close might be invoked twice.
-    private final ParcelFileDescriptor mParcelDescriptor;
+
+    /**
+     * Wrapped {@link ParcelFileDescriptor}, if any. Used to avoid
+     * double-closing {@link #mFileDescriptor}.
+     */
+    private final ParcelFileDescriptor mWrapped;
+
+    private volatile boolean mClosed;
+
+    private final CloseGuard mGuard = CloseGuard.get();
 
     /**
      * For use with {@link #open}: if {@link #MODE_CREATE} has been supplied
@@ -289,13 +296,15 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         if (mClosed) {
             throw new IllegalStateException("Already closed");
         }
-        if (mParcelDescriptor != null) {
-            int fd = mParcelDescriptor.detachFd();
+        if (mWrapped != null) {
+            int fd = mWrapped.detachFd();
             mClosed = true;
+            mGuard.close();
             return fd;
         }
         int fd = getFd();
         mClosed = true;
+        mGuard.close();
         Parcel.clearFileDescriptor(mFileDescriptor);
         return fd;
     }
@@ -307,15 +316,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @throws IOException
      *             If an error occurs attempting to close this ParcelFileDescriptor.
      */
+    @Override
     public void close() throws IOException {
-        synchronized (this) {
-            if (mClosed) return;
-            mClosed = true;
-        }
-        if (mParcelDescriptor != null) {
+        if (mClosed) return;
+        mClosed = true;
+        mGuard.close();
+
+        if (mWrapped != null) {
             // If this is a proxy to another file descriptor, just call through to its
             // close method.
-            mParcelDescriptor.close();
+            mWrapped.close();
         } else {
             Parcel.closeFileDescriptor(mFileDescriptor);
         }
@@ -374,6 +384,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     @Override
     protected void finalize() throws Throwable {
+        if (mGuard != null) {
+            mGuard.warnIfOpen();
+        }
         try {
             if (!mClosed) {
                 close();
@@ -384,21 +397,22 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     public ParcelFileDescriptor(ParcelFileDescriptor descriptor) {
-        super();
-        mParcelDescriptor = descriptor;
-        mFileDescriptor = mParcelDescriptor.mFileDescriptor;
+        mWrapped = descriptor;
+        mFileDescriptor = mWrapped.mFileDescriptor;
+        mGuard.open("close");
     }
 
-    /*package */ParcelFileDescriptor(FileDescriptor descriptor) {
-        super();
+    /** {@hide} */
+    public ParcelFileDescriptor(FileDescriptor descriptor) {
         if (descriptor == null) {
             throw new NullPointerException("descriptor must not be null");
         }
+        mWrapped = null;
         mFileDescriptor = descriptor;
-        mParcelDescriptor = null;
+        mGuard.open("close");
     }
 
-    /* Parcelable interface */
+    @Override
     public int describeContents() {
         return Parcelable.CONTENTS_FILE_DESCRIPTOR;
     }
@@ -408,6 +422,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * If {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE} is set in flags,
      * the file descriptor will be closed after a copy is written to the Parcel.
      */
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeFileDescriptor(mFileDescriptor);
         if ((flags&PARCELABLE_WRITE_RETURN_VALUE) != 0 && !mClosed) {
@@ -421,12 +436,14 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     public static final Parcelable.Creator<ParcelFileDescriptor> CREATOR
             = new Parcelable.Creator<ParcelFileDescriptor>() {
+        @Override
         public ParcelFileDescriptor createFromParcel(Parcel in) {
             return in.readFileDescriptor();
         }
+
+        @Override
         public ParcelFileDescriptor[] newArray(int size) {
             return new ParcelFileDescriptor[size];
         }
     };
-
 }
