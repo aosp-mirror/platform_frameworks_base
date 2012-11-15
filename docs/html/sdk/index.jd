@@ -2,17 +2,25 @@ page.title=Android SDK
 header.hide=1
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 
-sdk.win_bundle_download=adt-bundle-windows.zip
-sdk.win_bundle_bytes=417851515
-sdk.win_bundle_checksum=73bdd1168fce0e36a27255a4335c865d
+sdk.win32_bundle_download=adt-bundle-windows-x86.zip
+sdk.win32_bundle_bytes=417851015
+sdk.win32_bundle_checksum=42d9a6c15113d405a97eed05e6d42e2b
 
-sdk.mac_bundle_download=adt-bundle-mac.zip
-sdk.mac_bundle_bytes=382957959
-sdk.mac_bundle_checksum=a320f8bbaee8572a36e68c434564bdd0
+sdk.win64_bundle_download=adt-bundle-windows-x86_64.zip
+sdk.win64_bundle_bytes=417975502
+sdk.win64_bundle_checksum=9c8ef6855764ecc516ee9d1664405461
 
-sdk.linux_bundle_download=adt-bundle-linux.zip
-sdk.linux_bundle_bytes=411217430
-sdk.linux_bundle_checksum=b0590fe9c1533da9b20ea65525b77677
+sdk.mac64_bundle_download=adt-bundle-mac-x86_64.zip
+sdk.mac64_bundle_bytes=383081781
+sdk.mac64_bundle_checksum=3e39d683361901226183730f717bc4ee
+
+sdk.linux32_bundle_download=adt-bundle-linux-x86.zip
+sdk.linux32_bundle_bytes=411065882
+sdk.linux32_bundle_checksum=39687b06fedfea7487ff0824a4d32ee8
+
+sdk.linux64_bundle_download=adt-bundle-linux-x86_64.zip
+sdk.linux64_bundle_bytes=411339954
+sdk.linux64_bundle_checksum=b92a799faf94ee445e34b12a50bf9d08
 
 
 
@@ -41,30 +49,6 @@ sdk.linux_checksum=7f8d73b629f808cdcfc9f9900bbd7580
 <style type="text/css">
   .offline {display:none;}
 </style>
-
-
-<div id="naMessage" style="display:none">
-<div><p><strong>Sorry, the Eclipse IDE with ADT currently requires a 64-bit OS</strong></p>
-<p>It looks like you're running a 32-bit operating system. You can continue with the download if you'd like,
-but be aware the version of Eclipse included in this download <strong>will not work</strong>
-on a 32-bit OS, although the rest of the Android SDK tools and platforms <strong>will work</strong>
-normally on their own or with another IDE.</p>
-<p>If you'll be developing on a 32-bit OS, you can download a 32-bit version of Eclipse
-from <a href="http://eclipse.org/mobile/">http://eclipse.org/mobile/</a>. You should then
-instead download the stand-alone Android SDK Tools and separately
-set up Eclipse with the ADT plugin.</p>
-
-<input id="warningCancel" style="margin-top:1em;padding:5px;white-space:pre" type="button"
-   value="Continue download anyway" style="cursor:pointer">
-<input id="warningOk" class="button" style="margin-top:1em;padding:5px;white-space:pre;float:right" type="button"
-    value="Download SDK Tools instead">
-</div>
-</div>
-
-
-
-
-
 
 
 
@@ -234,6 +218,12 @@ This is the Android Software Development Kit License Agreement
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
+<p id="bitpicker" style="display:none">
+  <input id="32" onclick="onAgreeChecked()" type="radio" name="bit" value="32">
+    <label for="32">32-bit</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input id="64" onclick="onAgreeChecked()" type="radio" name="bit" value="64">
+    <label for="64">64-bit</label>  
+</p>
 <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
 </div>
 
@@ -282,9 +272,8 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 
 
 
-
 <div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/sdk-cube.png" alt="" />
+  <img src="{@docRoot}images/sdk-cube.png" alt="" height=264 />
 
 <!-- this appears when viewing the online docs -->
 <div class="online">
