@@ -296,17 +296,17 @@ function renderDevelopersLivePlaylist(data) {
  * Each string in 'ids' is the ID of a YouTube playlist that belongs in the corresponding tab.
  */
 var playlists = {
-  'googleio' : {
-    'ids': ["4C6BCDE45E05F49E"]
-  },
-  'fridayreview' : {
-    'ids': ["B7B9B23D864A55C3"]
-  },
-  'officehours' : {
-    'ids': ["7383D9AADA6E6D55"]
+  'designinaction' : {
+    'ids': ["PLWz5rJ2EKKc8j2B95zGMb8muZvrIy-wcF"]
   },
   'about' : {
-    'ids': ["D7C64411AF40DEA5"]
+    'ids': ["PL611F8C5DBF49CEC6"]
+  },
+  'developersstrikeback' : {
+    'ids': ["PLWz5rJ2EKKc8nhhIOieejm1PxYHmPkIPh"]
+  },
+  'googleio' : {
+    'ids': ["PL4C6BCDE45E05F49E"]
   }
 };
 
@@ -326,7 +326,7 @@ function showVideosPlaylists() {
 
 /* Request the playlist feeds from YouTube */
 function showDevelopersLivePlaylist() {
-  var playlistId = "B7B9B23D864A55C3"; /* The Friday Review */
+  var playlistId = "PLB7B9B23D864A55C3"; /* The App Clinic */
   var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
                 + playlistId +
                 "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=published'><\/script > ";
