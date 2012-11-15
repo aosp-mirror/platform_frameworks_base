@@ -83,9 +83,9 @@ public class WebViewClient {
      * Notify the host application of a resource request and allow the
      * application to return the data.  If the return value is null, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
-     * response and data will be used.  NOTE: This method is called by the
-     * network thread so clients should exercise caution when accessing private
-     * data.
+     * response and data will be used.  NOTE: This method is called on a thread
+     * other than the UI thread so clients should exercise caution
+     * when accessing private data or the view system.
      *
      * @param view The {@link android.webkit.WebView} that is requesting the
      *             resource.
