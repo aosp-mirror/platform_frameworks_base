@@ -855,13 +855,17 @@ class AppWidgetServiceImpl {
     }
 
     public List<AppWidgetProviderInfo> getInstalledProviders() {
+        return getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+    }
+
+    private List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
             final int N = mInstalledProviders.size();
             ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>(N);
             for (int i = 0; i < N; i++) {
                 Provider p = mInstalledProviders.get(i);
-                if (!p.zombie) {
+                if (!p.zombie && (p.info.widgetCategory & categoryFilter) != 0) {
                     result.add(cloneIfLocalBinder(p.info));
                 }
             }
