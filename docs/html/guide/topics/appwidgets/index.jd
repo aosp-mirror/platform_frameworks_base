@@ -62,7 +62,7 @@ able to hold other App Widgets is called an App Widget host. The screenshot
 below shows
 the Music App Widget.</p>
 
-<img src="{@docRoot}images/appwidget.png" alt="" />
+<img src="{@docRoot}images/appwidgets/appwidget.png" alt="" />
 
 <p>This document describes how to publish an App Widget using an App Widget
 provider.</p>
@@ -882,7 +882,7 @@ href="{@docRoot}resources/samples/StackWidget/index.html">StackView Widget
 sample</a>:</p>
 
 <p>
-<img src="{@docRoot}resources/images/StackWidget.png" alt="" />
+<img src="{@docRoot}images/appwidgets/StackWidget.png" alt="" />
 </p>
 
 <p>This sample consists of a stack of 10 views, which  display the values
@@ -1385,7 +1385,7 @@ collections when updates occur. It shows how the App Widget code interacts with
 the  {@link android.widget.RemoteViewsService.RemoteViewsFactory
 RemoteViewsFactory}, and how you can trigger updates:</p>
 
-<img src="{@docRoot}images/appwidget_collections.png" alt="" />
+<img src="{@docRoot}images/appwidgets/appwidget_collections.png" alt="" />
 
 <p>One feature of App Widgets that use collections is the ability to provide
 users with up-to-date content. For example, consider the Android 3.0 Gmail
