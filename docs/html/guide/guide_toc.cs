@@ -529,25 +529,6 @@
       <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
             <span class="en">Supporting Tablets and Handsets</span>
           </a></li>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/practices/performance.html">
-            <span class="en">Designing for Performance</span>
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>guide/practices/jni.html">
-                <span class="en">JNI Tips</span>
-              </a></li>
-        </ul>
-      </li>
-      <li><a href="<?cs var:toroot ?>guide/practices/responsiveness.html">
-            <span class="en">Designing for Responsiveness</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/practices/seamlessness.html">
-            <span class="en">Designing for Seamlessness</span>
-          </a></li>
-        <li><a href="<?cs var:toroot ?>guide/practices/security.html">
-            <span class="en">Designing for Security</span>
-          </a></li>
 
     </ul>
   </li>
