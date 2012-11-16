@@ -198,8 +198,8 @@ class MountService extends IMountService.Stub
     // Used as a lock for methods that register/unregister listeners.
     final private ArrayList<MountServiceBinderListener> mListeners =
             new ArrayList<MountServiceBinderListener>();
-    private CountDownLatch                        mConnectedSignal = new CountDownLatch(1);
-    private CountDownLatch                        mAsecsScanned = new CountDownLatch(1);
+    private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
+    private final CountDownLatch mAsecsScanned = new CountDownLatch(1);
     private boolean                               mSendUmsConnectedOnBoot = false;
 
     /**
@@ -495,10 +495,6 @@ class MountService extends IMountService.Stub
     }
 
     private void waitForLatch(CountDownLatch latch) {
-        if (latch == null) {
-            return;
-        }
-
         for (;;) {
             try {
                 if (latch.await(5000, TimeUnit.MILLISECONDS)) {
@@ -738,14 +734,12 @@ class MountService extends IMountService.Stub
                  * the hounds!
                  */
                 mConnectedSignal.countDown();
-                mConnectedSignal = null;
 
                 // Let package manager load internal ASECs.
                 mPms.scanAvailableAsecs();
 
                 // Notify people waiting for ASECs to be scanned that it's done.
                 mAsecsScanned.countDown();
-                mAsecsScanned = null;
             }
         }.start();
     }
