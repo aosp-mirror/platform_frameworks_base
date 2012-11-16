@@ -237,7 +237,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         public void userActivity();
         public void onUserActivityTimeoutChanged();
         public void onAddView(View v);
-        public void onRemoveView(View v);
+        public void onRemoveView(View v, boolean deletePermanently);
     }
 
     public void addWidget(View widget) {
@@ -245,10 +245,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
 
-    public void onRemoveView(View v) {
+    public void onRemoveView(View v, final boolean deletePermanently) {
         final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
         if (mCallbacks != null) {
-            mCallbacks.onRemoveView(v);
+            mCallbacks.onRemoveView(v, deletePermanently);
         }
         mBackgroundWorkerHandler.post(new Runnable() {
             @Override
