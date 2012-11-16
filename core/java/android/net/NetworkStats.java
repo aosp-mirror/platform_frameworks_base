@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Objects;
 
@@ -190,14 +191,14 @@ public class NetworkStats implements Parcelable {
         return clone;
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public NetworkStats addIfaceValues(
             String iface, long rxBytes, long rxPackets, long txBytes, long txPackets) {
         return addValues(
                 iface, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets, 0L);
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public NetworkStats addValues(String iface, int uid, int set, int tag, long rxBytes,
             long rxPackets, long txBytes, long txPackets, long operations) {
         return addValues(new Entry(
@@ -269,7 +270,7 @@ public class NetworkStats implements Parcelable {
         return size;
     }
 
-    // @VisibleForTesting
+    @VisibleForTesting
     public int internalSize() {
         return iface.length;
     }
@@ -335,7 +336,7 @@ public class NetworkStats implements Parcelable {
      * Find first stats index that matches the requested parameters, starting
      * search around the hinted index as an optimization.
      */
-    // @VisibleForTesting
+    @VisibleForTesting
     public int findIndexHinted(String iface, int uid, int set, int tag, int hintIndex) {
         for (int offset = 0; offset < size; offset++) {
             final int halfOffset = offset / 2;
