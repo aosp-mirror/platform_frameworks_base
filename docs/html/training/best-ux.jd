@@ -1,0 +1,12 @@
+page.title=Best Practices for User Experience &amp; UI
+page.trainingcourse=true
+
+@jd:body
+
+
+
+<p>These classes focus on the best Android user experience for your app.
+In some cases, the success of your app on Android is heavily
+affected by whether your app conforms to the user's expectations for
+UI and navigation on an Android device. Follow these recommendations to ensure that
+your app looks and behaves in a way that satisfies Android users.</p>
