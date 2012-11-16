@@ -224,6 +224,22 @@ public class AppWidgetHost {
         }
     }
 
+    /**
+     * Gets a list of all the appWidgetIds that are bound to the current host
+     *
+     * @hide
+     */
+    public int[] getAppWidgetIds() {
+        try {
+            if (sService == null) {
+                bindService();
+            }
+            return sService.getAppWidgetIdsForHost(mHostId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
     private static void checkCallerIsSystem() {
         int uid = Process.myUid();
         if (UserHandle.getAppId(uid) == Process.SYSTEM_UID || uid == 0) {

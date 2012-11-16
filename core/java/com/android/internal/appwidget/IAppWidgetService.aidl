@@ -38,6 +38,7 @@ interface IAppWidgetService {
     void deleteHost(int hostId);
     void deleteAllHosts();
     RemoteViews getAppWidgetViews(int appWidgetId);
+    int[] getAppWidgetIdsForHost(int hostId);
 
     //
     // for AppWidgetManager

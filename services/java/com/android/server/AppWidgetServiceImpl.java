@@ -1358,6 +1358,28 @@ class AppWidgetServiceImpl {
         }
     }
 
+    static int[] getAppWidgetIds(Host h) {
+        int instancesSize = h.instances.size();
+        int appWidgetIds[] = new int[instancesSize];
+        for (int i = 0; i < instancesSize; i++) {
+            appWidgetIds[i] = h.instances.get(i).appWidgetId;
+        }
+        return appWidgetIds;
+    }
+
+    public int[] getAppWidgetIdsForHost(int hostId) {
+        synchronized (mAppWidgetIds) {
+            ensureStateLoadedLocked();
+            int callingUid = Binder.getCallingUid();
+            Host host = lookupHostLocked(callingUid, hostId);
+            if (host != null) {
+                return getAppWidgetIds(host);
+            } else {
+                return new int[0];
+            }
+        }
+    }
+
     private Provider parseProviderInfoXml(ComponentName component, ResolveInfo ri) {
         Provider p = null;
 
