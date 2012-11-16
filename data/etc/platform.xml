@@ -134,6 +134,7 @@
     <assign-permission name="android.permission.ACCESS_NETWORK_STATE" uid="shell" />
     <assign-permission name="android.permission.ACCESS_WIFI_STATE" uid="shell" />
     <assign-permission name="android.permission.BLUETOOTH" uid="shell" />
+    <assign-permission name="android.permission.EXPAND_STATUS_BAR" uid="shell" />
     <!-- System tool permissions granted to the shell. -->
     <assign-permission name="android.permission.GET_TASKS" uid="shell" />
     <assign-permission name="android.permission.CHANGE_CONFIGURATION" uid="shell" />
