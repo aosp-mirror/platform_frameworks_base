@@ -1525,6 +1525,8 @@
   <java-symbol type="array" name="radioAttributes" />
   <java-symbol type="array" name="config_oemUsbModeOverride" />
   <java-symbol type="array" name="config_locationProviderPackageNames" />
+  <java-symbol type="array" name="config_defaultNotificationVibePattern" />
+  <java-symbol type="array" name="config_notificationFallbackVibePattern" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
   <java-symbol type="bool" name="config_sf_limitedAlpha" />
