@@ -203,12 +203,6 @@ public class TextToSpeech {
         public static final int USE_DEFAULTS = 0; // false
 
         /**
-         * Limit of length of input string passed to speak/synthesizeToFile.
-         * Larger strings will be rejected.
-         */
-        public static final int MAX_SPEECH_STRING_LENGTH = 4000;
-
-        /**
          * Package name of the default TTS engine.
          *
          * @hide
@@ -807,8 +801,7 @@ public class TextToSpeech {
      * {@link #setOnUtteranceProgressListener}) and using the
      * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
-     * @param text The string of text to be spoken. No longer than
-     *            {@link Engine#MAX_SPEECH_STRING_LENGTH} characters.
+     * @param text The string of text to be spoken.
      * @param queueMode The queuing strategy to use, {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
@@ -1120,8 +1113,7 @@ public class TextToSpeech {
      * {@link #setOnUtteranceProgressListener}) and using the
      * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
-     * @param text The text that should be synthesized. No longer than
-     *            {@link Engine#MAX_SPEECH_STRING_LENGTH} characters.
+     * @param text The text that should be synthesized
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.

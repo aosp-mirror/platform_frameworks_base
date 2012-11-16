@@ -74,7 +74,7 @@ public abstract class TextToSpeechService extends Service {
     private static final boolean DBG = false;
     private static final String TAG = "TextToSpeechService";
 
-
+    private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
     private static final String SYNTH_THREAD_NAME = "SynthThread";
 
     private SynthHandler mSynthHandler;
@@ -552,7 +552,7 @@ public abstract class TextToSpeechService extends Service {
                 Log.e(TAG, "null synthesis text");
                 return false;
             }
-            if (mText.length() >= TextToSpeech.Engine.MAX_SPEECH_STRING_LENGTH) {
+            if (mText.length() >= MAX_SPEECH_ITEM_CHAR_LENGTH) {
                 Log.w(TAG, "Text too long: " + mText.length() + " chars");
                 return false;
             }
