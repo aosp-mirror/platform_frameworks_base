@@ -775,7 +775,7 @@
     <ul>
       
       <li>
-        <a href="<?cs var:toroot ?>training/perf-tips.html"
+        <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
            description=
            "How to optimize your app's performance in various ways to improve its
            responsiveness and battery efficiency."
@@ -851,7 +851,7 @@
       </li>
       
       <li>
-        <a href="<?cs var:toroot ?>training/perf-anr.html"
+        <a href="<?cs var:toroot ?>training/articles/perf-anr.html"
            description=
            "How to keep your app responsive to user interaction so the UI does not lock-up and
            display an &quot;Application Not Responding&quot; dialog."
@@ -859,7 +859,7 @@
       </li>
       
       <li>
-        <a href="<?cs var:toroot ?>training/perf-jni.html"
+        <a href="<?cs var:toroot ?>training/articles/perf-jni.html"
            description=
            "How to efficiently use the Java Native Interface with the Android NDK."
           >JNI Tips</a>
@@ -879,7 +879,7 @@
     <ul>
 
       <li>
-        <a href="<?cs var:toroot ?>training/security-tips.html"
+        <a href="<?cs var:toroot ?>training/articles/security-tips.html"
            description=
            "How to perform various tasks and keep your app's data and your user's data secure."
           >Security Tips</a>
