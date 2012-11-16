@@ -36,7 +36,8 @@ int dhcp_do_request(const char *ifname,
                     const char *dns2,
                     const char *server,
                     uint32_t *lease,
-                    const char *vendorInfo);
+                    const char *vendorInfo,
+                    const char *domains);
 
 int dhcp_do_request_renew(const char *ifname,
                     const char *ipaddr,
@@ -46,7 +47,8 @@ int dhcp_do_request_renew(const char *ifname,
                     const char *dns2,
                     const char *server,
                     uint32_t *lease,
-                    const char *vendorInfo);
+                    const char *vendorInfo,
+                    const char *domains);
 
 int dhcp_stop(const char *ifname);
 int dhcp_release_lease(const char *ifname);
@@ -68,6 +70,7 @@ static struct fieldIds {
     jmethodID addLinkAddress;
     jmethodID addGateway;
     jmethodID addDns;
+    jmethodID setDomains;
     jmethodID setServerAddress;
     jmethodID setLeaseDuration;
     jmethodID setVendorInfo;
@@ -120,18 +123,18 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     char  server[PROPERTY_VALUE_MAX];
     uint32_t lease;
     char vendorInfo[PROPERTY_VALUE_MAX];
+    char domains[PROPERTY_VALUE_MAX];
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
     if (nameStr == NULL) return (jboolean)false;
 
     if (renew) {
         result = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease, vendorInfo);
+                dns1, dns2, server, &lease, vendorInfo, domains);
     } else {
         result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease, vendorInfo);
+                dns1, dns2, server, &lease, vendorInfo, domains);
     }
-
     env->ReleaseStringUTFChars(ifname, nameStr);
     if (result == 0) {
         env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.clear);
@@ -160,6 +163,9 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     }
 
     if (result == 0) {
+        env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.setDomains,
+                env->NewStringUTF(domains));
+
         result = env->CallBooleanMethod(dhcpResults,
                 dhcpResultsFieldIds.addDns, env->NewStringUTF(dns2));
     }
@@ -251,6 +257,8 @@ int register_android_net_NetworkUtils(JNIEnv* env)
             env->GetMethodID(dhcpResultsClass, "addGateway", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.addDns =
             env->GetMethodID(dhcpResultsClass, "addDns", "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.setDomains =
+            env->GetMethodID(dhcpResultsClass, "setDomains", "(Ljava/lang/String;)V");
     dhcpResultsFieldIds.setServerAddress =
             env->GetMethodID(dhcpResultsClass, "setServerAddress", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.setLeaseDuration =

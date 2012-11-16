@@ -1805,6 +1805,12 @@ public class WifiStateMachine extends StateMachine {
     private void handleSuccessfulIpConfiguration(DhcpResults dhcpResults) {
         mLastSignalLevel = -1; // force update of signal strength
         mReconnectCount = 0; //Reset IP failure tracking
+        if (dhcpResults.serverAddress == null) {
+            dhcpResults = null;
+        }
+        synchronized (mDhcpResultsLock) {
+            mDhcpResults = dhcpResults;
+        }
         LinkProperties linkProperties = dhcpResults.linkProperties;
         mWifiConfigStore.setLinkProperties(mLastNetworkId, linkProperties);
         InetAddress addr = null;
@@ -1826,7 +1832,6 @@ public class WifiStateMachine extends StateMachine {
                 sendLinkConfigurationChangedBroadcast();
             }
         } else {
-            mLinkProperties = linkProperties;
             configureLinkProperties();
         }
     }

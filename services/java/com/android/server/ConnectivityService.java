@@ -2524,18 +2524,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             SystemProperties.set(key, "");
         }
         mNumDnsEntries = last;
+        if (SystemProperties.get("net.dns.search").equals(domains) == false) {
+            SystemProperties.set("net.dns.search", domains);
+            changed = true;
+        }
 
         if (changed) {
             try {
-                mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
+                mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
                 mNetd.setDefaultInterfaceForDns(iface);
             } catch (Exception e) {
                 if (DBG) loge("exception setting default dns interface: " + e);
             }
-        }
-        if (!domains.equals(SystemProperties.get("net.dns.search"))) {
-            SystemProperties.set("net.dns.search", domains);
-            changed = true;
         }
         return changed;
     }
@@ -2552,13 +2552,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
                     if (!mDnsOverridden) {
-                        changed = updateDns(network, p.getInterfaceName(), dnses, "");
+                        changed = updateDns(network, p.getInterfaceName(), dnses, p.getDomains());
                     }
                 }
             } else {
                 try {
                     mNetd.setDnsServersForInterface(p.getInterfaceName(),
-                            NetworkUtils.makeStrings(dnses));
+                            NetworkUtils.makeStrings(dnses), p.getDomains());
                 } catch (Exception e) {
                     if (DBG) loge("exception setting dns servers: " + e);
                 }
