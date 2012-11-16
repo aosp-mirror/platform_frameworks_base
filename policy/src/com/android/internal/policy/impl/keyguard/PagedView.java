@@ -1457,7 +1457,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                                 }
 
                                 removeView(mDragView);
-                                onRemoveView(mDragView);
+                                onRemoveView(mDragView, false);
                                 addView(mDragView, pageUnderPointIndex);
                                 onAddView(mDragView, pageUnderPointIndex);
                                 mSidePageHoverIndex = -1;
@@ -1587,7 +1587,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
     }
 
     //public abstract void onFlingToDelete(View v);
-    public abstract void onRemoveView(View v);
+    public abstract void onRemoveView(View v, boolean deletePermanently);
     public abstract void onAddView(View v, int index);
 
     private void resetTouchState() {
@@ -2391,7 +2391,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                 slideAnimations.start();
 
                 removeView(dragView);
-                onRemoveView(dragView);
+                onRemoveView(dragView, true);
             }
         };
     }
