@@ -511,7 +511,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     ALOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)",
           sampleRateInHertz, nbChannels, audioFormat);
 
-    int frameCount = 0;
+    size_t frameCount = 0;
     status_t result = AudioRecord::getMinFrameCount(&frameCount,
             sampleRateInHertz,
             (audioFormat == javaAudioRecordFields.PCM16 ?
