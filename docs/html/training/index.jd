@@ -5,8 +5,8 @@ page.metaDescription=Android Training provides a collection of classes that aim 
 @jd:body
 
 
-<p>Welcome to Training. Each class provides a series of lessons that
-describe how to accomplish a specific task with code samples you can re-use in your app.
+<p>Welcome to Training for Android developers. Here you'll find sets of lessons within classes
+that describe how to accomplish a specific task with code samples you can re-use in your app.
 Classes are organized into several groups you can see at the top-level of the left navigation.</p>
 
 <p>This first group, <em>Getting Started</em>, teaches you the bare
