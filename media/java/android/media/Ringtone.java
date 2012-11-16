@@ -18,6 +18,8 @@ package android.media;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
@@ -229,10 +231,14 @@ public class Ringtone {
             try {
                 mRemotePlayer.play(mRemoteToken, canonicalUri, mStreamType);
             } catch (RemoteException e) {
-                Log.w(TAG, "Problem playing ringtone: " + e);
+                if (!playFallbackRingtone()) {
+                    Log.w(TAG, "Problem playing ringtone: " + e);
+                }
             }
         } else {
-            Log.w(TAG, "Neither local nor remote playback available");
+            if (!playFallbackRingtone()) {
+                Log.w(TAG, "Neither local nor remote playback available");
+            }
         }
     }
 
@@ -278,6 +284,43 @@ public class Ringtone {
             Log.w(TAG, "Neither local nor remote playback available");
             return false;
         }
+    }
+
+    private boolean playFallbackRingtone() {
+        if (mAudioManager.getStreamVolume(mStreamType) != 0) {
+            int ringtoneType = RingtoneManager.getDefaultType(mUri);
+            if (ringtoneType != -1 &&
+                    RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) != null) {
+                // Default ringtone, try fallback ringtone.
+                try {
+                    AssetFileDescriptor afd = mContext.getResources().openRawResourceFd(
+                            com.android.internal.R.raw.fallbackring);
+                    if (afd != null) {
+                        mLocalPlayer = new MediaPlayer();
+                        if (afd.getDeclaredLength() < 0) {
+                            mLocalPlayer.setDataSource(afd.getFileDescriptor());
+                        } else {
+                            mLocalPlayer.setDataSource(afd.getFileDescriptor(),
+                                    afd.getStartOffset(),
+                                    afd.getDeclaredLength());
+                        }
+                        mLocalPlayer.setAudioStreamType(mStreamType);
+                        mLocalPlayer.prepare();
+                        mLocalPlayer.start();
+                        afd.close();
+                        return true;
+                    } else {
+                        Log.e(TAG, "Could not load fallback ringtone");
+                    }
+                } catch (IOException ioe) {
+                    destroyLocalPlayer();
+                    Log.e(TAG, "Failed to open fallback ringtone");
+                } catch (NotFoundException nfe) {
+                    Log.e(TAG, "Fallback ringtone does not exist");
+                }
+            }
+        }
+        return false;
     }
 
     void setTitle(String title) {
