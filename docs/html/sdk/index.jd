@@ -7,20 +7,20 @@ sdk.win32_bundle_bytes=417851015
 sdk.win32_bundle_checksum=42d9a6c15113d405a97eed05e6d42e2b
 
 sdk.win64_bundle_download=adt-bundle-windows-x86_64.zip
-sdk.win64_bundle_bytes=417975502
-sdk.win64_bundle_checksum=9c8ef6855764ecc516ee9d1664405461
+sdk.win64_bundle_bytes=417851515
+sdk.win64_bundle_checksum=73bdd1168fce0e36a27255a4335c865d
 
 sdk.mac64_bundle_download=adt-bundle-mac-x86_64.zip
-sdk.mac64_bundle_bytes=383081781
-sdk.mac64_bundle_checksum=3e39d683361901226183730f717bc4ee
+sdk.mac64_bundle_bytes=382957959
+sdk.mac64_bundle_checksum=a320f8bbaee8572a36e68c434564bdd0
 
 sdk.linux32_bundle_download=adt-bundle-linux-x86.zip
 sdk.linux32_bundle_bytes=411065882
 sdk.linux32_bundle_checksum=39687b06fedfea7487ff0824a4d32ee8
 
 sdk.linux64_bundle_download=adt-bundle-linux-x86_64.zip
-sdk.linux64_bundle_bytes=411339954
-sdk.linux64_bundle_checksum=b92a799faf94ee445e34b12a50bf9d08
+sdk.linux64_bundle_bytes=411217430
+sdk.linux64_bundle_checksum=b0590fe9c1533da9b20ea65525b77677
 
 
 
