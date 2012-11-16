@@ -88,7 +88,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int MIN_USER_ID = 10;
 
-    private static final int USER_VERSION = 1;
+    private static final int USER_VERSION = 2;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -484,8 +484,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * This fixes an incorrect initialization of user name for the owner.
-     * TODO: Remove in the next release.
+     * Upgrade steps between versions, either for fixing bugs or changing the data format.
      */
     private void upgradeIfNecessary() {
         int userVersion = mUserVersion;
@@ -497,6 +496,16 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLocked(user);
             }
             userVersion = 1;
+        }
+
+        if (userVersion < 2) {
+            // Owner should be marked as initialized
+            UserInfo user = mUsers.get(UserHandle.USER_OWNER);
+            if ((user.flags & UserInfo.FLAG_INITIALIZED) == 0) {
+                user.flags |= UserInfo.FLAG_INITIALIZED;
+                writeUserLocked(user);
+            }
+            userVersion = 2;
         }
 
         if (userVersion < USER_VERSION) {
