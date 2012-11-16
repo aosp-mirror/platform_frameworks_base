@@ -100,6 +100,10 @@ public class AppWindowAnimator {
             animInitialized = false;
         }
         clearThumbnail();
+        if (mAppToken.deferClearAllDrawn) {
+            mAppToken.allDrawn = false;
+            mAppToken.deferClearAllDrawn = false;
+        }
     }
 
     public void clearThumbnail() {
