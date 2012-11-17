@@ -180,7 +180,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Λειτουργία πτήσης"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Φόρτιση, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Χρεώθηκε"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Μπαταρία πλήρης"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> συσκευές)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Απενεργοποιημένο Bluetooth"</string>
