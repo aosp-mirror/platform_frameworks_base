@@ -125,7 +125,6 @@ public class TestBase  {
 
     // Must override
     public void createTest(android.content.res.Resources res) {
-        android.util.Log.e("img", "implement createTest");
     }
 
     // Must override

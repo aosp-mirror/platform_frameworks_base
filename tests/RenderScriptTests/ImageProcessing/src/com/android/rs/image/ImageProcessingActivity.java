@@ -270,6 +270,9 @@ public class ImageProcessingActivity extends Activity
         case 28:
             mTest = new Blend();
             break;
+        case 29:
+            mTest = new Blur25G();
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn, mBitmapIn2);
@@ -281,7 +284,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[29];
+        mTestNames = new String[30];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -311,6 +314,7 @@ public class ImageProcessingActivity extends Activity
         mTestNames[26] = "Intrinsics Convolve 5x5";
         mTestNames[27] = "Mandelbrot";
         mTestNames[28] = "Intrinsics Blend";
+        mTestNames[29] = "Intrinsics Blur 25 uchar";
 
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
