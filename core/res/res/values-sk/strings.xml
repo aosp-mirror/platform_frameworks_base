@@ -993,6 +993,12 @@
     <string name="weeks" msgid="6509623834583944518">"týždne"</string>
     <string name="year" msgid="4001118221013892076">"rok"</string>
     <string name="years" msgid="6881577717993213522">"roky"</string>
+    <!-- no translation found for duration_seconds:one (6962015528372969481) -->
+    <!-- no translation found for duration_seconds:other (1886107766577166786) -->
+    <!-- no translation found for duration_minutes:one (4915414002546085617) -->
+    <!-- no translation found for duration_minutes:other (3165187169224908775) -->
+    <!-- no translation found for duration_hours:one (8917467491248809972) -->
+    <!-- no translation found for duration_hours:other (3863962854246773930) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problém s videom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Je nám ľúto, ale toto video sa nedá streamovať do tohto zariadenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nie je možné prehrať."</string>
