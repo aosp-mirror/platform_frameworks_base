@@ -10,8 +10,8 @@
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
-	    <li><a href="<?cs var:toroot ?>sdk/installing/bundle.html">
-	        <span class="en">Setting Up the ADT Bundle</span></a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/bundle.html">
+          <span class="en">Setting Up the ADT Bundle</span></a></li>
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>sdk/installing/index.html"><span class="en">Setting Up
@@ -19,12 +19,12 @@
         <ul>
           <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
               <span class="en">Installing the Eclipse Plugin</span></a></li>
-		    <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
-		        <span class="en">Adding Platforms and Packages</span></a></li>
+        <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
+            <span class="en">Adding Platforms and Packages</span></a></li>
         </ul>
       </li>
-	    <li><a href="<?cs var:toroot ?>sdk/exploring.html">
-	        <span class="en">Exploring the SDK</span></a></li>
+      <li><a href="<?cs var:toroot ?>sdk/exploring.html">
+          <span class="en">Exploring the SDK</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/ndk/index.html">Download the NDK</a>
       </li>
     </ul>
@@ -49,6 +49,7 @@
         <ul>
           <li><a href="/tools/projects/projects-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
           <li><a href="/tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
+          <li><a href="/tools/projects/templates.html"><span class="en">Using Code Templates</span></a></li>
         </ul>
       </li>
 
