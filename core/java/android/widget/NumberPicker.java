@@ -1284,7 +1284,12 @@ public class NumberPicker extends LinearLayout {
     /**
      * Sets the min value of the picker.
      *
-     * @param minValue The min value.
+     * @param minValue The min value inclusive.
+     *
+     * <strong>Note:</strong> The length of the displayed values array
+     * set via {@link #setDisplayedValues(String[])} must be equal to the
+     * range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMinValue(int minValue) {
         if (mMinValue == minValue) {
@@ -1317,7 +1322,12 @@ public class NumberPicker extends LinearLayout {
     /**
      * Sets the max value of the picker.
      *
-     * @param maxValue The max value.
+     * @param maxValue The max value inclusive.
+     *
+     * <strong>Note:</strong> The length of the displayed values array
+     * set via {@link #setDisplayedValues(String[])} must be equal to the
+     * range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMaxValue(int maxValue) {
         if (mMaxValue == maxValue) {
@@ -1351,6 +1361,10 @@ public class NumberPicker extends LinearLayout {
      * Sets the values to be displayed.
      *
      * @param displayedValues The displayed values.
+     *
+     * <strong>Note:</strong> The length of the displayed values array
+     * must be equal to the range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setDisplayedValues(String[] displayedValues) {
         if (mDisplayedValues == displayedValues) {
@@ -1361,14 +1375,6 @@ public class NumberPicker extends LinearLayout {
             // Allow text entry rather than strictly numeric entry.
             mInputText.setRawInputType(InputType.TYPE_CLASS_TEXT
                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-            // Make sure the min, max, respect the size of the displayed
-            // values. This will take care of the current value as well.
-            if (getMinValue() >= displayedValues.length) {
-                setMinValue(0);
-            }
-            if (getMaxValue() >= displayedValues.length) {
-                setMaxValue(displayedValues.length - 1);
-            }
         } else {
             mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         }
