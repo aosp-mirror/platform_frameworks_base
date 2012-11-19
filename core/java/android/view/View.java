@@ -623,6 +623,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_hapticFeedbackEnabled
  * @attr ref android.R.styleable#View_keepScreenOn
  * @attr ref android.R.styleable#View_layerType
+ * @attr ref android.R.styleable#View_layoutDirection
  * @attr ref android.R.styleable#View_longClickable
  * @attr ref android.R.styleable#View_minHeight
  * @attr ref android.R.styleable#View_minWidth
@@ -660,6 +661,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
  * @attr ref android.R.styleable#View_textAlignment
+ * @attr ref android.R.styleable#View_textDirection
  * @attr ref android.R.styleable#View_transformPivotX
  * @attr ref android.R.styleable#View_transformPivotY
  * @attr ref android.R.styleable#View_translationX
@@ -5854,6 +5856,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   {@link #LAYOUT_DIRECTION_RTL},
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
+     *
      * @attr ref android.R.styleable#View_layoutDirection
      *
      * @hide
@@ -5909,6 +5912,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * For compatibility, this will return {@link #LAYOUT_DIRECTION_LTR} if API version
      * is lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}.
+     *
+     * @attr ref android.R.styleable#View_layoutDirection
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR, to = "RESOLVED_DIRECTION_LTR"),
@@ -16627,6 +16632,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
      *
+     * @attr ref android.R.styleable#View_textDirection
+     *
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
@@ -16656,6 +16663,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Resolution will be done if the value is set to TEXT_DIRECTION_INHERIT. The resolution
      * proceeds up the parent chain of the view to get the value. If there is no parent, then it will
      * return the default {@link #TEXT_DIRECTION_FIRST_STRONG}.
+     *
+     * @attr ref android.R.styleable#View_textDirection
      */
     public void setTextDirection(int textDirection) {
         if (getRawTextDirection() != textDirection) {
@@ -16684,6 +16693,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     *
+     * @attr ref android.R.styleable#View_textDirection
      */
     public int getTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_RESOLVED_MASK) >> PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
@@ -16816,6 +16827,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_ALIGNMENT_VIEW_START},
      * {@link #TEXT_ALIGNMENT_VIEW_END}
      *
+     * @attr ref android.R.styleable#View_textAlignment
+     *
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
@@ -16879,6 +16892,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #TEXT_ALIGNMENT_TEXT_END},
      * {@link #TEXT_ALIGNMENT_VIEW_START},
      * {@link #TEXT_ALIGNMENT_VIEW_END}
+     *
+     * @attr ref android.R.styleable#View_textAlignment
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
