@@ -62,7 +62,7 @@ private:
     bool mWaitingForVsync;
 
     virtual int handleEvent(int receiveFd, int events, void* data);
-    bool readLastVsyncMessage(nsecs_t* outTimestamp, int32_t* id, uint32_t* outCount);
+    bool processPendingEvents(nsecs_t* outTimestamp, int32_t* id, uint32_t* outCount);
     void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
     void dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected);
 };
@@ -111,7 +111,7 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
         nsecs_t vsyncTimestamp;
         int32_t vsyncDisplayId;
         uint32_t vsyncCount;
-        readLastVsyncMessage(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount);
+        processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount);
 
         status_t status = mReceiver.requestNextVsync();
         if (status) {
@@ -141,43 +141,47 @@ int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* dat
     nsecs_t vsyncTimestamp;
     int32_t vsyncDisplayId;
     uint32_t vsyncCount;
-    if (!readLastVsyncMessage(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", this);
-        return 1; // keep the callback, did not obtain a vsync pulse
+    if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
+        ALOGV("receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
+                this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
+        mWaitingForVsync = false;
+        dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
     }
 
-    ALOGV("receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
-            this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
-    mWaitingForVsync = false;
-
-    dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
     return 1; // keep the callback
 }
 
-bool NativeDisplayEventReceiver::readLastVsyncMessage(
+bool NativeDisplayEventReceiver::processPendingEvents(
         nsecs_t* outTimestamp, int32_t* outId, uint32_t* outCount) {
+    bool gotVsync = false;
     DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
     ssize_t n;
     while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
         ALOGV("receiver %p ~ Read %d events.", this, int(n));
-        while (n-- > 0) {
-            const DisplayEventReceiver::Event& ev = buf[n];
-            if (ev.header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+        for (ssize_t i = 0; i < n; i++) {
+            const DisplayEventReceiver::Event& ev = buf[i];
+            switch (ev.header.type) {
+            case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
+                // Later vsync events will just overwrite the info from earlier
+                // ones. That's fine, we only care about the most recent.
+                gotVsync = true;
                 *outTimestamp = ev.header.timestamp;
                 *outId = ev.header.id;
                 *outCount = ev.vsync.count;
-                return true; // stop at last vsync in the buffer
-            }
-
-            if (ev.header.type == DisplayEventReceiver::DISPLAY_EVENT_HOTPLUG) {
+                break;
+            case DisplayEventReceiver::DISPLAY_EVENT_HOTPLUG:
                 dispatchHotplug(ev.header.timestamp, ev.header.id, ev.hotplug.connected);
+                break;
+            default:
+                ALOGW("receiver %p ~ ignoring unknown event type %#x", this, ev.header.type);
+                break;
             }
         }
     }
     if (n < 0) {
         ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
     }
-    return false;
+    return gotVsync;
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
