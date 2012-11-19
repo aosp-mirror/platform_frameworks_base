@@ -540,7 +540,7 @@ resource ID.</dd>
 
 <dt>resource reference:</dt>
 <dd>
-In Java: <code>R.array.<em>string_array_name</em></code><br/>
+In Java: <code>R.array.<em>integer_array_name</em></code><br/>
 In XML: <code>@[<em>package</em>:]array.<em>integer_array_name</em></code>
 </dd>
 
@@ -565,7 +565,7 @@ In XML: <code>@[<em>package</em>:]array.<em>integer_array_name</em></code>
     <dd><strong>Required.</strong> This must be the root node.
       <p>No attributes.</p>
     </dd>
-  <dt id="integer-array-element"><code>&lt;string-array&gt;</code></dt>
+  <dt id="integer-array-element"><code>&lt;integer-array&gt;</code></dt>
     <dd>Defines an array of integers. Contains one or more child {@code &lt;item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
