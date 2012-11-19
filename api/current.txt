@@ -20547,6 +20547,7 @@ package android.speech.tts {
     method public java.util.List<android.speech.tts.TextToSpeech.EngineInfo> getEngines();
     method public java.util.Set<java.lang.String> getFeatures(java.util.Locale);
     method public java.util.Locale getLanguage();
+    method public static int getMaxSpeechInputLength();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
     method public int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);

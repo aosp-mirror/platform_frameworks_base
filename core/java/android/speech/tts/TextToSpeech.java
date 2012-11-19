@@ -802,7 +802,8 @@ public class TextToSpeech {
      * {@link #setOnUtteranceProgressListener}) and using the
      * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
-     * @param text The string of text to be spoken.
+     * @param text The string of text to be spoken. No longer than
+     *            {@link #getMaxSpeechInputLength()} characters.
      * @param queueMode The queuing strategy to use, {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
@@ -1124,7 +1125,8 @@ public class TextToSpeech {
      * {@link #setOnUtteranceProgressListener}) and using the
      * {@link Engine#KEY_PARAM_UTTERANCE_ID} parameter.
      *
-     * @param text The text that should be synthesized
+     * @param text The text that should be synthesized. No longer than
+     *            {@link #getMaxSpeechInputLength()} characters.
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
@@ -1483,4 +1485,13 @@ public class TextToSpeech {
 
     }
 
+    /**
+     * Limit of length of input string passed to speak and synthesizeToFile.
+     *
+     * @see #speak
+     * @see #synthesizeToFile
+     */
+    public static int getMaxSpeechInputLength() {
+        return 4000;
+    }
 }
