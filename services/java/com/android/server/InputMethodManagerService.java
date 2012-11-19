@@ -1814,9 +1814,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public InputBindResult windowGainedFocus(IInputMethodClient client, IBinder windowToken,
             int controlFlags, int softInputMode, int windowFlags,
             EditorInfo attribute, IInputContext inputContext) {
-        if (!calledFromValidUser()) {
-            return null;
-        }
+        // Needs to check the validity before clearing calling identity
+        final boolean calledFromValidUser = calledFromValidUser();
+
         InputBindResult res = null;
         long ident = Binder.clearCallingIdentity();
         try {
@@ -1844,6 +1844,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return null;
                     }
                 } catch (RemoteException e) {
+                }
+
+                if (!calledFromValidUser) {
+                    Slog.w(TAG, "A background user is requesting window. Hiding IME.");
+                    Slog.w(TAG, "If you want to interect with IME, you need "
+                            + "android.permission.INTERACT_ACROSS_USERS_FULL");
+                    hideCurrentInputLocked(0, null);
+                    return null;
                 }
 
                 if (mCurFocusedWindow == windowToken) {
