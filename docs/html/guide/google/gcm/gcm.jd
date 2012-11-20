@@ -80,7 +80,6 @@ Messaging (GCM):</p>
 <ul>
   <li>It allows 3rd-party application servers to send messages to
 their Android applications.</li>
-  <li>GCM makes no guarantees about delivery or the order of messages.</li>
   <li>An Android application on an Android device doesn't need to be running to receive
 messages. The system will wake up the Android application via Intent broadcast when the  message arrives, as long as the application is set up with the proper
 broadcast receiver and permissions.</li>
