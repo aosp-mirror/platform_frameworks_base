@@ -59,6 +59,10 @@ public class Path {
         int valNative = 0;
         if (src != null) {
             valNative = src.mNativePath;
+            isSimplePath = src.isSimplePath;
+            if (src.rects != null) {
+                rects = new Region(src.rects);
+            }
         }
         mNativePath = init2(valNative);
         mDetectSimplePaths = HardwareRenderer.isAvailable();
@@ -544,6 +548,7 @@ public class Path {
         int dstNative = 0;
         if (dst != null) {
             dstNative = dst.mNativePath;
+            dst.isSimplePath = false;
         }
         native_offset(mNativePath, dx, dy, dstNative);
     }
@@ -555,6 +560,7 @@ public class Path {
      * @param dy The amount in the Y direction to offset the entire path
      */
     public void offset(float dx, float dy) {
+        isSimplePath = false;
         native_offset(mNativePath, dx, dy);
     }
 
@@ -580,6 +586,7 @@ public class Path {
     public void transform(Matrix matrix, Path dst) {
         int dstNative = 0;
         if (dst != null) {
+            dst.isSimplePath = false;
             dstNative = dst.mNativePath;
         }
         native_transform(mNativePath, matrix.native_instance, dstNative);
@@ -591,6 +598,7 @@ public class Path {
      * @param matrix The matrix to apply to the path
      */
     public void transform(Matrix matrix) {
+        isSimplePath = false;
         native_transform(mNativePath, matrix.native_instance);
     }
 
