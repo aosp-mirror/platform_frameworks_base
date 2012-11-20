@@ -18,14 +18,17 @@ package com.android.tests.memoryusage;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Debug.MemoryInfo;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
@@ -48,8 +51,9 @@ public class MemoryUsageTest extends InstrumentationTestCase {
 
     private static final int SLEEP_TIME = 1000;
     private static final int THRESHOLD = 1024;
-    private static final int MAX_ITERATIONS = 10;
-    private static final int MIN_ITERATIONS = 4;
+    private static final int MAX_ITERATIONS = 20;
+    private static final int MIN_ITERATIONS = 6;
+    private static final int JOIN_TIMEOUT = 10000;
 
     private static final String TAG = "MemoryUsageInstrumentation";
     private static final String KEY_APPS = "apps";
@@ -58,10 +62,13 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     private Map<String, String> mNameToProcess;
     private Map<String, String> mNameToResultKey;
 
+    private IActivityManager mAm;
+
     public void testMemory() {
         MemoryUsageInstrumentation instrumentation =
-                    (MemoryUsageInstrumentation) getInstrumentation();
+                (MemoryUsageInstrumentation) getInstrumentation();
         Bundle args = instrumentation.getBundle();
+        mAm = ActivityManagerNative.getDefault();
 
         createMappings();
         parseArgs(args);
@@ -136,7 +143,16 @@ public class MemoryUsageTest extends InstrumentationTestCase {
 
         String process = mNameToProcess.get(appName);
         Intent startIntent = mNameToIntent.get(appName);
-        getInstrumentation().getContext().startActivity(startIntent);
+
+        AppLaunchRunnable runnable = new AppLaunchRunnable(startIntent);
+        Thread t = new Thread(runnable);
+        t.start();
+        try {
+            t.join(JOIN_TIMEOUT);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
         return process;
     }
 
@@ -234,12 +250,37 @@ public class MemoryUsageTest extends InstrumentationTestCase {
             }
 
             int[] pids = {
-                proc.pid };
+                    proc.pid };
 
             MemoryInfo meminfo = am.getProcessMemoryInfo(pids)[0];
             return meminfo.getTotalPss();
 
         }
         return -1;
+    }
+
+    private class AppLaunchRunnable implements Runnable {
+        private Intent mLaunchIntent;
+
+        public AppLaunchRunnable(Intent intent) {
+            mLaunchIntent = intent;
+        }
+
+        public void run() {
+            try {
+                String mimeType = mLaunchIntent.getType();
+                if (mimeType == null && mLaunchIntent.getData() != null
+                        && "content".equals(mLaunchIntent.getData().getScheme())) {
+                    mimeType = mAm.getProviderMimeType(mLaunchIntent.getData(),
+                            UserHandle.USER_CURRENT);
+                }
+
+                mAm.startActivityAndWait(null, mLaunchIntent, mimeType,
+                        null, null, 0, mLaunchIntent.getFlags(), null, null, null,
+                        UserHandle.USER_CURRENT_OR_SELF);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error launching app", e);
+            }
+        }
     }
 }
