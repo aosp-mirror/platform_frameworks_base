@@ -84,7 +84,7 @@ public abstract class WallpaperService extends Service {
      * tag.
      */
     public static final String SERVICE_META_DATA = "android.service.wallpaper";
-    
+
     static final String TAG = "WallpaperService";
     static final boolean DEBUG = false;
     
@@ -100,7 +100,6 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
     
-    private Looper mCallbackLooper;
     private final ArrayList<Engine> mActiveEngines
             = new ArrayList<Engine>();
     
@@ -961,13 +960,7 @@ public abstract class WallpaperService extends Service {
         IWallpaperEngineWrapper(WallpaperService context,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight) {
-            if (DEBUG && mCallbackLooper != null) {
-                mCallbackLooper.setMessageLogging(new LogPrinter(Log.VERBOSE, TAG));
-            }
-            mCaller = new HandlerCaller(context,
-                    mCallbackLooper != null
-                            ? mCallbackLooper : context.getMainLooper(),
-                    this);
+            mCaller = new HandlerCaller(context, context.getMainLooper(), this);
             mConnection = conn;
             mWindowToken = windowToken;
             mWindowType = windowType;
@@ -1105,13 +1098,14 @@ public abstract class WallpaperService extends Service {
             mTarget = context;
         }
 
+        @Override
         public void attach(IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight) {
             new IWallpaperEngineWrapper(mTarget, conn, windowToken,
                     windowType, isPreview, reqWidth, reqHeight);
         }
     }
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -1134,20 +1128,7 @@ public abstract class WallpaperService extends Service {
     public final IBinder onBind(Intent intent) {
         return new IWallpaperServiceWrapper(this);
     }
-    
-    /**
-     * This allows subclasses to change the thread that most callbacks
-     * occur on.  Currently hidden because it is mostly needed for the
-     * image wallpaper (which runs in the system process and doesn't want
-     * to get stuck running on that seriously in use main thread).  Not
-     * exposed right now because the semantics of this are not totally
-     * well defined and some callbacks can still happen on the main thread).
-     * @hide
-     */
-    public void setCallbackLooper(Looper looper) {
-        mCallbackLooper = looper;
-    }
-    
+
     /**
      * Must be implemented to return a new instance of the wallpaper's engine.
      * Note that multiple instances may be active at the same time, such as
