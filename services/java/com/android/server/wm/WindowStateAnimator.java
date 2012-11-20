@@ -626,7 +626,14 @@ class WindowStateAnimator {
                     "createSurface " + this + ": mDrawState=DRAW_PENDING");
             mDrawState = DRAW_PENDING;
             if (mWin.mAppToken != null) {
-                mWin.mAppToken.allDrawn = false;
+                if (mWin.mAppToken.mAppAnimator.animation == null) {
+                    mWin.mAppToken.allDrawn = false;
+                    mWin.mAppToken.deferClearAllDrawn = false;
+                } else {
+                    // Currently animating, persist current state of allDrawn until animation
+                    // is complete.
+                    mWin.mAppToken.deferClearAllDrawn = true;
+                }
             }
 
             mService.makeWindowFreezingScreenIfNeededLocked(mWin);

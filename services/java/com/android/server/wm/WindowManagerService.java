@@ -4295,6 +4295,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // the new one.
                         if (ttoken.allDrawn) {
                             wtoken.allDrawn = true;
+                            wtoken.deferClearAllDrawn = ttoken.deferClearAllDrawn;
                         }
                         if (ttoken.firstWindowDrawn) {
                             wtoken.firstWindowDrawn = true;
@@ -4602,6 +4603,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // its windows to be ready.
                     if (wtoken.hidden) {
                         wtoken.allDrawn = false;
+                        wtoken.deferClearAllDrawn = false;
                         wtoken.waitingToShow = true;
 
                         if (wtoken.clientHidden) {
@@ -8708,6 +8710,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // this guy's animations regardless of whether it's
                 // gotten drawn.
                 wtoken.allDrawn = true;
+                wtoken.deferClearAllDrawn = false;
             }
 
             if (mNextAppTransitionThumbnail != null && topOpeningApp != null
@@ -8878,6 +8881,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
+                        w.mAppToken.deferClearAllDrawn = false;
                     }
                 }
                 if (!mResizingWindows.contains(w)) {

@@ -64,6 +64,9 @@ class AppWindowToken extends WindowToken {
     int numDrawnWindows;
     boolean inPendingTransaction;
     boolean allDrawn;
+    // Set to true when this app creates a surface while in the middle of an animation. In that
+    // case do not clear allDrawn until the animation completes.
+    boolean deferClearAllDrawn;
 
     // Is this token going to be hidden in a little while?  If so, it
     // won't be taken into account for setting the screen orientation.
