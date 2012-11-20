@@ -281,6 +281,10 @@
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_max_pan_devices" />
+  <java-symbol type="integer" name="config_ntpPollingInterval" />
+  <java-symbol type="integer" name="config_ntpPollingIntervalShorter" />
+  <java-symbol type="integer" name="config_ntpRetry" />
+  <java-symbol type="integer" name="config_ntpThreshold" />
   <java-symbol type="integer" name="config_ntpTimeout" />
   <java-symbol type="integer" name="config_wifi_framework_scan_interval" />
   <java-symbol type="integer" name="config_wifi_supplicant_scan_interval" />
