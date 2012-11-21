@@ -182,6 +182,8 @@ public final class PowerManager {
      * </p><p>
      * Since not all devices have proximity sensors, use {@link #isWakeLockLevelSupported}
      * to determine whether this wake lock level is supported.
+     * </p><p>
+     * Cannot be used with {@link #ACQUIRE_CAUSES_WAKEUP}.
      * </p>
      *
      * {@hide}
