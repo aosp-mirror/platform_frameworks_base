@@ -386,6 +386,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private Locale mLastSystemLocale;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
+    private boolean mInputBoundToKeyguard;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -877,10 +878,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean hardKeyShown = haveHardKeyboard
                 && conf.hardKeyboardHidden
                         != Configuration.HARDKEYBOARDHIDDEN_YES;
-        final boolean isScreenLocked = mKeyguardManager != null
-                && mKeyguardManager.isKeyguardLocked()
-                && mKeyguardManager.isKeyguardSecure();
-        mImeWindowVis = (!isScreenLocked && (mInputShown || hardKeyShown)) ?
+        final boolean isScreenLocked =
+                mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+        final boolean isScreenSecurelyLocked =
+                isScreenLocked && mKeyguardManager.isKeyguardSecure();
+        final boolean inputShown = mInputShown && (!isScreenLocked || mInputBoundToKeyguard);
+        mImeWindowVis = (!isScreenSecurelyLocked && (inputShown || hardKeyShown)) ?
                 (InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE) : 0;
         updateImeWindowStatusLocked();
     }
@@ -1122,6 +1125,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
+        }
+
+        if (mCurClient == null) {
+            mInputBoundToKeyguard = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+            if (DEBUG) {
+                Slog.v(TAG, "New bind. keyguard = " +  mInputBoundToKeyguard);
+            }
         }
 
         if (mCurClient != cs) {
