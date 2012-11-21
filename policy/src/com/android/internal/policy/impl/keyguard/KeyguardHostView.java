@@ -271,7 +271,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         addWidgetsFromSettings();
         if (numWidgets() >= MAX_WIDGETS) {
-            setAddWidgetEnabled(false);
+            mAppWidgetContainer.setAddWidgetEnabled(false);
         }
         checkAppWidgetConsistency();
         mSwitchPageRunnable.run();
@@ -365,21 +365,25 @@ public class KeyguardHostView extends KeyguardViewBase {
         @Override
         public void onAddView(View v) {
             if (numWidgets() >= MAX_WIDGETS) {
-                setAddWidgetEnabled(false);
+                mAppWidgetContainer.setAddWidgetEnabled(false);
             }
-        };
+        }
 
         @Override
         public void onRemoveView(View v, boolean deletePermanently) {
-            if (numWidgets() < MAX_WIDGETS) {
-                setAddWidgetEnabled(true);
-            }
             if (deletePermanently) {
                 final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
                 if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
                         appWidgetId != LockPatternUtils.ID_DEFAULT_STATUS_WIDGET) {
                     mAppWidgetHost.deleteAppWidgetId(appWidgetId);
                 }
+            }
+        }
+
+        @Override
+        public void onRemoveViewAnimationCompleted() {
+            if (numWidgets() < MAX_WIDGETS) {
+                mAppWidgetContainer.setAddWidgetEnabled(true);
             }
         }
     };
@@ -1053,15 +1057,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
         return widgetCount;
-    }
-
-
-    private void setAddWidgetEnabled(boolean clickable) {
-        View addWidget = mAppWidgetContainer.findViewById(R.id.keyguard_add_widget);
-        if (addWidget != null) {
-            View addWidgetButton = addWidget.findViewById(R.id.keyguard_add_widget_view);
-            addWidgetButton.setEnabled(clickable);
-        }
     }
 
     private void addDefaultWidgets() {
