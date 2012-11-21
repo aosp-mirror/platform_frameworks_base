@@ -362,7 +362,7 @@
     <string name="permlab_deletePackages" msgid="184385129537705938">"smazání aplikací"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Umožňuje aplikaci smazat balíčky Android. Škodlivé aplikace mohou toto oprávnění použít ke smazání důležitých aplikací."</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"smazání dat ostatních aplikací"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Umožňuje aplikaci smazat data uživatele."</string>
+    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Umožňuje aplikaci vymazat data uživatele."</string>
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"smazání mezipaměti ostatních aplikací"</string>
     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Umožňuje aplikaci smazat soubory v mezipaměti."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"výpočet místa pro ukládání aplikací"</string>
@@ -446,7 +446,7 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Povoluje aplikaci ovládat základní funkce displejů přes Wi-Fi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna vašeho nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrání zvuku"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikaci zaznamenat zvuk pomocí mikrofonu. Toto oprávnění umožňuje aplikaci kdykoliv zaznamenat zvuk bez vašeho svolení."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto oprávnění umožňuje aplikaci používat fotoaparát kdykoliv i bez vašeho svolení."</string>
@@ -587,8 +587,8 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"testování přístupu do chráněného úložiště"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Umožňuje aplikaci testovat oprávnění pro úložiště USB, které bude dostupné v budoucích zařízeních."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Umožňuje aplikaci testovat oprávnění pro kartu SD, která bude dostupná v budoucích zařízeních."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"úprava nebo smazání obsahu v úložišti USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava nebo smazání obsahu na kartě SD"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"úprava nebo mazání obsahu v úložišti USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"úprava nebo mazání obsahu na kartě SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikaci zapisovat do úložiště USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Umožňuje aplikaci zapisovat na kartu SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Upravit/smazat interní úlož."</string>
