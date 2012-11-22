@@ -571,7 +571,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slår synkronisering av og på"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering av og på"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lar appen endre synkroniseringsinnstillingene for en konto. For eksempel kan dette brukes til å synkronisere Personer-appen med en konto."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lese synkroniseringsstatistikk"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lar appen lese synkroniseringsstatistikk for en konto, inkludert loggen over synkroniseringsaktiviteter og hvor mye data som er synkronisert."</string>
@@ -994,12 +994,18 @@
     <string name="weeks" msgid="6509623834583944518">"uker"</string>
     <string name="year" msgid="4001118221013892076">"år"</string>
     <string name="years" msgid="6881577717993213522">"år"</string>
-    <!-- no translation found for duration_seconds:one (6962015528372969481) -->
-    <!-- no translation found for duration_seconds:other (1886107766577166786) -->
-    <!-- no translation found for duration_minutes:one (4915414002546085617) -->
-    <!-- no translation found for duration_minutes:other (3165187169224908775) -->
-    <!-- no translation found for duration_hours:one (8917467491248809972) -->
-    <!-- no translation found for duration_hours:other (3863962854246773930) -->
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"Ett sekund"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"Ett minutt"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minutter"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"Én time"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> timer"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoproblem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Denne videoen er ikke gyldig for direkteavspilling på enheten."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Kan ikke spille av denne videoen."</string>
