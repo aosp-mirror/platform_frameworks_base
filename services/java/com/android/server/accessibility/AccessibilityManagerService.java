@@ -87,7 +87,9 @@ import com.android.internal.statusbar.IStatusBarService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -121,6 +123,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final String TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED =
             "temporaryEnableAccessibilityStateUntilKeyguardRemoved";
+
+    private static final String FUNCTION_DUMP = "dump";
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -1258,6 +1262,46 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    @Override
+    public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
+        synchronized (mLock) {
+            pw.println("ACCESSIBILITY MANAGER (dumpsys accessibility)");
+            pw.println();
+            pw.println("Ui automation service: bound=" + (mUiAutomationService != null));
+            pw.println();
+            if (mUiAutomationService != null) {
+                mUiAutomationService.dump(fd, pw, args);
+                pw.println();
+            }
+            final int userCount = mUserStates.size();
+            for (int i = 0; i < userCount; i++) {
+                UserState userState = mUserStates.valueAt(i);
+                pw.append("User state[attributes:{id=" + userState.mUserId);
+                pw.append(", currentUser=" + (userState.mUserId == mCurrentUserId));
+                pw.append(", accessibilityEnabled=" + userState.mIsAccessibilityEnabled);
+                pw.append(", touchExplorationEnabled=" + userState.mIsTouchExplorationEnabled);
+                pw.append(", displayMagnificationEnabled="
+                        + userState.mIsDisplayMagnificationEnabled);
+                pw.append("}");
+                pw.println();
+                pw.append("           services:{");
+                final int serviceCount = userState.mServices.size();
+                for (int j = 0; j < serviceCount; j++) {
+                    if (j > 0) {
+                        pw.append(", ");
+                        pw.println();
+                        pw.append("                     ");
+                    }
+                    Service service = userState.mServices.get(j);
+                    service.dump(fd, pw, args);
+                }
+                pw.println("}]");
+                pw.println();
+            }
+        }
+    }
+
     private class AccessibilityConnectionWrapper implements DeathRecipient {
         private final int mWindowId;
         private final int mUserId;
@@ -1894,6 +1938,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
+        @Override
+        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
+            synchronized (mLock) {
+                pw.append("Service[label=" + mAccessibilityServiceInfo.getResolveInfo()
+                        .loadLabel(mContext.getPackageManager()));
+                pw.append(", feedbackType"
+                        + AccessibilityServiceInfo.feedbackTypeToString(mFeedbackType));
+                pw.append(", canRetrieveScreenContent=" + mCanRetrieveScreenContent);
+                pw.append(", eventTypes="
+                        + AccessibilityEvent.eventTypeToString(mEventTypes));
+                pw.append(", notificationTimeout=" + mNotificationTimeout);
+                pw.append("]");
+            }
+        }
+
+        @Override
         public void onServiceDisconnected(ComponentName componentName) {
             /* do nothing - #binderDied takes care */
         }
@@ -2313,7 +2374,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             if (!hasPermission(permission)) {
                 throw new SecurityException("You do not have " + permission
-                        + " required to call " + function);
+                        + " required to call " + function + " from pid="
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
             }
         }
 
