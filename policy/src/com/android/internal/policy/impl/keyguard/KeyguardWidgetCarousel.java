@@ -16,7 +16,6 @@
 package com.android.internal.policy.impl.keyguard;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -27,9 +26,9 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import java.util.ArrayList;
-
 import com.android.internal.R;
+
+import java.util.ArrayList;
 
 public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
 
@@ -56,17 +55,30 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
         return MAX_SCROLL_PROGRESS;
     }
 
-    public float getAlphaForPage(int screenCenter, int index) {
+    public float getAlphaForPage(int screenCenter, int index, boolean showSidePages) {
         View child = getChildAt(index);
         if (child == null) return 0f;
 
+        boolean inVisibleRange = index >= getNextPage() - 1 && index <= getNextPage() + 1;
         float scrollProgress = getScrollProgress(screenCenter, child, index);
-        if (!isOverScrollChild(index, scrollProgress)) {
+
+        if (isOverScrollChild(index, scrollProgress)) {
+            return 1.0f;
+        } else if ((showSidePages && inVisibleRange) || index == getNextPage()) {
             scrollProgress = getBoundedScrollProgress(screenCenter, child, index);
             float alpha = 1.0f - 1.0f * Math.abs(scrollProgress / MAX_SCROLL_PROGRESS);
             return alpha;
         } else {
-            return 1.0f;
+            return 0f;
+        }
+    }
+
+    public float getOutlineAlphaForPage(int screenCenter, int index, boolean showSidePages) {
+        boolean inVisibleRange = index >= getNextPage() - 1 && index <= getNextPage() + 1;
+        if (inVisibleRange) {
+            return super.getOutlineAlphaForPage(screenCenter, index, showSidePages);
+        } else {
+            return 0f;
         }
     }
 
@@ -75,24 +87,32 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
             mChildrenOutlineFadeAnimation.cancel();
             mChildrenOutlineFadeAnimation = null;
         }
+        boolean showSidePages = mShowingInitialHints || isPageMoving();
         if (!isReordering(false)) {
             for (int i = 0; i < getChildCount(); i++) {
                 KeyguardWidgetFrame child = getWidgetPageAt(i);
                 if (child != null) {
-                    child.setBackgroundAlpha(getOutlineAlphaForPage(screenCenter, i));
-                    child.setContentAlpha(getAlphaForPage(screenCenter, i));
+                    float outlineAlpha = getOutlineAlphaForPage(screenCenter, i, showSidePages);
+                    float contentAlpha = getAlphaForPage(screenCenter, i,showSidePages);
+                    child.setBackgroundAlpha(outlineAlpha);
+                    child.setContentAlpha(contentAlpha);
                 }
             }
         }
     }
 
     public void showInitialPageHints() {
+        mShowingInitialHints = true;
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
+            boolean inVisibleRange = i >= getNextPage() - 1 && i <= getNextPage() + 1;
             KeyguardWidgetFrame child = getWidgetPageAt(i);
-            if (i >= mCurrentPage - 1 && i <= mCurrentPage + 1) {
-                child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
-                        CHILDREN_OUTLINE_FADE_IN_DURATION);
+            if (inVisibleRange) {
+                child.setBackgroundAlpha(KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
+                child.setContentAlpha(1f);
+            } else {
+                child.setBackgroundAlpha(0f);
+                child.setContentAlpha(0f);
             }
         }
     }
@@ -220,8 +240,8 @@ public class KeyguardWidgetCarousel extends KeyguardWidgetPager {
 
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
-            float finalAlpha = getAlphaForPage(mScreenCenter, i);
-            float finalOutlineAlpha = getOutlineAlphaForPage(mScreenCenter, i);
+            float finalAlpha = getAlphaForPage(mScreenCenter, i, true);
+            float finalOutlineAlpha = getOutlineAlphaForPage(mScreenCenter, i, true);
             getTransformForPage(mScreenCenter, i, mTmpTransform);
 
             boolean inVisibleRange = (i >= mCurrentPage - 1 && i <= mCurrentPage + 1);
