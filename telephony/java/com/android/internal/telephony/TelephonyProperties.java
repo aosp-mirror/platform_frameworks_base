@@ -197,4 +197,10 @@ public interface TelephonyProperties
      * Set to true to indicates support for simultaneous voice and data.
      */
     static final String PROPERTY_SVDATA = "ro.config.svlte1x";
+
+    /**
+     * Property to control alpha ID display for proactive commands
+     * Type: boolean ( true = alpha display enabled, false = alpha display disabled)
+     */
+    static final String PROPERTY_ALPHA_USRCNF = "persist.atel.noalpha.usrcnf";
 }
