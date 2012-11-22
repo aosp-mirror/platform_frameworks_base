@@ -424,7 +424,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
             mBgAlphaController = caller;
         }
 
-        if (mBgAlphaController != caller) return;
+        if (mBgAlphaController != caller && mBgAlphaController != null) {
+            return;
+        }
 
         if (mFrameFade != null) {
             mFrameFade.cancel();
