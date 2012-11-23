@@ -485,7 +485,7 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Hardware testen"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Ermöglicht der App, verschiedene Peripherie-Geräte zu Hardware-Testzwecken zu steuern"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Ermöglicht der App, Telefonnummern zu wählen, ohne dass ein Eingreifen Ihrerseits nötig ist. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachten Sie, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne Ihre Bestätigung tätigen."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Ermöglicht der App, ohne Ihr Eingreifen Telefonnummern zu wählen. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachten Sie, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne Ihre Bestätigung tätigen."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Alle Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Ermöglicht der App, ohne Ihr Eingreifen eine beliebige Telefonnummer zu wählen, einschließlich Notrufnummern. Schädliche Apps können so unnötige und illegale Notrufe tätigen."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA-Tablet-Einrichtung direkt starten"</string>
