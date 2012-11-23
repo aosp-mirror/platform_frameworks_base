@@ -4569,7 +4569,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * Update native library dir if it starts with
                          * /data/data
                          */
-                        if (nativeLibraryDir.getPath().startsWith(dataPathString)) {
+                        // For devices using /datadata, dataPathString will point
+                        // to /datadata while nativeLibraryDir will point to /data/data.
+                        // Thus, compare to /data/data directly to avoid problems.
+                        if (nativeLibraryDir.getPath().startsWith("/data/data")) {
                             setInternalAppNativeLibraryPath(pkg, pkgSetting);
                             nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
                         }
