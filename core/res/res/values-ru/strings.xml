@@ -182,7 +182,7 @@
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Доступ к устройствам и сетям через Bluetooth."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Настройки звука"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Изменение настроек звука."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Воздействие на батарею"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Батарея"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Использование функций, приводящих к быстрой разрядке батареи."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Прямой доступ к календарю и мероприятиям."</string>
@@ -1146,7 +1146,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"НОВОЕ: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Источник: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Не требуется разрешений"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"за это может взиматься плата"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"это может стоить вам денег!"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Запоминающее устройство USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-подключение установлено"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Устройство подключено к компьютеру через USB-порт. Нажмите кнопку ниже, чтобы скопировать файлы с компьютера на USB-накопитель Android-устройства."</string>
