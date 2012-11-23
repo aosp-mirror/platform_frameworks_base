@@ -15,12 +15,7 @@
      limitations under the License.
 -->
 <resources>
-    <!-- ADB notification -->
-    <java-symbol type="string" name="adb_net_active_notification_title" />
-    <java-symbol type="string" name="adb_both_active_notification_title" />
-    <java-symbol type="string" name="adb_active_generic_notification_message" />
-
     <!-- Button backlight -->
-    <java-symbol type="integer" name="config_buttonBrightnessSettingDefault" />
-    <java-symbol type="bool" name="config_deviceHasVariableButtonBrightness" />
+    <integer name="config_buttonBrightnessSettingDefault">255</integer>
+    <bool name="config_deviceHasVariableButtonBrightness">false</bool>
 </resources>

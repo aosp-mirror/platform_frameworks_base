@@ -107,6 +107,16 @@ public abstract class PowerManagerInternal {
     public abstract void setScreenBrightnessOverrideFromWindowManager(int brightness);
 
     /**
+     * Used by the window manager to override the button brightness based on the
+     * current foreground activity.
+     *
+     * This method must only be called by the window manager.
+     *
+     * @param brightness The overridden brightness, or -1 to disable the override.
+     */
+    public abstract void setButtonBrightnessOverrideFromWindowManager(int brightness);
+
+    /**
      * Used by the window manager to override the user activity timeout based on the
      * current foreground activity.  It can only be used to make the timeout shorter
      * than usual, not longer.

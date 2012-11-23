@@ -919,6 +919,15 @@ public final class PowerManager {
     }
 
     /**
+     * Gets the default button brightness value.
+     * @hide
+     */
+    public int getDefaultButtonBrightness() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_buttonBrightnessSettingDefault);
+    }
+
+    /**
      * Creates a new wake lock with the specified level and flags.
      * <p>
      * The {@code levelAndFlags} parameter specifies a wake lock level and optional flags
