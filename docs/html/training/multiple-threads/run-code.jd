@@ -1,0 +1,148 @@
+page.title=Running Code on a Thread Pool Thread
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#RunRunnable">Run a Runnable on a Thread in the Thread Pool</a></li>
+  <li><a href="#StopThread">Interrupt Running Code</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threads</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>
+    The previous lesson showed you how to define a class that manages thread pools and the tasks
+    that run on them. This lesson shows you how to run a task on a thread pool. To do this,
+    you add the task to the pool's work queue. When a thread becomes available, the
+    {@link java.util.concurrent.ThreadPoolExecutor} takes a task from the queue and runs it on the
+    thread.
+</p>
+<p>
+    This lesson also shows you how to stop a task that's running. You might want to do this if a
+    task starts, but then discovers that its work isn't necessary. Rather than wasting processor
+    time, you can cancel the thread the task is running on. For example, if you are downloading
+    images from the network and using a cache, you probably want to stop a task if it detects that
+    an image is already present in the cache. Depending on how you write your app, you may not be
+    able to detect this before you start the download.
+</p>
+<h2 id="RunRunnable">Run a Task on a Thread in the Thread Pool</h2>
+<p>
+    To start a task object on a thread in a particular thread pool, pass the
+    {@link java.lang.Runnable} to {@link java.util.concurrent.ThreadPoolExecutor#execute
+    ThreadPoolExecutor.execute()}. This call adds the task to the thread pool's work queue. When an
+    idle thread becomes available, the manager takes the task that has been waiting the longest and
+    runs it on the thread:
+</p>
+<pre>
+public class PhotoManager {
+    public void handleState(PhotoTask photoTask, int state) {
+        switch (state) {
+            // The task finished downloading the image
+            case DOWNLOAD_COMPLETE:
+            // Decodes the image
+                mDecodeThreadPool.execute(
+                        photoTask.getPhotoDecodeRunnable());
+            ...
+        }
+        ...
+    }
+    ...
+}
+</pre>
+<p>
+    When {@link java.util.concurrent.ThreadPoolExecutor} starts a {@link java.lang.Runnable} on a
+    thread, it automatically calls the object's {@link java.lang.Runnable#run run()} method.
+</p>
+<h2 id="StopThread">Interrupt Running Code</h2>
+<p>
+    To stop a task, you need to interrupt the task's thread. To prepare to do this, you need to
+    store a handle to the task's thread when you create the task. For example:
+</p>
+<pre>
+class PhotoDecodeRunnable implements Runnable {
+    // Defines the code to run for this task
+    public void run() {
+        /*
+         * Stores the current Thread in the
+         * object that contains PhotoDecodeRunnable
+         */
+        mPhotoTask.setImageDecodeThread(Thread.currentThread());
+        ...
+    }
+    ...
+}
+</pre>
+<p>
+    To interrupt a thread, call {@link java.lang.Thread#interrupt Thread.interrupt()}. Notice that
+    {@link java.lang.Thread} objects are controlled by the system, which can modify them outside of
+    your app's process. For this reason, you need to lock access on a thread before you
+    interrupt it, by placing the access in a <code>synchronized</code> block. For example:
+</p>
+<pre>
+public class PhotoManager {
+    public static void cancelAll() {
+        /*
+         * Creates an array of Runnables that's the same size as the
+         * thread pool work queue
+         */
+        Runnable[] runnableArray = new Runnable[mDecodeWorkQueue.size()];
+        // Populates the array with the Runnables in the queue
+        mDecodeWorkQueue.toArray(runnableArray);
+        // Stores the array length in order to iterate over the array
+        int len = runnableArray.length;
+        /*
+         * Iterates over the array of Runnables and interrupts each one's Thread.
+         */
+        synchronized (sInstance) {
+            // Iterates over the array of tasks
+            for (int runnableIndex = 0; runnableIndex &lt; len; runnableIndex++) {
+                // Gets the current thread
+                Thread thread = runnableArray[taskArrayIndex].mThread;
+                // if the Thread exists, post an interrupt to it
+                if (null != thread) {
+                    thread.interrupt();
+                }
+            }
+        }
+    }
+    ...
+}
+</pre>
+<p>
+    In most cases, {@link java.lang.Thread#interrupt Thread.interrupt()} stops the thread
+    immediately. However, it only stops threads that are waiting, and will not interrupt CPU or
+    network-intensive tasks. To avoid slowing down or locking up the system, you should test for
+    any pending interrupt requests before attempting an operation :
+</p>
+<pre>
+/*
+ * Before continuing, checks to see that the Thread hasn't
+ * been interrupted
+ */
+if (Thread.interrupted()) {
+    return;
+}
+...
+// Decodes a byte array into a Bitmap (CPU-intensive)
+BitmapFactory.decodeByteArray(
+        imageBuffer, 0, imageBuffer.length, bitmapOptions);
+...
+</pre>
