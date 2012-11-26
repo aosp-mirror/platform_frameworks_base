@@ -82,6 +82,7 @@ public final class Bitmap implements Parcelable {
         if (sDefaultDensity >= 0) {
             return sDefaultDensity;
         }
+        //noinspection deprecation
         sDefaultDensity = DisplayMetrics.DENSITY_DEVICE;
         return sDefaultDensity;
     }
@@ -360,6 +361,9 @@ public final class Bitmap implements Parcelable {
      * that if this bitmap stores its pixels pre-multiplied
      * (see {@link #isPremultiplied()}, the values in the buffer will also be
      * pre-multiplied.</p>
+     * <p>After this method returns, the current position of the buffer is
+     * updated: the position is incremented by the number of elements written
+     * in the buffer.</p>
      */
     public void copyPixelsToBuffer(Buffer dst) {
         int elements = dst.remaining();
@@ -394,6 +398,10 @@ public final class Bitmap implements Parcelable {
      * overwriting the bitmap's pixels. The data in the buffer is not changed
      * in any way (unlike setPixels(), which converts from unpremultipled 32bit
      * to whatever the bitmap's native format is.</p>
+     * <p>After this method returns, the current position of the buffer is
+     * updated: the position is incremented by the number of elements read from
+     * the buffer. If you need to read the bitmap from the buffer again you must
+     * first rewind the buffer.</p>
      */
     public void copyPixelsFromBuffer(Buffer src) {
         checkRecycled("copyPixelsFromBuffer called on recycled bitmap");
