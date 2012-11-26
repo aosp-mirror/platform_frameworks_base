@@ -57,7 +57,7 @@ class WindowList extends ArrayList<WindowState> {
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
     static final String TAG = "WindowState";
-    
+
     static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
     static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
     static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
@@ -246,7 +246,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
-    
+
     // Used to improve performance of toString()
     String mStringNameCache;
     CharSequence mLastTitle;
@@ -627,6 +627,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 : WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
     }
 
+    @Override
     public boolean hasAppShownWindows() {
         return mAppToken != null && (mAppToken.firstWindowDrawn || mAppToken.startingDisplayed);
     }
@@ -672,7 +673,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public boolean isVisibleOrBehindKeyguardLw() {
         if (mRootToken.waitingToShow &&
-                mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
@@ -751,7 +752,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isReadyForDisplay() {
         if (mRootToken.waitingToShow &&
-                mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
@@ -766,8 +767,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * to the keyguard.
      */
     boolean isReadyForDisplayIgnoringKeyguard() {
-        if (mRootToken.waitingToShow &&
-                mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
@@ -870,7 +870,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void removeLocked() {
         disposeInputChannel();
-        
+
         if (mAttachedWindow != null) {
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
@@ -898,7 +898,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     void disposeInputChannel() {
         if (mInputChannel != null) {
             mService.mInputManager.unregisterInputChannel(mInputChannel);
-            
+
             mInputChannel.dispose();
             mInputChannel = null;
         }
@@ -907,6 +907,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     private class DeathRecipient implements IBinder.DeathRecipient {
+        @Override
         public void binderDied() {
             try {
                 synchronized(mService.mWindowMap) {
@@ -1233,7 +1234,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mWallpaperYStep="); pw.println(mWallpaperYStep);
         }
     }
-    
+
     String makeInputChannelName() {
         return Integer.toHexString(System.identityHashCode(this))
             + " " + mAttrs.getTitle();

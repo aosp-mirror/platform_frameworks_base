@@ -58,12 +58,12 @@ public class AppWindowAnimator {
         mAnimator = atoken.mAnimator;
     }
 
-    public void setAnimation(Animation anim, boolean initialized) {
+    public void setAnimation(Animation anim) {
         if (WindowManagerService.localLOGV) Slog.v(
             TAG, "Setting animation in " + mAppToken + ": " + anim);
         animation = anim;
         animating = false;
-        animInitialized = initialized;
+        animInitialized = anim.isInitialized();
         anim.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mService.mTransitionAnimationScale);
         int zorder = anim.getZAdjustment();
