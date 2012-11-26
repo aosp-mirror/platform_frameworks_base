@@ -116,16 +116,6 @@ public class LockPatternUtils {
     public static final String KEYGUARD_SHOW_APPWIDGET = "showappwidget";
 
     /**
-     * Options used to lock the device upon user switch.
-     */
-    public static final Bundle USER_SWITCH_LOCK_OPTIONS = new Bundle();
-
-    static {
-        USER_SWITCH_LOCK_OPTIONS.putBoolean(KEYGUARD_SHOW_USER_SWITCHER, true);
-        USER_SWITCH_LOCK_OPTIONS.putBoolean(KEYGUARD_SHOW_SECURITY_CHALLENGE, true);
-    }
-
-    /**
      * The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should
      * be used
      */
