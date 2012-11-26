@@ -491,6 +491,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mComputedConstantSize = orig.mComputedConstantSize;
                 mConstantWidth = orig.mConstantWidth;
                 mConstantHeight = orig.mConstantHeight;
+                mConstantMinimumWidth = orig.mConstantMinimumWidth;
+                mConstantMinimumHeight = orig.mConstantMinimumHeight;
                 
                 mOpacity = orig.mOpacity;
                 mHaveStateful = orig.mHaveStateful;
