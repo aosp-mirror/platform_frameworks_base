@@ -72,6 +72,11 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private int mWidgetToResetAfterFadeOut;
     protected boolean mShowingInitialHints = false;
 
+    // A temporary handle to the Add-Widget view
+    private View mAddWidgetView;
+    private int mLastWidthMeasureSpec;
+    private int mLastHeightMeasureSpec;
+
     // Bouncer
     private int mBouncerZoomInOutDuration = 250;
     private float BOUNCER_SCALE_FACTOR = 0.67f;
@@ -239,6 +244,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         public void onUserActivityTimeoutChanged();
         public void onAddView(View v);
         public void onRemoveView(View v, boolean deletePermanently);
+        public void onRemoveViewAnimationCompleted();
     }
 
     public void addWidget(View widget) {
@@ -256,6 +262,13 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                 mLockPatternUtils.removeAppWidget(appWidgetId);
             }
         });
+    }
+
+    @Override
+    public void onRemoveViewAnimationCompleted() {
+        if (mCallbacks != null) {
+            mCallbacks.onRemoveViewAnimationCompleted();
+        }
     }
 
     public void onAddView(View v, final int index) {
@@ -597,12 +610,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         mHasMeasure = false;
     }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mLastWidthMeasureSpec = widthMeasureSpec;
+        mLastHeightMeasureSpec = heightMeasureSpec;
+
         int maxChallengeTop = -1;
         View parent = (View) getParent();
         boolean challengeShowing = false;
@@ -811,6 +822,24 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
         if (currentPage instanceof KeyguardWidgetFrame) {
             ((KeyguardWidgetFrame)currentPage).onBouncerShowing(true);
+        }
+    }
+
+    void setAddWidgetEnabled(boolean enabled) {
+        if (mAddWidgetView != null && enabled) {
+            addView(mAddWidgetView, 0);
+            // We need to force measure the PagedView so that the calls to update the scroll
+            // position below work
+            measure(mLastWidthMeasureSpec, mLastHeightMeasureSpec);
+            // Bump up the current page to account for the addition of the new page
+            setCurrentPage(mCurrentPage + 1);
+            mAddWidgetView = null;
+        } else if (mAddWidgetView == null && !enabled) {
+            View addWidget = findViewById(com.android.internal.R.id.keyguard_add_widget);
+            if (addWidget != null) {
+                mAddWidgetView = addWidget;
+                removeView(addWidget);
+            }
         }
     }
 
