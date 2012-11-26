@@ -1588,6 +1588,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
 
     //public abstract void onFlingToDelete(View v);
     public abstract void onRemoveView(View v, boolean deletePermanently);
+    public abstract void onRemoveViewAnimationCompleted();
     public abstract void onAddView(View v, int index);
 
     private void resetTouchState() {
@@ -2383,6 +2384,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                             public void run() {
                                 mDeferringForDelete = false;
                                 onEndReordering();
+                                onRemoveViewAnimationCompleted();
                             }
                         };
                         zoomIn(onCompleteRunnable);
