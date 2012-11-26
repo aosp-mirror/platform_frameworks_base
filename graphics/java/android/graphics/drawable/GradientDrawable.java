@@ -479,7 +479,7 @@ public class GradientDrawable extends Drawable {
             mFillPaint.setDither(mDither);
             mFillPaint.setColorFilter(mColorFilter);
             if (mColorFilter != null && !mGradientState.mHasSolidColor) {
-                mFillPaint.setColor(0xff000000);
+                mFillPaint.setColor(mAlpha << 24);
             }
             if (haveStroke) {
                 mStrokePaint.setAlpha(currStrokeAlpha);
@@ -743,7 +743,7 @@ public class GradientDrawable extends Drawable {
                     mFillPaint.setShader(new LinearGradient(x0, y0, x1, y1,
                             colors, st.mPositions, Shader.TileMode.CLAMP));
                     if (!mGradientState.mHasSolidColor) {
-                        mFillPaint.setColor(0xff000000);
+                        mFillPaint.setColor(mAlpha << 24);
                     }
                 } else if (st.mGradient == RADIAL_GRADIENT) {
                     x0 = r.left + (r.right - r.left) * st.mCenterX;
@@ -755,7 +755,7 @@ public class GradientDrawable extends Drawable {
                             level * st.mGradientRadius, colors, null,
                             Shader.TileMode.CLAMP));
                     if (!mGradientState.mHasSolidColor) {
-                        mFillPaint.setColor(0xff000000);
+                        mFillPaint.setColor(mAlpha << 24);
                     }
                 } else if (st.mGradient == SWEEP_GRADIENT) {
                     x0 = r.left + (r.right - r.left) * st.mCenterX;
@@ -788,7 +788,7 @@ public class GradientDrawable extends Drawable {
                     }
                     mFillPaint.setShader(new SweepGradient(x0, y0, tempColors, tempPositions));
                     if (!mGradientState.mHasSolidColor) {
-                        mFillPaint.setColor(0xff000000);
+                        mFillPaint.setColor(mAlpha << 24);
                     }
                 }
             }
