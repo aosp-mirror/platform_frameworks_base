@@ -1936,6 +1936,7 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "layout");
         try {
             host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+            mInLayout = false;
             int numViewsRequestingLayout = mLayoutRequesters.size();
             if (numViewsRequestingLayout > 0) {
                 // requestLayout() was called during layout: unusual, but try to handle correctly
@@ -1944,6 +1945,7 @@ public final class ViewRootImpl implements ViewParent,
                     mLayoutRequesters.get(i).requestLayout();
                 }
                 // Now run layout one more time
+                mInLayout = true;
                 host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
                 mHandlingLayoutInLayoutRequest = false;
                 mLayoutRequesters.clear();
