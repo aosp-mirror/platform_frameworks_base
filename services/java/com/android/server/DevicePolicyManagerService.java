@@ -1875,25 +1875,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
             long ident = Binder.clearCallingIdentity();
             try {
-                if (userHandle == UserHandle.USER_OWNER) {
-                    wipeDataLocked(flags);
-                } else {
-                    lockNowUnchecked();
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            try {
-                                ActivityManagerNative.getDefault().switchUser(0);
-                                ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
-                                        .removeUser(userHandle);
-                            } catch (RemoteException re) {
-                                // Shouldn't happen
-                            }
-                        }
-                    });
-                }
+                wipeDeviceOrUserLocked(flags, userHandle);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private void wipeDeviceOrUserLocked(int flags, final int userHandle) {
+        if (userHandle == UserHandle.USER_OWNER) {
+            wipeDataLocked(flags);
+        } else {
+            lockNowUnchecked();
+            mHandler.post(new Runnable() {
+                public void run() {
+                    try {
+                        ActivityManagerNative.getDefault().switchUser(0);
+                        ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
+                                .removeUser(userHandle);
+                    } catch (RemoteException re) {
+                        // Shouldn't happen
+                    }
+                }
+            });
         }
     }
 
@@ -1996,7 +2000,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 saveSettingsLocked(userHandle);
                 int max = getMaximumFailedPasswordsForWipe(null, userHandle);
                 if (max > 0 && policy.mFailedPasswordAttempts >= max) {
-                    wipeDataLocked(0);
+                    wipeDeviceOrUserLocked(0, userHandle);
                 }
                 sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
                         DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
