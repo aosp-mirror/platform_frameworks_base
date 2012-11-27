@@ -41,7 +41,7 @@ page.title=GCM: Getting Started
 
 <pre> https://code.google.com/apis/console/#project:<strong>4815162342</strong></pre>
 
-  <li> Take note of the value after <code>#project:</code> (4815162342 in this example). This is your project ID, and it will be used later on as the GCM sender ID.</li>
+  <li> Take note of the value after <code>#project:</code> (4815162342 in this example). This is your project number, and it will be used later on as the GCM sender ID.</li>
   
 </ol>
 <h2 id="gcm-service">Enabling the GCM Service</h2>

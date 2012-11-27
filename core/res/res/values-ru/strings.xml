@@ -182,7 +182,7 @@
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Доступ к устройствам и сетям через Bluetooth."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Настройки звука"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Изменение настроек звука."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Воздействие на батарею"</string>
+    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Батарея"</string>
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Использование функций, приводящих к быстрой разрядке батареи."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Прямой доступ к календарю и мероприятиям."</string>
@@ -759,7 +759,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторите попытку"</string>
-    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторить попытку"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторите попытку"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Все попытки войти с помощью Фейсконтроля использованы"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Заряжено"</string>
@@ -829,7 +829,7 @@
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN-код"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Пароль"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ввода графического ключа"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область прокрутки"</string>
+    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область слайдера"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -1140,7 +1140,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"НОВОЕ: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Источник: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Не требуется разрешений"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"за это может взиматься плата"</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"это может стоить вам денег!"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Запоминающее устройство USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-подключение установлено"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Устройство подключено к компьютеру через USB-порт. Нажмите кнопку ниже, чтобы скопировать файлы с компьютера на USB-накопитель Android-устройства."</string>
@@ -1370,7 +1370,7 @@
     <string name="fingerprints" msgid="4516019619850763049">"Отпечатки:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Отпечаток SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Отпечаток SHA-1:"</string>
-    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Просмотреть все"</string>
+    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Показать все"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выберите"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Открыть доступ"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>

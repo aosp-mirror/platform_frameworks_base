@@ -27,7 +27,8 @@ Differences Report &raquo;</a> </li>
 <p>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+<p>For developers, the Android {@sdkPlatformVersion}
+({@link android.os.Build.VERSION_CODES#GINGERBREAD})platform is available as a
 downloadable component for the Android SDK. The downloadable platform includes
 an Android library and system image, as well as a set of emulator skins and
 more. To get started developing or testing against Android {@sdkPlatformVersion},

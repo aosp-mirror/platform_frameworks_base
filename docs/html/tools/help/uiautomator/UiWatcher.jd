@@ -1,0 +1,78 @@
+page.title=UiWatcher
+parent.title=uiautomator
+parent.link=index.html
+@jd:body
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+
+<p>Represents a conditional watcher on the target device. To learn how to register a conditional 
+ watcher, see <code><a href="UiDevice.html#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">UiDevice.registerWatcher()</a></code>.
+</p>
+
+<div class="jd-descr">
+
+<h2>Summary</h2>
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="api" >
+        <td class="jd-typecol">
+            abstract
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#checkForCondition()">checkForCondition</a></span>()
+        
+        <div class="jd-descrdiv">The testing framework calls this handler method automatically when the framework  
+        is unable to find a match using the <code><a href="UiSelector.html">UiSelector</a></code>.</div>
+  
+  </td></tr>
+
+</table>
+
+</div><!-- jd-descr (summary) -->
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+<a id="checkForCondition()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        boolean
+      </span>
+      <span class="sympad">checkForCondition</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The testing framework calls this handler method automatically when the framework is unable to find a match using the <code><a href="UiSelector.html">UiSelector</a></code>. When a match is not found after a predetermined time has elapsed, the framework calls the checkForCondition() method of all registered watchers on the device. You can use this method to handle known blocking issues that are preventing the test from proceeding. For example, you can check if a dialog appeared that is blocking the the test, then close the dialog or perform some other appropriate action to allow the test to continue.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true to indicate a matched condition, or false if no matching condition is found
+</li></ul>
+  </div>
+
+    </div>
+</div>

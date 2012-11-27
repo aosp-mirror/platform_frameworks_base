@@ -17,14 +17,10 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
                     </div>
                     <div class="content-right col-6">
-                    <h1>Jelly Bean now available!</h1>
-                    <p>Android 4.1 (Jelly Bean) builds on what's great about Android
-                      with improvements to performance and user experience.</p>
-                    <p>New APIs are also available that allow you to build richer and more
-                      interactive notifications, transfer larger
-                    payloads through NFC, discover services over Wi-Fi, and much more.</p>
-                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">More 
-                        about Jelly Bean</a></p>
+                    <h1>Android 4.2 Jelly Bean!</h1>
+                    <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
+                    <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
+                    <p><a href="/about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">

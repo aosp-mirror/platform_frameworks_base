@@ -83,14 +83,14 @@ public class Content {
         + "  Example:\n"
         + "  # Change \"new_setting\" secure setting to \"newer_value\".\n"
         + "  adb shell content update --uri content://settings/secure --bind"
-                + " value:s:newer_value --where \"name=\'new_setting\'\"\n"
+                + " value:s:newer_value --where \"name=\\'new_setting\\'\"\n"
         + "\n"
         + "usage: adb shell content delete --uri <URI> [--user <USER_ID>] --bind <BINDING>"
                 + " [--bind <BINDING>...] [--where <WHERE>]\n"
         + "  Example:\n"
         + "  # Remove \"new_setting\" secure setting.\n"
         + "  adb shell content delete --uri content://settings/secure "
-                + "--where \"name=\'new_setting\'\"\n"
+                + "--where \"name=\\'new_setting\\'\"\n"
         + "\n"
         + "usage: adb shell content query --uri <URI> [--user <USER_ID>]"
                 + " [--projection <PROJECTION>] [--where <WHERE>] [--sort <SORT_ORDER>]\n"
@@ -101,7 +101,7 @@ public class Content {
         + "  # Select \"name\" and \"value\" columns from secure settings where \"name\" is "
                 + "equal to \"new_setting\" and sort the result by name in ascending order.\n"
         + "  adb shell content query --uri content://settings/secure --projection name:value"
-                + " --where \"name=\'new_setting\'\" --sort \"name ASC\"\n"
+                + " --where \"name=\\'new_setting\\'\" --sort \"name ASC\"\n"
         + "\n";
 
     private static class Parser {

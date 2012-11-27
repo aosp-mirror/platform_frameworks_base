@@ -1128,10 +1128,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"همیشه مجاز"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"همیشه غیرمجاز"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکهٔ تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"برای دسترسی به شبکه تلفن همراه، دستگاه خود را مجدداً راه‌اندازی کنید."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"برای دسترسی به شبکهٔ تلفن همراه، دستگاه خود را مجدداً راه‌اندازی کنید."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"راه‌اندازی مجدد"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
@@ -1437,7 +1437,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید."\n\n" لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"برداشتن"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"صدا به بالاتر از سطح ایمن افزایش یابد؟"\n"گوش دادن به صدای بلند برای زمان‌های طولانی می‌تواند به شنوایی شما آسیب برساند."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"برای فعال کردن قابلیت دسترسی، با دو انگشت خود همچنان به طرف پایین فشار دهید."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"قابلیت دسترسی فعال شد."</string>

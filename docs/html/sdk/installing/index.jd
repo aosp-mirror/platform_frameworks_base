@@ -1,30 +1,37 @@
-page.title=Installing the SDK
-walkthru=1
+page.title=Setting Up an Existing IDE
 
 @jd:body
 
 
-<p>You should have already downloaded the <a href="{@docRoot}sdk/index.html">Android SDK</a>. Now
-you need to set up your development environment.</p>
+<p>You should have already downloaded the <a href="{@docRoot}sdk/index.html#ExistingIDE"
+>Android SDK Tools</a>. (If you downloaded the ADT Bundle, you should instead read
+<a href="{@docRoot}sdk/installing/bundle.html">Setting Up the ADT Bundle</a>.)</p>
 
-<p>The SDK you've downloaded is not the complete SDK environment. It includes only the core SDK tools, which you can
+<p>The SDK Tools package is not the complete SDK environment. It includes only the core SDK tools, which you can
 use to download the rest of the SDK packages (such as the latest system image).</p>
 
 
 <div id="win" class="docs" style="display:none">
-  
+
 <h3>Getting started on Windows</h3>
 <p>Your download package is an executable file that starts an installer. The installer checks your machine
   for required tools, such as the proper Java SE Development Kit (JDK) and installs it if necessary.
   The installer then saves the Android SDK Tools into a default location (or you can specify the location).</p>
 
-<p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
+<ol>
+<li>Double-click the executable ({@code .exe} file) to start the install.</li>
+<li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will need to
 refer to the SDK directory later, when setting up the ADT plugin and when using
-the SDK tools from the command line.</p>
-
-<p>Once the tools are installed, the installer offers to start the Android SDK Manager. Start it and
-continue with the installation guide by clicking the
-<strong>Next</strong> link on the right.</p>
+the SDK tools from the command line.</li>
+<li>Once the installation completes, the installer offers to start the Android SDK Manager.
+If you'll be using Eclipse, <strong>do not</strong> start the Android SDK Manager,
+and instead move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
+>Installing the Eclipse Plugin</a>.
+<p>If you're using a different IDE,
+start the SDK Manager and read <a href="{@docRoot}sdk/installing/adding-packages.html"
+>Adding Platforms and Packages</a>.</p>
+</li>
+</ol>
 
 </div>
 
@@ -34,16 +41,20 @@ continue with the installation guide by clicking the
   
 <h3>Getting started on Mac</h3>
 
-<p>Your download package is {@code .zip}.
-  Unpack it to a safe location on your machine. By default, the SDK files are unpacked
-into a directory named <code>android-sdk-mac_x86</code>.</p>
+<ol>
+<li>Unpack the ZIP file you've downloaded. By default, it's unpacked
+into a directory named <code>android-sdk-mac_x86</code>. Move it to an appropriate location on your machine,
+such as a "Development" directory in your home directory.
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later, when setting up the ADT plugin and when using
 the SDK tools from the command line.</p>
-
-<p>Now continue with the installation guide by clicking the
-<strong>Next</strong> link on the right.</p>
+</li>
+<li>If you're using Eclipse, move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
+>Installing the Eclipse Plugin</a>. Otherwise, if you're using a different IDE,
+read <a href="{@docRoot}sdk/installing/adding-packages.html"
+>Adding Platforms and Packages</a>.</li>
+</ol>
 
 </div>
 
@@ -54,20 +65,27 @@ the SDK tools from the command line.</p>
   
 <h3>Getting started on Linux</h3>
 
-<p>Your download package is a {@code .tgz}.
-  Unpack it to a safe location on your machine. By default, the SDK files are unpacked
-into a directory named <code>android-sdk-linux_x86</code>.</p>
+<ol>
+<li>Unpack the {@code .tgz} file you've downloaded. By default, the SDK files are unpacked
+into a directory named <code>android-sdk-linux_x86</code>. Move it to an appropriate location on your machine,
+such as a "Development" directory in your home directory.
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later, when setting up the ADT plugin and when using
 the SDK tools from the command line.</p>
+</li>
+<li>If you're using Eclipse, move on to <a href="{@docRoot}sdk/installing/installing-adt.html"
+>Installing the Eclipse Plugin</a>. Otherwise, if you're using a different IDE,
+read <a href="{@docRoot}sdk/installing/adding-packages.html"
+>Adding Platforms and Packages</a>.</li>
+</ol>
 
-<p>Now continue with the installation guide by clicking the
-<strong>Next</strong> link on the right.</p>
 
+<h5 id="Troubleshooting"><a href='' class="expandable"
+  onclick="toggleExpandable(this,'#ubuntu-trouble');return false;"
+  >Troubleshooting Ubuntu</a></h5>
 
-<h4 id="Troubleshooting">Troubleshooting Ubuntu</h4>
-
+<div id="ubuntu-trouble" style="display:none">
 <ul>
   <li>If you need help installing and configuring Java on your
     development machine, you might find these resources helpful:
@@ -95,10 +113,12 @@ the SDK tools from the command line.</p>
     </ol>
   </li>
 </ul>
+</div><!-- end ubuntu trouble -->
+
 
 </div>
 
-<p><a href='' onclick='showAll();return false;'>Other platforms</a></p>
+<p style="margin-top:2em;"><a href='' onclick='showAll();return false;'>Information for other platforms</a></p>
 
 <script>
   var $osDocs;

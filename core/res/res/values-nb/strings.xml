@@ -571,7 +571,7 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slår synkronisering av og på"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering av og på"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Lar appen endre synkroniseringsinnstillingene for en konto. For eksempel kan dette brukes til å synkronisere Personer-appen med en konto."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lese synkroniseringsstatistikk"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Lar appen lese synkroniseringsstatistikk for en konto, inkludert loggen over synkroniseringsaktiviteter og hvor mye data som er synkronisert."</string>

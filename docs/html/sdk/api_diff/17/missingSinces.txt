@@ -1,0 +1,348 @@
+NO DOC BLOCK: android.util.AtomicFile Class
+NO DOC BLOCK: android.widget.AutoCompleteTextView.OnDismissListener Interface
+NO DOC BLOCK: android.telephony.CellIdentityCdma Class
+NO DOC BLOCK: android.telephony.CellIdentityGsm Class
+NO DOC BLOCK: android.telephony.CellIdentityLte Class
+NO DOC BLOCK: android.telephony.CellInfo Class
+NO DOC BLOCK: android.telephony.CellInfoCdma Class
+NO DOC BLOCK: android.telephony.CellInfoGsm Class
+NO DOC BLOCK: android.telephony.CellInfoLte Class
+NO DOC BLOCK: android.telephony.CellSignalStrength Class
+NO DOC BLOCK: android.telephony.CellSignalStrengthCdma Class
+NO DOC BLOCK: android.telephony.CellSignalStrengthGsm Class
+NO DOC BLOCK: android.telephony.CellSignalStrengthLte Class
+NO DOC BLOCK: android.opengl.EGL14 Class
+NO DOC BLOCK: android.opengl.EGLConfig Class
+NO DOC BLOCK: android.opengl.EGLContext Class
+NO DOC BLOCK: android.opengl.EGLDisplay Class
+NO DOC BLOCK: android.opengl.EGLObjectHandle Class
+NO DOC BLOCK: android.opengl.EGLSurface Class
+NO DOC BLOCK: android.webkit.JavascriptInterface Class
+NO DOC BLOCK: android.text.style.LocaleSpan Class
+NO DOC BLOCK: android.nfc.tech.NfcBarcode Class
+NO DOC BLOCK: android.app.Presentation Class
+NO DOC BLOCK: android.renderscript.Script.FieldID Class
+NO DOC BLOCK: android.renderscript.Script.KernelID Class
+NO DOC BLOCK: android.renderscript.ScriptGroup Class
+NO DOC BLOCK: android.renderscript.ScriptGroup.Builder Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsic Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicBlend Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicBlur Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicColorMatrix Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicConvolve3x3 Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicConvolve5x5 Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicLUT Class
+NO DOC BLOCK: android.renderscript.ScriptIntrinsicYuvToRGB Class
+NO DOC BLOCK: android.provider.Settings.Global Class
+NO DOC BLOCK: android.widget.TextClock Class
+NO DOC BLOCK: android.os.UserHandle Class
+NO DOC BLOCK: android.os.UserManager Class
+NO DOC BLOCK: android.view.WindowManager.InvalidDisplayException Class
+NO DOC BLOCK: android.net.http.X509TrustManagerExtensions Class
+NO DOC BLOCK: android.view.inputmethod.InputMethodSubtype Constructor (int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean, int)
+NO DOC BLOCK: android.content.pm.ResolveInfo Constructor (android.content.pm.ResolveInfo)
+NO DOC BLOCK: android.view.Gravity Method apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int)
+NO DOC BLOCK: android.view.Gravity Method apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int)
+NO DOC BLOCK: android.view.Gravity Method applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int)
+NO DOC BLOCK: android.view.ContextThemeWrapper Method applyOverrideConfiguration(android.content.res.Configuration)
+NO DOC BLOCK: android.appwidget.AppWidgetManager Method bindAppWidgetIdIfAllowed(int, android.content.ComponentName, android.os.Bundle)
+NO DOC BLOCK: android.content.ContentProviderClient Method call(java.lang.String, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.telephony.cdma.CdmaCellLocation Method convertQuartSecToDecDegrees(int)
+NO DOC BLOCK: android.graphics.Bitmap Method createBitmap(android.util.DisplayMetrics, int, int, android.graphics.Bitmap.Config)
+NO DOC BLOCK: android.graphics.Bitmap Method createBitmap(android.util.DisplayMetrics, int[], int, int, android.graphics.Bitmap.Config)
+NO DOC BLOCK: android.graphics.Bitmap Method createBitmap(android.util.DisplayMetrics, int[], int, int, int, int, android.graphics.Bitmap.Config)
+NO DOC BLOCK: android.content.Context Method createConfigurationContext(android.content.res.Configuration)
+NO DOC BLOCK: android.content.ContextWrapper Method createConfigurationContext(android.content.res.Configuration)
+NO DOC BLOCK: android.test.mock.MockContext Method createConfigurationContext(android.content.res.Configuration)
+NO DOC BLOCK: android.content.Context Method createDisplayContext(android.view.Display)
+NO DOC BLOCK: android.content.ContextWrapper Method createDisplayContext(android.view.Display)
+NO DOC BLOCK: android.test.mock.MockContext Method createDisplayContext(android.view.Display)
+NO DOC BLOCK: android.renderscript.Script Method createFieldID(int, android.renderscript.Element)
+NO DOC BLOCK: android.renderscript.Script Method createKernelID(int, int, android.renderscript.Element, android.renderscript.Element)
+NO DOC BLOCK: android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl Method dispatchGenericMotionEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback)
+NO DOC BLOCK: android.view.inputmethod.InputMethodSession Method dispatchGenericMotionEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback)
+NO DOC BLOCK: android.os.SystemClock Method elapsedRealtimeNanos()
+NO DOC BLOCK: android.inputmethodservice.InputMethodService Method enableHardwareAcceleration()
+NO DOC BLOCK: android.hardware.Camera Method enableShutterSound(boolean)
+NO DOC BLOCK: android.util.DisplayMetrics Method equals(android.util.DisplayMetrics)
+NO DOC BLOCK: android.util.FloatMath Method exp(float)
+NO DOC BLOCK: android.content.pm.PackageManager Method extendVerificationTimeout(int, int, long)
+NO DOC BLOCK: android.test.mock.MockPackageManager Method extendVerificationTimeout(int, int, long)
+NO DOC BLOCK: android.view.View Method generateViewId()
+NO DOC BLOCK: android.view.Gravity Method getAbsoluteGravity(int, int)
+NO DOC BLOCK: android.telephony.TelephonyManager Method getAllCellInfo()
+NO DOC BLOCK: android.widget.ViewAnimator Method getAnimateFirstView()
+NO DOC BLOCK: android.os.Binder Method getCallingUserHandle()
+NO DOC BLOCK: android.app.Fragment Method getChildFragmentManager()
+NO DOC BLOCK: android.widget.TextView Method getCompoundDrawablesRelative()
+NO DOC BLOCK: android.widget.TextView Method getCompoundPaddingEnd()
+NO DOC BLOCK: android.widget.TextView Method getCompoundPaddingStart()
+NO DOC BLOCK: android.app.PendingIntent Method getCreatorPackage()
+NO DOC BLOCK: android.content.IntentSender Method getCreatorPackage()
+NO DOC BLOCK: android.app.PendingIntent Method getCreatorUid()
+NO DOC BLOCK: android.content.IntentSender Method getCreatorUid()
+NO DOC BLOCK: android.app.PendingIntent Method getCreatorUserHandle()
+NO DOC BLOCK: android.content.IntentSender Method getCreatorUserHandle()
+NO DOC BLOCK: android.webkit.WebSettings Method getDefaultUserAgent(android.content.Context)
+NO DOC BLOCK: android.view.View Method getDisplay()
+NO DOC BLOCK: android.location.Location Method getElapsedRealtimeNanos()
+NO DOC BLOCK: android.view.Display Method getFlags()
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Method getKeyguardDisabledFeatures(android.content.ComponentName)
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method getLabeledBy()
+NO DOC BLOCK: android.view.View Method getLabelFor()
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method getLabelFor()
+NO DOC BLOCK: android.content.res.Configuration Method getLayoutDirection()
+NO DOC BLOCK: android.view.View Method getLayoutDirection()
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method getLayoutDirection()
+NO DOC BLOCK: android.text.TextUtils Method getLayoutDirectionFromLocale(java.util.Locale)
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method getMarginEnd()
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method getMarginStart()
+NO DOC BLOCK: android.webkit.WebSettings Method getMediaPlaybackRequiresUserGesture()
+NO DOC BLOCK: android.view.Display Method getName()
+NO DOC BLOCK: android.view.View Method getPaddingEnd()
+NO DOC BLOCK: android.view.View Method getPaddingStart()
+NO DOC BLOCK: android.app.Fragment Method getParentFragment()
+NO DOC BLOCK: android.media.MediaRouter.RouteInfo Method getPresentationDisplay()
+NO DOC BLOCK: android.media.AudioManager Method getProperty(java.lang.String)
+NO DOC BLOCK: android.view.Display Method getRealMetrics(android.util.DisplayMetrics)
+NO DOC BLOCK: android.view.Display Method getRealSize(android.graphics.Point)
+NO DOC BLOCK: android.os.RemoteCallbackList Method getRegisteredCallbackCount()
+NO DOC BLOCK: android.view.View Method getTextAlignment()
+NO DOC BLOCK: android.view.View Method getTextDirection()
+NO DOC BLOCK: android.graphics.Paint Method getTextLocale()
+NO DOC BLOCK: android.widget.TextView Method getTextLocale()
+NO DOC BLOCK: android.widget.TextView Method getTotalPaddingEnd()
+NO DOC BLOCK: android.widget.TextView Method getTotalPaddingStart()
+NO DOC BLOCK: android.opengl.GLES20 Method glGetActiveAttrib(int, int, int[], int, int[], int)
+NO DOC BLOCK: android.opengl.GLES20 Method glGetActiveAttrib(int, int, java.nio.IntBuffer, java.nio.IntBuffer)
+NO DOC BLOCK: android.opengl.GLES20 Method glGetActiveUniform(int, int, int[], int, int[], int)
+NO DOC BLOCK: android.opengl.GLES20 Method glGetActiveUniform(int, int, java.nio.IntBuffer, java.nio.IntBuffer)
+NO DOC BLOCK: android.opengl.GLES20 Method glGetShaderSource(int)
+NO DOC BLOCK: android.graphics.Bitmap Method hasMipMap()
+NO DOC BLOCK: android.app.WallpaperManager Method hasResourceWallpaper(int)
+NO DOC BLOCK: android.util.FloatMath Method hypot(float, float)
+NO DOC BLOCK: android.app.Activity Method isDestroyed()
+NO DOC BLOCK: android.app.FragmentManager Method isDestroyed()
+NO DOC BLOCK: android.media.MediaRouter.RouteInfo Method isEnabled()
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method isMarginRelative()
+NO DOC BLOCK: android.view.View Method isPaddingRelative()
+NO DOC BLOCK: android.graphics.Bitmap Method isPremultiplied()
+NO DOC BLOCK: android.view.Display Method isValid()
+NO DOC BLOCK: android.os.Process Method myUserHandle()
+NO DOC BLOCK: android.telephony.PhoneStateListener Method onCellInfoChanged(java.util.List<android.telephony.CellInfo>)
+NO DOC BLOCK: android.inputmethodservice.AbstractInputMethodService Method onGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.appwidget.AppWidgetHost Method onProvidersChanged()
+NO DOC BLOCK: android.media.MediaRouter.Callback Method onRoutePresentationDisplayChanged(android.media.MediaRouter, android.media.MediaRouter.RouteInfo)
+NO DOC BLOCK: android.view.View Method onRtlPropertiesChanged(int)
+NO DOC BLOCK: android.app.Fragment Method onViewStateRestored(android.os.Bundle)
+NO DOC BLOCK: android.util.FloatMath Method pow(float, float)
+NO DOC BLOCK: android.widget.RelativeLayout.LayoutParams Method removeRule(int)
+NO DOC BLOCK: android.content.Context Method removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.content.ContextWrapper Method removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.test.mock.MockContext Method removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.view.ViewGroup.LayoutParams Method resolveLayoutDirection(int)
+NO DOC BLOCK: android.content.Context Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.content.Context Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String)
+NO DOC BLOCK: android.content.ContextWrapper Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.content.ContextWrapper Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String)
+NO DOC BLOCK: android.test.mock.MockContext Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.test.mock.MockContext Method sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String)
+NO DOC BLOCK: android.content.Context Method sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.content.ContextWrapper Method sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.test.mock.MockContext Method sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.content.Context Method sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.content.ContextWrapper Method sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.test.mock.MockContext Method sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle)
+NO DOC BLOCK: android.content.Context Method sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.content.ContextWrapper Method sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.test.mock.MockContext Method sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle)
+NO DOC BLOCK: android.widget.TextView Method setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable)
+NO DOC BLOCK: android.widget.TextView Method setCompoundDrawablesRelativeWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable)
+NO DOC BLOCK: android.widget.TextView Method setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int)
+NO DOC BLOCK: android.location.Location Method setElapsedRealtimeNanos(long)
+NO DOC BLOCK: android.graphics.Bitmap Method setHasMipMap(boolean)
+NO DOC BLOCK: android.net.SSLCertificateSocketFactory Method setHostname(java.net.Socket, java.lang.String)
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Method setKeyguardDisabledFeatures(android.content.ComponentName, int)
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method setLabeledBy(android.view.View)
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method setLabeledBy(android.view.View, int)
+NO DOC BLOCK: android.view.View Method setLabelFor(int)
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method setLabelFor(android.view.View)
+NO DOC BLOCK: android.view.accessibility.AccessibilityNodeInfo Method setLabelFor(android.view.View, int)
+NO DOC BLOCK: android.widget.RemoteViews Method setLabelFor(int, int)
+NO DOC BLOCK: android.view.View Method setLayerPaint(android.graphics.Paint)
+NO DOC BLOCK: android.content.res.Configuration Method setLayoutDirection(java.util.Locale)
+NO DOC BLOCK: android.view.View Method setLayoutDirection(int)
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method setLayoutDirection(int)
+NO DOC BLOCK: android.content.res.Configuration Method setLocale(java.util.Locale)
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method setMarginEnd(int)
+NO DOC BLOCK: android.view.ViewGroup.MarginLayoutParams Method setMarginStart(int)
+NO DOC BLOCK: android.webkit.WebSettings Method setMediaPlaybackRequiresUserGesture(boolean)
+NO DOC BLOCK: android.app.AlertDialog.Builder Method setOnDismissListener(android.content.DialogInterface.OnDismissListener)
+NO DOC BLOCK: android.widget.AutoCompleteTextView Method setOnDismissListener(android.widget.AutoCompleteTextView.OnDismissListener)
+NO DOC BLOCK: android.widget.VideoView Method setOnInfoListener(android.media.MediaPlayer.OnInfoListener)
+NO DOC BLOCK: android.view.View Method setPaddingRelative(int, int, int, int)
+NO DOC BLOCK: android.view.SurfaceView Method setSecure(boolean)
+NO DOC BLOCK: android.app.Notification.Builder Method setShowWhen(boolean)
+NO DOC BLOCK: android.widget.AutoCompleteTextView Method setText(java.lang.CharSequence, boolean)
+NO DOC BLOCK: android.view.View Method setTextAlignment(int)
+NO DOC BLOCK: android.view.View Method setTextDirection(int)
+NO DOC BLOCK: android.graphics.Paint Method setTextLocale(java.util.Locale)
+NO DOC BLOCK: android.widget.TextView Method setTextLocale(java.util.Locale)
+NO DOC BLOCK: android.net.SSLCertificateSocketFactory Method setUseSessionTickets(java.net.Socket, boolean)
+NO DOC BLOCK: android.util.LruCache Method trimToSize(int)
+NO DOC BLOCK: android.os.PowerManager Method wakeUp(long)
+NO DOC BLOCK: android.content.Intent Field ACTION_DREAMING_STARTED
+NO DOC BLOCK: android.content.Intent Field ACTION_DREAMING_STOPPED
+NO DOC BLOCK: android.provider.MediaStore Field ACTION_IMAGE_CAPTURE_SECURE
+NO DOC BLOCK: android.content.Intent Field ACTION_PACKAGE_VERIFIED
+NO DOC BLOCK: android.content.Intent Field ACTION_QUICK_CLOCK
+NO DOC BLOCK: android.content.Intent Field ACTION_USER_BACKGROUND
+NO DOC BLOCK: android.content.Intent Field ACTION_USER_FOREGROUND
+NO DOC BLOCK: android.content.Intent Field ACTION_USER_INITIALIZE
+NO DOC BLOCK: android.Manifest.permission_group Field AFFECTS_BATTERY
+NO DOC BLOCK: android.widget.RelativeLayout Field ALIGN_END
+NO DOC BLOCK: android.widget.RelativeLayout Field ALIGN_PARENT_END
+NO DOC BLOCK: android.widget.RelativeLayout Field ALIGN_PARENT_START
+NO DOC BLOCK: android.widget.RelativeLayout Field ALIGN_START
+NO DOC BLOCK: android.Manifest.permission_group Field APP_INFO
+NO DOC BLOCK: android.Manifest.permission_group Field AUDIO_SETTINGS
+NO DOC BLOCK: android.os.BatteryManager Field BATTERY_PLUGGED_WIRELESS
+NO DOC BLOCK: android.Manifest.permission_group Field BLUETOOTH_NETWORK
+NO DOC BLOCK: android.Manifest.permission_group Field BOOKMARKS
+NO DOC BLOCK: android.Manifest.permission_group Field CALENDAR
+NO DOC BLOCK: android.Manifest.permission_group Field CAMERA
+NO DOC BLOCK: android.hardware.Camera.CameraInfo Field canDisableShutterSound
+NO DOC BLOCK: android.R.attr Field checkedTextViewStyle
+NO DOC BLOCK: android.content.pm.ActivityInfo Field CONFIG_DENSITY
+NO DOC BLOCK: android.content.pm.ActivityInfo Field CONFIG_LAYOUT_DIRECTION
+NO DOC BLOCK: android.content.res.Configuration Field DENSITY_DPI_UNDEFINED
+NO DOC BLOCK: android.content.res.Configuration Field densityDpi
+NO DOC BLOCK: android.Manifest.permission_group Field DEVICE_ALARMS
+NO DOC BLOCK: android.Manifest.permission_group Field DISPLAY
+NO DOC BLOCK: android.content.Context Field DISPLAY_SERVICE
+NO DOC BLOCK: android.widget.RelativeLayout Field END_OF
+NO DOC BLOCK: android.net.ConnectivityManager Field EXTRA_NETWORK_TYPE
+NO DOC BLOCK: android.content.Intent Field EXTRA_ORIGINATING_URI
+NO DOC BLOCK: android.content.Intent Field EXTRA_REFERRER
+NO DOC BLOCK: android.content.pm.PackageManager Field EXTRA_VERIFICATION_RESULT
+NO DOC BLOCK: android.content.pm.PackageManager Field FEATURE_CAMERA_ANY
+NO DOC BLOCK: android.accessibilityservice.AccessibilityServiceInfo Field FEEDBACK_BRAILLE
+NO DOC BLOCK: android.content.pm.PermissionInfo Field FLAG_COSTS_MONEY
+NO DOC BLOCK: android.content.pm.ApplicationInfo Field FLAG_INSTALLED
+NO DOC BLOCK: android.content.pm.ApplicationInfo Field FLAG_IS_DATA_ONLY
+NO DOC BLOCK: android.content.pm.PermissionGroupInfo Field FLAG_PERSONAL_INFO
+NO DOC BLOCK: android.view.Display Field FLAG_SECURE
+NO DOC BLOCK: android.content.pm.ActivityInfo Field FLAG_SINGLE_USER
+NO DOC BLOCK: android.content.pm.ProviderInfo Field FLAG_SINGLE_USER
+NO DOC BLOCK: android.content.pm.ServiceInfo Field FLAG_SINGLE_USER
+NO DOC BLOCK: android.view.Display Field FLAG_SUPPORTS_PROTECTED_BUFFERS
+NO DOC BLOCK: android.content.pm.ApplicationInfo Field FLAG_SUPPORTS_RTL
+NO DOC BLOCK: android.content.pm.PermissionGroupInfo Field flags
+NO DOC BLOCK: android.content.pm.PermissionInfo Field flags
+NO DOC BLOCK: android.content.pm.ProviderInfo Field flags
+NO DOC BLOCK: android.R.attr Field format12Hour
+NO DOC BLOCK: android.R.attr Field format24Hour
+NO DOC BLOCK: android.accessibilityservice.AccessibilityService Field GLOBAL_ACTION_QUICK_SETTINGS
+NO DOC BLOCK: android.R.attr Field initialKeyguardLayout
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field initialKeyguardLayout
+NO DOC BLOCK: android.provider.MediaStore Field INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
+NO DOC BLOCK: android.provider.MediaStore Field INTENT_ACTION_TEXT_OPEN_FROM_SEARCH
+NO DOC BLOCK: android.provider.MediaStore Field INTENT_ACTION_VIDEO_PLAY_FROM_SEARCH
+NO DOC BLOCK: android.provider.CalendarContract.EventsColumns Field IS_ORGANIZER
+NO DOC BLOCK: android.provider.CalendarContract.CalendarColumns Field IS_PRIMARY
+NO DOC BLOCK: android.os.Build.VERSION_CODES Field JELLY_BEAN_MR1
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Field KEYGUARD_DISABLE_FEATURES_ALL
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Field KEYGUARD_DISABLE_FEATURES_NONE
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Field KEYGUARD_DISABLE_SECURE_CAMERA
+NO DOC BLOCK: android.app.admin.DevicePolicyManager Field KEYGUARD_DISABLE_WIDGETS_ALL
+NO DOC BLOCK: android.R.attr Field labelFor
+NO DOC BLOCK: android.R.attr Field layout_alignEnd
+NO DOC BLOCK: android.R.attr Field layout_alignParentEnd
+NO DOC BLOCK: android.R.attr Field layout_alignParentStart
+NO DOC BLOCK: android.R.attr Field layout_alignStart
+NO DOC BLOCK: android.view.View Field LAYOUT_DIRECTION_INHERIT
+NO DOC BLOCK: android.view.View Field LAYOUT_DIRECTION_LOCALE
+NO DOC BLOCK: android.view.View Field LAYOUT_DIRECTION_LTR
+NO DOC BLOCK: android.view.View Field LAYOUT_DIRECTION_RTL
+NO DOC BLOCK: android.R.attr Field layout_marginEnd
+NO DOC BLOCK: android.R.attr Field layout_marginStart
+NO DOC BLOCK: android.R.attr Field layout_toEndOf
+NO DOC BLOCK: android.R.attr Field layout_toStartOf
+NO DOC BLOCK: android.R.attr Field layoutDirection
+NO DOC BLOCK: android.provider.CallLog.Calls Field LIMIT_PARAM_KEY
+NO DOC BLOCK: android.telephony.PhoneStateListener Field LISTEN_CELL_INFO
+NO DOC BLOCK: android.R.attr Field listPreferredItemPaddingEnd
+NO DOC BLOCK: android.R.attr Field listPreferredItemPaddingStart
+NO DOC BLOCK: android.content.pm.PackageManager Field MAXIMUM_VERIFICATION_TIMEOUT
+NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_ERROR_IO
+NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_ERROR_MALFORMED
+NO DOC BLOCK: android.media.MediaRecorder Field MEDIA_ERROR_SERVER_DIED
+NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_ERROR_TIMED_OUT
+NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_ERROR_UNSUPPORTED
+NO DOC BLOCK: android.media.MediaPlayer Field MEDIA_INFO_VIDEO_RENDERING_START
+NO DOC BLOCK: android.media.MediaMetadataRetriever Field METADATA_KEY_VIDEO_ROTATION
+NO DOC BLOCK: android.Manifest.permission_group Field MICROPHONE
+NO DOC BLOCK: android.provider.CallLog.Calls Field OFFSET_PARAM_KEY
+NO DOC BLOCK: android.appwidget.AppWidgetManager Field OPTION_APPWIDGET_HOST_CATEGORY
+NO DOC BLOCK: android.R.attr Field paddingEnd
+NO DOC BLOCK: android.R.attr Field paddingStart
+NO DOC BLOCK: android.R.attr Field permissionFlags
+NO DOC BLOCK: android.R.attr Field permissionGroupFlags
+NO DOC BLOCK: android.R.attr Field presentationTheme
+NO DOC BLOCK: android.content.pm.PermissionGroupInfo Field priority
+NO DOC BLOCK: android.media.AudioManager Field PROPERTY_OUTPUT_FRAMES_PER_BUFFER
+NO DOC BLOCK: android.media.AudioManager Field PROPERTY_OUTPUT_SAMPLE_RATE
+NO DOC BLOCK: android.media.MediaRouter Field ROUTE_TYPE_LIVE_VIDEO
+NO DOC BLOCK: android.hardware.Camera.Parameters Field SCENE_MODE_HDR
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_LAYOUTDIR_LTR
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_LAYOUTDIR_MASK
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_LAYOUTDIR_RTL
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_LAYOUTDIR_SHIFT
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_LAYOUTDIR_UNDEFINED
+NO DOC BLOCK: android.content.res.Configuration Field SCREENLAYOUT_UNDEFINED
+NO DOC BLOCK: android.Manifest.permission_group Field SCREENLOCK
+NO DOC BLOCK: android.R.attr Field showOnLockScreen
+NO DOC BLOCK: android.R.attr Field singleUser
+NO DOC BLOCK: android.Manifest.permission_group Field SOCIAL_INFO
+NO DOC BLOCK: android.text.format.DateFormat Field STANDALONE_MONTH
+NO DOC BLOCK: android.widget.RelativeLayout Field START_OF
+NO DOC BLOCK: android.Manifest.permission_group Field STATUS_BAR
+NO DOC BLOCK: android.R.attr Field subtypeId
+NO DOC BLOCK: android.R.attr Field supportsRtl
+NO DOC BLOCK: android.Manifest.permission_group Field SYNC_SETTINGS
+NO DOC BLOCK: android.Manifest.permission_group Field SYSTEM_CLOCK
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_CENTER
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_GRAVITY
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_TEXT_END
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_TEXT_START
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_VIEW_END
+NO DOC BLOCK: android.view.View Field TEXT_ALIGNMENT_VIEW_START
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_ANY_RTL
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_FIRST_STRONG
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_INHERIT
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_LOCALE
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_LTR
+NO DOC BLOCK: android.view.View Field TEXT_DIRECTION_RTL
+NO DOC BLOCK: android.R.attr Field textAlignment
+NO DOC BLOCK: android.R.attr Field textDirection
+NO DOC BLOCK: android.net.wifi.ScanResult Field timestamp
+NO DOC BLOCK: android.R.attr Field timeZone
+NO DOC BLOCK: android.view.accessibility.AccessibilityEvent Field TYPE_GESTURE_DETECTION_END
+NO DOC BLOCK: android.view.accessibility.AccessibilityEvent Field TYPE_GESTURE_DETECTION_START
+NO DOC BLOCK: android.view.accessibility.AccessibilityEvent Field TYPE_TOUCH_INTERACTION_END
+NO DOC BLOCK: android.view.accessibility.AccessibilityEvent Field TYPE_TOUCH_INTERACTION_START
+NO DOC BLOCK: android.provider.CalendarContract.EventsColumns Field UID_2445
+NO DOC BLOCK: android.Manifest.permission_group Field USER_DICTIONARY
+NO DOC BLOCK: android.content.Context Field USER_SERVICE
+NO DOC BLOCK: android.app.admin.DeviceAdminInfo Field USES_POLICY_DISABLE_KEYGUARD_FEATURES
+NO DOC BLOCK: android.Manifest.permission_group Field VOICEMAIL
+NO DOC BLOCK: android.Manifest.permission_group Field WALLPAPER
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field WIDGET_CATEGORY_HOME_SCREEN
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field WIDGET_CATEGORY_KEYGUARD
+NO DOC BLOCK: android.R.style Field Widget_DeviceDefault_CheckedTextView
+NO DOC BLOCK: android.R.style Field Widget_DeviceDefault_Light_CheckedTextView
+NO DOC BLOCK: android.R.style Field Widget_Holo_CheckedTextView
+NO DOC BLOCK: android.R.style Field Widget_Holo_Light_CheckedTextView
+NO DOC BLOCK: android.R.attr Field widgetCategory
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field widgetCategory
+NO DOC BLOCK: android.Manifest.permission_group Field WRITE_USER_DICTIONARY

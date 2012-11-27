@@ -28,6 +28,91 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 21</a> <em>(November 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 15 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r21 is designed
+        for use with ADT 21.0.0 and later. If you haven't already, update your
+        <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> to 21.0.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Build System
+          <ul>
+            <li>Added a flag that sets <em>jumbo mode</em> for DEX files, which allows a larger
+              number of strings in the DEX files. Enable this mode by adding the following line to
+              the {@code project.properties} file of your project:
+              <pre>set dex.force.jumbo=true</pre></li>
+            <li>Improved the build time by pre-dexing libraries (both JAR files and library
+              projects).</li>
+            <li>Updated the build to generate {@code R} resource classes for library projects
+              with only the IDs needed by the libraries, reducing the risk of hitting DEX file
+              limits for fields and methods.</li>
+            <li>Improved the build so that several editing features (code completion, resource
+              chooser, go to declaration) properly handle library project resources.</li>
+          </ul>
+        </li>
+        <li>Lint
+          <ul>
+            <li>Added over 25 new lint rules for resources, locale settings, layout
+              files, incorrect use of {@link android.util.SparseArray} and
+              {@link android.os.PowerManager.WakeLock} and manifest issues.</li>
+            <li>Updated reporting to include errors in library projects if the library project is
+              in the list of projects to be checked.</li>
+            <li>Added a new {@code lint} target to the Ant build system for easier
+              integration with continuous build systems.</li>
+            <li>Added new {@code --sources} and {@code --classpath} arguments to point to sources
+              with different directory structures.</li>
+            <li>Improved the XML export function to support the <a
+              href="https://wiki.jenkins-ci.org/display/JENKINS/Android+Lint+Plugin">Jenkins Lint
+              plugin</a>.
+            </li>
+            <li>Added support for class file flow analysis.</li>
+          </ul>
+        </li>
+        <li>Android Virtual Devices (AVD)
+          <ul>
+            <li>Added new <strong>Device Definitions</strong> tab in the AVD Manager for configuring
+              standard size and Nexus virtual devices.</li>
+            <li>Improved emulators so that they launch with a skin that is dynamically generated and
+              reflects the actual hardware configured in the AVD Manager.</li>
+            <li>Improved support for developing Android apps on MIPS-based devices with new MIPS
+              System Images for Android Virtual Devices.</li>
+          </ul>
+        </li>
+        <li>Added {@code jobb} tool for creating and encrypting
+          <a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a>.
+          (<a href="{@docRoot}tools/help/jobb.html">more info</a>)
+        <li>Improved the Android JUnit test runner to allow a test to be run on all connected
+          devices simultaneously.</li>
+      </ul>
+    </dd>
+
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed manifest merger to properly adapt library classes in the merged manifest.</li>
+      </ul>
+    </dd>
+
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 20.0.3</a> <em>(August 2012)</em>
   </p>
 
@@ -128,12 +213,12 @@ application code.</li>
             <li>Added automatic merging of library project manifest files into the including
 project's manifest. Enable this feature with the {@code manifestmerger.enabled} property.</li>
             <li>Added automatic ProGuard support for the {@code aapt -G} flag. This change causes
-the build system to generate a temporary ProGuard keep-rules file containing classes that
-are referenced from XML files (such as custom views) and pass this to ProGuard at shrink-time. This
+the build system to generate a temporary ProGuard {@code keep-rules} file containing classes that
+are referenced from XML files (such as custom views) and pass this to ProGuard at shrink time. This
 can make the resulting APK much smaller when using just a small portion of a large library project
 (such as the Android Support library), since the catch-all rules to keep all custom views from the
 default ProGuard configuration file have also been removed.</li>
-            <li>Added two ProGuard configuration files for use in projects: {@code 
+            <li>Added two ProGuard configuration files for use in projects: {@code
 proguard-android-optimize.txt} which enables optimizations and {@code proguard-android.txt} which
 disables them.</li>
           </ul>
@@ -141,9 +226,8 @@ disables them.</li>
         <li>SDK Manager
           <ul>
             <li>Improved caching to reduce downloading of repository definitions.</li>
-            <li>Added <strong>Tools > Manage Add-on Sites</strong> option to allow deactivation of
-      third-party sites for improved performance (e.g., if one or more sites are temporarily slow to
-      load.)</li>
+            <li>Added <strong>Tools > Manage Add-on Sites</strong> option to improve performance by
+            allowing temporary deactivation of third-party sites if they are loading slowly.</li>
             <li>Added settings for the SDK Manager download cache (<strong>SDK Manager > Tools >
 Options</strong>).</li>
           </ul>

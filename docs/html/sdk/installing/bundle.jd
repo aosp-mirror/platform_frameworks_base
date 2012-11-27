@@ -1,0 +1,45 @@
+page.title=Setting Up the ADT Bundle
+
+@jd:body
+
+
+<p>The ADT Bundle provides everything you need to start developing apps, including
+a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b> to
+streamline your Android app development.
+If you haven't already, go download the <a href="{@docRoot}sdk/index.html"
+>Android ADT Bundle</a>. (If you downloaded the SDK Tools only, for use with an
+existing IDE, you should instead read
+<a href="{@docRoot}sdk/installing/index.html">Setting Up an Existing IDE</a>.)</p>
+
+<h3>Install the SDK and Eclipse IDE</h3>
+<ol>
+<li>Unpack the ZIP file
+(named {@code adt-bundle-&lt;os_platform>.zip}) and save it to an appropriate location,
+such as a "Development" directory in your home directory.</li>
+<li>Open the {@code adt-bundle-&lt;os_platform>/eclipse/} directory and launch
+<strong>eclipse</strong>.</li>
+</ol>
+
+<p>That's it! The IDE is already loaded with the Android Developer Tools plugin and
+the SDK is ready to go. To start developing, read <a href="{@docRoot}training/basics/firstapp/index.html"
+>Building Your First App</a>.</p>
+
+<p class="caution"><strong>Caution:</strong> Do not move any of the files or directories
+from the {@code adt-bundle-&lt;os_platform>} directory. If you move the {@code eclipse}
+or {@code sdk} directory, ADT will not be able to locate the SDK and you'll
+need to manually update the ADT preferences.</p>
+
+<h3>Additional information</h3>
+
+<p>As you continue developing apps, you may need to install additional versions
+of Android for the emulator and other packages such as the library for
+Google Play In-app Billing. To install more packages, use
+the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</p>
+
+<p>Everything you need to develop Android apps is on this web site, including <a
+href="{@docRoot}design/index.html">design guidelines</a>,
+<a href="{@docRoot}training/index.html">developer training</a>, <a
+href="{@docRoot}reference/packages.html">API reference</a>, and information
+about how you can <a href="{@docRoot}distribute/index.html">distribute your app</a>.
+For additional resources about developing and distributing your app, see the
+<a href="{@docRoot}support.html">Developer Support Resources</a>.</p>

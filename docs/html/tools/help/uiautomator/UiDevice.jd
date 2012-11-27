@@ -1,0 +1,3073 @@
+page.title=UiDevice
+parent.title=uiautomator
+parent.link=index.html
+@jd:body
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+
+<h2>Class Overview</h2>
+<p>UiDevice provides access to state information about the device.
+ You can also use this class to simulate user actions on the device,
+ such as pressing the d-pad or pressing the Home and Menu buttons.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#clearLastTraversedText()">clearLastTraversedText</a></span>()
+        
+        <div class="jd-descrdiv">Clears the text from the last UI traversal event.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#click(int, int)">click</a></span>(int x, int y)
+        
+        <div class="jd-descrdiv">Perform a click at arbitrary coordinates specified by the user</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#dumpWindowHierarchy(java.lang.String)">dumpWindowHierarchy</a></span>(String fileName)
+        
+        <div class="jd-descrdiv">Helper method used for debugging to dump the current window's layout hierarchy.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#freezeRotation()">freezeRotation</a></span>()
+        
+        <div class="jd-descrdiv">Disables the sensors and freezes the device rotation at its
+ current rotation state.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getCurrentActivityName()">getCurrentActivityName</a></span>()
+        
+        <div class="jd-descrdiv">
+      <em>
+  This method is deprecated.
+      The results returned should be considered unreliable</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getCurrentPackageName()">getCurrentPackageName</a></span>()
+        
+        <div class="jd-descrdiv">Retrieves the name of the last package to report accessibility events.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getDisplayHeight()">getDisplayHeight</a></span>()
+        
+        <div class="jd-descrdiv">Gets the height of the display, in pixels.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getDisplayRotation()">getDisplayRotation</a></span>()
+        
+        <div class="jd-descrdiv">Returns the current rotation of the display, as defined in Surface@return</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getDisplayWidth()">getDisplayWidth</a></span>()
+        
+        <div class="jd-descrdiv">Gets the width of the display, in pixels.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            static
+            
+            <a href="UiDevice.html">UiDevice</a>
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getInstance()">getInstance</a></span>()
+        
+        <div class="jd-descrdiv">Retrieves a singleton instance of UiDevice</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getLastTraversedText()">getLastTraversedText</a></span>()
+        
+        <div class="jd-descrdiv">Retrieves the text from the last UI traversal event received.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#getProductName()">getProductName</a></span>()
+        
+        <div class="jd-descrdiv">Retrieves the product name of the device.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#hasAnyWatcherTriggered()">hasAnyWatcherTriggered</a></span>()
+        
+        <div class="jd-descrdiv">Checks if any registered <code><a href="UiWatcher.html">UiWatcher</a></code> have triggered.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#hasWatcherTriggered(java.lang.String)">hasWatcherTriggered</a></span>(String watcherName)
+        
+        <div class="jd-descrdiv">Checks if a specific registered  <code><a href="UiWatcher.html">UiWatcher</a></code> has triggered.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#isNaturalOrientation()">isNaturalOrientation</a></span>()
+        
+        <div class="jd-descrdiv">Check if the device is in its natural orientation.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#isScreenOn()">isScreenOn</a></span>()
+        
+        <div class="jd-descrdiv">Checks the power manager if the screen is ON.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressBack()">pressBack</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the BACK button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDPadCenter()">pressDPadCenter</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the CENTER button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDPadDown()">pressDPadDown</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the DOWN button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDPadLeft()">pressDPadLeft</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the LEFT button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDPadRight()">pressDPadRight</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the RIGHT button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDPadUp()">pressDPadUp</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the UP button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressDelete()">pressDelete</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the DELETE key.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressEnter()">pressEnter</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the ENTER key.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressHome()">pressHome</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the HOME button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressKeyCode(int)">pressKeyCode</a></span>(int keyCode)
+        
+        <div class="jd-descrdiv">Simulates a short press using a key code.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressKeyCode(int, int)">pressKeyCode</a></span>(int keyCode, int metaState)
+        
+        <div class="jd-descrdiv">Simulates a short press using a key code.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressMenu()">pressMenu</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the MENU button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressRecentApps()">pressRecentApps</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the Recent Apps button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#pressSearch()">pressSearch</a></span>()
+        
+        <div class="jd-descrdiv">Simulates a short press on the SEARCH button.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher</a></span>(String name, <a href="UiWatcher.html">UiWatcher</a> watcher)
+        
+        <div class="jd-descrdiv">Registers a <code><a href="UiWatcher.html">UiWatcher</a></code> to run automatically when the testing framework is unable to
+ find a match using a <code><a href="UiSelector.html">UiSelector</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#removeWatcher(java.lang.String)">removeWatcher</a></span>(String name)
+        
+        <div class="jd-descrdiv">Removes a previously registered <code><a href="UiWatcher.html">UiWatcher</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#resetWatcherTriggers()">resetWatcherTriggers</a></span>()
+        
+        <div class="jd-descrdiv">Resets a <code><a href="UiWatcher.html">UiWatcher</a></code> that has been triggered.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#runWatchers()">runWatchers</a></span>()
+        
+        <div class="jd-descrdiv">This method forces all registered watchers to run.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#setOrientationLeft()">setOrientationLeft</a></span>()
+        
+        <div class="jd-descrdiv">Simulates orienting the device to the left and also freezes rotation
+ by disabling the sensors.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#setOrientationNatural()">setOrientationNatural</a></span>()
+        
+        <div class="jd-descrdiv">Simulates orienting the device into its natural orientation and also freezes rotation
+ by disabling the sensors.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#setOrientationRight()">setOrientationRight</a></span>()
+        
+        <div class="jd-descrdiv">Simulates orienting the device to the right and also freezes rotation
+ by disabling the sensors.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#sleep()">sleep</a></span>()
+        
+        <div class="jd-descrdiv">This method simply presses the power button if the screen is ON else
+ it does nothing if the screen is already OFF.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#swipe(android.graphics.Point[], int)">swipe</a></span>(Point[] segments, int segmentSteps)
+        
+        <div class="jd-descrdiv">Performs a swipe between points in the Point array.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#swipe(int, int, int, int, int)">swipe</a></span>(int startX, int startY, int endX, int endY, int steps)
+        
+        <div class="jd-descrdiv">Performs a swipe from one coordinate to another using the number of steps
+ to determine smoothness and speed.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#takeScreenshot(java.io.File, float, int)">takeScreenshot</a></span>(File storePath, float scale, int quality)
+        
+        <div class="jd-descrdiv">Take a screenshot of current window and store it as PNG
+
+ The screenshot is adjusted per screen rotation</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#takeScreenshot(java.io.File)">takeScreenshot</a></span>(File storePath)
+        
+        <div class="jd-descrdiv">Take a screenshot of current window and store it as PNG
+
+ Default scale of 1.0f (original size) and 90% quality is used
+ The screenshot is adjusted per screen rotation</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#unfreezeRotation()">unfreezeRotation</a></span>()
+        
+        <div class="jd-descrdiv">Re-enables the sensors and un-freezes the device rotation allowing its contents
+ to rotate with the device physical rotation.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#waitForIdle(long)">waitForIdle</a></span>(long time)
+        
+        <div class="jd-descrdiv">Waits for the current application to idle.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#waitForIdle()">waitForIdle</a></span>()
+        
+        <div class="jd-descrdiv">Waits for the current application to idle.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#waitForWindowUpdate(java.lang.String, long)">waitForWindowUpdate</a></span>(String packageName, long timeout)
+        
+        <div class="jd-descrdiv">Waits for a window content update event to occur.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#wakeUp()">wakeUp</a></span>()
+        
+        <div class="jd-descrdiv">This method simulates pressing the power button if the screen is OFF else
+ it does nothing if the screen is already ON.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">equals</span>(Object arg0)
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">getClass</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">hashCode</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notify</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notifyAll</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">toString</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>()
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0, int arg1)
+        
+  </td></tr>
+
+
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            final
+            
+            
+            void
+        </td>
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0)
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<a id="clearLastTraversedText()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">clearLastTraversedText</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Clears the text from the last UI traversal event.
+ See <code><a href="#getLastTraversedText()">getLastTraversedText()</a></code>.</p></div>
+
+    </div>
+</div>
+
+
+<a id="click(int, int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">click</span>
+      <span class="normal">(int x, int y)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Perform a click at arbitrary coordinates specified by the user</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>x</th>
+          <td>coordinate</td>
+        </tr>
+        <tr>
+          <th>y</th>
+          <td>coordinate</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the click succeeded else false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="dumpWindowHierarchy(java.lang.String)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">dumpWindowHierarchy</span>
+      <span class="normal">(String fileName)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Helper method used for debugging to dump the current window's layout hierarchy.
+ The file root location is /data/local/tmp</p></div>
+
+    </div>
+</div>
+
+
+<a id="freezeRotation()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">freezeRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Disables the sensors and freezes the device rotation at its
+ current rotation state.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getCurrentActivityName()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getCurrentActivityName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      <p>
+  <p class="caution">
+      <strong>
+  This method is deprecated.</strong><br/> The results returned should be considered unreliable
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the last activity to report accessibility events.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>String name of activity</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getCurrentPackageName()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getCurrentPackageName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the name of the last package to report accessibility events.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>String name of package</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getDisplayHeight()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getDisplayHeight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the height of the display, in pixels. The size is adjusted based
+ on the current orientation of the display.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>height in pixels or zero on failure</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getDisplayRotation()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getDisplayRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the current rotation of the display, as defined in Surface@return</p></div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="getDisplayWidth()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getDisplayWidth</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the width of the display, in pixels. The width and height details
+ are reported based on the current orientation of the display.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>width in pixels or zero on failure</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getInstance()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="UiDevice.html">UiDevice</a>
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a singleton instance of UiDevice</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>UiDevice instance</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getLastTraversedText()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getLastTraversedText</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the text from the last UI traversal event received.
+
+ You can use this method to read the contents in a WebView container
+ because the accessibility framework fires events
+ as each text is highlighted. You can write a test to perform
+ directional arrow presses to focus on different elements inside a WebView,
+ and call this method to get the text from each traversed element.
+ If you are testing a view container that can return a reference to a
+ Document Object Model (DOM) object, your test should use the view's
+ DOM instead.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>text of the last traversal event, else return an empty string</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="getProductName()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getProductName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the product name of the device.
+
+ This method provides information on what type of device the test is running on. This value is
+ the same as returned by invoking #adb shell getprop ro.product.name.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>product name of the device</li></ul>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="hasAnyWatcherTriggered()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">hasAnyWatcherTriggered</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if any registered <code><a href="UiWatcher.html">UiWatcher</a></code> have triggered.
+
+ See <code><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher(String, UiWatcher)</a></code>
+ See <code><a href="#hasWatcherTriggered(java.lang.String)">hasWatcherTriggered(String)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<a id="hasWatcherTriggered(java.lang.String)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">hasWatcherTriggered</span>
+      <span class="normal">(String watcherName)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if a specific registered  <code><a href="UiWatcher.html">UiWatcher</a></code> has triggered.
+ See <code><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher(String, UiWatcher)</a></code>. If a UiWatcher runs and its
+ <code><a href="UiWatcher.html#checkForCondition()">checkForCondition()</a></code> call returned <code>true</code>, then
+ the UiWatcher is considered triggered. This is helpful if a watcher is detecting errors
+ from ANR or crash dialogs and the test needs to know if a UiWatcher has been triggered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if triggered else false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="isNaturalOrientation()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isNaturalOrientation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Check if the device is in its natural orientation. This is determined by checking if the
+ orientation is at 0 or 180 degrees.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if it is in natural orientation</li></ul>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="isScreenOn()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isScreenOn</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Checks the power manager if the screen is ON.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the screen is ON else false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressBack()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressBack</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the BACK button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDPadCenter()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDPadCenter</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the CENTER button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDPadDown()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDPadDown</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the DOWN button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDPadLeft()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDPadLeft</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the LEFT button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDPadRight()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDPadRight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the RIGHT button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDPadUp()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDPadUp</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the UP button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressDelete()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressDelete</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the DELETE key.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressEnter()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressEnter</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the ENTER key.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressHome()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressHome</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the HOME button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressKeyCode(int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressKeyCode</span>
+      <span class="normal">(int keyCode)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press using a key code.
+
+ See KeyEvent</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressKeyCode(int, int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressKeyCode</span>
+      <span class="normal">(int keyCode, int metaState)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press using a key code.
+
+ See KeyEvent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>keyCode</th>
+          <td>the key code of the event.</td>
+        </tr>
+        <tr>
+          <th>metaState</th>
+          <td>an integer in which each bit set to 1 represents a pressed meta key</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressMenu()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressMenu</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the MENU button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressRecentApps()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressRecentApps</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the Recent Apps button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="pressSearch()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">pressSearch</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the SEARCH button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">registerWatcher</span>
+      <span class="normal">(String name, <a href="UiWatcher.html">UiWatcher</a> watcher)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Registers a <code><a href="UiWatcher.html">UiWatcher</a></code> to run automatically when the testing framework is unable to
+ find a match using a <code><a href="UiSelector.html">UiSelector</a></code>. See <code><a href="#runWatchers()">runWatchers()</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</th>
+          <td>to register the UiWatcher</td>
+        </tr>
+        <tr>
+          <th>watcher</th>
+          <td><code><a href="UiWatcher.html">UiWatcher</a></code></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="removeWatcher(java.lang.String)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">removeWatcher</span>
+      <span class="normal">(String name)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a previously registered <code><a href="UiWatcher.html">UiWatcher</a></code>.
+
+ See <code><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</th>
+          <td>used to register the UiWatcher</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>UiAutomationException</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="resetWatcherTriggers()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">resetWatcherTriggers</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Resets a <code><a href="UiWatcher.html">UiWatcher</a></code> that has been triggered.
+ If a UiWatcher runs and its <code><a href="UiWatcher.html#checkForCondition()">checkForCondition()</a></code> call
+ returned <code>true</code>, then the UiWatcher is considered triggered.
+ See <code><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<a id="runWatchers()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">runWatchers</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This method forces all registered watchers to run.
+ See <code><a href="#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<a id="setOrientationLeft()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setOrientationLeft</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device to the left and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="setOrientationNatural()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setOrientationNatural</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device into its natural orientation and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="setOrientationRight()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setOrientationRight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device to the right and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="sleep()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">sleep</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This method simply presses the power button if the screen is ON else
+ it does nothing if the screen is already OFF.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="swipe(android.graphics.Point[], int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">swipe</span>
+      <span class="normal">(Point[] segments, int segmentSteps)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe between points in the Point array. Each step execution is throttled
+ to 5ms per step. So for a 100 steps, the swipe will take about 1/2 second to complete</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>segments</th>
+          <td>is Point array containing at least one Point object</td>
+        </tr>
+        <tr>
+          <th>segmentSteps</th>
+          <td>steps to inject between two Points</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true on success</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="swipe(int, int, int, int, int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">swipe</span>
+      <span class="normal">(int startX, int startY, int endX, int endY, int steps)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe from one coordinate to another using the number of steps
+ to determine smoothness and speed. Each step execution is throttled to 5ms
+ per step. So for a 100 steps, the swipe will take about 1/2 second to complete.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>steps</th>
+          <td>is the number of move steps sent to the system</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>false if the operation fails or the coordinates are invalid</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="takeScreenshot(java.io.File, float, int)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">takeScreenshot</span>
+      <span class="normal">(File storePath, float scale, int quality)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Take a screenshot of current window and store it as PNG
+
+ The screenshot is adjusted per screen rotation</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>storePath</th>
+          <td>where the PNG should be written to</td>
+        </tr>
+        <tr>
+          <th>scale</th>
+          <td>scale the screenshot down if needed; 1.0f for original size</td>
+        </tr>
+        <tr>
+          <th>quality</th>
+          <td>quality of the PNG compression; range: 0-100</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if screen shot is created successfully, false otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="takeScreenshot(java.io.File)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">takeScreenshot</span>
+      <span class="normal">(File storePath)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Take a screenshot of current window and store it as PNG
+
+ Default scale of 1.0f (original size) and 90% quality is used
+ The screenshot is adjusted per screen rotation</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>storePath</th>
+          <td>where the PNG should be written to</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if screen shot is created successfully, false otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
+    </div>
+</div>
+
+
+<a id="unfreezeRotation()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">unfreezeRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Re-enables the sensors and un-freezes the device rotation allowing its contents
+ to rotate with the device physical rotation. During a test execution, it is best to
+ keep the device frozen in a specific orientation until the test case execution has completed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="waitForIdle(long)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">waitForIdle</span>
+      <span class="normal">(long time)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for the current application to idle.</p></div>
+
+    </div>
+</div>
+
+
+<a id="waitForIdle()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">waitForIdle</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for the current application to idle.
+ Default wait timeout is 10 seconds</p></div>
+
+    </div>
+</div>
+
+
+<a id="waitForWindowUpdate(java.lang.String, long)"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">waitForWindowUpdate</span>
+      <span class="normal">(String packageName, long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for a window content update event to occur.
+
+ If a package name for the window is specified, but the current window
+ does not have the same package name, the function returns immediately.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>packageName</th>
+          <td>the specified window package name (can be <code>null</code>).
+        If <code>null</code>, a window update from any front-end window will end the wait</td>
+        </tr>
+        <tr>
+          <th>timeout</th>
+          <td>the timeout for the wait</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if a window update occurred, false if timeout has elapsed or if the current
+         window does not have the specified package name</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<a id="wakeUp()"></a>
+
+<div class="jd-details api "> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">wakeUp</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This method simulates pressing the power button if the screen is OFF else
+ it does nothing if the screen is already ON.
+
+ If the screen was OFF and it just got turned ON, this method will insert a 500ms delay
+ to allow the device time to wake up and accept input.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>  
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+

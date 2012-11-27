@@ -1,36 +1,27 @@
 page.title=Installing the Eclipse Plugin
-walkthru=1
-adt.zip.version=20.0.3
-adt.zip.download=ADT-20.0.3.zip
-adt.zip.bytes=12390954
-adt.zip.checksum=869a536b1c56d0cd920ed9ae259ae619
+adt.zip.version=21.0.0
+adt.zip.download=ADT-21.0.0.zip
+adt.zip.bytes=13556487
+adt.zip.checksum=7db4eaae5df6a34fd853317a2bd8250b
 
 @jd:body
 
 
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
-Development Tools (ADT). This plugin is designed to give you a powerful, integrated
+Development Tools (ADT). This plugin provides a powerful, integrated
 environment in which to develop Android apps. It extends the capabilities
 of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
 
-<p>If you will be developing in Eclipse with the ADT Plugin, first make sure that you have a
-suitable version of Eclipse
-installed on your computer as described by the 
-<a href="{@docRoot}sdk/index.html#Requirements">system requirements</a>.</p>
-
 <p>If you need to install Eclipse, you can download it from <a href=
-"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>.
-We recommend the "Eclipse Classic" version. Otherwise, you should use a Java or
-RCP version of Eclipse.</p>
+"http://eclipse.org/mobile/">eclipse.org/mobile</a>.</p>
 
 
 <p class="note"><strong>Note:</strong> If you prefer to work in a different IDE, you do not need to
 install Eclipse or ADT. Instead, you can directly use the SDK tools to build and
-debug your application. So if you're not using Eclipse, continue to the next page by clicking
-the <strong>Next</strong> link on the right.</p>
+debug your application.</p>
 
 
 
@@ -70,59 +61,21 @@ the software can't be established, click <strong>OK</strong>.</p></li>
     <li>In the "Welcome to Android Development" window that appears, select <strong>Use
 existing SDKs</strong>.</li>
     <li>Browse and select the location of the Android SDK directory you recently
-downloaded.</li>
+downloaded and unpacked.</li>
     <li>Click <strong>Next</strong>.</li>
 </ol>
 
-
-<p>If you haven't encountered any errors, you're done setting up ADT
-  and can continue to <a href="{@docRoot}sdk/installing/next.html">Next Steps</a>.</p>
-
-
-
-
-<h2 id="Updating">Updating the ADT Plugin</h2>
-
-<p>From time to time, a new revision of the ADT Plugin becomes available, with
-new features and bug fixes. Generally, when a new revision of ADT is available,
-you should update to it as soon as convenient. </p>
-
-<p>In some cases, a new revision of ADT will have a dependency on a specific
-revision of the Android SDK Tools. If such dependencies exist, you will need to
-update the SDK Tools package of the SDK after installing the new revision of
-ADT. To update the SDK Tools package, use the Android SDK Manager, as
-described in <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
-
-<p>To learn about new features of each ADT revision and also any dependencies on
-the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
-section. To determine the version currently installed, open the
-Eclipse Installed Software window using <strong>Help</strong>
-&gt; <strong>Software Updates</strong> and refer to the version listed for
-"Android Development Tools".</p>
-
-<p>Follow the steps below to check whether an update is available and, if so,
-to install it. </p>
-
-<ol>
-    <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>.
-      <p>If there are no updates available, a dialog will say so and you're done.</p></li>
-    <li>If there are updates available, select Android DDMS, Android Development Tools,
-      and Android Hierarchy Viewer, then click <strong>Next</strong>.</li>
-    <li>In the Update Details dialog, click <strong>Next</strong>.</li>
-    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
-      This will download and install the latest version of Android DDMS and
-      Android Development Tools.</li>
-    <li>Restart Eclipse.</li>
-</ol>
-
-
-<p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
-perform a fresh installation, using the instructions for <a href="#installing">Installing the ADT
-Plugin</a>.</p>
+<p>Your Eclipse IDE is now set up to develop Android apps, but you need to add
+the latest SDK platform tools and an Android platform to your environment.
+To get these packages for your SDK, continue to
+<a href="{@docRoot}sdk/installing/adding-packages.html">Adding Platforms and Packages</a>.</p>
 
 
 
-<h2 id="Troubleshooting">Troubleshooting</h2>
+
+
+
+<h2 id="Troubleshooting">Troubleshooting Installation</h2>
 
 <p> If you are having trouble downloading the ADT plugin after following the
 steps above, here are some suggestions: </p>

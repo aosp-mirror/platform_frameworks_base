@@ -1,20 +1,193 @@
 ndk=true
 
-ndk.win_download=android-ndk-r8b-windows.zip
-ndk.win_bytes=188724991
-ndk.win_checksum=6d290d4f2729ef2063c5ae5b1e335622
+ndk.win_download=android-ndk-r8c-windows.zip
+ndk.win_bytes=233787657
+ndk.win_checksum=3ff1570fa4ea865b7702507ea43dbae4
 
-ndk.mac_download=android-ndk-r8b-darwin-x86.tar.bz2
-ndk.mac_bytes=181255568
-ndk.mac_checksum=94fe392194ea41f8a70cfce0dee3870f
+ndk.mac_download=android-ndk-r8c-darwin-x86.tar.bz2
+ndk.mac_bytes=214270840
+ndk.mac_checksum=74a23e9e058512121835e0d6932e72d5
 
-ndk.linux_download=android-ndk-r8b-linux-x86.tar.bz2
-ndk.linux_bytes=160466240
-ndk.linux_checksum=6694ccc04d543500f0661a75f6c46526
+ndk.linux_download=android-ndk-r8c-linux-x86.tar.bz2
+ndk.linux_bytes=179945337
+ndk.linux_checksum=b0851346ff90c9266bc050016a228319
 
 page.title=Android NDK
 
 @jd:body
+
+
+
+
+<div id="tos" style="display:none;width:760px;height:0;margin:0 auto">
+
+<div class="ndk" style="
+z-index: 99;
+width: 720px;
+position: absolute;
+margin: -70px 0;
+padding: 14px;
+background: white;
+border: 1px solid #999;
+box-shadow: -10px 10px 50px #888;
+-moz-box-shadow: -10px 10px 50px #888;
+-webkit-box-shadow: -10px 10px 50px #888;">
+<p>Before installing the Android NDK, you must agree to the following terms and conditions.</p>
+<div class="sdk-terms" style="width:auto" onfocus="this.blur()">
+<h2 class="norule">Terms and Conditions</h2>
+This is the Android Software Development Kit License Agreement
+
+<h3>1. Introduction</h3>
+1.1 The Android Software Development Kit (referred to in this License Agreement as the "SDK" and specifically including the Android system files, packaged APIs, and Google APIs add-ons) is licensed to you subject to the terms of this License Agreement. This License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
+
+1.2 “Android” means the Android software stack for devices, as made available under the Android Open Source Project, which is located at the following URL: http://source.android.com/, as updated from time to time.
+
+1.3 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
+
+
+<h3>2. Accepting this License Agreement</h3>
+2.1 In order to use the SDK, you must first agree to this License Agreement. You may not use the SDK if you do not accept this License Agreement.
+
+2.2 By clicking to accept, you hereby agree to the terms of this License Agreement.
+
+2.3 You may not use the SDK and may not accept the License Agreement if you are a person barred from receiving the SDK under the laws of the United States or other countries including the country in which you are resident or from which you use the SDK.
+
+2.4 If you are agreeing to be bound by this License Agreement on behalf of your employer or other entity, you represent and warrant that you have full legal authority to bind your employer or such entity to this License Agreement. If you do not have the requisite authority, you may not accept the License Agreement or use the SDK on behalf of your employer or other entity.
+
+
+<h3>3. SDK License from Google</h3>
+3.1 Subject to the terms of this License Agreement, Google grants you a limited, worldwide, royalty-free, non-assignable and non-exclusive license to use the SDK solely to develop applications to run on the Android platform.
+
+3.2 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
+
+3.3 You may not use the SDK for any purpose not expressly permitted by this License Agreement.  Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
+
+3.4 You agree that you will not take any actions that may cause or result in the fragmentation of Android, including but not limited to distributing, participating in the creation of, or promoting in any way a software development kit derived from the SDK.
+
+3.5 Use, reproduction and distribution of components of the SDK licensed under an open source software license are governed solely by the terms of that open source software license and not this License Agreement.
+
+3.6 You agree that the form and nature of the SDK that Google provides may change without prior notice to you and that future versions of the SDK may be incompatible with applications developed on previous versions of the SDK. You agree that Google may stop (permanently or temporarily) providing the SDK (or any features within the SDK) to you or to users generally at Google's sole discretion, without prior notice to you.
+
+3.7 Nothing in this License Agreement gives you a right to use any of Google's trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
+
+3.8 You agree that you will not remove, obscure, or alter any proprietary rights notices (including copyright and trademark notices) that may be affixed to or contained within the SDK.
+
+
+<h3>4. Use of the SDK by You</h3>
+4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under this License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights that subsist in those applications.
+
+4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) this License Agreement and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions (including any laws regarding the export of data or software to and from the United States or other relevant countries).
+
+4.3 You agree that if you use the SDK to develop applications for general public users, you will protect the privacy and legal rights of those users. If the users provide you with user names, passwords, or other login information or personal information, you must make the users aware that the information will be available to your application, and you must provide legally adequate privacy notice and protection for those users. If your application stores personal or sensitive information provided by users, it must do so securely. If the user provides your application with Google Account information, your application may only use that information to access the user's Google Account when, and for the limited purposes for which, the user has given you permission to do so.
+
+4.4 You agree that you will not engage in any activity with the SDK, including the development or distribution of an application, that interferes with, disrupts, damages, or accesses in an unauthorized manner the servers, networks, or other properties or services of any third party including, but not limited to, Google or any mobile communications carrier.
+
+4.5 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any data, content, or resources that you create, transmit or display through Android and/or applications for Android, and for the consequences of your actions (including any loss or damage which Google may suffer) by doing so.
+
+4.6 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any breach of your obligations under this License Agreement, any applicable third party contract or Terms of Service, or any applicable law or regulation, and for the consequences (including any loss or damage which Google or any third party may suffer) of any such breach.
+
+
+<h3>5. Your Developer Credentials</h3>
+5.1 You agree that you are responsible for maintaining the confidentiality of any developer credentials that may be issued to you by Google or which you may choose yourself and that you will be solely responsible for all applications that are developed under your developer credentials.
+
+
+<h3>6. Privacy and Information</h3>
+6.1 In order to continually innovate and improve the SDK, Google may collect certain usage statistics from the software including but not limited to a unique identifier, associated IP address, version number of the software, and information on which tools and/or services in the SDK are being used and how they are being used. Before any of this information is collected, the SDK will notify you and seek your consent. If you withhold consent, the information will not be collected.
+
+6.2 The data collected is examined in the aggregate to improve the SDK and is maintained in accordance with Google's Privacy Policy.
+
+
+<h3>7. Third Party Applications</h3>
+7.1 If you use the SDK to run applications developed by a third party or that access data, content or resources provided by a third party, you agree that Google is not responsible for those applications, data, content, or resources. You understand that all data, content or resources which you may access through such third party applications are the sole responsibility of the person from which they originated and that Google is not liable for any loss or damage that you may experience as a result of the use or access of any of those third party applications, data, content, or resources.
+
+7.2 You should be aware the data, content, and resources presented to you through such a third party application may be protected by intellectual property rights which are owned by the providers (or by other persons or companies on their behalf). You may not modify, rent, lease, loan, sell, distribute or create derivative works based on these data, content, or resources (either in whole or in part) unless you have been specifically given permission to do so by the relevant owners.
+
+7.3 You acknowledge that your use of such third party applications, data, content, or resources may be subject to separate terms between you and the relevant third party. In that case, this License Agreement does not affect your legal relationship with these third parties.
+
+
+<h3>8. Using Android APIs</h3>
+8.1 Google Data APIs
+
+8.1.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by Google or those parties that provide the data (or by other persons or companies on their behalf). Your use of any such API may be subject to additional Terms of Service. You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless allowed by the relevant Terms of Service.
+
+8.1.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so.
+
+
+<h3>9. Terminating this License Agreement</h3>
+9.1 This License Agreement will continue to apply until terminated by either you or Google as set out below.
+
+9.2 If you want to terminate this License Agreement, you may do so by ceasing your use of the SDK and any relevant developer credentials.
+
+9.3 Google may at any time, terminate this License Agreement with you if:
+(A) you have breached any provision of this License Agreement; or
+(B) Google is required to do so by law; or
+(C) the partner with whom Google offered certain parts of SDK (such as APIs) to you has terminated its relationship with Google or ceased to offer certain parts of the SDK to you; or
+(D) Google decides to no longer provide the SDK or certain parts of the SDK to users in the country in which you are resident or from which you use the service, or the provision of the SDK or certain SDK services to you by Google is, in Google's sole discretion, no longer commercially viable.
+
+9.4 When this License Agreement comes to an end, all of the legal rights, obligations and liabilities that you and Google have benefited from, been subject to (or which have accrued over time whilst this License Agreement has been in force) or which are expressed to continue indefinitely, shall be unaffected by this cessation, and the provisions of paragraph 14.7 shall continue to apply to such rights, obligations and liabilities indefinitely.
+
+
+<h3>10. DISCLAIMER OF WARRANTIES</h3>
+10.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SDK IS AT YOUR SOLE RISK AND THAT THE SDK IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND FROM GOOGLE.
+
+10.2 YOUR USE OF THE SDK AND ANY MATERIAL DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SDK IS AT YOUR OWN DISCRETION AND RISK AND YOU ARE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE OR LOSS OF DATA THAT RESULTS FROM SUCH USE.
+
+10.3 GOOGLE FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+
+
+<h3>11. LIMITATION OF LIABILITY</h3>
+11.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL NOT BE LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU, INCLUDING ANY LOSS OF DATA, WHETHER OR NOT GOOGLE OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING.
+
+
+<h3>12. Indemnification</h3>
+12.1 To the maximum extent permitted by law, you agree to defend, indemnify and hold harmless Google, its affiliates and their respective directors, officers, employees and agents from and against any and all claims, actions, suits or proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys fees) arising out of or accruing from (a) your use of the SDK, (b) any application you develop on the SDK that infringes any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of any person or defames any person or violates their rights of publicity or privacy, and (c) any non-compliance by you with this License Agreement.
+
+
+<h3>13. Changes to the License Agreement</h3>
+13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available.
+
+
+<h3>14. General Legal Terms</h3>
+14.1 This License Agreement constitutes the whole legal agreement between you and Google and governs your use of the SDK (excluding any services which Google may provide to you under a separate written agreement), and completely replaces any prior agreements between you and Google in relation to the SDK.
+
+14.2 You agree that if Google does not exercise or enforce any legal right or remedy which is contained in this License Agreement (or which Google has the benefit of under any applicable law), this will not be taken to be a formal waiver of Google's rights and that those rights or remedies will still be available to Google.
+
+14.3 If any court of law, having the jurisdiction to decide on this matter, rules that any provision of this License Agreement is invalid, then that provision will be removed from this License Agreement without affecting the rest of this License Agreement. The remaining provisions of this License Agreement will continue to be valid and enforceable.
+
+14.4 You acknowledge and agree that each member of the group of companies of which Google is the parent shall be third party beneficiaries to this License Agreement and that such other companies shall be entitled to directly enforce, and rely upon, any provision of this License Agreement that confers a benefit on (or rights in favor of) them. Other than this, no other person or company shall be third party beneficiaries to this License Agreement.
+
+14.5 EXPORT RESTRICTIONS. THE SDK IS SUBJECT TO UNITED STATES EXPORT LAWS AND REGULATIONS. YOU MUST COMPLY WITH ALL DOMESTIC AND INTERNATIONAL EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK. THESE LAWS INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE.
+
+14.6 The rights granted in this License Agreement may not be assigned or transferred by either you or Google without the prior written approval of the other party. Neither you nor Google shall be permitted to delegate their responsibilities or obligations under this License Agreement without the prior written approval of the other party.
+
+14.7 This License Agreement, and your relationship with Google under this License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from this License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
+
+
+<em>November 13, 2012</em>
+</div>
+
+
+
+<div id="sdk-terms-form">
+<p>
+<input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+<label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
+</p>
+<p><a href="" class="button disabled ndk" id="downloadForRealz" onclick="return onDownloadNdkForRealz(this);"></a></p>
+</div>
+
+
+
+</div>
+</div>
+
+
+
+
+
+
+
+
 
 
  <div id="qv-wrapper">
@@ -44,8 +217,8 @@ page.title=Android NDK
 
   <p>The NDK is a toolset that allows you to implement parts
   of your app using native-code languages such as C and C++. For certain types of apps,
-  this can be helpful so that you may reuse existing code libraries written in these
-  languages and possibly increased performance.</p>
+  this can be helpful so you can reuse existing code libraries written in these
+  languages, but most apps do not need the Android NDK.</p>
 
   <p>Before downloading the NDK, you should understand that <strong>the NDK
    will not benefit most apps</strong>. As a developer, you need to balance its benefits
@@ -73,51 +246,325 @@ $('#Downloads').after($('#download-table'));
 <p>The sections below provide information and notes about successive releases of
 the NDK, as denoted by revision number. </p>
 
-<script type="text/javascript">
-function toggleDiv(link) {
-  var toggleable = $(link).parent();
-  if (toggleable.hasClass("closed")) {
-    //$(".toggleme", toggleable).slideDown("fast");
-    toggleable.removeClass("closed");
-    toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", "{@docRoot}assets/images/triangle-opened.png");
-  } else {
-    //$(".toggleme", toggleable).slideUp("fast");
-    toggleable.removeClass("open");
-    toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", "/assets/images/triangle-closed.png");
-  }
-  return false;
-}
-</script>
 
-<style>
-.toggleable {
-padding: 5px 0 0;
-}
-.toggleme {
-  padding: 10px 0 0 20px;
-}
-.toggleable a {
-  text-decoration:none;
-}
-.toggleme a {
-  text-decoration:underline;
-}
-.toggleable.closed .toggleme {
-  display:none;
-}
-#jd-content .toggle-img {
-  margin:0 5px 3px 0;
-}
-</style>
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8c</a> <em>(November 2012)</em>
+  </p>
 
-<div class="toggleable open">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 8b</a> <em>(July 2012)</em>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
 
-  <div class="toggleme">
+      <dd>
+        <ul>
+          <li>Added the Clang 3.1 compiler to the NDK. The GNU Compiler Collection (GCC) 4.6 is
+          still the default, so you must explicitly enable the Clang compiler option as follows:
+            <ul>
+              <li>For {@code ndk-build}, export {@code NDK_TOOLCHAIN_VERSION=clang3.1} <em>or</em>
+                add this environment variable setting to {@code Application.mk}.</li>
+              <li>For standalone builds, add {@code --llvm-version=3.1} to
+                {@code make-standalone-toolchain.sh} and replace {@code CC} and {@code CXX} in your
+                makefile with {@code &lt;tool-path&gt;/bin/clang} and
+                {@code &lt;tool-path&gt;/bin/clang++}. See {@code STANDALONE-TOOLCHAIN.html} for
+                details.</li>
+            </ul>
+            <p class="note"><strong>Note:</strong> This feature is experimental. Please try it and
+            <a href="http://code.google.com/p/android/issues/list">report any issues</a>.</p></li>
+          <li>Added Gold linker {@code ld.gold} for the Windows toolchain. Gold linker is also the
+            default for ARM and X86 on all hosts. You may override it to use the {@code ld.bfd}
+            linker by adding {@code LOCAL_LDFLAGS += -fuse-ld=bfd} to {@code Android.mk}, or by passing
+            {@code -fuse-ld=bfd} to the g++/clang++ command line that does the linking.</li>
+          <li>Added checks for spaces in the NDK path to the {@code ndk-build[.cmd]} and
+            {@code ndk-gdb} scripts, to prevent build errors that are difficult to diagnose.</li>
+          <li>Made the following changes to API level handling:
+            <ul>
+              <li>Modified build logic so that projects that specify {@code android-10} through
+                {@code android-13} in {@code APP_PLATFORM}, {@code project.properties} or
+                {@code default.properties} link against {@code android-9} instead of
+                {@code android-14}.
+              <li>Updated build so that executables using android-16 (Jelly Bean) or higher are
+                compiled with the {@code -fPIE} option for position-independent executables (PIE).
+                A new {@code APP_PIE} option allows you to control this behavior. See {@code
+                APPLICATION-MK.html} for details.
+                <p class="note">
+                  <strong>Note:</strong> All API levels above 14 still link against {@code
+                  platforms/android-14} and no new {@code platforms/android-N} have been added.
+                </p></li>
+              <li>Modified {@code ndk-build} to provide warnings if the adjusted API level is larger
+              than {@code android:minSdkVersion} in the project's {@code AndroidManifest.xml}.</li>
+            </ul>
+          </li>
+          <li>Updated the {@code cpu-features} helper library to include more ARM-specific features.
+          See {@code sources/android/cpufeatures/cpu-features.h} for details.</li>
+          <li>Modified the long double on the X86 platform to be 8 bytes. This data type is now the
+          same size as a double, but is still treated as a distinct type.</li>
+          <li>Updated build for {@code APP_ABI=armeabi-v7a}:
+            <ul>
+              <li>Modified this build type to pass the {@code -march=armv7-a} parameter
+              to the linker. This change ensures that v7-specific libraries and {@code crt*.o} are
+              linked correctly.</li>
+              <li>Added {@code -mfpu=vfpv3-d16} to {@code ndk-build} instead of the
+              {@code -mfpu=vfp} option used in previous releases.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Important bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue where running {@code make-standalone-toolchain.sh} with root privileges
+            resulted in the stand alone tool chain being inaccessible to some users.
+            (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+            <ul>
+              <li>All files and executables in the NDK release package are set to have read and
+                execute permissions for all.</li>
+              <li>The ownership/group of {@code libstdc++.a} is now preserved when copied.</li>
+            </ul>
+          </li>
+          <li>Removed redundant {@code \r} from Windows prebuilt {@code echo.exe}. The redundant
+          {@code \r} caused {@code gdb.setup} to fail in the GNU Debugger (GDB) because it
+          incorrectly became part of the path.
+          (<a href="http://code.google.com/p/android/issues/detail?id=36054">Issue 36054</a>)</li>
+          <li>Fixed Windows parallel builds that sometimes failed due to timing issues in the
+          {@code host-mkdir} implementation.
+          (<a href="http://code.google.com/p/android/issues/detail?id=25875">Issue 25875</a>)</li>
+          <li>Fixed GCC 4.4.3 GNU {@code libstdc++} to <em>not</em> merge {@code typeinfo} names by
+          default. For more details, see
+          {@code toolchain repo gcc/gcc-4.4.3/libstdc++-v3/libsupc++/typeinfo}.
+          (<a href="http://code.google.com/p/android/issues/detail?id=22165">Issue 22165</a>)</li>
+          <li>Fixed problem on {@code null} context in GCC 4.6
+          {@code cp/mangle.c::write_unscoped_name}, where GCC may crash when the context is
+          {@code null} and dereferenced in {@code TREE_CODE}.</li>
+          <li>Fixed GCC 4.4.3 crashes on ARM NEON-specific type definitions for floats.
+          (<a href="http://code.google.com/p/android/issues/detail?id=34613">Issue 34613</a>)</li>
+          <li>Fixed the {@code STLport} internal {@code _IteWrapper::operator*()} implementation
+          where a stale stack location holding the dereferenced value was returned and caused
+          runtime crashes.
+          (<a href="http://code.google.com/p/android/issues/detail?id=38630">Issue 38630</a>)</li>
+
+          <li>ARM-specific fixes:
+            <ul>
+              <li>Fixed ARM GCC 4.4.3/4.6 {@code g++} to not warn that the <em>mangling of
+              &lt;va_list&gt; was changed in GCC 4.4</em>. The workaround using the
+              {@code -Wno-psabi} switch to avoid this warning is no longer required.</li>
+              <li>Fixed an issue when a project with {@code .arm} or {@code .neon} suffixes in
+              {@code LOCAL_SRC_FILES} also used {@code APP_STL}. With {@code APP_STL}, the
+              {@code ndk-build} script searches for C++ files in {@code LOCAL_SRC_FILES} before
+              adding STL {@code header/lib} paths to compilation. Modified {@code ndk-build} to
+              filter out {@code .arm} and {@code .neon} suffixes before the search, otherwise items
+              in {@code LOCAL_SRC_FILES} like {@code myfile.cpp.arm.neon} won't be compiled as C++
+              code.</li>
+              <li>Fixed {@code binutils-2.21/ld.bfd} to be capable of linking object from older
+              binutils without {@code tag_FP_arch}, which was producing <em>assertion fail</em>
+              error messages in GNU Binutils.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35209">Issue 35209</a>)
+              </li>
+              <li>Removed <em>Unknown EABI object attribute 44</em> warning when
+              {@code binutils-2.19/ld} links prebuilt object by newer {@code binutils-2.21}</li>
+              <li>Fixed an issue in GNU {@code stdc++} compilation with both {@code -mthumb} and
+              {@code -march=armv7-a}, by modifying {@code make-standalone-toolchain.sh} to populate
+              {@code headers/libs} in sub-directory {@code armv7-a/thumb}.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35616">Issue 35616</a>)
+              </li>
+              <li>Fixed <em>unresolvable R_ARM_THM_CALL relocation</em> error.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35342">Issue 35342</a>)
+              </li>
+              <li>Fixed internal compiler error at {@code reload1.c:3633}, caused by the ARM
+              back-end expecting the wrong operand type when sign-extend from {@code char}.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50099">GCC Issue 50099</a>)</li>
+              <li>Fixed internal compiler error with negative shift amount.
+              (<a href="http://gcc.gnu.org/ml/gcc-patches/2011-10/msg00594.html">GCC Issue</a>)</li>
+            </ul>
+          </li>
+
+          <li>Fixed {@code -fstack-protector} for X86, which is also the default for the
+          {@code ndk-build} x86 ABI target.</li>
+
+          <li>MIPS-specific fixes:
+            <ul>
+              <li>Fixed {@code STLport} endian-ness by setting {@code _STLP_LITTLE_ENDIAN} to 1 when
+              compiling MIPS {@code libstlport_*}.</li>
+              <li>Fixed GCC {@code __builtin_unreachable} issue when compiling LLVM.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54369">GCC Issue 54369</a>)</li>
+              <li>Backported fix for {@code cc1} compile process consuming 100% CPU.
+              (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50380">GCC Issue 50380</a>)</li>
+            </ul>
+          </li>
+
+          <li>GNU Debugger-specific fixes:
+            <ul>
+              <li>Disabled Python support in gdb-7.x at build, otherwise the gdb-7.x configure
+              function may pick up whatever Python version is available on the host and build
+              {@code gdb} with a hard-wired dependency on a specific version of Python.
+              (<a href="http://code.google.com/p/android/issues/detail?id=36120">Issue 36120</a>)
+              </li>
+              <li>Fixed {@code ndk-gdb} when {@code APP_ABI} contains {@code all} and matchs none
+              of the known architectures.
+              (<a href="http://code.google.com/p/android/issues/detail?id=35392">Issue 35392</a>)
+              </li>
+              <li>Fixed Windows pathname support, by keeping the {@code :} character if it looks
+              like it could be part of a Windows path starting with a drive letter.
+              (<a href="http://sourceware.org/bugzilla/show_bug.cgi?id=12843">GDB Issue 12843</a>)
+              </li>
+              <li>Fixed adding of hardware breakpoint support for ARM in {@code gdbserver}.
+              (<a href="http://sourceware.org/ml/gdb-patches/2011-09/msg00200.html">GDB Issue</a>)
+              </li>
+              <li>Added fix to only read the current {@code solibs} when the linker is consistent.
+              This change speeds up {@code solib} event handling.
+              (<a href="http://code.google.com/p/android/issues/detail?id=37677">Issue 37677</a>)
+              </li>
+              <li>Added fix to make repeated attempts to find {@code solib} breakpoints. GDB now
+              retries {@code enable_break()} during every call to {@code svr4_current_sos()} until
+              it succeeds.
+              (<a href="https://android-review.googlesource.com/#/c/43563">Change 43563</a>)</li>
+              <li>Fixed an issue where {@code gdb} would not stop on breakpoints placed in
+              {@code dlopen-ed} libraries.
+              (<a href="http://code.google.com/p/android/issues/detail?id=34856">Issue 34856</a>)
+              </li>
+              <li>Fixed {@code SIGILL} in dynamic linker when calling {@code dlopen()}, on system
+              where {@code /system/bin/linker} is stripped of symbols and
+              {@code rtld_db_dlactivity()} is implemented as {@code Thumb}, due to not preserving
+              {@code LSB} of {@code sym_addr}.
+              (<a href="http://code.google.com/p/android/issues/detail?id=37147">Issue 37147</a>)
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed NDK headers:
+            <ul>
+              <li>Fixed {@code arch-mips/include/asm/*} code that was incorrectly removed from
+              original kernel. (<a href="https://android-review.googlesource.com/#/c/43335">Change
+              43335</a>)</li>
+              <li>Replaced struct member data {@code __unused} with {@code __linux_unused} in
+              {@code linux/sysctl.h} and {@code linux/icmp.h} to avoid conflict with
+              {@code #define __unused} in {@code sys/cdefs.h}.</li>
+              <li>Fixed {@code fenv.h} for enclosed C functions with {@code __BEGIN_DECLS} and
+              {@code __END_DECLS}.</li>
+              <li>Removed unimplemented functions in {@code malloc.h}.</li>
+              <li>Fixed {@code stdint.h} defintion of {@code uint64_t} for ANSI compilers.
+              (<a href="http://code.google.com/p/android/issues/detail?id=1952">Issue 1952</a>)</li>
+              <li>Fixed preprocessor macros in {@code &lt;arch&gt;/include/machine/*}.</li>
+              <li>Replaced {@code link.h} for MIPS with new version supporting all platforms.</li>
+              <li>Removed {@code linux-unistd.h}</li>
+              <li>Move GLibc-specific macros {@code LONG_LONG_MIN}, {@code LONG_LONG_MAX} and
+              {@code ULONG_LONG_MAX} from {@code &lt;pthread.h&gt;} to {@code &lt;limits.h&gt;}.</li>
+            </ul>
+          </li>
+          <li>Fixed a buffer overflow in {@code ndk-stack-parser}.</li>
+          <li>Fixed {@code _STLP_USE_EXCEPTIONS}, when not defined, to omit all declarations
+          and uses of {@code __Named_exception}. Compiling and use of {@code __Named_exception}
+          settings only occurs when {@code STLport} is allowed to use exceptions.</li>
+          <li>Fixed building of Linux-only NDK packages without also building Windows code. Use the
+          following settings to perform this type of build:
+          <pre>./build/tools/make-release.sh --force --systems=linux-x86</pre></li>
+          <li>Fixed {@code libc.so} so it does not export {@code atexit()} and {@code __do_handler}.
+          These symbols are exported for ARM builds by the system version of the C library to
+          support legacy native libraries. NDK-generated should never reference them directly.
+          Instead, each shared library or executable should embed its own version of these symbols,
+          provided by {@code crtbegin_*.o}.
+          <p>If your project is linked with the {@code -nostdlib -Wl,--no-undefined} options, you
+          must provide your own {@code __dso_handle} because {@code crtbegin_so.o} is not linked in
+          this case. The content of {@code __dso_handle} does not matter, as shown in the following
+          example code:</p>
+<pre>
+extern "C" {
+  extern void *__dso_handle __attribute__((__visibility__ ("hidden")));
+  void *__dso_handle;
+}
+</pre>
+          </li>
+          <li>Fixed symbol decoder for ARM used in {@code objdump} for {@code plt} entries to
+          generate a more readable form {@code function@plt}.</li>
+          <li>Removed the following symbols, introduced in GCC 4.6 {@code libgcc.a}, from
+          the X86 platform {@code libc.so} library: {@code __aeabi_idiv0}, {@code __aeabi_ldiv0},
+          {@code __aeabi_unwind_cpp_pr1}, and {@code __aeabi_unwind_cpp_pr2}.</li>
+          <li>Removed unused {@code .ctors}, {@code .dtors}, and {@code .eh_frame} in MIPS
+          {@code crt*_so.S}.</li>
+          <li>Updated {@code ndk-gdb} so that it only takes the last line of output for
+          {@code ndk-build} {@code DUMP_XXXX}. This change ensures that if {@code Application.mk} or
+          {@code Android.mk} print something with {@code $(info ...)} syntax, it does not get
+          injected into the result of {@code DUMP_XXXX}.
+          (<a href="https://groups.google.com/d/msg/android-ndk/-/ew0lTWGr1UEJ">More info</a>)</li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other changes:</dt>
+
+      <dd>
+        <ul>
+          <li>Removed {@code arch-x86} and {@code arch-mips} headers from
+          {@code platforms/android-[3,4,5,8]}. Those headers were incomplete, since both X86 and
+          MIPS ABIs are only supported at API 9 or higher.</li>
+          <li>Simplified c++ include path in standalone packages, as shown below.
+          (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+<pre>
+&lt;path&gt;/arm-linux-androideabi/include/c++/4.6.x-google
+  to:
+&lt;path&gt;/include/c++/4.6/
+</pre></li>
+          <li>Fixed {@code ndk-build} to recognize more C++ file extensions by default:
+          {@code .cc .cp .cxx .cpp .CPP .c++ .C}. You may still use {@code LOCAL_CPP_EXTENSION} to
+          overwrite these extension settings.</li>
+          <li>Fixed an issue in {@code samples/san-angeles} that caused a black screen or freeze
+          frame on re-launch.</li>
+          <li>Replaced deprecated APIs in NDK samples.
+          (<a href="http://code.google.com/p/android/issues/detail?id=20017">Issue 20017</a>)
+            <ul>
+              <li>{@code hello-gl2} from android-5 to android-7</li>
+              <li>{@code native-activity} from android-9 to android-10</li>
+              <li>{@code native-audio} from android-9 to android-10</li>
+              <li>{@code native-plasma} from android-9 to android-10</li>
+            </ul>
+          </li>
+          <li>Added new branding for Android executables with a simpler scheme in section
+          {@code .note.android.ident} (defined in {@code crtbegin_static/dynamic.o}) so that
+          debugging tools can act accordingly. The structure member and values are defined as
+          follows:
+<pre>
+static const struct {
+  int32_t namesz;  /* = 8,  sizeof ("Android") */
+  int32_t descsz;  /* = 1 * sizeof(int32_t) */
+  int32_t type;    /* = 1, ABI_NOTETYPE */
+  char name[sizeof "Android"];  /* = "Android" */
+  int32_t android_api; /* = 3, 4, 5, 8, 9, 14 */
+}
+</pre>
+            <p>The previous branding options in section {@code .note.ABI-tag} are deprecated.</p>
+          </li>
+          <li>Added a new script {@code run-tests-all.sh} which calls {@code run-tests.sh} and
+          {@code standalone/run.sh} with various conditions. The script {@code run-tests.sh} runs
+          without the {@code --abi} option, and is enhanced to compile most of the tests for all
+          supported ABIs and run on all attached devices</li>
+        </ul>
+      </dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8b</a> <em>(July 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
     <p>The main features of this release are a new GNU Compiler Collection (GCC) 4.6 toolchain and
 GNU Debugger (GDB) 7.3.x which adds debugging support for the Android 4.1 (API Level 16) system
 image.</p>
@@ -304,12 +751,13 @@ in Linux).</li>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 8</a> <em>(May 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 8</a> <em>(May 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes support for MIPS ABI and a few additional fixes.</p>
 
     <dl>
@@ -376,12 +824,13 @@ is compiled for the device's CPU architecture.</p>
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7c</a> <em>(April 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7c</a> <em>(April 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes an important fix for Tegra2-based devices, and a few
 additional fixes and improvements:</p>
 
@@ -429,12 +878,13 @@ was called, rather than the total number of <em>physically available</em> cores.
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7b</a> <em>(February 2012)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7b</a> <em>(February 2012)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes fixes for native Windows builds, Cygwin and many other
       improvements:</p>
 
@@ -500,7 +950,7 @@ was called, rather than the total number of <em>physically available</em> cores.
             first process listed by {@code ps}, which is usually a service process.</li>
           <li>Fixed a rare bug where NDK r7 would fail to honor the {@code LOCAL_ARM_MODE} value
             and always compile certain source files (but not all) to 32-bit instructions.</li>
-          <li>{@code stlport}: Refresh the sources to match the Android platform version. This
+          <li>{@code STLport}: Refresh the sources to match the Android platform version. This
             update fixes a few minor bugs:
             <ul>
                <li>Fixed instantiation of an incomplete type</li>
@@ -511,7 +961,7 @@ was called, rather than the total number of <em>physically available</em> cores.
              </ul>
              <p>For complete details, see the commit log.</p>
           </li>
-          <li>{@code stlport}: Removed 5 unnecessary static initializers from the library.</li>
+          <li>{@code STLport}: Removed 5 unnecessary static initializers from the library.</li>
           <li>The GNU libstdc++ libraries for armeabi-v7a were mistakenly compiled for
             armeabi instead. This change had no impact on correctness, but using the right
             ABI should provide slightly better performance.</li>
@@ -539,12 +989,13 @@ was called, rather than the total number of <em>physically available</em> cores.
 </div>
 
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7</a> <em>(November 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 7</a> <em>(November 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK includes new features to support the Android 4.0 platform as well
     as many other additions and improvements:</p>
 
@@ -842,13 +1293,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
 </div>
 
 
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 6b</a> <em>(August 2011)</em>
+  </p>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 6b</a> <em>(August 2011)</em>
-
-   <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK does not include any new features compared to r6. The r6b release
       addresses the following issues in the r6 release:</p>
       <dl>
@@ -876,12 +1327,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
   </div>
 </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 6</a> <em>(July 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 6</a> <em>(July 2011)</em>
+  </p>
 
-   <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK includes support for the x86 ABI and other minor changes.
       For detailed information describing the changes in this release, read the
       <code>CHANGES.HTML</code> document included in the NDK package.
@@ -928,12 +1380,13 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
     </div>
   </div>
 
-<div class="toggleable closed">
-  <a href="#" onclick="return toggleDiv(this)"><img src=
-  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 5c</a> <em>(June 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5c</a> <em>(June 2011)</em>
+  </p>
 
-  <div class="toggleme">
+  <div class="toggle-content-toggleme">
     <p>This release of the NDK does not include any new features compared to r5b. The r5c release
     addresses the following problems in the r5b release:</p>
     <dl>
@@ -1011,14 +1464,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
   </div>
 </div>
 
-<div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 5b</a> <em>(January 2011)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5b</a> <em>(January 2011)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK does not include any new features compared to r5. The r5b release addresses the
       following problems in the r5 release:
       </p>
@@ -1063,14 +1515,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
   </div>
   </div>
 
-<div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 5</a> <em>(December 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 5</a> <em>(December 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>This release of the NDK includes many new APIs, most of which are introduced to
          support the development of games and similar applications that make extensive use
          of native code. Using the APIs, developers have direct native access to events, audio,
@@ -1142,14 +1593,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 4b</a> <em>(June 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 4b</a> <em>(June 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <dl>
         <dt>NDK r4b notes:</dt>
 
@@ -1216,14 +1666,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 3</a> <em>(March 2010)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 3</a> <em>(March 2010)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <dl>
         <dt>General notes:</dt>
 
@@ -1244,14 +1693,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 2</a> <em>(September 2009)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 2</a> <em>(September 2009)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>Originally released as "Android 1.6 NDK, Release 1".</p>
 
       <dl>
@@ -1270,14 +1718,13 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
     </div>
   </div>
 
-  <div class="toggleable closed">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 1</a> <em>(June 2009)</em>
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt="">Android NDK, Revision 1</a> <em>(June 2009)</em>
+  </p>
 
-    <div class="toggleme">
+  <div class="toggle-content-toggleme">
       <p>Originally released as "Android 1.5 NDK, Release 1".</p>
 
       <dl>

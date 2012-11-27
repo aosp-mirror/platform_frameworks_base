@@ -80,7 +80,6 @@ Messaging (GCM):</p>
 <ul>
   <li>It allows 3rd-party application servers to send messages to
 their Android applications.</li>
-  <li>GCM makes no guarantees about delivery or the order of messages.</li>
   <li>An Android application on an Android device doesn't need to be running to receive
 messages. The system will wake up the Android application via Intent broadcast when the  message arrives, as long as the application is set up with the proper
 broadcast receiver and permissions.</li>
@@ -133,7 +132,7 @@ application server and sending them to the device. </td>
   </tr>
   <tr>
     <td><strong>Sender ID</strong></td>
-    <td>A project ID you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. The sender
+    <td>A project number you acquire from the API console, as described in <a href="gs.html#create-proj">Getting Started</a>. The sender
 ID is used in the <a href="#registering">registration process</a> to identify an
 Android application that is permitted to send messages to the device.</td>
   </tr>
@@ -360,7 +359,7 @@ could not run properly. </li>
 </p>
 
 <ul>
-  <li><code>sender</code> is the project ID of the account authorized to send messages
+  <li><code>sender</code> is the project number of the account authorized to send messages
 to the Android application. </li>
   <li><code>app</code> is the Android application's ID, set with a <code>PendingIntent</code> to
 allow the registration service to extract Android application information. </li>
@@ -675,6 +674,16 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
     <td><code>time_to_live</code></td>
     <td>How long (in seconds) the message should be kept on GCM storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as a JSON number).</td>
   </tr>
+<tr>
+  <td><code>restricted_package_name</code></td>
+  <td>A string containing the package name of your application. When set, messages will only be sent to registration IDs that match the package name. Optional.
+  </td>
+</tr>
+<tr>
+  <td><code>dry_run</code></td>
+  <td>If included, allows developers to test their request without actually sending a message. Optional. The default value is <code>false</code>, and must be a JSON boolean.
+  </td>
+</tr>
 </table>
 
 <p>If you are using plain text instead of JSON, the message fields must be set as HTTP parameters sent in the body, and their syntax is slightly different, as described below:
@@ -706,9 +715,19 @@ sent. Optional. The default value is <code>false</code>, and must be a JSON bool
     <td><code>time_to_live</code></td>
     <td>Same as JSON (see previous table). Optional.</td>
   </tr>
+<tr>
+  <td><code>restricted_package_name</code></td>
+  <td>Same as JSON (see previous table). Optional.
+  </td>
+</tr>
+<tr>
+  <td><code>dry_run</code></td>
+  <td>Same as JSON (see previous table). Optional.
+  </td>
+</tr>
 </table>
 
-
+<p>If you want to test your request (either JSON or plain text) without delivering the message to the devices, you can set an optional HTTP or JSON parameter called <code>dry_run</code> with the value <code>true</code>. The result will be almost identical to running the request without this parameter, except that the message will not be delivered to the devices. Consequently, the response will contain fake IDs for the message and multicast fields (see <a href="#response">Response format</a>).</p>
 
   <h4 id="example-requests">Example requests</h4>
   <p>Here is the smallest possible request (a message without any parameters and just one recipient) using JSON:</p>
@@ -889,7 +908,7 @@ Happens when the error code is <code>InvalidDataKey</code>.</dd>
   <dt id="auth_error"><strong>Authentication Error</strong></dt>
   <dd>The sender account that you're trying to use to send a message couldn't be authenticated. Possible causes are: <ul>
 <li>Authorization header missing or with invalid syntax.</li>
-<li>Invalid project ID sent as key.</li>
+<li>Invalid project number sent as key.</li>
 <li>Key valid but with GCM service disabled.</li>
 <li>Request originated from a server not whitelisted in the Server Key IPs.</li>
 
@@ -942,6 +961,13 @@ section), but if the error persists, please report the problem in the <a href="h
 <br />
 Happens when the HTTP status code is 500, or when the <code>error</code> field of a JSON
 object in the results array is <code>InternalServerError</code>.
+</dd>
+
+<dt id="restricted_package_name"><strong>Invalid Package Name</strong></dt>
+
+<dd>
+A message was addressed to a registration ID whose package name did not match the value passed in the request. Happens when error code is 
+<code>InvalidPackageName</code>.
 </dd>
 
 

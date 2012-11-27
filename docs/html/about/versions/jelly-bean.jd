@@ -1,12 +1,681 @@
-page.title=Android 4.1 for Developers
+page.title=Jelly Bean
+tab1=Android 4.2
+tab1.link=#android-42
+tab2=Android 4.1
+tab2.link=#android-41
+
 @jd:body
+
+
+<style>
+#android-41 {display:none;}
+</style>
+
+<script>
+function revealSection(hashy) {
+  if (hashy != "" && !$(hashy).is(":visible")) {
+    sectionId = $(hashy).closest(".version-section").attr("id");
+    link = $("#title-tabs a[href$="+sectionId+"]");
+    link.parent().addClass("selected");
+    link.parent().siblings().removeClass("selected");
+    
+    sectionDiv = $(".version-section"+link.attr("href"));
+    if (sectionDiv.length) {
+      $(".version-section").hide();
+      sectionDiv.show();
+    }
+    
+    $('html, body').animate({
+         scrollTop: $(hashy).offset().top
+     }, 100);
+  }
+}
+
+$(document).ready(function() {
+  $("#title-tabs li a").each(function() {
+    $(this).click(function(){
+      $(this).parent().addClass("selected");
+      $(this).parent().siblings().removeClass("selected");
+      $(".version-section").hide();
+      $($(this).attr("href")).show();
+      return false;
+    });
+  });
+
+  hashy = escapeHTML(location.hash);
+  revealSection(hashy);
+});
+
+window.onhashchange = function () {
+  revealSection(escapeHTML(location.hash));
+}
+
+</script>
+
+
+
+<!-- BEGIN ANDROID 4.2 -->
+<div id="android-42" class="version-section">
+<div style="float:right;padding:0px 0px 12px 34px;">
+<div>
+<img src="{@docRoot}images/jb-device-2.png" alt="Android 4.2 on phone and tablet" height="348" width="400">
+</div>
+</div>
+<p>Welcome to Android 4.2, the latest version of <span
+style="white-space:nowrap;">Jelly Bean!</span></p>
+
+<p>Android 4.2 has performance optimizations, a refreshed system UI, and great
+new features for users and developers. This document provides a glimpse of what's new for
+developers.
+
+<p>See the <a href="/about/versions/android-4.2.html">Android 4.2 APIs</a>
+document for a detailed look at the new developer APIs.</p>
+
+<p>Find out more about the new Jelly Bean features for users at <a
+href="http://www.android.com/whatsnew">www.android.com</a>.</p>
+
+
+<h2 id="42-performance" style="line-height:1.25em;">Faster, Smoother, More Responsive</h2>
+
+<p>Android 4.2 builds on the performance improvements already included in Jelly Bean
+&mdash; <strong>vsync timing</strong>, <strong>triple buffering</strong>,
+<strong>reduced touch latency</strong>, and <strong>CPU input boost</strong>
+&mdash; and adds new optimizations that make Android even faster.</p>
+
+<p>Improvements in the <strong>hardware-accelerated 2D renderer</strong> make
+common animations such as scrolling and swiping smoother and faster. In
+particular, <strong>drawing is optimized</strong> for layers, clipping and
+certain shapes (rounded rects, circles and ovals).</p>
+
+<p>A variety of <strong>WebView rendering optimizations</strong> make scrolling
+of web pages smoother and free from jitter and lags.</p>
+
+<p>Android’s <strong>Renderscript Compute</strong> is the first computation
+platform ported to run directly on a <strong>mobile device GPU</strong>. It automatically
+takes advantage of <strong>GPU computation</strong> resources whenever possible,
+dramatically improving performance for graphics and image processing. Any app using
+Renderscript on a supported device can benefit immediately from
+this GPU integration <strong>without recompiling</strong>.</p>
+
+
+<div style="float:left;margin:16px 24px 12px 0px;">
+<a href="" target="_android">
+<img src="{@docRoot}images/jb-nexus10-1.png" alt="10-inch tablet running Android 4.2" width="380" height="281" /></a>
+</div> 
+
+<h2 id="42-ui" style="margin-top:2em;">Refined, refreshed UI</h2>
+
+<p>Android 4.2 refines the Jelly Bean user experience and brings familiar
+Android UI patterns such as status bar, system bar, and notifications window to
+all tablets.</p>
+
+<p>All screen sizes now feature the <strong>status bar</strong> on top, with
+pull-down access to <strong>notifications</strong> and a new <strong>Quick
+Settings</strong> menu. The familiar </strong>system bar</strong> appears on the
+bottom, with buttons easily accessible from either hand. The <strong>Application
+Tray</strong> is also available on all screen sizes.</p>
+
+
+<h2 id="42-multiuser" style="margin-top:2em;clear:left;">One tablet, many users</h2>
+
+<p>Now several users can <strong>share a single Android tablet</strong>, with
+each user having convenient access to a <strong>dedicated user
+space</strong>. Users can switch to their spaces with a single touch from the
+lock screen.</p>
+
+<p>On a multiuser device, Android gives each user a separate environment,
+including user-specific emulated SD card storage. Users also have their own
+homescreens, widgets, accounts, settings, files, and apps, and the system keeps
+these separate. All users share core system services, but the system ensures that
+each user's applications and data remain isolated. In effect, each of the multiple
+users has his or her own Android device.</p>
+
+<p>Users can install and uninstall apps at any time in their own environments.
+To save storage space, Google Play downloads an APK only if it's not already
+installed by another user on the device. If the app is already installed, Google
+Play records the new user's installation in the usual way but doesn't download
+another copy of the app. Multiple users can run the same copy of an APK because
+the system creates a new instance for each user, including a user-specific data
+directory.</p>
+
+<p>For developers, <strong>multi-user support is transparent</strong> &mdash;
+your apps do not need to do anything special to run normally in a multi-user
+environment and there are no changes you need to make in your existing or
+published APKs. The system manages your app in each user space just as it does
+in a single-user environment. </p>
+
+
+<h2 id="42-engagement" style="clear:left; margin-top:1em;">New ways to engage users</h2>
+
+<div style="float:right;margin:22px 0px 0px 24px;width:280px;">
+<div>
+<img src="{@docRoot}images/jb-lock-calendar.png" alt="Calendar lock screen widget" width="280" height="543" style="padding-left:1em;margin-bottom:0">
+</div>
+<p class="image-caption" style="padding:1.5em">You can extend <strong>app widgets</strong> to run on the lock screen, for instant access to your content.</p>
+</div>
+
+<h3 id="42-lockscreen-widgets">Lock screen widgets</h3>
+
+<p>In Android 4.2, users can place <strong>app widgets</strong> directly on
+their <strong>lock screens</strong>, for instant access to favorite app content
+without having to unlock. Users can add as many as five lock screen widgets,
+choosing from widgets provided by installed apps. The lock screen displays each
+widget in its own panel, letting users swipe left and right to view different
+panels and their widgets.</p>
+
+<p>Like all app widgets, lock screen widgets can display <strong>any kind of content</strong> and
+they can accept direct user interaction. They can be entirely self-contained,
+such as a widget that offers controls to play music, or they can let users jump
+straight to an Activity in your app, after unlocking along the way as
+needed.</p>
+
+<p>For developers, lock screen widgets offer a great new way to engage users.
+They let you put your content in front of users in a location they’ll see often,
+and they give you more opportunities to bring users directly into your app.</p>
+
+<p>You can take advantage of this new capability by building a new app widget or
+by extending an existing home screen widget. If your app already includes home
+screen widgets, you can extend them to the lock screen with minimal change. To
+give users an optimal experience, you can update the widget to use the full lock
+screen area when available and resize when needed on smaller screens. You can
+also add features to your widgets that might be especially useful or convenient
+on the lock screen.</p>
+
+<h3 id="42-daydreams">Daydream</h3>
+
+<p>Daydream is an <strong>interactive screensaver mode</strong> that starts when
+a user’s device is docked or charging. In this mode, the system launches a
+daydream &mdash; a remote content service provided by an installed app &mdash;
+as the device screensaver. A user can enable Daydream from the Settings app and
+then choose the daydream to display.</p>
+
+<p>Daydreams combine the best capabilities of live wallpapers and home screen
+widgets, but they are more powerful. They let you offer the any kind of content
+in a completely new context, with user interactions such as flipping through
+photos, playing audio or video, or jumping straight into your app with a single
+touch.</p>
+
+<p>Because daydreams can start automatically when a device is charging or
+docked, they also give your app a great way to support new types of user
+experiences, such as leanback or exhibition mode, demo or kiosk mode, and
+"attract mode" &mdash; all without requiring special hardware.</p>
+
+<div style="float:left;margin:20px 30px 0px 0px;width:460px;">
+<div>
+<img src="{@docRoot}images/jb-dream-1.png" alt="Daydream screensaver mode" height="300" style="padding-left:1em;">
+</div>
+<p class="image-caption" style="padding:.5em .5em .5em 1.5em;"><span
+style="font-weight:500;">Daydream</span> lets you create powerful interactive screensavers that display any kind of content.</p>
+</div>
+
+<p>Daydreams are similar to Activities and can do anything that Activity
+can do &mdash; from rendering a UI hierarchy (without using RemoteViews) to
+drawing directly using Canvas, OpenGL, SurfaceTexture, and more. They can play
+video and audio and they can even accept direct user interaction. However,
+daydreams are not Activities, so they don’t affect the backstack or appear in
+Recents and they cannot be launched directly from your app.</p>
+
+<p>Implementing a daydream is straightforward and you can take advantage of UI
+components and resources that you’ve already created for other parts of your
+app. You can provide multiple daydreams in your app and you can offer distinct
+content and display settings for each.</p>
+
+<h2  id="42-external-display" style="clear:left;">External display support</h2>
+
+<p>Android 4.2 introduces platform support for <strong>external
+displays</strong> that goes far beyond mirroring &mdash; apps can now target
+unique content to any one or multiple displays that are attached to an Android
+device. Apps can build on this to deliver new kinds of interaction and
+entertainment experiences to users.</p>
+
+<h3 id="42-display-manager">Display manager</h3>
+
+<p>Apps interact with displays through a new display manager system service.
+Your app can enumerate the displays and check the capabilities of each,
+including size, density, display name, ID, support for secure video, and more.
+Your app can also receive callbacks when displays are added or removed or when
+their capabilities change, to better manage your content on external
+displays.</p>
+
+<h3 id="42-presentation">Presentation window</h3>
+
+<p>To make it easy to show content on an external display, the framework
+provides a new UI object called a <strong>Presentation</strong> &mdash; a type of dialog that
+represents a window for your app’s content on a specific external display. Your
+app just gives the display to use, a theme for the window, and any unique
+content to show. The Presentation handles inflating resources and rendering your
+content according to the characteristics of the targeted display.</p>
+
+<div style="margin:0 auto;width:569px;padding-top:1em;">
+
+<img src="{@docRoot}images/external-display.png" alt="" width="555" height="351" style="padding-left:1em;margin-bottom:0">
+
+<p class="image-caption" style="padding:1.25em">You can take full control of two or more independent displays using <strong>Presentation</strong>.</p>
+</div>
+
+<p>A Presentation gives your app full control over the remote display window and
+its content and lets you manage it based on user input events such as key
+presses, gestures, motion events, and more. You can use all of the normal tools
+to create a UI and render content in the Presentation, from building an
+arbitrary view hierarchy to using SurfaceView or SurfaceTexture to draw directly
+into the window for streamed content or camera previews.</p>
+
+<h3 id="42-preferred display">Preferred display selection</h3>
+
+<p>When multiple external displays are available, you can create as many
+Presentations as you need, with each one showing unique content on a specific
+display. In many cases, you might only want to show your content on a single
+external display &mdash; but always on the that’s best for Presentation content.
+For this, the system can help your app choose the best display to use.</p>
+
+<p>To find the best display to use, your app can query the display manager for
+the system’s <strong>preferred Presentation display</strong> and receive callbacks when that
+display changes. Alternatively, you can use the media router service, extended
+in Android 4.2, to receive notifications when a system video route changes. Your
+app can display content by default in the main Activity until a preferred
+Presentation display is attached, at which time it can automatically switch to
+Presentation content on the preferred display. Your apps can also use media
+router’s MediaRouteActionProvider and MediaRouteButton to offer standard
+display-selection UI.</p>
+
+<h3 id="42-protected-content">Protected content</h3>
+
+<p>For apps that handle protected or encrypted content, the display API now
+reports the <strong>secure video capabilities</strong> of attached displays. Your app query a
+display to find out if it offers a secure video output or provides protected
+graphics buffers and then choose the appropriate content stream or decoding to
+make the content viewable. For additional security on SurfaceView objects, your
+app can set a secure flag to indicate that the contents should never appear in
+screenshots or on a non-secure display output, even when mirrored.</p>
+
+<h3 id="42-wireless-display">Wireless display</h3>
+
+<p>Starting in Android 4.2, users on supported devices can connect to an
+external display over Wi-Fi, using <a
+href="http://www.wi-fi.org/wi-fi-certified-miracast%E2%84%A2">Miracast</a>, a
+peer-to-peer wireless display standard created by the <a
+href="http://www.wi-fi.org/">Wi-Fi Alliance</a>. When a wireless display is
+connected, users can stream any type of content to the big screen, including
+photos, games, maps, and more.</p>
+
+<p>Apps can take advantage of <strong>wireless displays</strong> in the same way as they do other
+external displays and no extra work is needed. The system manages the network
+connection and streams your Presentation or other app content to the wireless
+display as needed.</p>
+
+
+<h2 id="42-native-rtl">Native RTL support</h2>
+
+<div style="float:right;margin:22px 0px 0px 24px;width:340px;">
+<div>
+<img src="{@docRoot}images/jb-rtl.png" alt="RTL layout mirroring" width="340" height="457" style="margin-bottom:0;">
+</div>
+<p class="image-caption" style="padding-top:1em">Developers can now <strong>mirror their layouts</strong> for RTL languages.</p>
+</div>
+
+<p>Android 4.2 introduces <strong>full native support for RTL</strong>
+(right-to-left) layouts, including layout mirroring. With native RTL support,
+you can deliver the same great app experience to all of your users, whether
+their language uses a script that reads right-to-left or one that reads
+left-to-right.</p>
+
+<p>When the user switches the system language to a right-to-left script, the
+system now provides automatic mirroring of app UI layouts and all view widgets,
+in addition to bidi mirroring of text elements for both reading and character
+input.</p>
+
+<p>Your app can take advantage of <strong>RTL layout mirroring</strong> in your app with minimal effort.
+If you want the app to be mirrored, you simply declare a new attribute in your
+app manifest and change all "left/right" layout properties to new "start/end"
+equivalents. The system then handles the mirroring and display of your UI as
+appropriate.</p>
+
+<p>For precise control over your app UI, Android 4.2 includes new APIs that let
+you manage layout direction, text direction, text alignment, gravity, and locale
+direction in View components. You can even create custom versions of layout,
+drawables, and other resources for display when a right-to-left script is in
+use.</p>
+
+<p>To help you debug and optimize your custom right-to-left layouts, the
+HierarchyViewer tool now lets you see start/end properties, layout direction,
+text direction, and text alignment for all the Views in the hierarchy,</p>
+
+
+<h2 id="42-intl">Enhancements for international languages</h2>
+
+<p>Android 4.2 includes a variety of <strong>font and character
+optimizations</strong> for international users:</p>
+<ul>
+<li>For Korean users, a new font choice is available &mdash; Nanum (나눔글꼴)
+Gothic, a unicode font designed especially for the Korean-language script.</li>
+<li>Improved support for Japanese vertical text displayed in WebViews.</li>
+<li>Improved font kerning and positioning for Indic, Thai, Arabic, and Hebrew
+default fonts.</li>
+</ul>
+
+<p>The default Android keyboard also includes an updated set of
+dictionaries:</p>
+<ul>
+<li>Improved dictionaries for French (with bigram support), English, and
+Russian</li>
+<li>New dictionaries for Danish, Greek, Finnish, Lithuanian, Latvian, Polish,
+Slovenian, Serbian, Swedish, Turkish</li>
+</ul>
+
+
+<h2 id="42-ui-tools">New ways to create beautiful UI</h2>
+
+<h3 id="42-nested-fragments">Nested Fragments</h3>
+
+<p>For more control over your UI components and to make them more modular,
+Android 4.2 lets you <strong>nest Fragments inside of Fragments</strong>. For
+any Fragment, a new Fragment manager lets you insert other Fragments as child
+nodes in the View hierarchy.</p>
+
+<p>You can use nested Fragments in a variety of ways, but they are especially
+useful for implementing dynamic and reusable UI components inside of a UI
+component that is itself dynamic and reusable. For example, if you use ViewPager
+to create fragments that swipe left and right, you can now insert fragments into
+each Fragment of the view pager.</p>
+
+<p>To let you take advantage of nested Fragments more broadly in your app, this
+capability is added to the latest version of the <strong>Android Support
+Library</strong>.</p>
+
+
+<h2 id="42-accessibility">Accessibility</h2>
+
+<p>The system now helps accessibility services <strong>distinguish between touch
+exploration and accessibility gestures</strong> while in touch-exploration mode.
+When a user touches the screen, the system notifies the service that a generic
+touch interaction has started. It then tracks the speed of the touch interaction
+and determines whether it is a touch exploration (slow) or accessibility gesture
+(fast) and notifies the service. When the touch interaction ends, the system
+notifies the service.</p>
+
+<p>The system provides a new global accessibility option that lets an
+accessibility service open the Quick Settings menu based on an action by the
+user. Also added in Android 4.2 is a new accessibility feedback type for
+<strong>Braille devices</strong>.</p>
+
+<p>To give accessibility services insight into the meaning of Views for
+accessibility purposes, the framework provides new APIs for associating a View
+as the label for another View. The label for each View is available to
+accessibility services through AccessibilityNodeInfo.</p>
+
+
+<h2 id="42-camera">Improved Camera with HDR</h2>
+
+<p>Android 4.2 introduces a <strong>new camera hardware interface and
+pipeline</strong> for improved performance. On supported devices, apps can use a
+new <strong>HDR camera scene mode</strong> to capture an image using high
+dynamic range imaging techniques. </p>
+
+<p>Additionally, the framework now provides an API to let apps check whether the
+camera shutter sound can be disabled. Apps can then let the user disable the
+sound or choose an alternative sound  in place of the standard shutter sound,
+which is recommended.</p>
+
+
+<h2 id="42-renderscript">Renderscript Computation</h2>
+
+<p>In Android 4.2, Renderscript Compute introduces new scripting features, new
+optimizations, and direct GPU integration for the highest performance in
+computation operations.</p>
+
+<h3 id="42-filterscript">Filterscript</h3>
+
+<p>Filterscript is a subset of Renderscript that is focused on <strong>optimized
+image processing across a broad range of device chipsets</strong>. Developers
+can write their image processing operations in Filterscript using the standard
+Renderscript runtime API, but within stricter constraints that ensure wider
+compatibility and improved optimization across CPUs, GPUs, and DSPs.</p>
+
+<p>Filterscript is ideal for hardware-accelerating simple image-processing and
+computation operations such as those that might be written for OpenGL ES
+fragment shaders. Because it places a relaxed set of constraints on hardware,
+your operations are optimized and accelerated on more types of device chipsets. 
+Any app targeting API level 17 or higher can make use of Filterscript.</p>
+
+<h3 id="42-rs-intrinsics">Script intrinsics</h3>
+
+<p>In Android 4.2, Renderscript adds support for a set of script intrinsics
+&mdash; pre-implemented <strong>filtering primitives that are
+accelerated</strong> to reduce the amount of code that you need to write and to
+ensure that your app gets the maximum performance gain possible.</p>
+
+<p>Intrinsics are available for blends, blur, color matrix, 3x3  and 5x5 convolve,
+per-channel lookup table, and converting an Android YUV buffer to RGB.</p>
+
+<h3 id="42-rs-groups">Script groups</h3>
+
+<p>You can now create <strong>groups of Renderscript scripts</strong> and
+execute them all with a single call as though they were part of a single script.
+This allows Renderscript to optimize execution of the scripts in ways that it
+could not do if the scripts were executed individually.</p>
+
+<div style="float:right;padding-top:1em;width:400px;margin-left:2em;">
+<img src="{@docRoot}images/jb-rs-chart-versions.png" alt="Renderscipt optimizations chart" width="360" height="252"
+style="border:1px solid #ddd;border-radius: 6px;" />
+<p style="image-caption">Renderscript image-processing 
+benchmarks run on different Android platform versions (Android 4.0, 4.1, and 4.2)
+in CPU only on a Galaxy Nexus device.</p>
+<img src="{@docRoot}images/jb-rs-chart-gpu.png" style="border:1px solid #ddd;border-radius: 6px; alt="" width="360" height="252" />
+<p style="image-caption">Renderscript image-processing benchmarks comparing operations run with GPU + CPU to those run in CPU only on the same Nexus 10 device.</p>
+</div>
+
+<p>If you have a direct acyclic graph of Renderscript operations to run, you can
+use a builder class to create a script group defining the operations. At
+execution time, Renderscript optimizes the run order and the connections between
+these operations for best performance.</p>
+
+
+<h3 id="42-rs-optimization">Ongoing optimization improvements</h3>
+
+<p>When you use Renderscript for computation operations, you apps benefit from
+<strong>ongoing performance and optimization improvements</strong> in the
+Renderscript engine itself, without any impact on your app code or any need for
+recompilation.</p>
+
+<p>As optimization improves, your operations execute faster and on more
+chipsets, without any work on your part. The chart at right highlights
+the performance gain delivered by ongoing Renderscript optimization improvements
+across successive versions of the Android platform.</p>
+
+<h3 id="42-gpu-compute">GPU Compute</h3>
+
+<p>Renderscript Compute is the first computation platform ported to run directly on a mobile device GPU. It now
+automatically takes advantage of <strong>GPU computation</strong> resources
+whenver possible to improve performance. With GPU integration, even the most
+complex computations for graphics or image processing can execute with
+dramatically improved performance.</p>
+
+<p>Any app using Renderscript on a supported device can benefit immediately from
+this GPU integration, without recompiling. The Nexus 10 tablet is the first
+device to support this integration.</p>
+
+<h2  id="42-dev-options" style="clear:right;margin-top:1em;">New built-in developer options</h2>
+
+<p>The Android 4.2 system includes a variety of new developer options that make
+it easier to create great looking apps that perform well. The new options expose
+features for <strong>debugging and profiling</strong> your app from any device
+or emulator.</p>
+
+<p class="caution" style="clear:right;">On devices running Android 4.2,
+developer options are hidden by default, helping to create a better experience
+for users. You can reveal the developer options at any time by tapping 7 times
+on <strong>Settings</strong> > <strong>About phone</strong> > <strong>Build
+number</strong> on any compatible Android device.</p>
+
+<div style="float:left;margin:20px 42px 0px 0px;width:290px;">
+<div>
+<img src="{@docRoot}images/jb-dev-options-device.png" width="280" height="548">
+</div>
+<p class="image-caption" style="padding:.5em">New <span
+style="font-weight:500;">developer options</span> give you more ways to profile and debug on a device.</p>
+</div>
+
+<p style="margin-top:2em;">New developer options in Android 4.2 include:</p>
+
+<ul>
+<li><strong>Take bug report</strong> &mdash; immediately takes a screen shot and
+dumps device state information to local file storage, then attaches them to a
+new outgoing email message.</li>
+<li><strong>Power menu bug reports</strong> &mdash; Adds a new option to the
+device power menu and quick settings to take a bug report (see above).</li>
+<li><strong>Verify apps over usb</strong> &mdash; Allows you to disable app
+checks for sideloading apps over USB, while still checking apps from other
+sources like the browser. This can speed up the development process while
+keeping the security feature enabled.</li>
+<li><strong>Show hardware layers updates</strong> &mdash; Flashes hardware
+layers green when they update.</li>
+<li><strong>Show GPU overdraw</strong> &mdash; Highlights GPU overdraw
+areas.</li>
+<li><strong>Force 4x MSAA</strong> &mdash; Enables 4x MSAA in Open GL ES 2.0
+apps.</li>
+<li><strong>Simulate secondary displays</strong> &mdash; Creates one or more
+non-secure overlay windows on the current screen for use as a simulated remote
+display. You can control the simulated display’s size and density.</li>
+<li><strong>Enable OpenGL traces</strong> &mdash; Lets you trace OpenGL
+execution using Logcat, Systrace, or callstack on glGetError.</li>
+</ul>
+
+<h2 id="42-platform-tech" style="padding-top:1em;clear:left;">New Platform Technologies</h2>
+
+<p>Android 4.2 includes a variety of new and <strong>enhanced platform technologies</strong> to
+support innovative communications use-cases across a broad range of hardware
+devices. In most cases, the new platform technologies and enhancements do not directly
+affect your apps, so you can benefit from them without any modification.</p>
+
+<h3 id="42-security">Security enhancements</h3>
+
+<p>Every Android release includes dozens of security enhancements to protect
+users.  Here are some of the enhancements in Android 4.2:</p>
+
+<ul>
+<li><strong>Application verification</strong> &mdash; Users can choose to enable
+“Verify Apps" and have applications screened by an application verifier, prior
+to installation.  App verification can alert the user if they try to install an
+app that might be harmful; if an application is especially bad, it can block
+installation.</li>
+<li><strong>More control of premium SMS</strong> &mdash; Android will provide a
+notification if an application attempts to send SMS to a short code that uses
+premium services which might cause additional charges.  The user can choose
+whether to allow the application to send the message or block it.</li>
+<li><strong>Always-on VPN</strong> &mdash;  VPN can be configured so that
+applications will not have access to the network until a VPN connection is
+established.  This prevents applications from sending data across other
+networks.</li>
+<li><strong>Certificate Pinning</strong> &mdash; The libcore SSL implementation
+now supports certificate pinning.  Pinned domains will receive a certificate
+validation failure if the certificate does not chain to a set of expected
+certificates.  This protects against possible compromise of Certificate
+Authorities.</li>
+<li><strong>Improved display of Android permissions</strong> &mdash; Permissions
+have been organized into groups that are more easily understood by users. 
+During review of the permissions, the user can click on the permission to see
+more detailed information about the permission.</li>
+<li><strong>installd hardening</strong> &mdash; The installd daemon does not run
+as the root user, reducing potential attack surface for root privilege
+escalation.</li>
+<li><strong>init script hardening</strong> &mdash;  init scripts now apply
+O_NOFOLLOW semantics to prevent symlink related attacks.</li>
+<li><strong>FORTIFY_SOURCE</strong> &mdash;  Android now implements
+FORTIFY_SOURCE. This is used by system libraries and applications to prevent
+memory corruption.</li>
+<li><strong>ContentProvider default configuration</strong> &mdash; Applications
+which target API level 17 will have “export” set to “false” by default for each
+ContentProvider, reducing default attack surface for applications.</li>
+<li><strong>Cryptography</strong> &mdash; Modified the default implementations
+of SecureRandom and Cipher.RSA to use OpenSSL.  Added  SSLSocket support for
+TLSv1.1 and TLSv1.2 using OpenSSL 1.0.1</li>
+<li><strong>Security Fixes</strong> &mdash; Upgraded open source libraries with
+security fixes include WebKit, libpng, OpenSSL, and LibXML. Android 4.2 also
+includes fixes for Android-specific vulnerabilities. Information about these
+vulnerabilities has been provided to Open Handset Alliance members and fixes are
+available in Android Open Source Project.  To improve security, some devices
+with earlier versions of Android may also include these fixes.</li>
+</ul>
+
+<h3 id="42-bt-stack">New Bluetooth stack</h3>
+
+Android 4.2 introduces a new Bluetooth stack optimized for use with Android
+devices. The new Bluetooth stack developed in collaboration between Google and
+Broadcom replaces the stack based on BlueZ and provides improved compatibility
+and reliability.
+
+<h3 id="42-audio">Low-latency audio</h3>
+
+<p>Android 4.2 improves support for low-latency audio playback, starting from the
+improvements made in Android 4.1 release for audio output latency using OpenSL
+ES, Soundpool and tone generator APIs. These improvements depend on hardware
+support &mdash; devices that offer these low-latency audio features can
+advertise their support to apps through a hardware feature constant. New
+AudioManager APIs are provided to query the native audio sample rate and buffer
+size, for use on devices which claim this feature.</p>
+
+<h3 id="42-camera-interface">New camera hardware interface</h3>
+
+Android 4.2 introduces a new implementation of the camera stack. The camera
+subsystem includes the implementations for components in the camera pipeline
+such as burst mode capture with processing controls.
+
+<h3 id="42-nfc-interface">New NFC hardware interface and controller interface</h3>
+
+Android 4.2 introduces support for controllers based on the NCI standard from
+the NFC-Forum. NCI provides a standard communication protocol between an NFC
+Controller (NFCC) and a device Host, and the new NFC stack developed in
+collaboration between Google and Broadcom supports it.  
+
+<h3 id="42-dalvik">Dalvik runtime optimizations</h3>
+
+<p>The Dalvik runtime includes enhancements for performance and security across
+a wider range of architectures:</p>
+<ul>
+<li>x86 JIT support from Intel and MIPS JIT support from MIPS</li>
+<li>Optimized garbage-collection parameters for devices with > 512MB</li>
+<li>Default implementations of SecureRandom and Cipher.RSA now use OpenSSL</li>
+<li>SSLSocket support for TLSv1.1 and TLSv1.2 via OpenSSL 1.0.1</li>
+<li>New intrinsic support for StrictMath methods abs, min, max, and sqrt</li>
+<li>BouncyCastle updated to 1.47</li>
+<li>zlib updated to 1.27</li>
+<li>dlmalloc updated to 2.8.6</li>
+</ul>
+
+</div> <!-- END ANDROID 4.2 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- BEGIN ANDROID 4.1 -->
+<div id="android-41" class="version-section">
 
 <div style="float:right;width:320px;padding:0px 0px 0px 34px;clear:both">
 <div>
-<img src="{@docRoot}images/jb-android-4.1.png" height="426" width="390">
+<img src="{@docRoot}images/jb-android-4.1.png" height="426" width="320">
 </div>
 </div>
-<p>Welcome to Android 4.1, Jelly Bean!</p>
+<p>Welcome to Android 4.1 the first version of Jelly Bean!</p>
 
 <p>Android 4.1 is the fastest and smoothest version of Android yet. We’ve made 
 improvements throughout the platform and added great new features
@@ -31,7 +700,7 @@ for users and developers. This document provides a glimpse of what's new for dev
 
 
 <div style="float:left;margin:12px 24px 0px 0px;">
-<img src="{@docRoot}images/jb-accessibility-focus-250.png" style="width:240px">
+<img src="{@docRoot}images/jb-accessibility-focus-250.png" width="240px" height="469">
 </div>
 
 <div style="width:85%;padding-top:16px;">
@@ -52,7 +721,7 @@ for users and developers. This document provides a glimpse of what's new for dev
 <div style="clear:both;padding-top:16px;float:right;">
 
 <div style="float:right;margin-left:18px;fpadding-top:90px;padding-bottom:60px">
-<img src="{@docRoot}images/jb-r2l.png" width="280">
+<img src="{@docRoot}images/jb-r2l.png" width="280" height="356">
 </div>
 </div>
 
@@ -220,7 +889,7 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 
 <p>Ice Cream Sandwich introduced support for Wi-Fi Direct, a technology that lets apps <strong>discover and pair directly</strong>, over a high-bandwidth peer-to-peer connection. Wi-Fi Direct is an ideal way to share media, photos, files and other types of data and sessions, even where there is no cell network or Wi-Fi available.</p>
 
-<p>With Jelly Bean, Android takes Wi-Fi Direct further, adding API support for <strong>pre-associated service discovery</strong>. Pre-associated service discovery lets your apps get more useful information from nearby devices about the services they support, before they attempt to connect.  Apps can initiate discovery for a specific service and filter the list of discovered devices to those that actually support the target service or application.</p>
+<p>Android 4.1 takes Wi-Fi Direct further, adding API support for <strong>pre-associated service discovery</strong>. Pre-associated service discovery lets your apps get more useful information from nearby devices about the services they support, before they attempt to connect.  Apps can initiate discovery for a specific service and filter the list of discovered devices to those that actually support the target service or application.</p>
 
 <p>For example, this means that your app could discover only devices that are “printers” or that have a specific game available, instead of discovering all nearby Wi-Fi Direct devices. On the other hand, your app can advertise the service it provides to other devices, which can discover it and then negotiate a connection. This greatly simplifies discovery and pairing for users and lets apps take advantage of Wi-Fi Direct more effectively.</p>
 
@@ -312,3 +981,11 @@ style="font-weight:500;">App Widgets</span> can resize automatically to fit the 
 <p>Because your app only contains the small client library, you can take advantage of these services without a big increase in download size and storage footprint. Also, Google Play will <strong>deliver regular updates</strong> to the services, without developers needing to publish app updates to take advantage of them.</p>
 
 <p>For more information about the APIs included in Google Play Services, see the <a href="http://developers.google.com/android/google-play-services/index.html">Google Play services</a> developer page.</p>
+
+</div> <!-- END ANDROID 4.1 -->
+
+
+
+
+
+

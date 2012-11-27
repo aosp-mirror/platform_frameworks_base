@@ -28,7 +28,8 @@ Differences Report &raquo;</a> </li>
 <p>
 <em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
 
-<p>Android 2.3.4 is a maintenance release that adds several bug fixes and patches
+<p>Android 2.3.4 ({@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1})
+is a maintenance release that adds several bug fixes and patches
 to the Android 2.3 platform, without any API changes from Android 2.3.3. Additionally, 
 Android 2.3.4 brings support for the Open Accessory API to mobile devices,
 through the optional <a href="#usb">Open Accessory Library</a>. </p>
