@@ -123,18 +123,15 @@ public class XmlUtils
         return Integer.parseInt(nm.substring(index), base) * sign;
     }
 
-    public static final int
-    convertValueToUnsignedInt(String value, int defaultValue)
-    {
-        if (null == value)
+    public static int convertValueToUnsignedInt(String value, int defaultValue) {
+        if (null == value) {
             return defaultValue;
+        }
 
         return parseUnsignedIntAttribute(value);
     }
 
-    public static final int
-    parseUnsignedIntAttribute(CharSequence charSeq)
-    {
+    public static int parseUnsignedIntAttribute(CharSequence charSeq) {
         String  value = charSeq.toString();
 
         long    bits;
