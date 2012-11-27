@@ -8772,7 +8772,7 @@ package android.graphics {
     method public final boolean isDither();
     method public final boolean isFakeBoldText();
     method public final boolean isFilterBitmap();
-    method public final deprecated boolean isLinearText();
+    method public final boolean isLinearText();
     method public final boolean isStrikeThruText();
     method public final boolean isSubpixelText();
     method public final boolean isUnderlineText();
@@ -8792,7 +8792,7 @@ package android.graphics {
     method public void setFilterBitmap(boolean);
     method public void setFlags(int);
     method public void setHinting(int);
-    method public deprecated void setLinearText(boolean);
+    method public void setLinearText(boolean);
     method public android.graphics.MaskFilter setMaskFilter(android.graphics.MaskFilter);
     method public android.graphics.PathEffect setPathEffect(android.graphics.PathEffect);
     method public android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
