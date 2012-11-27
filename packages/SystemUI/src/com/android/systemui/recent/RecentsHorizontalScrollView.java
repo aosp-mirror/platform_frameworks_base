@@ -336,19 +336,6 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         });
     }
 
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        // scroll to bottom after reloading
-        if (visibility == View.VISIBLE && changedView == this) {
-            post(new Runnable() {
-                public void run() {
-                    update();
-                }
-            });
-        }
-    }
-
     public void setAdapter(TaskDescriptionAdapter adapter) {
         mAdapter = adapter;
         mAdapter.registerDataSetObserver(new DataSetObserver() {
