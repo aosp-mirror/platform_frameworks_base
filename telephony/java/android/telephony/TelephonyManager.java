@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.util.Log;
+import android.telephony.Rlog;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
@@ -411,7 +411,7 @@ public class TelephonyManager {
                 cmdline = new String(buffer, 0, count);
             }
         } catch (IOException e) {
-            Log.d(TAG, "No /proc/cmdline exception=" + e);
+            Rlog.d(TAG, "No /proc/cmdline exception=" + e);
         } finally {
             if (is != null) {
                 try {
@@ -420,7 +420,7 @@ public class TelephonyManager {
                 }
             }
         }
-        Log.d(TAG, "/proc/cmdline=" + cmdline);
+        Rlog.d(TAG, "/proc/cmdline=" + cmdline);
         return cmdline;
     }
 
@@ -467,7 +467,7 @@ public class TelephonyManager {
             }
         }
 
-        Log.d(TAG, "getLteOnCdmaMode=" + retVal + " curVal=" + curVal +
+        Rlog.d(TAG, "getLteOnCdmaMode=" + retVal + " curVal=" + curVal +
                 " product_type='" + productType +
                 "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
         return retVal;
