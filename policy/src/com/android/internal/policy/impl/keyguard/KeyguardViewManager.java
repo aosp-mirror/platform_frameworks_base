@@ -243,12 +243,6 @@ public class KeyguardViewManager {
         }
 
         if (options != null) {
-            if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER)) {
-                mKeyguardView.goToUserSwitcher();
-            }
-            if (options.getBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE)) {
-                mKeyguardView.showNextSecurityScreenIfPresent();
-            }
             int widgetToShow = options.getInt(LockPatternUtils.KEYGUARD_SHOW_APPWIDGET,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             if (widgetToShow != AppWidgetManager.INVALID_APPWIDGET_ID) {
