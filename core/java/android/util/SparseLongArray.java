@@ -22,8 +22,6 @@ import com.android.internal.util.ArrayUtils;
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
  * there can be gaps in the indices.  It is intended to be more efficient
  * than using a HashMap to map Integers to Longs.
- *
- * @hide
  */
 public class SparseLongArray implements Cloneable {
 

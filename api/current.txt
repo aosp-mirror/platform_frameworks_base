@@ -23497,6 +23497,24 @@ package android.util {
     method public int valueAt(int);
   }
 
+  public class SparseLongArray implements java.lang.Cloneable {
+    ctor public SparseLongArray();
+    ctor public SparseLongArray(int);
+    method public void append(int, long);
+    method public void clear();
+    method public android.util.SparseLongArray clone();
+    method public void delete(int);
+    method public long get(int);
+    method public long get(int, long);
+    method public int indexOfKey(int);
+    method public int indexOfValue(long);
+    method public int keyAt(int);
+    method public void put(int, long);
+    method public void removeAt(int);
+    method public int size();
+    method public long valueAt(int);
+  }
+
   public class StateSet {
     method public static java.lang.String dump(int[]);
     method public static boolean isWildCard(int[]);
