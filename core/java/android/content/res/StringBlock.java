@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.graphics.Color;
 import android.text.*;
 import android.text.style.*;
 import android.util.Log;
@@ -24,7 +25,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 
-import com.android.internal.util.XmlUtils;
+import java.util.Arrays;
 
 /**
  * Conveniences for retrieving data out of a compiled string resource.
@@ -33,7 +34,7 @@ import com.android.internal.util.XmlUtils;
  */
 final class StringBlock {
     private static final String TAG = "AssetManager";
-    private static final boolean localLOGV = false || false;
+    private static final boolean localLOGV = false;
 
     private final int mNative;
     private final boolean mUseSparse;
@@ -82,7 +83,7 @@ final class StringBlock {
             CharSequence res = str;
             int[] style = nativeGetStyle(mNative, idx);
             if (localLOGV) Log.v(TAG, "Got string: " + str);
-            if (localLOGV) Log.v(TAG, "Got styles: " + style);
+            if (localLOGV) Log.v(TAG, "Got styles: " + Arrays.toString(style));
             if (style != null) {
                 if (mStyleIDs == null) {
                     mStyleIDs = new StyleIDs();
@@ -139,8 +140,12 @@ final class StringBlock {
     }
 
     protected void finalize() throws Throwable {
-        if (mOwnsNative) {
-            nativeDestroy(mNative);
+        try {
+            super.finalize();
+        } finally {
+            if (mOwnsNative) {
+                nativeDestroy(mNative);
+            }
         }
     }
 
@@ -236,18 +241,30 @@ final class StringBlock {
 
                     sub = subtag(tag, ";fgcolor=");
                     if (sub != null) {
-                        int color = XmlUtils.convertValueToUnsignedInt(sub, -1);
-                        buffer.setSpan(new ForegroundColorSpan(color),
+                        buffer.setSpan(getColor(sub, true),
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
 
+                    sub = subtag(tag, ";color=");
+                    if (sub != null) {
+                        buffer.setSpan(getColor(sub, true),
+                                style[i+1], style[i+2]+1,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+
                     sub = subtag(tag, ";bgcolor=");
                     if (sub != null) {
-                        int color = XmlUtils.convertValueToUnsignedInt(sub, -1);
-                        buffer.setSpan(new BackgroundColorSpan(color),
+                        buffer.setSpan(getColor(sub, false),
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+
+                    sub = subtag(tag, ";face=");
+                    if (sub != null) {
+                        buffer.setSpan(new TypefaceSpan(sub),
+                                style[i+1], style[i+2]+1,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 } else if (tag.startsWith("a;")) {
                     String sub;
@@ -286,6 +303,48 @@ final class StringBlock {
             i += 3;
         }
         return new SpannedString(buffer);
+    }
+
+    /**
+     * Returns a span for the specified color string representation.
+     * If the specified string does not represent a color (null, empty, etc.)
+     * the color black is returned instead.
+     *
+     * @param color The color as a string. Can be a resource reference,
+     *              HTML hexadecimal, octal or a name
+     * @param foreground True if the color will be used as the foreground color,
+     *                   false otherwise
+     *
+     * @return A CharacterStyle
+     *
+     * @see Color#getHtmlColor(String)
+     */
+    private static CharacterStyle getColor(String color, boolean foreground) {
+        int c = 0xff000000;
+
+        if (!TextUtils.isEmpty(color)) {
+            if (color.startsWith("@")) {
+                Resources res = Resources.getSystem();
+                String name = color.substring(1);
+                int colorRes = res.getIdentifier(name, "color", "android");
+                if (colorRes != 0) {
+                    ColorStateList colors = res.getColorStateList(colorRes);
+                    if (foreground) {
+                        return new TextAppearanceSpan(null, 0, 0, colors, null);
+                    } else {
+                        c = colors.getDefaultColor();
+                    }
+                }
+            } else {
+                c = Color.getHtmlColor(color);
+            }
+        }
+
+        if (foreground) {
+            return new ForegroundColorSpan(c);
+        } else {
+            return new BackgroundColorSpan(c);
+        }
     }
 
     /**
@@ -423,11 +482,11 @@ final class StringBlock {
                 + ": " + nativeGetSize(mNative));
     }
 
-    private static final native int nativeCreate(byte[] data,
+    private static native int nativeCreate(byte[] data,
                                                  int offset,
                                                  int size);
-    private static final native int nativeGetSize(int obj);
-    private static final native String nativeGetString(int obj, int idx);
-    private static final native int[] nativeGetStyle(int obj, int idx);
-    private static final native void nativeDestroy(int obj);
+    private static native int nativeGetSize(int obj);
+    private static native String nativeGetString(int obj, int idx);
+    private static native int[] nativeGetStyle(int obj, int idx);
+    private static native void nativeDestroy(int obj);
 }
