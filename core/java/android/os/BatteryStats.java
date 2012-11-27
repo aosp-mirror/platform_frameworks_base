@@ -18,6 +18,8 @@ package android.os;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -1127,8 +1129,10 @@ public abstract class BatteryStats implements Parcelable {
             if (totalTimeMillis != 0) {
                 sb.append(linePrefix);
                 formatTimeMs(sb, totalTimeMillis);
-                if (name != null) sb.append(name);
-                sb.append(' ');
+                if (name != null) {
+                    sb.append(name);
+                    sb.append(' ');
+                }
                 sb.append('(');
                 sb.append(count);
                 sb.append(" times)");
@@ -1440,8 +1444,21 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    static final class TimerEntry {
+        final String mName;
+        final int mId;
+        final BatteryStats.Timer mTimer;
+        final long mTime;
+        TimerEntry(String name, int id, BatteryStats.Timer timer, long time) {
+            mName = name;
+            mId = id;
+            mTimer = timer;
+            mTime = time;
+        }
+    }
+
     @SuppressWarnings("unused")
-    public final void dumpLocked(PrintWriter pw, String prefix, int which, int reqUid) {
+    public final void dumpLocked(PrintWriter pw, String prefix, final int which, int reqUid) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -1516,19 +1533,43 @@ public abstract class BatteryStats implements Parcelable {
         long txTotal = 0;
         long fullWakeLockTimeTotalMicros = 0;
         long partialWakeLockTimeTotalMicros = 0;
-        
+
+        final Comparator<TimerEntry> timerComparator = new Comparator<TimerEntry>() {
+            @Override
+            public int compare(TimerEntry lhs, TimerEntry rhs) {
+                long lhsTime = lhs.mTime;
+                long rhsTime = rhs.mTime;
+                if (lhsTime < rhsTime) {
+                    return 1;
+                }
+                if (lhsTime > rhsTime) {
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
         if (reqUid < 0) {
             Map<String, ? extends BatteryStats.Timer> kernelWakelocks = getKernelWakelockStats();
             if (kernelWakelocks.size() > 0) {
+                final ArrayList<TimerEntry> timers = new ArrayList<TimerEntry>();
                 for (Map.Entry<String, ? extends BatteryStats.Timer> ent : kernelWakelocks.entrySet()) {
-                    
+                    BatteryStats.Timer timer = ent.getValue();
+                    long totalTimeMillis = computeWakeLock(timer, batteryRealtime, which);
+                    if (totalTimeMillis > 0) {
+                        timers.add(new TimerEntry(ent.getKey(), 0, timer, totalTimeMillis));
+                    }
+                }
+                Collections.sort(timers, timerComparator);
+                for (int i=0; i<timers.size(); i++) {
+                    TimerEntry timer = timers.get(i);
                     String linePrefix = ": ";
                     sb.setLength(0);
                     sb.append(prefix);
                     sb.append("  Kernel Wake lock ");
-                    sb.append(ent.getKey());
-                    linePrefix = printWakeLock(sb, ent.getValue(), batteryRealtime, null, which, 
-                            linePrefix);
+                    sb.append(timer.mName);
+                    linePrefix = printWakeLock(sb, timer.mTimer, batteryRealtime, null,
+                            which, linePrefix);
                     if (!linePrefix.equals(": ")) {
                         sb.append(" realtime");
                         // Only print out wake locks that were held
@@ -1537,7 +1578,9 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
         }
-    
+
+        final ArrayList<TimerEntry> timers = new ArrayList<TimerEntry>();
+
         for (int iu = 0; iu < NU; iu++) {
             Uid u = uidStats.valueAt(iu);
             rxTotal += u.getTcpBytesReceived(which);
@@ -1557,8 +1600,18 @@ public abstract class BatteryStats implements Parcelable {
 
                     Timer partialWakeTimer = wl.getWakeTime(WAKE_TYPE_PARTIAL);
                     if (partialWakeTimer != null) {
-                        partialWakeLockTimeTotalMicros += partialWakeTimer.getTotalTimeLocked(
+                        long totalTimeMicros = partialWakeTimer.getTotalTimeLocked(
                                 batteryRealtime, which);
+                        if (totalTimeMicros > 0) {
+                            if (reqUid < 0) {
+                                // Only show the ordered list of all wake
+                                // locks if the caller is not asking for data
+                                // about a specific uid.
+                                timers.add(new TimerEntry(ent.getKey(), u.getUid(),
+                                        partialWakeTimer, totalTimeMicros));
+                            }
+                            partialWakeLockTimeTotalMicros += totalTimeMicros;
+                        }
                     }
                 }
             }
@@ -1571,7 +1624,7 @@ public abstract class BatteryStats implements Parcelable {
         sb.append(prefix);
                 sb.append("  Total full wakelock time: "); formatTimeMs(sb,
                         (fullWakeLockTimeTotalMicros + 500) / 1000);
-                sb.append(", Total partial waklock time: "); formatTimeMs(sb,
+                sb.append(", Total partial wakelock time: "); formatTimeMs(sb,
                         (partialWakeLockTimeTotalMicros + 500) / 1000);
         pw.println(sb.toString());
         
@@ -1676,9 +1729,26 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println(getDischargeAmountScreenOnSinceCharge());
             pw.print(prefix); pw.print("    Amount discharged while screen off: ");
                     pw.println(getDischargeAmountScreenOffSinceCharge());
-            pw.println(" ");
+            pw.println();
         }
-        
+
+        if (timers.size() > 0) {
+            Collections.sort(timers, timerComparator);
+            pw.print(prefix); pw.println("  All partial wake locks:");
+            for (int i=0; i<timers.size(); i++) {
+                TimerEntry timer = timers.get(i);
+                sb.setLength(0);
+                sb.append("  Wake lock #");
+                sb.append(timer.mId);
+                sb.append(" ");
+                sb.append(timer.mName);
+                printWakeLock(sb, timer.mTimer, batteryRealtime, null, which, ": ");
+                sb.append(" realtime");
+                pw.println(sb.toString());
+            }
+            timers.clear();
+            pw.println();
+        }
 
         for (int iu=0; iu<NU; iu++) {
             final int uid = uidStats.keyAt(iu);
