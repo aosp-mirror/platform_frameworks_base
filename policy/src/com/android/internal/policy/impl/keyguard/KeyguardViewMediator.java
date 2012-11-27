@@ -315,10 +315,7 @@ public class KeyguardViewMediator {
             // We need to force a reset of the views, since lockNow (called by
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
-                Bundle options = new Bundle();
-                options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_USER_SWITCHER, true);
-                options.putBoolean(LockPatternUtils.KEYGUARD_SHOW_SECURITY_CHALLENGE, true);
-                resetStateLocked(options);
+                resetStateLocked(null);
                 adjustStatusBarLocked();
                 // Disable face unlock when the user switches.
                 KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(false);
