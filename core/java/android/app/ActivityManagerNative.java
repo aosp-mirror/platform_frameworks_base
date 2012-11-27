@@ -1701,6 +1701,21 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_INTENT_FOR_INTENT_SENDER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IIntentSender r = IIntentSender.Stub.asInterface(
+                data.readStrongBinder());
+            Intent intent = getIntentForIntentSender(r);
+            reply.writeNoException();
+            if (intent != null) {
+                reply.writeInt(1);
+                intent.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            } else {
+                reply.writeInt(0);
+            }
+            return true;
+        }
+
         case UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
@@ -3972,6 +3987,20 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(IS_INTENT_SENDER_AN_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public Intent getIntentForIntentSender(IIntentSender sender) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(sender.asBinder());
+        mRemote.transact(GET_INTENT_FOR_INTENT_SENDER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Intent res = reply.readInt() != 0
+                ? Intent.CREATOR.createFromParcel(reply) : null;
         data.recycle();
         reply.recycle();
         return res;

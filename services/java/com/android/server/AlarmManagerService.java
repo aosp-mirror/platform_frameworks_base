@@ -22,6 +22,7 @@ import android.app.AlarmManager;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -38,6 +39,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.text.format.Time;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -45,15 +47,17 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
+
+import com.android.internal.util.LocalLog;
 
 class AlarmManagerService extends IAlarmManager.Stub {
     // The threshold for how long an alarm can be late before we print a
@@ -79,7 +83,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
     
     private final Context mContext;
-    
+
+    private final LocalLog mLog = new LocalLog(TAG);
+
     private Object mLock = new Object();
     
     private final ArrayList<Alarm> mRtcWakeupAlarms = new ArrayList<Alarm>();
@@ -91,7 +97,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private int mDescriptor;
     private int mBroadcastRefCount = 0;
     private PowerManager.WakeLock mWakeLock;
-    private LinkedList<PendingIntent> mInFlight = new LinkedList<PendingIntent>();
+    private ArrayList<InFlight> mInFlight = new ArrayList<InFlight>();
     private final AlarmThread mWaitThread = new AlarmThread();
     private final AlarmHandler mHandler = new AlarmHandler();
     private ClockReceiver mClockReceiver;
@@ -99,18 +105,59 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private final ResultReceiver mResultReceiver = new ResultReceiver();
     private final PendingIntent mTimeTickSender;
     private final PendingIntent mDateChangeSender;
-    
-    private static final class FilterStats {
-        int count;
+
+    private static final class InFlight extends Intent {
+        final PendingIntent mPendingIntent;
+        final Pair<String, ComponentName> mTarget;
+        final BroadcastStats mBroadcastStats;
+        final FilterStats mFilterStats;
+
+        InFlight(AlarmManagerService service, PendingIntent pendingIntent) {
+            mPendingIntent = pendingIntent;
+            Intent intent = pendingIntent.getIntent();
+            mTarget = intent != null
+                    ? new Pair<String, ComponentName>(intent.getAction(), intent.getComponent())
+                    : null;
+            mBroadcastStats = service.getStatsLocked(pendingIntent);
+            FilterStats fs = mBroadcastStats.filterStats.get(mTarget);
+            if (fs == null) {
+                fs = new FilterStats(mBroadcastStats, mTarget);
+                mBroadcastStats.filterStats.put(mTarget, fs);
+            }
+            mFilterStats = fs;
+        }
     }
-    
-    private static final class BroadcastStats {
+
+    private static final class FilterStats {
+        final BroadcastStats mBroadcastStats;
+        final Pair<String, ComponentName> mTarget;
+
         long aggregateTime;
+        int count;
         int numWakeup;
         long startTime;
         int nesting;
-        HashMap<Intent.FilterComparison, FilterStats> filterStats
-                = new HashMap<Intent.FilterComparison, FilterStats>();
+
+        FilterStats(BroadcastStats broadcastStats, Pair<String, ComponentName> target) {
+            mBroadcastStats = broadcastStats;
+            mTarget = target;
+        }
+    }
+    
+    private static final class BroadcastStats {
+        final String mPackageName;
+
+        long aggregateTime;
+        int count;
+        int numWakeup;
+        long startTime;
+        int nesting;
+        final HashMap<Pair<String, ComponentName>, FilterStats> filterStats
+                = new HashMap<Pair<String, ComponentName>, FilterStats>();
+
+        BroadcastStats(String packageName) {
+            mPackageName = packageName;
+        }
     }
     
     private final HashMap<String, BroadcastStats> mBroadcastStats
@@ -496,24 +543,104 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     dumpAlarmList(pw, mElapsedRealtimeAlarms, "  ", "ELAPSED", now);
                 }
             }
-            
-            pw.println(" ");
+
+            pw.println();
             pw.print("  Broadcast ref count: "); pw.println(mBroadcastRefCount);
-            
-            pw.println(" ");
-            pw.println("  Alarm Stats:");
+            pw.println();
+
+            if (mLog.dump(pw, "  Recent problems", "    ")) {
+                pw.println();
+            }
+
+            final FilterStats[] topFilters = new FilterStats[10];
+            final Comparator<FilterStats> comparator = new Comparator<FilterStats>() {
+                @Override
+                public int compare(FilterStats lhs, FilterStats rhs) {
+                    if (lhs.aggregateTime < rhs.aggregateTime) {
+                        return 1;
+                    } else if (lhs.aggregateTime > rhs.aggregateTime) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            };
+            int len = 0;
             for (Map.Entry<String, BroadcastStats> be : mBroadcastStats.entrySet()) {
                 BroadcastStats bs = be.getValue();
-                pw.print("  "); pw.println(be.getKey());
-                pw.print("    "); pw.print(bs.aggregateTime);
-                        pw.print("ms running, "); pw.print(bs.numWakeup);
-                        pw.println(" wakeups");
-                for (Map.Entry<Intent.FilterComparison, FilterStats> fe
+                for (Map.Entry<Pair<String, ComponentName>, FilterStats> fe
                         : bs.filterStats.entrySet()) {
-                    pw.print("    "); pw.print(fe.getValue().count);
-                            pw.print(" alarms: ");
-                            pw.println(fe.getKey().getIntent().toShortString(
-                                    false, true, false, true));
+                    FilterStats fs = fe.getValue();
+                    int pos = len > 0
+                            ? Arrays.binarySearch(topFilters, 0, len, fs, comparator) : 0;
+                    if (pos < 0) {
+                        pos = -pos - 1;
+                    }
+                    if (pos < topFilters.length) {
+                        int copylen = topFilters.length - pos - 1;
+                        if (copylen > 0) {
+                            System.arraycopy(topFilters, pos, topFilters, pos+1, copylen);
+                        }
+                        topFilters[pos] = fs;
+                        if (len < topFilters.length) {
+                            len++;
+                        }
+                    }
+                }
+            }
+            if (len > 0) {
+                pw.println("  Top Alarms:");
+                for (int i=0; i<len; i++) {
+                    FilterStats fs = topFilters[i];
+                    pw.print("    ");
+                    if (fs.nesting > 0) pw.print("*ACTIVE* ");
+                    TimeUtils.formatDuration(fs.aggregateTime, pw);
+                    pw.print(" running, "); pw.print(fs.numWakeup);
+                    pw.print(" wakeups, "); pw.print(fs.count);
+                    pw.print(" alarms: "); pw.print(fs.mBroadcastStats.mPackageName);
+                    pw.println();
+                    pw.print("      ");
+                    if (fs.mTarget.first != null) {
+                        pw.print(" act="); pw.print(fs.mTarget.first);
+                    }
+                    if (fs.mTarget.second != null) {
+                        pw.print(" cmp="); pw.print(fs.mTarget.second.toShortString());
+                    }
+                    pw.println();
+                }
+            }
+
+            pw.println(" ");
+            pw.println("  Alarm Stats:");
+            final ArrayList<FilterStats> tmpFilters = new ArrayList<FilterStats>();
+            for (Map.Entry<String, BroadcastStats> be : mBroadcastStats.entrySet()) {
+                BroadcastStats bs = be.getValue();
+                pw.print("  ");
+                if (bs.nesting > 0) pw.print("*ACTIVE* ");
+                pw.print(be.getKey());
+                pw.print(" "); TimeUtils.formatDuration(bs.aggregateTime, pw);
+                        pw.print(" running, "); pw.print(bs.numWakeup);
+                        pw.println(" wakeups:");
+                tmpFilters.clear();
+                for (Map.Entry<Pair<String, ComponentName>, FilterStats> fe
+                        : bs.filterStats.entrySet()) {
+                    tmpFilters.add(fe.getValue());
+                }
+                Collections.sort(tmpFilters, comparator);
+                for (int i=0; i<tmpFilters.size(); i++) {
+                    FilterStats fs = tmpFilters.get(i);
+                    pw.print("    ");
+                            if (fs.nesting > 0) pw.print("*ACTIVE* ");
+                            TimeUtils.formatDuration(fs.aggregateTime, pw);
+                            pw.print(" "); pw.print(fs.numWakeup);
+                            pw.print(" wakes " ); pw.print(fs.count);
+                            pw.print(" alarms:");
+                            if (fs.mTarget.first != null) {
+                                pw.print(" act="); pw.print(fs.mTarget.first);
+                            }
+                            if (fs.mTarget.second != null) {
+                                pw.print(" cmp="); pw.print(fs.mTarget.second.toShortString());
+                            }
+                            pw.println();
                 }
             }
         }
@@ -708,18 +835,31 @@ class AlarmManagerService extends IAlarmManager.Stub {
                                 setWakelockWorkSource(alarm.operation);
                                 mWakeLock.acquire();
                             }
-                            mInFlight.add(alarm.operation);
+                            final InFlight inflight = new InFlight(AlarmManagerService.this,
+                                    alarm.operation);
+                            mInFlight.add(inflight);
                             mBroadcastRefCount++;
-                            
-                            BroadcastStats bs = getStatsLocked(alarm.operation);
+
+                            final BroadcastStats bs = inflight.mBroadcastStats;
+                            bs.count++;
                             if (bs.nesting == 0) {
+                                bs.nesting = 1;
                                 bs.startTime = nowELAPSED;
                             } else {
                                 bs.nesting++;
                             }
+                            final FilterStats fs = inflight.mFilterStats;
+                            fs.count++;
+                            if (fs.nesting == 0) {
+                                fs.nesting = 1;
+                                fs.startTime = nowELAPSED;
+                            } else {
+                                fs.nesting++;
+                            }
                             if (alarm.type == AlarmManager.ELAPSED_REALTIME_WAKEUP
                                     || alarm.type == AlarmManager.RTC_WAKEUP) {
                                 bs.numWakeup++;
+                                fs.numWakeup++;
                                 ActivityManagerNative.noteWakeupAlarm(
                                         alarm.operation);
                             }
@@ -908,44 +1048,58 @@ class AlarmManagerService extends IAlarmManager.Stub {
         String pkg = pi.getTargetPackage();
         BroadcastStats bs = mBroadcastStats.get(pkg);
         if (bs == null) {
-            bs = new BroadcastStats();
+            bs = new BroadcastStats(pkg);
             mBroadcastStats.put(pkg, bs);
         }
         return bs;
     }
-    
+
     class ResultReceiver implements PendingIntent.OnFinished {
         public void onSendFinished(PendingIntent pi, Intent intent, int resultCode,
                 String resultData, Bundle resultExtras) {
             synchronized (mLock) {
-                BroadcastStats bs = getStatsLocked(pi);
-                if (bs != null) {
+                InFlight inflight = null;
+                for (int i=0; i<mInFlight.size(); i++) {
+                    if (mInFlight.get(i).mPendingIntent == pi) {
+                        inflight = mInFlight.remove(i);
+                        break;
+                    }
+                }
+                if (inflight != null) {
+                    final long nowELAPSED = SystemClock.elapsedRealtime();
+                    BroadcastStats bs = inflight.mBroadcastStats;
                     bs.nesting--;
                     if (bs.nesting <= 0) {
                         bs.nesting = 0;
-                        bs.aggregateTime += SystemClock.elapsedRealtime()
-                                - bs.startTime;
-                        Intent.FilterComparison fc = new Intent.FilterComparison(intent);
-                        FilterStats fs = bs.filterStats.get(fc);
-                        if (fs == null) {
-                            fs = new FilterStats();
-                            bs.filterStats.put(fc, fs);
-                        }
-                        fs.count++;
+                        bs.aggregateTime += nowELAPSED - bs.startTime;
                     }
+                    FilterStats fs = inflight.mFilterStats;
+                    fs.nesting--;
+                    if (fs.nesting <= 0) {
+                        fs.nesting = 0;
+                        fs.aggregateTime += nowELAPSED - fs.startTime;
+                    }
+                } else {
+                    mLog.w("No in-flight alarm for " + pi + " " + intent);
                 }
-                mInFlight.removeFirst();
                 mBroadcastRefCount--;
                 if (mBroadcastRefCount == 0) {
                     mWakeLock.release();
+                    if (mInFlight.size() > 0) {
+                        mLog.w("Finished all broadcasts with " + mInFlight.size()
+                                + " remaining inflights");
+                        for (int i=0; i<mInFlight.size(); i++) {
+                            mLog.w("  Remaining #" + i + ": " + mInFlight.get(i));
+                        }
+                        mInFlight.clear();
+                    }
                 } else {
                     // the next of our alarms is now in flight.  reattribute the wakelock.
-                    final PendingIntent nowInFlight = mInFlight.peekFirst();
-                    if (nowInFlight != null) {
-                        setWakelockWorkSource(nowInFlight);
+                    if (mInFlight.size() > 0) {
+                        setWakelockWorkSource(mInFlight.get(0).mPendingIntent);
                     } else {
                         // should never happen
-                        Slog.e(TAG, "Alarm wakelock still held but sent queue empty");
+                        mLog.w("Alarm wakelock still held but sent queue empty");
                         mWakeLock.setWorkSource(null);
                     }
                 }
