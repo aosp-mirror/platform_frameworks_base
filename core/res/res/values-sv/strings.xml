@@ -132,7 +132,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pekdatorns lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Mobilens lagringsutrymme är fullt. Ta bort några filer för att frigöra utrymme."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
-    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Alternativ för pekdatorn"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Alternativ för surfplattan"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefonalternativ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Tyst läge"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Aktivera trådlöst"</string>
@@ -150,7 +150,7 @@
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Vill du starta om datorn i felsäkert läge? Då inaktiveras alla appar från tredje part som du har installerat. Apparna återställs när du startar om datorn igen."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Inga nya appar."</string>
-    <string name="global_actions" product="tablet" msgid="408477140088053665">"Alternativ för pekdatorn"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"Alternativ för surfplattan"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
@@ -450,7 +450,7 @@
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillåter att appen spelar in ljud med mikrofonen. Med den här behörigheten tillåts appen att spela in ljud när som helst utan ditt godkännande."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillåter att appen tar bilder och spelar in videor med kameran. Med den här behörigheten tillåts appen att använda kameran när som helst utan ditt godkännande."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"inaktivera pekdatorn permanent"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"inaktivera surfplattan permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"inaktivera telefonen permanent"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Tillåter att appen inaktiverar hela pekdatorn permanent. Detta är mycket farligt."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Tillåter att appen inaktiverar hela mobilen permanent. Detta är mycket farligt."</string>
@@ -501,16 +501,16 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Tillåter att appen styr enhetens telefonfunktioner. En app med den här behörigheten kan byta nätverk, aktivera/inaktivera mobilens radio och liknande utan att meddela dig."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"läsa telefonens status och identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillåter att appen kommer åt enhetens telefonfunktioner. Med den här behörigheten tillåts appen att identifiera mobilens telefonnummer och enhets-ID, om ett samtal pågår och vilket nummer samtalet är kopplat till."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att pekdatorn går in i viloläge"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tillåter att appen förhindrar att pekdatorn går in i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"slå på eller stänga av pekdatorn"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"slå på eller stänga av surfplattan"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sätta på eller stänga av telefonen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tillåter att appen slår på eller stänger av pekdatorn."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Tillåter att appen slår på eller stänger av mobilen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kör i fabrikstestläge"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till pekdatorns maskinvara. Är endast tillgänglig när pekdatorn körs i tillverkarens testläge."</string>
+    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till surfplattans maskinvara. Är endast tillgänglig när surfplattan körs i tillverkarens testläge."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till telefonens maskinvara. Är endast tillgänglig när telefonen körs i tillverkarens testläge."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ange bakgrund"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Tillåter att appen anger systemets bakgrund."</string>
@@ -766,7 +766,7 @@
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Inget SIM-kort"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Inget SIM-kort i pekdatorn."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Inget SIM-kort i surfplattan."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Sätt i ett SIM-kort."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kort saknas eller kan inte läsas. Sätt i ett SIM-kort."</string>
@@ -788,9 +788,9 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%d</xliff:g> gånger. "\n\n"Försök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till ombeds du att låsa upp pekdatorn med din Google-inloggning."\n\n" Försök igen om  <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till ombeds du att låsa upp mobilen med uppgifterna som du använder när du loggar in på Google."\n\n" Försök igen om  <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Du har försökt låsa upp pekdatorn på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök till kommer pekdatorn att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök till kommer pekdatorn att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> misslyckade försök till kommer mobilen att återställas till fabriksinställningarna. Du förlorar då alla användardata."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Du har försökt låsa upp pekdatorn på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Pekdatorn återställs nu till fabriksinställningarna."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Du har försökt låsa upp surfplattan på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Surfplattan återställs nu till fabriksinställningarna."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Du har försökt låsa upp mobilen på fel sätt <xliff:g id="NUMBER">%d</xliff:g> gånger. Mobilen återställs nu till fabriksinställningarna."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Glömt ditt grafiska lösenord?"</string>
