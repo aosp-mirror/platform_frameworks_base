@@ -1096,7 +1096,7 @@ void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         rects.push(r.fTop);
         rects.push(r.fRight);
         rects.push(r.fBottom);
-        count++;
+        count += 4;
         it.next();
     }
 
@@ -1732,7 +1732,7 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList,
 
 void OpenGLRenderer::outputDisplayList(DisplayList* displayList, uint32_t level) {
     if (displayList) {
-        displayList->output(*this, level);
+        displayList->output(level);
     }
 }
 
@@ -2082,7 +2082,6 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
  */
 void OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
     int color = paint->getColor();
-    SkPaint::Style style = paint->getStyle();
     SkXfermode::Mode mode = getXfermode(paint->getXfermode());
     bool isAA = paint->isAntiAlias();
 
@@ -3193,8 +3192,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     Vertex mesh[count * 6];
     Vertex* vertex = mesh;
 
-    for (int i = 0; i < count; i++) {
-        int index = i * 4;
+    for (int index = 0; index < count; index += 4) {
         float l = rects[index + 0];
         float t = rects[index + 1];
         float r = rects[index + 2];

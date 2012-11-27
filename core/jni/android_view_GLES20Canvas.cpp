@@ -479,7 +479,7 @@ static void android_view_GLES20Canvas_drawRegionAsRects(JNIEnv* env, jobject cla
             rects.push(r.fTop);
             rects.push(r.fRight);
             rects.push(r.fBottom);
-            count++;
+            count += 4;
             it.next();
         }
         renderer->drawRects(rects.array(), count, paint);

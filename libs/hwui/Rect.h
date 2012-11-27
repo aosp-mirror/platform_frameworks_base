@@ -171,22 +171,19 @@ public:
     }
 
 private:
-    static inline float min(float a, float b) { return (a < b) ? a : b; }
-    static inline float max(float a, float b) { return (a > b) ? a : b; }
-
     void intersectWith(Rect& tmp) const {
-        tmp.left = max(left, tmp.left);
-        tmp.top = max(top, tmp.top);
-        tmp.right = min(right, tmp.right);
-        tmp.bottom = min(bottom, tmp.bottom);
+        tmp.left = fmaxf(left, tmp.left);
+        tmp.top = fmaxf(top, tmp.top);
+        tmp.right = fminf(right, tmp.right);
+        tmp.bottom = fminf(bottom, tmp.bottom);
     }
 
     Rect intersectWith(float l, float t, float r, float b) const {
         Rect tmp;
-        tmp.left = max(left, l);
-        tmp.top = max(top, t);
-        tmp.right = min(right, r);
-        tmp.bottom = min(bottom, b);
+        tmp.left = fmaxf(left, l);
+        tmp.top = fmaxf(top, t);
+        tmp.right = fminf(right, r);
+        tmp.bottom = fminf(bottom, b);
         return tmp;
     }
 
