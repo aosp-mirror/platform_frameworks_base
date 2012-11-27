@@ -197,7 +197,7 @@ public class SurfaceTexture {
     public void attachToGLContext(int texName) {
         int err = nativeAttachToGLContext(texName);
         if (err != 0) {
-            throw new RuntimeException("Error during detachFromGLContext (see logcat for details)");
+            throw new RuntimeException("Error during attachToGLContext (see logcat for details)");
         }
     }
 
