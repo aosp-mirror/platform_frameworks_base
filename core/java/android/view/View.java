@@ -14465,6 +14465,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground instanceof ColorDrawable) {
             ((ColorDrawable) mBackground.mutate()).setColor(color);
             computeOpaqueFlags();
+            mBackgroundResource = 0;
         } else {
             setBackground(new ColorDrawable(color));
         }
