@@ -243,7 +243,7 @@ public class BitmapDrawable extends Drawable {
     public int getGravity() {
         return mBitmapState.mGravity;
     }
-    
+
     /** Set the gravity used to position/stretch the bitmap within its bounds.
         See android.view.Gravity
      * @param gravity the gravity
@@ -257,16 +257,58 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
+     * Enables or disables the mipmap hint for this drawable's bitmap.
+     * See {@link Bitmap#setHasMipMap(boolean)} for more information.
+     *
+     * If the bitmap is null calling this method has no effect.
+     *
+     * @param mipMap True if the bitmap should use mipmaps, false otherwise.
+     *
+     * @see #hasMipMap() 
+     */
+    public void setMipMap(boolean mipMap) {
+        if (mBitmapState.mBitmap != null) {
+            mBitmapState.mBitmap.setHasMipMap(mipMap);
+            invalidateSelf();
+        }
+    }
+
+    /**
+     * Indicates whether the mipmap hint is enabled on this drawable's bitmap.
+     *
+     * @return True if the mipmap hint is set, false otherwise. If the bitmap
+     *         is null, this method always returns false.
+     *
+     * @see #setMipMap(boolean) 
+     */
+    public boolean hasMipMap() {
+        return mBitmapState.mBitmap != null && mBitmapState.mBitmap.hasMipMap();
+    }
+
+    /**
      * Enables or disables anti-aliasing for this drawable. Anti-aliasing affects
      * the edges of the bitmap only so it applies only when the drawable is rotated.
      * 
      * @param aa True if the bitmap should be anti-aliased, false otherwise.
+     *
+     * @see #hasAntiAlias() 
      */
     public void setAntiAlias(boolean aa) {
         mBitmapState.mPaint.setAntiAlias(aa);
         invalidateSelf();
     }
-    
+
+    /**
+     * Indicates whether anti-aliasing is enabled for this drawable.
+     *
+     * @return True if anti-aliasing is enabled, false otherwise.
+     *
+     * @see #setAntiAlias(boolean)
+     */
+    public boolean hasAntiAlias() {
+        return mBitmapState.mPaint.isAntiAlias();
+    }
+
     @Override
     public void setFilterBitmap(boolean filter) {
         mBitmapState.mPaint.setFilterBitmap(filter);
@@ -451,6 +493,8 @@ public class BitmapDrawable extends Drawable {
         mBitmapState.mBitmap = bitmap;
         setBitmap(bitmap);
         setTargetDensity(r.getDisplayMetrics());
+        setMipMap(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_mipMap,
+                bitmap.hasMipMap()));
 
         final Paint paint = mBitmapState.mPaint;
         paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,

@@ -723,6 +723,7 @@ package android {
     field public static final int minResizeWidth = 16843669; // 0x1010395
     field public static final int minSdkVersion = 16843276; // 0x101020c
     field public static final int minWidth = 16843071; // 0x101013f
+    field public static final int mipMap = 16843725; // 0x10103cd
     field public static final int mode = 16843134; // 0x101017e
     field public static final int moreIcon = 16843061; // 0x1010135
     field public static final int multiprocess = 16842771; // 0x1010013
@@ -9344,10 +9345,13 @@ package android.graphics.drawable {
     method public final android.graphics.Paint getPaint();
     method public android.graphics.Shader.TileMode getTileModeX();
     method public android.graphics.Shader.TileMode getTileModeY();
+    method public boolean hasAntiAlias();
+    method public boolean hasMipMap();
     method public void setAlpha(int);
     method public void setAntiAlias(boolean);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void setGravity(int);
+    method public void setMipMap(boolean);
     method public void setTargetDensity(android.graphics.Canvas);
     method public void setTargetDensity(android.util.DisplayMetrics);
     method public void setTargetDensity(int);

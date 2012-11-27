@@ -4030,20 +4030,21 @@
     <declare-styleable name="BitmapDrawable">
         <!-- Identifier of the bitmap file. This attribute is mandatory. -->
         <attr name="src" />
-        <!-- Enables or disables antialiasing. -->
+        <!-- Enables or disables antialiasing. Antialiasing can be used to smooth the
+             edges of a bitmap when rotated. Default value is false. -->
         <attr name="antialias" format="boolean" />
         <!-- Enables or disables bitmap filtering. Filtering is used when the bitmap is
-             shrunk or stretched to smooth its apperance. -->
+             shrunk or stretched to smooth its apperance. Default value is true. -->
         <attr name="filter" format="boolean" />
         <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
-             an RGB 565 screen). -->
+             an RGB 565 screen). Default value is true. -->
         <attr name="dither" />
         <!-- Defines the gravity for the bitmap. The gravity indicates where to position
              the drawable in its container if the bitmap is smaller than the container. -->
         <attr name="gravity" />
         <!-- Defines the tile mode. When the tile mode is enabled, the bitmap is repeated.
-             Gravity is ignored when the tile mode is enabled. -->
+             Gravity is ignored when the tile mode is enabled. Default value is "disabled". -->
         <attr name="tileMode">
             <!-- Do not tile the bitmap. This is the default value. -->
             <enum name="disabled" value="-1" />
@@ -4055,6 +4056,10 @@
                  mirror images so that adjacent images always seam. -->
             <enum name="mirror" value="2" />
         </attr>
+        <!-- Enables or disables the mipmap hint. See
+            {@link android.graphics.Bitmap#setHasMipMap(boolean)} for more information.
+            Default value is false. -->
+        <attr name="mipMap" format="boolean" />
     </declare-styleable>
 
     <!-- Drawable used to draw 9-patches. -->
