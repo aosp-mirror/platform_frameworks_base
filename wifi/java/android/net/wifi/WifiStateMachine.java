@@ -127,7 +127,7 @@ public class WifiStateMachine extends StateMachine {
     private final boolean mBackgroundScanSupported;
 
     private String mInterfaceName;
-    /* Tethering interface could be seperate from wlan interface */
+    /* Tethering interface could be separate from wlan interface */
     private String mTetherInterfaceName;
 
     private int mLastSignalLevel = -1;
@@ -249,7 +249,7 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_START_DRIVER                     = BASE + 13;
     /* Stop the driver */
     static final int CMD_STOP_DRIVER                      = BASE + 14;
-    /* Indicates Static IP succeded */
+    /* Indicates Static IP succeeded */
     static final int CMD_STATIC_IP_SUCCESS                = BASE + 15;
     /* Indicates Static IP failed */
     static final int CMD_STATIC_IP_FAILURE                = BASE + 16;
@@ -264,7 +264,7 @@ public class WifiStateMachine extends StateMachine {
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
-    /* Indicates soft ap start succeded */
+    /* Indicates soft ap start succeeded */
     static final int CMD_START_AP_SUCCESS                 = BASE + 22;
     /* Indicates soft ap start failed */
     static final int CMD_START_AP_FAILURE                 = BASE + 23;
@@ -883,22 +883,22 @@ public class WifiStateMachine extends StateMachine {
      * TODO: doc
      */
     public void setScanOnlyMode(boolean enable) {
-      if (enable) {
-          sendMessage(obtainMessage(CMD_SET_SCAN_MODE, SCAN_ONLY_MODE, 0));
-      } else {
-          sendMessage(obtainMessage(CMD_SET_SCAN_MODE, CONNECT_MODE, 0));
-      }
+        if (enable) {
+            sendMessage(obtainMessage(CMD_SET_SCAN_MODE, SCAN_ONLY_MODE, 0));
+        } else {
+            sendMessage(obtainMessage(CMD_SET_SCAN_MODE, CONNECT_MODE, 0));
+        }
     }
 
     /**
      * TODO: doc
      */
     public void setScanType(boolean active) {
-      if (active) {
-          sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_ACTIVE, 0));
-      } else {
-          sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_PASSIVE, 0));
-      }
+        if (active) {
+            sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_ACTIVE, 0));
+        } else {
+            sendMessage(obtainMessage(CMD_SET_SCAN_TYPE, SCAN_PASSIVE, 0));
+        }
     }
 
     /**
