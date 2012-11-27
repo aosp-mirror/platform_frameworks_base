@@ -994,11 +994,11 @@
     <string name="year" msgid="4001118221013892076">"godina"</string>
     <string name="years" msgid="6881577717993213522">"godina"</string>
   <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 sekundu"</item>
+    <item quantity="one" msgid="6962015528372969481">"1 s"</item>
     <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 minutu"</item>
+    <item quantity="one" msgid="4915414002546085617">"1 min"</item>
     <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min"</item>
   </plurals>
   <plurals name="duration_hours">
