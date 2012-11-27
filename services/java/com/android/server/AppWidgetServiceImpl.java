@@ -336,6 +336,7 @@ class AppWidgetServiceImpl {
                 pw.print(info.autoAdvanceViewId);
                 pw.print(" initialLayout=#");
                 pw.print(Integer.toHexString(info.initialLayout));
+                pw.print(" uid="); pw.print(p.uid);
                 pw.print(" zombie="); pw.println(p.zombie);
     }
 
@@ -699,6 +700,10 @@ class AppWidgetServiceImpl {
             }
 
             int userId = UserHandle.getUserId(id.provider.uid);
+            if (userId != mUserId) {
+                Slog.w(TAG, "AppWidgetServiceImpl of user " + mUserId
+                        + " binding to provider on user " + userId);
+            }
             // Bind to the RemoteViewsService (which will trigger a callback to the
             // RemoteViewsAdapter.onServiceConnected())
             final long token = Binder.clearCallingIdentity();
@@ -966,12 +971,31 @@ class AppWidgetServiceImpl {
             ensureStateLoadedLocked();
             for (int i = 0; i < N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
+                if (id == null) {
+                    String message = "AppWidgetId NPE: mUserId=" + mUserId
+                            + ", callingUid=" + Binder.getCallingUid()
+                            + ", appWidgetIds[i]=" + appWidgetIds[i]
+                            + "\n  mAppWidgets:\n" + getUserWidgets();
+                    throw new NullPointerException(message);
+                }
                 if (id.views != null) {
                     // Only trigger a partial update for a widget if it has received a full update
                     updateAppWidgetInstanceLocked(id, views, true);
                 }
             }
         }
+    }
+
+    private String getUserWidgets() {
+        StringBuffer sb = new StringBuffer();
+        for (AppWidgetId widget: mAppWidgetIds) {
+            sb.append("    id="); sb.append(widget.appWidgetId);
+            sb.append(", hostUid="); sb.append(widget.host.uid);
+            sb.append(", provider="); sb.append(widget.provider.info.provider.toString());
+            sb.append("\n");
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
