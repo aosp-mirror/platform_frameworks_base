@@ -1,0 +1,182 @@
+page.title=Displaying Progress in a Notification
+parent.title=Notifying the User
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Using Expanded Notification Styles
+previous.link=expanded.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#FixedProgress">Display a Fixed-duration progress Indicator</a></li>
+  <li><a href="#ActivityIndicator">Display a Continuing Activity Indicator</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">
+        Intents and Intent Filters
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+    </li>
+</ul>
+
+
+</div>
+</div>
+
+
+
+<p>
+    Notifications can include an animated progress indicator that shows users the status
+    of an ongoing operation. If you can estimate how long the operation takes and how much of it
+    is complete at any time, use the "determinate" form of the indicator
+    (a progress bar). If you can't estimate the length of the operation, use the
+    "indeterminate" form of the indicator (an activity indicator).
+</p>
+<p>
+    Progress indicators are displayed with the platform's implementation of the
+    {@link android.widget.ProgressBar} class.
+</p>
+<p>
+    To use a progress indicator, call
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. The
+    determinate and indeterminate forms are described in the following sections.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="FixedProgress">Display a Fixed-duration Progress Indicator</h2>
+<p>
+    To display a determinate progress bar, add the bar to your notification by calling
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
+    setProgress(max, progress, false)} and then issue the notification. 
+    The third argument is a boolean that indicates whether the 
+    progress bar is indeterminate (<strong>true</strong>) or determinate (<strong>false</strong>).
+    As your operation proceeds,
+    increment <code>progress</code>, and update the notification. At the end of the operation,
+    <code>progress</code> should equal <code>max</code>. A common way to call
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
+    is to set <code>max</code> to 100 and then increment <code>progress</code> as a
+    "percent complete" value for the operation.
+</p>
+<p>
+    You can either leave the progress bar showing when the operation is done, or remove it. In
+    either case, remember to update the notification text to show that the operation is complete.
+    To remove the progress bar, call
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
+    setProgress(0, 0, false)}. For example:
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+<p>
+    The resulting notifications are shown in figure 1. On the left side is a snapshot of the
+    notification during the operation; on the right side is a snapshot of it after the operation
+    has finished.
+</p>
+<img
+    id="figure1"
+    src="{@docRoot}images/ui/notifications/progress_bar_summary.png"
+    height="84"
+    alt="" />
+<p class="img-caption">
+<strong>Figure 1.</strong> The progress bar during and after the operation.</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="ActivityIndicator">Display a Continuing Activity Indicator</h2>
+<p>
+    To display a continuing (indeterminate) activity indicator, add it to your notification with
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
+    and issue the notification. The first two arguments are ignored, and the third argument  
+    declares that the indicator is indeterminate. The result is an indicator
+    that has the same style as a progress bar, except that its animation is ongoing.
+</p>
+<p>
+    Issue the notification at the beginning of the operation. The animation will run until you
+    modify your notification. When the operation is done, call
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
+    setProgress(0, 0, false)} and then update the notification to remove the activity indicator.
+    Always do this; otherwise, the animation will run even when the operation is complete. Also
+    remember to change the notification text to indicate that the operation is complete.
+</p>
+<p>
+    To see how continuing activity indicators work, refer to the preceding snippet. Locate the following lines:
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    Replace the lines you've found with the following lines. Notice that the third parameter
+    in the {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} 
+    call is set to {@code true} to indicate that the progress bar is
+    indeterminate:
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    The resulting indicator is shown in figure 2:
+</p>
+<img
+    id="figure2"
+    src="{@docRoot}images/ui/notifications/activity_indicator.png"
+    height="99"
+    alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> An ongoing activity indicator.</p>
