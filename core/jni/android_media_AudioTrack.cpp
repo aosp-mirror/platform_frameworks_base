@@ -227,9 +227,12 @@ int getformat(int audioformat)
         return AUDIO_FORMAT_EVRCB;
     else if(audioformat==javaAudioTrackFields.EVRCWB)
         return AUDIO_FORMAT_EVRCWB;
+    else if(audioformat==javaAudioTrackFields.EVRCNW)
+        return AUDIO_FORMAT_EVRCNW;
 
     return AUDIO_FORMAT_PCM_8_BIT;
 }
+
 static int
 android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jint streamType, jint sampleRateInHertz, jint javaChannelMask,
@@ -289,7 +292,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         && (audioFormat != javaAudioTrackFields.AMRWB)
         && (audioFormat != javaAudioTrackFields.EVRC)
         && (audioFormat != javaAudioTrackFields.EVRCB)
-        && (audioFormat != javaAudioTrackFields.EVRCWB)) {
+        && (audioFormat != javaAudioTrackFields.EVRCWB)
+        && (audioFormat != javaAudioTrackFields.EVRCNW)) {
         ALOGE("Error creating AudioTrack: unsupported audio format.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
@@ -308,12 +312,9 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     }
 
     // compute the frame count
-    int bytesPerSample;
-    if(audioFormat == javaAudioTrackFields.PCM8)
-        bytesPerSample = 1;
-    else
-        bytesPerSample = 2;
-    audio_format_t format = (audio_format_t)getformat(audioFormat);
+    int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
+    audio_format_t format = audioFormat == javaAudioTrackFields.PCM16 ?
+            AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
     int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
 
     jclass clazz = env->GetObjectClass(thiz);
@@ -571,7 +572,8 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
         || (audioFormat == javaAudioTrackFields.AMRWB)
         || (audioFormat == javaAudioTrackFields.EVRC)
         || (audioFormat == javaAudioTrackFields.EVRCB)
-        || (audioFormat == javaAudioTrackFields.EVRCWB)) {
+        || (audioFormat == javaAudioTrackFields.EVRCWB)
+        || (audioFormat == javaAudioTrackFields.EVRCNW)) {
             // writing to shared memory, check for capacity
             if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
                 sizeInBytes = track->sharedBuffer()->size();
@@ -889,7 +891,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
             sampleRateInHertz) != NO_ERROR) {
         return -1;
     }
-    return frameCount * nbChannels * (audioFormat == javaAudioTrackFields.PCM8 ? 1 : 2);
+    return frameCount * nbChannels * (audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1);
 }
 
 // ----------------------------------------------------------------------------
@@ -964,26 +966,8 @@ static JNINativeMethod gMethods[] = {
 
 // field names found in android/media/AudioTrack.java
 #define JAVA_POSTEVENT_CALLBACK_NAME                    "postEventFromNative"
-#define JAVA_CONST_PCM16_NAME                           "ENCODING_PCM_16BIT"
-#define JAVA_CONST_PCM8_NAME                            "ENCODING_PCM_8BIT"
-#define JAVA_CONST_AMRNB_NAME                           "ENCODING_AMRNB"
-#define JAVA_CONST_AMRWB_NAME                           "ENCODING_AMRWB"
-#define JAVA_CONST_EVRC_NAME                            "ENCODING_EVRC"
-#define JAVA_CONST_EVRCB_NAME                           "ENCODING_EVRCB"
-#define JAVA_CONST_EVRCWB_NAME                          "ENCODING_EVRCWB"
-#define JAVA_CONST_BUFFER_COUNT_NAME                    "BUFFER_COUNT"
-#define JAVA_CONST_STREAM_VOICE_CALL_NAME               "STREAM_VOICE_CALL"
-#define JAVA_CONST_STREAM_SYSTEM_NAME                   "STREAM_SYSTEM"
-#define JAVA_CONST_STREAM_RING_NAME                     "STREAM_RING"
-#define JAVA_CONST_STREAM_MUSIC_NAME                    "STREAM_MUSIC"
-#define JAVA_CONST_STREAM_ALARM_NAME                    "STREAM_ALARM"
-#define JAVA_CONST_STREAM_NOTIFICATION_NAME             "STREAM_NOTIFICATION"
-#define JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME            "STREAM_BLUETOOTH_SCO"
-#define JAVA_CONST_STREAM_DTMF_NAME                     "STREAM_DTMF"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
 #define JAVA_JNIDATA_FIELD_NAME                         "mJniData"
-#define JAVA_AUDIOFORMAT_CLASS_NAME             "android/media/AudioFormat"
-#define JAVA_AUDIOMANAGER_CLASS_NAME            "android/media/AudioManager"
 
 // ----------------------------------------------------------------------------
 // preconditions:
@@ -1042,68 +1026,6 @@ int register_android_media_AudioTrack(JNIEnv *env)
         return -1;
     }
 
-    jclass audioFormatClass = NULL;
-    audioFormatClass = env->FindClass(JAVA_AUDIOFORMAT_CLASS_NAME);
-    if (audioFormatClass == NULL) {
-        ALOGE("Can't find %s", JAVA_AUDIOFORMAT_CLASS_NAME);
-        return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM16_NAME, &(javaAudioTrackFields.PCM16))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM8_NAME, &(javaAudioTrackFields.PCM8))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_AMRNB_NAME, &(javaAudioTrackFields.AMRNB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_AMRWB_NAME, &(javaAudioTrackFields.AMRWB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRC_NAME, &(javaAudioTrackFields.EVRC))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRCB_NAME, &(javaAudioTrackFields.EVRCB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRCWB_NAME, &(javaAudioTrackFields.EVRCWB))
-) {
-        return -1;
-    }
-    jclass audioManagerClass = NULL;
-    audioManagerClass = env->FindClass(JAVA_AUDIOMANAGER_CLASS_NAME);
-    if (audioManagerClass == NULL) {
-       ALOGE("Can't find %s", JAVA_AUDIOMANAGER_CLASS_NAME);
-       return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_VOICE_CALL_NAME, &(javaAudioTrackFields.STREAM_VOICE_CALL))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_MUSIC_NAME, &(javaAudioTrackFields.STREAM_MUSIC))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_SYSTEM_NAME, &(javaAudioTrackFields.STREAM_SYSTEM))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_RING_NAME, &(javaAudioTrackFields.STREAM_RING))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_ALARM_NAME, &(javaAudioTrackFields.STREAM_ALARM))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_NOTIFICATION_NAME, &(javaAudioTrackFields.STREAM_NOTIFICATION))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME, &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_DTMF_NAME, &(javaAudioTrackFields.STREAM_DTMF))) {
-        return -1;
-    }
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

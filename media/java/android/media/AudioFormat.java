@@ -49,6 +49,8 @@ public class AudioFormat {
     public static final int ENCODING_EVRCB = 103;   // accessed by native code
     /** @hide */
     public static final int ENCODING_EVRCWB = 104;  // accessed by native code
+    /** @hide */
+    public static final int ENCODING_EVRCNW = 105;  // accessed by native code
 
     /** Invalid audio channel configuration */
     /** @deprecated use CHANNEL_INVALID instead  */

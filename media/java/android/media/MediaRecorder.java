@@ -204,6 +204,11 @@ public class MediaRecorder
          */
         public static final int REMOTE_SUBMIX = 8;
 
+        /** @hide */
+        public static final int FM_RX = 9;
+
+        /** @hide */
+        public static final int FM_RX_A2DP = 10;
         /**
          * Audio source for preemptible, low-priority software hotword detection
          * It presents the same gain and pre processing tuning as {@link #VOICE_RECOGNITION}.
@@ -216,12 +221,6 @@ public class MediaRecorder
          * @hide
          */
         protected static final int HOTWORD = 1999;
-
-        /** @hide */
-        public static final int FM_RX = 9;
-
-        /** @hide */
-        public static final int FM_RX_A2DP = 10;
     }
 
     /**
@@ -280,12 +279,11 @@ public class MediaRecorder
 
         /** @hide H.264/AAC data encapsulated in MPEG2/TS */
         public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+
         /** @hide QCP file format */
         public static final int QCP = 9;
-        /** @hide 3GPP2 media file format*/
-        public static final int THREE_GPP2 = 10;
         /** @hide WAVE media file format*/
-        public static final int WAVE = 11;
+        public static final int WAVE = 10;
     };
 
     /**

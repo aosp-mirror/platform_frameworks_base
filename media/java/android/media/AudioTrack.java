@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -420,6 +423,7 @@ public class AudioTrack
         case AudioFormat.ENCODING_EVRC:
         case AudioFormat.ENCODING_EVRCB:
         case AudioFormat.ENCODING_EVRCWB:
+        case AudioFormat.ENCODING_EVRCNW:
             mAudioFormat = audioFormat;
             break;
         default:
@@ -712,7 +716,8 @@ public class AudioTrack
             && (audioFormat != AudioFormat.ENCODING_AMRWB)
             && (audioFormat != AudioFormat.ENCODING_EVRC)
             && (audioFormat != AudioFormat.ENCODING_EVRCB)
-            && (audioFormat != AudioFormat.ENCODING_EVRCWB)) {
+            && (audioFormat != AudioFormat.ENCODING_EVRCWB)
+            && (audioFormat != AudioFormat.ENCODING_EVRCNW)) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }

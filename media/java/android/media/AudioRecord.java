@@ -308,6 +308,7 @@ public class AudioRecord
         case AudioFormat.ENCODING_EVRC:
         case AudioFormat.ENCODING_EVRCB:
         case AudioFormat.ENCODING_EVRCWB:
+        case AudioFormat.ENCODING_EVRCNW:
             mAudioFormat = audioFormat;
             break;
         default:
@@ -327,13 +328,13 @@ public class AudioRecord
         // NB: this section is only valid with PCM data.
         // To update when supporting compressed formats
         int bytesPerSample;
-        if(mAudioFormat == AudioFormat.ENCODING_PCM_8BIT)
-            bytesPerSample = 1;
+        if(mAudioFormat == AudioFormat.ENCODING_PCM_16BIT)
+            bytesPerSample = 2;
         else if((mAudioFormat == AudioFormat.ENCODING_AMRWB) &&
                 (mRecordSource != MediaRecorder.AudioSource.VOICE_COMMUNICATION))
             bytesPerSample = 61;
         else
-            bytesPerSample = 2;
+            bytesPerSample = 1;
         int frameSizeInBytes = mChannelCount * bytesPerSample;
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
             throw new IllegalArgumentException("Invalid audio buffer size.");
@@ -494,7 +495,8 @@ public class AudioRecord
             && audioFormat != AudioFormat.ENCODING_AMRWB
             && audioFormat != AudioFormat.ENCODING_EVRC
             && audioFormat != AudioFormat.ENCODING_EVRCB
-            && audioFormat != AudioFormat.ENCODING_EVRCWB) {
+            && audioFormat != AudioFormat.ENCODING_EVRCWB
+            && audioFormat != AudioFormat.ENCODING_EVRCNW) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }
