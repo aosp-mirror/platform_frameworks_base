@@ -45,8 +45,10 @@
 
     <style name="FieldTitle">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">120dp</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">right</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="FieldContents">
@@ -61,5 +63,18 @@
         <item name="android:visibility">gone</item>
     </style>
 
+    <style name="FieldGroup">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_marginTop">18dp</item>
+    </style>
+    
+    <style name="FieldChoices">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:baselineAlignedChildIndex">0</item>
+    </style>
 </resources>
 
