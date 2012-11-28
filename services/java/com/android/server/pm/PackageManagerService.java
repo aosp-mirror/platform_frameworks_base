@@ -4113,7 +4113,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
 
-                    Slog.i(TAG, "Linking native library dir for " + path);
+                    if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
                     final int[] userIds = sUserManager.getUserIds();
                     synchronized (mInstallLock) {
                         for (int userId : userIds) {
@@ -6301,20 +6301,21 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     final File packageFile;
                     if (encryptionParams != null || !"file".equals(mPackageURI.getScheme())) {
-                        ParcelFileDescriptor out = null;
-
                         mTempPackage = createTempPackageFile(mDrmAppPrivateInstallDir);
                         if (mTempPackage != null) {
+                            ParcelFileDescriptor out;
                             try {
                                 out = ParcelFileDescriptor.open(mTempPackage,
                                         ParcelFileDescriptor.MODE_READ_WRITE);
                             } catch (FileNotFoundException e) {
+                                out = null;
                                 Slog.e(TAG, "Failed to create temporary file for : " + mPackageURI);
                             }
 
                             // Make a temporary file for decryption.
                             ret = mContainerService
                                     .copyResource(mPackageURI, encryptionParams, out);
+                            IoUtils.closeQuietly(out);
 
                             packageFile = mTempPackage;
 
@@ -9079,10 +9080,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (removed.size() > 0) {
                     for (int j=0; j<removed.size(); j++) {
                         PreferredActivity pa = removed.get(i);
-                        RuntimeException here = new RuntimeException("here");
-                        here.fillInStackTrace();
                         Slog.w(TAG, "Removing dangling preferred activity: "
-                                + pa.mPref.mComponent, here);
+                                + pa.mPref.mComponent);
                         pir.removeFilter(pa);
                     }
                     mSettings.writePackageRestrictionsLPr(
