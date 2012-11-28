@@ -1,0 +1,228 @@
+page.title=Preserving Navigation when Starting an Activity
+parent.title=Notifying the User
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Updating Notifications
+next.link=managing.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DirectEntry">Set up a regular activity PendingIntent</a></li>
+  <li><a href="#ExtendedNotification">Set up a special activity PendingIntent</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">
+        Intents and Intent Filters
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+    </li>
+</ul>
+
+
+</div>
+</div>
+<p>
+    Part of designing a notification is preserving the user's expected navigation experience. 
+    For a detailed discussion of this topic, see the
+    <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#NotificationResponse">Notifications</a>
+    API guide.
+    There are two general situations:
+</p>
+<dl>
+    <dt>
+        Regular activity
+    </dt>
+    <dd>
+        You're starting an {@link android.app.Activity} that's part of the application's normal
+        workflow. 
+    </dd>
+    <dt>
+        Special activity
+    </dt>
+    <dd>
+        The user only sees this {@link android.app.Activity} if it's started from a notification.
+        In a sense, the {@link android.app.Activity} extends the notification by providing
+        information that would be hard to display in the notification itself.
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="DirectEntry">Set Up a Regular Activity PendingIntent</h2>
+<p>
+    To set up a {@link android.app.PendingIntent} that starts a direct entry
+    {@link android.app.Activity}, follow these steps:
+</p>
+<ol>
+    <li>
+        Define your application's {@link android.app.Activity} hierarchy in the manifest. The final XML should look like this:
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        Create a back stack based on the {@link android.content.Intent} that starts the
+        {@link android.app.Activity}. For example:
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="ExtendedNotification">Set Up a Special Activity PendingIntent</h2>
+
+<p>
+    A special {@link android.app.Activity} doesn't need a back stack, so you don't have to
+    define its {@link android.app.Activity} hierarchy in the manifest, and you don't have
+    to call
+    {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} to build a
+    back stack. Instead, use the manifest to set up the {@link android.app.Activity} task options,
+    and create the {@link android.app.PendingIntent} by calling
+    {@link android.app.PendingIntent#getActivity getActivity()}:
+</p>
+<ol>
+    <li>
+        In your manifest, add the following attributes to the
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+        element for the {@link android.app.Activity}:
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                The activity's fully-qualified class name.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                Combined with the
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK} flag
+                that you set in code, this ensures that this {@link android.app.Activity} doesn't
+                go into the application's default task. Any existing tasks that have the
+                application's default affinity are not affected.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                Excludes the new task from <i>Recents</i>, so that the user can't accidentally
+                navigate back to it.
+            </dd>
+        </dl>
+        <p>
+            This snippet shows the element:
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        Build and issue the notification:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Create an {@link android.content.Intent} that starts the
+                {@link android.app.Activity}.
+            </li>
+            <li>
+                Set the {@link android.app.Activity} to start in a new, empty task by calling
+                {@link android.content.Intent#setFlags setFlags()} with the flags
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                and
+                {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK}.
+            </li>
+            <li>
+                Set any other options you need for the {@link android.content.Intent}.
+            </li>
+            <li>
+                Create a {@link android.app.PendingIntent} from the {@link android.content.Intent}
+                by calling {@link android.app.PendingIntent#getActivity getActivity()}.
+                You can then use this {@link android.app.PendingIntent} as the argument to
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+    <p>
+        The following code snippet demonstrates the process:
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(new ComponentName(this, ResultActivity.class));
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
