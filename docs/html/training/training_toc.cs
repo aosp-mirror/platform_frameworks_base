@@ -417,7 +417,6 @@
           </li>
         </ul>
       </li>
-
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/efficient-downloads/index.html"
@@ -601,6 +600,66 @@
           </li>
         </ul>
       </li>
+
+      <li class="nav-section">
+          <div class="nav-section-header">
+              <a href="<?cs var:toroot ?>training/notify-user/index.html"
+                 description=
+                 "How to display messages called notifications outside of 
+                 your application's UI."
+               >Notifying the User</a>
+          </div>
+          <ul>
+              <li>
+                  <a href="<?cs var:toroot ?>training/notify-user/build-notification.html">
+                  Building a Notification
+                  </a>
+              </li>
+              <li>
+                  <a href="<?cs var:toroot ?>training/notify-user/navigation.html">
+                  Preserving Navigation when Starting an Activity
+                  </a>
+              </li>
+              <li>
+                  <a href="<?cs var:toroot ?>training/notify-user/managing.html">
+                  Updating Notifications
+                  </a>
+              </li>
+              <li>
+                  <a href="<?cs var:toroot ?>training/notify-user/expanded.html">
+                  Using Big View Styles
+                  </a>
+              </li>
+              <li>
+                  <a href="<?cs var:toroot ?>training/notify-user/display-progress.html">
+                  Displaying Progress in a Notification
+                  </a>
+              </li>
+          </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/search/index.html"
+             description=
+             "How to properly add a search interface to your app and create a searchable database."
+            >Adding Search Functionality</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/search/setup.html">
+            Setting up the Search Interface
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/search/search.html">
+            Storing and Searching for Data
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/search/backward-compat.html">
+            Remaining Backward Compatible
+          </a>
+          </li>
+        </ul>
+      </li>
       
       
       <li class="nav-section">
@@ -656,29 +715,6 @@
           </li>
           <li><a href="<?cs var:toroot ?>training/tv/unsupported-features-tv.html">
             Handling Features Not Supported on TV
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/search/index.html"
-             description=
-             "How to properly add a search interface to your app and create a searchable database."
-            >Adding Search Functionality</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/search/setup.html">
-            Setting up the Search Interface
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/search/search.html">
-            Storing and Searching for Data
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/search/backward-compat.html">
-            Remaining Backward Compatible
           </a>
           </li>
         </ul>
