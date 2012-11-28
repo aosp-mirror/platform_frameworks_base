@@ -1,0 +1,167 @@
+page.title=Using Big View Styles
+Styles parent.title=Notifying the User
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Displaying Progress in a Notification
+next.link=display-progress.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#activity">Set Up the Notification to Launch a New Activity</a></li>
+  <li><a href="#big-view">Construct the Big View</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">
+        Intents and Intent Filters
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+    </li>
+</ul>
+
+
+</div>
+</div>
+
+<p>Notifications in the notification drawer appear in two main visual styles,
+normal view and big view. The big view of a notification only appears when the
+notification is expanded. This happens when the notification is at the top of
+the drawer, or the user clicks the notification. </p>
+
+<p>Big views were introduced in
+Android 4.1, and they're not supported on older devices. This lesson describes
+how to incorporate big view notifications into your app while still providing
+full functionality via the normal view. See the <a
+href="{@docRoot}guide/topics/ui/notifiers/notifications.html#BigNotify">
+Notifications API guide</a> for more discussion of big views.</p>
+
+<p>Here is an example of a normal view: </p>
+
+<img src="{@docRoot}images/training/notifications-normalview.png" width="300" height="58" alt="normal view" />
+
+<p class="img-caption">
+  <strong>Figure 1.</strong> Normal view notification.
+</p>
+
+
+<p>Here is an example of a big view:</p>
+
+<img src="{@docRoot}images/training/notifications-bigview.png" width="300" height="143" alt="big view" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Big view notification.
+</p>
+
+
+<p> In the sample application shown in this lesson, both the normal view and the
+big view give users access to same functionality:</p>
+
+<ul>
+ <li>The ability to snooze or dismiss the notification.</li>
+ <li>A way to view the reminder text the user set as part of the timer.</li>
+</ul>
+
+<p>The normal view provides these features through a new activity that launches
+when the user clicks the notification. Keep this in mind as you design your notifications&mdash;first 
+provide the functionality in the normal view, since
+this is how many users will interact with the notification.</p>
+
+<h2 id="activity">Set Up the Notification to Launch a New Activity</h2>
+
+<p>The sample application uses an {@link android.app.IntentService} subclass ({@code PingService})
+to construct and issue the notification.</p>
+
+
+<p>In this snippet, the
+{@link android.app.IntentService} method
+{@link android.app.IntentService#onHandleIntent onHandleIntent()} specifies the new activity 
+that will be launched if the user
+clicks the notification itself. The method 
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} 
+defines a pending intent that should be fired when the user
+clicks the notification, thereby launching the activity.</p>
+
+<pre>Intent resultIntent = new Intent(this, ResultActivity.class);
+resultIntent.putExtra(CommonConstants.EXTRA_MESSAGE, msg);
+resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+     
+// Because clicking the notification launches a new ("special") activity, 
+// there's no need to create an artificial back stack.
+PendingIntent resultPendingIntent =
+         PendingIntent.getActivity(
+         this,
+         0,
+         resultIntent,
+         PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// This sets the pending intent that should be fired when the user clicks the
+// notification. Clicking the notification launches a new activity.
+builder.setContentIntent(resultPendingIntent);
+</pre>
+
+<h2 id="big-view">Construct the Big View</h2>
+
+<p>This snippet shows how to set up the buttons that will appear in the big view:</p>
+
+<pre>
+// Sets up the Snooze and Dismiss action buttons that will appear in the
+// big view of the notification.
+Intent dismissIntent = new Intent(this, PingService.class);
+dismissIntent.setAction(CommonConstants.ACTION_DISMISS);
+PendingIntent piDismiss = PendingIntent.getService(this, 0, dismissIntent, 0);
+
+Intent snoozeIntent = new Intent(this, PingService.class);
+snoozeIntent.setAction(CommonConstants.ACTION_SNOOZE);
+PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
+</pre>
+
+<p>This snippet shows how to construct the 
+{@link android.support.v4.app.NotificationCompat.Builder Builder} object. 
+It sets the style for the big
+view to be "big text," and sets its content to be the reminder message. It uses
+{@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()}
+to add the <strong>Snooze</strong> and <strong>Dismiss</strong> buttons (and
+their associated pending intents) that will appear in the notification's
+big view:</p>
+
+<pre>// Constructs the Builder object.
+NotificationCompat.Builder builder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.ic_stat_notification)
+        .setContentTitle(getString(R.string.notification))
+        .setContentText(getString(R.string.ping))
+        .setDefaults(Notification.DEFAULT_ALL) // requires VIBRATE permission
+        /*
+         * Sets the big view "big text" style and supplies the
+         * text (the user's reminder message) that will be displayed
+         * in the detail area of the expanded notification.
+         * These calls are ignored by the support library for
+         * pre-4.1 devices.
+         */
+        .setStyle(new NotificationCompat.BigTextStyle()
+                .bigText(msg))
+        .addAction (R.drawable.ic_stat_dismiss,
+                getString(R.string.dismiss), piDismiss)
+        .addAction (R.drawable.ic_stat_snooze,
+                getString(R.string.snooze), piSnooze);
+</pre>
+
+
+
