@@ -177,7 +177,8 @@ LOCAL_C_INCLUDES += \
 	external/harfbuzz_ng/src \
 	external/zlib \
 	frameworks/opt/emoji \
-	libcore/include
+	libcore/include \
+	$(call include-path-for, audio-utils) \
 
 LOCAL_SHARED_LIBRARIES := \
 	libmemtrack \
@@ -213,7 +214,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libjpeg \
 	libusbhost \
 	libharfbuzz_ng \
-	libz
+	libz \
+	libaudioutils \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

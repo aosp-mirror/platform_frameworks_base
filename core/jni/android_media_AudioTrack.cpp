@@ -26,6 +26,7 @@
 #include <utils/Log.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
+#include <audio_utils/primitives.h>
 
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
@@ -546,10 +547,8 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* da
             }
             int count = sizeInBytes;
             int16_t *dst = (int16_t *)track->sharedBuffer()->pointer();
-            const int8_t *src = (const int8_t *)(data + offsetInBytes);
-            while (count--) {
-                *dst++ = (int16_t)(*src++^0x80) << 8;
-            }
+            const uint8_t *src = (const uint8_t *)(data + offsetInBytes);
+            memcpy_to_i16_from_u8(dst, src, count);
             // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
             // the 8bit mixer restriction from the user of this function
             written = sizeInBytes;
