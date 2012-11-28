@@ -134,7 +134,6 @@ class KeyguardCircleFramedDrawable extends Drawable {
     }
 
     public void setScale(float scale) {
-        Log.i("KFD", "scale: " + scale);
         mScale = scale;
     }
 

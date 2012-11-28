@@ -146,8 +146,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     getSendingUserId());
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
-                Slog.v(TAG, "Sending password expiration notifications for action " + action
-                        + " for user " + userHandle);
+                if (DBG) Slog.v(TAG, "Sending password expiration notifications for action "
+                        + action + " for user " + userHandle);
                 mHandler.post(new Runnable() {
                     public void run() {
                         handlePasswordExpirationNotification(getUserData(userHandle));
@@ -468,7 +468,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(int userHandle) {
         boolean removed = false;
-        Slog.d(TAG, "Handling package changes for user " + userHandle);
+        if (DBG) Slog.d(TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         IPackageManager pm = AppGlobals.getPackageManager();
         for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
@@ -982,7 +982,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long token = Binder.clearCallingIdentity();
             try {
                 String value = cameraDisabled ? "1" : "0";
-                Slog.v(TAG, "Change in camera state ["
+                if (DBG) Slog.v(TAG, "Change in camera state ["
                         + SYSTEM_PROP_DISABLE_CAMERA + "] = " + value);
                 SystemProperties.set(SYSTEM_PROP_DISABLE_CAMERA, value);
             } finally {
@@ -1682,10 +1682,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 int neededNumbers = getPasswordMinimumNumeric(null, userHandle);
                 if (numbers < neededNumbers) {
-                    Slog
-                            .w(TAG, "resetPassword: number of numerical digits " + numbers
-                                    + " does not meet required number of numerical digits "
-                                    + neededNumbers);
+                    Slog.w(TAG, "resetPassword: number of numerical digits " + numbers
+                            + " does not meet required number of numerical digits "
+                            + neededNumbers);
                     return false;
                 }
                 int neededLowerCase = getPasswordMinimumLowerCase(null, userHandle);
