@@ -1006,9 +1006,9 @@
      -->
     <integer-array name="config_defaultNotificationVibePattern">
         <item>0</item>
-        <item>150</item>
-        <item>200</item>
+        <item>350</item>
         <item>250</item>
+        <item>350</item>
     </integer-array>
 
     <!-- Vibrator pattern to be used as the default for notifications
@@ -1017,8 +1017,8 @@
      -->
     <integer-array name="config_notificationFallbackVibePattern">
         <item>0</item>
-        <item>33</item>
+        <item>100</item>
         <item>150</item>
-        <item>50</item>
+        <item>100</item>
     </integer-array>
 </resources>
