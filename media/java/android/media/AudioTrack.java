@@ -317,7 +317,7 @@ public class AudioTrack
         audioBuffSizeCheck(bufferSizeInBytes);
 
         if (sessionId < 0) {
-            throw (new IllegalArgumentException("Invalid audio session ID: "+sessionId));
+            throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
         }
 
         int[] session = new int[1];
@@ -370,7 +370,7 @@ public class AudioTrack
            && (streamType != AudioManager.STREAM_NOTIFICATION)
            && (streamType != AudioManager.STREAM_BLUETOOTH_SCO)
            && (streamType != AudioManager.STREAM_DTMF)) {
-            throw (new IllegalArgumentException("Invalid stream type."));
+            throw new IllegalArgumentException("Invalid stream type.");
         } else {
             mStreamType = streamType;
         }
@@ -378,8 +378,8 @@ public class AudioTrack
         //--------------
         // sample rate, note these values are subject to change
         if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
-            throw (new IllegalArgumentException(sampleRateInHz
-                    + "Hz is not a supported sample rate."));
+            throw new IllegalArgumentException(sampleRateInHz
+                    + "Hz is not a supported sample rate.");
         } else {
             mSampleRate = sampleRateInHz;
         }
@@ -406,7 +406,7 @@ public class AudioTrack
                 mChannelCount = 0;
                 mChannels = AudioFormat.CHANNEL_INVALID;
                 mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
-                throw(new IllegalArgumentException("Unsupported channel configuration."));
+                throw new IllegalArgumentException("Unsupported channel configuration.");
             } else {
                 mChannels = channelConfig;
                 mChannelCount = Integer.bitCount(channelConfig);
@@ -425,14 +425,14 @@ public class AudioTrack
             break;
         default:
             mAudioFormat = AudioFormat.ENCODING_INVALID;
-            throw(new IllegalArgumentException("Unsupported sample encoding."
-                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT."));
+            throw new IllegalArgumentException("Unsupported sample encoding."
+                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT.");
         }
 
         //--------------
         // audio load mode
         if ( (mode != MODE_STREAM) && (mode != MODE_STATIC) ) {
-            throw(new IllegalArgumentException("Invalid mode."));
+            throw new IllegalArgumentException("Invalid mode.");
         } else {
             mDataLoadMode = mode;
         }
@@ -482,7 +482,7 @@ public class AudioTrack
         int frameSizeInBytes = mChannelCount
                 * (mAudioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
-            throw (new IllegalArgumentException("Invalid audio buffer size."));
+            throw new IllegalArgumentException("Invalid audio buffer size.");
         }
 
         mNativeBufferSizeInBytes = audioBufferSize;
@@ -889,7 +889,7 @@ public class AudioTrack
     public void play()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("play() called on uninitialized AudioTrack."));
+            throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
 
         synchronized(mPlayStateLock) {
@@ -909,7 +909,7 @@ public class AudioTrack
     public void stop()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("stop() called on uninitialized AudioTrack."));
+            throw new IllegalStateException("stop() called on uninitialized AudioTrack.");
         }
 
         // stop playing
@@ -929,7 +929,7 @@ public class AudioTrack
     public void pause()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("pause() called on uninitialized AudioTrack."));
+            throw new IllegalStateException("pause() called on uninitialized AudioTrack.");
         }
         //logd("pause()");
 
