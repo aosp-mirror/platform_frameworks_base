@@ -4766,6 +4766,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    public Intent getIntentForIntentSender(IIntentSender pendingResult) {
+        if (!(pendingResult instanceof PendingIntentRecord)) {
+            return null;
+        }
+        try {
+            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
+            return res.key.requestIntent != null ? new Intent(res.key.requestIntent) : null;
+        } catch (ClassCastException e) {
+        }
+        return null;
+    }
+
     public void setProcessLimit(int max) {
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
                 "setProcessLimit()");
