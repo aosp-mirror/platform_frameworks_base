@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import com.android.server.input.InputWindowHandle;
@@ -112,6 +113,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mLayoutSeq = -1;
 
     Configuration mConfiguration = null;
+    // Sticky answer to isConfigChanged(), remains true until new Configuration is assigned.
+    // Used only on {@link #TYPE_KEYGUARD}.
+    private boolean mConfigHasChanged;
 
     /**
      * Actual frame shown on-screen (may be modified by animation).  These
@@ -627,6 +631,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 : WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
     }
 
+    @Override
     public boolean hasAppShownWindows() {
         return mAppToken != null && (mAppToken.firstWindowDrawn || mAppToken.startingDisplayed);
     }
@@ -857,9 +862,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isConfigChanged() {
-        return mConfiguration != mService.mCurConfiguration
+        boolean configChanged = mConfiguration != mService.mCurConfiguration
                 && (mConfiguration == null
                         || (mConfiguration.diff(mService.mCurConfiguration) != 0));
+
+        if (mAttrs.type == TYPE_KEYGUARD) {
+            // Retain configuration changed status until resetConfiguration called.
+            mConfigHasChanged |= configChanged;
+            configChanged = mConfigHasChanged;
+        }
+
+        return configChanged;
     }
 
     boolean isConfigDiff(int mask) {
@@ -886,6 +899,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    void setConfiguration(final Configuration newConfig) {
+        mConfiguration = newConfig;
+        mConfigHasChanged = false;
+    }
+
     void setInputChannel(InputChannel inputChannel) {
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
@@ -907,6 +925,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     private class DeathRecipient implements IBinder.DeathRecipient {
+        @Override
         public void binderDied() {
             try {
                 synchronized(mService.mWindowMap) {
