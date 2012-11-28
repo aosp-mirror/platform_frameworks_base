@@ -982,14 +982,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 sendBluetoothStateCallback(isUp);
 
                 //If Bluetooth is off, send service down event to proxy objects, and unbind
-                if (!isUp) {
-                    //Only unbind with mEnable flag not set
-                    //For race condition: disable and enable back-to-back
-                    //Avoid unbind right after enable due to callback from disable
-                    if ((!mEnable) && (mBluetooth != null)) {
-                        sendBluetoothServiceDownCallback();
-                        unbindAndFinish();
-                    }
+                if (!isUp && canUnbindBluetoothService()) {
+                    sendBluetoothServiceDownCallback();
+                    unbindAndFinish();
                 }
             }
 
@@ -1035,6 +1030,24 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             i++;
         }
         Log.e(TAG,"waitForOnOff time out");
+        return false;
+    }
+
+    private boolean canUnbindBluetoothService() {
+        synchronized(mConnection) {
+            //Only unbind with mEnable flag not set
+            //For race condition: disable and enable back-to-back
+            //Avoid unbind right after enable due to callback from disable
+            //Only unbind with Bluetooth at OFF state
+            //Only unbind without any MESSAGE_BLUETOOTH_STATE_CHANGE message
+            try {
+                if (mEnable || (mBluetooth == null)) return false;
+                if (mHandler.hasMessages(MESSAGE_BLUETOOTH_STATE_CHANGE)) return false;
+                return (mBluetooth.getState() == BluetoothAdapter.STATE_OFF);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getState()", e);
+            }
+        }
         return false;
     }
 }
