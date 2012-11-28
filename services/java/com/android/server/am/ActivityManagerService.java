@@ -14170,7 +14170,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
-                mWindowManager.lockNow(LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
+                mWindowManager.lockNow(null);
 
                 final UserStartedState uss = mStartedUsers.get(userId);
 
