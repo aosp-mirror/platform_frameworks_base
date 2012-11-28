@@ -138,7 +138,7 @@ public class AudioTrack
      */
     private static final int NATIVE_EVENT_NEW_POS = 4;
 
-    private final static String TAG = "AudioTrack-Java";
+    private final static String TAG = "android.media.AudioTrack";
 
 
     //--------------------------------------------------------------------------
@@ -446,7 +446,7 @@ public class AudioTrack
     private static boolean isMultichannelConfigSupported(int channelConfig) {
         // check for unsupported channels
         if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
-            Log.e(TAG, "Channel configuration features unsupported channels");
+            loge("Channel configuration features unsupported channels");
             return false;
         }
         // check for unsupported multichannel combinations:
@@ -455,14 +455,14 @@ public class AudioTrack
         final int frontPair =
                 AudioFormat.CHANNEL_OUT_FRONT_LEFT | AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
         if ((channelConfig & frontPair) != frontPair) {
-                Log.e(TAG, "Front channels must be present in multichannel configurations");
+                loge("Front channels must be present in multichannel configurations");
                 return false;
         }
         final int backPair =
                 AudioFormat.CHANNEL_OUT_BACK_LEFT | AudioFormat.CHANNEL_OUT_BACK_RIGHT;
         if ((channelConfig & backPair) != 0) {
             if ((channelConfig & backPair) != backPair) {
-                Log.e(TAG, "Rear channels can't be used independently");
+                loge("Rear channels can't be used independently");
                 return false;
             }
         }
@@ -1170,8 +1170,7 @@ public class AudioTrack
                             }
                             break;
                         default:
-                            Log.e(TAG, "[ android.media.AudioTrack.NativeEventHandler ] " +
-                                    "Unknown event type: " + msg.what);
+                            loge("Unknown native event type: " + msg.what);
                             break;
                         }
                     }
@@ -1268,11 +1267,11 @@ public class AudioTrack
     //------------------
 
     private static void logd(String msg) {
-        Log.d(TAG, "[ android.media.AudioTrack ] " + msg);
+        Log.d(TAG, msg);
     }
 
     private static void loge(String msg) {
-        Log.e(TAG, "[ android.media.AudioTrack ] " + msg);
+        Log.e(TAG, msg);
     }
 
 }
