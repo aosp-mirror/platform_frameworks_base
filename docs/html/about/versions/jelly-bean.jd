@@ -464,7 +464,7 @@ in CPU only on a Galaxy Nexus device.</p>
 <p style="image-caption">Renderscript image-processing benchmarks comparing operations run with GPU + CPU to those run in CPU only on the same Nexus 10 device.</p>
 </div>
 
-<p>If you have a direct acyclic graph of Renderscript operations to run, you can
+<p>If you have a directed acyclic graph of Renderscript operations to run, you can
 use a builder class to create a script group defining the operations. At
 execution time, Renderscript optimizes the run order and the connections between
 these operations for best performance.</p>
