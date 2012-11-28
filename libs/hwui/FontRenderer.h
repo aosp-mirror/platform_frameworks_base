@@ -138,6 +138,7 @@ private:
 
     void removeFont(const Font* font);
 
+    void updateDrawParams();
     void checkTextureUpdate();
 
     void setTextureDirty() {
@@ -155,13 +156,13 @@ private:
     Vector<Font*> mActiveFonts;
 
     CacheTexture* mCurrentCacheTexture;
-    CacheTexture* mLastCacheTexture;
 
     bool mUploadTexture;
 
     // Pointer to vertex data to speed up frame to frame work
     float* mTextMesh;
     uint32_t mCurrentQuadIndex;
+    uint32_t mLastQuadIndex;
     uint32_t mMaxNumberOfQuads;
 
     uint32_t mIndexBufferID;
@@ -173,6 +174,10 @@ private:
     bool mInitialized;
 
     bool mLinearFiltering;
+
+    Vector<uint16_t*> mDrawOffsets;
+    Vector<uint32_t> mDrawCounts;
+    Vector<CacheTexture*> mDrawCacheTextures;
 
     /** We should consider multi-threading this code or using Renderscript **/
     static void computeGaussianWeights(float* weights, int32_t radius);
