@@ -44,13 +44,13 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.policy.PolicyManager;
 
 /**
- * Extend this class to implement a custom Dream (displayed to the user as a "Sleep Mode").
+ * Extend this class to implement a custom dream (available to the user as a "Daydream").
  *
  * <p>Dreams are interactive screensavers launched when a charging device is idle, or docked in a
  * desk dock. Dreams provide another modality for apps to express themselves, tailored for
  * an exhibition/lean-back experience.</p>
  *
- * <p>The Dream lifecycle is as follows:</p>
+ * <p>The {@code DreamService} lifecycle is as follows:</p>
  * <ol>
  *   <li>{@link #onAttachedToWindow}
  *     <p>Use this for initial setup, such as calling {@link #setContentView setContentView()}.</li>
@@ -59,14 +59,15 @@ import com.android.internal.policy.PolicyManager;
  *   <li>{@link #onDreamingStopped}
  *     <p>Use this to stop the things you started in {@link #onDreamingStarted}.</li>
  *   <li>{@link #onDetachedFromWindow}
- *     <p>Use this to dismantle resources your dream set up. For example, detach from handlers
- *        and listeners.</li>
+ *     <p>Use this to dismantle resources (for example, detach from handlers
+ *        and listeners).</li>
  * </ol>
  *
  * <p>In addition, onCreate and onDestroy (from the Service interface) will also be called, but
  * initialization and teardown should be done by overriding the hooks above.</p>
  *
- * <p>To be available to the system, Dreams should be declared in the manifest as follows:</p>
+ * <p>To be available to the system, your {@code DreamService} should be declared in the
+ * manifest as follows:</p>
  * <pre>
  * &lt;service
  *     android:name=".MyDream"
