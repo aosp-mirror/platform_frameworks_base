@@ -54,7 +54,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     // settable by the client
     private Uri         mUri;
     private Map<String, String> mHeaders;
-    private int         mDuration;
 
     // all possible internal states
     private static final int STATE_ERROR              = -1;
@@ -229,7 +228,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
-            mDuration = -1;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
             mMediaPlayer.setOnInfoListener(mOnInfoListener);
@@ -608,17 +606,12 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         openVideo();
     }
 
-    // cache duration as mDuration for faster access
     public int getDuration() {
         if (isInPlaybackState()) {
-            if (mDuration > 0) {
-                return mDuration;
-            }
-            mDuration = mMediaPlayer.getDuration();
-            return mDuration;
+            return mMediaPlayer.getDuration();
         }
-        mDuration = -1;
-        return mDuration;
+
+        return -1;
     }
 
     public int getCurrentPosition() {
