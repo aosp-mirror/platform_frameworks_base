@@ -567,7 +567,7 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData(con, (RsAllocation)alloc, 0, 0,
                        0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
-                       w, h, ptr, bitmap.getSize());
+                       w, h, ptr, bitmap.getSize(), 0);
     bitmap.unlockPixels();
 }
 
@@ -650,7 +650,7 @@ nAllocationData2D_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DData_s, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jshort *ptr = _env->GetShortArrayElements(data, NULL);
-    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes, 0);
     _env->ReleaseShortArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -661,7 +661,7 @@ nAllocationData2D_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DData_b, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jbyte *ptr = _env->GetByteArrayElements(data, NULL);
-    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes, 0);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -672,7 +672,7 @@ nAllocationData2D_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes, 0);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -683,7 +683,7 @@ nAllocationData2D_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
+    rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes, 0);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
