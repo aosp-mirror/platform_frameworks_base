@@ -810,7 +810,7 @@ class WindowStateAnimator {
 
             mSurfaceShown = false;
             mSurface = null;
-            mWin.mHasSurface =false;
+            mWin.mHasSurface = false;
             mDrawState = NO_SURFACE;
         }
     }
