@@ -1,0 +1,107 @@
+page.title=Updating Notifications
+parent.title=Notifying the User
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Creating Expanded Notifications
+next.link=expanded.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Updating">Modify a Notification</a></li>
+  <li><a href="#Removing">Remove Notifications</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">
+        Intents and Intent Filters
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+    </li>
+</ul>
+
+
+</div>
+</div>
+<p>
+    When you need to issue a notification multiple times for the same type of event, you
+    should avoid making a completely new notification. Instead, you should consider updating a
+    previous notification, either by changing some of its values or by adding to it, or both.
+</p>
+
+<p>
+    The following section describes how to update notifications and also how to remove them.
+</p>
+<h2 id="Updating">Modify a Notification</h2>
+<p>
+    To set up a notification so it can be updated, issue it with a notification ID by
+    calling {@link android.app.NotificationManager#notify(int, Notification)
+    NotificationManager.notify(ID, notification)}. To update this notification once you've issued
+    it, update or create a {@link android.support.v4.app.NotificationCompat.Builder} object,
+    build a {@link android.app.Notification} object from it, and issue the
+    {@link android.app.Notification} with the same ID you used previously.
+</p>
+<p>
+    The following snippet demonstrates a notification that is updated to reflect the
+    number of events that have occurred. It stacks the notification, showing a summary:
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Removing">Remove Notifications</h2>
+<p>
+    Notifications remain visible until one of the following happens:
+</p>
+<ul>
+    <li>
+        The user dismisses the notification either individually or by using "Clear All" (if
+        the notification can be cleared).
+    </li>
+    <li>
+        The user touches the notification, and you called
+        {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()} when
+        you created the notification.
+    </li>
+    <li>
+        You call {@link android.app.NotificationManager#cancel(int) cancel()} for a specific
+        notification ID. This method also deletes ongoing notifications.
+    </li>
+    <li>
+        You call {@link android.app.NotificationManager#cancelAll() cancelAll()}, which removes
+        all of the notifications you previously issued.
+    </li>
