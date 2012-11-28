@@ -1,0 +1,160 @@
+page.title=Building a Notification
+parent.title=Notifying the User
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Preserving Navigation when Starting an Activity
+next.link=navigation.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#builder">Create a Notification Builder</a></li>
+  <li><a href="#action">Define the Notification's Action</a></li>
+  <li><a href="#click">Set the Notification's Click Behavior</a></li>
+  <li><a href="#notify">Issue the Notification</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li>
+        <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a> API Guide
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">
+        Intents and Intent Filters
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+    </li>
+</ul>
+
+
+</div>
+</div>
+
+
+<p>This lesson explains how to create and issue a notification.</p>
+
+<p>The examples in this class are based on the 
+{@link android.support.v4.app.NotificationCompat.Builder} class. 
+{@link android.support.v4.app.NotificationCompat.Builder} 
+is in the <a href="{@docRoot}">Support Library</a>. You should use
+{@link android.support.v4.app.NotificationCompat} and its subclasses,
+particularly {@link android.support.v4.app.NotificationCompat.Builder}, to
+provide the best notification support for a wide range of platforms. </p>
+
+<h2 id="builder">Create a Notification Builder</h2>
+
+<p>When creating a notification, specify the UI content and actions with a 
+{@link android.support.v4.app.NotificationCompat.Builder} object. At bare minimum, 
+a {@link android.support.v4.app.NotificationCompat.Builder Builder} 
+object must include the following:</p>
+
+<ul>
+  <li>
+        A small icon, set by
+        {@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()}
+    </li>
+    <li>
+        A title, set by
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()}
+    </li>
+    <li>
+        Detail text, set by
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()}
+    </li>
+</ul>
+<p> For example: </p>
+<pre>
+NotificationCompat.Builder mBuilder =
+    new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle(&quot;My notification&quot;)
+    .setContentText(&quot;Hello World!&quot;);
+</pre>
+
+<h2 id="action">Define the Notification's Action</h2>
+
+
+<p>Although actions are optional, you should add at least one action to your
+notification. An action takes users directly from the notification to an
+{@link android.app.Activity} in your application, where they can look at the
+event that caused the notification or do further work. Inside a notification, the action itself is
+defined by a {@link android.app.PendingIntent} containing an {@link
+android.content.Intent} that starts an {@link android.app.Activity} in your
+application.</p>
+
+<p>How you construct the {@link android.app.PendingIntent} depends on what type
+of {@link android.app.Activity} you're starting. When you start an {@link
+android.app.Activity} from a notification, you must preserve the user's expected
+navigation experience. In the snippet below, clicking the notification opens a
+new activity that effectively extends the behavior of the notification. In this
+case there is no need to create an artificial back stack (see 
+<a href="navigation.html">Preserving Navigation when Starting an Activity</a> for
+more information):</p>
+
+<pre>Intent resultIntent = new Intent(this, ResultActivity.class);
+...
+// Because clicking the notification opens a new ("special") activity, there's
+// no need to create an artificial back stack.
+PendingIntent resultPendingIntent =
+    PendingIntent.getActivity(
+    this,
+    0,
+    resultIntent,
+    PendingIntent.FLAG_UPDATE_CURRENT
+);
+</pre>
+
+<h2 id="click">Set the Notification's Click Behavior</h2>
+
+<p>
+To associate the {@link android.app.PendingIntent} created in the previous
+step with a gesture, call the appropriate method of {@link
+android.support.v4.app.NotificationCompat.Builder}. For example, to start an
+activity when the user clicks the notification text in the notification drawer,
+add the {@link android.app.PendingIntent} by calling {@link
+android.support.v4.app.NotificationCompat.Builder#setContentIntent
+setContentIntent()}. For example:</p>
+
+<pre>PendingIntent resultPendingIntent;
+...
+mBuilder.setContentIntent(resultPendingIntent);</pre>
+
+<h2 id="notify">Issue the Notification</h2>
+
+<p>To issue the notification:</p>
+<ul>
+<li>Get an instance of {@link android.app.NotificationManager}.</li> 
+
+<li>Use the {@link android.app.NotificationManager#notify notify()} method to issue the
+notification. When you call {@link android.app.NotificationManager#notify notify()}, specify a notification ID. 
+You can use this ID to update the notification later on. This is described in more detail in 
+<a href="managing.html">Managing Notifications</a>.</li>
+
+<li>Call {@link
+android.support.v4.app.NotificationCompat.Builder#build() build()}, which
+returns a {@link android.app.Notification} object containing your
+specifications.</li>
+
+<p>For example:</p>
+
+<pre>
+// Sets an ID for the notification
+int mNotificationId = 001;
+// Gets an instance of the NotificationManager service
+NotificationManager mNotifyMgr = 
+        (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+// Builds the notification and issues it.
+mNotifyMgr.notify(mNotificationId, builder.build());
+</pre>
+
