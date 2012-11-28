@@ -24,10 +24,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
+import android.util.Pools.SynchronizedPool;
 
 /**
  * An implementation of a GL canvas that records drawing operations.
@@ -35,26 +32,13 @@ import android.util.Pools;
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
  */
-class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20RecordingCanvas> {
+class GLES20RecordingCanvas extends GLES20Canvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
 
-    private static final Pool<GLES20RecordingCanvas> sPool = Pools.synchronizedPool(
-            Pools.finitePool(new PoolableManager<GLES20RecordingCanvas>() {
-                public GLES20RecordingCanvas newInstance() {
-                    return new GLES20RecordingCanvas();
-                }
-                @Override
-                public void onAcquired(GLES20RecordingCanvas element) {
-                }
-                @Override
-                public void onReleased(GLES20RecordingCanvas element) {
-                }
-            }, POOL_LIMIT));
-
-    private GLES20RecordingCanvas mNextPoolable;
-    private boolean mIsPooled;
+    private static final SynchronizedPool<GLES20RecordingCanvas> sPool =
+            new SynchronizedPool<GLES20RecordingCanvas>(POOL_LIMIT);
 
     private GLES20DisplayList mDisplayList;
 
@@ -64,6 +48,9 @@ class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20Recor
 
     static GLES20RecordingCanvas obtain(GLES20DisplayList displayList) {
         GLES20RecordingCanvas canvas = sPool.acquire();
+        if (canvas == null) {
+            canvas = new GLES20RecordingCanvas();
+        }
         canvas.mDisplayList = displayList;
         return canvas;
     }
@@ -299,25 +286,5 @@ class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20Recor
         super.drawVertices(mode, vertexCount, verts, vertOffset, texs, texOffset, colors,
                 colorOffset, indices, indexOffset, indexCount, paint);
         recordShaderBitmap(paint);
-    }
-
-    @Override
-    public GLES20RecordingCanvas getNextPoolable() {
-        return mNextPoolable;
-    }
-
-    @Override
-    public void setNextPoolable(GLES20RecordingCanvas element) {
-        mNextPoolable = element;
-    }
-
-    @Override
-    public boolean isPooled() {
-        return mIsPooled;
-    }
-
-    @Override
-    public void setPooled(boolean isPooled) {
-        mIsPooled = isPooled;
     }
 }

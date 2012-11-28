@@ -2873,7 +2873,7 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_INVALIDATE_RECT:
                 final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
                 info.target.invalidate(info.left, info.top, info.right, info.bottom);
-                info.release();
+                info.recycle();
                 break;
             case MSG_IME_FINISHED_EVENT:
                 handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
@@ -4488,7 +4488,7 @@ public final class ViewRootImpl implements ViewParent,
                     AttachInfo.InvalidateInfo info = mViewRects.get(i);
                     if (info.target == view) {
                         mViewRects.remove(i);
-                        info.release();
+                        info.recycle();
                     }
                 }
 
@@ -4529,7 +4529,7 @@ public final class ViewRootImpl implements ViewParent,
             for (int i = 0; i < viewRectCount; i++) {
                 final View.AttachInfo.InvalidateInfo info = mTempViewRects[i];
                 info.target.invalidate(info.left, info.top, info.right, info.bottom);
-                info.release();
+                info.recycle();
             }
         }
 

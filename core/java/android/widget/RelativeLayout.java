@@ -30,10 +30,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
+import android.util.Pools.SimplePool;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
@@ -1631,7 +1628,7 @@ public class RelativeLayout extends ViewGroup {
          *
          * A node with no dependent is considered a root of the graph.
          */
-        static class Node implements Poolable<Node> {
+        static class Node {
             /**
              * The view representing this node in the layout.
              */
@@ -1654,43 +1651,14 @@ public class RelativeLayout extends ViewGroup {
             // The pool is static, so all nodes instances are shared across
             // activities, that's why we give it a rather high limit
             private static final int POOL_LIMIT = 100;
-            private static final Pool<Node> sPool = Pools.synchronizedPool(
-                    Pools.finitePool(new PoolableManager<Node>() {
-                        public Node newInstance() {
-                            return new Node();
-                        }
-
-                        public void onAcquired(Node element) {
-                        }
-
-                        public void onReleased(Node element) {
-                        }
-                    }, POOL_LIMIT)
-            );
-
-            private Node mNext;
-            private boolean mIsPooled;
-
-            public void setNextPoolable(Node element) {
-                mNext = element;
-            }
-
-            public Node getNextPoolable() {
-                return mNext;
-            }
-
-            public boolean isPooled() {
-                return mIsPooled;
-            }
-
-            public void setPooled(boolean isPooled) {
-                mIsPooled = isPooled;
-            }
+            private static final SimplePool<Node> sPool = new SimplePool<Node>(POOL_LIMIT);
 
             static Node acquire(View view) {
-                final Node node = sPool.acquire();
+                Node node = sPool.acquire();
+                if (node == null) {
+                    node = new Node();
+                }
                 node.view = view;
-
                 return node;
             }
 
