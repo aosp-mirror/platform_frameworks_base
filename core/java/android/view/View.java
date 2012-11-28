@@ -52,10 +52,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
+import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -10748,7 +10745,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // if we are not attached to our window
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.obtain();
             info.target = this;
             info.left = left;
             info.top = top;
@@ -10797,7 +10794,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // if we are not attached to our window
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
+            final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.obtain();
             info.target = this;
             info.left = left;
             info.top = top;
@@ -17696,25 +17693,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * POOL_LIMIT objects that get reused. This reduces memory allocations
          * whenever possible.
          */
-        static class InvalidateInfo implements Poolable<InvalidateInfo> {
+        static class InvalidateInfo {
             private static final int POOL_LIMIT = 10;
-            private static final Pool<InvalidateInfo> sPool = Pools.synchronizedPool(
-                    Pools.finitePool(new PoolableManager<InvalidateInfo>() {
-                        public InvalidateInfo newInstance() {
-                            return new InvalidateInfo();
-                        }
 
-                        public void onAcquired(InvalidateInfo element) {
-                        }
-
-                        public void onReleased(InvalidateInfo element) {
-                            element.target = null;
-                        }
-                    }, POOL_LIMIT)
-            );
-
-            private InvalidateInfo mNext;
-            private boolean mIsPooled;
+            private static final SynchronizedPool<InvalidateInfo> sPool =
+                    new SynchronizedPool<InvalidateInfo>(POOL_LIMIT);
 
             View target;
 
@@ -17723,28 +17706,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int right;
             int bottom;
 
-            public void setNextPoolable(InvalidateInfo element) {
-                mNext = element;
+            public static InvalidateInfo obtain() {
+                InvalidateInfo instance = sPool.acquire();
+                return (instance != null) ? instance : new InvalidateInfo();
             }
 
-            public InvalidateInfo getNextPoolable() {
-                return mNext;
-            }
-
-            static InvalidateInfo acquire() {
-                return sPool.acquire();
-            }
-
-            void release() {
+            public void recycle() {
+                target = null;
                 sPool.release(this);
-            }
-
-            public boolean isPooled() {
-                return mIsPooled;
-            }
-
-            public void setPooled(boolean isPooled) {
-                mIsPooled = isPooled;
             }
         }
 

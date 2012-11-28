@@ -16,10 +16,7 @@
 
 package android.view;
 
-import android.util.Poolable;
-import android.util.Pool;
-import android.util.Pools;
-import android.util.PoolableManager;
+import android.util.Pools.SynchronizedPool;
 
 /**
  * Helper for tracking the velocity of touch events, for implementing
@@ -31,29 +28,14 @@ import android.util.PoolableManager;
  * {@link #computeCurrentVelocity(int)} and then call {@link #getXVelocity(int)}
  * and {@link #getYVelocity(int)} to retrieve the velocity for each pointer id.
  */
-public final class VelocityTracker implements Poolable<VelocityTracker> {
-    private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
-            Pools.finitePool(new PoolableManager<VelocityTracker>() {
-                public VelocityTracker newInstance() {
-                    return new VelocityTracker(null);
-                }
-
-                public void onAcquired(VelocityTracker element) {
-                    // Intentionally empty
-                }
-
-                public void onReleased(VelocityTracker element) {
-                    element.clear();
-                }
-            }, 2));
+public final class VelocityTracker {
+    private static final SynchronizedPool<VelocityTracker> sPool =
+            new SynchronizedPool<VelocityTracker>(2);
 
     private static final int ACTIVE_POINTER_ID = -1;
 
     private int mPtr;
     private final String mStrategy;
-
-    private VelocityTracker mNext;
-    private boolean mIsPooled;
 
     private static native int nativeInitialize(String strategy);
     private static native void nativeDispose(int ptr);
@@ -73,7 +55,8 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      * @return Returns a new VelocityTracker.
      */
     static public VelocityTracker obtain() {
-        return sPool.acquire();
+        VelocityTracker instance = sPool.acquire();
+        return (instance != null) ? instance : new VelocityTracker(null);
     }
 
     /**
@@ -98,36 +81,9 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      */
     public void recycle() {
         if (mStrategy == null) {
+            clear();
             sPool.release(this);
         }
-    }
-
-    /**
-     * @hide
-     */
-    public void setNextPoolable(VelocityTracker element) {
-        mNext = element;
-    }
-
-    /**
-     * @hide
-     */
-    public VelocityTracker getNextPoolable() {
-        return mNext;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isPooled() {
-        return mIsPooled;
-    }
-
-    /**
-     * @hide
-     */
-    public void setPooled(boolean isPooled) {
-        mIsPooled = isPooled;
     }
 
     private VelocityTracker(String strategy) {
