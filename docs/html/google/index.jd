@@ -1,0 +1,86 @@
+page.title=Google Services
+@jd:body
+
+<p>
+  Google offers a variety of services that help you build new revenue streams, enhance your app's
+  capabilities, manage distribution and payloads, and track usage and installs. 
+  The sections below highlight some of the services offered by Google and link you to more information about
+  how to use them in your Android app.
+</p>
+    <h2>
+      Integrate Google Products
+    </h2>
+    <img src="{@docRoot}images/gps-small.png" style="float:left; padding-right:10px">
+    <p>Utilize the most up-to-date features of Google products in your app
+    without worrying the Android versions running on your users' devices. Users receive updates to Google Play
+    services through the Google Play store whenever available, ensuring
+    that exciting, new features of your app reach the most devices possible.
+    All of this comes with an easy-to-use authentication flow for you and your users.
+    </p><a href="{@docRoot}guide/google/play-services/index.html">Learn more &raquo;</a>
+
+<div class="vspace size-1">
+  &nbsp;
+</div>
+
+<h2 id="monetization">
+  Monetize Your App
+</h2>
+<p>
+  Make the most out of your app's revenue potential by using monetization policies targeted
+  at your users' needs.
+</p>
+
+<div class="vspace size-1">
+  &nbsp;
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4>
+     Google Play In-App Billing
+    </h4>
+    <p>
+      Engage users by offering features such as new content or virtual goods directly in your app.
+    </p><a href="{@docRoot}guide/google/play/billing/index.html">Learn more &raquo;</a>
+  </div>
+
+  <div class="layout-content-col span-6">
+    <h4>
+      Google AdMob Ads
+    </h4>
+    <p>
+      Generate revenue by displaying ads in your app with multiple ad networks.
+    </p><a href="http://www.google.com/ads/admob/index.html">Learn more &raquo;</a>
+  </div> 
+</div>
+
+
+
+<h2 id="gcm">
+  Receive Messages from the Cloud
+</h2>
+  <img src="/images/gcm/gcm-logo.png" width="150px" style="padding:9px; float:left">
+    
+    <p>Use Google Cloud Messaging to notify your apps of important events with
+    that are lightweight and battery-saving. There are no quotas or charges
+    to use Google Cloud Messaging, no matter how big your messaging needs are.</p>
+
+    <a href="{@docRoot}guide/google/gcm/index.html">Learn more &raquo;</a>
+
+<div class="vspace size-1">
+  &nbsp;
+</div>
+
+
+<h2 id="distribution">
+  Manage App Distribution and Licensing
+</h2>
+<p>
+  Google Play allows you to manage your app distribution with features such as app licensing
+  and device filtering. Take advantage of features that let you reach the right users with
+  the right content while protecting your app from unauthorized use.
+</p>
+
+    <a href="{@docRoot}guide/google/play/dist.html">Learn more &raquo;</a>
+</div>
+

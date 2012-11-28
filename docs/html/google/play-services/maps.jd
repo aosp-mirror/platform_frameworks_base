@@ -1,0 +1,73 @@
+page.title=Google Maps
+page.landing=true
+page.landing.intro=Add Google maps to your Android apps and let your users explore the world. Give your users all of the benefits of the Google Maps, but with the customizations that you need for your app and users.
+page.landing.link=https://developers.google.com/maps/documentation/android/
+page.landing.link.text=developers.google.com/maps
+page.landing.image=images/gps-maps.png
+
+@jd:body
+
+<div class="landing-docs">
+  <div class="col-6">
+    <h3 style="clear:left">Key Developer Features</h3>
+    <a href="https://developers.google.com/maps/documentation/android/map">
+    <h4>Bring Maps to your Mobile Apps</h4>
+    The Google Maps APIs let you embed Google Maps into an Activity with a simple XML snippet
+    in the form of a fragment. With MapFragment, you can take advantage of exciting features such as 3D maps;
+    indoor, satellite, terrain, and hybrid maps; and vector-based tiles for efficient caching and drawing.
+    </a>
+    
+    <a href="https://developers.google.com/maps/documentation/android/marker">
+    <h4>Highlight important places and routes</h4>
+    <p>
+    Overlay markers onto your maps to highlight places your users are interested
+    in. You can also define custom colors or icons for your map markers to
+    coincide with the look and feel of your app.</p>
+
+    <p>In addition, you can draw polylines, a set of connected line segments on a map
+    and polygons, a set of polylines in a closed loop.</p>
+    </a>
+
+    <a href="https://developers.google.com/maps/documentation/android/views">
+    <h4>Change views and perspectives</h4>
+    Give your users a different view of the world with the ability to control rotation, tilting,
+    zooming, and panning properties of the maps you are displaying. Show 3D views of maps,
+    zoom in on terrain maps, allow users to swipe across areas, and much more.
+    </a>
+
+  </div>
+
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Getting Started</h3>
+    <h4>Configure Maps</h4>
+    <p>The Google Maps Android APIs are part of the Google Play services platform.</p>
+    <p>To use Google Maps, <a href="{@docRoot}google/play-services/download.html">download and configure</a>
+      the Google Play services SDK and see the <a href="https://developers.google.com/maps/documentation/android/start#installing_the_google_maps_android_v2_api">
+      Getting Started guide</a> on how to configure Google Maps for your app.
+    </p>
+            
+    <h4>Run the sample</h4>
+    <p>
+      The Google Maps sample is located in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/maps</code>
+      and shows you how to use the major components of the Google Maps Android APIs.
+    </p>
+    
+    <h4>Visit the Google Maps developer site</h4>
+    <p>
+      For instructions on how to fully integrate Google+ into your app, with code snippets, visit the
+      <a href="https://developers.google.com/maps/documentation/android/intro">Google Maps developer documentation</a>
+      located at developers.google.com.
+    </p>
+    
+    <h4>See the reference documentation</h4>
+    <p>
+      The <a href="{@docRoot}google/play-services/reference/com/google/android/gms/maps/package-summary.html">Google Maps API reference</a>
+      is provided for you on this site and is also available at <a href="https://developers.google.com/maps/documentation/android/reference/com/google/android/gms/maps/package-summary">developers.google.com</a> if you
+      prefer to read them there.</p>
+    <p>
+      In addition, the entire <a href="{@docRoot}google/play-services/reference/packages.html">Google Play
+      services platform reference</a> is hosted on this site for your convenience.
+    </p>
+  </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+page.title=Google Maps
+page.landing=true
+page.landing.intro=Add Google maps to your Android apps and let your users explore the world. Give your users all of the benefits of the Google Maps, but with the customizations that you need for your app and users.
+page.landing.link=https://developers.google.com/maps/documentation/android/
+page.landing.link.text=developers.google.com/maps
+page.landing.image=images/gps.png
+
+@jd:body
+<img src="{@docRoot}images/gps.png" style="float:right;" />
+
+<p>
+    Google Play services is a platform delivered through the Google Play Store that
+    lets you integrate Google products into your Android apps.
+    The Google Play services framework consists of a services component
+    that runs on the device and a thin client library that you package with your app.
+</p>
+
+
+<p>
+<a class="next-page-link topic-start-link"
+href="{@docRoot}google/play-services/overview.html">
+OVERVIEW</a>
+</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Google Technology</h4>
+<p>Add exciting and useful Google features such as Maps, Google+, Analytics, and more
+to your Android apps. Easy-to-use client libraries are provided for the products in Google
+Play services, so you can implement the functionality you want faster. New features
+and products are continuously being added, so make sure to check back often.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Standard Authentication</h4>
+<p>All products in Google Play services share a common authentication API
+  that leverages the existing Google accounts on the device. You and your
+  users have a consistent and safe way to grant and receive OAuth2 authentication
+  to Google services. Even services that are not bundled in Google Play services
+  can take advantage of the authentication APIs as long as they accept OAuth2
+  tokens associated with a Google account.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Automatic Updates</h4>
+<p>Devices running Android 2.2 and newer and that have the Google Play Store app installed
+automatically receive updates to Google Play services. New products, features, and fixes are
+automatically pushed to a wide range of devices, old and new. You can now enhance your app with the most
+up-to-date version of Google Play services without worrying about your users' Android platform version.</p>
+
+  </div>
+</div>
+
+<h2>Services</h2>
+ <div class="landing-docs">
+ <a href="">
+      <h4>Google+</h4>
+      <p>Add social features to your app to with Google+.</p>
+    </a>
+
+     <a href="">
+      <h4>Google Analytics</h4>
+      <p>Make sure you're reaching the right users and find ways to reach more with Google Analytics.</p>
+    </a>
+
+    <a href="">
+      <h4>Google Maps</h4>
+      <p>Add compelling location-based features to your app to direct your users where they
+      want to go.</p>
+    </a>
+</div>
