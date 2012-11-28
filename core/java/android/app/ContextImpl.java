@@ -168,7 +168,7 @@ class ReceiverRestrictedContext extends ContextWrapper {
  * context object for Activity and other application components.
  */
 class ContextImpl extends Context {
-    private final static String TAG = "ApplicationContext";
+    private final static String TAG = "ContextImpl";
     private final static boolean DEBUG = false;
 
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
@@ -1715,7 +1715,7 @@ class ContextImpl extends Context {
     private void warnIfCallingFromSystemProcess() {
         if (Process.myUid() == Process.SYSTEM_UID) {
             Slog.w(TAG, "Calling a method in the system process without a qualified user: "
-                    + Debug.getCallers(3));
+                    + Debug.getCallers(5));
         }
     }
 

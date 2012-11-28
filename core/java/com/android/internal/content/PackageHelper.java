@@ -51,7 +51,7 @@ public class PackageHelper {
     public static final int RECOMMEND_FAILED_INVALID_URI = -6;
     public static final int RECOMMEND_FAILED_VERSION_DOWNGRADE = -7;
 
-    private static final boolean localLOGV = true;
+    private static final boolean localLOGV = false;
     private static final String TAG = "PackageHelper";
     // App installation location settings values
     public static final int APP_INSTALL_AUTO = 0;

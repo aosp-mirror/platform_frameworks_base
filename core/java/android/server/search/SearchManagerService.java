@@ -92,7 +92,7 @@ public class SearchManagerService extends ISearchManager.Stub {
             Searchables searchables = mSearchables.get(userId);
 
             if (searchables == null) {
-                Log.i(TAG, "Building list of searchable activities for userId=" + userId);
+                //Log.i(TAG, "Building list of searchable activities for userId=" + userId);
                 searchables = new Searchables(mContext, userId);
                 searchables.buildSearchableList();
                 mSearchables.append(userId, searchables);

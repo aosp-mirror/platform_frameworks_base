@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
@@ -7935,7 +7934,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                         }, 0, null, null,
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
-                        false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+                        true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -14257,7 +14256,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 }
                             }, 0, null, null,
                             android.Manifest.permission.INTERACT_ACROSS_USERS,
-                            false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
+                            true, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
             }
         } finally {
@@ -14480,7 +14479,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             long ident = Binder.clearCallingIdentity();
             try {
                 // We are going to broadcast ACTION_USER_STOPPING and then
-                // once that is down send a final ACTION_SHUTDOWN and then
+                // once that is done send a final ACTION_SHUTDOWN and then
                 // stop the user.
                 final Intent stoppingIntent = new Intent(Intent.ACTION_USER_STOPPING);
                 stoppingIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);

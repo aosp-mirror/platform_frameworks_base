@@ -105,9 +105,9 @@ class MountService extends IMountService.Stub
 
     // TODO: listen for user creation/deletion
 
-    private static final boolean LOCAL_LOGD = true;
-    private static final boolean DEBUG_UNMOUNT = true;
-    private static final boolean DEBUG_EVENTS = true;
+    private static final boolean LOCAL_LOGD = false;
+    private static final boolean DEBUG_UNMOUNT = false;
+    private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
     // Disable this since it messes up long-running cryptfs operations.

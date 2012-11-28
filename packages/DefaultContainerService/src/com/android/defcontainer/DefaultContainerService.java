@@ -80,7 +80,7 @@ import libcore.io.StructStatFs;
  */
 public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
-    private static final boolean localLOGV = true;
+    private static final boolean localLOGV = false;
 
     private static final String LIB_DIR_NAME = "lib";
 
