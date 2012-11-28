@@ -19,7 +19,7 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+import android.telephony.Rlog;
 
 /**
  * Contains phone state and service related information.
@@ -535,7 +535,7 @@ public class ServiceState implements Parcelable {
                 break;
             default:
                 rtString = "Unexpected";
-                Log.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
+                Rlog.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
                 break;
         }
         return rtString;
@@ -562,7 +562,7 @@ public class ServiceState implements Parcelable {
     }
 
     private void setNullState(int state) {
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setNullState=" + state);
+        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setNullState=" + state);
         mVoiceRegState = state;
         mDataRegState = state;
         mRoaming = false;
@@ -592,19 +592,19 @@ public class ServiceState implements Parcelable {
 
     public void setState(int state) {
         setVoiceRegState(state);
-        if (DBG) Log.e(LOG_TAG, "[ServiceState] setState deprecated use setVoiceRegState()");
+        if (DBG) Rlog.e(LOG_TAG, "[ServiceState] setState deprecated use setVoiceRegState()");
     }
 
     /** @hide */
     public void setVoiceRegState(int state) {
         mVoiceRegState = state;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setVoiceRegState=" + mVoiceRegState);
+        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setVoiceRegState=" + mVoiceRegState);
     }
 
     /** @hide */
     public void setDataRegState(int state) {
         mDataRegState = state;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
+        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
     }
 
     public void setRoaming(boolean roaming) {
@@ -734,7 +734,7 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setRilDataRadioTechnology(int rt) {
         this.mRilDataRadioTechnology = rt;
-        if (DBG) Log.d(LOG_TAG, "[ServiceState] setDataRadioTechnology=" + mRilDataRadioTechnology);
+        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRadioTechnology=" + mRilDataRadioTechnology);
     }
 
     /** @hide */
@@ -762,7 +762,7 @@ public class ServiceState implements Parcelable {
      * {@link #getRilVoiceRadioTechnology}
      */
     public int getRadioTechnology() {
-        Log.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
+        Rlog.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
         return getRilDataRadioTechnology();
     }
 
@@ -807,7 +807,7 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public int getNetworkType() {
-        Log.e(LOG_TAG, "ServiceState.getNetworkType() DEPRECATED will be removed *******");
+        Rlog.e(LOG_TAG, "ServiceState.getNetworkType() DEPRECATED will be removed *******");
         return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
     }
 
