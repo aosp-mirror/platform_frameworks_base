@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Pools.SynchronizedPool;
 import android.util.SparseLongArray;
 import android.view.View;
 
@@ -354,11 +355,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 50;
-    private static final Object sPoolLock = new Object();
-    private static AccessibilityNodeInfo sPool;
-    private static int sPoolSize;
-    private AccessibilityNodeInfo mNext;
-    private boolean mIsInPool;
+    private static final SynchronizedPool<AccessibilityNodeInfo> sPool =
+            new SynchronizedPool<AccessibilityNodeInfo>(MAX_POOL_SIZE);
+
     private boolean mSealed;
 
     // Data.
@@ -1517,17 +1516,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return An instance.
      */
     public static AccessibilityNodeInfo obtain() {
-        synchronized (sPoolLock) {
-            if (sPool != null) {
-                AccessibilityNodeInfo info = sPool;
-                sPool = sPool.mNext;
-                sPoolSize--;
-                info.mNext = null;
-                info.mIsInPool = false;
-                return info;
-            }
-            return new AccessibilityNodeInfo();
-        }
+        AccessibilityNodeInfo info = sPool.acquire();
+        return (info != null) ? info : new AccessibilityNodeInfo();
     }
 
     /**
@@ -1552,18 +1542,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If the info is already recycled.
      */
     public void recycle() {
-        if (mIsInPool) {
-            throw new IllegalStateException("Info already recycled!");
-        }
         clear();
-        synchronized (sPoolLock) {
-            if (sPoolSize <= MAX_POOL_SIZE) {
-                mNext = sPool;
-                sPool = this;
-                mIsInPool = true;
-                sPoolSize++;
-            }
-        }
+        sPool.release(this);
     }
 
     /**
@@ -1620,7 +1600,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param other The other instance.
      */
-    @SuppressWarnings("unchecked")
     private void init(AccessibilityNodeInfo other) {
         mSealed = other.mSealed;
         mSourceNodeId = other.mSourceNodeId;

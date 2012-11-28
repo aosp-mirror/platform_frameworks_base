@@ -19,6 +19,7 @@ package android.view.accessibility;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Pools.SynchronizedPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -686,11 +687,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
     private static final int MAX_POOL_SIZE = 10;
-    private static final Object sPoolLock = new Object();
-    private static AccessibilityEvent sPool;
-    private static int sPoolSize;
-    private AccessibilityEvent mNext;
-    private boolean mIsInPool;
+    private static final SynchronizedPool<AccessibilityEvent> sPool =
+            new SynchronizedPool<AccessibilityEvent>(MAX_POOL_SIZE);
 
     private int mEventType;
     private CharSequence mPackageName;
@@ -916,17 +914,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return An instance.
      */
     public static AccessibilityEvent obtain() {
-        synchronized (sPoolLock) {
-            if (sPool != null) {
-                AccessibilityEvent event = sPool;
-                sPool = sPool.mNext;
-                sPoolSize--;
-                event.mNext = null;
-                event.mIsInPool = false;
-                return event;
-            }
-            return new AccessibilityEvent();
-        }
+        AccessibilityEvent event = sPool.acquire();
+        return (event != null) ? event : new AccessibilityEvent();
     }
 
     /**
@@ -939,18 +928,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     @Override
     public void recycle() {
-        if (mIsInPool) {
-            throw new IllegalStateException("Event already recycled!");
-        }
         clear();
-        synchronized (sPoolLock) {
-            if (sPoolSize <= MAX_POOL_SIZE) {
-                mNext = sPool;
-                sPool = this;
-                mIsInPool = true;
-                sPoolSize++;
-            }
-        }
+        sPool.release(this);
     }
 
     /**
