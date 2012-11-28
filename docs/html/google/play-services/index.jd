@@ -1,37 +1,41 @@
-page.title=Google Maps
-page.landing=true
-page.landing.intro=Add Google maps to your Android apps and let your users explore the world. Give your users all of the benefits of the Google Maps, but with the customizations that you need for your app and users.
-page.landing.link=https://developers.google.com/maps/documentation/android/
-page.landing.link.text=developers.google.com/maps
-page.landing.image=images/gps.png
+page.title=Google Play services
+header.hide=1
 
 @jd:body
-<img src="{@docRoot}images/gps.png" style="float:right;" />
 
-<p>
-    Google Play services is a platform delivered through the Google Play Store that
-    lets you integrate Google products into your Android apps.
-    The Google Play services framework consists of a services component
-    that runs on the device and a thin client library that you package with your app.
-</p>
+<div class="landing-banner">
+        
+<div class="col-6">
+  <img src="/images/google/gps.png" alt="">
+</div>
+<div class="col-6">
+
+  <h1 itemprop="name" style="margin-bottom:0;">Google Play services</h1>
+  <p itemprop="description"> 
+  </p>
+
+  <p>Give your apps more features to attract users on a wider range of devices.
+  With Google Play services, your app can take advantage
+  of the latest, Google-powered features such as Maps, Google+, and more.
+  with automatic platform updates distributed as an APK through
+  the Google Play store. This makes it faster for your users to receive updates
+  and easier for you to integrate the newest that Google has to offer.
+  </p>
+
+   <p><a class="next-page-link topic-start-link"
+href="/google/play-services/download.html">Setup</a></p>
+
+</div>
+</div>
 
 
-<p>
-<a class="next-page-link topic-start-link"
-href="{@docRoot}google/play-services/overview.html">
-OVERVIEW</a>
-</p>
-
-<div class="vspace size-1">&nbsp;</div>
-
-<div class="layout-content-row">
+  <div class="layout-content-row">
   <div class="layout-content-col span-4">
 
 <h4>Google Technology</h4>
-<p>Add exciting and useful Google features such as Maps, Google+, Analytics, and more
-to your Android apps. Easy-to-use client libraries are provided for the products in Google
-Play services, so you can implement the functionality you want faster. New features
-and products are continuously being added, so make sure to check back often.</p>
+<p>Google Play services provides you with easy access to Google services and is tightly
+integrated with the Android OS. Easy-to-use client libraries are provided for
+each service that let you implement the functionality you want easier and faster.</p>
 
   </div>
   <div class="layout-content-col span-4">
@@ -40,37 +44,81 @@ and products are continuously being added, so make sure to check back often.</p>
 <p>All products in Google Play services share a common authentication API
   that leverages the existing Google accounts on the device. You and your
   users have a consistent and safe way to grant and receive OAuth2 authentication
-  to Google services. Even services that are not bundled in Google Play services
-  can take advantage of the authentication APIs as long as they accept OAuth2
-  tokens associated with a Google account.</p>
+  to Google services.</p>
 
   </div>
   <div class="layout-content-col span-4">
 
 <h4>Automatic Updates</h4>
-<p>Devices running Android 2.2 and newer and that have the Google Play Store app installed
-automatically receive updates to Google Play services. New products, features, and fixes are
-automatically pushed to a wide range of devices, old and new. You can now enhance your app with the most
-up-to-date version of Google Play services without worrying about your users' Android platform version.</p>
+<p>Devices running Android 2.2 and newer and that have the Google Play Store
+app automatically receive updates to Google Play services. Enhance
+your app with the most recent version of Google Play services without worrying
+about your users' Android version.</p>
 
   </div>
 </div>
 
-<h2>Services</h2>
- <div class="landing-docs">
- <a href="">
-      <h4>Google+</h4>
-      <p>Add social features to your app to with Google+.</p>
-    </a>
 
-     <a href="">
-      <h4>Google Analytics</h4>
-      <p>Make sure you're reaching the right users and find ways to reach more with Google Analytics.</p>
-    </a>
+<h2>How It Works</h2>
 
-    <a href="">
-      <h4>Google Maps</h4>
-      <p>Add compelling location-based features to your app to direct your users where they
-      want to go.</p>
-    </a>
+<h4 id="client-lib">The Google Play services client library</h4>
+<p>
+    The client library contains the interfaces to the individual Google
+    services and allows you to obtain authorization from users to authenticate
+    to these services with their credentials. It also contains APIs that allow
+    you to resolve any issues at  runtime, such as a missing, disabled, or out-of-date
+    Google Play services APK. The client library has a light footprint if you use
+    <a href="/tools/help/proguard.html">ProGuard</a> as part of your build process, so it won't have
+    an adverse impact on your app's file size.  
+</p>
+<p>
+    If you want to access added features or products, you can upgrade to a new version of the
+    client library as they are released. However, upgrading is not
+    necessary if you don't care about new features or bug fixes.
+    We anticipate more Google services to be continuously added, so be on the lookout for
+    these updates.
+</p>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <h4 id="apk">The Google Play services APK</h4>
+    <p>
+        The Google Play services APK contains the individual Google services and runs
+        as a background service in the Android OS. You interact with the background service
+        through the client library and the service carries out the actions on your behalf.
+        An easy-to-use authentication flow is also
+        provided to gain access to the each Google service, which provides consistency for both
+        you and your users. 
+    </p>
+    <p>
+      The Google Play services APK is delivered through the Google Play Store, so
+      updates to the services are not dependent on carrier or OEM system image updates. In general, devices
+      running Android 2.2 (Froyo) or later and have the Google Play Store app installed receive updates within a
+      few days. This allows you to use the newest APIs in Google Play services and reach most of the
+      devices in the Android ecosystem (devices older than Android 2.2 or devices without the Google
+      Play Store app are not supported).
+    </p>
+  </div>
+
+  <div class="layout-content-col span-6">
+    <img src="/images/play-services-diagram.png" />
+    <p class="img-caption"><em>Updates to Google Play services include access to new APIs, features, and bug fixes.</em></p>
+  </div>
 </div>
+
+<h4 id="benefits">The benefits for your app</h4>
+
+<p>Google Play services gives you the freedom to use the newest APIs for popular
+Google services without worrying about device support. Updates to Google Play
+services are distributed automatically by the Google Play Store and new versions
+of the client library are delivered through the Android SDK Manager. This makes it
+easy for you to focus on what's important: your users' experience.</p>
+
+<p>To get started, <a href="{@docRoot}google/play-services/setup.html">set up</a> the SDK and check out
+the various products in the Google Play services platform now!</p>
+
+
+
+
