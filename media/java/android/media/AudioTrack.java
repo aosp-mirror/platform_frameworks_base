@@ -754,7 +754,7 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setStereoVolume(float leftVolume, float rightVolume) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
 
@@ -799,7 +799,7 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setPlaybackRate(int sampleRateInHz) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         if (sampleRateInHz <= 0) {
@@ -816,7 +816,7 @@ public class AudioTrack
      *  {@link #ERROR_INVALID_OPERATION}
      */
     public int setNotificationMarkerPosition(int markerInFrames) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         return native_set_marker_pos(markerInFrames);
@@ -829,7 +829,7 @@ public class AudioTrack
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
     public int setPositionNotificationPeriod(int periodInFrames) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         return native_set_pos_update_period(periodInFrames);
@@ -1065,7 +1065,7 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR_BAD_VALUE}
      */
     public int attachAuxEffect(int effectId) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         return native_attachAuxEffect(effectId);
@@ -1087,7 +1087,7 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setAuxEffectSendLevel(float level) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         // clamp the level
