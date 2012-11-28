@@ -2848,7 +2848,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     if (win.isConfigChanged()) {
                         if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + win
-                                + " visible with new config: " + win.mConfiguration);
+                                + " visible with new config: " + mCurConfiguration);
                         outConfig.setTo(mCurConfiguration);
                     }
                 }
@@ -3808,22 +3808,23 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowList windows = getDefaultWindowListLocked();
         int pos = windows.size() - 1;
         while (pos >= 0) {
-            WindowState wtoken = windows.get(pos);
+            WindowState win = windows.get(pos);
             pos--;
-            if (wtoken.mAppToken != null) {
+            if (win.mAppToken != null) {
                 // We hit an application window. so the orientation will be determined by the
                 // app window. No point in continuing further.
                 return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             }
-            if (!wtoken.isVisibleLw() || !wtoken.mPolicyVisibilityAfterAnim) {
+            if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
                 continue;
             }
-            int req = wtoken.mAttrs.screenOrientation;
+            int req = win.mAttrs.screenOrientation;
             if((req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) ||
                     (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
                 continue;
             }
 
+            if (DEBUG_ORIENTATION) Slog.v(TAG, win + " forcing orientation to " + req);
             return (mLastWindowForcedOrientation=req);
         }
         return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -9407,7 +9408,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " / " + mCurConfiguration + " / 0x"
                             + Integer.toHexString(diff));
                 }
-                win.mConfiguration = mCurConfiguration;
+                win.setConfiguration(mCurConfiguration);
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
