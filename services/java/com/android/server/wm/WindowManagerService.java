@@ -58,7 +58,6 @@ import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
-import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
@@ -138,13 +137,8 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.FakeWindow;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 
 import java.io.BufferedWriter;
@@ -292,8 +286,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     private final boolean mHeadless;
-
-    private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -483,29 +475,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     PowerManager.WakeLock mScreenFrozenLock;
 
-    // State management of app transitions.  When we are preparing for a
-    // transition, mNextAppTransition will be the kind of transition to
-    // perform or TRANSIT_NONE if we are not waiting.  If we are waiting,
-    // mOpeningApps and mClosingApps are the lists of tokens that will be
-    // made visible or hidden at the next transition.
-    int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
-    int mNextAppTransitionType = ActivityOptions.ANIM_NONE;
-    String mNextAppTransitionPackage;
-    Bitmap mNextAppTransitionThumbnail;
-    // Used for thumbnail transitions. True if we're scaling up, false if scaling down
-    boolean mNextAppTransitionScaleUp;
-    IRemoteCallback mNextAppTransitionCallback;
-    int mNextAppTransitionEnter;
-    int mNextAppTransitionExit;
-    int mNextAppTransitionStartX;
-    int mNextAppTransitionStartY;
-    int mNextAppTransitionStartWidth;
-    int mNextAppTransitionStartHeight;
-    boolean mAppTransitionReady = false;
-    boolean mAppTransitionRunning = false;
-    boolean mAppTransitionTimeout = false;
+    final AppTransition mAppTransition;
     boolean mStartingIconInTransition = false;
     boolean mSkipAppTransitionAnimation = false;
+
     final ArrayList<AppWindowToken> mOpeningApps = new ArrayList<AppWindowToken>();
     final ArrayList<AppWindowToken> mClosingApps = new ArrayList<AppWindowToken>();
 
@@ -811,6 +784,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
+
+        mAppTransition = new AppTransition(context, mH);
 
         mActivityManager = ActivityManagerNative.getDefault();
         mBatteryStats = BatteryStatsService.getService();
@@ -1253,13 +1228,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 if (highestTarget != null) {
-                    if (DEBUG_INPUT_METHOD) Slog.v(TAG, "mNextAppTransition="
-                            + mNextAppTransition + " " + highestTarget
+                    if (DEBUG_INPUT_METHOD) Slog.v(TAG, mAppTransition + " " + highestTarget
                             + " animating=" + highestTarget.mWinAnimator.isAnimating()
                             + " layer=" + highestTarget.mWinAnimator.mAnimLayer
                             + " new layer=" + w.mWinAnimator.mAnimLayer);
 
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                    if (mAppTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation,
                         // hold everything until we can find out what will happen.
                         mInputMethodTargetWaitingAnim = true;
@@ -1633,7 +1607,7 @@ public class WindowManagerService extends IWindowManager.Stub
             foundI = windowDetachedI;
         }
 
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+        if (mAppTransition.isTransitionSet()) {
             // If we are currently waiting for an app transition, and either
             // the current target or the next target are involved with it,
             // then hold off on doing anything with the wallpaper.
@@ -3178,280 +3152,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return info;
     }
 
-    private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
-        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
-                + (lp != null ? lp.packageName : null)
-                + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
-        if (lp != null && lp.windowAnimations != 0) {
-            // If this is a system resource, don't try to load it from the
-            // application resources.  It is nice to avoid loading application
-            // resources if we can.
-            String packageName = lp.packageName != null ? lp.packageName : "android";
-            int resId = lp.windowAnimations;
-            if ((resId&0xFF000000) == 0x01000000) {
-                packageName = "android";
-            }
-            if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: picked package="
-                    + packageName);
-            return AttributeCache.instance().get(packageName, resId,
-                    com.android.internal.R.styleable.WindowAnimation);
-        }
-        return null;
-    }
-
-    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
-        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: package="
-                + packageName + " resId=0x" + Integer.toHexString(resId));
-        if (packageName != null) {
-            if ((resId&0xFF000000) == 0x01000000) {
-                packageName = "android";
-            }
-            if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: picked package="
-                    + packageName);
-            return AttributeCache.instance().get(packageName, resId,
-                    com.android.internal.R.styleable.WindowAnimation);
-        }
-        return null;
-    }
-
-    Animation loadAnimation(WindowManager.LayoutParams lp, int animAttr) {
-        int anim = 0;
-        Context context = mContext;
-        if (animAttr >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations(lp);
-            if (ent != null) {
-                context = ent.context;
-                anim = ent.array.getResourceId(animAttr, 0);
-            }
-        }
-        if (anim != 0) {
-            return AnimationUtils.loadAnimation(context, anim);
-        }
-        return null;
-    }
-
-    private Animation loadAnimation(String packageName, int resId) {
-        int anim = 0;
-        Context context = mContext;
-        if (resId >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
-            if (ent != null) {
-                context = ent.context;
-                anim = resId;
-            }
-        }
-        if (anim != 0) {
-            return AnimationUtils.loadAnimation(context, anim);
-        }
-        return null;
-    }
-
-    private Animation createExitAnimationLocked(int transit, int duration) {
-        if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN ||
-                transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE) {
-            // If we are on top of the wallpaper, we need an animation that
-            // correctly handles the wallpaper staying static behind all of
-            // the animated elements.  To do this, will just have the existing
-            // element fade out.
-            Animation a = new AlphaAnimation(1, 0);
-            a.setDetachWallpaper(true);
-            a.setDuration(duration);
-            return a;
-        }
-        // For normal animations, the exiting element just holds in place.
-        Animation a = new AlphaAnimation(1, 1);
-        a.setDuration(duration);
-        return a;
-    }
-
-    /**
-     * Compute the pivot point for an animation that is scaling from a small
-     * rect on screen to a larger rect.  The pivot point varies depending on
-     * the distance between the inner and outer edges on both sides.  This
-     * function computes the pivot point for one dimension.
-     * @param startPos  Offset from left/top edge of outer rectangle to
-     * left/top edge of inner rectangle.
-     * @param finalScale The scaling factor between the size of the outer
-     * and inner rectangles.
-     */
-    private static float computePivot(int startPos, float finalScale) {
-        final float denom = finalScale-1;
-        if (Math.abs(denom) < .0001f) {
-            return startPos;
-        }
-        return -startPos / denom;
-    }
-
-    private Animation createScaleUpAnimationLocked(int transit, boolean enter) {
-        Animation a;
-        // Pick the desired duration.  If this is an inter-activity transition,
-        // it  is the standard duration for that.  Otherwise we use the longer
-        // task transition duration.
-        int duration;
-        switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                duration = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_shortAnimTime);
-                break;
-            default:
-                duration = 300;
-                break;
-        }
-        // TODO(multidisplay): For now assume all app animation is on main display.
-        final DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-        if (enter) {
-            // Entering app zooms out from the center of the initial rect.
-            float scaleW = mNextAppTransitionStartWidth / (float) displayInfo.appWidth;
-            float scaleH = mNextAppTransitionStartHeight / (float) displayInfo.appHeight;
-            Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                    computePivot(mNextAppTransitionStartX, scaleW),
-                    computePivot(mNextAppTransitionStartY, scaleH));
-            scale.setDuration(duration);
-            AnimationSet set = new AnimationSet(true);
-            Animation alpha = new AlphaAnimation(0, 1);
-            scale.setDuration(duration);
-            set.addAnimation(scale);
-            alpha.setDuration(duration);
-            set.addAnimation(alpha);
-            set.setDetachWallpaper(true);
-            a = set;
-        } else {
-            a = createExitAnimationLocked(transit, duration);
-        }
-        a.setFillAfter(true);
-        final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_cubic);
-        a.setInterpolator(interpolator);
-        a.initialize(displayInfo.appWidth, displayInfo.appHeight,
-                displayInfo.appWidth, displayInfo.appHeight);
-        return a;
-    }
-
-    private Animation createThumbnailAnimationLocked(int transit,
-            boolean enter, boolean thumb, boolean scaleUp) {
-        Animation a;
-        final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
-        final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
-        final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
-        final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
-        // Pick the desired duration.  If this is an inter-activity transition,
-        // it  is the standard duration for that.  Otherwise we use the longer
-        // task transition duration.
-        int duration;
-        switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                duration = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_shortAnimTime);
-                break;
-            default:
-                duration = 250;
-                break;
-        }
-        // TOOD(multidisplay): For now assume all app animation is on the main screen.
-        DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-        if (thumb) {
-            // Animation for zooming thumbnail from its initial size to
-            // filling the screen.
-            if (scaleUp) {
-                float scaleW = displayInfo.appWidth / thumbWidth;
-                float scaleH = displayInfo.appHeight / thumbHeight;
-
-                Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
-                        computePivot(mNextAppTransitionStartX, 1 / scaleW),
-                        computePivot(mNextAppTransitionStartY, 1 / scaleH));
-                AnimationSet set = new AnimationSet(true);
-                Animation alpha = new AlphaAnimation(1, 0);
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                set.addAnimation(scale);
-                alpha.setDuration(duration);
-                set.addAnimation(alpha);
-                set.setFillBefore(true);
-                a = set;
-            } else {
-                float scaleW = displayInfo.appWidth / thumbWidth;
-                float scaleH = displayInfo.appHeight / thumbHeight;
-
-                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                        computePivot(mNextAppTransitionStartX, 1 / scaleW),
-                        computePivot(mNextAppTransitionStartY, 1 / scaleH));
-                AnimationSet set = new AnimationSet(true);
-                Animation alpha = new AlphaAnimation(1, 1);
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                set.addAnimation(scale);
-                alpha.setDuration(duration);
-                set.addAnimation(alpha);
-                set.setFillBefore(true);
-
-                a = set;
-            }
-        } else if (enter) {
-            // Entering app zooms out from the center of the thumbnail.
-            if (scaleUp) {
-                float scaleW = thumbWidth / displayInfo.appWidth;
-                float scaleH = thumbHeight / displayInfo.appHeight;
-                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                        computePivot(mNextAppTransitionStartX, scaleW),
-                        computePivot(mNextAppTransitionStartY, scaleH));
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                scale.setFillBefore(true);
-                a = scale;
-            } else {
-                // noop animation
-                a = new AlphaAnimation(1, 1);
-                a.setDuration(duration);
-            }
-        } else {
-            // Exiting app
-            if (scaleUp) {
-                if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN) {
-                    // Fade out while bringing up selected activity. This keeps the
-                    // current activity from showing through a launching wallpaper
-                    // activity.
-                    a = new AlphaAnimation(1, 0);
-                } else {
-                    // noop animation
-                    a = new AlphaAnimation(1, 1);
-                }
-                a.setDuration(duration);
-            } else {
-                float scaleW = thumbWidth / displayInfo.appWidth;
-                float scaleH = thumbHeight / displayInfo.appHeight;
-                Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
-                        computePivot(mNextAppTransitionStartX, scaleW),
-                        computePivot(mNextAppTransitionStartY, scaleH));
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                scale.setFillBefore(true);
-                AnimationSet set = new AnimationSet(true);
-                Animation alpha = new AlphaAnimation(1, 0);
-                set.addAnimation(scale);
-                alpha.setDuration(duration);
-                alpha.setInterpolator(new DecelerateInterpolator(
-                        THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                set.addAnimation(alpha);
-                set.setFillBefore(true);
-                set.setZAdjustment(Animation.ZORDER_TOP);
-                a = set;
-            }
-        }
-        a.setFillAfter(true);
-        final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_quad);
-        a.setInterpolator(interpolator);
-        a.initialize(displayInfo.appWidth, displayInfo.appHeight,
-                displayInfo.appWidth, displayInfo.appHeight);
-        return a;
-    }
-
     private boolean applyAnimationLocked(AppWindowToken atoken,
             WindowManager.LayoutParams lp, int transit, boolean enter) {
         // Only apply an animation if the display isn't frozen.  If it is
@@ -3459,98 +3159,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // artifacts when we unfreeze the display if some different animation
         // is running.
         if (okToDisplay()) {
-            Animation a;
-            boolean initialized = false;
-            if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
-                a = loadAnimation(mNextAppTransitionPackage, enter ?
-                        mNextAppTransitionEnter : mNextAppTransitionExit);
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                        "applyAnimation: atoken=" + atoken
-                        + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
-                        + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers=" + Debug.getCallers(3));
-            } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
-                a = createScaleUpAnimationLocked(transit, enter);
-                initialized = true;
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                        "applyAnimation: atoken=" + atoken
-                        + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
-                        + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers=" + Debug.getCallers(3));
-            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP ||
-                    mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN) {
-                boolean scaleUp = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP);
-                a = createThumbnailAnimationLocked(transit, enter, false, scaleUp);
-                initialized = true;
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                    String animName = scaleUp ? "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
-                    Slog.v(TAG, "applyAnimation: atoken=" + atoken
-                            + " anim=" + a + " nextAppTransition=" + animName
-                            + " transit=" + transit + " isEntrance=" + enter
-                            + " Callers=" + Debug.getCallers(3));
-                }
-            } else {
-                int animAttr = 0;
-                switch (transit) {
-                    case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_TASK_OPEN:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE:
-                        animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
-                        break;
-                }
-                a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
-                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                        "applyAnimation: atoken=" + atoken
-                        + " anim=" + a
-                        + " animAttr=0x" + Integer.toHexString(animAttr)
-                        + " transit=" + transit + " isEntrance=" + enter
-                        + " Callers=" + Debug.getCallers(3));
-            }
+            DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
+                    + atoken);
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
+                    displayInfo.appWidth,  displayInfo.appHeight);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -3560,7 +3173,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + atoken, e);
                 }
-                atoken.mAppAnimator.setAnimation(a, initialized);
+                atoken.mAppAnimator.setAnimation(a);
             }
         } else {
             atoken.mAppAnimator.clearAnimation();
@@ -4094,26 +3707,26 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                     TAG, "Prepare app transition: transit=" + transit
-                    + " mNextAppTransition=" + mNextAppTransition
+                    + " " + mAppTransition
                     + " alwaysKeepCurrent=" + alwaysKeepCurrent
                     + " Callers=" + Debug.getCallers(3));
             if (okToDisplay()) {
-                if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
-                        || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
-                    mNextAppTransition = transit;
+                if (!mAppTransition.isTransitionSet() || mAppTransition.isTransitionNone()) {
+                    mAppTransition.setAppTransition(transit);
                 } else if (!alwaysKeepCurrent) {
                     if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
-                            && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
+                            && mAppTransition.isTransitionEqual(
+                                    WindowManagerPolicy.TRANSIT_TASK_CLOSE)) {
                         // Opening a new task always supersedes a close for the anim.
-                        mNextAppTransition = transit;
+                        mAppTransition.setAppTransition(transit);
                     } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
-                            && mNextAppTransition == WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE) {
+                            && mAppTransition.isTransitionEqual(
+                                WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE)) {
                         // Opening a new activity always supersedes a close for the anim.
-                        mNextAppTransition = transit;
+                        mAppTransition.setAppTransition(transit);
                     }
                 }
-                mAppTransitionReady = false;
-                mAppTransitionTimeout = false;
+                mAppTransition.prepare();
                 mStartingIconInTransition = false;
                 mSkipAppTransitionAnimation = false;
                 mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
@@ -4125,30 +3738,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public int getPendingAppTransition() {
-        return mNextAppTransition;
-    }
-
-    private void scheduleAnimationCallback(IRemoteCallback cb) {
-        if (cb != null) {
-            mH.sendMessage(mH.obtainMessage(H.DO_ANIMATION_CALLBACK, cb));
-        }
+        return mAppTransition.getAppTransition();
     }
 
     @Override
     public void overridePendingAppTransition(String packageName,
             int enterAnim, int exitAnim, IRemoteCallback startedCallback) {
         synchronized(mWindowMap) {
-            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-                mNextAppTransitionType = ActivityOptions.ANIM_CUSTOM;
-                mNextAppTransitionPackage = packageName;
-                mNextAppTransitionThumbnail = null;
-                mNextAppTransitionEnter = enterAnim;
-                mNextAppTransitionExit = exitAnim;
-                scheduleAnimationCallback(mNextAppTransitionCallback);
-                mNextAppTransitionCallback = startedCallback;
-            } else {
-                scheduleAnimationCallback(startedCallback);
-            }
+            mAppTransition.overridePendingAppTransition(packageName, enterAnim, exitAnim,
+                    startedCallback);
         }
     }
 
@@ -4156,17 +3754,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
         synchronized(mWindowMap) {
-            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-                mNextAppTransitionType = ActivityOptions.ANIM_SCALE_UP;
-                mNextAppTransitionPackage = null;
-                mNextAppTransitionThumbnail = null;
-                mNextAppTransitionStartX = startX;
-                mNextAppTransitionStartY = startY;
-                mNextAppTransitionStartWidth = startWidth;
-                mNextAppTransitionStartHeight = startHeight;
-                scheduleAnimationCallback(mNextAppTransitionCallback);
-                mNextAppTransitionCallback = null;
-            }
+            mAppTransition.overridePendingAppTransitionScaleUp(startX, startY, startWidth,
+                    startHeight);
         }
     }
 
@@ -4174,19 +3763,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {
-            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-                mNextAppTransitionType = scaleUp
-                        ? ActivityOptions.ANIM_THUMBNAIL_SCALE_UP : ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
-                mNextAppTransitionPackage = null;
-                mNextAppTransitionThumbnail = srcThumb;
-                mNextAppTransitionScaleUp = scaleUp;
-                mNextAppTransitionStartX = startX;
-                mNextAppTransitionStartY = startY;
-                scheduleAnimationCallback(mNextAppTransitionCallback);
-                mNextAppTransitionCallback = startedCallback;
-            } else {
-                scheduleAnimationCallback(startedCallback);
-            }
+            mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
+                    startedCallback, scaleUp);
         }
     }
 
@@ -4201,11 +3779,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) {
                 RuntimeException e = new RuntimeException("here");
                 e.fillInStackTrace();
-                Slog.w(TAG, "Execute app transition: mNextAppTransition="
-                        + mNextAppTransition, e);
+                Slog.w(TAG, "Execute app transition: " + mAppTransition, e);
             }
-            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-                mAppTransitionReady = true;
+            if (mAppTransition.isTransitionSet()) {
+                mAppTransition.setReady(true);
                 final long origId = Binder.clearCallingIdentity();
                 performLayoutAndPlaceSurfacesLocked();
                 Binder.restoreCallingIdentity(origId);
@@ -4574,14 +4151,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     e.fillInStackTrace();
                 }
                 Slog.v(TAG, "setAppVisibility(" + token + ", visible=" + visible
-                        + "): mNextAppTransition=" + mNextAppTransition
+                        + "): " + mAppTransition
                         + " hidden=" + wtoken.hidden
                         + " hiddenRequested=" + wtoken.hiddenRequested, e);
             }
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (okToDisplay() && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            if (okToDisplay() && mAppTransition.isTransitionSet()) {
                 // Already in requested state, don't do anything more.
                 if (wtoken.hiddenRequested != visible) {
                     return;
@@ -4771,7 +4348,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.waitingToShow = false;
                 if (mClosingApps.contains(wtoken)) {
                     delayed = true;
-                } else if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                } else if (mAppTransition.isTransitionSet()) {
                     mClosingApps.add(wtoken);
                     wtoken.waitingToHide = true;
                     delayed = true;
@@ -4981,8 +4558,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
                     "Start moving token " + wtoken + " initially at "
                     + oldIndex);
-            if (oldIndex > index && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET
-                        && !mAppTransitionRunning) {
+            if (oldIndex > index && mAppTransition.isTransitionSet()
+                    && !mAppTransition.isRunning()) {
                 // animation towards back has not started, copy old list for duration of animation.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -4996,7 +4573,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_REORDER) Slog.v(TAG, "Moved " + token + " to " + index + ":");
             else if (DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "Moved " + token + " to " + index);
             if (DEBUG_REORDER) dumpAppTokensLocked();
-            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET && !mAppTransitionRunning) {
+            if (!mAppTransition.isTransitionSet() && !mAppTransition.isRunning()) {
                 // Not animating, bring animating app list in line with mAppTokens.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -5144,13 +4721,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
                             "Adding next to top: " + wt);
                     mAppTokens.add(wt);
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                    if (mAppTransition.isTransitionSet()) {
                         wt.sendingToBottom = false;
                     }
                 }
             }
 
-            if (!mAppTransitionRunning) {
+            if (!mAppTransition.isRunning()) {
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
                 moveAppWindowsLocked(tokens, mAppTokens.size());
@@ -5169,7 +4746,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             final int N = tokens.size();
-            if (N > 0 && !mAppTransitionRunning) {
+            if (N > 0 && !mAppTransition.isRunning()) {
                 // animating towards back, hang onto old list for duration of animation.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -5182,14 +4759,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "Adding next to bottom: " + wt + " at " + pos);
                     mAppTokens.add(pos, wt);
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                    if (mAppTransition.isTransitionSet()) {
                         wt.sendingToBottom = true;
                     }
                     pos++;
                 }
             }
 
-            if (!mAppTransitionRunning) {
+            if (!mAppTransition.isRunning()) {
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
                 moveAppWindowsLocked(tokens, 0);
@@ -7561,11 +7138,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case APP_TRANSITION_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+                        if (mAppTransition.isTransitionSet()) {
                             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                                     "*** APP TRANSITION TIMEOUT");
-                            mAppTransitionReady = true;
-                            mAppTransitionTimeout = true;
+                            mAppTransition.setReady(true);
+                            mAppTransition.setTimeout(true);
                             mAnimatingAppTokens.clear();
                             mAnimatingAppTokens.addAll(mAppTokens);
                             performLayoutAndPlaceSurfacesLocked();
@@ -8521,8 +8098,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                 "Checking " + NN + " opening apps (frozen="
                 + mDisplayFrozen + " timeout="
-                + mAppTransitionTimeout + ")...");
-        if (!mDisplayFrozen && !mAppTransitionTimeout) {
+                + mAppTransition.isTimeout() + ")...");
+        if (!mDisplayFrozen && !mAppTransition.isTimeout()) {
             // If the display isn't frozen, wait to do anything until
             // all of the apps are ready.  Otherwise just go because
             // we'll unfreeze the display when everyone is ready.
@@ -8541,14 +8118,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (goodToGo) {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
-            int transit = mNextAppTransition;
+            int transit = mAppTransition.getAppTransition();
             if (mSkipAppTransitionAnimation) {
                 transit = WindowManagerPolicy.TRANSIT_UNSET;
             }
-            mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
-            mAppTransitionReady = false;
-            mAppTransitionRunning = true;
-            mAppTransitionTimeout = false;
+            mAppTransition.goodToGo();
             mStartingIconInTransition = false;
             mSkipAppTransitionAnimation = false;
 
@@ -8718,12 +8292,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.deferClearAllDrawn = false;
             }
 
-            if (mNextAppTransitionThumbnail != null && topOpeningApp != null
-                    && topOpeningApp.mAppAnimator.animation != null) {
+            AppWindowAnimator appAnimator =
+                    topOpeningApp == null ? null : topOpeningApp.mAppAnimator;
+            Bitmap nextAppTransitionThumbnail = mAppTransition.getNextAppTransitionThumbnail();
+            if (nextAppTransitionThumbnail != null && appAnimator != null
+                    && appAnimator.animation != null) {
                 // This thumbnail animation is very special, we need to have
                 // an extra surface with the thumbnail included with the animation.
-                Rect dirty = new Rect(0, 0, mNextAppTransitionThumbnail.getWidth(),
-                        mNextAppTransitionThumbnail.getHeight());
+                Rect dirty = new Rect(0, 0, nextAppTransitionThumbnail.getWidth(),
+                        nextAppTransitionThumbnail.getHeight());
                 try {
                     // TODO(multi-display): support other displays
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
@@ -8733,35 +8310,34 @@ public class WindowManagerService extends IWindowManager.Stub
                             dirty.width(), dirty.height(),
                             PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                     surface.setLayerStack(display.getLayerStack());
-                    topOpeningApp.mAppAnimator.thumbnail = surface;
-                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "
-                            + surface + ": CREATE");
+                    appAnimator.thumbnail = surface;
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL " + surface + ": CREATE");
                     Surface drawSurface = new Surface();
                     drawSurface.copyFrom(surface);
                     Canvas c = drawSurface.lockCanvas(dirty);
-                    c.drawBitmap(mNextAppTransitionThumbnail, 0, 0, null);
+                    c.drawBitmap(nextAppTransitionThumbnail, 0, 0, null);
                     drawSurface.unlockCanvasAndPost(c);
                     drawSurface.release();
-                    topOpeningApp.mAppAnimator.thumbnailLayer = topOpeningLayer;
-                    Animation anim = createThumbnailAnimationLocked(
-                            transit, true, true, mNextAppTransitionScaleUp);
-                    topOpeningApp.mAppAnimator.thumbnailAnimation = anim;
+                    appAnimator.thumbnailLayer = topOpeningLayer;
+                    DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+                    Animation anim = mAppTransition.createThumbnailAnimationLocked(
+                            transit, true, true, displayInfo.appWidth, displayInfo.appHeight);
+                    appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
-                    topOpeningApp.mAppAnimator.thumbnailX = mNextAppTransitionStartX;
-                    topOpeningApp.mAppAnimator.thumbnailY = mNextAppTransitionStartY;
+                    Point p = new Point();
+                    mAppTransition.getStartingPoint(p);
+                    appAnimator.thumbnailX = p.x;
+                    appAnimator.thumbnailY = p.y;
                 } catch (Surface.OutOfResourcesException e) {
                     Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
                             + " h=" + dirty.height(), e);
-                    topOpeningApp.mAppAnimator.clearThumbnail();
+                    appAnimator.clearThumbnail();
                 }
             }
 
-            mNextAppTransitionType = ActivityOptions.ANIM_NONE;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionThumbnail = null;
-            scheduleAnimationCallback(mNextAppTransitionCallback);
-            mNextAppTransitionCallback = null;
+            mAppTransition.postAnimationCallback();
+            mAppTransition.clear();
 
             mOpeningApps.clear();
             mClosingApps.clear();
@@ -8791,7 +8367,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private int handleAnimatingStoppedAndTransitionLocked() {
         int changes = 0;
 
-        mAppTransitionRunning = false;
+        mAppTransition.setRunning(false);
         // Restore window app tokens to the ActivityManager views
         for (int i = mAnimatingAppTokens.size() - 1; i >= 0; i--) {
             mAnimatingAppTokens.get(i).sendingToBottom = false;
@@ -9336,7 +8912,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // If we are ready to perform an app transition, check through
         // all of the app tokens to be shown and see if they are ready
         // to go.
-        if (mAppTransitionReady) {
+        if (mAppTransition.isReady()) {
             defaultDisplay.pendingLayoutChanges |= handleAppTransitionReadyLocked(defaultWindows);
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after handleAppTransitionReadyLocked",
                 defaultDisplay.pendingLayoutChanges);
@@ -9344,7 +8920,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInnerFields.mAdjResult = 0;
 
-        if (!mAnimator.mAnimating && mAppTransitionRunning) {
+        if (!mAnimator.mAnimating && mAppTransition.isRunning()) {
             // We have finished the animation of an app transition.  To do
             // this, we have delayed a lot of operations like showing and
             // hiding apps, moving apps in Z-order, etc.  The app token list
@@ -9357,7 +8933,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (mInnerFields.mWallpaperForceHidingChanged && defaultDisplay.pendingLayoutChanges == 0
-                && !mAppTransitionReady) {
+                && !mAppTransition.isReady()) {
             // At this point, there was a window with a wallpaper that
             // was force hiding other windows behind it, but now it
             // is going away.  This may be simple -- just animate
@@ -10087,12 +9663,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // the screen then the whole world is changing behind the scenes.
         mPolicy.setLastInputMethodWindowLw(null, null);
 
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-            mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
-            mNextAppTransitionType = ActivityOptions.ANIM_NONE;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionThumbnail = null;
-            mAppTransitionReady = true;
+        if (mAppTransition.isTransitionSet()) {
+            mAppTransition.setAppTransition(WindowManagerPolicy.TRANSIT_UNSET);
+            mAppTransition.clear();
+            mAppTransition.setReady(true);
         }
 
         if (PROFILE_ORIENTATION) {
@@ -10465,7 +10039,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mAppTransitionRunning && mAnimatingAppTokens.size() > 0) {
+        if (mAppTransition.isRunning() && mAnimatingAppTokens.size() > 0) {
             pw.println();
             pw.println("  Application tokens during animation:");
             for (int i=mAnimatingAppTokens.size()-1; i>=0; i--) {
@@ -10696,48 +10270,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);
                     pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
-            pw.print("  mTraversalScheduled="); pw.print(mTraversalScheduled);
-                    pw.print(" mNextAppTransition=0x");
-                    pw.print(Integer.toHexString(mNextAppTransition));
-                    pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
-            pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
-                    pw.print(" mAppTransitionTimeout="); pw.println(mAppTransitionTimeout);
-            if (mNextAppTransitionType != ActivityOptions.ANIM_NONE) {
-                pw.print("  mNextAppTransitionType="); pw.println(mNextAppTransitionType);
-            }
-            switch (mNextAppTransitionType) {
-                case ActivityOptions.ANIM_CUSTOM:
-                    pw.print("  mNextAppTransitionPackage=");
-                            pw.println(mNextAppTransitionPackage);
-                    pw.print("  mNextAppTransitionEnter=0x");
-                            pw.print(Integer.toHexString(mNextAppTransitionEnter));
-                            pw.print(" mNextAppTransitionExit=0x");
-                            pw.println(Integer.toHexString(mNextAppTransitionExit));
-                    break;
-                case ActivityOptions.ANIM_SCALE_UP:
-                    pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
-                            pw.print(" mNextAppTransitionStartY=");
-                            pw.println(mNextAppTransitionStartY);
-                    pw.print("  mNextAppTransitionStartWidth=");
-                            pw.print(mNextAppTransitionStartWidth);
-                            pw.print(" mNextAppTransitionStartHeight=");
-                            pw.println(mNextAppTransitionStartHeight);
-                    break;
-                case ActivityOptions.ANIM_THUMBNAIL_SCALE_UP:
-                case ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN:
-                    pw.print("  mNextAppTransitionThumbnail=");
-                            pw.print(mNextAppTransitionThumbnail);
-                            pw.print(" mNextAppTransitionStartX=");
-                            pw.print(mNextAppTransitionStartX);
-                            pw.print(" mNextAppTransitionStartY=");
-                            pw.println(mNextAppTransitionStartY);
-                    pw.print("  mNextAppTransitionScaleUp="); pw.println(mNextAppTransitionScaleUp);
-                    break;
-            }
-            if (mNextAppTransitionCallback != null) {
-                pw.print("  mNextAppTransitionCallback=");
-                        pw.println(mNextAppTransitionCallback);
-            }
+            pw.print("  mTraversalScheduled="); pw.println(mTraversalScheduled);
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
             pw.println("  mLayoutToAnim:");
@@ -10766,6 +10299,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.println(mLayoutToAnim.mWallpaperTokens.get(i));
             }
             // XXX also need to print mDimParams and mAppWindowAnimParams.  I am lazy.
+            mAppTransition.dump(pw);
         }
     }
 
