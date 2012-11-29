@@ -19,30 +19,30 @@
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
 
-#include <utils/Trace.h>
+#include <cutils/trace.h>
 #include <cutils/log.h>
 
 namespace android {
 
 static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv* env, jclass clazz) {
-    return Tracer::getEnabledTags();
+    return atrace_get_enabled_tags();
 }
 
 static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint value) {
     ScopedUtfChars name(env, nameStr);
-    Tracer::traceCounter(tag, name.c_str(), value);
+    atrace_int(tag, name.c_str(), value);
 }
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr) {
     ScopedUtfChars name(env, nameStr);
-    Tracer::traceBegin(tag, name.c_str());
+    atrace_begin(tag, name.c_str());
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag) {
-    Tracer::traceEnd(tag);
+    atrace_end(tag);
 }
 
 static JNINativeMethod gTraceMethods[] = {
