@@ -248,6 +248,15 @@ public abstract class CompoundButton extends Button implements Checkable {
         return padding;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getHorizontalOffsetForDrawables() {
+        final Drawable buttonDrawable = mButtonDrawable;
+        return (buttonDrawable != null) ? buttonDrawable.getIntrinsicWidth() : 0;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
