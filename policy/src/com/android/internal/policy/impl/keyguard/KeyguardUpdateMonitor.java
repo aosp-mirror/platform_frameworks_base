@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -113,7 +114,7 @@ public class KeyguardUpdateMonitor {
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
-    private ContentObserver mContentObserver;
+    private ContentObserver mDeviceProvisionedObserver;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -322,9 +323,7 @@ public class KeyguardUpdateMonitor {
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
 
-        mDeviceProvisioned = Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-
+        mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
         if (!mDeviceProvisioned) {
@@ -373,13 +372,17 @@ public class KeyguardUpdateMonitor {
         }
     }
 
+    private boolean isDeviceProvisionedInSettingsDb() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+    }
+
     private void watchForDeviceProvisioning() {
-        mContentObserver = new ContentObserver(mHandler) {
+        mDeviceProvisionedObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
-                mDeviceProvisioned = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+                mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
                 if (mDeviceProvisioned) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_DEVICE_PROVISIONED));
                 }
@@ -389,12 +392,11 @@ public class KeyguardUpdateMonitor {
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
-                false, mContentObserver);
+                false, mDeviceProvisionedObserver);
 
         // prevent a race condition between where we check the flag and where we register the
         // observer by grabbing the value once again...
-        boolean provisioned = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        boolean provisioned = isDeviceProvisionedInSettingsDb();
         if (provisioned != mDeviceProvisioned) {
             mDeviceProvisioned = provisioned;
             if (mDeviceProvisioned) {
@@ -475,10 +477,10 @@ public class KeyguardUpdateMonitor {
                 cb.onDeviceProvisioned();
             }
         }
-        if (mContentObserver != null) {
+        if (mDeviceProvisionedObserver != null) {
             // We don't need the observer anymore...
-            mContext.getContentResolver().unregisterContentObserver(mContentObserver);
-            mContentObserver = null;
+            mContext.getContentResolver().unregisterContentObserver(mDeviceProvisionedObserver);
+            mDeviceProvisionedObserver = null;
         }
     }
 
