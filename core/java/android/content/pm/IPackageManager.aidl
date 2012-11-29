@@ -378,6 +378,7 @@ interface IPackageManager {
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
+    boolean isOnlyCoreApps();
 
     void setPermissionEnforced(String permission, boolean enforced);
     boolean isPermissionEnforced(String permission);
