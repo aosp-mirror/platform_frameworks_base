@@ -281,8 +281,9 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public List<AppWidgetProviderInfo> getInstalledProviders() throws RemoteException {
-        return getImplForUser(getCallingOrCurrentUserId()).getInstalledProviders();
+    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter)
+            throws RemoteException {
+        return getImplForUser(getCallingOrCurrentUserId()).getInstalledProviders(categoryFilter);
     }
 
     @Override
