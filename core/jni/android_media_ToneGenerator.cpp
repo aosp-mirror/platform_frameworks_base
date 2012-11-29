@@ -93,11 +93,6 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
 
     ALOGV("android_media_ToneGenerator_native_setup jobject: %x", (int)thiz);
 
-    if (lpToneGen == NULL) {
-        ALOGE("ToneGenerator creation failed");
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-        return;
-    }
     ALOGV("ToneGenerator lpToneGen: %x", (unsigned int)lpToneGen);
 
     if (!lpToneGen->isInited()) {
