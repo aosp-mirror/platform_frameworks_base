@@ -1096,6 +1096,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
             } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "no current wallpaper -- first boot?");
         } catch (NullPointerException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         } catch (NumberFormatException e) {

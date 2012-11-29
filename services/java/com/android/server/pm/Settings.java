@@ -1556,7 +1556,7 @@ final class Settings {
         }
     }
 
-    boolean readLPw(List<UserInfo> users) {
+    boolean readLPw(List<UserInfo> users, int sdkVersion, boolean onlyCore) {
         FileInputStream str = null;
         if (mBackupSettingsFilename.exists()) {
             try {
@@ -1586,7 +1586,10 @@ final class Settings {
                     mReadMessages.append("No settings file found\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
-                    readDefaultPreferredAppsLPw(0);
+                    if (!onlyCore) {
+                        readDefaultPreferredAppsLPw(0);
+                    }
+                    mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
                     return false;
                 }
                 str = new FileInputStream(mSettingsFilename);
