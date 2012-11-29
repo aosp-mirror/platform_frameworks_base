@@ -30,7 +30,7 @@ href="https://developers.google.com/maps/documentation/android/">developers.goog
 <div class="landing-docs">
   <div class="col-6 normal-links">
     <h3 style="clear:left">Key Developer Features</h3>
-    <h4>Add Maps in a fragment</h4>
+    <h4>Add maps to your app</h4>
     <p>With version 2 of the Google Maps Android API, you can embed maps into an activity
     as a fragment with a simple XML snippet. The new Maps offer exciting features such as 3D maps;
     indoor, satellite, terrain, and hybrid maps;
@@ -59,8 +59,8 @@ href="https://developers.google.com/maps/documentation/android/">developers.goog
     <h3 style="clear:left">Getting Started</h3>
     <h4>1. Get the Google Play services SDK</h4>
     <p>The Google Maps Android APIs are part of the Google Play services platform.</p>
-    <p>To use Google Maps, <a href="{@docRoot}google/play-services/download.html">download and configure</a>
-      the Google Play services SDK from the SDK Manager. Then see the <a class="external-link"
+    <p>To use Google Maps, <a href="{@docRoot}google/play-services/setup.html">set up</a>
+      the Google Play services SDK. Then see the <a class="external-link"
       href="https://developers.google.com/maps/documentation/android/start#installing_the_google_maps_android_v2_api">
       Getting Started guide</a> to get your API key for Maps and set up your app.
     </p>
