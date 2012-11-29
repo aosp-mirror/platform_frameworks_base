@@ -21,10 +21,9 @@
 
 #include <SkPaint.h>
 
+#include <utils/LruCache.h>
 #include <utils/String16.h>
 
-#include "utils/Compare.h"
-#include "utils/GenerationCache.h"
 #include "FontRenderer.h"
 #include "Texture.h"
 
@@ -32,12 +31,13 @@ namespace android {
 namespace uirenderer {
 
 struct ShadowText {
-    ShadowText(): radius(0), len(0), textSize(0.0f), typeface(NULL) {
+    ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(NULL),
+            flags(0), italicStyle(0.0f), scaleX(0), text(NULL), positions(NULL) {
     }
 
-    ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText,
+    ShadowText(SkPaint* paint, float radius, uint32_t len, const char* srcText,
             const float* positions):
-            radius(radius), len(len), positions(positions) {
+            len(len), radius(radius), positions(positions) {
         // TODO: Propagate this through the API, we should not cast here
         text = (const char16_t*) srcText;
 
@@ -49,30 +49,27 @@ struct ShadowText {
             flags |= Font::kFakeBold;
         }
 
-        const float skewX = paint->getTextSkewX();
-        italicStyle = *(uint32_t*) &skewX;
-
-        const float scaleXFloat = paint->getTextScaleX();
-        scaleX = *(uint32_t*) &scaleXFloat;
+        italicStyle = paint->getTextSkewX();
+        scaleX = paint->getTextScaleX();
     }
 
     ~ShadowText() {
     }
 
-    uint32_t radius;
-    uint32_t len;
-    float textSize;
-    SkTypeface* typeface;
-    uint32_t flags;
-    uint32_t italicStyle;
-    uint32_t scaleX;
-    const char16_t* text;
-    const float* positions;
-    String16 str;
-    Vector<float> positionsCopy;
+    hash_t hash() const;
+
+    static int compare(const ShadowText& lhs, const ShadowText& rhs);
+
+    bool operator==(const ShadowText& other) const {
+        return compare(*this, other) == 0;
+    }
+
+    bool operator!=(const ShadowText& other) const {
+        return compare(*this, other) != 0;
+    }
 
     void copyTextLocally() {
-        str.setTo((const char16_t*) text, len >> 1);
+        str.setTo((const char16_t*) text, len * sizeof(char16_t));
         text = str.string();
         if (positions != NULL) {
             positionsCopy.clear();
@@ -81,30 +78,35 @@ struct ShadowText {
         }
     }
 
-    bool operator<(const ShadowText& rhs) const {
-        LTE_INT(len) {
-            LTE_INT(radius) {
-                LTE_FLOAT(textSize) {
-                    LTE_INT(typeface) {
-                        LTE_INT(flags) {
-                            LTE_INT(italicStyle) {
-                                LTE_INT(scaleX) {
-                                    int cmp = memcmp(text, rhs.text, len);
-                                    if (cmp < 0) return true;
-                                    if (cmp == 0 && rhs.positions != NULL) {
-                                        if (positions == NULL) return true;
-                                        return memcmp(positions, rhs.positions, len << 2) < 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
+    uint32_t len;
+    float radius;
+    float textSize;
+    SkTypeface* typeface;
+    uint32_t flags;
+    float italicStyle;
+    float scaleX;
+    const char16_t* text;
+    const float* positions;
+
+    // Not directly used to compute the cache key
+    String16 str;
+    Vector<float> positionsCopy;
+
 }; // struct ShadowText
+
+// Caching support
+
+inline int strictly_order_type(const ShadowText& lhs, const ShadowText& rhs) {
+    return ShadowText::compare(lhs, rhs) < 0;
+}
+
+inline int compare_type(const ShadowText& lhs, const ShadowText& rhs) {
+    return ShadowText::compare(lhs, rhs);
+}
+
+inline hash_t hash_type(const ShadowText& entry) {
+    return entry.hash();
+}
 
 /**
  * Alpha texture used to represent a shadow.
@@ -130,7 +132,7 @@ public:
     void operator()(ShadowText& text, ShadowTexture*& texture);
 
     ShadowTexture* get(SkPaint* paint, const char* text, uint32_t len,
-            int numGlyphs, uint32_t radius, const float* positions);
+            int numGlyphs, float radius, const float* positions);
 
     /**
      * Clears the cache. This causes all textures to be deleted.
@@ -157,7 +159,7 @@ public:
 private:
     void init();
 
-    GenerationCache<ShadowText, ShadowTexture*> mCache;
+    LruCache<ShadowText, ShadowTexture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

@@ -19,12 +19,12 @@
 
 #include <SkBitmap.h>
 
+#include <utils/LruCache.h>
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
 #include "Debug.h"
 #include "Texture.h"
-#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -130,7 +130,7 @@ private:
 
     void init();
 
-    GenerationCache<SkBitmap*, Texture*> mCache;
+    LruCache<SkBitmap*, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

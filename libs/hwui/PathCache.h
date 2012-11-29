@@ -22,8 +22,6 @@
 #include "Debug.h"
 #include "ShapeCache.h"
 
-#include "utils/Compare.h"
-
 namespace android {
 namespace uirenderer {
 
@@ -41,17 +39,27 @@ struct PathCacheEntry: public ShapeCacheEntry {
         path = NULL;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(path));
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const PathCacheEntry& rhs = (const PathCacheEntry&) r;
-        LTE_INT(path) {
-            return false;
-        }
-        return false;
+        return path - rhs.path;
     }
 
     SkPath* path;
 
 }; // PathCacheEntry
+
+inline hash_t hash_type(const PathCacheEntry& entry) {
+    return entry.hash();
+}
 
 /**
  * A simple LRU path cache. The cache has a maximum size expressed in bytes.
