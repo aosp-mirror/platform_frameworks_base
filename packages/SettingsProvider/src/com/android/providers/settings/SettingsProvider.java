@@ -455,8 +455,8 @@ public class SettingsProvider extends ContentProvider {
                     cache.setFullyMatchesDisk(false);
                     Log.d(TAG, "row count exceeds max cache entries for table " + table);
                 }
-                Log.d(TAG, "cache for settings table '" + table + "' rows=" + rows + "; fullycached=" +
-                      cache.fullyMatchesDisk());
+                if (LOCAL_LOGV) Log.d(TAG, "cache for settings table '" + table
+                        + "' rows=" + rows + "; fullycached=" + cache.fullyMatchesDisk());
             }
         } finally {
             c.close();
