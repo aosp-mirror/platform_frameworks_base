@@ -76,16 +76,6 @@ public abstract class HardwareRenderer {
      * "false", to disable partial invalidates
      */
     static final String RENDER_DIRTY_REGIONS_PROPERTY = "debug.hwui.render_dirty_regions";
-    
-    /**
-     * System property used to enable or disable vsync.
-     * The default value of this property is assumed to be false.
-     * 
-     * Possible values:
-     * "true", to disable vsync
-     * "false", to enable vsync
-     */
-    static final String DISABLE_VSYNC_PROPERTY = "debug.hwui.disable_vsync";
 
     /**
      * System property used to enable or disable hardware rendering profiling.
@@ -373,15 +363,6 @@ public abstract class HardwareRenderer {
     private static native boolean nIsBackBufferPreserved();
 
     /**
-     * Disables v-sync. For performance testing only.
-     */
-    static void disableVsync() {
-        nDisableVsync();
-    }
-
-    private static native void nDisableVsync();
-
-    /**
      * Indicates that the specified hardware layer needs to be updated
      * as soon as possible.
      * 
@@ -652,8 +633,6 @@ public abstract class HardwareRenderer {
         boolean mDirtyRegionsEnabled;
         boolean mUpdateDirtyRegions;
 
-        final boolean mVsyncDisabled;
-
         final boolean mProfileEnabled;
         final float[] mProfileData;
         final ReentrantLock mProfileLock;
@@ -677,12 +656,6 @@ public abstract class HardwareRenderer {
             mTranslucent = translucent;
             
             String property;
-
-            property = SystemProperties.get(DISABLE_VSYNC_PROPERTY, "false");
-            mVsyncDisabled = "true".equalsIgnoreCase(property);
-            if (mVsyncDisabled) {
-                Log.d(LOG_TAG, "Disabling v-sync");
-            }
 
             property = SystemProperties.get(PROFILE_PROPERTY, "false");
             mProfileEnabled = "true".equalsIgnoreCase(property);
@@ -1484,14 +1457,6 @@ public abstract class HardwareRenderer {
                 if (full && mGlCanvas != null) {
                     mGlCanvas = null;
                 }
-            }
-        }
-
-        @Override
-        void setup(int width, int height) {
-            super.setup(width, height);
-            if (mVsyncDisabled) {
-                disableVsync();
             }
         }
 
