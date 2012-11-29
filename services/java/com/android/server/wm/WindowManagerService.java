@@ -821,7 +821,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mTransitionAnimationScale = Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
         setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
-                Settings.Global.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale));
+                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale));
 
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
