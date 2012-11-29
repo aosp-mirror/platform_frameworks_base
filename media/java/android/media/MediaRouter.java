@@ -313,13 +313,25 @@ public class MediaRouter {
     }
 
     /**
-     * Return the currently selected route for the given types
+     * Return the currently selected route for any of the given types
      *
      * @param type route types
      * @return the selected route
      */
     public RouteInfo getSelectedRoute(int type) {
-        return sStatic.mSelectedRoute;
+        if (sStatic.mSelectedRoute != null &&
+                (sStatic.mSelectedRoute.mSupportedTypes & type) != 0) {
+            // If the selected route supports any of the types supplied, it's still considered
+            // 'selected' for that type.
+            return sStatic.mSelectedRoute;
+        } else if (type == ROUTE_TYPE_USER) {
+            // The caller specifically asked for a user route and the currently selected route
+            // doesn't qualify.
+            return null;
+        }
+        // If the above didn't match and we're not specifically asking for a user route,
+        // consider the default selected.
+        return sStatic.mDefaultAudioVideo;
     }
 
     /**
