@@ -3716,8 +3716,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         view.resetRtlProperties();
 
-        onViewRemoved(view);
-
         needGlobalAttributesUpdate(false);
 
         removeFromArray(index);
@@ -3730,6 +3728,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (view.isAccessibilityFocused()) {
             view.clearAccessibilityFocus();
         }
+
+        onViewRemoved(view);
     }
 
     /**
