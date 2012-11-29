@@ -30,6 +30,7 @@ import android.media.AudioManager;
 import android.media.RemoteDisplay;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -572,6 +573,16 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
             mConnectingDevice = mDesiredDevice;
             WifiP2pConfig config = new WifiP2pConfig();
+            WpsInfo wps = new WpsInfo();
+            if (mConnectingDevice.wpsPbcSupported()) {
+                wps.setup = WpsInfo.PBC;
+            } else if (mConnectingDevice.wpsDisplaySupported()) {
+                // We do keypad if peer does display
+                wps.setup = WpsInfo.KEYPAD;
+            } else {
+                wps.setup = WpsInfo.DISPLAY;
+            }
+            config.wps = wps;
             config.deviceAddress = mConnectingDevice.deviceAddress;
             // Helps with STA & P2P concurrency
             config.groupOwnerIntent = WifiP2pConfig.MIN_GROUP_OWNER_INTENT;
