@@ -369,10 +369,10 @@ public class RelativeLayout extends ViewGroup {
         int width = 0;
         int height = 0;
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         // Record our dimensions if they are known;
         if (widthMode != MeasureSpec.UNSPECIFIED) {
@@ -416,6 +416,32 @@ public class RelativeLayout extends ViewGroup {
 
         View[] views = mSortedHorizontalChildren;
         int count = views.length;
+
+        // We need to know our size for doing the correct computation of positioning in RTL mode
+        if (isLayoutRtl() && (myWidth == -1 || isWrapContentWidth)) {
+            myWidth = getPaddingStart() + getPaddingEnd();
+            final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            for (int i = 0; i < count; i++) {
+                View child = views[i];
+                if (child.getVisibility() != GONE) {
+                    LayoutParams params = (LayoutParams) child.getLayoutParams();
+                    // Would be similar to a call to measureChildHorizontal(child, params, -1, myHeight)
+                    // but we cannot change for now the behavior of measureChildHorizontal() for
+                    // taking care or a "-1" for "mywidth" so use here our own version of that code.
+                    int childHeightMeasureSpec;
+                    if (params.width == LayoutParams.MATCH_PARENT) {
+                        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
+                    } else {
+                        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
+                    }
+                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+
+                    myWidth += child.getMeasuredWidth();
+                    myWidth += params.leftMargin + params.rightMargin;
+                }
+            }
+        }
+
         for (int i = 0; i < count; i++) {
             View child = views[i];
             if (child.getVisibility() != GONE) {
@@ -924,7 +950,7 @@ public class RelativeLayout extends ViewGroup {
 
             // Find the first non-GONE view up the chain
             while (v.getVisibility() == View.GONE) {
-                rules = ((LayoutParams) v.getLayoutParams()).getRules();
+                rules = ((LayoutParams) v.getLayoutParams()).getRules(v.getLayoutDirection());
                 node = mGraph.mKeyNodes.get((rules[relation]));
                 if (node == null) return null;
                 v = node.view;
@@ -975,7 +1001,7 @@ public class RelativeLayout extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         //  The layout has actually already been performed and the positions
         //  cached.  Apply the cached values to the children.
-        int count = getChildCount();
+        final int count = getChildCount();
 
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
