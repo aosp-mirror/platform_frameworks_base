@@ -114,7 +114,7 @@ public final class ViewRootImpl implements ViewParent,
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
-    private static final String PROPERTY_PROFILE_RENDERING = "viewancestor.profile_rendering";    
+    private static final String PROPERTY_PROFILE_RENDERING = "viewancestor.profile_rendering";
     
     private static final boolean MEASURE_LATENCY = false;
     private static LatencyTimer lt;
@@ -289,8 +289,8 @@ public final class ViewRootImpl implements ViewParent,
     final PointF mLastTouchPoint = new PointF();
     
     private boolean mProfileRendering;    
-    private Thread mRenderProfiler;
-    private volatile boolean mRenderProfilingEnabled;
+    private Choreographer.FrameCallback mRenderProfiler;
+    private boolean mRenderProfilingEnabled;
 
     // Variables to track frames per second, enabled via DEBUG_FPS flag
     private long mFpsStartTime = -1;
@@ -2037,30 +2037,19 @@ public final class ViewRootImpl implements ViewParent,
         if (mProfileRendering) {
             mRenderProfilingEnabled = enabled;
             if (mRenderProfiler == null) {
-                mRenderProfiler = new Thread(new Runnable() {
+                mRenderProfiler = new Choreographer.FrameCallback() {
                     @Override
-                    public void run() {
-                        Log.d(TAG, "Starting profiling thread");
-                        while (mRenderProfilingEnabled) {
-                            mAttachInfo.mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mDirty.set(0, 0, mWidth, mHeight);
-                                    scheduleTraversals();
-                                }
-                            });
-                            try {
-                                // TODO: This should use vsync when we get an API
-                                Thread.sleep(15);
-                            } catch (InterruptedException e) {
-                                Log.d(TAG, "Exiting profiling thread");
-                            }                            
+                    public void doFrame(long frameTimeNanos) {
+                        mDirty.set(0, 0, mWidth, mHeight);
+                        scheduleTraversals();
+                        if (mRenderProfilingEnabled) {
+                            Choreographer.getInstance().postFrameCallback(mRenderProfiler);
                         }
                     }
-                }, "Rendering Profiler");
-                mRenderProfiler.start();
+                };
+                Choreographer.getInstance().postFrameCallback(mRenderProfiler);
             } else {
-                mRenderProfiler.interrupt();
+                Choreographer.getInstance().removeFrameCallback(mRenderProfiler);
                 mRenderProfiler = null;
             }
         }
