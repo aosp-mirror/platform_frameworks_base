@@ -297,8 +297,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean isEnabled() {
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"isEnabled(): not allowed for non-active user");
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+            (!checkIfCallerIsForegroundUser())) {
+            Log.w(TAG,"isEnabled(): not allowed for non-active and non system user");
             return false;
         }
 
@@ -325,11 +326,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
 
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"enableNoAutoConnect(): not allowed for non-active user");
-            return false;
-        }
-
         if (DBG) {
             Log.d(TAG,"enableNoAutoConnect():  mBluetooth =" + mBluetooth +
                     " mBinding = " + mBinding);
@@ -345,8 +341,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     }
     public boolean enable() {
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"enable(): not allowed for non-active user");
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+            (!checkIfCallerIsForegroundUser())) {
+            Log.w(TAG,"enable(): not allowed for non-active and non system user");
             return false;
         }
 
@@ -357,8 +354,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permissicacheNameAndAddresson");
 
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"disable(): not allowed for non-active user");
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+            (!checkIfCallerIsForegroundUser())) {
+            Log.w(TAG,"disable(): not allowed for non-active and non system user");
             return false;
         }
 
@@ -456,9 +454,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
 
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"getAddress(): not allowed for non-active user");
-            return mAddress;
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+            (!checkIfCallerIsForegroundUser())) {
+            Log.w(TAG,"getAddress(): not allowed for non-active and non system user");
+            return null;
         }
 
         synchronized(mConnection) {
@@ -480,9 +479,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
 
-        if (!checkIfCallerIsForegroundUser()) {
-            Log.w(TAG,"getName(): not allowed for non-active user");
-            return mName;
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+            (!checkIfCallerIsForegroundUser())) {
+            Log.w(TAG,"getName(): not allowed for non-active and non system user");
+            return null;
         }
 
         synchronized(mConnection) {
