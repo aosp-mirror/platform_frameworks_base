@@ -859,11 +859,7 @@ class AppWidgetServiceImpl {
         }
     }
 
-    public List<AppWidgetProviderInfo> getInstalledProviders() {
-        return getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
-    }
-
-    private List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
+    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
         synchronized (mAppWidgetIds) {
             ensureStateLoadedLocked();
             final int N = mInstalledProviders.size();
