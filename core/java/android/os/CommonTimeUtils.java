@@ -19,6 +19,7 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetSocketAddress;
+import java.util.Locale;
 import static libcore.io.OsConstants.*;
 
 class CommonTimeUtils {
@@ -192,10 +193,11 @@ class CommonTimeUtils {
                 if (AF_INET == type) {
                     int addr = reply.readInt();
                     port = reply.readInt();
-                    addrStr = String.format("%d.%d.%d.%d", (addr >> 24) & 0xFF,
-                                                           (addr >> 16) & 0xFF,
-                                                           (addr >>  8) & 0xFF,
-                                                            addr        & 0xFF);
+                    addrStr = String.format(Locale.US, "%d.%d.%d.%d",
+                                                       (addr >> 24) & 0xFF,
+                                                       (addr >> 16) & 0xFF,
+                                                       (addr >>  8) & 0xFF,
+                                                        addr        & 0xFF);
                 } else if (AF_INET6 == type) {
                     int addr1 = reply.readInt();
                     int addr2 = reply.readInt();
@@ -207,11 +209,11 @@ class CommonTimeUtils {
                     int flowinfo = reply.readInt();
                     int scope_id = reply.readInt();
 
-                    addrStr = String.format("[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]",
-                                            (addr1 >> 16) & 0xFFFF, addr1 & 0xFFFF,
-                                            (addr2 >> 16) & 0xFFFF, addr2 & 0xFFFF,
-                                            (addr3 >> 16) & 0xFFFF, addr3 & 0xFFFF,
-                                            (addr4 >> 16) & 0xFFFF, addr4 & 0xFFFF);
+                    addrStr = String.format(Locale.US, "[%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X]",
+                                                       (addr1 >> 16) & 0xFFFF, addr1 & 0xFFFF,
+                                                       (addr2 >> 16) & 0xFFFF, addr2 & 0xFFFF,
+                                                       (addr3 >> 16) & 0xFFFF, addr3 & 0xFFFF,
+                                                       (addr4 >> 16) & 0xFFFF, addr4 & 0xFFFF);
                 }
 
                 if (null != addrStr) {
