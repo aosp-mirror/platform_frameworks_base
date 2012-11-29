@@ -1,86 +1,119 @@
 page.title=Google Services
+header.hide=1
 @jd:body
 
-<p>
-  Google offers a variety of services that help you build new revenue streams, enhance your app's
-  capabilities, manage distribution and payloads, and track usage and installs. 
-  The sections below highlight some of the services offered by Google and link you to more information about
-  how to use them in your Android app.
-</p>
-    <h2>
-      Integrate Google Products
-    </h2>
-    <img src="{@docRoot}images/gps-small.png" style="float:left; padding-right:10px">
-    <p>Utilize the most up-to-date features of Google products in your app
-    without worrying the Android versions running on your users' devices. Users receive updates to Google Play
-    services through the Google Play store whenever available, ensuring
-    that exciting, new features of your app reach the most devices possible.
-    All of this comes with an easy-to-use authentication flow for you and your users.
-    </p><a href="{@docRoot}guide/google/play-services/index.html">Learn more &raquo;</a>
+<style>
+div.landing-cell,
+div.cell-icon {
+  height:150px;
+}
+div.cell-icon {
+  float:left;
+  margin-right:20px;
+}
+div.cell-icon img {
+  margin:0;
+}
+</style>
 
-<div class="vspace size-1">
-  &nbsp;
+<div class="landing-banner">
+        
+<div class="col-6" style="min-height:0">
+  <img src="{@docRoot}images/google/google-services.png" alt="" width="340" height="193" />
 </div>
+<div class="col-6">
 
-<h2 id="monetization">
-  Monetize Your App
-</h2>
-<p>
-  Make the most out of your app's revenue potential by using monetization policies targeted
-  at your users' needs.
-</p>
-
-<div class="vspace size-1">
-  &nbsp;
+  <h1 itemprop="name" style="margin-bottom:0;">Google Services</h1>
+  <p itemprop="description">Google offers a variety of services that help you
+enhance your app's capabilities, build new revenue streams, manage app distribution,
+and track app usage.</p>
+  <p>Because these services are offered directly by Google, they're not included in
+  the Android platform. Some are provided by the Google Play
+  service on users' devices, which receives updates from the Google Play Store,
+  and others require a library added to your app.</p>
 </div>
+</div>
+<div>&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
-    <h4>
-     Google Play In-App Billing
-    </h4>
-    <p>
-      Engage users by offering features such as new content or virtual goods directly in your app.
-    </p><a href="{@docRoot}guide/google/play/billing/index.html">Learn more &raquo;</a>
+
+
+
+<div style="margin-top:10px">
+<div class="col-6 normal-links" style="margin-left:0">
+
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/maps-pin.png">
   </div>
-
-  <div class="layout-content-col span-6">
-    <h4>
-      Google AdMob Ads
-    </h4>
-    <p>
-      Generate revenue by displaying ads in your app with multiple ad networks.
-    </p><a href="http://www.google.com/ads/admob/index.html">Learn more &raquo;</a>
-  </div> 
+    <h4><a href="{@docRoot}google/play-services/maps.html">Google Maps API</a></h4>
+    <p>The power of Google Maps is available to your app
+    with an embeddable map view. You can customize the map with
+    markers and overlays, control the user's perspective, animate the camera, and much more.</p>
 </div>
 
-
-
-<h2 id="gcm">
-  Receive Messages from the Cloud
-</h2>
-  <img src="/images/gcm/gcm-logo.png" width="150px" style="padding:9px; float:left">
-    
-    <p>Use Google Cloud Messaging to notify your apps of important events with
-    that are lightweight and battery-saving. There are no quotas or charges
-    to use Google Cloud Messaging, no matter how big your messaging needs are.</p>
-
-    <a href="{@docRoot}guide/google/gcm/index.html">Learn more &raquo;</a>
-
-<div class="vspace size-1">
-  &nbsp;
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/plus-one.png">
+  </div>
+    <h4><a href="{@docRoot}google/play-services/plus.html">Google+ API</a></h4>
+    <p>Authenticate your users by allowing them to sign in with Google+.
+    Provide +1 buttons that allow users to recommend your app content and build customized
+    content for posts on Google+.</p>
 </div>
 
-
-<h2 id="distribution">
-  Manage App Distribution and Licensing
-</h2>
-<p>
-  Google Play allows you to manage your app distribution with features such as app licensing
-  and device filtering. Take advantage of features that let you reach the right users with
-  the right content while protecting your app from unauthorized use.
-</p>
-
-    <a href="{@docRoot}guide/google/play/dist.html">Learn more &raquo;</a>
+<div class="landing-cell">
+  <div class="cell-icon">
+  <img src="{@docRoot}images/google/gcm-cloud.png">
+  </div>
+    <h4><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging</a></h4>
+    <p>Keep your users connected by delivering events with
+    lightweight messages immediately from your web server. There are no quotas or charges
+    to use Google Cloud Messaging.</p>
 </div>
+
+</div><!-- col-6 -->
+
+
+
+
+<div class="col-6" style="margin-right:0">
+
+<div class="landing-cell">
+  <div class="cell-icon">
+    <img src="{@docRoot}images/google/iab-99c.png" />
+  </div>
+    <h4><a href="{@docRoot}guide/google/play/billing/index.html">In-App Billing</a></h4>
+    <p>Build an app with a steady revenue stream that keeps users engaged
+    by offering new content or virtual goods directly in your app. All transactions are handled
+    by Google Play Store for a simple user experience.
+    </p>
+</div>
+
+<div class="landing-cell">
+  <div class="cell-icon">
+<img src="{@docRoot}images/google/analytics.png" />
+  </div>
+    <h4><a class="external-link" 
+href="https://developers.google.com/analytics/devguides/collection/android/v2/">Analytics</a></h4>
+
+<p>Measure your success and gain deeper insights into how mobile users engage with your content
+by integrating Google Analytics with your app.</p>
+</div>
+
+<div class="landing-cell">
+  <div class="cell-icon">
+    <img src="{@docRoot}images/google/admob-money.png" />
+  </div>
+    <h4><a class="external-link" href="http://www.google.com/ads/admob/index.html">AdMob Ads</a></h4>
+    <p>Display ads from AdMob offer you an alternative revenue opportunity that leverages
+    multiple ad networks.
+    </p>
+</div>
+  
+</div><!-- col-6 -->
+
+</div><!-- margin wrapper -->
+
+
+
 
