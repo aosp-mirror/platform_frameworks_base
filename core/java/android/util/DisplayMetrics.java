@@ -232,19 +232,32 @@ public class DisplayMetrics {
      * @return True if the display metrics are equal.
      */
     public boolean equals(DisplayMetrics other) {
+        return equalsPhysical(other)
+                && scaledDensity == other.scaledDensity
+                && noncompatScaledDensity == other.noncompatScaledDensity;
+    }
+
+    /**
+     * Returns true if the physical aspects of the two display metrics
+     * are equal.  This ignores the scaled density, which is a logical
+     * attribute based on the current desired font size.
+     *
+     * @param other The display metrics with which to compare.
+     * @return True if the display metrics are equal.
+     * @hide
+     */
+    public boolean equalsPhysical(DisplayMetrics other) {
         return other != null
                 && widthPixels == other.widthPixels
                 && heightPixels == other.heightPixels
                 && density == other.density
                 && densityDpi == other.densityDpi
-                && scaledDensity == other.scaledDensity
                 && xdpi == other.xdpi
                 && ydpi == other.ydpi
                 && noncompatWidthPixels == other.noncompatWidthPixels
                 && noncompatHeightPixels == other.noncompatHeightPixels
                 && noncompatDensity == other.noncompatDensity
                 && noncompatDensityDpi == other.noncompatDensityDpi
-                && noncompatScaledDensity == other.noncompatScaledDensity
                 && noncompatXdpi == other.noncompatXdpi
                 && noncompatYdpi == other.noncompatYdpi;
     }
