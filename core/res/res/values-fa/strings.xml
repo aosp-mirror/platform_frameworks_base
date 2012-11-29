@@ -993,12 +993,18 @@
     <string name="weeks" msgid="6509623834583944518">"هفته"</string>
     <string name="year" msgid="4001118221013892076">"سال"</string>
     <string name="years" msgid="6881577717993213522">"سال"</string>
-    <!-- no translation found for duration_seconds:one (6962015528372969481) -->
-    <!-- no translation found for duration_seconds:other (1886107766577166786) -->
-    <!-- no translation found for duration_minutes:one (4915414002546085617) -->
-    <!-- no translation found for duration_minutes:other (3165187169224908775) -->
-    <!-- no translation found for duration_hours:one (8917467491248809972) -->
-    <!-- no translation found for duration_hours:other (3863962854246773930) -->
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"۱ ثانیه"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> ثانیه"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"۱ دقیقه"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> دقیقه"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"۱ ساعت"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ساعت"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدئو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدئو ممکن نیست."</string>
