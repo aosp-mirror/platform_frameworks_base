@@ -170,7 +170,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         // so they are paired correctly.  The messages on the handler will be
         // handled in the order they were enqueued, but will be outside the lock.
         manageDisableListLocked(userId, what, token, pkg);
-        final int net = gatherDisableActionsLocked(userId);
+
+        // Ensure state for the current user is applied, even if passed a non-current user.
+        final int net = gatherDisableActionsLocked(mCurrentUserId);
         if (net != mDisabled) {
             mDisabled = net;
             mHandler.post(new Runnable() {
