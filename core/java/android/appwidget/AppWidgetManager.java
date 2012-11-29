@@ -544,8 +544,19 @@ public class AppWidgetManager {
      * Return a list of the AppWidget providers that are currently installed.
      */
     public List<AppWidgetProviderInfo> getInstalledProviders() {
+        return getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
+    }
+
+    /**
+     * Return a list of the AppWidget providers that are currently installed.
+     *
+     * @param categoryFilter Will only return providers which register as any of the specified
+     *        specified categories. See {@link AppWidgetProviderInfo#widgetCategory}.
+     * @hide
+     */
+    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter) {
         try {
-            List<AppWidgetProviderInfo> providers = sService.getInstalledProviders();
+            List<AppWidgetProviderInfo> providers = sService.getInstalledProviders(categoryFilter);
             for (AppWidgetProviderInfo info : providers) {
                 // Converting complex to dp.
                 info.minWidth =
