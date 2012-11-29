@@ -25,11 +25,12 @@
 #include <SkPath.h>
 #include <SkRect.h>
 
+#include <utils/JenkinsHash.h>
+#include <utils/LruCache.h>
+
 #include "Debug.h"
 #include "Properties.h"
 #include "Texture.h"
-#include "utils/Compare.h"
-#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -89,10 +90,8 @@ struct ShapeCacheEntry {
         join = SkPaint::kDefault_Join;
         cap = SkPaint::kDefault_Cap;
         style = SkPaint::kFill_Style;
-        float v = 4.0f;
-        miter = *(uint32_t*) &v;
-        v = 1.0f;
-        strokeWidth = *(uint32_t*) &v;
+        miter = 4.0f;
+        strokeWidth = 1.0f;
         pathEffect = NULL;
     }
 
@@ -100,10 +99,8 @@ struct ShapeCacheEntry {
         shapeType = type;
         join = paint->getStrokeJoin();
         cap = paint->getStrokeCap();
-        float v = paint->getStrokeMiter();
-        miter = *(uint32_t*) &v;
-        v = paint->getStrokeWidth();
-        strokeWidth = *(uint32_t*) &v;
+        miter = paint->getStrokeMiter();
+        strokeWidth = paint->getStrokeWidth();
         style = paint->getStyle();
         pathEffect = paint->getPathEffect();
     }
@@ -111,47 +108,80 @@ struct ShapeCacheEntry {
     virtual ~ShapeCacheEntry() {
     }
 
+    virtual hash_t hash() const {
+        uint32_t hash = JenkinsHashMix(0, shapeType);
+        hash = JenkinsHashMix(hash, join);
+        hash = JenkinsHashMix(hash, cap);
+        hash = JenkinsHashMix(hash, style);
+        hash = JenkinsHashMix(hash, android::hash_type(miter));
+        hash = JenkinsHashMix(hash, android::hash_type(strokeWidth));
+        hash = JenkinsHashMix(hash, android::hash_type(pathEffect));
+        return JenkinsHashWhiten(hash);
+    }
+
+    virtual int compare(const ShapeCacheEntry& rhs) const {
+        int deltaInt = shapeType - rhs.shapeType;
+        if (deltaInt != 0) return deltaInt;
+
+        deltaInt = join - rhs.join;
+        if (deltaInt != 0) return deltaInt;
+
+        deltaInt = cap - rhs.cap;
+        if (deltaInt != 0) return deltaInt;
+
+        deltaInt = style - rhs.style;
+        if (deltaInt != 0) return deltaInt;
+
+        if (miter < rhs.miter) return -1;
+        if (miter > rhs.miter) return +1;
+
+        if (strokeWidth < rhs.strokeWidth) return -1;
+        if (strokeWidth > rhs.strokeWidth) return +1;
+
+        if (pathEffect < rhs.pathEffect) return -1;
+        if (pathEffect > rhs.pathEffect) return +1;
+
+        return 0;
+    }
+
+    bool operator==(const ShapeCacheEntry& other) const {
+        return compare(other) == 0;
+    }
+
+    bool operator!=(const ShapeCacheEntry& other) const {
+        return compare(other) != 0;
+    }
+
     ShapeType shapeType;
     SkPaint::Join join;
     SkPaint::Cap cap;
     SkPaint::Style style;
-    uint32_t miter;
-    uint32_t strokeWidth;
+    float miter;
+    float strokeWidth;
     SkPathEffect* pathEffect;
-
-    bool operator<(const ShapeCacheEntry& rhs) const {
-        LTE_INT(shapeType) {
-            LTE_INT(join) {
-                LTE_INT(cap) {
-                    LTE_INT(style) {
-                        LTE_INT(miter) {
-                            LTE_INT(strokeWidth) {
-                                LTE_INT(pathEffect) {
-                                    return lessThan(rhs);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-protected:
-    virtual bool lessThan(const ShapeCacheEntry& rhs) const {
-        return false;
-    }
 }; // struct ShapeCacheEntry
 
+// Cache support
+
+inline int strictly_order_type(const ShapeCacheEntry& lhs, const ShapeCacheEntry& rhs) {
+    return lhs.compare(rhs) < 0;
+}
+
+inline int compare_type(const ShapeCacheEntry& lhs, const ShapeCacheEntry& rhs) {
+    return lhs.compare(rhs);
+}
+
+inline hash_t hash_type(const ShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 struct RoundRectShapeCacheEntry: public ShapeCacheEntry {
     RoundRectShapeCacheEntry(float width, float height, float rx, float ry, SkPaint* paint):
             ShapeCacheEntry(ShapeCacheEntry::kShapeRoundRect, paint) {
-        mWidth = *(uint32_t*) &width;
-        mHeight = *(uint32_t*) &height;
-        mRx = *(uint32_t*) &rx;
-        mRy = *(uint32_t*) &ry;
+        mWidth = width;
+        mHeight = height;
+        mRx = rx;
+        mRy = ry;
     }
 
     RoundRectShapeCacheEntry(): ShapeCacheEntry() {
@@ -161,109 +191,175 @@ struct RoundRectShapeCacheEntry: public ShapeCacheEntry {
         mRy = 0;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(mWidth));
+        hash = JenkinsHashMix(hash, android::hash_type(mHeight));
+        hash = JenkinsHashMix(hash, android::hash_type(mRx));
+        hash = JenkinsHashMix(hash, android::hash_type(mRy));
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const RoundRectShapeCacheEntry& rhs = (const RoundRectShapeCacheEntry&) r;
-        LTE_INT(mWidth) {
-            LTE_INT(mHeight) {
-                LTE_INT(mRx) {
-                    LTE_INT(mRy) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return false;
+
+        if (mWidth < rhs.mWidth) return -1;
+        if (mWidth > rhs.mWidth) return +1;
+
+        if (mHeight < rhs.mHeight) return -1;
+        if (mHeight > rhs.mHeight) return +1;
+
+        if (mRx < rhs.mRx) return -1;
+        if (mRx > rhs.mRx) return +1;
+
+        if (mRy < rhs.mRy) return -1;
+        if (mRy > rhs.mRy) return +1;
+
+        return 0;
     }
 
 private:
-    uint32_t mWidth;
-    uint32_t mHeight;
-    uint32_t mRx;
-    uint32_t mRy;
+    float mWidth;
+    float mHeight;
+    float mRx;
+    float mRy;
 }; // RoundRectShapeCacheEntry
+
+inline hash_t hash_type(const RoundRectShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 struct CircleShapeCacheEntry: public ShapeCacheEntry {
     CircleShapeCacheEntry(float radius, SkPaint* paint):
             ShapeCacheEntry(ShapeCacheEntry::kShapeCircle, paint) {
-        mRadius = *(uint32_t*) &radius;
+        mRadius = radius;
     }
 
     CircleShapeCacheEntry(): ShapeCacheEntry() {
         mRadius = 0;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(mRadius));
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const CircleShapeCacheEntry& rhs = (const CircleShapeCacheEntry&) r;
-        LTE_INT(mRadius) {
-            return false;
-        }
-        return false;
+
+        if (mRadius < rhs.mRadius) return -1;
+        if (mRadius > rhs.mRadius) return +1;
+
+        return 0;
     }
 
 private:
-    uint32_t mRadius;
+    float mRadius;
 }; // CircleShapeCacheEntry
+
+inline hash_t hash_type(const CircleShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 struct OvalShapeCacheEntry: public ShapeCacheEntry {
     OvalShapeCacheEntry(float width, float height, SkPaint* paint):
             ShapeCacheEntry(ShapeCacheEntry::kShapeOval, paint) {
-        mWidth = *(uint32_t*) &width;
-        mHeight = *(uint32_t*) &height;
+        mWidth = width;
+        mHeight = height;
     }
 
     OvalShapeCacheEntry(): ShapeCacheEntry() {
         mWidth = mHeight = 0;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(mWidth));
+        hash = JenkinsHashMix(hash, android::hash_type(mHeight));
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const OvalShapeCacheEntry& rhs = (const OvalShapeCacheEntry&) r;
-        LTE_INT(mWidth) {
-            LTE_INT(mHeight) {
-                return false;
-            }
-        }
-        return false;
+
+        if (mWidth < rhs.mWidth) return -1;
+        if (mWidth > rhs.mWidth) return +1;
+
+        if (mHeight < rhs.mHeight) return -1;
+        if (mHeight > rhs.mHeight) return +1;
+
+        return 0;
     }
 
 private:
-    uint32_t mWidth;
-    uint32_t mHeight;
+    float mWidth;
+    float mHeight;
 }; // OvalShapeCacheEntry
+
+inline hash_t hash_type(const OvalShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 struct RectShapeCacheEntry: public ShapeCacheEntry {
     RectShapeCacheEntry(float width, float height, SkPaint* paint):
             ShapeCacheEntry(ShapeCacheEntry::kShapeRect, paint) {
-        mWidth = *(uint32_t*) &width;
-        mHeight = *(uint32_t*) &height;
+        mWidth = width;
+        mHeight = height;
     }
 
     RectShapeCacheEntry(): ShapeCacheEntry() {
         mWidth = mHeight = 0;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(mWidth));
+        hash = JenkinsHashMix(hash, android::hash_type(mHeight));
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const RectShapeCacheEntry& rhs = (const RectShapeCacheEntry&) r;
-        LTE_INT(mWidth) {
-            LTE_INT(mHeight) {
-                return false;
-            }
-        }
-        return false;
+
+        if (mWidth < rhs.mWidth) return -1;
+        if (mWidth > rhs.mWidth) return +1;
+
+        if (mHeight < rhs.mHeight) return -1;
+        if (mHeight > rhs.mHeight) return +1;
+
+        return 0;
     }
 
 private:
-    uint32_t mWidth;
-    uint32_t mHeight;
+    float mWidth;
+    float mHeight;
 }; // RectShapeCacheEntry
+
+inline hash_t hash_type(const RectShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 struct ArcShapeCacheEntry: public ShapeCacheEntry {
     ArcShapeCacheEntry(float width, float height, float startAngle, float sweepAngle,
             bool useCenter, SkPaint* paint):
             ShapeCacheEntry(ShapeCacheEntry::kShapeArc, paint) {
-        mWidth = *(uint32_t*) &width;
-        mHeight = *(uint32_t*) &height;
-        mStartAngle = *(uint32_t*) &startAngle;
-        mSweepAngle = *(uint32_t*) &sweepAngle;
+        mWidth = width;
+        mHeight = height;
+        mStartAngle = startAngle;
+        mSweepAngle = sweepAngle;
         mUseCenter = useCenter ? 1 : 0;
     }
 
@@ -275,29 +371,48 @@ struct ArcShapeCacheEntry: public ShapeCacheEntry {
         mUseCenter = 0;
     }
 
-    bool lessThan(const ShapeCacheEntry& r) const {
+    hash_t hash() const {
+        uint32_t hash = ShapeCacheEntry::hash();
+        hash = JenkinsHashMix(hash, android::hash_type(mWidth));
+        hash = JenkinsHashMix(hash, android::hash_type(mHeight));
+        hash = JenkinsHashMix(hash, android::hash_type(mStartAngle));
+        hash = JenkinsHashMix(hash, android::hash_type(mSweepAngle));
+        hash = JenkinsHashMix(hash, mUseCenter);
+        return JenkinsHashWhiten(hash);
+    }
+
+    int compare(const ShapeCacheEntry& r) const {
+        int deltaInt = ShapeCacheEntry::compare(r);
+        if (deltaInt != 0) return deltaInt;
+
         const ArcShapeCacheEntry& rhs = (const ArcShapeCacheEntry&) r;
-        LTE_INT(mWidth) {
-            LTE_INT(mHeight) {
-                LTE_INT(mStartAngle) {
-                    LTE_INT(mSweepAngle) {
-                        LTE_INT(mUseCenter) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+
+        if (mWidth < rhs.mWidth) return -1;
+        if (mWidth > rhs.mWidth) return +1;
+
+        if (mHeight < rhs.mHeight) return -1;
+        if (mHeight > rhs.mHeight) return +1;
+
+        if (mStartAngle < rhs.mStartAngle) return -1;
+        if (mStartAngle > rhs.mStartAngle) return +1;
+
+        if (mSweepAngle < rhs.mSweepAngle) return -1;
+        if (mSweepAngle > rhs.mSweepAngle) return +1;
+
+        return mUseCenter - rhs.mUseCenter;
     }
 
 private:
-    uint32_t mWidth;
-    uint32_t mHeight;
-    uint32_t mStartAngle;
-    uint32_t mSweepAngle;
+    float mWidth;
+    float mHeight;
+    float mStartAngle;
+    float mSweepAngle;
     uint32_t mUseCenter;
 }; // ArcShapeCacheEntry
+
+inline hash_t hash_type(const ArcShapeCacheEntry& entry) {
+    return entry.hash();
+}
 
 /**
  * A simple LRU shape cache. The cache has a maximum size expressed in bytes.
@@ -356,7 +471,7 @@ protected:
 
     void removeTexture(PathTexture* texture);
 
-    GenerationCache<Entry, PathTexture*> mCache;
+    LruCache<Entry, PathTexture*> mCache;
     uint32_t mSize;
     uint32_t mMaxSize;
     GLuint mMaxTextureSize;
@@ -415,7 +530,7 @@ public:
 
 template<class Entry>
 ShapeCache<Entry>::ShapeCache(const char* name, const char* propertyName, float defaultSize):
-        mCache(GenerationCache<ShapeCacheEntry, PathTexture*>::kUnlimitedCapacity),
+        mCache(LruCache<ShapeCacheEntry, PathTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(defaultSize)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(propertyName, property, NULL) > 0) {

@@ -34,7 +34,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 TextureCache::TextureCache():
-        mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
         mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE) {
     char property[PROPERTY_VALUE_MAX];
@@ -58,7 +58,7 @@ TextureCache::TextureCache():
 }
 
 TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(GenerationCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<SkBitmap*, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     init();
 }

@@ -16,6 +16,8 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <utils/JenkinsHash.h>
+
 #include "Debug.h"
 #include "TextDropShadowCache.h"
 #include "Properties.h"
@@ -24,11 +26,71 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Cache support
+///////////////////////////////////////////////////////////////////////////////
+
+hash_t ShadowText::hash() const {
+    uint32_t charCount = len * sizeof(char16_t);
+    uint32_t hash = JenkinsHashMix(0, len);
+    hash = JenkinsHashMix(hash, android::hash_type(radius));
+    hash = JenkinsHashMix(hash, android::hash_type(textSize));
+    hash = JenkinsHashMix(hash, android::hash_type(typeface));
+    hash = JenkinsHashMix(hash, flags);
+    hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
+    hash = JenkinsHashMix(hash, android::hash_type(scaleX));
+    hash = JenkinsHashMixShorts(hash, text, charCount);
+    for (uint32_t i = 0; i < charCount * 2; i++) {
+        hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
+    }
+    return JenkinsHashWhiten(hash);
+}
+
+int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
+    int deltaInt = int(lhs.len) - int(rhs.len);
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.flags - rhs.flags;
+    if (deltaInt != 0) return deltaInt;
+
+    if (lhs.radius < rhs.radius) return -1;
+    if (lhs.radius > rhs.radius) return +1;
+
+    if (lhs.typeface < rhs.typeface) return -1;
+    if (lhs.typeface > rhs.typeface) return +1;
+
+    if (lhs.textSize < rhs.textSize) return -1;
+    if (lhs.textSize > rhs.textSize) return +1;
+
+    if (lhs.italicStyle < rhs.italicStyle) return -1;
+    if (lhs.italicStyle > rhs.italicStyle) return +1;
+
+    if (lhs.scaleX < rhs.scaleX) return -1;
+    if (lhs.scaleX > rhs.scaleX) return +1;
+
+    if (lhs.text != rhs.text) {
+        if (!lhs.text) return -1;
+        if (!rhs.text) return +1;
+
+        deltaInt = memcmp(lhs.text, rhs.text, lhs.len);
+        if (deltaInt != 0) return deltaInt;
+    }
+
+    if (lhs.positions != rhs.positions) {
+        if (!lhs.positions) return -1;
+        if (!rhs.positions) return +1;
+
+        return memcmp(lhs.positions, rhs.positions, lhs.len << 2);
+    }
+
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
 TextDropShadowCache::TextDropShadowCache():
-        mCache(GenerationCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
+        mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
@@ -43,7 +105,7 @@ TextDropShadowCache::TextDropShadowCache():
 }
 
 TextDropShadowCache::TextDropShadowCache(uint32_t maxByteSize):
-        mCache(GenerationCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
+        mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     init();
 }
@@ -102,7 +164,7 @@ void TextDropShadowCache::clear() {
 }
 
 ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32_t len,
-        int numGlyphs, uint32_t radius, const float* positions) {
+        int numGlyphs, float radius, const float* positions) {
     ShadowText entry(paint, radius, len, text, positions);
     ShadowTexture* texture = mCache.get(entry);
 

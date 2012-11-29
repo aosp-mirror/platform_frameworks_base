@@ -55,22 +55,19 @@ PathCache::PathCache(): ShapeCache<PathCacheEntry>("path",
 }
 
 void PathCache::remove(SkPath* path) {
-    // TODO: Linear search...
-    Vector<size_t> pathsToRemove;
-    for (size_t i = 0; i < mCache.size(); i++) {
-        if (mCache.getKeyAt(i).path == path) {
-            pathsToRemove.push(i);
-            removeTexture(mCache.getValueAt(i));
+    Vector<PathCacheEntry> pathsToRemove;
+    LruCache<PathCacheEntry, PathTexture*>::Iterator i(mCache);
+
+    while (i.next()) {
+        const PathCacheEntry& key = i.key();
+        if (key.path == path) {
+            pathsToRemove.push(key);
         }
     }
 
-    mCache.setOnEntryRemovedListener(NULL);
     for (size_t i = 0; i < pathsToRemove.size(); i++) {
-        // This will work because pathsToRemove is sorted
-        // and because the cache is a sorted keyed vector
-        mCache.removeAt(pathsToRemove.itemAt(i) - i);
+        mCache.remove(pathsToRemove.itemAt(i));
     }
-    mCache.setOnEntryRemovedListener(this);
 }
 
 void PathCache::removeDeferred(SkPath* path) {

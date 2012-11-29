@@ -21,12 +21,11 @@
 
 #include <SkShader.h>
 
+#include <utils/LruCache.h>
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
 #include "Texture.h"
-#include "utils/Compare.h"
-#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -38,7 +37,7 @@ struct GradientCacheEntry {
         positions = NULL;
     }
 
-    GradientCacheEntry(uint32_t* colors, float* positions, int count) {
+    GradientCacheEntry(uint32_t* colors, float* positions, uint32_t count) {
         copy(colors, positions, count);
     }
 
@@ -62,27 +61,26 @@ struct GradientCacheEntry {
         return *this;
     }
 
-    bool operator<(const GradientCacheEntry& r) const {
-        const GradientCacheEntry& rhs = (const GradientCacheEntry&) r;
-        LTE_INT(count) {
-            int result = memcmp(colors, rhs.colors, count * sizeof(uint32_t));
-            if (result< 0) return true;
-            else if (result == 0) {
-                result = memcmp(positions, rhs.positions, count * sizeof(float));
-                if (result < 0) return true;
-            }
-        }
-        return false;
+    hash_t hash() const;
+
+    static int compare(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs);
+
+    bool operator==(const GradientCacheEntry& other) const {
+        return compare(*this, other) == 0;
+    }
+
+    bool operator!=(const GradientCacheEntry& other) const {
+        return compare(*this, other) != 0;
     }
 
     uint32_t* colors;
     float* positions;
-    int count;
+    uint32_t count;
     SkShader::TileMode tileMode;
 
 private:
 
-    void copy(uint32_t* colors, float* positions, int count) {
+    void copy(uint32_t* colors, float* positions, uint32_t count) {
         this->count = count;
         this->colors = new uint32_t[count];
         this->positions = new float[count];
@@ -92,6 +90,20 @@ private:
     }
 
 }; // GradientCacheEntry
+
+// Caching support
+
+inline int strictly_order_type(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs) {
+    return GradientCacheEntry::compare(lhs, rhs) < 0;
+}
+
+inline int compare_type(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs) {
+    return GradientCacheEntry::compare(lhs, rhs);
+}
+
+inline hash_t hash_type(const GradientCacheEntry& entry) {
+    return entry.hash();
+}
 
 /**
  * A simple LRU gradient cache. The cache has a maximum size expressed in bytes.
@@ -150,7 +162,7 @@ private:
 
     void getGradientInfo(const uint32_t* colors, const int count, GradientInfo& info);
 
-    GenerationCache<GradientCacheEntry, Texture*> mCache;
+    LruCache<GradientCacheEntry, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

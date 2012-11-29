@@ -16,6 +16,7 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <utils/JenkinsHash.h>
 #include <utils/threads.h>
 
 #include "Caches.h"
@@ -43,11 +44,38 @@ static inline T min(T a, T b) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Cache entry
+///////////////////////////////////////////////////////////////////////////////
+
+hash_t GradientCacheEntry::hash() const {
+    uint32_t hash = JenkinsHashMix(0, count);
+    hash = JenkinsHashMix(hash, tileMode);
+    for (uint32_t i = 0; i < count; i++) {
+        hash = JenkinsHashMix(hash, android::hash_type(colors[i]));
+        hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
+    }
+    return JenkinsHashWhiten(hash);
+}
+
+int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs) {
+    int deltaInt = int(lhs.count) - int(rhs.count);
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = lhs.tileMode - rhs.tileMode;
+    if (deltaInt != 0) return deltaInt;
+
+    deltaInt = memcmp(lhs.colors, rhs.colors, lhs.count * sizeof(uint32_t));
+    if (deltaInt != 0) return deltaInt;
+
+    return memcmp(lhs.positions, rhs.positions, lhs.count * sizeof(float));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
 GradientCache::GradientCache():
-        mCache(GenerationCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
@@ -63,7 +91,7 @@ GradientCache::GradientCache():
 }
 
 GradientCache::GradientCache(uint32_t maxByteSize):
-        mCache(GenerationCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
+        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }

@@ -792,7 +792,9 @@ public:
     static void doTextBounds(JNIEnv* env, const jchar* text, int count,
                              jobject bounds, const SkPaint& paint)
     {
-        SkRect  r{0,0,0,0};
+        SkRect  r;
+        r.set(0,0,0,0);
+
         SkIRect ir;
 
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
