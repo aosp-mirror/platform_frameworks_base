@@ -101,8 +101,11 @@ public class KeyguardHostView extends KeyguardViewBase {
     private boolean mSafeModeEnabled;
 
     private boolean mUserSetupCompleted;
+
     // User for whom this host view was created
     private int mUserId;
+
+    private KeyguardMultiUserSelectorView mKeyguardMultiUserSelectorView;
 
     /*package*/ interface TransportCallback {
         void onListenerDetached();
@@ -207,6 +210,12 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (mCleanupAppWidgetsOnBootCompleted) {
                 cleanupAppWidgetIds();
                 mCleanupAppWidgetsOnBootCompleted = false;
+            }
+        }
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            if (mKeyguardMultiUserSelectorView != null) {
+                mKeyguardMultiUserSelectorView.finalizeActiveUserView(true);
             }
         }
     };
@@ -398,6 +407,12 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
     };
+
+    public void initializeSwitchingUserState(boolean switching) {
+        if (!switching && mKeyguardMultiUserSelectorView != null) {
+            mKeyguardMultiUserSelectorView.finalizeActiveUserView(false);
+        }
+    }
 
     public void userActivity() {
         if (mViewMediatorCallback != null) {
@@ -1452,10 +1467,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         if (users.size() > 1) {
             if (multiUserView instanceof KeyguardMultiUserSelectorView) {
-                KeyguardMultiUserSelectorView multiUser =
-                        (KeyguardMultiUserSelectorView) multiUserView;
-                multiUser.setVisibility(View.VISIBLE);
-                multiUser.addUsers(users);
+                mKeyguardMultiUserSelectorView = (KeyguardMultiUserSelectorView) multiUserView;
+                mKeyguardMultiUserSelectorView.setVisibility(View.VISIBLE);
+                mKeyguardMultiUserSelectorView.addUsers(users);
                 UserSwitcherCallback callback = new UserSwitcherCallback() {
                     @Override
                     public void hideSecurityView(int duration) {
@@ -1481,7 +1495,7 @@ public class KeyguardHostView extends KeyguardViewBase {
                         }
                     }
                 };
-                multiUser.setCallback(callback);
+                mKeyguardMultiUserSelectorView.setCallback(callback);
             } else {
                 Throwable t = new Throwable();
                 t.fillInStackTrace();
