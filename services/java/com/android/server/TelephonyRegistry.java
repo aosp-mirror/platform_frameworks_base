@@ -139,7 +139,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_SWITCHED: {
-                    Slog.d(TAG, "MSG_USER_SWITCHED userId=" + msg.arg1);
+                    if (DBG) Slog.d(TAG, "MSG_USER_SWITCHED userId=" + msg.arg1);
                     TelephonyRegistry.this.notifyCellLocation(mCellLocation);
                     break;
                 }

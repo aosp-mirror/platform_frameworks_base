@@ -63,6 +63,7 @@ import java.util.List;
 public class SyncStorageEngine extends Handler {
 
     private static final String TAG = "SyncManager";
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_FILE = false;
 
     private static final String XML_ATTR_NEXT_AUTHORITY_ID = "nextAuthorityId";
@@ -449,7 +450,7 @@ public class SyncStorageEngine extends Handler {
             mChangeListeners.finishBroadcast();
         }
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (DEBUG) {
             Log.v(TAG, "reportChange " + which + " to: " + reports);
         }
 
@@ -490,13 +491,17 @@ public class SyncStorageEngine extends Handler {
 
     public void setSyncAutomatically(Account account, int userId, String providerName,
             boolean sync) {
-        Log.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
-                + ", user " + userId + " -> " + sync);
+        if (DEBUG) {
+            Log.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
+                    + ", user " + userId + " -> " + sync);
+        }
         synchronized (mAuthorities) {
             AuthorityInfo authority = getOrCreateAuthorityLocked(account, userId, providerName, -1,
                     false);
             if (authority.enabled == sync) {
-                Log.d(TAG, "setSyncAutomatically: already set to " + sync + ", doing nothing");
+                if (DEBUG) {
+                    Log.d(TAG, "setSyncAutomatically: already set to " + sync + ", doing nothing");
+                }
                 return;
             }
             authority.enabled = sync;
@@ -539,13 +544,17 @@ public class SyncStorageEngine extends Handler {
         } else if (syncable < -1) {
             syncable = -1;
         }
-        Log.d(TAG, "setIsSyncable: " + account + ", provider " + providerName
-                + ", user " + userId + " -> " + syncable);
+        if (DEBUG) {
+            Log.d(TAG, "setIsSyncable: " + account + ", provider " + providerName
+                    + ", user " + userId + " -> " + syncable);
+        }
         synchronized (mAuthorities) {
             AuthorityInfo authority = getOrCreateAuthorityLocked(account, userId, providerName, -1,
                     false);
             if (authority.syncable == syncable) {
-                Log.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
+                if (DEBUG) {
+                    Log.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
+                }
                 return;
             }
             authority.syncable = syncable;
@@ -572,7 +581,7 @@ public class SyncStorageEngine extends Handler {
 
     public void setBackoff(Account account, int userId, String providerName,
             long nextSyncTime, long nextDelay) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (DEBUG) {
             Log.v(TAG, "setBackoff: " + account + ", provider " + providerName
                     + ", user " + userId
                     + " -> nextSyncTime " + nextSyncTime + ", nextDelay " + nextDelay);
@@ -623,7 +632,7 @@ public class SyncStorageEngine extends Handler {
                     for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
                         if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
                                 || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
-                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            if (DEBUG) {
                                 Log.v(TAG, "clearAllBackoffs:"
                                         + " authority:" + authorityInfo.authority
                                         + " account:" + accountInfo.accountAndUser.account.name
@@ -649,7 +658,7 @@ public class SyncStorageEngine extends Handler {
 
     public void setDelayUntilTime(Account account, int userId, String providerName,
             long delayUntil) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (DEBUG) {
             Log.v(TAG, "setDelayUntil: " + account + ", provider " + providerName
                     + ", user " + userId + " -> delayUntil " + delayUntil);
         }
@@ -685,7 +694,7 @@ public class SyncStorageEngine extends Handler {
         if (extras == null) {
             extras = new Bundle();
         }
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        if (DEBUG) {
             Log.v(TAG, "addOrRemovePeriodicSync: " + account + ", user " + userId
                     + ", provider " + providerName
                     + " -> period " + period + ", extras " + extras);
@@ -842,7 +851,7 @@ public class SyncStorageEngine extends Handler {
 
     public PendingOperation insertIntoPending(PendingOperation op) {
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "insertIntoPending: account=" + op.account
                         + " user=" + op.userId
                         + " auth=" + op.authority
@@ -874,7 +883,7 @@ public class SyncStorageEngine extends Handler {
     public boolean deleteFromPending(PendingOperation op) {
         boolean res = false;
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "deleteFromPending: account=" + op.account
                     + " user=" + op.userId
                     + " auth=" + op.authority
@@ -893,7 +902,7 @@ public class SyncStorageEngine extends Handler {
                 AuthorityInfo authority = getAuthorityLocked(op.account, op.userId, op.authority,
                         "deleteFromPending");
                 if (authority != null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "removing - " + authority);
+                    if (DEBUG) Log.v(TAG, "removing - " + authority);
                     final int N = mPendingOperations.size();
                     boolean morePending = false;
                     for (int i=0; i<N; i++) {
@@ -907,7 +916,7 @@ public class SyncStorageEngine extends Handler {
                     }
 
                     if (!morePending) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "no more pending!");
+                        if (DEBUG) Log.v(TAG, "no more pending!");
                         SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
                         status.pending = false;
                     }
@@ -947,7 +956,7 @@ public class SyncStorageEngine extends Handler {
      */
     public void doDatabaseCleanup(Account[] accounts, int userId) {
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) Log.w(TAG, "Updating for new accounts...");
+            if (DEBUG) Log.v(TAG, "Updating for new accounts...");
             SparseArray<AuthorityInfo> removing = new SparseArray<AuthorityInfo>();
             Iterator<AccountInfo> accIt = mAccounts.values().iterator();
             while (accIt.hasNext()) {
@@ -955,8 +964,8 @@ public class SyncStorageEngine extends Handler {
                 if (!ArrayUtils.contains(accounts, acc.accountAndUser.account)
                         && acc.accountAndUser.userId == userId) {
                     // This account no longer exists...
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.w(TAG, "Account removed: " + acc.accountAndUser);
+                    if (DEBUG) {
+                        Log.v(TAG, "Account removed: " + acc.accountAndUser);
                     }
                     for (AuthorityInfo auth : acc.authorities.values()) {
                         removing.put(auth.ident, auth);
@@ -1002,7 +1011,7 @@ public class SyncStorageEngine extends Handler {
     public SyncInfo addActiveSync(SyncManager.ActiveSyncContext activeSyncContext) {
         final SyncInfo syncInfo;
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "setActiveSync: account="
                     + activeSyncContext.mSyncOperation.account
                     + " auth=" + activeSyncContext.mSyncOperation.authority
@@ -1030,7 +1039,7 @@ public class SyncStorageEngine extends Handler {
      */
     public void removeActiveSync(SyncInfo syncInfo, int userId) {
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "removeActiveSync: account=" + syncInfo.account
                         + " user=" + userId
                         + " auth=" + syncInfo.authority);
@@ -1055,7 +1064,7 @@ public class SyncStorageEngine extends Handler {
             String authorityName, long now, int source, boolean initialization, Bundle extras) {
         long id;
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "insertStartSyncEvent: account=" + accountName + "user=" + userId
                     + " auth=" + authorityName + " source=" + source);
             }
@@ -1079,7 +1088,7 @@ public class SyncStorageEngine extends Handler {
                 mSyncHistory.remove(mSyncHistory.size()-1);
             }
             id = item.historyId;
-            if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "returning historyId " + id);
+            if (DEBUG) Log.v(TAG, "returning historyId " + id);
         }
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
@@ -1107,7 +1116,7 @@ public class SyncStorageEngine extends Handler {
     public void stopSyncEvent(long historyId, long elapsedTime, String resultMessage,
             long downstreamActivity, long upstreamActivity) {
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "stopSyncEvent: historyId=" + historyId);
             }
             SyncHistoryItem item = null;
@@ -1369,7 +1378,7 @@ public class SyncStorageEngine extends Handler {
         AccountInfo accountInfo = mAccounts.get(au);
         if (accountInfo == null) {
             if (tag != null) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                if (DEBUG) {
                     Log.v(TAG, tag + ": unknown account " + au);
                 }
             }
@@ -1378,7 +1387,7 @@ public class SyncStorageEngine extends Handler {
         AuthorityInfo authority = accountInfo.authorities.get(authorityName);
         if (authority == null) {
             if (tag != null) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                if (DEBUG) {
                     Log.v(TAG, tag + ": unknown authority " + authorityName);
                 }
             }
@@ -1403,7 +1412,7 @@ public class SyncStorageEngine extends Handler {
                 mNextAuthorityId++;
                 doWrite = true;
             }
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            if (DEBUG) {
                 Log.v(TAG, "created a new AuthorityInfo for " + accountName
                         + ", user " + userId
                         + ", provider " + authorityName);

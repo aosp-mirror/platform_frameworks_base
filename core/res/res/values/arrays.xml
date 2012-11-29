@@ -143,10 +143,6 @@
        <item>@drawable/menu_dropdown_panel_holo_dark</item>
        <item>@drawable/overscroll_edge</item>
        <item>@drawable/overscroll_glow</item>
-       <item>@drawable/popup_inline_error_above_holo_dark</item>
-       <item>@drawable/popup_inline_error_above_holo_light</item>
-       <item>@drawable/popup_inline_error_holo_dark</item>
-       <item>@drawable/popup_inline_error_holo_light</item>
        <item>@drawable/spinner_16_outer_holo</item>
        <item>@drawable/spinner_16_inner_holo</item>
        <item>@drawable/spinner_48_outer_holo</item>
@@ -257,8 +253,6 @@
        <item>@drawable/ab_solid_shadow_holo</item>
        <item>@drawable/item_background_holo_dark</item>
        <item>@drawable/item_background_holo_light</item>
-       <item>@drawable/ic_ab_back_holo_dark</item>
-       <item>@drawable/ic_ab_back_holo_light</item>
        <item>@drawable/fastscroll_thumb_holo</item>
        <item>@drawable/fastscroll_thumb_pressed_holo</item>
        <item>@drawable/fastscroll_thumb_default_holo</item>
