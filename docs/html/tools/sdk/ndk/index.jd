@@ -1,4 +1,5 @@
 ndk=true
+page.template=sdk
 
 ndk.win_download=android-ndk-r8d-windows.zip
 ndk.win_bytes=327014028

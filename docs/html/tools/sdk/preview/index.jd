@@ -1,2 +1,3 @@
 sdk.redirect=true
+page.template=sdk
 @jd:body
