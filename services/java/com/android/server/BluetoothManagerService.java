@@ -43,8 +43,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import java.util.ArrayList;
-import java.util.List;
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = true;
@@ -334,9 +332,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Log.d(TAG,"enableNoAutoConnect():  mBluetooth =" + mBluetooth +
                     " mBinding = " + mBinding);
         }
-        if (Binder.getCallingUid() != Process.NFC_UID) {
+        int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+
+        if (callingAppId != Process.NFC_UID) {
             throw new SecurityException("no permission to enable Bluetooth quietly");
         }
+
         Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
         msg.arg1=0; //No persist
         msg.arg2=1; //Quiet mode
@@ -943,11 +944,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private boolean checkIfCallerIsForegroundUser() {
         int foregroundUser;
         int callingUser = UserHandle.getCallingUserId();
+        int callingUid = Binder.getCallingUid();
         long callingIdentity = Binder.clearCallingIdentity();
+        int callingAppId = UserHandle.getAppId(callingUid);
         boolean valid = false;
         try {
             foregroundUser = ActivityManager.getCurrentUser();
-            valid = (callingUser == foregroundUser);
+            valid = (callingUser == foregroundUser) ||
+                    callingAppId == Process.NFC_UID;
             if (DBG) {
                 Log.d(TAG, "checkIfCallerIsForegroundUser: valid=" + valid
                     + " callingUser=" + callingUser
