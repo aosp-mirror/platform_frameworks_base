@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -53,8 +52,6 @@ import java.util.List;
  * Utilities for the lock pattern and its settings.
  */
 public class LockPatternUtils {
-
-    private static final String OPTION_ENABLE_FACELOCK = "enable_facelock";
 
     private static final String TAG = "LockPatternUtils";
 

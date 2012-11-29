@@ -40,6 +40,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -101,6 +102,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private boolean mSafeModeEnabled;
 
+    private boolean mUserSetupCompleted;
+
     /*package*/ interface TransportCallback {
         void onListenerDetached();
         void onListenerAttached();
@@ -143,6 +146,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
+        mUserSetupCompleted = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
 
         if (mSafeModeEnabled) {
             Log.v(TAG, "Keyguard widgets disabled by safe mode");
@@ -270,7 +275,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
 
         addWidgetsFromSettings();
-        if (numWidgets() >= MAX_WIDGETS) {
+        if (!shouldEnableAddWidget()) {
             mAppWidgetContainer.setAddWidgetEnabled(false);
         }
         checkAppWidgetConsistency();
@@ -280,6 +285,10 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
+    }
+
+    private boolean shouldEnableAddWidget() {
+        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
     }
 
     private int getDisabledFeatures(DevicePolicyManager dpm) {
@@ -364,7 +373,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         @Override
         public void onAddView(View v) {
-            if (numWidgets() >= MAX_WIDGETS) {
+            if (!shouldEnableAddWidget()) {
                 mAppWidgetContainer.setAddWidgetEnabled(false);
             }
         }
@@ -382,7 +391,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         @Override
         public void onRemoveViewAnimationCompleted() {
-            if (numWidgets() < MAX_WIDGETS) {
+            if (shouldEnableAddWidget()) {
                 mAppWidgetContainer.setAddWidgetEnabled(true);
             }
         }
