@@ -1,4 +1,4 @@
-page.title=Downloading and Configuring the Google Play services SDK
+page.title=Setup
 @jd:body
 
 <div id="qv-wrapper">
@@ -24,7 +24,7 @@ page.title=Downloading and Configuring the Google Play services SDK
 </p>
 
 <p>
-    To download and configure the Google Play services SDK:
+    To set up the Google Play services SDK:
 </p>
 
 <ol>
@@ -34,19 +34,21 @@ page.title=Downloading and Configuring the Google Play services SDK
     </li>
     <li>
         Scroll to the bottom of the package list and select <b>Extras &gt; Google Play services</b>.
-        The add-on is downloaded to your computer and installed in your SDK environment at
+        The Google Play services SDK is downloaded to your computer and installed in your Android SDK environment at
         <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/</code>.
     </li>
-    <li>
-        Reference the Google Play services client library project located in
-        <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/libproject/google-play-services_lib</code> as
-        a library project for your Android project. See the 
+    <li>Copy the <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/libproject/google-play-services_lib</code>        
+        library project to a location in your project's source tree.</li>
+    <li>If you are using Eclipse, import the library project into your workspace. Click <b>File > Import...</b>, select <b>Android > Existing
+    Android Code into Workspace</b>, and browse to the copy of the library project to import it.</li>
+    </li>
+    <li>Reference the library project in your Android project. See the 
         <a href="{@docRoot}tools/projects/projects-eclipse.html#ReferencingLibraryProject">Referencing a Library Project for Eclipse</a>
         or <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing a Library Project on the Command Line</a>
         for more information on how to do this.
     </li>
     <li>If you are using <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>, add the following
-        lines in the <code>&lt;project_directory&gt;/proguard-project.txt</code> file:
+        lines in the <code>&lt;project_directory&gt;/proguard-project.txt</code> file
         to prevent ProGuard from stripping away required classes:
 <pre>
 -keep class * extends java.util.ListResourceBundle {

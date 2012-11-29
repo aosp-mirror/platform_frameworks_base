@@ -18,19 +18,12 @@
       <span class="en">Google Play services</span></a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot?>google/play-services/overview.html">
-          <span class="en">Overview</span></a>
+      <li><a href="<?cs var:toroot?>google/play-services/setup.html">
+          <span class="en">Setup</span></a>
       </li>
 
-      <li><a href="<?cs var:toroot?>google/play-services/download.html">
-          <span class="en">Downloading and Configuring</span></a>
-      </li>
       <li><a href="<?cs var:toroot?>google/play-services/auth.html">
           <span class="en">Authentication</span></a>
-      </li>
-
-      <li><a href="<?cs var:toroot?>google/play-services/analytics.html">
-          <span class="en">Analytics</span></a>
       </li>
 
       <li><a href="<?cs var:toroot?>google/play-services/plus.html">
@@ -41,9 +34,19 @@
           <span class="en">Maps</span></a>
       </li>
 
-      <li id="tree-list">
-      <a href="<?cs var:toroot?>google/play-services/reference/packages.html">
-          <span class="en">Reference</span></a>
+      <li id="tree-list" class="nav-section">
+        <div class="nav-section-header">
+           <a href="<?cs var:toroot?>google/play-services/reference/packages.html">
+           <span class="en">Reference</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/auth/package-summary.html">auth</a></li>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/common/package-summary.html">common</a></li>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/maps/package-summary.html">maps</a></li>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/maps.model/package-summary.html">maps.model</a></li>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/panorama/package-summary.html">panorama</a></li>
+          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/plus/package-summary.html">plus</a></li>
+        </ul>
       </li>
     </ul>
   </li>
