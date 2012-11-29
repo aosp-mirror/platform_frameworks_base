@@ -49,7 +49,7 @@ interface IAppWidgetService {
     void partiallyUpdateAppWidgetIds(in int[] appWidgetIds, in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(in int[] appWidgetIds, int viewId);
-    List<AppWidgetProviderInfo> getInstalledProviders();
+    List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter);
     AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName);
     void setBindAppWidgetPermission(in String packageName, in boolean permission);
