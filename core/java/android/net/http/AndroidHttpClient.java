@@ -67,8 +67,7 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Implementation of the Apache {@link DefaultHttpClient} that is configured with
- * reasonable default settings and registered schemes for Android, and
- * also lets the user add {@link HttpRequestInterceptor} classes.
+ * reasonable default settings and registered schemes for Android.
  * Don't create this directly, use the {@link #newInstance} factory method.
  *
  * <p>This client processes cookies but does not retain them by default.
