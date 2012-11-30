@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 
 /**
@@ -779,6 +780,21 @@ public class BroadcastQueue {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when sending broadcast to "
                           + r.curComponent, e);
+                } catch (RuntimeException e) {
+                    Log.wtf(TAG, "Failed sending broadcast to "
+                            + r.curComponent + " with " + r.intent, e);
+                    // If some unexpected exception happened, just skip
+                    // this broadcast.  At this point we are not in the call
+                    // from a client, so throwing an exception out from here
+                    // will crash the entire system instead of just whoever
+                    // sent the broadcast.
+                    logBroadcastReceiverDiscardLocked(r);
+                    finishReceiverLocked(r, r.resultCode, r.resultData,
+                            r.resultExtras, r.resultAbort, true);
+                    scheduleBroadcastsLocked();
+                    // We need to reset the state if we failed to start the receiver.
+                    r.state = BroadcastRecord.IDLE;
+                    return;
                 }
 
                 // If a dead object exception was thrown -- fall through to
