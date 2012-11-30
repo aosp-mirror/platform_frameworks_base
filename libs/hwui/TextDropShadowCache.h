@@ -35,6 +35,7 @@ struct ShadowText {
             flags(0), italicStyle(0.0f), scaleX(0), text(NULL), positions(NULL) {
     }
 
+    // len is the number of bytes in text
     ShadowText(SkPaint* paint, float radius, uint32_t len, const char* srcText,
             const float* positions):
             len(len), radius(radius), positions(positions) {
@@ -69,11 +70,12 @@ struct ShadowText {
     }
 
     void copyTextLocally() {
-        str.setTo((const char16_t*) text, len * sizeof(char16_t));
+        uint32_t charCount = len / sizeof(char16_t);
+        str.setTo((const char16_t*) text, charCount);
         text = str.string();
         if (positions != NULL) {
             positionsCopy.clear();
-            positionsCopy.appendArray(positions, len);
+            positionsCopy.appendArray(positions, charCount * 2);
             positions = positionsCopy.array();
         }
     }
