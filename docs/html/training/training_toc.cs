@@ -900,6 +900,12 @@
            "How to efficiently use the Java Native Interface with the Android NDK."
           >JNI Tips</a>
       </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/smp.html"
+           description=
+           "Tips for coding Android apps on symmetric multiprocessor systems."
+          >SMP Primer for Android</a>
+      </li>
     </ul>
   </li> <!-- end of Performance -->
       
