@@ -61,7 +61,8 @@ public class GeolocationPermissions {
     };
 
     /**
-     * Gets the singleton instance of this class.
+     * Gets the singleton instance of this class. This method cannot be
+     * called before the application instantiates a {@link WebView} instance.
      *
      * @return the singleton {@link GeolocationPermissions} instance
      */
