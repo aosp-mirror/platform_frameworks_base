@@ -14131,7 +14131,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Multi-user methods
 
     @Override
-    public boolean switchUser(int userId) {
+    public boolean switchUser(final int userId) {
         if (checkCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -14225,7 +14225,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     public void performReceive(Intent intent, int resultCode,
                                             String data, Bundle extras, boolean ordered,
                                             boolean sticky, int sendingUser) {
-                                        userInitialized(uss);
+                                        userInitialized(uss, userId);
                                     }
                                 }, 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
                                 userId);
@@ -14352,32 +14352,39 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oldUserId, newUserId, uss));
     }
 
-    void userInitialized(UserStartedState uss) {
-        synchronized (ActivityManagerService.this) {
-            getUserManagerLocked().makeInitialized(uss.mHandle.getIdentifier());
-            uss.initializing = false;
-            completeSwitchAndInitalizeLocked(uss);
-        }
+    void userInitialized(UserStartedState uss, int newUserId) {
+        completeSwitchAndInitalize(uss, newUserId, true, false);
     }
 
     void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
-        final int N = mUserSwitchObservers.beginBroadcast();
-        for (int i=0; i<N; i++) {
-            try {
-                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
-            } catch (RemoteException e) {
-            }
-        }
-        mUserSwitchObservers.finishBroadcast();
-        synchronized (this) {
-            uss.switching = false;
-            completeSwitchAndInitalizeLocked(uss);
-        }
+        completeSwitchAndInitalize(uss, newUserId, false, true);
     }
 
-    void completeSwitchAndInitalizeLocked(UserStartedState uss) {
-        if (!uss.switching && !uss.initializing) {
-            mWindowManager.stopFreezingScreen();
+    void completeSwitchAndInitalize(UserStartedState uss, int newUserId,
+            boolean clearInitializing, boolean clearSwitching) {
+        boolean unfrozen = false;
+        synchronized (this) {
+            if (clearInitializing) {
+                uss.initializing = false;
+                getUserManagerLocked().makeInitialized(uss.mHandle.getIdentifier());
+            }
+            if (clearSwitching) {
+                uss.switching = false;
+            }
+            if (!uss.switching && !uss.initializing) {
+                mWindowManager.stopFreezingScreen();
+                unfrozen = true;
+            }
+        }
+        if (unfrozen) {
+            final int N = mUserSwitchObservers.beginBroadcast();
+            for (int i=0; i<N; i++) {
+                try {
+                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
+                } catch (RemoteException e) {
+                }
+            }
+            mUserSwitchObservers.finishBroadcast();
         }
     }
 
