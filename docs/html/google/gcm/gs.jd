@@ -25,7 +25,7 @@ page.title=GCM: Getting Started
 </div>
 </div>
 
-<p>This document describes how to write an Android application and the  server-side logic, using the helper libraries (<a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>) provided by GCM.</p>
+<p>This document describes how to write an Android application and the  server-side logic, using the helper libraries (<a href="{@docRoot}google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}google/gcm/server-javadoc/index.html">server</a>) provided by GCM.</p>
 
 
 <h2 id="create-proj">Creating a Google API project</h2>
@@ -85,7 +85,7 @@ page.title=GCM: Getting Started
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click  <strong>Generate new key</strong>. A new key  will be created while the old one will still be active for up to 24 hours. If you want to get rid of the old key immediately (for example, if you feel it was compromised), click <strong>Delete key</strong>.</p>
 
 <h2 id="libs">Install the Helper Libraries</h2>
-<p>To perform the steps described in the following sections, you must first install the helper libraries (reference: <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">server</a>). From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
+<p>To perform the steps described in the following sections, you must first install the helper libraries (reference: <a href="{@docRoot}google/gcm/client-javadoc/index.html">client</a> and <a href="{@docRoot}google/gcm/server-javadoc/index.html">server</a>). From the SDK Manager, install <strong>Extras &gt; Google Cloud Messaging for Android Library</strong>. This creates a <code>gcm</code> directory under <code><em>YOUR_SDK_ROOT</em>/extras/google/</code> containing these subdirectories: <code>gcm-client</code>, <code>gcm-server</code>, <code>samples/gcm-demo-client</code>, <code>samples/gcm-demo-server</code>, and <code>samples/gcm-demo-appengine</code>.</p>
 
 <p class="note"><strong>Note:</strong> If you don't see <strong>Extras &gt; Google Cloud Messaging for Android Library</strong> in the SDK Manager, make sure you are running version 20 or higher. Be sure to restart the SDK Manager after updating it.</p>
 

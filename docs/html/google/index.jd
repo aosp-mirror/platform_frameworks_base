@@ -65,7 +65,7 @@ and track app usage.</p>
   <div class="cell-icon">
   <img src="{@docRoot}images/google/gcm-cloud.png">
   </div>
-    <h4><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging</a></h4>
+    <h4><a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a></h4>
     <p>Keep your users connected by delivering events with
     lightweight messages immediately from your web server. There are no quotas or charges
     to use Google Cloud Messaging.</p>
@@ -82,7 +82,7 @@ and track app usage.</p>
   <div class="cell-icon">
     <img src="{@docRoot}images/google/iab-99c.png" />
   </div>
-    <h4><a href="{@docRoot}guide/google/play/billing/index.html">In-App Billing</a></h4>
+    <h4><a href="{@docRoot}google/play/billing/index.html">In-App Billing</a></h4>
     <p>Build an app with a steady revenue stream that keeps users engaged
     by offering new content or virtual goods directly in your app. All transactions are handled
     by Google Play Store for a simple user experience.

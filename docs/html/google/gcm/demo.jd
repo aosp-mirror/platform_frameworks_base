@@ -40,8 +40,8 @@ page.title=GCM Demo Application
 </ul>
 <p>Here is the API reference documentation for the helper libraries on which the demo is based:</p>
 <ul>
-  <li><a href="{@docRoot}guide/google/gcm/client-javadoc/index.html">Client Reference</a></li>
-  <li><a href="{@docRoot}guide/google/gcm/server-javadoc/index.html">Server Reference</a></li>
+  <li><a href="{@docRoot}google/gcm/client-javadoc/index.html">Client Reference</a></li>
+  <li><a href="{@docRoot}google/gcm/server-javadoc/index.html">Server Reference</a></li>
 </ul>
 
 <p>The sections below describe how to download the demo code and helper libraries from the SDK Manager. The demo code and helper libraries are also available at the <a href="http://code.google.com/p/gcm">open source site</a>.

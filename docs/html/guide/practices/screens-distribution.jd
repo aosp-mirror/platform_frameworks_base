@@ -213,4 +213,4 @@ sizes, especially, is within reason using a single APK, as long as you follow th
 <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
 <p>If you need more information about how to publish multiple APKs on Google Play, read <a
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>

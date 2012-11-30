@@ -129,8 +129,8 @@ your Android applications to users around the world. When you release your appli
 Google Play you have access to a suite of developer tools that let you analyze your sales,
 identify market trends, and control who your applications are being distributed to. You also have
 access to several revenue-enhancing features that are not available anywhere else, such as <a
-href="{@docRoot}guide/google/play/billing/index.html">in-app billing</a> and <a
-href="{@docRoot}guide/google/play/licensing.html">application licensing</a>. This rich array of tools
+href="{@docRoot}google/play/billing/index.html">in-app billing</a> and <a
+href="{@docRoot}google/play/licensing.html">application licensing</a>. This rich array of tools
 and features, coupled with numerous end-user community features, makes Google Play the premier
 marketplace for selling and buying Android applications.</p>
 

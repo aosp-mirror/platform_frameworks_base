@@ -62,7 +62,7 @@ others.</p>
 
 <p>When you upload your app, Google Play reads the dependencies and sets up any
 necessary distribution rules. For technical information about declaring
-dependencies, read <a href="{@docRoot}guide/google/play/filters.html">Filters on 
+dependencies, read <a href="{@docRoot}google/play/filters.html">Filters on 
 Google Play</a>. </p>
 
 <p>For pinpoint control over distribution, Google Play lets you see all of the

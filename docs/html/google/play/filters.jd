@@ -6,19 +6,18 @@ page.title=Filters on Google Play
 
 <h2>Quickview</h2>
 <ul>
-<li>Google Play applies filters that control which Android-powered devices can access your
-application when the user is visiting the store.</li>
-<li>Filtering is determined by comparing device configurations that you declare in you app's
-manifest file to the configurations defined by the device, as well as other factors.</li> </ul>
+<li>Google Play applies filters to control which Android devices can download
+your application from the store.</li>
+<li>Filtering ensures that your apps are available only to users whose devices meet your app's compatibility requirements.
+<li>Filtering is determined by the configuration requirements that you declare in you app's
+manifest file, as well as other factors.</li>
+</ul>
 
 <h2>In this document</h2>
 
 <ol>
   <li><a href="#how-filters-work">How Filters Work on Google Play</a></li>
   <li><a href="#manifest-filters">Filtering based on Manifest Elements</a>
-    <ol>
-      <li><a href="#advanced-filters">Advanced manifest filters</a></li>
-    </ol>
   </li>
   <li><a href="#other-filters">Other Filters</a></li>
   <li><a href="#MultiApks">Publishing Multiple APKs with Different Filters</a></li>
@@ -44,53 +43,44 @@ href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-per
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</code></a></li>
 </ol>
 
-<div id="qv-extra">
-  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
-  <div id="qv-sub-rule">
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0 5px;">
-    <h2 style="color:#669999;padding-top:1em;">Interested in publishing your app on Google Play?</h2>
-    <p><a id="publish-link"
-href="http://play.google.com/apps/publish">Go to Google Play</a> to create a publisher
-account and upload your app.</p></div>
-</div>
-
 </div>
 </div>
 
+<p>When a user searches or browses for apps to download on Google Play, the
+results are filtered based on which applications are compatible with the device.
+For example, if an app requires a camera, Google Play would not show the app to devices
+that do not have a camera. This <em>filtering</em> helps developers manage the
+distribution of their apps and helps ensure the best possible experience for
+users.</p>
 
-<p>When a user searches or browses on Google Play on an Android device, the results are filtered
-based on which applications are compatible with that device. For example, if an application
-requires a camera (as specified in the application manifest file), then Google Play will not show
-the app on any device that does not have a camera.</p>
+<p>Filtering in Google Play is based on several types of app metadata and
+configuration settings, including manifest declarations, required
+libraries,architecture dependencies, and distribution controls set in the Google
+Play Developer Console, such as geographic targeting, pricing, and more.</p>
 
-<p>Declarations in the manifest file that are compared to the device's configuration is not the
-only part of how applications are filtered. Filtering might also occur due to the user's country and
-carrier, the presence or absence of a SIM card, and other factors. </p>
-
-<p>Changes to the Google Play filters are independent of changes to the Android platform itself.
-This document is updated periodically to reflect any changes that affect the way Google Play
-filters applications.</p>
+<p>Google Play filtering is based in part on manifest declarations and other
+aspects of the Android framework, but actual filtering behaviors are distinct
+from the framework and are not bound to specific API levels. This document
+specifies the current filtering rules used by Google Play.</p>
 
 
 <h2 id="how-filters-work">How Filters Work on Google Play</h2>
 
 <p>Google Play uses the filter restrictions described below to determine
 whether to show your application to a user who is browsing or searching for
-applications from the Google Play app. When determining whether to display your app,
-Google Play checks the device's hardware and software configuration, as well as it's
-carrier, location, and other characteristics. It then compares those against the
-restrictions and dependencies expressed by the application's
-manifest file and publishing details. If the application is
-compatible with the device according to the filter rules, Google Play displays the
-application to the user. Otherwise, Google Play hides your application from search
-results and category browsing, even if a user specifically requests
-the app by clicking a deep link that points directly to the app's ID within Google Play..</p>
+applications from the Google Play app.</p>
 
-<p class="note"><strong>Note:</strong> When users browse the <a
-href="http://play.google.com/apps">Google Play web site</a>, they can see all published
-applications. The Google Play web site compares the application requirements to each of the
-user's registered devices for compatibility, though, and only allows them to install the application
-if it's compatible with their device.</p>
+<p>When determining whether to display your app, Google Play checks the device's
+hardware and software requirement, as well as it's carrier, location, and other
+characteristics. It then compares those against the restrictions and
+dependencies expressed by the application's manifest file and publishing
+details. </p>
+
+<p>If the application is compatible with the device according to the filter
+rules, Google Play displays the application to the user. Otherwise, Google Play
+hides your application from search results and category browsing, even if a user
+specifically requests the app by clicking a deep link that points directly to
+the app's ID within Google Play.</p>
 
 <p>You can use any combination of the available filters for your app. For example, you can set a
 <code>minSdkVersion</code> requirement of <code>"4"</code> and set <code>smallScreens="false"</code>
@@ -103,8 +93,15 @@ change between versions. For example, if a user has installed your application a
 update that makes the app invisible to the user, the user will not see that an update is
 available.</p>
 
+<h4>Filtering on the Google Play web site</h4>
 
-<h2 id="manifest-filters">Filtering based on Manifest Elements</h2>
+<p>When users browse the <a href="http://play.google.com/apps">Google Play web
+site</a>, they can see all published applications. The Google Play web site
+compares the application requirements to each of the user's registered devices
+for compatibility, though, and only allows them to install the application if
+it's compatible with their device.</p>
+
+<h2 id="manifest-filters">Filtering based on the App Manifest</h2>
 
 <p>Most filters are triggered by elements within an application's
 manifest file, <a
@@ -451,4 +448,4 @@ requires that you follow specific rules within your filters and that you pay ext
 version codes for each APK to ensure proper update paths for each configuration.</p>
 
 <p>If you need more information about how to publish multiple APKs on Google Play, read <a
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
+href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
