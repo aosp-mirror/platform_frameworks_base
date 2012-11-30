@@ -796,6 +796,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a boolean value
      */
     public boolean getBoolean(String key, boolean defaultValue) {
@@ -829,6 +830,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a byte value
      */
     public Byte getByte(String key, byte defaultValue) {
@@ -846,7 +848,7 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
-     * Returns the value associated with the given key, or false if
+     * Returns the value associated with the given key, or (char) 0 if
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
@@ -858,10 +860,11 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
-     * Returns the value associated with the given key, or (char) 0 if
+     * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a char value
      */
     public char getChar(String key, char defaultValue) {
@@ -895,6 +898,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a short value
      */
     public short getShort(String key, short defaultValue) {
@@ -928,6 +932,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return an int value
      */
     public int getInt(String key, int defaultValue) {
@@ -961,6 +966,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a long value
      */
     public long getLong(String key, long defaultValue) {
@@ -994,6 +1000,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a float value
      */
     public float getFloat(String key, float defaultValue) {
@@ -1027,6 +1034,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * no mapping of the desired type exists for the given key.
      *
      * @param key a String
+     * @param defaultValue Value to return if key does not exist
      * @return a double value
      */
     public double getDouble(String key, double defaultValue) {
