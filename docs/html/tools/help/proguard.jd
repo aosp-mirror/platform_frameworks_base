@@ -39,7 +39,7 @@ parent.link=index.html
   sized <code>.apk</code> file that is more difficult to reverse engineer. Because ProGuard makes your
   application harder to reverse engineer, it is important that you use it
   when your application utilizes features that are sensitive to security like when you are
-  <a href="{@docRoot}guide/google/play/licensing/index.html">Licensing Your Applications</a>.</p>
+  <a href="{@docRoot}google/play/licensing/index.html">Licensing Your Applications</a>.</p>
 
   <p>ProGuard is integrated into the Android build system, so you do not have to invoke it
   manually. ProGuard runs only when you build your application in release mode, so you do not 

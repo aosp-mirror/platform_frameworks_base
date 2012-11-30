@@ -85,13 +85,13 @@ android.support.v4.view.ViewPager} APIs that allow you to easily build a side-sw
     <td>{@code &lt;sdk>/extras/android/support/}</td>
   </tr>
   <tr>
-    <td><a href="{@docRoot}guide/google/play/billing/index.html">Google Play Billing</a></td>
+    <td><a href="{@docRoot}google/play/billing/index.html">Google Play Billing</a></td>
     <td>Provides the static libraries and samples that allow you to
 integrate billing services in your app with Google Play.</td>
     <td>{@code &lt;sdk>/extras/google/}</td>
   </tr>
   <tr>
-    <td><a href="{@docRoot}guide/google/play/licensing/index.html">Google Play Licensing</a></td>
+    <td><a href="{@docRoot}google/play/licensing/index.html">Google Play Licensing</a></td>
     <td>Provides the static libraries and samples that allow you to perform license verification for
 your app when distributing with Google Play.</td>
     <td>{@code &lt;sdk>/extras/google/}</td>

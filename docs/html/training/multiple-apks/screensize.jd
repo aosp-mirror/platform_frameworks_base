@@ -34,7 +34,7 @@ next.link=texture.html
 <!-- other docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>
-  <li><a href="http://developer.android.com/guide/google/play/publishing/multiple-apks.html">Multiple APK
+  <li><a href="http://developer.android.com/google/play/publishing/multiple-apks.html">Multiple APK
 Support</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
 </ul>
@@ -56,7 +56,7 @@ make maintaining a multiple APK codebase as painless as possible.</p>
 naturally you want your application to take advantage of all the available space on larger devices,
 without sacrificing compatibility or usability on the smaller screens.  It may seem at the outset as
 though multiple APK support is the best solution, but this often isn’t the case.  The <a
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
+href="{@docRoot}google/play/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
 Instead</a> section of the multiple APK developer guide includes some useful information on how to
 accomplish this with a single APK, including use of our support library. You should also read the 
 guide to <a href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>,
@@ -227,7 +227,7 @@ each APK such that red &#8805; green &#8805; blue, the chart effectively collaps
 </table>
 <p>
 Now, let’s further assume that the Red APK has some requirement on it that the other two don’t.  The
-<a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a> page of the Android
+<a href="{@docRoot}google/play/filters.html">Filters on Google Play</a> page of the Android
 Developer guide has a whole list of possible culprits.  For the sake of example, let’s assume that
 red requires a front-facing camera.  In fact, the entire point of the red APK is to use the extra
 available screen space to do entertaining things with that front-facing camera.  But, it turns out,
@@ -243,7 +243,7 @@ size.</p>
 
 <p>  In order to keep all your APKs on separate "tracks", it’s important to have a good version code
 scheme.  The recommended one can be found on the <a
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html#VersionCodes">Version Codes</a> area of
+href="{@docRoot}google/play/publishing/multiple-apks.html#VersionCodes">Version Codes</a> area of
 our developer guide.  Since the example set of APKs is only dealing with one of 3 possible
 dimensions, it would be sufficient to separate each APK by 1000 and increment from there.  This
 might look like:</p>

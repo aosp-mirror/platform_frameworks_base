@@ -478,7 +478,7 @@ and tablets), with a single Google Play listing:
   </ul>
 </li>
 <li>If necessary, you can alternatively choose to deliver your app using <a 
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html">Multiple APK Support</a>, 
+href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>, 
 although in most cases using a single APK to reach all devices is strongly recommended.</li>
 
 <li>Highlight your app’s tablet capabilities in the product details page:

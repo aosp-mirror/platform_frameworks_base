@@ -167,7 +167,7 @@ external storage, it can never receive this broadcast.</dd>
   <dt>Copy Protection</dt>
     <dd>Your application cannot be installed to a device's SD card if it uses Google Play's 
       Copy Protection feature. However, if you use Google Play's 
-      <a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> instead, your 
+      <a href="{@docRoot}google/play/licensing/index.html">Application Licensing</a> instead, your 
       application <em>can</em> be installed to internal or external storage, including SD cards.</dd>
 </dl>
 

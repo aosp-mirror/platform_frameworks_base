@@ -343,7 +343,7 @@ unique installations</a>. By creating a new {@link java.util.UUID} when your app
 first time, you’re certain to obtain a unique ID for tracking each user, regardless of how many
 users install your app on a single device. Alternatively, you can save a local token fetched from
 your server or use the registrations ID provided by <a
-href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging</a>.</p>
+href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a>.</p>
 
 <p>Beware that if your app requests one of the hardware device identifiers (such as the WiFi MAC
 address, the {@link android.os.Build#SERIAL} number, or the {@link

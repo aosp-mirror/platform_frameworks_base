@@ -3,12 +3,25 @@ parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
 
+<div class="sidebox-wrapper"> 
+<div class="sidebox">
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <p style="padding-top:1em;">Google Play uses the &lt;uses-library&gt; elements declared
+    in your app manifest to filter your app from devices that do not meet it's library
+    requirements. For more information about filtering, see the topic
+    <a href="{@docRoot}google/play/filters.html">Google Play filters</a>.</p>
+  </div>
+</div>
+
 <dl class="xml">
+
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;uses-library android:<a href="#nm">name</a>="<var>string</var>"
-              android:<a href="#rq">required</a>=["true" | "false"] /&gt;
+&lt;uses-library
+  android:<a href="#nm">name</a>="<var>string</var>"
+  android:<a href="#rq">required</a>=["true" | "false"] /&gt;
 </pre>
 </dd>
 <dt>contained in:</dt>
@@ -41,12 +54,6 @@ parent.link=manifest-intro.html
             If this element is present and its {@code android:required} attribute is set to
             {@code true}, the {@link android.content.pm.PackageManager} framework won't let the user
             install the application unless the library is present on the user's device.
-        </dd>
-        <dt><em>Google Play</em></dt>
-        <dd>
-            Google Play filters applications based on the libraries installed on the
-            user's device. For more information about filtering, see the topic
-            <a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.
         </dd>
     </dl>
     <p>
