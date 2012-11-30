@@ -126,7 +126,10 @@ void Caches::initConstraints() {
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
-void Caches::initProperties() {
+bool Caches::initProperties() {
+    bool prevDebugLayersUpdates = debugLayersUpdates;
+    bool prevDebugOverdraw = debugOverdraw;
+
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, NULL) > 0) {
         INIT_LOGD("  Layers updates debug enabled: %s", property);
@@ -141,6 +144,9 @@ void Caches::initProperties() {
     } else {
         debugOverdraw = false;
     }
+
+    return (prevDebugLayersUpdates != debugLayersUpdates) ||
+            (prevDebugOverdraw != debugOverdraw);
 }
 
 void Caches::terminate() {

@@ -41,6 +41,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     renderer = NULL;
     displayList = NULL;
     fbo = 0;
+    debugDrawUpdate = false;
     Caches::getInstance().resourceCache.incrementRefcount(this);
 }
 

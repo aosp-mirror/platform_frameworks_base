@@ -313,6 +313,20 @@ public abstract class HardwareRenderer {
     abstract long getFrameCount();
 
     /**
+     * Loads system properties used by the renderer. This method is invoked
+     * whenever system properties are modified. Implementations can use this
+     * to trigger live updates of the renderer based on properties.
+     *
+     * @param surface The surface to update with the new properties.
+     *                Can be null.
+     *
+     * @return True if a property has changed.
+     */
+    abstract boolean loadSystemProperties(Surface surface);
+
+    private static native boolean nLoadProperties();
+
+    /**
      * Sets the directory to use as a persistent storage for hardware rendering
      * resources.
      * 
@@ -633,13 +647,13 @@ public abstract class HardwareRenderer {
         boolean mDirtyRegionsEnabled;
         boolean mUpdateDirtyRegions;
 
-        final boolean mProfileEnabled;
-        final float[] mProfileData;
-        final ReentrantLock mProfileLock;
+        boolean mProfileEnabled;
+        float[] mProfileData;
+        ReentrantLock mProfileLock;
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
         
-        final boolean mDebugDirtyRegions;
-        final boolean mShowOverdraw;
+        boolean mDebugDirtyRegions;
+        boolean mShowOverdraw;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -654,38 +668,67 @@ public abstract class HardwareRenderer {
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
             mTranslucent = translucent;
-            
-            String property;
 
-            property = SystemProperties.get(PROFILE_PROPERTY, "false");
-            mProfileEnabled = "true".equalsIgnoreCase(property);
-            if (mProfileEnabled) {
-                Log.d(LOG_TAG, "Profiling hardware renderer");
-            }
+            loadSystemProperties(null);
+        }
 
-            if (mProfileEnabled) {
-                property = SystemProperties.get(PROFILE_MAXFRAMES_PROPERTY,
-                        Integer.toString(PROFILE_MAX_FRAMES));
-                int maxProfileFrames = Integer.valueOf(property);
-                mProfileData = new float[maxProfileFrames * PROFILE_FRAME_DATA_COUNT];
-                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
-                    mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
+        @Override
+        boolean loadSystemProperties(Surface surface) {
+            boolean changed = false;
+
+            boolean value = SystemProperties.getBoolean(PROFILE_PROPERTY, false);
+            if (value != mProfileEnabled) {
+                changed = true;
+                mProfileEnabled = value;
+
+                if (mProfileEnabled) {
+                    Log.d(LOG_TAG, "Profiling hardware renderer");
                 }
 
-                mProfileLock = new ReentrantLock();
-            } else {
-                mProfileData = null;
-                mProfileLock = null;
+                if (mProfileEnabled) {
+                    int maxProfileFrames = SystemProperties.getInt(PROFILE_MAXFRAMES_PROPERTY,
+                            PROFILE_MAX_FRAMES);
+                    mProfileData = new float[maxProfileFrames * PROFILE_FRAME_DATA_COUNT];
+                    for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                        mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
+                    }
+
+                    mProfileLock = new ReentrantLock();
+                } else {
+                    mProfileData = null;
+                    mProfileLock = null;
+                }
             }
 
-            property = SystemProperties.get(DEBUG_DIRTY_REGIONS_PROPERTY, "false");
-            mDebugDirtyRegions = "true".equalsIgnoreCase(property);
-            if (mDebugDirtyRegions) {
-                Log.d(LOG_TAG, "Debugging dirty regions");
+            value = SystemProperties.getBoolean(DEBUG_DIRTY_REGIONS_PROPERTY, false);
+            if (value != mDebugDirtyRegions) {
+                changed = true;
+                mDebugDirtyRegions = value;
+
+                if (mDebugDirtyRegions) {
+                    Log.d(LOG_TAG, "Debugging dirty regions");
+                }
             }
 
-            mShowOverdraw = SystemProperties.getBoolean(
+            value = SystemProperties.getBoolean(
                     HardwareRenderer.DEBUG_SHOW_OVERDRAW_PROPERTY, false);
+            if (value != mShowOverdraw) {
+                changed = true;
+                mShowOverdraw = value;
+
+                if (surface != null && isEnabled()) {
+                    if (validate()) {
+                        sEglConfig = loadEglConfig();
+                        invalidate(surface);
+                    }
+                }
+            }
+
+            if (nLoadProperties()) {
+                changed = true;
+            }
+
+            return changed;
         }
 
         @Override
@@ -815,19 +858,7 @@ public abstract class HardwareRenderer {
 
                     checkEglErrorsForced();
 
-                    sEglConfig = chooseEglConfig();
-                    if (sEglConfig == null) {
-                        // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
-                        if (sDirtyRegions) {
-                            sDirtyRegions = false;
-                            sEglConfig = chooseEglConfig();
-                            if (sEglConfig == null) {
-                                throw new RuntimeException("eglConfig not initialized");
-                            }
-                        } else {
-                            throw new RuntimeException("eglConfig not initialized");
-                        }
-                    }
+                    sEglConfig = loadEglConfig();
                 }
             }
 
@@ -839,6 +870,23 @@ public abstract class HardwareRenderer {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
                 sEglContextStorage.set(createManagedContext(mEglContext));
             }
+        }
+
+        private EGLConfig loadEglConfig() {
+            EGLConfig eglConfig = chooseEglConfig();
+            if (eglConfig == null) {
+                // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
+                if (sDirtyRegions) {
+                    sDirtyRegions = false;
+                    eglConfig = chooseEglConfig();
+                    if (eglConfig == null) {
+                        throw new RuntimeException("eglConfig not initialized");
+                    }
+                } else {
+                    throw new RuntimeException("eglConfig not initialized");
+                }
+            }
+            return eglConfig;
         }
 
         abstract ManagedEGLContext createManagedContext(EGLContext eglContext);

@@ -265,6 +265,7 @@ struct Layer {
     OpenGLRenderer* renderer;
     DisplayList* displayList;
     Rect dirtyRect;
+    bool debugDrawUpdate;
 
 private:
     /**
