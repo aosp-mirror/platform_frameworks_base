@@ -310,7 +310,7 @@ public class AudioTrack
     public AudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes, int mode, int sessionId)
     throws IllegalArgumentException {
-        mState = STATE_UNINITIALIZED;
+        // mState already == STATE_UNINITIALIZED
 
         // remember which looper is associated with the AudioTrack instantiation
         Looper looper;
@@ -698,7 +698,7 @@ public class AudioTrack
         }
 
         int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
-        if ((size == -1) || (size == 0)) {
+        if (size <= 0) {
             loge("getMinBufferSize(): error querying hardware");
             return ERROR;
         }
@@ -844,23 +844,26 @@ public class AudioTrack
 
 
     /**
-     * Sets the playback head position. The track must be stopped for the position to be changed.
+     * Sets the playback head position.
+     * The track must be stopped or paused for the position to be changed,
+     * and must use the {@link #MODE_STATIC} mode.
      * @param positionInFrames playback head position expressed in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setPlaybackHeadPosition(int positionInFrames) {
-        synchronized(mPlayStateLock) {
-            if ((mPlayState == PLAYSTATE_STOPPED) || (mPlayState == PLAYSTATE_PAUSED)) {
-                return native_set_position(positionInFrames);
-            } else {
-                return ERROR_INVALID_OPERATION;
-            }
+        if (mDataLoadMode == MODE_STREAM || mState != STATE_INITIALIZED ||
+                getPlayState() == PLAYSTATE_PLAYING) {
+            return ERROR_INVALID_OPERATION;
         }
+        return native_set_position(positionInFrames);
     }
 
     /**
      * Sets the loop points and the loop count. The loop can be infinite.
+     * Similarly to setPlaybackHeadPosition,
+     * the track must be stopped or paused for the position to be changed,
+     * and must use the {@link #MODE_STATIC} mode.
      * @param startInFrames loop start marker expressed in frames
      * @param endInFrames loop end marker expressed in frames
      * @param loopCount the number of times the loop is looped.
@@ -869,7 +872,8 @@ public class AudioTrack
      *    {@link #ERROR_INVALID_OPERATION}
      */
     public int setLoopPoints(int startInFrames, int endInFrames, int loopCount) {
-        if (mDataLoadMode == MODE_STREAM) {
+        if (mDataLoadMode == MODE_STREAM || mState != STATE_INITIALIZED ||
+                getPlayState() == PLAYSTATE_PLAYING) {
             return ERROR_INVALID_OPERATION;
         }
         return native_set_loop(startInFrames, endInFrames, loopCount);
@@ -981,22 +985,27 @@ public class AudioTrack
      */
 
     public int write(byte[] audioData, int offsetInBytes, int sizeInBytes) {
-        if ((mDataLoadMode == MODE_STATIC)
-                && (mState == STATE_NO_STATIC_DATA)
-                && (sizeInBytes > 0)) {
-            mState = STATE_INITIALIZED;
-        }
 
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
 
         if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
+                || (offsetInBytes + sizeInBytes < 0)    // detect integer overflow
                 || (offsetInBytes + sizeInBytes > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
 
-        return native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat);
+        int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat);
+
+        if ((mDataLoadMode == MODE_STATIC)
+                && (mState == STATE_NO_STATIC_DATA)
+                && (ret > 0)) {
+            // benign race with respect to other APIs that read mState
+            mState = STATE_INITIALIZED;
+        }
+
+        return ret;
     }
 
 
@@ -1017,22 +1026,27 @@ public class AudioTrack
      */
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
-        if ((mDataLoadMode == MODE_STATIC)
-                && (mState == STATE_NO_STATIC_DATA)
-                && (sizeInShorts > 0)) {
-            mState = STATE_INITIALIZED;
-        }
 
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
 
         if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0)
+                || (offsetInShorts + sizeInShorts < 0)  // detect integer overflow
                 || (offsetInShorts + sizeInShorts > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
 
-        return native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
+        int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
+
+        if ((mDataLoadMode == MODE_STATIC)
+                && (mState == STATE_NO_STATIC_DATA)
+                && (ret > 0)) {
+            // benign race with respect to other APIs that read mState
+            mState = STATE_INITIALIZED;
+        }
+
+        return ret;
     }
 
 
@@ -1044,7 +1058,7 @@ public class AudioTrack
      *  {@link #ERROR_INVALID_OPERATION}
      */
     public int reloadStaticData() {
-        if (mDataLoadMode == MODE_STREAM) {
+        if (mDataLoadMode == MODE_STREAM || mState != STATE_INITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
         return native_reload_static();
