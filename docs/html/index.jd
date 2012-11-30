@@ -20,7 +20,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                     <h1>Android 4.2 Jelly Bean!</h1>
                     <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
                     <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
-                    <p><a href="/about/versions/jelly-bean.html" class="button">Learn More</a></p>
+                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">
@@ -78,4 +78,3 @@ class="button">Watch the Android sessions</a></p>
     </div>
     <!-- /Section links -->
 </div>     
-

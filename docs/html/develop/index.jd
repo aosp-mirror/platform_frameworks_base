@@ -32,6 +32,24 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
            <ul>
               <li class="item carousel-home">
                  <div class="col-8">
+                   <img src="{@docRoot}images/google/maps-v2-trulia-n7.png"
+class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
+                                           max-width:403px;width:403px" />
+                 </div>
+                <div class="content-right col-6" style="width:350px">
+                  <h2>New MapView APIs!</h2>
+                  <p>Google Maps Android API version 2 is now available with enhanced
+                    features such as 3D buildings, vector-based map tiles, rich overlay capabilities,
+                    indoor maps, support for fragments, and much more.</p>
+                    
+                  <p>The APIs are bundled with Google Play services and are
+                  compatible with Android 2.2 and higher.</p>
+                  <p><a
+href="{@docRoot}google/play-services/maps.html" class="button">Read more</a></p>
+                </div>            
+              </li>
+              <li class="item carousel-home">
+                 <div class="col-8">
                    <img
 src="http://4.bp.blogspot.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
 class="play no-shadow no-transform" />
