@@ -20,7 +20,7 @@ previous.link=backupapi.html
     </ol>
     <h2>You should also read</h2>
     <ul>
-      <li><a href="http://developer.android.com/guide/google/gcm/index.html">Google
+      <li><a href="http://developer.android.com/google/gcm/index.html">Google
       Cloud Messaging for Android</a></li>
     </ul>
   </div>
@@ -37,7 +37,7 @@ your server.</p>
 <p>This lesson covers some of the best practices
 for integrating GCM into your application, and assumes you are already familiar
 with basic implementation of this service.  If this is not the case, you can read the <a
-  href="{@docRoot}guide/google/gcm/demo.html">GCM demo app tutorial</a>.</p>
+  href="{@docRoot}google/gcm/demo.html">GCM demo app tutorial</a>.</p>
 
 <h2 id="multicast">Send Multicast Messages Efficiently</h2>
 <p>One of the most useful features in GCM is support for up to 1,000 recipients for
@@ -53,7 +53,7 @@ disaster alerts or sports scores, where a 30 minute interval might render the
 information useless.</p>
 
 <p>Taking advantage of this functionality is easy.  If you're using the <a
-  href="http://developer.android.com/guide/google/gcm/gs.html#libs">GCM helper
+  href="{@docRoot}google/gcm/gs.html#libs">GCM helper
   library</a> for Java, simply provide a <code>List<String></code> collection of
 registration IDs to the <code>send</code> or <code>sendNoRetry</code> method,
 instead of a single registration ID.</p>
@@ -97,7 +97,7 @@ GCM-defined parameters.  The endpoint for this HTTP POST message will be
 </pre>
 
 <p>For a more thorough overview of the format of multicast GCM messages, see the <a
-  href="http://developer.android.com/guide/google/gcm/gcm.html#send-msg">Sending
+  href="{@docRoot}google/gcm/gcm.html#send-msg">Sending
   Messages</a> section of the GCM guide.</pre>
 
 <h2 id="collapse">Collapse Messages that Can Be Replaced</h2>

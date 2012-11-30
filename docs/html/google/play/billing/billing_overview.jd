@@ -21,19 +21,19 @@ parent.link=index.html
   </ol>
   <h2>Downloads</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
     Application</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
     Design</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app Billing</a></li>
+    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
     Reference</a></li>
   </ol>
 </div>
@@ -156,7 +156,7 @@ messaging that takes place between your application and the Google Play applicat
 interface. This interface is defined in an <a
 href="{@docRoot}guide/components/aidl.html">Android Interface Definition Language</a> file
 (<code>IMarketBillingService.aidl</code>). You can <a
-href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">download</a> this AIDL
+href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">download</a> this AIDL
 file with the in-app billing sample application.</p>
 
 <p>The <code>sendBillingRequest()</code> method has a single {@link android.os.Bundle} parameter.
@@ -164,7 +164,7 @@ The Bundle that you deliver must include several key-value pairs that specify va
 the request, such as the type of billing request you are making, the item that is being purchased and
 its type, and the application that is making the request. For more information about the Bundle keys
 that are sent with a request, see <a
-href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-interface">In-app Billing
+href="{@docRoot}google/play/billing/billing_reference.html#billing-interface">In-app Billing
 Service Interface</a>.
 
 <p>One of the most important keys that every request Bundle must have is the
@@ -198,9 +198,9 @@ requests:</p>
   </li>
   <li><code>RESTORE_TRANSACTIONS</code>
     <p>This request retrieves a user's transaction status for <a
-    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-purchase-type">managed
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">managed
     purchases</a> and <a
-    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-purchase-type">subscriptions</a>.
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">subscriptions</a>.
     You should send this request only when you need to retrieve a user's transaction
     status, which is usually only when your application is reinstalled or installed for the first
     time on a device.</p>
@@ -240,7 +240,7 @@ include the following:</p>
     request. This response is <em>not</em> used to report any purchase state changes (such as refund
     or purchase information). For more information about the response codes that are sent with this
     response, see <a
-    href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-codes">Server Response Codes
+    href="{@docRoot}google/play/billing/billing_reference.html#billing-codes">Server Response Codes
     for In-app Billing</a>.</p>
   </li>
   <li><code>com.android.vending.billing.IN_APP_NOTIFY</code>
@@ -276,7 +276,7 @@ string for a subscription item is shown below:</p>
 </pre>
 
 <p>For more information about the fields in this JSON string, see <a
-href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-intents">In-app Billing
+href="{@docRoot}google/play/billing/billing_reference.html#billing-intents">In-app Billing
 Broadcast Intents</a>.</p>
 
 <h3 id="billing-message-sequence">Messaging sequence</h3>
@@ -435,7 +435,7 @@ application can handle this message the same way it handles the response from an
 application-initiated <code>REQUEST_PURCHASE</code> message, so that ultimately your application
 receives a <code>PURCHASE_STATE_CHANGED</code> broadcast intent message that includes information
 about the item that has been purchased. This applies only to items that have their <a
-href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-purchase-type">purchase type</a> set
+href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">purchase type</a> set
 to "managed per user account."</p>
 
 <p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
@@ -478,7 +478,7 @@ application. When your application receives the JSON string, you need to verify 
 the signature of the JSON string.</p>
 
 <p>For more information about best practices for security and design, see <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
 
 <h2 id="billing-limitations">In-app Billing Requirements and Limitations</h2>
 

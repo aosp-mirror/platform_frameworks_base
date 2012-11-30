@@ -152,7 +152,7 @@ either internal or external storage through the system settings.</td>
 
 <p class="caution"><strong>Caution:</strong> If your application uses Google Play's Copy 
   Protection feature, it cannot be installed to a device's SD card. However, if you use Google 
-  Play's <a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a> instead, 
+  Play's <a href="{@docRoot}google/play/licensing/index.html">Application Licensing</a> instead, 
   your application <em>can</em> be installed to internal or external storage, including SD cards.</p>
 
 <p class="note"><strong>Note:</strong> By default, your application will be installed on the

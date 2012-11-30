@@ -141,10 +141,10 @@ time, just by saving changes in the Develoer Console.</p>
 <div class="sidebox">
 <h2>In-app Billing</h2>
 <p>For details on how to implement In-app Billing, see the
-<a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing</span></a>
+<a href="{@docRoot}google/play/billing/index.html">In-app Billing</span></a>
 developer documentation.</p></div></div>
 
-<p><a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing</a> is a Google Play service that lets you monetize your apps in more ways by selling in-app products and subscriptions. In-app products are one-time purchases, while  subscriptions are recurring charges on an monthly or annual basis.</p>
+<p><a href="{@docRoot}google/play/billing/index.html">In-app Billing</a> is a Google Play service that lets you monetize your apps in more ways by selling in-app products and subscriptions. In-app products are one-time purchases, while  subscriptions are recurring charges on an monthly or annual basis.</p>
 
 <p>From the Developer Console you can create product lists for in-app
 products and subscriptions, set prices, and publish.</p>

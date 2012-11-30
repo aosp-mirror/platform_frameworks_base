@@ -291,7 +291,7 @@ current user has purchased it. Using Google Play Licensing is optional even if y
 releasing your app through Google Play.</p>
 
 <p>For more information about Google Play Licensing Service and how to use it in your
-application, see <a href="{@docRoot}guide/google/play/licensing/index.html">Application Licensing</a>.</p>
+application, see <a href="{@docRoot}google/play/licensing/index.html">Application Licensing</a>.</p>
 
 <h2 id="publishing-build">Building Your Application for Release</h2>
 
@@ -333,7 +333,7 @@ information about the signing process and signing guidelines.</p>
 
 <p>If your application relies on a remote server, make sure the server is secure and that it is
 configured for production use. This is particularly important if you are implementing <a
-href="{@docRoot}guide/google/play/billing/index.html">in-app billing</a> in your application and you are
+href="{@docRoot}google/play/billing/index.html">in-app billing</a> in your application and you are
 performing the signature verification step on a remote server.</p>
 
 <p>Also, if your application fetches content from a remote server or a real-time service (such as a

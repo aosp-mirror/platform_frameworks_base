@@ -74,9 +74,9 @@ users have configured their Settings to allow the installation of apps from
 website, it can be inefficient. For example, if you want to monetize your
 application you will have to process and track all financial transactions
 yourself and you will not be able to use Google Play's <a
-href="{@docRoot}guide/google/play/billing/index.html">In-app Billing service</a>
+href="{@docRoot}google/play/billing/index.html">In-app Billing service</a>
 to sell in-app products. In addition, you will not be able to use the <a
-href="{@docRoot}guide/google/play/licensing/index.html">Licensing service</a> to
+href="{@docRoot}google/play/licensing/index.html">Licensing service</a> to
 help prevent unauthorized installation and use of your application.</p>
 
 

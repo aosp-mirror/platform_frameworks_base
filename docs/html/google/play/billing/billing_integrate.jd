@@ -21,15 +21,15 @@ parent.link=index.html
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
     Design</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
     Reference</a></li>
   </ol>
 </div>
@@ -41,8 +41,8 @@ you implement in-app billing by stepping through the primary implementation task
 billing sample application as an example.</p>
 
 <p>Before you implement in-app billing in your own application, be sure that you read <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app Billing</a> and <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design</a>. These
+href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app Billing</a> and <a
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a>. These
 documents provide background information that will make it easier for you to implement in-app
 billing.</p>
 
@@ -238,7 +238,7 @@ how to do this.</p>
     your product list so that <code>sword_001</code> has a purchase type of "Managed per user
     account" and <code>potion_001</code> has a purchase type of "Unmanaged" so you can see how these
     two purchase types behave. To learn how to set up a product list, see <a
-    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-list-setup">Creating a Product
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-list-setup">Creating a Product
     List</a>.</p>
     <p class="note"><strong>Note:</strong> You must publish the items in your product
     list (<code>sword_001</code> and <code>potion_001</code>) even though you are not publishing the
@@ -258,7 +258,7 @@ onto a device to run it. To run the sample application, do the following:</p>
     <p>You cannot purchase items from yourself (Google Wallet prohibits this), so you need to
     create at least one test account that you can use to purchase items in the sample application.
     To learn how to set up a test account, see <a
-    href="{@docRoot}guide/google/play/billing/billing_testing.html#billing-testing-setup">Setting up Test
+    href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-setup">Setting up Test
     Accounts</a>.</p>
   </li>
   <li><strong>Verify that your device is running a supported version of the Google Play
@@ -279,7 +279,7 @@ onto a device to run it. To run the sample application, do the following:</p>
  </li>
  <li><strong>Make one of your test accounts the primary account on your device.</strong>
     <p>The primary account on your device must be one of the <a
-    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a>
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">test accounts</a>
     that you registered on the Google Play publisher site. If the primary account on your device is not a
     test account, you must do a factory reset of the device and then sign in with one of your test
     accounts. To perform a factory reset, do the following:</p>
@@ -466,7 +466,7 @@ indicates the item being purchased, and another identifies your application. The
 code. However, this is not the complete purchase response; the complete response is delivered with
 an asynchronous broadcast intent. For more information about the various Bundle keys that are
 supported by the <code>MarketBillingService</code>, see <a
-href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-interface">In-app Billing
+href="{@docRoot}google/play/billing/billing_reference.html#billing-interface">In-app Billing
 Service Interface</a>.</p>
 
 <p>You can use the <code>sendBillingRequest()</code> method to send five types of billing requests.
@@ -482,7 +482,7 @@ key can have the following five values:</p>
   <li><code>CONFIRM_NOTIFICATIONS</code>&mdash;acknowledges that you received the transaction
   information for a purchase or refund.</li>
   <li><code>RESTORE_TRANSACTIONS</code>&mdash;retrieves a user's transaction history for <a
-  href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-purchase-type">managed
+  href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">managed
   purchases</a>.</li>
 </ul>
 
@@ -529,7 +529,7 @@ three keys that are required for all requests: <code>BILLING_REQUEST</code>,
 <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. If you are offering subscriptions in
 your app, set the API_VERSION key to a value of "2", to confirm that In-app Billing v2 is
 available. For an examnple, see
-<a href="{@docRoot}guide/google/play/billing/billing_subscriptions.html#version">Subscriptions</a>.</p>
+<a href="{@docRoot}google/play/billing/billing_subscriptions.html#version">Subscriptions</a>.</p>
 
 <p>The <code>CHECK_BILLING_SUPPORTED</code> request returns a synchronous {@link
 android.os.Bundle} response, which contains only a single key: <code>RESPONSE_CODE</code>. The
@@ -577,7 +577,7 @@ Help topic.</p>
 <p>You must specify four keys in the request {@link android.os.Bundle}. The following code sample
 shows how to set these keys and make a purchase request for a single in-app item. In the sample,
 <code>mProductId</code> is the Google Play product ID of an in-app item (which is listed in the
-application's <a href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-list-setup">product
+application's <a href="{@docRoot}google/play/billing/billing_admin.html#billing-list-setup">product
 list</a>), and <code>mService</code> is an instance of the <code>MarketBillingService</code>
 interface.</p>
 
@@ -672,7 +672,7 @@ use to retrieve the transaction details for the <code>REQUEST_PURCHASE</code> re
 
 <p class="note"><strong>Note:</strong> The Google Play application also sends
 an <code>IN_APP_NOTIFY</code> for refunds. For more information, see <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html#billing-action-notify">Handling
+href="{@docRoot}google/play/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a>.</p>
 
 <p>Because the purchase process is not instantaneous and can take several seconds (or more), you
@@ -855,7 +855,7 @@ android.content.BroadcastReceiver}. To see an example of how you can send and re
 messages, see the <code>BillingReceiver.java</code> and <code>BillingService.java</code> files in
 the sample application. You can use these samples as a basis for your own implementation. However,
 if you use any of the code from the sample application, be sure you follow the guidelines in <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
 
 <h2 id="billing-broadcast-receiver">Creating a BroadcastReceiver</h2>
 
@@ -868,19 +868,19 @@ android.content.BroadcastReceiver} that can handle the following intents:</p>
   <p>This broadcast intent contains a Google Play response code, and is sent after you make an
   in-app billing request. For more information about the response codes that are sent with this
   response, see <a
-  href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-codes">Google Play Response
+  href="{@docRoot}google/play/billing/billing_reference.html#billing-codes">Google Play Response
   Codes for In-app Billing</a>.</p>
   </li>
   <li>com.android.vending.billing.IN_APP_NOTIFY
   <p>This response indicates that a purchase has changed state, which means a purchase succeeded,
   was canceled, or was refunded. For more information about notification messages, see <a
-  href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-intents">In-app Billing
+  href="{@docRoot}google/play/billing/billing_reference.html#billing-intents">In-app Billing
   Broadcast Intents</a></p>
   </li>
   <li>com.android.vending.billing.PURCHASE_STATE_CHANGED
   <p>This broadcast intent contains detailed information about one or more transactions. For more
   information about purchase state messages, see <a
-  href="{@docRoot}guide/google/play/billing/billing_reference.html#billing-intents">In-app Billing
+  href="{@docRoot}google/play/billing/billing_reference.html#billing-intents">In-app Billing
   Broadcast Intents</a></p>
   </li>
 </ul>
@@ -989,7 +989,7 @@ local service (discussed in the next section). The <code>BillingReceiver.java</c
 sample application shows you how to do this. You can use this sample as a basis for your own {@link
 android.content.BroadcastReceiver}. However, if you use any of the code from the sample application,
 be sure you follow the guidelines that are discussed in <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design </a>.</p>
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design </a>.</p>
 
 <h2 id="billing-signatures">Verifying Signatures and Nonces</h2>
 
@@ -1028,7 +1028,7 @@ code shows some simple methods you can use to do this.</p>
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent. The <code>Security.java</code> file in the
 sample application shows you how to do this. If you use this file as a basis for your own security
 implementation, be sure to follow the guidelines in <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and Design</a> and
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a> and
 obfuscate your code.</p>
 
 <p>You will need to use your Google Play public key to perform the signature verification. The
@@ -1075,7 +1075,7 @@ sample application provides an example database (PurchaseDatabase.java); however
 database has been simplified for clarity and does not exhibit the security best practices that we
 recommend. If you have a remote server, we recommend that you store purchase information on your
 server instead of in a local database on a device. For more information about security best
-practices, see <a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+practices, see <a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
 Design</a>.</p>
 
 <p class="note"><strong>Note</strong>: If you store any purchase information on a device, be sure to
