@@ -34,20 +34,14 @@
           <span class="en">Google Maps</span></a>
       </li>
 
-      <li id="tree-list" class="nav-section">
+      <li id="gms-tree-list" class="nav-section">
         <div class="nav-section-header">
-           <a href="<?cs var:toroot?>google/play-services/reference/packages.html">
-           <span class="en">Reference</span></a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/auth/package-summary.html">auth</a></li>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/common/package-summary.html">common</a></li>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/maps/package-summary.html">maps</a></li>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/maps.model/package-summary.html">maps.model</a></li>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/panorama/package-summary.html">panorama</a></li>
-          <li><a href="<?cs var:toroot ?>google/play-services/reference/com/google/android/gms/plus/package-summary.html">plus</a></li>
-        </ul>
+          <a href="<?cs var:toroot ?>reference/gms-packages.html">
+            <span class="en">Reference</span>
+          </a>
+        <div>
       </li>
+
     </ul>
   </li>
 
@@ -139,6 +133,14 @@
           <li><a href="<?cs var:toroot?>google/gcm/c2dm.html">
               <span class="en">Migration</span></a>
           </li>
+          <li id="gcm-tree-list" class="nav-section">
+            <div class="nav-section-header">
+              <a href="<?cs var:toroot ?>reference/gcm-packages.html">
+                <span class="en">Reference</span>
+              </a>
+            <div>
+      </li>
+
         </ul>
       </li>
 </ul>
