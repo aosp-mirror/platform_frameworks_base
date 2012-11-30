@@ -7,7 +7,7 @@ page.title=Android Compatibility
 <h2>See also</h2>
  <ol>
 <li><a
-href="{@docRoot}guide/google/play/filters.html">Filtering on Google Play</a></li>
+href="{@docRoot}google/play/filters.html">Filtering on Google Play</a></li>
 <li><a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing Alternative Resources</a></li>
 <li><a
@@ -119,7 +119,7 @@ device.
 
 <p style="margin-top:1em;">For information about other filters that you can
 use to control the availability of your apps, see the 
-<a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>
+<a href="{@docRoot}google/play/filters.html">Filters on Google Play</a>
 document.</p>
   </div> 
 </div>

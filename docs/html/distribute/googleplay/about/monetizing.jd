@@ -112,7 +112,7 @@ gameplay levels, and upgrades as in-app products. The only restriction is that
 free apps must remain free (to download) for the life of the app.</p>
 
 <p>For details about in-app products or subscriptions,
-see <a href="/guide/google/play/billing/index.html">Google Play In-app Billing</a>.</p>
+see <a href="{@docRoot}google/play/billing/index.html">Google Play In-app Billing</a>.</p>
 
 <h2 id="buyer-currency" style="margin-top:1.5em;">Flexible pricing in the currencies of your customers</h2>
 

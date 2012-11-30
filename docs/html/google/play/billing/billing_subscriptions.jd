@@ -48,19 +48,19 @@ parent.link=index.html
 </ol>
   <h2>Downloads</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample Application</a></li>
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample Application</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
     Design</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
     Reference</a></li>
   </ol>
 </div>
@@ -78,7 +78,7 @@ subscriptions using the standard communication model, data structures, and user
 interactions as for other in-app products.subscriptions. Because the
 implementation of subscriptions follows the same path as for other in-app
 products, details are provided outside of this document, starting with the <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
 Overview</a>. </p>
 
 <p>This document is focused on highlighting implementation details that are
@@ -395,7 +395,7 @@ other in-app products.subscriptions. </p>
 
 <p>The full implementation details for In-app Billing are provided outside of
 this document, starting with the <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
 Overview</a>. This document is focused on highlighting implementation details
 that are specific to subscriptions, along with some strategies for the
 associated billing and business models.</p>
@@ -407,7 +407,7 @@ associated billing and business models.</p>
 subscriptions, an updated version of the In-app Billing sample app is available.
 You can download the sample app from the Android SDK repository using the
 Android SDK Manager. For details, see <a
-href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">
+href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">
 Downloading the Sample Application</a>.</p>
 
 <h3 id="model">Application model</h3>
@@ -426,7 +426,7 @@ Play. Also recommended are a response Handler for processing notifications,
 errors, and status messages, and an observer for sending callbacks to your
 application as needed. All of these components and their interactions are
 described in full in the <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
 Overview</a> and related documents.</p>
 
 <p>To initiate different types of billing communication with Google Play, your
@@ -470,7 +470,7 @@ is shown below. </p>
 pass it to your backend servers, which can then use it to query the billing
 status or cancel the subscription remotely. If your app will store the token
 locally, please read the <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
 Design</a> document for best practices for maintaining the security of your
 data.</p>
 
@@ -565,7 +565,7 @@ transaction..
 
 <p>The REQUEST_PURCHASE includes a Bundle containing the item details, as
 described in the <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
 Overview</a>. For a subscription, the Bundle must also specify:</p>
 
 <ul>
@@ -581,7 +581,7 @@ Overview</a>. For a subscription, the Bundle must also specify:</p>
 <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and
 <code>REQUEST_ID</code>. Your app uses the <code>PURCHASE_INTENT</code> to
 launch the checkout UI and the message flow proceeds exactly as described in <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html#billing-message-
+href="{@docRoot}google/play/billing/billing_overview.html#billing-message-
 sequence">Messaging sequence</a>.</p>
 
 <p>Here’s how the sample app initiates a purchase for a subscription, where
@@ -638,7 +638,7 @@ the subscriptions that the user has purchased.</p>
 
 <p>The process for restoring subscriptions transactions is the same as described
 in <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html#billing-message-
+href="{@docRoot}google/play/billing/billing_overview.html#billing-message-
 sequence">Messaging sequence</a>. Your app sends a
 <code>RESTORE_TRANSACTIONS</code> request to Google Play. Google Play sends two
 broadcast intents as asynchronous responses &mdash; a <code>RESPONSE_CODE</code>
@@ -654,7 +654,7 @@ restore locally.</p>
 <p>Your app can store the restored purchase state and other transaction details
 in the way that best meets your needs. Your app can use it later to check the
 subscription validity, although please read the <a
-href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
 Design</a> document for best practices for maintaining the security of your
 data.</p>
 
@@ -788,7 +788,7 @@ your app does not need to grant further access to the subscription content.</p>
 
 <p>For subscriptions, you make the same types of modifications to your app as
 are described in <a
-href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-implement">
+href="{@docRoot}google/play/billing/billing_integrate.html#billing-implement">
 Modifying your Application Code</a>.</p>
 
 <p>Note that, in your UI that lets users view and select subscriptions for
@@ -816,7 +816,7 @@ subscription product:</p>
 <li>Additional currency pricing (can be auto-filled)</li>
 </ul>
 
-<p>For details, please see <a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering
+<p>For details, please see <a href="{@docRoot}google/play/billing/billing_admin.html">Administering
 In-app Billing</a>.</p>
 
 

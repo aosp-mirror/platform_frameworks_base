@@ -54,7 +54,7 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element to declare whether the system should resize your
 application for different screen sizes.</p>
 
-  <p>Also see the <a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>
+  <p>Also see the <a href="{@docRoot}google/play/filters.html">Filters on Google Play</a>
 document for more information about how Google Play filters applications using this and
 other manifest elements.</p>
 
@@ -138,5 +138,5 @@ entry looks like if your application is compatible with only small and normal sc
 <dt>see also:</dt>
 <dd><a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></dd>
-<dd><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></dd>
+<dd><a href="{@docRoot}google/play/filters.html">Filters on Google Play</a></dd>
 </dl>

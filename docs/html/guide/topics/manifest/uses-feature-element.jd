@@ -28,46 +28,39 @@ parent.link=manifest-intro.html
 </div>
 </div>
 
-
-<dl class="xml">
-
-<dt>syntax:</dt>
-<dd>
-<pre class="stx">&lt;uses-feature android:<a href="#name">name</a>="<em>string</em>"
-              android:<a href="#required">required</a>=["true" | "false"]
-              android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>" /&gt;</pre>
-</dd>
-
-<dt>contained in:</dt>
-<dd><code><a
-href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
-
  <div class="sidebox-wrapper"> 
-  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
-  <div id="qv-sub-rule"> 
+ <div class="sidebox">
     <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play and <code style="color:#669999;">&lt;uses-feature&gt;</code> elements</p>
-    <p style="margin-top:1em;">Google Play filters the applications that are visible to users, so
-that users can see and download only those applications that are compatible with their
-devices. One of the ways it filters applications is by feature compatibility.</p>
-
-<p style="margin-top:1em;">To do this, Google Play checks the
-<code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
-establish the app's feature needs. Google Play then shows or hides the application to
-each user, based on a comparison with the features available on the user's
-device. </p>
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <p style="padding-top:1em;">Google Play uses the <code>&lt;uses-feature&gt;</code>
+    elements declared in your app manifest to filter your app from devices 
+    that do not meet it's hardware and software feature requirements. </p>
 
 <p style="margin-top:1em;">By specifying the features that your application requires,
 you enable Google Play to present your application only to users whose
 devices meet the application's feature requirements, rather than presenting it
 to all users. </p>
 
-<p style="margin-top:1em;" class="caution">For important information about how
+<p>For important information about how
 Google Play uses features as the basis for filtering, please read <a
 href="#market-feature-filtering">Google Play and Feature-Based Filtering</a>,
 below.</p>
 </div>
 </div>
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">&lt;uses-feature
+  android:<a href="#name">name</a>="<em>string</em>"
+  android:<a href="#required">required</a>=["true" | "false"]
+  android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>" /&gt;</pre>
+</dd>
+
+<dt>contained in:</dt>
+<dd><code><a
+href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
 <dd>Declares a single hardware or software feature that is used by the
@@ -207,7 +200,7 @@ can check at run-time whether a higher level of OpenGL ES is available.)</p>
     <li>{@link android.content.pm.FeatureInfo}</li>
     <li>{@link android.content.pm.ConfigurationInfo}</li>
     <li><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a></li>
-    <li><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></li>
+    <li><a href="{@docRoot}google/play/filters.html">Filters on Google Play</a></li>
   </ul>
 </dd>
 

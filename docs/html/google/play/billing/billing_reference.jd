@@ -15,20 +15,20 @@ parent.link=index.html
   </ol>
   <h2>Downloads</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
     Application</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
     Design</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
     Billing</a></li>
   </ol>
 </div>
@@ -114,7 +114,7 @@ purchase an item from yourself, which is not allowed by Google Wallet.</td>
 <p>The following section describes the interface for Google Play's in-app billing service. The
 interface is defined in the <code>IMarketBillingService.aidl</code> file, which is included with the
 in-app billing <a
-href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">sample
+href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">sample
 application</a>.</p>
 <p>The interface consists of a single request method <code>sendBillingRequest()</code>. This method
 takes a single {@link android.os.Bundle} parameter. The Bundle parameter includes several key-value
@@ -233,7 +233,7 @@ pairs, which are summarized in table 2.</p>
   </li>
   <li><code>RESTORE_TRANSACTIONS</code>
     <p>This request retrieves a user's transaction status for managed purchases (see <a
-    href="{@docRoot}guide/google/play/billing/billing_admin.html#billing-purchase-type">Choosing a
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">Choosing a
     Purchase Type</a> for more information). You should send this message only when you need to
     retrieve a user's transaction status, which is usually only when your application is reinstalled
     or installed for the first time on a device.</p>
@@ -304,7 +304,7 @@ each in-app billing request type.</p>
 Play application. These broadcast intents inform your application about in-app billing actions
 that have occurred. Your application must implement a {@link android.content.BroadcastReceiver} to
 receive these broadcast intents, such as the <code>BillingReceiver</code> that's shown in the in-app
-billing <a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">sample
+billing <a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">sample
 application</a>.</p>
 
 <h4>com.android.vending.billing.RESPONSE_CODE</h4>
@@ -442,7 +442,7 @@ validity of a specific subscription at any time or cancel a subscription. The
 API is designed to be used from your backend servers as a way of securely
 managing subscriptions, as well as extending and integrating subscriptions with
 other services. See <a
-href="{@docRoot}guide/google/play/billing/billing_subscriptions.html#play-dev-api">
+href="{@docRoot}google/play/billing/billing_subscriptions.html#play-dev-api">
 Google Play Android Developer API</a> for more information.</p>
 
 <h2 id="billing-versions">In-app Billing API Versions</h2>
@@ -457,7 +457,7 @@ Versions are specified in the <code>API_VERSION</code> key of the Bundle object
 passed in the <code>sendBillingRequest()</code>, which is defined in the defined
 in the <code>IMarketBillingService.aidl</code> file, which is included with the
 in-app billing <a
-href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">
+href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">
 sample application</a>. For more information, see <a
 href="#billing-interface">In-app Billing Service Interface</a>.</p>
 <h3 id="version_2">In-app Billing version 2</h3>

@@ -92,7 +92,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
           </ul>
         </li>
         <li>Added {@code jobb} tool for creating and encrypting
-          <a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a>.
+          <a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a>.
           (<a href="{@docRoot}tools/help/jobb.html">more info</a>)
         <li>Improved the Android JUnit test runner to allow a test to be run on all connected
           devices simultaneously.</li>

@@ -22,7 +22,7 @@ next.link=redundant_redundant.html
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
-  <li><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging for Android</a></li>
+  <li><a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging for Android</a></li>
 </ul>
 
 </div>
@@ -38,7 +38,7 @@ next.link=redundant_redundant.html
  
 <p>Every time your app polls your server to check if an update is required, you activate the wireless radio, drawing power unnecessarily, for up to 20 seconds on a typical 3G connection.</p>
 
-<p><a href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging for Android (GCM)</a> is a lightweight mechanism used to transmit data from a server to a particular app instance. Using GCM, your server can notify your app running on a particular device that there is new data available for it.</p>
+<p><a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging for Android (GCM)</a> is a lightweight mechanism used to transmit data from a server to a particular app instance. Using GCM, your server can notify your app running on a particular device that there is new data available for it.</p>
 
 <p>Compared to polling, where your app must regularly ping the server to query for new data, this event-driven model allows your app to create a new connection only when it knows there is data to download.</p>
 

@@ -463,7 +463,7 @@ applications are available on each device. As such, your application should be a
 devices that meet all your application requirements.</p>
 
 <p>For more information about how Google Play filters applications based on these (and other)
-requirements, see the <a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>
+requirements, see the <a href="{@docRoot}google/play/filters.html">Filters on Google Play</a>
 document.</p>
 
 

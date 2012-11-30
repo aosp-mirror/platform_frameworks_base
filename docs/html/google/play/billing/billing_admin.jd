@@ -15,20 +15,20 @@ parent.link=index.html
   </ol>
   <h2>Downloads</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
     Application</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_best_practices.html">Security and
+    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
     Design</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
     Reference</a></li>
   </ol>
 </div>
@@ -83,12 +83,12 @@ account and the application's manifest must include the <code>com.android.vendin
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
 information about this permission, see
-<a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-permission">Updating Your
+<a href="{@docRoot}google/play/billing/billing_integrate.html#billing-permission">Updating Your
 Application's Manifest</a>.</p>
 
 <p>In addition, an application package can have only one product list. If you create a product
 list for an application, and you use the <a
-href="{@docRoot}guide/google/play/publishing/multiple-apks.html">multiple APK feature</a> to distribute
+href="{@docRoot}google/play/publishing/multiple-apks.html">multiple APK feature</a> to distribute
 more than one APK for that application, the product list applies to all APK versions that are
 associated with the application listing. You cannot create individual product lists for each APK if
 you are using the multiple APK feature.</p>
@@ -143,7 +143,7 @@ number of in-app items.</p>
     <strong>Published</strong> and the item's application must be published on Google Play.</p>
     <p class="note"><strong>Note:</strong> This is not true for test accounts. An item is visible to
     a test account if the application is not published and the item is published. See <a
-    href="{@docRoot}guide/google/play/billing/billing_testing.html#billing-testing-real">Testing In-app
+    href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-real">Testing In-app
     Billing</a> for more information.</p>
   </li>
   <li><strong>Language</strong>
@@ -435,7 +435,7 @@ in-app purchases must be directed to you (the application developer). You can th
 refund through your Google Wallet merchant account. When you do this, Google Play receives a
 refund notification from Google Wallet, and Google Play sends a refund message to your
 application. For more information, see <a
-href="{@docRoot}guide/google/play/billing/billing_overview.html#billing-action-notify">Handling
+href="{@docRoot}google/play/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
 href="http://www.google.com/support/androidmarket/bin/answer.py?answer=1153485">In-app Billing
 Pricing</a>.</p>

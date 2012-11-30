@@ -296,7 +296,7 @@ any responses to intents issued against HTTP.</p>
 <p>The <acronym title="Short Message Service">SMS</acronym> protocol was primarily designed for
 user-to-user communication and is not well-suited for apps that want to transfer data.
 Due to the limitations of SMS, we strongly recommend the use of <a
-href="{@docRoot}guide/google/gcm/index.html">Google Cloud Messaging</a> (GCM)
+href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> (GCM)
 and IP networking for sending data messages from a web server to your app on a user device.</p>
 
 <p>Beware that SMS is neither encrypted nor strongly
