@@ -749,6 +749,11 @@ public class DisplayPolicy {
         return mScreenOnListener;
     }
 
+    public int getTopFullscreenOpaqueWindowStatePrivateFlags() {
+        return mTopFullscreenOpaqueWindowState != null ?
+                mTopFullscreenOpaqueWindowState.getAttrs().privateFlags : 0;
+    }
+
     public void screenTurnedOn(ScreenOnListener screenOnListener) {
         synchronized (mLock) {
             mScreenOnEarly = true;
