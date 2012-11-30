@@ -626,6 +626,21 @@ public final class Settings {
     public static final String ACTION_NFCSHARING_SETTINGS =
         "android.settings.NFCSHARING_SETTINGS";
 
+    /**
+     * Activity Action: Show Daydream settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @see android.service.dreams.DreamService
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
