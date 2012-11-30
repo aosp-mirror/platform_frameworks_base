@@ -116,6 +116,15 @@ class AppWidgetServiceImpl {
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
         int tag; // for use while saving state (the index)
+
+        boolean uidMatches(int callingUid) {
+            if (UserHandle.getAppId(callingUid) == Process.myUid()) {
+                // For a host that's in the system process, ignore the user id
+                return UserHandle.isSameApp(this.uid, callingUid);
+            } else {
+                return this.uid == callingUid;
+            }
+        }
     }
 
     static class AppWidgetId {
@@ -476,7 +485,7 @@ class AppWidgetServiceImpl {
             boolean changed = false;
             for (int i = N - 1; i >= 0; i--) {
                 Host host = mHosts.get(i);
-                if (host.uid == callingUid) {
+                if (host.uidMatches(callingUid)) {
                     deleteHostLocked(host);
                     changed = true;
                 }
@@ -744,8 +753,6 @@ class AppWidgetServiceImpl {
                 conn.disconnect();
                 mContext.unbindService(conn);
                 mBoundRemoteViewsServices.remove(key);
-            } else {
-                Log.e("AppWidgetService", "Error (unbindRemoteViewsService): Connection not bound");
             }
         }
     }
@@ -968,30 +975,13 @@ class AppWidgetServiceImpl {
             for (int i = 0; i < N; i++) {
                 AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
                 if (id == null) {
-                    String message = "AppWidgetId NPE: mUserId=" + mUserId
-                            + ", callingUid=" + Binder.getCallingUid()
-                            + ", appWidgetIds[i]=" + appWidgetIds[i]
-                            + "\n  mAppWidgets:\n" + getUserWidgets();
-                    throw new NullPointerException(message);
-                }
-                if (id.views != null) {
+                    Slog.w(TAG, "widget id " + appWidgetIds[i] + " not found!");
+                } else if (id.views != null) {
                     // Only trigger a partial update for a widget if it has received a full update
                     updateAppWidgetInstanceLocked(id, views, true);
                 }
             }
         }
-    }
-
-    private String getUserWidgets() {
-        StringBuffer sb = new StringBuffer();
-        for (AppWidgetId widget: mAppWidgetIds) {
-            sb.append("    id="); sb.append(widget.appWidgetId);
-            sb.append(", hostUid="); sb.append(widget.host.uid);
-            sb.append(", provider="); sb.append(widget.provider.info.provider.toString());
-            sb.append("\n");
-        }
-        sb.append("\n");
-        return sb.toString();
     }
 
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
@@ -1186,7 +1176,7 @@ class AppWidgetServiceImpl {
     }
 
     boolean canAccessAppWidgetId(AppWidgetId id, int callingUid) {
-        if (id.host.uid == callingUid) {
+        if (id.host.uidMatches(callingUid)) {
             // Apps hosting the AppWidget have access to it.
             return true;
         }
@@ -1229,7 +1219,7 @@ class AppWidgetServiceImpl {
         final int N = mHosts.size();
         for (int i = 0; i < N; i++) {
             Host h = mHosts.get(i);
-            if (h.uid == uid && h.hostId == hostId) {
+            if (h.uidMatches(uid) && h.hostId == hostId) {
                 return h;
             }
         }

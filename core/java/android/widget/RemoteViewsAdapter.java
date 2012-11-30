@@ -29,7 +29,9 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -40,6 +42,7 @@ import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
+import com.android.internal.widget.LockPatternUtils;
 
 /**
  * An adapter to a RemoteViewsService which fetches and caches RemoteViews
@@ -106,6 +109,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     // construction (happens when we have a cached FixedSizeRemoteViewsCache).
     private boolean mDataReady = false;
 
+    int mUserId;
+
     /**
      * An interface for the RemoteAdapter to notify other classes when adapters
      * are actually connected to/disconnected from their actual services.
@@ -146,8 +151,16 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         public synchronized void bind(Context context, int appWidgetId, Intent intent) {
             if (!mIsConnecting) {
                 try {
+                    RemoteViewsAdapter adapter;
                     final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-                    mgr.bindRemoteViewsService(appWidgetId, intent, asBinder());
+                    if (Process.myUid() == Process.SYSTEM_UID
+                            && (adapter = mAdapter.get()) != null) {
+                        mgr.bindRemoteViewsService(appWidgetId, intent, asBinder(),
+                                new UserHandle(adapter.mUserId));
+                    } else {
+                        mgr.bindRemoteViewsService(appWidgetId, intent, asBinder(),
+                                Process.myUserHandle());
+                    }
                     mIsConnecting = true;
                 } catch (Exception e) {
                     Log.e("RemoteViewsAdapterServiceConnection", "bind(): " + e.getMessage());
@@ -159,8 +172,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         public synchronized void unbind(Context context, int appWidgetId, Intent intent) {
             try {
+                RemoteViewsAdapter adapter;
                 final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-                mgr.unbindRemoteViewsService(appWidgetId, intent);
+                if (Process.myUid() == Process.SYSTEM_UID
+                        && (adapter = mAdapter.get()) != null) {
+                    mgr.unbindRemoteViewsService(appWidgetId, intent,
+                            new UserHandle(adapter.mUserId));
+                } else {
+                    mgr.unbindRemoteViewsService(appWidgetId, intent, Process.myUserHandle());
+                }
                 mIsConnecting = false;
             } catch (Exception e) {
                 Log.e("RemoteViewsAdapterServiceConnection", "unbind(): " + e.getMessage());
@@ -760,6 +780,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             throw new IllegalArgumentException("Non-null Intent must be specified.");
         }
         mRequestedViews = new RemoteViewsFrameLayoutRefSet();
+
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            mUserId = new LockPatternUtils(context).getCurrentUser();
+        } else {
+            mUserId = UserHandle.myUserId();
+        }
 
         // Strip the previously injected app widget id from service intent
         if (intent.hasExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID)) {

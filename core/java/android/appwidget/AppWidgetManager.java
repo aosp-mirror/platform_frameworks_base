@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
@@ -749,11 +750,14 @@ public class AppWidgetManager {
      * @param intent        The intent of the service which will be providing the data to the
      *                      RemoteViewsAdapter.
      * @param connection    The callback interface to be notified when a connection is made or lost.
+     * @param userHandle    The user to bind to.
      * @hide
      */
-    public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection) {
+    public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection,
+            UserHandle userHandle) {
         try {
-            sService.bindRemoteViewsService(appWidgetId, intent, connection);
+            sService.bindRemoteViewsService(appWidgetId, intent, connection,
+                    userHandle.getIdentifier());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -769,11 +773,12 @@ public class AppWidgetManager {
      * @param appWidgetId   The AppWidget instance for which to bind the RemoteViewsService.
      * @param intent        The intent of the service which will be providing the data to the
      *                      RemoteViewsAdapter.
+     * @param userHandle    The user to unbind from.
      * @hide
      */
-    public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
+    public void unbindRemoteViewsService(int appWidgetId, Intent intent, UserHandle userHandle) {
         try {
-            sService.unbindRemoteViewsService(appWidgetId, intent);
+            sService.unbindRemoteViewsService(appWidgetId, intent, userHandle.getIdentifier());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
