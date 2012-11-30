@@ -39,6 +39,7 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 
@@ -332,6 +333,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
         } else {
             setInitialState(mWatchdogDisabledState);
         }
+        setLogRecSize(25);
+        setLogOnlyTransitions(true);
         updateSettings();
     }
 
@@ -417,9 +420,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 false, contentObserver);
     }
 
-    public void dump(PrintWriter pw) {
-        pw.print("WatchdogStatus: ");
-        pw.print("State: " + getCurrentState());
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
         pw.println("mWifiInfo: [" + mWifiInfo + "]");
         pw.println("mLinkProperties: [" + mLinkProperties + "]");
         pw.println("mCurrentSignalLevel: [" + mCurrentSignalLevel + "]");

@@ -69,6 +69,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
@@ -77,8 +79,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.TelephonyIntents;
@@ -1282,11 +1282,25 @@ public class WifiService extends IWifiManager.Stub {
         pw.println("Stay-awake conditions: " +
                 Settings.Global.getInt(mContext.getContentResolver(),
                                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0));
-        pw.println();
+        pw.println("mScreenOff " + mScreenOff);
+        pw.println("mDeviceIdle " + mDeviceIdle);
+        pw.println("mPluggedType " + mPluggedType);
+        pw.println("mEmergencyCallbackMode " + mEmergencyCallbackMode);
+        pw.println("mMulticastEnabled " + mMulticastEnabled);
+        pw.println("mMulticastDisabled " + mMulticastDisabled);
+        pw.println("mEnableTrafficStatsPoll " + mEnableTrafficStatsPoll);
+        pw.println("mTrafficStatsPollToken " + mTrafficStatsPollToken);
+        pw.println("mTxPkts " + mTxPkts);
+        pw.println("mRxPkts " + mRxPkts);
+        pw.println("mDataActivity " + mDataActivity);
+        pw.println("mPersistWifiState " + mPersistWifiState.get());
+        pw.println("mAirplaneModeOn " + mAirplaneModeOn.get());
+        pw.println("mWifiEnabled " + mWifiEnabled);
+        pw.println("mNotificationEnabled " + mNotificationEnabled);
+        pw.println("mNotificationRepeatTime " + mNotificationRepeatTime);
+        pw.println("mNotificationShown " + mNotificationShown);
+        pw.println("mNumScansSinceNetworkStateChange " + mNumScansSinceNetworkStateChange);
 
-        pw.println("Internal state:");
-        pw.println(mWifiStateMachine);
-        pw.println();
         pw.println("Latest scan results:");
         List<ScanResult> scanResults = mWifiStateMachine.syncGetScanResultsList();
         if (scanResults != null && scanResults.size() != 0) {
@@ -1311,11 +1325,10 @@ public class WifiService extends IWifiManager.Stub {
         pw.println("Locks held:");
         mLocks.dump(pw);
 
+        mWifiWatchdogStateMachine.dump(fd, pw, args);
         pw.println();
-        pw.println("WifiWatchdogStateMachine dump");
-        mWifiWatchdogStateMachine.dump(pw);
-        pw.println("WifiStateMachine dump");
         mWifiStateMachine.dump(fd, pw, args);
+        pw.println();
     }
 
     private class WifiLock extends DeathRecipient {
