@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.rs.image">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-sdk android:minSdkVersion="11" />
+    <uses-sdk android:minSdkVersion="17" />
     <application android:label="Image Processing"
                  android:hardwareAccelerated="true">
         <uses-library android:name="android.test.runner" />
