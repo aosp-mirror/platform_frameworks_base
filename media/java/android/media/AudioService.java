@@ -157,6 +157,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 25;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 26;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 27;
+    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 28;
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -481,14 +482,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 null,
                 0);
 
+        mSafeMediaVolumeState = new Integer(Settings.Global.getInt(mContentResolver,
+                                                        Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                                                        SAFE_MEDIA_VOLUME_NOT_CONFIGURED));
+        // The default safe volume index read here will be replaced by the actual value when
+        // the mcc is read by onConfigureSafeVolume()
+        mSafeMediaVolumeIndex = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_safe_media_volume_index) * 10;
+
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
         updateStreamVolumeAlias(false /*updateVolumes*/);
         createStreamStates();
 
         mMediaServerOk = true;
-
-        mSafeMediaVolumeState = new Integer(SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
 
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
@@ -822,70 +829,72 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // convert one UI step (+/-1) into a number of internal units on the stream alias
         int step = rescaleIndex(10, streamType, streamTypeAlias);
 
-        if ((direction == AudioManager.ADJUST_RAISE) &&
-                !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
-            return;
-        }
-
         int index;
         int oldIndex;
 
-        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-        if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
-               ((device & mFixedVolumeDevices) != 0)) {
-            flags |= AudioManager.FLAG_FIXED_VOLUME;
-            index = mStreamStates[streamType].getMaxIndex();
+        if ((direction == AudioManager.ADJUST_RAISE) &&
+                !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
+            index = mStreamStates[streamType].getIndex(device,
+                                                 (streamState.muteCount() != 0)  /* lastAudible */);
             oldIndex = index;
         } else {
-            // If either the client forces allowing ringer modes for this adjustment,
-            // or the stream type is one that is affected by ringer modes
-            if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
-                    (streamTypeAlias == getMasterStreamType())) {
-                int ringerMode = getRingerMode();
-                // do not vibrate if already in vibrate mode
-                if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
-                    flags &= ~AudioManager.FLAG_VIBRATE;
-                }
-                // Check if the ringer mode changes with this volume adjustment. If
-                // it does, it will handle adjusting the volume, so we won't below
-                adjustVolume = checkForRingerModeChange(aliasIndex, direction, step);
-                if ((streamTypeAlias == getMasterStreamType()) &&
-                        (mRingerMode == AudioManager.RINGER_MODE_SILENT)) {
-                    streamState.setLastAudibleIndex(0, device);
-                }
-            }
-
-            // If stream is muted, adjust last audible index only
-            oldIndex = mStreamStates[streamType].getIndex(device,
-                    (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
-
-            if (streamState.muteCount() != 0) {
-                if (adjustVolume) {
-                    // Post a persist volume msg
-                    // no need to persist volume on all streams sharing the same alias
-                    streamState.adjustLastAudibleIndex(direction * step, device);
-                    sendMsg(mAudioHandler,
-                            MSG_PERSIST_VOLUME,
-                            SENDMSG_QUEUE,
-                            PERSIST_LAST_AUDIBLE,
-                            device,
-                            streamState,
-                            PERSIST_DELAY);
-                }
-                index = mStreamStates[streamType].getIndex(device, true  /* lastAudible */);
+            flags &= ~AudioManager.FLAG_FIXED_VOLUME;
+            if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
+                   ((device & mFixedVolumeDevices) != 0)) {
+                flags |= AudioManager.FLAG_FIXED_VOLUME;
+                index = mStreamStates[streamType].getMaxIndex();
+                oldIndex = index;
             } else {
-                if (adjustVolume && streamState.adjustIndex(direction * step, device)) {
-                    // Post message to set system volume (it in turn will post a message
-                    // to persist). Do not change volume if stream is muted.
-                    sendMsg(mAudioHandler,
-                            MSG_SET_DEVICE_VOLUME,
-                            SENDMSG_QUEUE,
-                            device,
-                            0,
-                            streamState,
-                            0);
+                // If either the client forces allowing ringer modes for this adjustment,
+                // or the stream type is one that is affected by ringer modes
+                if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                        (streamTypeAlias == getMasterStreamType())) {
+                    int ringerMode = getRingerMode();
+                    // do not vibrate if already in vibrate mode
+                    if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+                        flags &= ~AudioManager.FLAG_VIBRATE;
+                    }
+                    // Check if the ringer mode changes with this volume adjustment. If
+                    // it does, it will handle adjusting the volume, so we won't below
+                    adjustVolume = checkForRingerModeChange(aliasIndex, direction, step);
+                    if ((streamTypeAlias == getMasterStreamType()) &&
+                            (mRingerMode == AudioManager.RINGER_MODE_SILENT)) {
+                        streamState.setLastAudibleIndex(0, device);
+                    }
                 }
-                index = mStreamStates[streamType].getIndex(device, false  /* lastAudible */);
+
+                // If stream is muted, adjust last audible index only
+                oldIndex = mStreamStates[streamType].getIndex(device,
+                        (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
+
+                if (streamState.muteCount() != 0) {
+                    if (adjustVolume) {
+                        // Post a persist volume msg
+                        // no need to persist volume on all streams sharing the same alias
+                        streamState.adjustLastAudibleIndex(direction * step, device);
+                        sendMsg(mAudioHandler,
+                                MSG_PERSIST_VOLUME,
+                                SENDMSG_QUEUE,
+                                PERSIST_LAST_AUDIBLE,
+                                device,
+                                streamState,
+                                PERSIST_DELAY);
+                    }
+                    index = mStreamStates[streamType].getIndex(device, true  /* lastAudible */);
+                } else {
+                    if (adjustVolume && streamState.adjustIndex(direction * step, device)) {
+                        // Post message to set system volume (it in turn will post a message
+                        // to persist). Do not change volume if stream is muted.
+                        sendMsg(mAudioHandler,
+                                MSG_SET_DEVICE_VOLUME,
+                                SENDMSG_QUEUE,
+                                device,
+                                0,
+                                streamState,
+                                0);
+                    }
+                    index = mStreamStates[streamType].getIndex(device, false  /* lastAudible */);
+                }
             }
         }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
@@ -2306,13 +2315,31 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
                 boolean safeMediaVolumeEnabled = mContext.getResources().getBoolean(
                         com.android.internal.R.bool.config_safe_media_volume_enabled);
+
+                // The persisted state is either "disabled" or "active": this is the state applied
+                // next time we boot and cannot be "inactive"
+                int persistedState;
                 if (safeMediaVolumeEnabled) {
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                    enforceSafeMediaVolume();
+                    persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
+                    // The state can already be "inactive" here if the user has forced it before
+                    // the 30 seconds timeout for forced configuration. In this case we don't reset
+                    // it to "active".
+                    if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
+                        mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
+                        enforceSafeMediaVolume();
+                    }
                 } else {
+                    persistedState = SAFE_MEDIA_VOLUME_DISABLED;
                     mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
                 }
                 mMcc = mcc;
+                sendMsg(mAudioHandler,
+                        MSG_PERSIST_SAFE_VOLUME_STATE,
+                        SENDMSG_QUEUE,
+                        persistedState,
+                        0,
+                        null,
+                        0);
             }
         }
     }
@@ -3224,6 +3251,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             AudioSystem.setForceUse(usage, config);
         }
 
+        private void onPersistSafeVolumeState(int state) {
+            Settings.Global.putInt(mContentResolver,
+                    Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                    state);
+        }
+
         @Override
         public void handleMessage(Message msg) {
 
@@ -3432,6 +3465,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED:
                 case MSG_CONFIGURE_SAFE_MEDIA_VOLUME:
                     onConfigureSafeVolume((msg.what == MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED));
+                    break;
+                case MSG_PERSIST_SAFE_VOLUME_STATE:
+                    onPersistSafeVolumeState(msg.arg1);
                     break;
             }
         }
