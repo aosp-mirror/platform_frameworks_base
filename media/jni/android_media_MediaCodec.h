@@ -81,6 +81,8 @@ struct JMediaCodec : public RefBase {
     status_t getBuffers(
             JNIEnv *env, bool input, jobjectArray *bufArray) const;
 
+    status_t getName(JNIEnv *env, jstring *name) const;
+
     void setVideoScalingMode(int mode);
 
 protected:

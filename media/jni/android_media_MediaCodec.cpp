@@ -264,6 +264,20 @@ status_t JMediaCodec::getBuffers(
     return OK;
 }
 
+status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
+    AString name;
+
+    status_t err = mCodec->getName(&name);
+
+    if (err != OK) {
+        return err;
+    }
+
+    *nameStr = env->NewStringUTF(name.c_str());
+
+    return OK;
+}
+
 void JMediaCodec::setVideoScalingMode(int mode) {
     if (mSurfaceTextureClient != NULL) {
         native_window_set_scaling_mode(mSurfaceTextureClient.get(), mode);
@@ -706,6 +720,29 @@ static jobjectArray android_media_MediaCodec_getBuffers(
     return NULL;
 }
 
+static jobject android_media_MediaCodec_getName(
+        JNIEnv *env, jobject thiz) {
+    ALOGV("android_media_MediaCodec_getName");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    jstring name;
+    status_t err = codec->getName(env, &name);
+
+    if (err == OK) {
+        return name;
+    }
+
+    throwExceptionAsNecessary(env, err);
+
+    return NULL;
+}
+
 static void android_media_MediaCodec_setVideoScalingMode(
         JNIEnv *env, jobject thiz, jint mode) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -825,6 +862,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getBuffers", "(Z)[Ljava/nio/ByteBuffer;",
       (void *)android_media_MediaCodec_getBuffers },
+
+    { "getName", "()Ljava/lang/String;",
+      (void *)android_media_MediaCodec_getName },
 
     { "setVideoScalingMode", "(I)V",
       (void *)android_media_MediaCodec_setVideoScalingMode },
