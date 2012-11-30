@@ -7015,10 +7015,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int current = getAccessibilityCursorPosition();
         if (current == ACCESSIBILITY_CURSOR_POSITION_UNDEFINED) {
             current = text.length();
+            setAccessibilityCursorPosition(current);
         } else if (granularity == AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER) {
             // When traversing by character we always put the cursor after the character
             // to ease edit and have to compensate before asking the for previous segment.
             current--;
+            setAccessibilityCursorPosition(current);
         }
         final int[] range = iterator.preceding(current);
         if (range == null) {
