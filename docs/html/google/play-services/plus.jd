@@ -1,4 +1,4 @@
-page.title=Google+
+page.title=Google+ Platform for Android
 header.hide=1
 
 @jd:body
@@ -11,7 +11,7 @@ header.hide=1
 </div>
 <div class="col-6">
 
-  <h1 itemprop="name" style="margin-bottom:0;">Google+</h1>
+  <h1 itemprop="name" style="margin-bottom:0;">Google+ Platform for Android</h1>
   <p itemprop="description">Create an engaging social experience
   by integrating Google+ features in your app. You can <b>authenticate users</b> and allow them to
   <b>sign in</b>, add +1 buttons so users can <b>recommend your app content</b>,
@@ -78,6 +78,7 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
     <p>Extended documentation for the Google+ Android APIs is provided with the rest of the
     Google+ developer documents at <a class="external-link"
     href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a>.</p>
-    
+    <p>Be sure to read the <a href="https://developers.google.com/+/terms">Google+ Platform
+    Terms of Service</a>.</p>
   </div>
 </div>

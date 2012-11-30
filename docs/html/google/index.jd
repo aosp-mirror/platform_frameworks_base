@@ -29,7 +29,7 @@ enhance your app's capabilities, build new revenue streams, manage app distribut
 and track app usage.</p>
   <p>Because these services are offered directly by Google, they're not included in
   the Android platform. Some are provided by the Google Play
-  service on users' devices, which receives updates from the Google Play Store,
+  service available on devices with Google Play,
   and others require a library added to your app.</p>
 </div>
 </div>
@@ -45,7 +45,8 @@ and track app usage.</p>
   <div class="cell-icon">
   <img src="{@docRoot}images/google/maps-pin.png">
   </div>
-    <h4><a href="{@docRoot}google/play-services/maps.html">Google Maps API</a></h4>
+    <h4><a href="{@docRoot}google/play-services/maps.html"
+    >Google Maps</a></h4>
     <p>The power of Google Maps is available to your app
     with an embeddable map view. You can customize the map with
     markers and overlays, control the user's perspective, animate the camera, and much more.</p>
@@ -55,7 +56,8 @@ and track app usage.</p>
   <div class="cell-icon">
   <img src="{@docRoot}images/google/plus-one.png">
   </div>
-    <h4><a href="{@docRoot}google/play-services/plus.html">Google+ API</a></h4>
+    <h4><a href="{@docRoot}google/play-services/plus.html"
+    >Google+</a></h4>
     <p>Authenticate your users by allowing them to sign in with Google+.
     Provide +1 buttons that allow users to recommend your app content and build customized
     content for posts on Google+.</p>
@@ -65,7 +67,8 @@ and track app usage.</p>
   <div class="cell-icon">
   <img src="{@docRoot}images/google/gcm-cloud.png">
   </div>
-    <h4><a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a></h4>
+    <h4><a href="{@docRoot}google/gcm/index.html"
+    >Google Cloud Messaging</a></h4>
     <p>Keep your users connected by delivering events with
     lightweight messages immediately from your web server. There are no quotas or charges
     to use Google Cloud Messaging.</p>
@@ -82,7 +85,8 @@ and track app usage.</p>
   <div class="cell-icon">
     <img src="{@docRoot}images/google/iab-99c.png" />
   </div>
-    <h4><a href="{@docRoot}google/play/billing/index.html">In-App Billing</a></h4>
+    <h4><a href="{@docRoot}google/play/billing/index.html"
+    >Google Play In-App Billing</a></h4>
     <p>Build an app with a steady revenue stream that keeps users engaged
     by offering new content or virtual goods directly in your app. All transactions are handled
     by Google Play Store for a simple user experience.
@@ -94,7 +98,8 @@ and track app usage.</p>
 <img src="{@docRoot}images/google/analytics.png" />
   </div>
     <h4><a class="external-link" 
-href="https://developers.google.com/analytics/devguides/collection/android/v2/">Analytics</a></h4>
+href="https://developers.google.com/analytics/devguides/collection/android/v2/"
+  >Google Analytics</a></h4>
 
 <p>Measure your success and gain deeper insights into how mobile users engage with your content
 by integrating Google Analytics with your app.</p>
@@ -104,7 +109,8 @@ by integrating Google Analytics with your app.</p>
   <div class="cell-icon">
     <img src="{@docRoot}images/google/admob-money.png" />
   </div>
-    <h4><a class="external-link" href="http://www.google.com/ads/admob/index.html">AdMob Ads</a></h4>
+    <h4><a class="external-link" href="https://developers.google.com/mobile-ads-sdk/"
+    >Google AdMob Ads</a></h4>
     <p>Display ads from AdMob offer you an alternative revenue opportunity that leverages
     multiple ad networks.
     </p>

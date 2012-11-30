@@ -1,4 +1,4 @@
-page.title=Google Maps
+page.title=Google Maps Android API
 header.hide=1
 
 @jd:body
@@ -11,7 +11,7 @@ header.hide=1
 </div>
 <div class="col-6">
 
-  <h1 itemprop="name" style="margin-bottom:0;">Google Maps</h1>
+  <h1 itemprop="name" style="margin-bottom:0;">Google Maps Android API</h1>
   <p itemprop="description">Allow your users explore the world with rich maps provided by
   Google. Identify locations with <b>custom markers</b>, augment the map data
   with <b>image overlays</b>, embed <b>one or more maps</b> as fragments,
@@ -79,6 +79,8 @@ href="https://developers.google.com/maps/documentation/android/">developers.goog
     Google Maps developer documents at <a class="external-link"
     href="https://developers.google.com/maps/documentation/android/">developers.google.com/maps</a>.
     </p>
+    <p>Be sure to read the <a href="https://devsite.googleplex.com/maps/terms">Google Maps
+    API Terms of Service</a>.</p>
   </div>
 
 
