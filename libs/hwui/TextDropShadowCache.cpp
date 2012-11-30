@@ -30,7 +30,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 hash_t ShadowText::hash() const {
-    uint32_t charCount = len * sizeof(char16_t);
+    uint32_t charCount = len / sizeof(char16_t);
     uint32_t hash = JenkinsHashMix(0, len);
     hash = JenkinsHashMix(hash, android::hash_type(radius));
     hash = JenkinsHashMix(hash, android::hash_type(textSize));
@@ -38,9 +38,13 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, flags);
     hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
-    hash = JenkinsHashMixShorts(hash, text, charCount);
-    for (uint32_t i = 0; i < charCount * 2; i++) {
-        hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
+    if (text) {
+        hash = JenkinsHashMixShorts(hash, text, charCount);
+    }
+    if (positions) {
+        for (uint32_t i = 0; i < charCount * 2; i++) {
+            hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
+        }
     }
     return JenkinsHashWhiten(hash);
 }
