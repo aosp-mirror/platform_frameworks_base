@@ -31,7 +31,7 @@
       </li>
 
       <li><a href="<?cs var:toroot?>google/play-services/maps.html">
-          <span class="en">Maps</span></a>
+          <span class="en">Google Maps</span></a>
       </li>
 
       <li id="tree-list" class="nav-section">
@@ -53,7 +53,7 @@
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/billing/index.html">
-      <span class="en">Google Play <br />In-app Billing</span></a>
+      <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
           <li><a href="<?cs var:toroot?>google/play/billing/billing_overview.html">
@@ -82,7 +82,7 @@
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/dist.html">
-      <span class="en">Google Play Distribution and Licensing</span></a>
+      <span class="en">Google Play Distribution</span></a>
     </div>
     <ul>
       <li><a href="<?cs var:toroot ?>google/play/filters.html">
