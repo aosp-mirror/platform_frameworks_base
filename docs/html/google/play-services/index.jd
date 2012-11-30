@@ -6,7 +6,7 @@ header.hide=1
 <div class="landing-banner">
         
 <div class="col-6">
-  <img src="{@docRoot}images/google/gps.png" alt="">
+  <img src="/images/google/gps.png" alt="">
 </div>
 <div class="col-6">
 
@@ -23,7 +23,7 @@ header.hide=1
   </p>
 
    <p><a class="next-page-link topic-start-link"
-href="{@docRoot}google/play-services/download.html">Setup</a></p>
+href="/google/play-services/download.html">Setup</a></p>
 
 </div>
 </div>
@@ -68,7 +68,7 @@ about your users' Android version.</p>
     to these services with their credentials. It also contains APIs that allow
     you to resolve any issues at  runtime, such as a missing, disabled, or out-of-date
     Google Play services APK. The client library has a light footprint if you use
-    <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> as part of your build process, so it won't have
+    <a href="/tools/help/proguard.html">ProGuard</a> as part of your build process, so it won't have
     an adverse impact on your app's file size.  
 </p>
 <p>
@@ -103,7 +103,7 @@ about your users' Android version.</p>
   </div>
 
   <div class="layout-content-col span-6">
-    <img src="{@docRoot}images/play-services-diagram.png" />
+    <img src="/images/play-services-diagram.png" />
     <p class="img-caption"><em>Updates to Google Play services include access to new APIs, features, and bug fixes.</em></p>
   </div>
 </div>
