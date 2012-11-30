@@ -721,6 +721,7 @@ public class WifiStateMachine extends StateMachine {
         setInitialState(mInitialState);
 
         setLogRecSize(100);
+        setLogOnlyTransitions(true);
         if (DBG) setDbg(true);
 
         //start the state machine
@@ -1183,36 +1184,6 @@ public class WifiStateMachine extends StateMachine {
 
         sb.append(mWifiConfigStore.dump());
         return sb.toString();
-    }
-
-    @Override
-    protected boolean recordLogRec(Message msg) {
-        //Ignore screen on/off & common messages when driver has started
-        if (getCurrentState() == mConnectedState || getCurrentState() == mDisconnectedState) {
-            switch (msg.what) {
-                case CMD_LOAD_DRIVER:
-                case CMD_START_SUPPLICANT:
-                case CMD_START_DRIVER:
-                case CMD_SET_SCAN_MODE:
-                case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_SUSPEND_OPT_ENABLED:
-                case CMD_ENABLE_BACKGROUND_SCAN:
-                case CMD_ENABLE_ALL_NETWORKS:
-                return false;
-            }
-        }
-
-        switch (msg.what) {
-            case CMD_START_SCAN:
-            case CMD_ENABLE_RSSI_POLL:
-            case CMD_RSSI_POLL:
-            case CMD_DELAYED_STOP_DRIVER:
-            case WifiMonitor.SCAN_RESULTS_EVENT:
-            case WifiManager.RSSI_PKTCNT_FETCH:
-                return false;
-            default:
-                return true;
-        }
     }
 
     /*********************************************************

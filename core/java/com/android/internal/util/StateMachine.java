@@ -452,17 +452,20 @@ public class StateMachine {
         private String mInfo;
         private State mState;
         private State mOrgState;
+        private State mTransitionToState;
 
         /**
          * Constructor
          *
          * @param msg
-         * @param state that handled the message
+         * @param state the state which handled the message
          * @param orgState is the first state the received the message but
          * did not processes the message.
+         * @param transToState is the state that was transitioned to after the message was
+         * processed.
          */
-        LogRec(Message msg, String info, State state, State orgState) {
-            update(msg, info, state, orgState);
+        LogRec(Message msg, String info, State state, State orgState, State transToState) {
+            update(msg, info, state, orgState, transToState);
         }
 
         /**
@@ -470,13 +473,17 @@ public class StateMachine {
          * @param state that handled the message
          * @param orgState is the first state the received the message but
          * did not processes the message.
+         * @param transToState is the state that was transitioned to after the message was
+         * processed.
          */
-        public void update(Message msg, String info, State state, State orgState) {
+        public void update(Message msg, String info, State state, State orgState,
+                State transToState) {
             mTime = System.currentTimeMillis();
             mWhat = (msg != null) ? msg.what : 0;
             mInfo = info;
             mState = state;
             mOrgState = orgState;
+            mTransitionToState = transToState;
         }
 
         /**
@@ -523,10 +530,12 @@ public class StateMachine {
             Calendar c = Calendar.getInstance();
             c.setTimeInMillis(mTime);
             sb.append(String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c));
-            sb.append(" state=");
+            sb.append(" processed=");
             sb.append(mState == null ? "<null>" : mState.getName());
-            sb.append(" orgState=");
+            sb.append(" org=");
             sb.append(mOrgState == null ? "<null>" : mOrgState.getName());
+            sb.append(" dest=");
+            sb.append(mTransitionToState == null ? "<null>" : mTransitionToState.getName());
             sb.append(" what=");
             String what = sm.getWhatToString(mWhat);
             if (TextUtils.isEmpty(what)) {
@@ -560,10 +569,11 @@ public class StateMachine {
 
         private static final int DEFAULT_SIZE = 20;
 
-        private Vector<LogRec> mLogRecords = new Vector<LogRec>();
+        private Vector<LogRec> mLogRecVector = new Vector<LogRec>();
         private int mMaxSize = DEFAULT_SIZE;
         private int mOldestIndex = 0;
         private int mCount = 0;
+        private boolean mLogOnlyTransitions = false;
 
         /**
          * private constructor use add
@@ -579,14 +589,22 @@ public class StateMachine {
         synchronized void setSize(int maxSize) {
             mMaxSize = maxSize;
             mCount = 0;
-            mLogRecords.clear();
+            mLogRecVector.clear();
+        }
+
+        synchronized void setLogOnlyTransitions(boolean enable) {
+            mLogOnlyTransitions = enable;
+        }
+
+        synchronized boolean logOnlyTransitions() {
+            return mLogOnlyTransitions;
         }
 
         /**
          * @return the number of recent records.
          */
         synchronized int size() {
-            return mLogRecords.size();
+            return mLogRecVector.size();
         }
 
         /**
@@ -600,7 +618,7 @@ public class StateMachine {
          * Clear the list of records.
          */
         synchronized void cleanup() {
-            mLogRecords.clear();
+            mLogRecVector.clear();
         }
 
         /**
@@ -616,7 +634,7 @@ public class StateMachine {
             if (nextIndex >= size()) {
                 return null;
             } else {
-                return mLogRecords.get(nextIndex);
+                return mLogRecVector.get(nextIndex);
             }
         }
 
@@ -628,18 +646,22 @@ public class StateMachine {
          * @param state that handled the message
          * @param orgState is the first state the received the message but
          * did not processes the message.
+         * @param transToState is the state that was transitioned to after the message was
+         * processed.
+         *
          */
-        synchronized void add(Message msg, String messageInfo, State state, State orgState) {
+        synchronized void add(Message msg, String messageInfo, State state, State orgState,
+                State transToState) {
             mCount += 1;
-            if (mLogRecords.size() < mMaxSize) {
-                mLogRecords.add(new LogRec(msg, messageInfo, state, orgState));
+            if (mLogRecVector.size() < mMaxSize) {
+                mLogRecVector.add(new LogRec(msg, messageInfo, state, orgState, transToState));
             } else {
-                LogRec pmi = mLogRecords.get(mOldestIndex);
+                LogRec pmi = mLogRecVector.get(mOldestIndex);
                 mOldestIndex += 1;
                 if (mOldestIndex >= mMaxSize) {
                     mOldestIndex = 0;
                 }
-                pmi.update(msg, messageInfo, state, orgState);
+                pmi.update(msg, messageInfo, state, orgState, transToState);
             }
         }
     }
@@ -755,9 +777,11 @@ public class StateMachine {
             /** Save the current message */
             mMsg = msg;
 
+            /** State that processed the message */
+            State msgProcessedState = null;
             if (mIsConstructionCompleted) {
                 /** Normal path */
-                processMsg(msg);
+                msgProcessedState = processMsg(msg);
             } else if (!mIsConstructionCompleted &&
                     (mMsg.what == SM_INIT_CMD) && (mMsg.obj == mSmHandlerObj)) {
                 /** Initial one time path. */
@@ -767,21 +791,27 @@ public class StateMachine {
                 throw new RuntimeException("StateMachine.handleMessage: " +
                             "The start method not called, received msg: " + msg);
             }
-            performTransitions();
+            performTransitions(msgProcessedState);
 
             if (mDbg) Log.d(TAG, "handleMessage: X");
         }
 
         /**
          * Do any transitions
+         * @param msgProcessedState is the state that processed the message
          */
-        private void performTransitions() {
+        private void performTransitions(State msgProcessedState) {
             /**
              * If transitionTo has been called, exit and then enter
              * the appropriate states. We loop on this to allow
              * enter and exit methods to use transitionTo.
              */
             State destState = null;
+            State orgState = mStateStack[mStateStackTopIndex].state;
+
+            /** Record whether message needs to be logged before transitions */
+            boolean recordLogMsg = mSm.recordLogRec(mMsg);
+
             while (mDestState != null) {
                 if (mDbg) Log.d(TAG, "handleMessage: new destination call exit");
 
@@ -831,6 +861,18 @@ public class StateMachine {
                      */
                     mSm.onHalting();
                 }
+            }
+
+            if (mLogRecords.logOnlyTransitions()) {
+                /** Record only if there is a transition */
+                if (destState != null) {
+                    mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
+                            orgState, destState);
+                }
+            } else if (recordLogMsg) {
+                /** Record message */
+                mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
+                        orgState, destState);
             }
         }
 
@@ -892,8 +934,9 @@ public class StateMachine {
          * Process the message. If the current state doesn't handle
          * it, call the states parent and so on. If it is never handled then
          * call the state machines unhandledMessage method.
+         * @return the state that processed the message
          */
-        private final void processMsg(Message msg) {
+        private final State processMsg(Message msg) {
             StateInfo curStateInfo = mStateStack[mStateStackTopIndex];
             if (mDbg) {
                 Log.d(TAG, "processMsg: " + curStateInfo.state.getName());
@@ -918,20 +961,8 @@ public class StateMachine {
                         Log.d(TAG, "processMsg: " + curStateInfo.state.getName());
                     }
                 }
-
-                /**
-                 * Record that we processed the message
-                 */
-                if (mSm.recordLogRec(msg)) {
-                    if (curStateInfo != null) {
-                        State orgState = mStateStack[mStateStackTopIndex].state;
-                        mLogRecords.add(msg, mSm.getLogRecString(msg), curStateInfo.state,
-                                orgState);
-                    } else {
-                        mLogRecords.add(msg, mSm.getLogRecString(msg), null, null);
-                    }
-                }
-            }
+           }
+            return (curStateInfo != null) ? curStateInfo.state : null;
         }
 
         /**
@@ -1347,6 +1378,15 @@ public class StateMachine {
     }
 
     /**
+     * Set to log only messages that cause a state transition
+     *
+     * @param enable {@code true} to enable, {@code false} to disable
+     */
+    public final void setLogOnlyTransitions(boolean enable) {
+        mSmHandler.mLogRecords.setLogOnlyTransitions(enable);
+    }
+
+    /**
      * @return number of log records
      */
     public final int getLogRecSize() {
@@ -1373,7 +1413,7 @@ public class StateMachine {
      * @param string
      */
     protected void addLogRec(String string) {
-        mSmHandler.mLogRecords.add(null, string, null, null);
+        mSmHandler.mLogRecords.add(null, string, null, null, null);
     }
 
     /**
@@ -1383,7 +1423,7 @@ public class StateMachine {
      * @param state current state
      */
     protected void addLogRec(String string, State state) {
-        mSmHandler.mLogRecords.add(null, string, state, null);
+        mSmHandler.mLogRecords.add(null, string, state, null, null);
     }
 
     /**
