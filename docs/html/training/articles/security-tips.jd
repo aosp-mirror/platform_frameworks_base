@@ -1,10 +1,11 @@
 page.title=﻿Security Tips
+page.article=true
 @jd:body
 
 <div id="tb-wrapper">
 <div id="tb">
 <h2>In this document</h2>
-<ol>
+<ol class="nolist">
   <li><a href="#StoringData">Storing Data</a></li>
   <li><a href="#Permissions">Using Permissions</a></li>
   <li><a href="#Networking">Using Networking</a></li>
@@ -18,11 +19,11 @@ page.title=﻿Security Tips
   <li><a href="#Native">Security in Native Code</a></li>
 </ol>
 <h2>See also</h2>
-<ol>
+<ul>
 <li><a href="http://source.android.com/tech/security/index.html">Android
 Security Overview</a></li>
 <li><a href="{@docRoot}guide/topics/security/permissions.html">Permissions</a></li>
-</ol>
+</ul>
 </div></div>
 
 
