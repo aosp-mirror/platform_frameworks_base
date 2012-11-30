@@ -876,7 +876,7 @@ class WindowStateAnimator {
             final Matrix tmpMatrix = mWin.mTmpMatrix;
 
             // Compute the desired transformation.
-            if (screenAnimation) {
+            if (screenAnimation && screenRotationAnimation.isRotating()) {
                 // If we are doing a screen animation, the global rotation
                 // applied to windows can result in windows that are carefully
                 // aligned with each other to slightly separate, allowing you
