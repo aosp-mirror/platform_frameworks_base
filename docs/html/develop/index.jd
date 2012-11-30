@@ -34,7 +34,7 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
                  <div class="col-8">
                    <img src="{@docRoot}images/google/maps-v2-trulia-n7.png"
 class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
-                                           max-width:403px;width:403px" />
+                                           max-width:409px;width:409px" />
                  </div>
                 <div class="content-right col-6" style="width:350px">
                   <h2>New MapView APIs!</h2>
