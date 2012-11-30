@@ -11199,7 +11199,9 @@ package android.media {
     method public final int dequeueInputBuffer(long);
     method public final int dequeueOutputBuffer(android.media.MediaCodec.BufferInfo, long);
     method public final void flush();
+    method public android.media.MediaCodecInfo getCodecInfo();
     method public java.nio.ByteBuffer[] getInputBuffers();
+    method public final java.lang.String getName();
     method public java.nio.ByteBuffer[] getOutputBuffers();
     method public final android.media.MediaFormat getOutputFormat();
     method public final void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
