@@ -26,6 +26,18 @@ parent.link=manifest-intro.html
 </div>
 </div>
 
+<div class="sidebox-wrapper"> 
+<div class="sidebox">
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <p style="padding-top:1em;">Google Play uses the <code>&lt;uses-sdk&gt;</code>
+    attributes declared in your app manifest to filter your app from devices 
+    that do not meet it's platform version requirements. Before setting these
+    attributes, make sure that you understand 
+    <a href="{@docRoot}google/play/filters.html">Google Play filters</a>. </p>
+  </div>
+</div>
+
 <dl class="xml">
 <dt>syntax:</dt>
 <dd><pre>
@@ -51,22 +63,6 @@ major version or the sum of the major and minor versions).</p>
 <p>Also read the document about
 <a href="{@docRoot}tools/publishing/versioning.html">Versioning Your Applications</a>.
 </p></dd> 
-
- <div class="sidebox-wrapper" xstyle="margin-bottom:2em;margin-top:.5em;width:90%;"> 
-  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
-  <div id="qv-sub-rule"> 
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play and &lt;uses-sdk&gt; attributes</p> 
-    <p style="padding-top:1em;">Google Play filters the applications that are visible to users, so
-that users can only see and download applications that are compatible with their
-devices. One of the ways it filters applications is by Android
-version-compatibility. To do this, Google Play checks the <code>&lt;uses-sdk&gt;</code>
-attributes in each application's manifest to establish its version-compatibility
-range, then shows or hides the application based on a comparison with the API
-Level of the user's Android system version. For more information, see <a
-href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a>.</p>
-  </div>
-</div>
 
 <dt>attributes:</dt>
 
@@ -224,12 +220,20 @@ exactly one API Level, although support is implicit for all earlier API Levels
 (down to API Level 1). The initial release of the Android platform provided 
 API Level 1 and subsequent releases have incremented the API Level.</p>
 
-<p>The following table specifies the API Level supported by each version of the
-Android platform.</p>
+<p>The table below specifies the API Level supported by each version of the
+Android platform. For information about the relative numbers of devices that
+are running each version, see the <a href="{@docRoot}about/dashboards/index.html">Platform
+Versions dashboards page</a>.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
  
+    <tr><td><a href="{@docRoot}about/versions/android-4.2.html">Android 4.2</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/17/changes.html" title="Diff Report">17</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}</td>
+    <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
+Highlights</a></td></tr>
+
     <tr><td><a href="{@docRoot}about/versions/android-4.1.html">Android 4.1, 4.1.1</a></td>
     <td><a href="{@docRoot}sdk/api_diff/16/changes.html" title="Diff Report">16</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN}</td>

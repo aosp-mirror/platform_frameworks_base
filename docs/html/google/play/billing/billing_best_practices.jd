@@ -11,20 +11,20 @@ parent.link=index.html
   </ol>
   <h2>Downloads</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html#billing-download">Sample
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
     Application</a></li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_overview.html">Overview of In-app
+    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_integrate.html">Implementing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_testing.html">Testing In-app
+    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_admin.html">Administering In-app
+    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
     Billing</a></li>
-    <li><a href="{@docRoot}guide/google/play/billing/billing_reference.html">In-app Billing
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
     Reference</a></li>
   </ol>
 </div>

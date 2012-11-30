@@ -44,8 +44,8 @@ support all desired devices with a single APK</li>
 
   <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a></li>
-  <li><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></li>
+  <li><a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a></li>
+  <li><a href="{@docRoot}google/play/filters.html">Filters on Google Play</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
   <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
   <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
@@ -194,7 +194,7 @@ following sections describe more about how it works.</p>
 <h3 id="SupportedFilters">Supported filters</h3>
 
 <p>Which devices receive each APK is determined by <a
-href="{@docRoot}guide/google/play/filters.html">Google Play filters</a> that are specified by
+href="{@docRoot}google/play/filters.html">Google Play filters</a> that are specified by
 elements in the manifest file of each APK. However, Google Play allows you to publish multiple
 APKs only when each APK uses filters to support a variation of the following
 device characteristics:</p>
@@ -293,7 +293,7 @@ higher, as per the previous note).</li>
 </ul>
 
 <p>Other manifest elements that enable <a
-href="{@docRoot}guide/google/play/filters.html">Google Play filters</a>&mdash;but are not
+href="{@docRoot}google/play/filters.html">Google Play filters</a>&mdash;but are not
 listed above&mdash;are still applied for each APK as usual. However, Google Play does not allow
 you to publish separate APKs based on variations of those device characteristics. Thus, you cannot
 publish multiple APKs if the above listed filters are the same for each APK (but the APKs differ
