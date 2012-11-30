@@ -531,7 +531,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     synchronized (this) {
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
-                        mListener.onLocationChanged(location);
+                        mListener.onLocationChanged(new Location(location));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -1323,10 +1323,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
                     Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
                     if (noGPSLocation != null) {
-                        return mLocationFudger.getOrCreate(noGPSLocation);
+                        return new Location(mLocationFudger.getOrCreate(noGPSLocation));
                     }
                 } else {
-                    return location;
+                    return new Location(location);
                 }
             }
             return null;
