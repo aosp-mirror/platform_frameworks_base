@@ -993,12 +993,18 @@
     <string name="weeks" msgid="6509623834583944518">"週"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <!-- no translation found for duration_seconds:one (6962015528372969481) -->
-    <!-- no translation found for duration_seconds:other (1886107766577166786) -->
-    <!-- no translation found for duration_minutes:one (4915414002546085617) -->
-    <!-- no translation found for duration_minutes:other (3165187169224908775) -->
-    <!-- no translation found for duration_hours:one (8917467491248809972) -->
-    <!-- no translation found for duration_hours:other (3863962854246773930) -->
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 秒"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> 秒"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 分鐘"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> 分鐘"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 小時"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> 小時"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"影片發生問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"這部影片的格式無效，因此無法在此裝置中串流播放。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"無法播放這部影片。"</string>
