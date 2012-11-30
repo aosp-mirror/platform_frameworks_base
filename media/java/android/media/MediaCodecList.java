@@ -46,6 +46,8 @@ final public class MediaCodecList {
     /* package private */ static native final MediaCodecInfo.CodecCapabilities
         getCodecCapabilities(int index, String type);
 
+    /* package private */ static native final int findCodecByName(String codec);
+
     private static native final void native_init();
 
     private MediaCodecList() {}
