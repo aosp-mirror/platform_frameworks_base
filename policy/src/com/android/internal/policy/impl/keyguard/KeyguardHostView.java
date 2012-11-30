@@ -92,8 +92,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSecurityModel mSecurityModel;
     private KeyguardViewStateManager mViewStateManager;
 
-    boolean mPersitentStickyWidgetLoaded = false;
-
     private Rect mTempRect = new Rect();
 
     private int mDisabledFeatures;
@@ -1088,7 +1086,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // We currently disable cameras in safe mode because we support loading 3rd party
         // cameras we can't trust.  TODO: plumb safe mode into camera creation code and only
         // inflate system-provided camera?
-        if (!mSafeModeEnabled && !cameraDisabledByDpm()
+        if (!mSafeModeEnabled && !cameraDisabledByDpm() && mUserSetupCompleted
                 && mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
             View cameraWidget =
                     CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
