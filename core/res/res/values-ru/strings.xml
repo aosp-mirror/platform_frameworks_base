@@ -993,12 +993,18 @@
     <string name="weeks" msgid="6509623834583944518">"нед."</string>
     <string name="year" msgid="4001118221013892076">"г."</string>
     <string name="years" msgid="6881577717993213522">"г."</string>
-    <!-- no translation found for duration_seconds:one (6962015528372969481) -->
-    <!-- no translation found for duration_seconds:other (1886107766577166786) -->
-    <!-- no translation found for duration_minutes:one (4915414002546085617) -->
-    <!-- no translation found for duration_minutes:other (3165187169224908775) -->
-    <!-- no translation found for duration_hours:one (8917467491248809972) -->
-    <!-- no translation found for duration_hours:other (3863962854246773930) -->
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 сек."</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> сек."</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 мин."</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> мин."</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 ч."</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ч."</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Ошибка"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Это видео не предназначено для потокового воспроизведения на данном устройстве."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Не удалось воспроизвести видео."</string>
