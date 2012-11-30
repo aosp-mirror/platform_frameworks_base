@@ -50,7 +50,7 @@ public class WebViewDatabase {
      *
      * @return true if there are any saved username/password pairs
      * @see WebView#savePassword
-     * @see clearUsernamePassword
+     * @see #clearUsernamePassword
      */
     public boolean hasUsernamePassword() {
         throw new MustOverrideException();
@@ -61,7 +61,7 @@ public class WebViewDatabase {
      * Note that these are unrelated to HTTP authentication credentials.
      *
      * @see WebView#savePassword
-     * @see hasUsernamePassword
+     * @see #hasUsernamePassword
      */
     public void clearUsernamePassword() {
         throw new MustOverrideException();
@@ -71,9 +71,9 @@ public class WebViewDatabase {
      * Gets whether there are any saved credentials for HTTP authentication.
      *
      * @return whether there are any saved credentials
-     * @see Webview#getHttpAuthUsernamePassword
-     * @see Webview#setHttpAuthUsernamePassword
-     * @see clearHttpAuthUsernamePassword
+     * @see WebView#getHttpAuthUsernamePassword
+     * @see WebView#setHttpAuthUsernamePassword
+     * @see #clearHttpAuthUsernamePassword
      */
     public boolean hasHttpAuthUsernamePassword() {
         throw new MustOverrideException();
@@ -82,9 +82,9 @@ public class WebViewDatabase {
     /**
      * Clears any saved credentials for HTTP authentication.
      *
-     * @see Webview#getHttpAuthUsernamePassword
-     * @see Webview#setHttpAuthUsernamePassword
-     * @see hasHttpAuthUsernamePassword
+     * @see WebView#getHttpAuthUsernamePassword
+     * @see WebView#setHttpAuthUsernamePassword
+     * @see #hasHttpAuthUsernamePassword
      */
     public void clearHttpAuthUsernamePassword() {
         throw new MustOverrideException();
@@ -94,7 +94,7 @@ public class WebViewDatabase {
      * Gets whether there is any saved data for web forms.
      *
      * @return whether there is any saved data for web forms
-     * @see clearFormData
+     * @see #clearFormData
      */
     public boolean hasFormData() {
         throw new MustOverrideException();
@@ -103,7 +103,7 @@ public class WebViewDatabase {
     /**
      * Clears any saved data for web forms.
      *
-     * @see hasFormData
+     * @see #hasFormData
      */
     public void clearFormData() {
         throw new MustOverrideException();
