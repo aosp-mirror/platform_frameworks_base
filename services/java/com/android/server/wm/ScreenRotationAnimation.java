@@ -668,6 +668,10 @@ class ScreenRotationAnimation {
         return hasAnimations() || (TWO_PHASE_ANIMATION && mFinishAnimReady);
     }
 
+    public boolean isRotating() {
+        return mCurRotation != mOriginalRotation;
+    }
+
     private boolean hasAnimations() {
         return (TWO_PHASE_ANIMATION &&
                     (mStartEnterAnimation != null || mStartExitAnimation != null
