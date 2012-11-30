@@ -44,9 +44,11 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -1544,15 +1546,14 @@ class WifiConfigStore {
         return key.hashCode();
     }
 
-    String dump() {
-        StringBuffer sb = new StringBuffer();
-        String LS = System.getProperty("line.separator");
-        sb.append("mLastPriority ").append(mLastPriority).append(LS);
-        sb.append("Configured networks ").append(LS);
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("WifiConfigStore");
+        pw.println("mLastPriority " + mLastPriority);
+        pw.println("Configured networks");
         for (WifiConfiguration conf : getConfiguredNetworks()) {
-            sb.append(conf).append(LS);
+            pw.println(conf);
         }
-        return sb.toString();
+        pw.println();
     }
 
     public String getConfigFile() {

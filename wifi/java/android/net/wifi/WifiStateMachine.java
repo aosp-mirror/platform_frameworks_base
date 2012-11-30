@@ -70,7 +70,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -81,6 +80,8 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,11 +221,6 @@ public class WifiStateMachine extends StateMachine {
     //Used to initiate a connection with WifiP2pService
     private AsyncChannel mWifiP2pChannel = new AsyncChannel();
     private AsyncChannel mWifiApConfigChannel = new AsyncChannel();
-
-    // Event log tags (must be in sync with event-log-tags)
-    private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
-    private static final int EVENTLOG_WIFI_EVENT_HANDLED        = 50022;
-    private static final int EVENTLOG_SUPPLICANT_STATE_CHANGED  = 50023;
 
     /* The base for wifi message types */
     static final int BASE = Protocol.BASE_WIFI;
@@ -1164,26 +1160,23 @@ public class WifiStateMachine extends StateMachine {
     }
 
     @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        String LS = System.getProperty("line.separator");
-        sb.append("current HSM state: ").append(getCurrentState().getName()).append(LS);
-        sb.append("mLinkProperties ").append(mLinkProperties).append(LS);
-        sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
-        sb.append("mDhcpResults ").append(mDhcpResults).append(LS);
-        sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
-        sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
-        sb.append("mLastBssid ").append(mLastBssid).append(LS);
-        sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
-        sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
-        sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
-        sb.append("mUserWantsSuspendOpt ").append(mUserWantsSuspendOpt).append(LS);
-        sb.append("mSuspendOptNeedsDisabled ").append(mSuspendOptNeedsDisabled).append(LS);
-        sb.append("Supplicant status").append(LS)
-                .append(mWifiNative.status()).append(LS).append(LS);
-
-        sb.append(mWifiConfigStore.dump());
-        return sb.toString();
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        mSupplicantStateTracker.dump(fd, pw, args);
+        pw.println("mLinkProperties " + mLinkProperties);
+        pw.println("mWifiInfo " + mWifiInfo);
+        pw.println("mDhcpResults " + mDhcpResults);
+        pw.println("mNetworkInfo " + mNetworkInfo);
+        pw.println("mLastSignalLevel " + mLastSignalLevel);
+        pw.println("mLastBssid " + mLastBssid);
+        pw.println("mLastNetworkId " + mLastNetworkId);
+        pw.println("mReconnectCount " + mReconnectCount);
+        pw.println("mIsScanMode " + mIsScanMode);
+        pw.println("mUserWantsSuspendOpt " + mUserWantsSuspendOpt);
+        pw.println("mSuspendOptNeedsDisabled " + mSuspendOptNeedsDisabled);
+        pw.println("Supplicant status " + mWifiNative.status());
+        pw.println();
+        mWifiConfigStore.dump(fd, pw, args);
     }
 
     /*********************************************************
@@ -1663,7 +1656,6 @@ public class WifiStateMachine extends StateMachine {
         // [31-13] Reserved for future use
         // [8 - 0] Supplicant state (as defined in SupplicantState.java)
         // 50023 supplicant_state_changed (custom|1|5)
-        EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, state.ordinal());
         mWifiInfo.setSupplicantState(state);
         // Network id is only valid when we start connecting
         if (SupplicantState.isConnecting(state)) {
@@ -2023,11 +2015,6 @@ public class WifiStateMachine extends StateMachine {
         //TODO: could move logging into a common class
         public void enter() {
             if (DBG) log(getName() + "\n");
-            // [31-8] Reserved for future use
-            // [7 - 0] HSM state change
-            // 50021 wifi_state_changed (custom|1|5)
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
             if (mWifiNative.isDriverLoaded()) {
                 transitionTo(mDriverLoadedState);
             }
@@ -2061,8 +2048,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
             final Message message = new Message();
             message.copyFrom(getCurrentMessage());
             /* TODO: add a timeout to fail when driver load is hung.
@@ -2138,7 +2123,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2197,7 +2181,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             final Message message = new Message();
             message.copyFrom(getCurrentMessage());
@@ -2276,7 +2259,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2296,7 +2278,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             loge(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2310,7 +2291,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
 
         private void initializeWpsDetails() {
@@ -2407,7 +2387,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             /* Initialize for connect mode operation at start */
             mIsScanMode = false;
             /* Wifi is available as long as we have a connection to supplicant */
@@ -2556,7 +2535,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             /* Send any reset commands to supplicant before shutting it down */
             handleNetworkDisconnect();
@@ -2630,7 +2608,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             mTries = 1;
             /* Send ourselves a delayed message to start driver a second time */
@@ -2698,7 +2675,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             mIsRunning = true;
             mInDelayedStop = false;
@@ -2900,7 +2876,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             switch (getCurrentMessage().what) {
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     mTransitionToState = mDriverLoadedState;
@@ -2957,7 +2932,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2994,7 +2968,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3026,7 +2999,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3062,7 +3034,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3205,7 +3176,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             mRssiPollToken++;
             if (mEnableRssiPolling) {
                 sendMessage(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0));
@@ -3340,7 +3310,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
                 //start DHCP
@@ -3408,7 +3377,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             setNetworkDetailedState(DetailedState.VERIFYING_POOR_LINK);
             mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.VERIFYING_POOR_LINK);
             sendNetworkStateChangeBroadcast(mLastBssid);
@@ -3463,7 +3431,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
        }
         @Override
         public boolean processMessage(Message message) {
@@ -3502,7 +3469,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3555,7 +3521,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             // We dont scan frequently if this is a temporary disconnect
             // due to p2p
@@ -3706,7 +3671,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             mSourceMessage = Message.obtain(getCurrentMessage());
         }
         @Override
@@ -3796,7 +3760,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             final Message message = getCurrentMessage();
             if (message.what == CMD_START_AP) {
@@ -3861,7 +3824,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3904,7 +3866,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             /* Send ourselves a delayed message to shut down if tethering fails to notify */
             sendMessageDelayed(obtainMessage(CMD_TETHER_NOTIFICATION_TIMED_OUT,
@@ -3953,7 +3914,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
         }
         @Override
         public boolean processMessage(Message message) {
@@ -3983,7 +3943,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
             /* Send ourselves a delayed message to shut down if tethering fails to notify */
             sendMessageDelayed(obtainMessage(CMD_TETHER_NOTIFICATION_TIMED_OUT,

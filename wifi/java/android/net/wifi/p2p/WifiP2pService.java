@@ -354,6 +354,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
+        mP2pStateMachine.dump(fd, pw, args);
+        pw.println("mAutonomousGroup " + mAutonomousGroup);
+        pw.println("mJoinExistingGroup " + mJoinExistingGroup);
+        pw.println("mDiscoveryStarted " + mDiscoveryStarted);
+        pw.println("mNetworkInfo " + mNetworkInfo);
+        pw.println("mTempoarilyDisconnectedWifi " + mTempoarilyDisconnectedWifi);
+        pw.println("mServiceDiscReqId " + mServiceDiscReqId);
+        pw.println();
     }
 
 
@@ -440,6 +448,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             } else {
                 setInitialState(mP2pNotSupportedState);
             }
+            setLogRecSize(50);
+            setLogOnlyTransitions(true);
         }
 
     class DefaultState extends State {
@@ -1769,6 +1779,17 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             }
             return HANDLED;
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        pw.println("mWifiP2pInfo " + mWifiP2pInfo);
+        pw.println("mGroup " + mGroup);
+        pw.println("mSavedPeerConfig " + mSavedPeerConfig);
+        pw.println("mSavedP2pGroup " + mSavedP2pGroup);
+        pw.println("mSavedProvDiscDevice " + mSavedProvDiscDevice);
+        pw.println();
     }
 
     private void sendP2pStateChangedBroadcast(boolean enabled) {
