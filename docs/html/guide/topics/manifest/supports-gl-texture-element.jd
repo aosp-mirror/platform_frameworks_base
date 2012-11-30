@@ -3,37 +3,35 @@ parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
 
+ <div class="sidebox-wrapper"> 
+ <div class="sidebox">
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <p style="padding-top:1em;">Google Play filters applications according
+    to the texture compression formats that they support, to ensure that
+    they can be installed only on devices that can handle their textures
+    properly. You can use texture compression filtering
+    as a way of targeting specific device types, based on GPU platform.</p>
+    
+    <p style="margin-top:1em;">For important information about how
+    Google Play uses <code>&lt;supports-gl-texture&gt;</code> elements as
+    the basis for filtering, please read <a href="#market-texture-filtering">Google
+    Play and texture compression filtering</a>, below.</p>
+</div>
+</div>
+
 <dl class="xml">
 
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;supports-gl-texture android:<a href="#name">name</a>="<em>string</em>" /&gt;
+&lt;supports-gl-texture
+  android:<a href="#name">name</a>="<em>string</em>" /&gt;
 </pre>
 </dd>
 
 <dt>contained in:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
-
- <div class="sidebox-wrapper">
-  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
-  <div id="qv-sub-rule">
-    <img src="{@docRoot}assets/images/icon_play.png"
-    style="float:left;margin:0;padding:0;">
-    <p style="color:#669999;padding-top:1em;">Google Play and <code
-    style="color:#669999;">&lt;supports-gl-texture&gt;</code> elements</p>
-    <p style="margin-top:1em;">Google Play filters applications according
-    to the texture compression formats that they support, to ensure that
-    they can be installed only on devices that can handle their textures
-    properly. Developers can use texture compression filtering
-    as a way of targeting specific device types, based on GPU platform.</p>
-    
-    <p style="margin-top:1em;" class="caution">For important information about how
-    Google Play uses <code>&lt;supports-gl-texture&gt;</code> elements as
-    the basis for filtering, please read <a href="#market-texture-filtering">Google
-    Play and texture compression filtering</a>, below.</p>
-</div> 
-</div>
 
 <dt>description:</dt>
 <dd>Declares a single GL texture compression format that is supported by
@@ -141,7 +139,7 @@ and others.</td>
 <dt>see also:</dt>
 <dd>
   <ul>
-    <li><a href="{@docRoot}guide/google/play/filters.html">Filters on Google Play</a></li>
+    <li><a href="{@docRoot}google/play/filters.html">Filters on Google Play</a></li>
   </ul>
 </dd>
 

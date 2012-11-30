@@ -8,7 +8,7 @@ page.title=JOBB
   Level 9) or higher. OBB files are used to provide additional file assets for Android applications
   (such as graphics, sounds and video), separate from an application's APK file. For more
   information on using expansion files, see
-  <a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a>.</p>
+  <a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a>.</p>
 
 
 <h2 id="usage">Usage</h2>

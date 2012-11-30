@@ -16,14 +16,12 @@ easier to update the doc when the change is made. -->
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;uses-configuration android:<a href="#five">reqFiveWayNav</a>=["true" | "false"] 
-                    android:<a href="#hard">reqHardKeyboard</a>=["true" | "false"]
-                    android:<a href="#kbd">reqKeyboardType</a>=["undefined" | "nokeys" | "qwerty" |  
-                                             "twelvekey"]
-                    android:<a href="#nav">reqNavigation</a>=["undefined" | "nonav" | "dpad" | 
-                                           "trackball" | "wheel"]
-                    android:<a href="#touch">reqTouchScreen</a>=["undefined" | "notouch" | "stylus" | 
-                                            "finger"] /&gt;</pre></dd>
+<dd><pre class="stx">&lt;uses-configuration
+  android:<a href="#five">reqFiveWayNav</a>=["true" | "false"] 
+  android:<a href="#hard">reqHardKeyboard</a>=["true" | "false"]
+  android:<a href="#kbd">reqKeyboardType</a>=["undefined" | "nokeys" | "qwerty" | "twelvekey"]
+  android:<a href="#nav">reqNavigation</a>=["undefined" | "nonav" | "dpad" | "trackball" | "wheel"]
+  android:<a href="#touch">reqTouchScreen</a>=["undefined" | "notouch" | "stylus" | "finger"] /&gt;</pre></dd>
 
 <dt>contained in:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>

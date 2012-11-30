@@ -10,19 +10,19 @@ page.title=Google Cloud Messaging for Android
 <p>To learn more about GCM, you can join the <a href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a> and read the following documents:</p>
 
 <dl>
-  <dt><strong><a href="{@docRoot}guide/google/gcm/gs.html">Getting Started</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></strong></dt>
     <dd>Read this document to learn the basic steps involved in developing Android applications based on GCM.</dd>
-  <dt><strong><a href="{@docRoot}guide/google/gcm/gcm.html">Architectural Overview</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/gcm/gcm.html">Architectural Overview</a></strong></dt>
     <dd>Read this document for a description of the underlying concepts and architecture in GCM.</dd>
-  <dt><strong><a href="{@docRoot}guide/google/gcm/demo.html">Demo App Tutorial</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/gcm/demo.html">Demo App Tutorial</a></strong></dt>
     <dd>Read this document to walk through setting up and running the GCM demo app.</dd>
-  <dt><strong><a href="{@docRoot}guide/google/gcm/adv.html">Advanced Topics</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/gcm/adv.html">Advanced Topics</a></strong></dt>
     <dd>Read this document to get a more in-depth understanding of key GCM features.</dd>
-  <dt><a href="{@docRoot}guide/google/gcm/c2dm.html"><strong>Migration</strong></a></dt>
+  <dt><a href="{@docRoot}google/gcm/c2dm.html"><strong>Migration</strong></a></dt>
     <dd>Read this document if you are a C2DM developer moving to GCM.</dd>
 </dl>
 
-<p>GCM also provides helper libraries for <a href="{@docRoot}guide/google/gcm/client-javadoc/index.html"><strong>client</strong></a> and <a href="{@docRoot}guide/google/gcm/server-javadoc/index.html"><strong>server</strong></a> development.</p>
+<p>GCM also provides helper libraries for <a href="{@docRoot}google/gcm/client-javadoc/index.html"><strong>client</strong></a> and <a href="{@docRoot}google/gcm/server-javadoc/index.html"><strong>server</strong></a> development.</p>
 
 
 

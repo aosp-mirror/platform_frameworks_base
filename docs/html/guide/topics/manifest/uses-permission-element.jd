@@ -5,22 +5,21 @@ parent.link=manifest-intro.html
 
 <dl class="xml">
 
- <div class="sidebox-wrapper"> 
-  <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
-  <div id="qv-sub-rule"> 
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;"><code style="color:#669999;">&lt;uses-permission&gt;</code> and filtering on Google Play. </p>
+<div class="sidebox-wrapper"> 
+<div class="sidebox">
+<img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+<p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
 
-<p style="margin-top:1em;">In some cases, the permissions that you request
+<p style="clear:left;">In some cases, the permissions that you request
 through <code>&lt;uses-permission&gt;</code> can affect how
 your application is filtered by Google Play.</p>
 
-<p style="margin-top:1em;">If you request a hardware-related permission &mdash;
+<p>If you request a hardware-related permission &mdash;
 <code>CAMERA</code>, for example &mdash; Google Play assumes that your
 application requires the underlying hardware feature and filters the application
 from devices that do not offer it.</p>
 
-<p style="margin-top:1em;">To control filtering, always explicitly declare
+<p>To control filtering, always explicitly declare
 hardware features in <code>&lt;uses-feature&gt;</code> elements, rather than
 relying on Google Play to "discover" the requirements in
 <code>&lt;uses-permission&gt;</code> elements. Then, if you want to disable
@@ -28,13 +27,12 @@ filtering for a particular feature, you can add a
 <code>android:required="false"</code> attribute to the
 <code>&lt;uses-feature&gt;</code> declaration.</p>
 
-<p style="margin-top:1em;" class="caution">For a list of permissions that imply
+<p>For a list of permissions that imply
 hardware features, see the documentation for the <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">
 <code>&lt;uses-feature&gt;</code></a> element.</p>
 </div>
 </div>
-
 
 <dt>syntax:</dt>
 <dd><pre class="stx">&lt;uses-permission android:<a href="#nm">name</a>="<i>string</i>" /&gt;</pre></dd>

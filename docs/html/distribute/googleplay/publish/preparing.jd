@@ -188,7 +188,7 @@ launch target date.</p>
 Google Play. Currently, the maximum size for an APK published on Google Play is
 <strong>50 MB</strong>. If your app exceeds that size, or if you want to offer a
 secondary download, you can use <a
-href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a>,
+href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a>,
 which Google Play will host for free on its server infrastructure and
 automatically handle the download to devices.</p>
 
@@ -207,7 +207,7 @@ creating your release-ready APK.</p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}guide/google/play/expansion-files.html">APK Expansion Files</a></strong> &mdash; Developer documentation describing APK Expansion Files and how to support them in your app.</li>
+<li><strong><a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a></strong> &mdash; Developer documentation describing APK Expansion Files and how to support them in your app.</li>
 </ul>
 </td>
 </tr>
@@ -276,7 +276,7 @@ you need set up a Checkout Merchant Account before you can publish.</p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing</a></strong> &mdash; Developer introduction to Google Play In-app Billing.</li>
+<li><strong><a href="{@docRoot}google/play/billing/index.html">In-app Billing</a></strong> &mdash; Developer introduction to Google Play In-app Billing.</li>
 </ul>
 </td>
 </tr>
@@ -284,7 +284,7 @@ you need set up a Checkout Merchant Account before you can publish.</p>
 
 <h2 id="inapp-billing">9. Consider using In-app Billing</h2>
 
-<p>Google Play <a href="{@docRoot}guide/google/play/billing/index.html">In-app
+<p>Google Play <a href="{@docRoot}google/play/billing/index.html">In-app
 Billing</a> lets you sell digital content in your applications. You can use the
 service to sell a wide range of content, including downloadable content such as
 media files or photos, and virtual content such as game levels or potions.
@@ -302,7 +302,7 @@ before creating your release-ready APK.</p>
 <tr>
 <td><p>Related resources:</p>
 <ul style="margin-top:-.5em;">
-<li><strong><a href="{@docRoot}guide/google/play/billing/index.html">In-app Billing</a></strong> &mdash; Developer documentation describing In-app Billing and how to support it in your app.</li>
+<li><strong><a href="{@docRoot}google/play/billing/index.html">In-app Billing</a></strong> &mdash; Developer documentation describing In-app Billing and how to support it in your app.</li>
 </ul>
 </td>
 </tr>
