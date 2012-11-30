@@ -22,7 +22,6 @@ public class AppWindowAnimator {
 
     boolean animating;
     Animation animation;
-    boolean animInitialized;
     boolean hasTransformation;
     final Transformation transformation = new Transformation();
 
@@ -58,12 +57,15 @@ public class AppWindowAnimator {
         mAnimator = atoken.mAnimator;
     }
 
-    public void setAnimation(Animation anim) {
+    public void setAnimation(Animation anim, int width, int height) {
         if (WindowManagerService.localLOGV) Slog.v(
-            TAG, "Setting animation in " + mAppToken + ": " + anim);
+            TAG, "Setting animation in " + mAppToken + ": " + anim
+                    + " wxh=" + width + "x" + height);
         animation = anim;
         animating = false;
-        animInitialized = anim.isInitialized();
+        if (!anim.isInitialized()) {
+            anim.initialize(width, height, width, height);
+        }
         anim.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mService.mTransitionAnimationScale);
         int zorder = anim.getZAdjustment();
@@ -87,7 +89,6 @@ public class AppWindowAnimator {
     public void setDummyAnimation() {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting dummy animation in " + mAppToken);
         animation = sDummyAnimation;
-        animInitialized = false;
         hasTransformation = true;
         transformation.clear();
         transformation.setAlpha(mAppToken.reportedVisible ? 1 : 0);
@@ -97,7 +98,6 @@ public class AppWindowAnimator {
         if (animation != null) {
             animation = null;
             animating = true;
-            animInitialized = false;
         }
         clearThumbnail();
         if (mAppToken.deferClearAllDrawn) {
@@ -189,7 +189,7 @@ public class AppWindowAnimator {
     }
 
     // This must be called while inside a transaction.
-    boolean stepAnimationLocked(long currentTime, int dw, int dh) {
+    boolean stepAnimationLocked(long currentTime) {
         if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -206,12 +206,8 @@ public class AppWindowAnimator {
                 if (!animating) {
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(
                         TAG, "Starting animation in " + mAppToken +
-                        " @ " + currentTime + ": dw=" + dw + " dh=" + dh
-                        + " scale=" + mService.mTransitionAnimationScale
+                        " @ " + currentTime + " scale=" + mService.mTransitionAnimationScale
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
-                    if (!animInitialized) {
-                        animation.initialize(dw, dh, dw, dh);
-                    }
                     animation.setStartTime(currentTime);
                     animating = true;
                     if (thumbnail != null) {
@@ -290,8 +286,7 @@ public class AppWindowAnimator {
                 pw.print(" allDrawn="); pw.print(allDrawn);
                 pw.print(" animLayerAdjustment="); pw.println(animLayerAdjustment);
         if (animating || animation != null) {
-            pw.print(prefix); pw.print("animating="); pw.print(animating);
-                    pw.print(" animInitialized="); pw.println(animInitialized);
+            pw.print(prefix); pw.print("animating="); pw.println(animating);
             pw.print(prefix); pw.print("animation="); pw.println(animation);
         }
         if (hasTransformation) {
