@@ -1019,15 +1019,22 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         return  (x > (getViewportOffsetX() + getViewportWidth() - getRelativeChildOffset(mCurrentPage) + mPageSpacing));
     }
 
-    /** Returns whether x and y originated within the buffered/unbuffered viewport */
-    private boolean isTouchPointInViewport(int x, int y, boolean buffer) {
-        if (buffer) {
-            mTmpRect.set(mViewport.left - mViewport.width() / 2, mViewport.top,
-                    mViewport.right + mViewport.width() / 2, mViewport.bottom);
+    /** Returns whether x and y originated within the buffered viewport */
+    private boolean isTouchPointInViewportWithBuffer(int x, int y) {
+        mTmpRect.set(mViewport.left - mViewport.width() / 2, mViewport.top,
+                mViewport.right + mViewport.width() / 2, mViewport.bottom);
+        return mTmpRect.contains(x, y);
+    }
+
+    /** Returns whether x and y originated within the current page view bounds */
+    private boolean isTouchPointInCurrentPage(int x, int y) {
+        View v = getPageAt(getCurrentPage());
+        if (v != null) {
+            mTmpRect.set((v.getLeft() - getScrollX()), 0, (v.getRight() - getScrollX()),
+                    v.getBottom());
             return mTmpRect.contains(x, y);
-        } else {
-            return mViewport.contains(x, y);
         }
+        return false;
     }
 
     @Override
@@ -1108,7 +1115,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
                     mTouchState = TOUCH_STATE_REST;
                     mScroller.abortAnimation();
                 } else {
-                    if (isTouchPointInViewport((int) mDownMotionX, (int) mDownMotionY, true)) {
+                    if (isTouchPointInViewportWithBuffer((int) mDownMotionX, (int) mDownMotionY)) {
                         mTouchState = TOUCH_STATE_SCROLLING;
                     } else {
                         mTouchState = TOUCH_STATE_REST;
@@ -1135,7 +1142,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             case MotionEvent.ACTION_CANCEL:
                 resetTouchState();
                 // Just intercept the touch event on up if we tap outside the strict viewport
-                if (!isTouchPointInViewport((int) mLastMotionX, (int) mLastMotionY, false)) {
+                if (!isTouchPointInCurrentPage((int) mLastMotionX, (int) mLastMotionY)) {
                     return true;
                 }
                 break;
@@ -1169,7 +1176,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         // Disallow scrolling if we started the gesture from outside the viewport
         final float x = ev.getX(pointerIndex);
         final float y = ev.getY(pointerIndex);
-        if (!isTouchPointInViewport((int) x, (int) y, true)) return;
+        if (!isTouchPointInViewportWithBuffer((int) x, (int) y)) return;
 
         // If we're only allowing edge swipes, we break out early if the down event wasn't
         // at the edge.
