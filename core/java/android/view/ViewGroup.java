@@ -23,11 +23,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PathEffect;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -37,6 +35,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -6234,50 +6233,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         private static final int MAX_POOL_SIZE = 32;
 
-        private static final Object sPoolLock = new Object();
-
-        private static ChildListForAccessibility sPool;
-
-        private static int sPoolSize;
-
-        private boolean mIsPooled;
-
-        private ChildListForAccessibility mNext;
+        private static final SynchronizedPool<ChildListForAccessibility> sPool =
+                new SynchronizedPool<ChildListForAccessibility>(MAX_POOL_SIZE);
 
         private final ArrayList<View> mChildren = new ArrayList<View>();
 
         private final ArrayList<ViewLocationHolder> mHolders = new ArrayList<ViewLocationHolder>();
 
         public static ChildListForAccessibility obtain(ViewGroup parent, boolean sort) {
-            ChildListForAccessibility list = null;
-            synchronized (sPoolLock) {
-                if (sPool != null) {
-                    list = sPool;
-                    sPool = list.mNext;
-                    list.mNext = null;
-                    list.mIsPooled = false;
-                    sPoolSize--;
-                } else {
-                    list = new ChildListForAccessibility();
-                }
-                list.init(parent, sort);
-                return list;
+            ChildListForAccessibility list = sPool.acquire();
+            if (list == null) {
+                list = new ChildListForAccessibility();
             }
+            list.init(parent, sort);
+            return list;
         }
 
         public void recycle() {
-            if (mIsPooled) {
-                throw new IllegalStateException("Instance already recycled.");
-            }
             clear();
-            synchronized (sPoolLock) {
-                if (sPoolSize < MAX_POOL_SIZE) {
-                    mNext = sPool;
-                    mIsPooled = true;
-                    sPool = this;
-                    sPoolSize++;
-                }
-            }
+            sPool.release(this);
         }
 
         public int getChildCount() {
@@ -6331,15 +6305,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         private static final int MAX_POOL_SIZE = 32;
 
-        private static final Object sPoolLock = new Object();
-
-        private static ViewLocationHolder sPool;
-
-        private static int sPoolSize;
-
-        private boolean mIsPooled;
-
-        private ViewLocationHolder mNext;
+        private static final SynchronizedPool<ViewLocationHolder> sPool =
+                new SynchronizedPool<ViewLocationHolder>(MAX_POOL_SIZE);
 
         private final Rect mLocation = new Rect();
 
@@ -6348,35 +6315,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private int mLayoutDirection;
 
         public static ViewLocationHolder obtain(ViewGroup root, View view) {
-            ViewLocationHolder holder = null;
-            synchronized (sPoolLock) {
-                if (sPool != null) {
-                    holder = sPool;
-                    sPool = holder.mNext;
-                    holder.mNext = null;
-                    holder.mIsPooled = false;
-                    sPoolSize--;
-                } else {
-                    holder = new ViewLocationHolder();
-                }
-                holder.init(root, view);
-                return holder;
+            ViewLocationHolder holder = sPool.acquire();
+            if (holder == null) {
+                holder = new ViewLocationHolder();
             }
+            holder.init(root, view);
+            return holder;
         }
 
         public void recycle() {
-            if (mIsPooled) {
-                throw new IllegalStateException("Instance already recycled.");
-            }
             clear();
-            synchronized (sPoolLock) {
-                if (sPoolSize < MAX_POOL_SIZE) {
-                    mNext = sPool;
-                    mIsPooled = true;
-                    sPool = this;
-                    sPoolSize++;
-                }
-            }
+            sPool.release(this);
         }
 
         @Override
