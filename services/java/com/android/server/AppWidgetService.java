@@ -196,9 +196,14 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection)
-            throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).bindRemoteViewsService(
+    public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection,
+            int userId) throws RemoteException {
+        if (Binder.getCallingPid() != android.os.Process.myPid()
+                && userId != UserHandle.getCallingUserId()) {
+            throw new SecurityException("Call from non-system process. Calling uid = "
+                    + Binder.getCallingUid());
+        }
+        getImplForUser(userId).bindRemoteViewsService(
                 appWidgetId, intent, connection);
     }
 
@@ -207,6 +212,17 @@ class AppWidgetService extends IAppWidgetService.Stub
             List<RemoteViews> updatedViews) throws RemoteException {
         return getImplForUser(getCallingOrCurrentUserId()).startListening(host,
                 packageName, hostId, updatedViews);
+    }
+
+    @Override
+    public int[] startListeningAsUser(IAppWidgetHost host, String packageName, int hostId,
+            List<RemoteViews> updatedViews, int userId) throws RemoteException {
+        if (Binder.getCallingPid() != android.os.Process.myPid()
+                && userId != UserHandle.getCallingUserId()) {
+            throw new SecurityException("Call from non-system process. Calling uid = "
+                    + Binder.getCallingUid());
+        }
+        return getImplForUser(userId).startListening(host, packageName, hostId, updatedViews);
     }
 
     public void onUserRemoved(int userId) {
@@ -306,8 +322,24 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
-    public void unbindRemoteViewsService(int appWidgetId, Intent intent) throws RemoteException {
-        getImplForUser(getCallingOrCurrentUserId()).unbindRemoteViewsService(
+    public void stopListeningAsUser(int hostId, int userId) throws RemoteException {
+        if (Binder.getCallingPid() != android.os.Process.myPid()
+                && userId != UserHandle.getCallingUserId()) {
+            throw new SecurityException("Call from non-system process. Calling uid = "
+                    + Binder.getCallingUid());
+        }
+        getImplForUser(userId).stopListening(hostId);
+    }
+
+    @Override
+    public void unbindRemoteViewsService(int appWidgetId, Intent intent, int userId)
+            throws RemoteException {
+        if (Binder.getCallingPid() != android.os.Process.myPid()
+                && userId != UserHandle.getCallingUserId()) {
+            throw new SecurityException("Call from non-system process. Calling uid = "
+                    + Binder.getCallingUid());
+        }
+        getImplForUser(userId).unbindRemoteViewsService(
                 appWidgetId, intent);
     }
 

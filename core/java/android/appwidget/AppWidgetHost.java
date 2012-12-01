@@ -154,6 +154,15 @@ public class AppWidgetHost {
      * becomes visible, i.e. from onStart() in your Activity.
      */
     public void startListening() {
+        startListeningAsUser(UserHandle.myUserId());
+    }
+
+    /**
+     * Start receiving onAppWidgetChanged calls for your AppWidgets.  Call this when your activity
+     * becomes visible, i.e. from onStart() in your Activity.
+     * @hide
+     */
+    public void startListeningAsUser(int userId) {
         int[] updatedIds;
         ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
 
@@ -161,7 +170,8 @@ public class AppWidgetHost {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();
             }
-            updatedIds = sService.startListening(mCallbacks, mPackageName, mHostId, updatedViews);
+            updatedIds = sService.startListeningAsUser(
+                    mCallbacks, mPackageName, mHostId, updatedViews, userId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -179,11 +189,27 @@ public class AppWidgetHost {
      */
     public void stopListening() {
         try {
-            sService.stopListening(mHostId);
+            sService.stopListeningAsUser(mHostId, UserHandle.myUserId());
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
+    }
+
+    /**
+     * Stop receiving onAppWidgetChanged calls for your AppWidgets.  Call this when your activity is
+     * no longer visible, i.e. from onStop() in your Activity.
+     * @hide
+     */
+    public void stopListeningAsUser(int userId) {
+        try {
+            sService.stopListeningAsUser(mHostId, userId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+        // Also clear the views
+        clearViews();
     }
 
     /**

@@ -32,7 +32,10 @@ interface IAppWidgetService {
     //
     int[] startListening(IAppWidgetHost host, String packageName, int hostId,
             out List<RemoteViews> updatedViews);
+    int[] startListeningAsUser(IAppWidgetHost host, String packageName, int hostId,
+            out List<RemoteViews> updatedViews, int userId);
     void stopListening(int hostId);
+    void stopListeningAsUser(int hostId, int userId);
     int allocateAppWidgetId(String packageName, int hostId);
     void deleteAppWidgetId(int appWidgetId);
     void deleteHost(int hostId);
@@ -56,8 +59,8 @@ interface IAppWidgetService {
     void bindAppWidgetId(int appWidgetId, in ComponentName provider, in Bundle options);
     boolean bindAppWidgetIdIfAllowed(
             in String packageName, int appWidgetId, in ComponentName provider, in Bundle options);
-    void bindRemoteViewsService(int appWidgetId, in Intent intent, in IBinder connection);
-    void unbindRemoteViewsService(int appWidgetId, in Intent intent);
+    void bindRemoteViewsService(int appWidgetId, in Intent intent, in IBinder connection, int userId);
+    void unbindRemoteViewsService(int appWidgetId, in Intent intent, int userId);
     int[] getAppWidgetIds(in ComponentName provider);
 
 }
