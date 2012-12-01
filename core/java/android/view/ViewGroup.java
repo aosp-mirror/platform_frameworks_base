@@ -3714,8 +3714,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             childHasTransientStateChanged(view, false);
         }
 
-        view.resetRtlProperties();
-
         needGlobalAttributesUpdate(false);
 
         removeFromArray(index);
@@ -5456,21 +5454,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             child.resolveLayoutParams();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void resetRtlProperties() {
-        super.resetRtlProperties();
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.isLayoutDirectionInherited()) {
-                child.resetRtlProperties();
-            }
         }
     }
 
