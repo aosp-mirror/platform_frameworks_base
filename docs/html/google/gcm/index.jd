@@ -1,13 +1,34 @@
 page.title=Google Cloud Messaging for Android
+header.hide=1
 @jd:body
 
 
-<p><img src="{@docRoot}images/gcm/gcm-logo.png" /></p>
-<p>Google Cloud Messaging for Android (GCM) is a service that helps developers send data from servers to their Android applications on Android devices. This could be a lightweight message telling the Android application that there is new data to be fetched from the server (for instance, a movie uploaded by a friend), or it could be a message containing up to 4kb of payload data (so apps like instant messaging can consume the message directly). The GCM service handles all aspects of queueing of messages and delivery to the target Android application running on the target device.</p>
+<div class="landing-banner">
+        
+<div class="col-5" style="min-height:100px">
+  <img src="{@docRoot}images/gcm/gcm-logo.png" />
+</div>
+<div class="col-7">
 
-<p>GCM is completely free no matter how big your messaging needs are, and there are no quotas.</p>
+  <h1 itemprop="name" style="margin-bottom:0;">Google Cloud Messaging for Android</h1>
+  <p itemprop="description">
+  Google Cloud Messaging for Android (GCM) is a service that allows you to send data
+from your server to your users' Android-powered device. This could be a lightweight
+message telling your app there is new data to be fetched from the
+server (for instance, a movie uploaded by a friend), or it could be a message containing
+up to 4kb of payload data (so apps like instant messaging can consume the message directly).
+</p>
+</div>
+</div>
 
-<p>To learn more about GCM, you can join the <a href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a> and read the following documents:</p>
+<p class="clear:both">
+The GCM service handles all aspects of queueing of messages and delivery to the target Android
+application running on the target device.
+GCM is completely free no matter how big your messaging needs are, and there are no quotas.</p>
+
+<p>To learn more about GCM, you can join the <a
+href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a>
+and read the following documents:</p>
 
 <dl>
   <dt><strong><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></strong></dt>
@@ -20,9 +41,9 @@ page.title=Google Cloud Messaging for Android
     <dd>Read this document to get a more in-depth understanding of key GCM features.</dd>
   <dt><a href="{@docRoot}google/gcm/c2dm.html"><strong>Migration</strong></a></dt>
     <dd>Read this document if you are a C2DM developer moving to GCM.</dd>
+  <dt><a href="{@docRoot}reference/gcm-packages.html"><strong>API Reference</strong></a></dt>
+    <dd>Helper libraries for client and server development.</dd>
 </dl>
-
-<p>GCM also provides helper libraries for <a href="{@docRoot}google/gcm/client-javadoc/index.html"><strong>client</strong></a> and <a href="{@docRoot}google/gcm/server-javadoc/index.html"><strong>server</strong></a> development.</p>
 
 
 
