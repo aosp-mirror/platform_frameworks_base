@@ -22,6 +22,8 @@
 
 #include <EGL/egl_cache.h>
 
+#include <Caches.h>
+
 #ifdef USE_OPENGL_RENDERER
     EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
 #endif
@@ -88,6 +90,13 @@ static jboolean android_view_HardwareRenderer_isBackBufferPreserved(JNIEnv* env,
 // Tracing and debugging
 // ----------------------------------------------------------------------------
 
+static bool android_view_HardwareRenderer_loadProperties(JNIEnv* env, jobject clazz) {
+    if (uirenderer::Caches::hasInstance()) {
+        return uirenderer::Caches::getInstance().initProperties();
+    }
+    return false;
+}
+
 static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz,
         jintArray size) {
 
@@ -134,6 +143,7 @@ static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "nIsBackBufferPreserved", "()Z",   (void*) android_view_HardwareRenderer_isBackBufferPreserved },
     { "nPreserveBackBuffer",    "()Z",   (void*) android_view_HardwareRenderer_preserveBackBuffer },
+    { "nLoadProperties",        "()Z",   (void*) android_view_HardwareRenderer_loadProperties },
 
     { "nBeginFrame",            "([I)V", (void*) android_view_HardwareRenderer_beginFrame },
 #endif

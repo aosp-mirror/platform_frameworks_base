@@ -115,6 +115,11 @@ public:
     void init();
 
     /**
+     * Initialize global system properties.
+     */
+    bool initProperties();
+
+    /**
      * Flush the cache.
      *
      * @param mode Indicates how much of the cache should be flushed
@@ -281,7 +286,6 @@ private:
     void initFont();
     void initExtensions();
     void initConstraints();
-    void initProperties();
 
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }

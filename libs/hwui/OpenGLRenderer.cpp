@@ -489,6 +489,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
         layer->deferredUpdateScheduled = false;
         layer->renderer = NULL;
         layer->displayList = NULL;
+        layer->debugDrawUpdate = mCaches.debugLayersUpdates;
 
         return true;
     }
@@ -2806,10 +2807,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
         return DrawGlInfo::kStatusDone;
     }
 
-    bool debugLayerUpdate = false;
-    if (updateLayer(layer, true)) {
-        debugLayerUpdate = mCaches.debugLayersUpdates;
-    }
+    updateLayer(layer, true);
 
     mCaches.setScissorEnabled(mScissorOptimizationDisabled || !clip.contains(transformed));
     mCaches.activeTexture(0);
@@ -2857,7 +2855,8 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* pain
 
         mColorFilter = oldFilter;
 
-        if (debugLayerUpdate) {
+        if (layer->debugDrawUpdate) {
+            layer->debugDrawUpdate = false;
             drawColorRect(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight(),
                     0x7f00ff00, SkXfermode::kSrcOver_Mode);
         }

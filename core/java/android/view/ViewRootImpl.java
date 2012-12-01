@@ -382,8 +382,6 @@ public final class ViewRootImpl implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
-        mProfileRendering = Boolean.parseBoolean(
-                SystemProperties.get(PROPERTY_PROFILE_RENDERING, "false"));
         mChoreographer = Choreographer.getInstance();
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -2043,13 +2041,13 @@ public final class ViewRootImpl implements ViewParent,
                         mDirty.set(0, 0, mWidth, mHeight);
                         scheduleTraversals();
                         if (mRenderProfilingEnabled) {
-                            Choreographer.getInstance().postFrameCallback(mRenderProfiler);
+                            mChoreographer.postFrameCallback(mRenderProfiler);
                         }
                     }
                 };
-                Choreographer.getInstance().postFrameCallback(mRenderProfiler);
+                mChoreographer.postFrameCallback(mRenderProfiler);
             } else {
-                Choreographer.getInstance().removeFrameCallback(mRenderProfiler);
+                mChoreographer.removeFrameCallback(mRenderProfiler);
                 mRenderProfiler = null;
             }
         }
@@ -4182,14 +4180,30 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void loadSystemProperties() {
-        boolean layout = SystemProperties.getBoolean(
-                View.DEBUG_LAYOUT_PROPERTY, false);
-        if (layout != mAttachInfo.mDebugLayout) {
-            mAttachInfo.mDebugLayout = layout;
-            if (!mHandler.hasMessages(MSG_INVALIDATE_WORLD)) {
-                mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Profiling
+                mProfileRendering = SystemProperties.getBoolean(PROPERTY_PROFILE_RENDERING, false);
+                profileRendering(mAttachInfo.mHasWindowFocus);
+
+                // Hardware rendering
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties(mHolder.getSurface())) {
+                        invalidate();
+                    }
+                }
+
+                // Layout debugging
+                boolean layout = SystemProperties.getBoolean(View.DEBUG_LAYOUT_PROPERTY, false);
+                if (layout != mAttachInfo.mDebugLayout) {
+                    mAttachInfo.mDebugLayout = layout;
+                    if (!mHandler.hasMessages(MSG_INVALIDATE_WORLD)) {
+                        mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200);
+                    }
+                }
             }
-        }
+        });
     }
 
     private void destroyHardwareRenderer() {
