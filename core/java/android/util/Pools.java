@@ -21,8 +21,8 @@ package android.util;
  * <pre>
  * public class MyPooledClass {
  *
- *     private static final Pool<MyPooledClass> sPool =
- *             new SynchronizedPool<MyPooledClass>(Pools.POOL_SIZE_INFINITE);
+ *     private static final SynchronizedPool<MyPooledClass> sPool =
+ *             new SynchronizedPool<MyPooledClass>(10);
  *
  *     public static MyPooledClass obtain() {
  *         MyPooledClass instance = sPool.acquire();
@@ -41,11 +41,6 @@ package android.util;
  * @hide
  */
 public final class Pools {
-
-    /**
-     * Pool with an infinite size.
-     */
-    public static final int POOL_SIZE_INFINITE = -1;
 
     /**
      * Interface for managing a pool of objects.
@@ -98,11 +93,9 @@ public final class Pools {
          * @param maxPoolSize The max pool size.
          *
          * @throws IllegalArgumentException If the max pool size is less than zero.
-         *
-         * @see Pools#POOL_SIZE_INFINITE
          */
         public SimplePool(int maxPoolSize) {
-            if (maxPoolSize <= 0 && maxPoolSize != POOL_SIZE_INFINITE) {
+            if (maxPoolSize <= 0) {
                 throw new IllegalArgumentException("The max pool size must be > 0");
             }
             mMaxPoolSize = maxPoolSize;
@@ -128,7 +121,7 @@ public final class Pools {
             if (isInPool(instance)) {
                 throw new IllegalStateException("Already in the pool!");
             }
-            if (mMaxPoolSize == POOL_SIZE_INFINITE || mPoolSize < mMaxPoolSize) {
+            if (mPoolSize < mMaxPoolSize) {
                 PoolableHolder<T> holder = mEmptyHolders;
                 if (holder == null) {
                     holder = new PoolableHolder<T>();
@@ -170,8 +163,6 @@ public final class Pools {
          * @param maxPoolSize The max pool size.
          *
          * @throws IllegalArgumentException If the max pool size is less than zero.
-         *
-         * @see Pools#POOL_SIZE_INFINITE
          */
         public SynchronizedPool(int maxPoolSize) {
             super(maxPoolSize);
