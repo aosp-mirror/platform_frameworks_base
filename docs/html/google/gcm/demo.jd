@@ -38,11 +38,7 @@ page.title=GCM Demo Application
   <li>A web server containing a page where you can send messages.</li>
   <li>An Android application that receives and displays such messages.</li>
 </ul>
-<p>Here is the API reference documentation for the helper libraries on which the demo is based:</p>
-<ul>
-  <li><a href="{@docRoot}google/gcm/client-javadoc/index.html">Client Reference</a></li>
-  <li><a href="{@docRoot}google/gcm/server-javadoc/index.html">Server Reference</a></li>
-</ul>
+<p>See the <a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">reference</a> for the client and server helper libraries used in this demo.</p>
 
 <p>The sections below describe how to download the demo code and helper libraries from the SDK Manager. The demo code and helper libraries are also available at the <a href="http://code.google.com/p/gcm">open source site</a>.
 
