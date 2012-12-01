@@ -1340,7 +1340,7 @@ public class LinearLayout extends ViewGroup {
     private void forceUniformHeight(int count, int widthMeasureSpec) {
         // Pretend that the linear layout has an exact size. This is the measured height of
         // ourselves. The measured height should be the max height of the children, changed
-        // to accomodate the heightMesureSpec from the parent
+        // to accommodate the heightMeasureSpec from the parent
         int uniformMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight(),
                 MeasureSpec.EXACTLY);
         for (int i = 0; i < count; ++i) {
