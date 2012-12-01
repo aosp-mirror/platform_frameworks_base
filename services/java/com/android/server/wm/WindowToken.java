@@ -48,7 +48,7 @@ class WindowToken {
     AppWindowToken appWindowToken;
 
     // All of the windows associated with this token.
-    final ArrayList<WindowState> windows = new ArrayList<WindowState>();
+    final WindowList windows = new WindowList();
 
     // Is key dispatching paused for this token?
     boolean paused = false;

@@ -79,7 +79,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
     final WindowState mAttachedWindow;
-    final ArrayList<WindowState> mChildWindows = new ArrayList<WindowState>();
+    final WindowList mChildWindows = new WindowList();
     final int mBaseLayer;
     final int mSubLayer;
     final boolean mLayoutAttached;
