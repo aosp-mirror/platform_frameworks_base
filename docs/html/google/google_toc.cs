@@ -63,13 +63,13 @@
               <span class="en">Security and Design</span></a>
           </li>
           <li><a href="<?cs var:toroot?>google/play/billing/billing_testing.html">
-              <span class="en">Testing <br/>In-app Billing</span></a>
+              <span class="en">Testing In-app Billing</span></a>
           </li>
           <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
           </li>
           <li><a href="<?cs var:toroot?>google/play/billing/billing_reference.html">
-              <span class="en">In-app Billing Reference</span></a>
+              <span class="en">Reference</span></a>
           </li>
     </ul>
   </li>

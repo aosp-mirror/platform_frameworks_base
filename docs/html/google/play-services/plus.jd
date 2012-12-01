@@ -47,13 +47,6 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
       can also share content with their circles. These endorsements can give your app more
       credibility and help it grow faster. <a class="external-link"
       href="https://developers.google.com/+/mobile/android/recommend">Add the +1 button</a>.</p>
-      
-      <h4>Save moments</h4>
-     <p>Save user actions from your app such as check-ins, reviews, video views, comments,
-     and more, to your users' private Google+ history. From there, users can share these
-     moments with others. <a class="external-link"
-     href="https://developers.google.com/+/mobile/android/write-moments">Save user
-     moments</a>.</p>
   </div>
 
 
@@ -78,7 +71,7 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
     <p>Extended documentation for the Google+ Android APIs is provided with the rest of the
     Google+ developer documents at <a class="external-link"
     href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a>.</p>
-    <p>Be sure to read the <a href="https://developers.google.com/+/terms">Google+ Platform
+    <p>Also read the <a href="https://developers.google.com/+/terms">Google+ Platform
     Terms of Service</a>.</p>
   </div>
 </div>

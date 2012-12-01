@@ -1,44 +1,10 @@
-page.title=In-app Billing
+page.title=Google Play In-app Billing
 @jd:body
-
-<div id="qv-wrapper">
-<div id="qv">
-
-  <h2>Topics</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_subscriptions.html">Subscriptions</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
-    Design</a></li>    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
-    Billing</a></li>
-  </ol>
-  <h2>Reference</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
-    Reference</a></li>
-  </ol>
-  <h2>Downloads</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
-    Application</a></li>
-  </ol>  
-</div>
-</div>
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
 your applications. You can use the service to sell a wide range of content, including downloadable
 content such as media files or photos, virtual content such as game levels or potions, premium services 
 and features, and more. You can use In-app Billing to sell products as</p>
-
-<ul>
-<li>Standard in-app products (one-time billing), or</li>
-<li>Subscriptions, (recurring, automated billing)</li>
-</ul>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
@@ -46,6 +12,11 @@ and features, and more. You can use In-app Billing to sell products as</p>
   <p>You can now offer users a configurable <a href="{@docRoot}google/play/billing/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed. 
 </div>
 </div>
+
+<ul>
+<li>Standard in-app products (one-time billing), or</li>
+<li>Subscriptions, (recurring, automated billing)</li>
+</ul>
 
 <p>When you use the in-app billing service to sell an item,
 whether it's an in-app product or a subscription, Google Play
@@ -84,8 +55,8 @@ obfuscate the sample code before you use it in a production application. For mor
 applications, read the following documents:</p>
 
 <dl>
-  <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
-  Billing</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">In-app
+  Billing Overview</a></strong></dt>
     <dd>Learn how the service works and what a typical in-app billing implementation looks
     like.</dd>
   <dt><strong><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing
@@ -106,8 +77,7 @@ applications, read the following documents:</p>
   <dt><strong><a href="{@docRoot}google/play/billing/billing_admin.html">Administering
   In-app Billing</a></strong></dt>
     <dd>Learn how to set up your product list, register test accounts, and handle refunds.</dd>
-  <dt><strong><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
-  Reference</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/play/billing/billing_reference.html">Reference</a></strong></dt>
     <dd>Get detailed information about Google Play response codes and the in-app billing
     interface.</dd>
 </dl>
