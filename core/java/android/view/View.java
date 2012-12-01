@@ -11856,8 +11856,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mCurrentAnimation = null;
 
-        resetRtlProperties();
-        onRtlPropertiesChanged(LAYOUT_DIRECTION_DEFAULT);
         resetAccessibilityStateChanged();
     }
 
