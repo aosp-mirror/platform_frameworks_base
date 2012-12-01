@@ -894,6 +894,27 @@ public class WindowManagerService extends IWindowManager.Stub
         return windowList;
     }
 
+    /**
+     * Recursive search through a WindowList and all of its windows' children.
+     * @param targetWin The window to search for.
+     * @param windows The list to search.
+     * @return The index of win in windows or of the window that is an ancestor of win.
+     */
+    private int indexOfWinInWindowList(WindowState targetWin, WindowList windows) {
+        for (int i = windows.size() - 1; i >= 0; i--) {
+            final WindowState w = windows.get(i);
+            if (w == targetWin) {
+                return i;
+            }
+            if (!w.mChildWindows.isEmpty()) {
+                if (indexOfWinInWindowList(targetWin, w.mChildWindows) >= 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     private void addWindowToListInOrderLocked(WindowState win, boolean addToToken) {
         final IWindow client = win.mClient;
         final WindowToken token = win.mToken;
@@ -917,13 +938,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         // Base windows go behind everything else.
                         WindowState lowestWindow = tokenWindowList.get(0);
                         placeWindowBefore(lowestWindow, win);
-                        tokenWindowsPos = token.windows.indexOf(lowestWindow);
+                        tokenWindowsPos = indexOfWinInWindowList(lowestWindow, token.windows);
                     } else {
                         AppWindowToken atoken = win.mAppToken;
                         WindowState lastWindow = tokenWindowList.get(index);
                         if (atoken != null && lastWindow == atoken.startingWindow) {
                             placeWindowBefore(lastWindow, win);
-                            tokenWindowsPos = token.windows.indexOf(lastWindow);
+                            tokenWindowsPos = indexOfWinInWindowList(lastWindow, token.windows);
                         } else {
                             int newIdx = findIdxBasedOnAppTokens(win);
                             //there is a window above this one associated with the same
@@ -939,7 +960,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // No window from token found on win's display.
                                 tokenWindowsPos = 0;
                             } else {
-                                tokenWindowsPos = token.windows.indexOf(windows.get(newIdx)) + 1;
+                                tokenWindowsPos = indexOfWinInWindowList(
+                                        windows.get(newIdx), token.windows) + 1;
                             }
                             mWindowsChanged = true;
                         }
