@@ -322,7 +322,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 <p>Once you have coded your test, follow these steps to build and deploy your test JAR to your target Android test device:</p>
 <ol>
 <li>Create the required build configuration files to build the output JAR. To generate the build configuration files, open a terminal and run the following command:
-<pre>&lt;android-sdk&gt;/tools/android uitest-project -n &lt;name&gt; -t 1 -p &lt;path&gt;</pre>
+<pre>&lt;android-sdk&gt;/tools/android create uitest-project -n &lt;name&gt; -t 1 -p &lt;path&gt;</pre>
 The {@code &lt;name&gt;} is the name of the project that contains your {@code uiautomator} test source files, and the {@code &lt;path&gt;} is the path to the corresponding project directory. 
 </li>
 <LI>From the command line, set the {@code ANDROID_HOME} variable: 
