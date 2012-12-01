@@ -615,7 +615,7 @@ public class WebView extends AbsoluteLayout
      * @param realm the realm to which the credentials apply
      * @param username the username
      * @param password the password
-     * @see getHttpAuthUsernamePassword
+     * @see #getHttpAuthUsernamePassword
      * @see WebViewDatabase#hasHttpAuthUsernamePassword
      * @see WebViewDatabase#clearHttpAuthUsernamePassword
      */
@@ -635,7 +635,7 @@ public class WebView extends AbsoluteLayout
      * @return the credentials as a String array, if found. The first element
      *         is the username and the second element is the password. Null if
      *         no credentials are found.
-     * @see setHttpAuthUsernamePassword
+     * @see #setHttpAuthUsernamePassword
      * @see WebViewDatabase#hasHttpAuthUsernamePassword
      * @see WebViewDatabase#clearHttpAuthUsernamePassword
      */
