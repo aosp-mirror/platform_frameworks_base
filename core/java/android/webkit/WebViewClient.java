@@ -214,7 +214,7 @@ public class WebViewClient {
      * @param handler the HttpAuthHandler used to set the WebView's response
      * @param host the host requiring authentication
      * @param realm the realm for which authentication is required
-     * @see Webview#getHttpAuthUsernamePassword
+     * @see WebView#getHttpAuthUsernamePassword
      */
     public void onReceivedHttpAuthRequest(WebView view,
             HttpAuthHandler handler, String host, String realm) {

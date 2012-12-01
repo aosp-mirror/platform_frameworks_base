@@ -1066,7 +1066,7 @@ public abstract class WebSettings {
      *
      * @param appCachePath a String path to the directory containing
      *                     Application Caches files.
-     * @see setAppCacheEnabled
+     * @see #setAppCacheEnabled
      */
     public synchronized void setAppCachePath(String appCachePath) {
         throw new MustOverrideException();

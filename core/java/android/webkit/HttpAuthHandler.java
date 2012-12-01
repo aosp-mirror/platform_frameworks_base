@@ -40,7 +40,7 @@ public class HttpAuthHandler extends Handler {
      * previously been rejected by the server for the current request.
      *
      * @return whether the credentials are suitable for use
-     * @see Webview#getHttpAuthUsernamePassword
+     * @see WebView#getHttpAuthUsernamePassword
      */
     public boolean useHttpAuthUsernamePassword() {
         return false;
