@@ -37,7 +37,7 @@ class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;he
                                            max-width:409px;width:409px" />
                  </div>
                 <div class="content-right col-6" style="width:350px">
-                  <h2>New MapView APIs!</h2>
+                  <h2>New Google Maps Android APIs!</h2>
                   <p>Google Maps Android API version 2 is now available with enhanced
                     features such as 3D buildings, vector-based map tiles, rich overlay capabilities,
                     indoor maps, support for fragments, and much more.</p>
