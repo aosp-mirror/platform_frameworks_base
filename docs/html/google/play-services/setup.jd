@@ -8,34 +8,55 @@ page.title=Setup
     Manager</a>. The download includes the client library and code samples.
 </p>
 
-<p>
-    To set up the Google Play services SDK:
-</p>
+<p>You must download the Google Play services SDK in order to develop using the
+<a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>. However, <strong>you
+cannot use the Android emulator</strong> to test an app that depends on the Google Play services
+APIs&mdash;you must use a real device running Android 2.2 or higher that includes
+Google Play Store.</p>
+
+
+<p>To install the Google Play services SDK for development:</p>
 
 <ol>
-    <li>
-        Launch Eclipse and select <b>Window &gt; Android SDK Manager</b> or run <code>android</code>
-        at the command line.
-    </li>
-    <li>
-        Scroll to the bottom of the package list and select <b>Extras &gt; Google Play services</b>.
-        The Google Play services SDK is downloaded to your computer and installed in your Android SDK environment at
-        <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/</code>.
-    </li>
-    <li>Copy the <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/libproject/google-play-services_lib</code>        
-        library project to a location in your project's source tree.
-    <p>If you are using Eclipse, import the library project into your workspace. Click <b>File > Import...</b>, select <b>Android > Existing
-    Android Code into Workspace</b>, and browse to the copy of the library project to import it.</p>
-    </li>
-    <li>Reference the library project in your Android project.
-        <p>See the 
-        <a href="{@docRoot}tools/projects/projects-eclipse.html#ReferencingLibraryProject">Referencing a Library Project for Eclipse</a>
-        or <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing a Library Project on the Command Line</a>
-        for more information on how to do this.</p>
-    </li>
-    <li>If you are using <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>, add the following
-        lines in the <code>&lt;project_directory&gt;/proguard-project.txt</code> file
-        to prevent ProGuard from stripping away required classes:
+  <li>Launch the SDK Manager.
+   <ul>
+    <li>From Eclipse (with <a href="{@docRoot}tools/help/adt.html">ADT</a>),
+    select <strong>Window</strong> &gt; <strong>Android SDK Manager</strong>.</li>
+    <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
+  SDK directory.</li>
+    <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
+  Android SDK, then execute <code>android sdk</code>.</li>
+    </ul>
+  </li>
+  <li>
+      Scroll to the bottom of the package list, select <b>Extras &gt; Google Play services</b>,
+      and install it.
+      <p>The Google Play services SDK is saved in your Android SDK environment at
+      <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/</code>.</p>
+  </li>
+  <li>Copy the <code>&lt;android-sdk-folder&gt;/extras/google/google_play_services/libproject/google-play-services_lib</code>        
+      library project into the source tree where you maintain your Android app projects.
+  <p>If you are using Eclipse, import the library project into your workspace. Click <b>File > Import</b>, select <b>Android > Existing
+  Android Code into Workspace</b>, and browse to the copy of the library project to import it.</p>
+  </li>
+</ol>
+
+
+<p>To set up a project to use the Google Play services SDK:</p>
+
+<ol>
+  <li>Reference the library project in your Android project.
+      <p>See the 
+      <a href="{@docRoot}tools/projects/projects-eclipse.html#ReferencingLibraryProject">Referencing a Library Project for Eclipse</a>
+      or <a href="{@docRoot}tools/projects/projects-cmdline.html#ReferencingLibraryProject">Referencing a Library Project on the Command Line</a>
+      for more information on how to do this.</p>
+      <p class="note"><strong>Note:</strong>
+      You should be referencing a copy of the library that you copied to your
+      source tree&mdash;you should not reference the library from the Android SDK directory.</p>
+  </li>
+  <li>If you are using <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>, add the following
+      lines in the <code>&lt;project_directory&gt;/proguard-project.txt</code> file
+      to prevent ProGuard from stripping away required classes:
 <pre>
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();
