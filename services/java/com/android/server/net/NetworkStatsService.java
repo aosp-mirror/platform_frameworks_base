@@ -903,7 +903,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 ident.add(NetworkIdentity.buildNetworkIdentity(mContext, state));
 
                 // remember any ifaces associated with mobile networks
-                if (isNetworkTypeMobile(state.networkInfo.getType())) {
+                if (isNetworkTypeMobile(state.networkInfo.getType()) && iface != null) {
                     if (!contains(mMobileIfaces, iface)) {
                         mMobileIfaces = appendElement(String.class, mMobileIfaces, iface);
                     }
