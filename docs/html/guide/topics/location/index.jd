@@ -11,29 +11,25 @@ device's location and bearing and register for updates</li>
     <li>A Google Maps external library is available that lets you display and manage Maps data</li>
   </ul>
 
-  <h2>Topics</h2>
+  <h2>In this document</h2>
   <ol>
-    <li><a href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a></li>
+    <li><a href="#location">Location Services</a></li>
+    <li><a href="#maps">Google Maps Android API</a></li>
   </ol>
   
-  <h2>See Also</h2>
-  <ol>
-    <li><a
-href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google
-Maps External Library &raquo;</a></li>
-  </ol>
 </div>
 </div>
 
-<p>Location and maps-based applications are compelling for mobile device users. You
-can build these capabilities into your applications using the classes of the {@link
-android.location} package and the Google Maps external library. The sections below provide details.
+<p>Location and maps-based apps offer a compelling experience on mobile devices. You
+can build these capabilities into your app using the classes of the {@link
+android.location} package and the Google Maps Android API. The sections below provide
+an introduction to how you can add the features.
 </p>
 
 <h2 id="location">Location Services</h2>
 
 <p>Android gives your applications access to the location services supported by
-the device through the classes in the {@code android.location} package. The
+the device through classes in the {@code android.location} package. The
 central component of the location framework is the 
 {@link android.location.LocationManager} system service, which provides APIs to
 determine location and bearing of the underlying device (if available). </p>
@@ -56,52 +52,39 @@ user location.</li>
 comes within a given proximity (specified by radius in meters) of a given lat/long.</li>
 </ul>
 
-<p>For more information, read the guide to <a
-href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a>.</p>
+<p>For more information about acquiring the user location, read the <a
+href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a> guide.</p>
 
 
-<h2 id="maps">Google Maps External Library</h2>
 
-<p>To make it easier for you to add powerful mapping capabilities to your
-application, Google provides a Maps external library that includes the
-com.google.android.maps package. The classes of the com.google.android.maps
-package offer built-in downloading, rendering, and caching of Maps tiles, as
-well as a variety of display options and controls. </p>
+<h2 id="maps">Google Maps Android API</h2>
 
-<p>The key class in the Maps package is
-<code>com.google.android.maps.MapView</code>, a subclass of 
-{@link android.view.ViewGroup ViewGroup}. A MapView displays a map with data obtained
-from the Google Maps service. When the MapView has focus, it will capture
+<p>With the Google Maps Android API, you can add maps to your app that are based on Google
+Maps data. The API automatically handles access to Google Maps servers, data downloading,
+map display, and touch gestures on the map. You can also use API calls to add markers,
+polygons and overlays, and to change the user's view of a particular map area.</p>
+
+<p>The key class in the Google Maps Android API is
+<a href="{@docRoot}reference/com/google/android/gms/maps/MapView.html">{@code MapView}</a>.
+A <a href="{@docRoot}reference/com/google/android/gms/maps/MapView.html">{@code MapView}</a>
+displays a map with data obtained
+from the Google Maps service. When the
+<a href="{@docRoot}reference/com/google/android/gms/maps/MapView.html">{@code MapView}</a>
+has focus, it will capture
 keypresses and touch gestures to pan and zoom the map automatically, including
 handling network requests for additional maps tiles. It also provides all of the
 UI elements necessary for users to control the map. Your application can also
-use MapView class methods to control the MapView programmatically and draw a
-number of Overlay types on top of the map. </p>
+use <a href="{@docRoot}reference/com/google/android/gms/maps/MapView.html">{@code MapView}</a>
+class methods to control the map programmatically and draw a
+number of overlays on top of the map. </p>
 
-<p>In general, the MapView class provides a wrapper around the Google Maps API
-that lets your application manipulate Google Maps data through class methods,
-and it lets you work with Maps data as you would other types of Views.</p>
+<p>The Google Maps Android APIs are not included in the Android platform,
+but are available on any device
+with the Google Play Store running Android 2.2 or higher, through
+<a href="{@docRoot}google/play-services/index.html">Google Play services</a>.</p>
 
-<p>The Maps external library is not part of the standard Android library, so it
-may not be present on some compliant Android-powered devices. Similarly, the
-Maps external library is not included in the standard Android library provided
-in the SDK. So that you can develop using the classes of the
-com.google.android.maps package, the Maps external library is made available to
-you as part of the Google APIs add-on for the Android SDK. </p>
+<p>To integrate Google Maps into your app, you need to install the Google Play services
+libraries for your Android SDK. For more details, read about <a
+href="{@docRoot}google/play-services/index.html">Google Play services</a>.</p>
 
-<p>To learn more about the Maps external library and how to download and use the
-Google APIs add-on, visit</p>
-
-<p style="margin-left:2em;"><a
-href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
-
-<p>For your convenience, the Google APIs add-on is also available as a downloadable component from
-the Android SDK Manager (see <a href="{@docRoot}sdk/exploring.html">Exploring the
-SDK</a>).</p>
-
-<p class="note"><strong>Note:</strong> In order to display Google Maps data in a
-MapView, you must register with the Google Maps service and obtain a Maps API
-Key. For information about how to get a Maps API Key, see <a
-href="http://code.google.com/android/add-ons/google-apis/mapkey.html">Obtaining
-a Maps API Key</a>.</p>
 
