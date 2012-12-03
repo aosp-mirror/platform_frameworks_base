@@ -40,6 +40,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Displays an arbitrary image, such as an icon.  The ImageView class
  * can load images from various sources (such as resources or content
@@ -632,20 +635,27 @@ public class ImageView extends View {
                 }
             } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                     || ContentResolver.SCHEME_FILE.equals(scheme)) {
+                InputStream stream = null;
                 try {
-                    d = Drawable.createFromStream(
-                        mContext.getContentResolver().openInputStream(mUri),
-                        null);
+                    stream = mContext.getContentResolver().openInputStream(mUri);
+                    d = Drawable.createFromStream(stream, null);
                 } catch (Exception e) {
                     Log.w("ImageView", "Unable to open content: " + mUri, e);
+                } finally {
+                    if (stream != null) {
+                        try {
+                            stream.close();
+                        } catch (IOException e) {
+                            Log.w("ImageView", "Unable to close content: " + mUri, e);
+                        }
+                    }
                 }
-            } else {
+        } else {
                 d = Drawable.createFromPath(mUri.toString());
             }
     
             if (d == null) {
-                System.out.println("resolveUri failed on bad bitmap uri: "
-                                   + mUri);
+                System.out.println("resolveUri failed on bad bitmap uri: " + mUri);
                 // Don't try again.
                 mUri = null;
             }
