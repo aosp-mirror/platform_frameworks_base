@@ -22,9 +22,6 @@ header.hide=1
   and easier for you to integrate the newest that Google has to offer.
   </p>
 
-   <p><a class="next-page-link topic-start-link"
-href="/google/play-services/download.html">Setup</a></p>
-
 </div>
 </div>
 
@@ -56,6 +53,11 @@ your app with the most recent version of Google Play services without worrying
 about your users' Android version.</p>
 
   </div>
+
+
+   <p>To start integrating Google Play services into your app,
+   follow the <a href="/google/play-services/download.html">Setup</a> guide.</p>
+
 </div>
 
 
@@ -104,7 +106,8 @@ about your users' Android version.</p>
 
   <div class="layout-content-col span-6">
     <img src="/images/play-services-diagram.png" />
-    <p class="img-caption"><em>Updates to Google Play services include access to new APIs, features, and bug fixes.</em></p>
+    <p class="img-caption"><em>The Google Play services APK on user devices receives regular updates
+    for new APIs, features, and bug fixes.</em></p>
   </div>
 </div>
 
