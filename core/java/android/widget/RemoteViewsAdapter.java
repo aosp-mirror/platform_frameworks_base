@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +34,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -90,13 +90,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private Handler mMainQueue;
 
     // We cache the FixedSizeRemoteViewsCaches across orientation. These are the related data
-    // structures;
-    private static final HashMap<Pair<Intent.FilterComparison, Integer>, FixedSizeRemoteViewsCache>
-            sCachedRemoteViewsCaches = new HashMap<Pair<Intent.FilterComparison, Integer>,
+    // structures; 
+    private static final HashMap<RemoteViewsCacheKey,
+            FixedSizeRemoteViewsCache> sCachedRemoteViewsCaches
+            = new HashMap<RemoteViewsCacheKey,
                     FixedSizeRemoteViewsCache>();
-    private static final HashMap<Pair<Intent.FilterComparison, Integer>, Runnable>
-            sRemoteViewsCacheRemoveRunnables = new HashMap<Pair<Intent.FilterComparison, Integer>,
-            Runnable>();
+    private static final HashMap<RemoteViewsCacheKey, Runnable>
+            sRemoteViewsCacheRemoveRunnables
+            = new HashMap<RemoteViewsCacheKey, Runnable>();
+
     private static HandlerThread sCacheRemovalThread;
     private static Handler sCacheRemovalQueue;
 
@@ -771,6 +773,33 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
+    static class RemoteViewsCacheKey {
+        final Intent.FilterComparison filter;
+        final int widgetId;
+        final int userId;
+
+        RemoteViewsCacheKey(Intent.FilterComparison filter, int widgetId, int userId) {
+            this.filter = filter;
+            this.widgetId = widgetId;
+            this.userId = userId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof RemoteViewsCacheKey)) {
+                return false;
+            }
+            RemoteViewsCacheKey other = (RemoteViewsCacheKey) o;
+            return other.filter.equals(filter) && other.widgetId == widgetId
+                    && other.userId == userId;
+        }
+
+        @Override
+        public int hashCode() {
+            return (filter == null ? 0 : filter.hashCode()) ^ (widgetId << 2) ^ (userId << 10);
+        }
+    }
+
     public RemoteViewsAdapter(Context context, Intent intent, RemoteAdapterConnectionCallback callback) {
         mContext = context;
         mIntent = intent;
@@ -786,7 +815,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         } else {
             mUserId = UserHandle.myUserId();
         }
-
         // Strip the previously injected app widget id from service intent
         if (intent.hasExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID)) {
             intent.removeExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID);
@@ -808,8 +836,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         mCallback = new WeakReference<RemoteAdapterConnectionCallback>(callback);
         mServiceConnection = new RemoteViewsAdapterServiceConnection(this);
 
-        Pair<Intent.FilterComparison, Integer> key = new Pair<Intent.FilterComparison, Integer>
-                (new Intent.FilterComparison(mIntent), mAppWidgetId);
+        RemoteViewsCacheKey key = new RemoteViewsCacheKey(new Intent.FilterComparison(mIntent),
+                mAppWidgetId, mUserId);
 
         synchronized(sCachedRemoteViewsCaches) {
             if (sCachedRemoteViewsCaches.containsKey(key)) {
@@ -850,8 +878,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     }
 
     public void saveRemoteViewsCache() {
-        final Pair<Intent.FilterComparison, Integer> key = new Pair<Intent.FilterComparison,
-                Integer> (new Intent.FilterComparison(mIntent), mAppWidgetId);
+        final RemoteViewsCacheKey key = new RemoteViewsCacheKey(
+                new Intent.FilterComparison(mIntent), mAppWidgetId, mUserId);
 
         synchronized(sCachedRemoteViewsCaches) {
             // If we already have a remove runnable posted for this key, remove it.
