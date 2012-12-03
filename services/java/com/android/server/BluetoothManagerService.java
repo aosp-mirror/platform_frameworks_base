@@ -77,6 +77,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_SAVE_NAME_AND_ADDRESS=201;
     private static final int MESSAGE_USER_SWITCHED = 300;
     private static final int MAX_SAVE_RETRIES=3;
+    // Bluetooth persisted setting is off
+    private static final int BLUETOOTH_OFF=0;
+    // Bluetooth persisted setting is on
+    // and Airplane mode won't affect Bluetooth state at start up
+    private static final int BLUETOOTH_ON_BLUETOOTH=1;
+    // Bluetooth persisted setting is on
+    // but Airplane mode will affect Bluetooth state at start up
+    // and Airplane mode will have higher priority.
+    private static final int BLUETOOTH_ON_AIRPLANE=2;
 
     private final Context mContext;
 
@@ -90,7 +99,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private IBluetooth mBluetooth;
     private boolean mBinding;
     private boolean mUnbinding;
+    // used inside handler thread
     private boolean mQuietEnable = false;
+    // configuarion from external IBinder call which is used to
+    // synchronize with broadcast receiver.
+    private boolean mQuietEnableExternal;
+    // configuarion from external IBinder call which is used to
+    // synchronize with broadcast receiver.
+    private boolean mEnableExternal;
+    // used inside handler thread
     private boolean mEnable;
     private int mState;
     private HandlerThread mThread;
@@ -128,18 +145,39 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     storeNameAndAddress(newName, null);
                 }
             } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
-                if (isAirplaneModeOn()) {
-                    // disable without persisting the setting
-                    mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_DISABLE,
-                           0, 0));
-                } else if (isBluetoothPersistedStateOn()) {
-                    // enable without persisting the setting
-                    mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_ENABLE,
-                           0, 0));
+                synchronized(mReceiver) {
+                    if (isBluetoothPersistedStateOn()) {
+                        if (isAirplaneModeOn()) {
+                            persistBluetoothSetting(BLUETOOTH_ON_AIRPLANE);
+                        } else {
+                            persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+                        }
+                    }
+                    if (isAirplaneModeOn()) {
+                        // disable without persisting the setting
+                        sendDisableMsg();
+                    } else if (mEnableExternal) {
+                        // enable without persisting the setting
+                        sendEnableMsg(mQuietEnableExternal);
+                    }
                 }
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_USER_SWITCHED,
                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
+            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                synchronized(mReceiver) {
+                    if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
+                        //Enable
+                        if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
+                        sendEnableMsg(mQuietEnableExternal);
+                    }
+                }
+
+                if (!isNameAndAddressSet()) {
+                    //Sync the Bluetooth name and address from the Bluetooth Adapter
+                    if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
+                    getNameAndAddress();
+                }
             }
         }
     };
@@ -155,30 +193,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mUnbinding = false;
         mEnable = false;
         mState = BluetoothAdapter.STATE_OFF;
+        mQuietEnableExternal = false;
+        mEnableExternal = false;
         mAddress = null;
         mName = null;
         mContentResolver = context.getContentResolver();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         registerForAirplaneMode(filter);
         mContext.registerReceiver(mReceiver, filter);
-        boolean airplaneModeOn = isAirplaneModeOn();
-        boolean bluetoothOn = isBluetoothPersistedStateOn();
         loadStoredNameAndAddress();
-        if (DBG) Log.d(TAG, "airplaneModeOn: " + airplaneModeOn + " bluetoothOn: " + bluetoothOn);
-        if (bluetoothOn) {
-            //Enable
-            if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
-            enableHelper();
-        }
-
-        if (!isNameAndAddressSet()) {
-            //Sync the Bluetooth name and address from the Bluetooth Adapter
-            if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
-            getNameAndAddress();
+        if (isBluetoothPersistedStateOn()) {
+            mEnableExternal = true;
         }
     }
 
@@ -195,17 +224,25 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private final boolean isBluetoothPersistedStateOn() {
         return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, 0) ==1;
+                Settings.Global.BLUETOOTH_ON, 0) != BLUETOOTH_OFF;
+    }
+
+    /**
+     *  Returns true if the Bluetooth saved state is BLUETOOTH_ON_BLUETOOTH
+     */
+    private final boolean isBluetoothPersistedStateOnBluetooth() {
+        return Settings.Global.getInt(mContentResolver,
+                Settings.Global.BLUETOOTH_ON, 0) == BLUETOOTH_ON_BLUETOOTH;
     }
 
     /**
      *  Save the Bluetooth on/off state
      *
      */
-    private void persistBluetoothSetting(boolean setOn) {
+    private void persistBluetoothSetting(int value) {
         Settings.Global.putInt(mContext.getContentResolver(),
                                Settings.Global.BLUETOOTH_ON,
-                               setOn ? 1 : 0);
+                               value);
     }
 
     /**
@@ -334,10 +371,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             throw new SecurityException("no permission to enable Bluetooth quietly");
         }
 
-        Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
-        msg.arg1=0; //No persist
-        msg.arg2=1; //Quiet mode
-        mHandler.sendMessage(msg);
+        synchronized(mReceiver) {
+            mQuietEnableExternal = true;
+            mEnableExternal = true;
+            sendEnableMsg(true);
+        }
         return true;
 
     }
@@ -348,7 +386,23 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             return false;
         }
 
-        return enableHelper();
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH ADMIN permission");
+        if (DBG) {
+            Log.d(TAG,"enable():  mBluetooth =" + mBluetooth +
+                    " mBinding = " + mBinding);
+        }
+
+        synchronized(mReceiver) {
+            mQuietEnableExternal = false;
+            mEnableExternal = true;
+            // waive WRITE_SECURE_SETTINGS permission check
+            long callingIdentity = Binder.clearCallingIdentity();
+            persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+            Binder.restoreCallingIdentity(callingIdentity);
+            sendEnableMsg(false);
+        }
+        return true;
     }
 
     public boolean disable(boolean persist) {
@@ -366,9 +420,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 " mBinding = " + mBinding);
         }
 
-        Message msg = mHandler.obtainMessage(MESSAGE_DISABLE);
-        msg.arg1=(persist?1:0);
-        mHandler.sendMessage(msg);
+        synchronized(mReceiver) {
+            if (persist) {
+                // waive WRITE_SECURE_SETTINGS permission check
+                long callingIdentity = Binder.clearCallingIdentity();
+                persistBluetoothSetting(BLUETOOTH_OFF);
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+            mEnableExternal = false;
+            sendDisableMsg();
+        }
         return true;
     }
 
@@ -641,7 +702,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
                     mHandler.removeMessages(MESSAGE_RESTART_BLUETOOTH_SERVICE);
                     mEnable = true;
-                    handleEnable(msg.arg1 == 1, msg.arg2 ==1);
+                    handleEnable(msg.arg1 == 1);
                     break;
 
                 case MESSAGE_DISABLE:
@@ -649,11 +710,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     if (mEnable && mBluetooth != null) {
                         waitForOnOff(true, false);
                         mEnable = false;
-                        handleDisable(msg.arg1 == 1);
+                        handleDisable();
                         waitForOnOff(false, false);
                     } else {
                         mEnable = false;
-                        handleDisable(msg.arg1 == 1);
+                        handleDisable();
                     }
                     break;
 
@@ -732,7 +793,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                     if (!mEnable) {
                         waitForOnOff(true, false);
-                        handleDisable(false);
+                        handleDisable();
                         waitForOnOff(false, false);
                     }
                     break;
@@ -800,7 +861,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                      it doesnt change when IBluetooth
                      service restarts */
                     mEnable = true;
-                    handleEnable(false, mQuietEnable);
+                    handleEnable(mQuietEnable);
                     break;
                 }
 
@@ -849,7 +910,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         }
 
                         // disable
-                        handleDisable(false);
+                        handleDisable();
                         // Pbap service need receive STATE_TURNING_OFF intent to close
                         bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
                                                     BluetoothAdapter.STATE_TURNING_OFF);
@@ -871,7 +932,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
                         mState = BluetoothAdapter.STATE_OFF;
                         // enable
-                        handleEnable(false, mQuietEnable);
+                        handleEnable(mQuietEnable);
 		    } else if (mBinding || mBluetooth != null) {
                         Message userMsg = mHandler.obtainMessage(MESSAGE_USER_SWITCHED);
                         userMsg.arg2 = 1 + msg.arg2;
@@ -888,11 +949,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     }
 
-    private void handleEnable(boolean persist, boolean quietMode) {
-        if (persist) {
-            persistBluetoothSetting(true);
-        }
-
+    private void handleEnable(boolean quietMode) {
         mQuietEnable = quietMode;
 
         synchronized(mConnection) {
@@ -944,11 +1001,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     }
 
-    private void handleDisable(boolean persist) {
-        if (persist) {
-            persistBluetoothSetting(false);
-        }
-
+    private void handleDisable() {
         synchronized(mConnection) {
             // don't need to disable if GetNameAddressOnly is set,
             // service will be unbinded after Name and Address are saved
@@ -986,21 +1039,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Binder.restoreCallingIdentity(callingIdentity);
         }
         return valid;
-    }
-
-    private boolean enableHelper() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH ADMIN permission");
-        if (DBG) {
-            Log.d(TAG,"enable():  mBluetooth =" + mBluetooth +
-                    " mBinding = " + mBinding);
-        }
-
-        Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
-        msg.arg1=1; //persist
-        msg.arg2=0; //No Quiet Mode
-        mHandler.sendMessage(msg);
-        return true;
     }
 
     private void bluetoothStateChangeHandler(int prevState, int newState) {
@@ -1060,6 +1098,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
         Log.e(TAG,"waitForOnOff time out");
         return false;
+    }
+
+    private void sendDisableMsg() {
+        mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_DISABLE));
+    }
+
+    private void sendEnableMsg(boolean quietMode) {
+        mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_ENABLE,
+                             quietMode ? 1 : 0, 0));
     }
 
     private boolean canUnbindBluetoothService() {
