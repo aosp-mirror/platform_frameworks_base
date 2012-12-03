@@ -1212,7 +1212,7 @@ public final class BluetoothAdapter {
     final private IBluetoothManagerCallback mManagerCallback =
         new IBluetoothManagerCallback.Stub() {
             public void onBluetoothServiceUp(IBluetooth bluetoothService) {
-                if (DBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
+                if (VDBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
                 synchronized (mManagerCallback) {
                     mService = bluetoothService;
                     for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
@@ -1228,7 +1228,7 @@ public final class BluetoothAdapter {
             }
 
             public void onBluetoothServiceDown() {
-                if (DBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
+                if (VDBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
                 synchronized (mManagerCallback) {
                     mService = null;
                     for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
