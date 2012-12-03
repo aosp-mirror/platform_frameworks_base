@@ -27,17 +27,17 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
-import android.view.IDisplayContentChangeListener;
+import android.view.IDisplayMagnificationMediator;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
 import android.view.KeyEvent;
 import android.view.InputEvent;
+import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
-import android.view.WindowInfo;
 
 /**
  * System private interface to the window manager.
@@ -221,39 +221,19 @@ interface IWindowManager
     IBinder getFocusedWindowToken();
 
     /**
-     * Gets the compatibility scale of e window given its token.
-     */
-    float getWindowCompatibilityScale(IBinder windowToken);
-
-    /**
      * Sets an input filter for manipulating the input event stream.
      */
     void setInputFilter(in IInputFilter filter);
 
     /**
-     * Sets the scale and offset for implementing accessibility magnification.
+     * Gets the display magnification mediator.
      */
-    void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY);
+    IDisplayMagnificationMediator getDisplayMagnificationMediator();
 
     /**
-     * Adds a listener for display content changes.
+     * Gets the frame of a window given its token.
      */
-    void addDisplayContentChangeListener(int displayId, IDisplayContentChangeListener listener);
-
-    /**
-     * Removes a listener for display content changes.
-     */
-    void removeDisplayContentChangeListener(int displayId, IDisplayContentChangeListener listener);
-
-    /**
-     * Gets the info for a window given its token.
-     */
-    WindowInfo getWindowInfo(IBinder token);
-
-    /**
-     * Gets the infos for all visible windows.
-     */
-    void getVisibleWindowsForDisplay(int displayId, out List<WindowInfo> outInfos);
+    void getWindowFrame(IBinder token, out Rect outFrame);
 
     /**
      * Device is in safe mode.

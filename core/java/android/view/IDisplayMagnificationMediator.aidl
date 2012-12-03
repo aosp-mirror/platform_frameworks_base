@@ -1,7 +1,7 @@
 /*
 ** Copyright 2012, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License")
+** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
@@ -16,18 +16,16 @@
 
 package android.view;
 
-import android.os.IBinder;
-import android.view.WindowInfo;
-import android.graphics.Rect;
+import android.view.IDisplayMagnificationController;
+import android.view.MagnificationSpec;
 
 /**
- * Interface for observing content changes on a display.
- *
  * {@hide}
  */
-oneway interface IDisplayContentChangeListener {
-    void onWindowTransition(int displayId, int transition, in WindowInfo info);
-    void onRectangleOnScreenRequested(int displayId, in Rect rectangle, boolean immediate);
-    void onWindowLayersChanged(int displayId);
-    void onRotationChanged(int rotation);
+interface IDisplayMagnificationMediator {
+    void addController(int displayId, in IDisplayMagnificationController controller);
+    void removeController(in IDisplayMagnificationController controller);
+    void setMagnificationSpec(in IDisplayMagnificationController controller,
+            in MagnificationSpec spec);
+    MagnificationSpec getCompatibleMagnificationSpec(in IBinder windowToken);
 }

@@ -17,7 +17,6 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -101,8 +100,6 @@ public final class AccessibilityInteractionClient
     private boolean mPerformAccessibilityActionResult;
 
     private Message mSameThreadMessage;
-
-    private final Rect mTempBounds = new Rect();
 
     // The connection cache is shared between all interrogating threads.
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
@@ -194,14 +191,14 @@ public final class AccessibilityInteractionClient
                     return cachedInfo;
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.findAccessibilityNodeInfoByAccessibilityId(
+                final boolean success = connection.findAccessibilityNodeInfoByAccessibilityId(
                         accessibilityWindowId, accessibilityNodeId, interactionId, this,
                         prefetchFlags, Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
-                if (windowScale > 0) {
+                if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId, windowScale);
+                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
                     if (infos != null && !infos.isEmpty()) {
                         return infos.get(0);
                     }
@@ -242,15 +239,13 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale =
-                    connection.findAccessibilityNodeInfoByViewId(accessibilityWindowId,
-                            accessibilityNodeId, viewId, interactionId, this,
-                            Thread.currentThread().getId());
-                // If the scale is zero the call has failed.
-                if (windowScale > 0) {
+                final boolean success =connection.findAccessibilityNodeInfoByViewId(
+                        accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
+                        Thread.currentThread().getId());
+                if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, windowScale);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
                     return info;
                 }
             } else {
@@ -290,14 +285,13 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.findAccessibilityNodeInfosByText(
+                final boolean success = connection.findAccessibilityNodeInfosByText(
                         accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
                         Thread.currentThread().getId());
-                // If the scale is zero the call has failed.
-                if (windowScale > 0) {
+                if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId, windowScale);
+                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
                     return infos;
                 }
             } else {
@@ -336,14 +330,13 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.findFocus(accessibilityWindowId,
+                final boolean success = connection.findFocus(accessibilityWindowId,
                         accessibilityNodeId, focusType, interactionId, this,
                         Thread.currentThread().getId());
-                // If the scale is zero the call has failed.
-                if (windowScale > 0) {
+                if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, windowScale);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
                     return info;
                 }
             } else {
@@ -381,14 +374,13 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.focusSearch(accessibilityWindowId,
+                final boolean success = connection.focusSearch(accessibilityWindowId,
                         accessibilityNodeId, direction, interactionId, this,
                         Thread.currentThread().getId());
-                // If the scale is zero the call has failed.
-                if (windowScale > 0) {
+                if (success) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, windowScale);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
                     return info;
                 }
             } else {
@@ -604,36 +596,14 @@ public final class AccessibilityInteractionClient
     }
 
     /**
-     * Applies compatibility scale to the info bounds if it is not equal to one.
-     *
-     * @param info The info whose bounds to scale.
-     * @param scale The scale to apply.
-     */
-    private void applyCompatibilityScaleIfNeeded(AccessibilityNodeInfo info, float scale) {
-        if (scale == 1.0f) {
-            return;
-        }
-        Rect bounds = mTempBounds;
-        info.getBoundsInParent(bounds);
-        bounds.scale(scale);
-        info.setBoundsInParent(bounds);
-
-        info.getBoundsInScreen(bounds);
-        bounds.scale(scale);
-        info.setBoundsInScreen(bounds);
-    }
-
-    /**
      * Finalize an {@link AccessibilityNodeInfo} before passing it to the client.
      *
      * @param info The info.
      * @param connectionId The id of the connection to the system.
-     * @param windowScale The source window compatibility scale.
      */
-    private void finalizeAndCacheAccessibilityNodeInfo(AccessibilityNodeInfo info, int connectionId,
-            float windowScale) {
+    private void finalizeAndCacheAccessibilityNodeInfo(AccessibilityNodeInfo info,
+            int connectionId) {
         if (info != null) {
-            applyCompatibilityScaleIfNeeded(info, windowScale);
             info.setConnectionId(connectionId);
             info.setSealed(true);
             sAccessibilityNodeInfoCache.add(info);
@@ -645,15 +615,14 @@ public final class AccessibilityInteractionClient
      *
      * @param infos The {@link AccessibilityNodeInfo}s.
      * @param connectionId The id of the connection to the system.
-     * @param windowScale The source window compatibility scale.
      */
     private void finalizeAndCacheAccessibilityNodeInfos(List<AccessibilityNodeInfo> infos,
-            int connectionId, float windowScale) {
+            int connectionId) {
         if (infos != null) {
             final int infosCount = infos.size();
             for (int i = 0; i < infosCount; i++) {
                 AccessibilityNodeInfo info = infos.get(i);
-                finalizeAndCacheAccessibilityNodeInfo(info, connectionId, windowScale);
+                finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
             }
         }
     }

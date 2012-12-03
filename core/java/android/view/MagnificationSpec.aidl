@@ -17,4 +17,4 @@
 
 package android.view;
 
-parcelable WindowInfo;
+parcelable MagnificationSpec;

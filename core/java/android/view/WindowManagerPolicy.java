@@ -1112,14 +1112,6 @@ public interface WindowManagerPolicy {
     public void setLastInputMethodWindowLw(WindowState ime, WindowState target);
 
     /**
-     * Returns whether magnification can be applied to the given window type.
-     *
-     * @param attrs The window's LayoutParams.
-     * @return Whether magnification can be applied.
-     */
-    public boolean canMagnifyWindowLw(WindowManager.LayoutParams attrs);
-
-    /**
      * Called when the current user changes. Guaranteed to be called before the broadcast
      * of the new user id is made to all listeners.
      *

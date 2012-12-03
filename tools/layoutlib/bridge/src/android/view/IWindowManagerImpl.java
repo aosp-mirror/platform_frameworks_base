@@ -22,6 +22,7 @@ import com.android.internal.view.IInputMethodClient;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -30,13 +31,11 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IApplicationToken;
-import android.view.IDisplayContentChangeListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
-import android.view.WindowInfo;
 
 import java.util.List;
 
@@ -446,7 +445,7 @@ public class IWindowManagerImpl implements IWindowManager {
     public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean isSafeModeEnabled() {
         return false;
@@ -464,43 +463,18 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public float getWindowCompatibilityScale(IBinder windowToken) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public void setInputFilter(IInputFilter filter) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void magnifyDisplay(int dipslayId, float scale, float offsetX, float offsetY)
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void addDisplayContentChangeListener(int displayId,
-            IDisplayContentChangeListener listener) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void removeDisplayContentChangeListener(int displayId,
-            IDisplayContentChangeListener listener) throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public WindowInfo getWindowInfo(IBinder token) throws RemoteException {
+    public IDisplayMagnificationMediator getDisplayMagnificationMediator() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void getVisibleWindowsForDisplay(int displayId, List<WindowInfo> outInfos)
-            throws RemoteException {
+    public void getWindowFrame(IBinder token, Rect outFrame) {
         // TODO Auto-generated method stub
     }
 }

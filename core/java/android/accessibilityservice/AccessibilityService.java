@@ -548,6 +548,7 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_ON_INTERRUPT = 20;
         private static final int DO_ON_ACCESSIBILITY_EVENT = 30;
         private static final int DO_ON_GESTURE = 40;
+        private static final int DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE = 50;
 
         private final HandlerCaller mCaller;
 
@@ -577,6 +578,11 @@ public abstract class AccessibilityService extends Service {
 
         public void onGesture(int gestureId) {
             Message message = mCaller.obtainMessageI(DO_ON_GESTURE, gestureId);
+            mCaller.sendMessage(message);
+        }
+
+        public void clearAccessibilityNodeInfoCache() {
+            Message message = mCaller.obtainMessage(DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE);
             mCaller.sendMessage(message);
         }
 
@@ -610,6 +616,9 @@ public abstract class AccessibilityService extends Service {
                 case DO_ON_GESTURE :
                     final int gestureId = message.arg1;
                     mCallback.onGesture(gestureId);
+                    return;
+                case DO_CLEAR_ACCESSIBILITY_NODE_INFO_CACHE:
+                    AccessibilityInteractionClient.getInstance().clearCache();
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);

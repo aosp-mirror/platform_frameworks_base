@@ -16,6 +16,7 @@ import android.graphics.Region;
 import android.os.Debug;
 import android.util.Slog;
 import android.view.DisplayInfo;
+import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -918,10 +919,13 @@ class WindowStateAnimator {
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
-            MagnificationSpec spec = mWin.getWindowMagnificationSpecLocked();
-            if (spec != null && !spec.isNop()) {
-                tmpMatrix.postScale(spec.mScale, spec.mScale);
-                tmpMatrix.postTranslate(spec.mOffsetX, spec.mOffsetY);
+            if (mService.mMagnificationMediator != null) {
+                MagnificationSpec spec = mService.mMagnificationMediator
+                        .getMagnificationSpecLw(mWin);
+                if (spec != null && !spec.isNop()) {
+                    tmpMatrix.postScale(spec.scale, spec.scale);
+                    tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
+                }
             }
 
             // "convert" it into SurfaceFlinger's format
@@ -994,7 +998,8 @@ class WindowStateAnimator {
         final boolean applyUniverseTransformation = (mAnimator.mUniverseBackground != null
                 && mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
                 && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
-        MagnificationSpec spec = mWin.getWindowMagnificationSpecLocked();
+        MagnificationSpec spec = (mService.mMagnificationMediator != null)
+                ? mService.mMagnificationMediator.getMagnificationSpecLw(mWin) : null;
         if (applyUniverseTransformation || spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
@@ -1008,8 +1013,8 @@ class WindowStateAnimator {
             }
 
             if (spec != null && !spec.isNop()) {
-                tmpMatrix.postScale(spec.mScale, spec.mScale);
-                tmpMatrix.postTranslate(spec.mOffsetX, spec.mOffsetY);
+                tmpMatrix.postScale(spec.scale, spec.scale);
+                tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
             }
 
             tmpMatrix.getValues(tmpFloats);
@@ -1494,7 +1499,9 @@ class WindowStateAnimator {
             transit = WindowManagerPolicy.TRANSIT_SHOW;
         }
         applyAnimationLocked(transit, true);
-        mService.scheduleNotifyWindowTranstionIfNeededLocked(mWin, transit);
+        if (mService.mMagnificationMediator != null) {
+            mService.mMagnificationMediator.onWindowTransitionLw(mWin, transit);
+        }
     }
 
     // TODO(cmautner): Move back to WindowState?

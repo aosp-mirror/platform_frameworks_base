@@ -5421,12 +5421,13 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                            spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5460,12 +5461,13 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByViewIdClientThread(accessibilityNodeId, viewId,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                            spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5479,12 +5481,13 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                            spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5498,12 +5501,12 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void findFocus(long accessibilityNodeId, int focusType, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findFocusClientThread(accessibilityNodeId, focusType, interactionId, callback,
-                            flags, interrogatingPid, interrogatingTid);
+                            flags, interrogatingPid, interrogatingTid, spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5517,12 +5520,12 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void focusSearch(long accessibilityNodeId, int direction, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .focusSearchClientThread(accessibilityNodeId, direction, interactionId,
-                            callback, flags, interrogatingPid, interrogatingTid);
+                            callback, flags, interrogatingPid, interrogatingTid, spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {

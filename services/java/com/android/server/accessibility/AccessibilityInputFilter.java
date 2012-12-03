@@ -19,6 +19,7 @@ package com.android.server.accessibility;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputFilter;
@@ -169,7 +170,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private void enableFeatures() {
         if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
-            mEventHandler = mScreenMagnifier = new ScreenMagnifier(mContext);
+            mEventHandler = mScreenMagnifier = new ScreenMagnifier(mContext,
+                    Display.DEFAULT_DISPLAY, mAms);
             mEventHandler.setNext(this);
         }
         if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
