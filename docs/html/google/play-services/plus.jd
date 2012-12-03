@@ -18,7 +18,7 @@ header.hide=1
   and allow users to <b>share rich content</b> with Google+.</p>
   
   <p>The <a
-href="{@docRoot}google/play-services/reference/com/google/android/gms/plus/package-summary.html"
+href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html"
 >Google+ Android API reference</a> is available here on developer.android.com, but for more
 information about integrating Google+, visit:</p>
 <p><a class="external-link"
@@ -65,13 +65,15 @@ href="https://developers.google.com/+/mobile/android/">developers.google.com/+</
     </p>
     
     <h4>3. Read the documentation</h4>
+    <p>Read the <a href="https://developers.google.com/+/terms">Google+ Platform
+    Terms of Service</a>.</p>
+ 
     <p>For quick access while developing your Android apps, the
-    <a href="{@docRoot}google/play-services/reference/com/google/android/gms/plus/package-summary.html">Google+
+    <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html">Google+
     API reference</a> is available here on developer.android.com.</p>
-    <p>Extended documentation for the Google+ Android APIs is provided with the rest of the
+ 
+    <p>Detailed documentation for the Google+ Android APIs is available with the rest of the
     Google+ developer documents at <a class="external-link"
     href="https://developers.google.com/+/mobile/android/">developers.google.com/+</a>.</p>
-    <p>Also read the <a href="https://developers.google.com/+/terms">Google+ Platform
-    Terms of Service</a>.</p>
   </div>
 </div>
