@@ -824,9 +824,11 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void requestLayout() {
-        checkThread();
-        mLayoutRequested = true;
-        scheduleTraversals();
+        if (!mHandlingLayoutInLayoutRequest) {
+            checkThread();
+            mLayoutRequested = true;
+            scheduleTraversals();
+        }
     }
 
     @Override
@@ -1712,7 +1714,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean triggerGlobalLayoutListener = didLayout
                 || attachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
-            performLayout();
+            performLayout(lp, desiredWindowWidth, desiredWindowHeight);
 
             // By this point all views have been sized and positionned
             // We can compute the transparent area
@@ -1920,7 +1922,8 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void performLayout() {
+    private void performLayout(WindowManager.LayoutParams lp, int desiredWindowWidth,
+            int desiredWindowHeight) {
         mLayoutRequested = false;
         mScrollMayChange = true;
         mInLayout = true;
@@ -1942,6 +1945,8 @@ public final class ViewRootImpl implements ViewParent,
                 for (int i = 0; i < numViewsRequestingLayout; ++i) {
                     mLayoutRequesters.get(i).requestLayout();
                 }
+                measureHierarchy(host, lp, mView.getContext().getResources(),
+                        desiredWindowWidth, desiredWindowHeight);
                 // Now run layout one more time
                 mInLayout = true;
                 host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
