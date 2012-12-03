@@ -433,19 +433,15 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean clipPath(Path path) {
-        // TODO: Implement
-        path.computeBounds(mPathBounds, true);
-        return nClipRect(mRenderer, mPathBounds.left, mPathBounds.top,
-                mPathBounds.right, mPathBounds.bottom, Region.Op.INTERSECT.nativeInt);
+        return nClipPath(mRenderer, path.mNativePath, Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
     public boolean clipPath(Path path, Region.Op op) {
-        // TODO: Implement
-        path.computeBounds(mPathBounds, true);
-        return nClipRect(mRenderer, mPathBounds.left, mPathBounds.top,
-                mPathBounds.right, mPathBounds.bottom, op.nativeInt);
+        return nClipPath(mRenderer, path.mNativePath, op.nativeInt);
     }
+
+    private static native boolean nClipPath(int renderer, int path, int op);
 
     @Override
     public boolean clipRect(float left, float top, float right, float bottom) {
@@ -465,8 +461,8 @@ class GLES20Canvas extends HardwareCanvas {
         return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
     
-    private static native boolean nClipRect(int renderer, int left, int top, int right, int bottom,
-            int op);
+    private static native boolean nClipRect(int renderer, int left, int top,
+            int right, int bottom, int op);
 
     @Override
     public boolean clipRect(Rect rect) {
@@ -492,19 +488,15 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean clipRegion(Region region) {
-        // TODO: Implement
-        region.getBounds(mClipBounds);
-        return nClipRect(mRenderer, mClipBounds.left, mClipBounds.top,
-                mClipBounds.right, mClipBounds.bottom, Region.Op.INTERSECT.nativeInt);
+        return nClipRegion(mRenderer, region.mNativeRegion, Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
     public boolean clipRegion(Region region, Region.Op op) {
-        // TODO: Implement
-        region.getBounds(mClipBounds);
-        return nClipRect(mRenderer, mClipBounds.left, mClipBounds.top,
-                mClipBounds.right, mClipBounds.bottom, op.nativeInt);
+        return nClipRegion(mRenderer, region.mNativeRegion, op.nativeInt);
     }
+
+    private static native boolean nClipRegion(int renderer, int region, int op);
 
     @Override
     public boolean getClipBounds(Rect bounds) {

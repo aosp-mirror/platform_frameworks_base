@@ -35,6 +35,9 @@
 // Turn on to enable layers debugging when rendered as regions
 #define DEBUG_LAYERS_AS_REGIONS 0
 
+// Turn on to enable debugging when the clip is not a rect
+#define DEBUG_CLIP_REGIONS 0
+
 // Turn on to display debug info about vertex/fragment shaders
 #define DEBUG_PROGRAMS 0
 

@@ -18,13 +18,7 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.view.View;
@@ -50,8 +44,10 @@ public class ClipRegionActivity extends Activity {
             canvas.save();
             canvas.clipRect(100.0f, 100.0f, getWidth() - 100.0f, getHeight() - 100.0f,
                     Region.Op.DIFFERENCE);
-            canvas.drawARGB(255, 255, 0, 0);
+            canvas.drawARGB(128, 255, 0, 0);
             canvas.restore();
+
+            invalidate();
         }
     }
 }
