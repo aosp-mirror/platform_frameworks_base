@@ -121,7 +121,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         public void startObserving() {
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.NEXT_ALARM_FORMATTED), false, this);
+                    Settings.System.getUriFor(Settings.System.NEXT_ALARM_FORMATTED), false, this,
+                    UserHandle.USER_ALL);
         }
     }
 
@@ -311,8 +312,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
     }
     void onNextAlarmChanged() {
-        mAlarmState.label = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.NEXT_ALARM_FORMATTED);
+        final String alarmText = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.NEXT_ALARM_FORMATTED,
+                UserHandle.USER_CURRENT);
+        mAlarmState.label = alarmText;
+
+        // When switching users, this is the only clue we're going to get about whether the
+        // alarm is actually set, since we won't get the ACTION_ALARM_CHANGED broadcast
+        mAlarmState.enabled = ! TextUtils.isEmpty(alarmText);
+
         mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
     }
 
