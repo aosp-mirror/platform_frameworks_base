@@ -28,10 +28,10 @@ div.cell-icon img {
 build new revenue streams, manage app distribution,
 track app usage, and enhance your app with features such as maps, sign-in, and
 cloud messaging.</p>
-  <p>Because these services are offered directly by Google, they're not included in
-  the Android platform. Some are provided by the Google Play
-  service available on devices with Google Play,
-  and others require a library added to your app.</p>
+  <p>Although these Google services are not included in the Android platform, they are
+  supported by most Android-powered devices. When using these services, you can
+  distribute your app to all device with Google Play running Android 2.2
+  or higher, and some services support even more devices.</p>
 </div>
 </div>
 <div>&nbsp;</div>
