@@ -25,8 +25,9 @@ div.cell-icon img {
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Services</h1>
   <p itemprop="description">Google offers a variety of services that help you
-enhance your app's capabilities, build new revenue streams, manage app distribution,
-and track app usage.</p>
+build new revenue streams, manage app distribution,
+track app usage, and enhance your app with features such as maps, sign-in, and
+cloud messaging.</p>
   <p>Because these services are offered directly by Google, they're not included in
   the Android platform. Some are provided by the Google Play
   service available on devices with Google Play,
@@ -43,34 +44,34 @@ and track app usage.</p>
 
 <div class="landing-cell">
   <div class="cell-icon">
-  <img src="{@docRoot}images/google/maps-pin.png">
+  <img src="{@docRoot}images/google/maps-pin.png" width="40" >
   </div>
     <h4><a href="{@docRoot}google/play-services/maps.html"
     >Google Maps</a></h4>
     <p>The power of Google Maps is available to your app
     with an embeddable map view. You can customize the map with
-    markers and overlays, control the user's perspective, animate the camera, and much more.</p>
+    markers and overlays, control the user's perspective, draw lines
+    and shapes, and much more.</p>
 </div>
 
 <div class="landing-cell">
   <div class="cell-icon">
-  <img src="{@docRoot}images/google/plus-one.png">
+  <img src="{@docRoot}images/google/plus-one.png" width="40" >
   </div>
     <h4><a href="{@docRoot}google/play-services/plus.html"
     >Google+</a></h4>
-    <p>Authenticate your users by allowing them to sign in with Google+.
-    Provide +1 buttons that allow users to recommend your app content and build customized
-    content for posts on Google+.</p>
+    <p>Authenticate users and allow them to sign in, add +1 buttons so users can
+    recommend your app content, and allow them to share your content on Google+.</p>
 </div>
 
 <div class="landing-cell">
   <div class="cell-icon">
-  <img src="{@docRoot}images/google/gcm-cloud.png">
+  <img src="{@docRoot}images/google/gcm-cloud.png" width="40" >
   </div>
     <h4><a href="{@docRoot}google/gcm/index.html"
     >Google Cloud Messaging</a></h4>
-    <p>Keep your users connected by delivering events with
-    lightweight messages immediately from your web server. There are no quotas or charges
+    <p>Immediately notify your users about timely events by delivering
+    lightweight messages from your web server. There are no quotas or charges
     to use Google Cloud Messaging.</p>
 </div>
 
@@ -83,7 +84,7 @@ and track app usage.</p>
 
 <div class="landing-cell">
   <div class="cell-icon">
-    <img src="{@docRoot}images/google/iab-99c.png" />
+    <img src="{@docRoot}images/google/iab-99c.png" width="40" />
   </div>
     <h4><a href="{@docRoot}google/play/billing/index.html"
     >Google Play In-App Billing</a></h4>
@@ -95,24 +96,26 @@ and track app usage.</p>
 
 <div class="landing-cell">
   <div class="cell-icon">
-<img src="{@docRoot}images/google/analytics.png" />
+<img src="{@docRoot}images/google/analytics.png" width="40" />
   </div>
     <h4><a class="external-link" 
 href="https://developers.google.com/analytics/devguides/collection/android/v2/"
   >Google Analytics</a></h4>
 
-<p>Measure your success and gain deeper insights into how mobile users engage with your content
-by integrating Google Analytics with your app.</p>
+<p>Measure your success and gain insights into how users engage with your app content
+by integrating Google Analytics. You can track in-app purchases, the number of active users,
+interaction patterns, and much more.
+</p>
 </div>
 
 <div class="landing-cell">
   <div class="cell-icon">
-    <img src="{@docRoot}images/google/admob-money.png" />
+    <img src="{@docRoot}images/google/admob-money.png" width="40" />
   </div>
     <h4><a class="external-link" href="https://developers.google.com/mobile-ads-sdk/"
     >Google AdMob Ads</a></h4>
     <p>Display ads from AdMob offer you an alternative revenue opportunity that leverages
-    multiple ad networks.
+    multiple ad networks with targeted ads and several display formats.
     </p>
 </div>
   
