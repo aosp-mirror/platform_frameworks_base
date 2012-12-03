@@ -14,6 +14,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -1533,7 +1534,8 @@ class WindowStateAnimator {
                         break;
                 }
                 if (attr >= 0) {
-                    a = mService.loadAnimation(mWin.mAttrs, attr);
+                    a = mService.loadAnimation(UserHandle.getUserId(mWin.mOwnerUid),
+                            mWin.mAttrs, attr);
                 }
             }
             if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
