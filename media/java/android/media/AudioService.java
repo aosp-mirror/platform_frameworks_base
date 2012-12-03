@@ -439,6 +439,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
+    // Used when safe volume warning message display is requested by setStreamVolume(). In this
+    // case, the new requested volume, stream type and device are stored in mPendingVolumeCommand
+    // and used later when/if disableSafeMediaVolume() is called.
+    private StreamVolumeCommand mPendingVolumeCommand;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -831,6 +836,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         int index;
         int oldIndex;
 
+        // reset any pending volume command
+        synchronized (mSafeMediaVolumeState) {
+            mPendingVolumeCommand = null;
+        }
+
         flags &= ~AudioManager.FLAG_FIXED_VOLUME;
         if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
                ((device & mFixedVolumeDevices) != 0)) {
@@ -858,6 +868,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             index = mStreamStates[streamType].getIndex(device,
                                                  (streamState.muteCount() != 0)  /* lastAudible */);
             oldIndex = index;
+            mVolumePanel.postDisplaySafeVolumeWarning(flags);
         } else {
             // If either the client forces allowing ringer modes for this adjustment,
             // or the stream type is one that is affected by ringer modes
@@ -929,39 +940,23 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         setMasterVolume(volume, flags);
     }
 
-    /** @see AudioManager#setStreamVolume(int, int, int) */
-    public void setStreamVolume(int streamType, int index, int flags) {
-        ensureValidStreamType(streamType);
-        VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
+    // StreamVolumeCommand contains the information needed to defer the process of
+    // setStreamVolume() in case the user has to acknowledge the safe volume warning message.
+    class StreamVolumeCommand {
+        public final int mStreamType;
+        public final int mIndex;
+        public final int mFlags;
+        public final int mDevice;
 
-        final int device = getDeviceForStream(streamType);
-        int oldIndex;
-
-        // get last audible index if stream is muted, current index otherwise
-        oldIndex = streamState.getIndex(device,
-                                        (streamState.muteCount() != 0) /* lastAudible */);
-
-        index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
-
-        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-        if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
-                ((device & mFixedVolumeDevices) != 0)) {
-            flags |= AudioManager.FLAG_FIXED_VOLUME;
-            // volume is either 0 or max allowed for fixed volume devices
-            if (index != 0) {
-                if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
-                        (device & mSafeMediaVolumeDevices) != 0) {
-                    index = mSafeMediaVolumeIndex;
-                } else {
-                    index = streamState.getMaxIndex();
-                }
-            }
+        StreamVolumeCommand(int streamType, int index, int flags, int device) {
+            mStreamType = streamType;
+            mIndex = index;
+            mFlags = flags;
+            mDevice = device;
         }
+    };
 
-        if (!checkSafeMediaVolume(mStreamVolumeAlias[streamType], index, device)) {
-            return;
-        }
-
+    private void onSetStreamVolume(int streamType, int index, int flags, int device) {
         // setting volume on master stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
@@ -981,9 +976,53 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, false, true);
-        // get last audible index if stream is muted, current index otherwise
-        index = mStreamStates[streamType].getIndex(device,
-                                (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
+    }
+
+    /** @see AudioManager#setStreamVolume(int, int, int) */
+    public void setStreamVolume(int streamType, int index, int flags) {
+        ensureValidStreamType(streamType);
+        VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
+
+        final int device = getDeviceForStream(streamType);
+        int oldIndex;
+
+        synchronized (mSafeMediaVolumeState) {
+            // reset any pending volume command
+            mPendingVolumeCommand = null;
+
+            // get last audible index if stream is muted, current index otherwise
+            oldIndex = streamState.getIndex(device,
+                                            (streamState.muteCount() != 0) /* lastAudible */);
+
+            index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
+
+            flags &= ~AudioManager.FLAG_FIXED_VOLUME;
+            if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
+                    ((device & mFixedVolumeDevices) != 0)) {
+                flags |= AudioManager.FLAG_FIXED_VOLUME;
+
+                // volume is either 0 or max allowed for fixed volume devices
+                if (index != 0) {
+                    if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
+                            (device & mSafeMediaVolumeDevices) != 0) {
+                        index = mSafeMediaVolumeIndex;
+                    } else {
+                        index = streamState.getMaxIndex();
+                    }
+                }
+            }
+
+            if (!checkSafeMediaVolume(mStreamVolumeAlias[streamType], index, device)) {
+                mVolumePanel.postDisplaySafeVolumeWarning(flags);
+                mPendingVolumeCommand = new StreamVolumeCommand(
+                                                    streamType, index, flags, device);
+            } else {
+                onSetStreamVolume(streamType, index, flags, device);
+                // get last audible index if stream is muted, current index otherwise
+                index = mStreamStates[streamType].getIndex(device,
+                                    (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
+            }
+        }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
@@ -2317,7 +2356,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true);
                             mMusicActiveMs = 0;
-                            mVolumePanel.postDisplaySafeVolumeWarning();
                         }
                     }
                 }
@@ -5993,7 +6031,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
                     (index > mSafeMediaVolumeIndex)) {
-                mVolumePanel.postDisplaySafeVolumeWarning();
                 return false;
             }
             return true;
@@ -6003,6 +6040,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public void disableSafeMediaVolume() {
         synchronized (mSafeMediaVolumeState) {
             setSafeMediaVolumeEnabled(false);
+            if (mPendingVolumeCommand != null) {
+                onSetStreamVolume(mPendingVolumeCommand.mStreamType,
+                                  mPendingVolumeCommand.mIndex,
+                                  mPendingVolumeCommand.mFlags,
+                                  mPendingVolumeCommand.mDevice);
+                mPendingVolumeCommand = null;
+            }
         }
     }
 
