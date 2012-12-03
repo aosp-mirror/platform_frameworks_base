@@ -5,10 +5,10 @@ page.title=Authentication
   <div id="qv">    
     <h2>In this document</h2>
     <ol>
-    <li><a href="#choose">Choosing an account</a></li>
-    <li><a href="#obtain">Obtaining an authorization token</a></li>
-    <li><a href="#handle">Handling exceptions</a></li>
-    <li><a href="#use">Using the token</a></li>
+    <li><a href="#choose">Choosing an Account</a></li>
+    <li><a href="#obtain">Obtaining an Authorization Token</a></li>
+    <li><a href="#handle">Handling Exceptions</a></li>
+    <li><a href="#use">Using the Token</a></li>
     </ol>
   </div>
 </div>
@@ -31,7 +31,8 @@ to carry out these basic steps for obtaining an authentication token.</p>
     a valid Google account is required and it must exist on the device. You can ask your users which
     account they want to use by enumerating the Google accounts on the device or using the
     built-in 
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/common/AccountPicker.html">AccountPicker</a>
+<a href="{@docRoot}reference/com/google/android/gms/common/AccountPicker.html">{@code
+AccountPicker}</a>
     class to display a standard account picker view. You'll need the
     {@link android.Manifest.permission#GET_ACCOUNTS}
     permission set in your manifest file for both methods.
@@ -60,9 +61,12 @@ private String[] getAccountNames() {
   ways to get a token:</p>
 
     <ul>
-      <li>Call one of the two overloaded <a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">GoogleAuthUtil.getToken()</a> methods in a foreground activity where you can
+      <li>Call one of the two overloaded <a
+      href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)"
+      >{@code GoogleAuthUtil.getToken()}</a> methods in a foreground activity where you can
         display a dialog to the user to interactively handle authentication errors.</li>
-      <li>Call one of the three <a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getTokenWithNotification()</a>
+      <li>Call one of the three <a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"
+      >{@code getTokenWithNotification()}</a>
         methods if you are authenticating in a background service or sync adapter so that a notification is displayed if an authentication
         error occurs.</a></li>
     </ul>
@@ -76,7 +80,6 @@ String mScope;
 String token;
 
 ...
-
 try {
     token = GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
 } catch {
@@ -85,41 +88,62 @@ try {
 </pre>
 
 <p>Call this method off of the main UI thread since it executes network transactions. An easy way to do this
-  is in an <a href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</a>.
+  is in an {@link android.os.AsyncTask}.
   The sample in the Google Play services SDK shows you how to wrap this call in an AsyncTask.
-  If authentication is successful, the token is returned. If not, the exceptions described in <a href="#handle">Handling Exceptions</a>
+  If authentication is successful, the token is returned. If not, the exceptions described in
+<a href="#handle">Handling Exceptions</a>
   are thrown that you can catch and handle appropriately.
 </p>
 
   <h3>Using getTokenWithNotification()</h3>
-  <p>If you are obtaining authentication tokens in a background service or sync adapter, there are three overloaded <code>getTokenWithNotification()</code> methods
+  <p>If you are obtaining authentication tokens in a background service or sync adapter, there
+  are three overloaded
+  <a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"
+      >{@code getTokenWithNotification()}</a> methods
   that you can use:</p>
   <ul>
-    <li><a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context context, String accountName, String scope, Bundle extras)</a>:
+    <li><a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"
+    >{@code getTokenWithNotification(Context context, String accountName, String scope, Bundle extras)}</a>:
     For background services. Displays a notification to the user when authentication errors occur.</li>
-    <li><a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification(Context context, String accountName, String scope, Bundle extras, Intent callback)</a>:
-    This method is for use in background services. It displays a notification to the user when authentication errors occur. If a user clicks the notification and then authorizes the app to access the account, the intent is broadcasted. When using this method:
+    <li><a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)"
+    >{@code getTokenWithNotification(Context context, String accountName, String scope, Bundle extras, Intent callback)}</a>:
+    This method is for use in background services. It displays a notification to the user
+    when authentication errors occur. If a user clicks the notification and then authorizes the
+    app to access the account, the intent is broadcasted. When using this method:
     <ul>
-     <li>Create a {@link android.content.BroadcastReceiver} that registers the intent and handles it appropriately</li>
-     <li>In the app's manifest file, set the <code>android:exported</code> attribute to <code>true</code> for the broadcast receiver</li>
-     <li>Ensure that the intent is serializable using the {@link android.content.Intent#toUri toUri(Intent.URI_INTENT_SCHEME)} and
+     <li>Create a {@link android.content.BroadcastReceiver} that registers the intent and handles
+it appropriately</li>
+     <li>In the app's manifest file, set the <a
+     href="{@docRoot}guide/topics/manifest/receiver-element.html#exported"><code>android:exported</code></a>
+     attribute to <code>true</code> for the broadcast receiver</li>
+     <li>Ensure that the intent is serializable using the {@link
+android.content.Intent#toUri toUri(Intent.URI_INTENT_SCHEME)} and
     {@link android.content.Intent#parseUri parseUri(intentUri, Intent.URI_INTENT_SCHEME)} methods.</li>
    </ul>
-    <li><a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)</a>: This method is for use in sync adapters. It displays a notification to the user when authentication errors occur. If a user clicks the notification and then authorizes the app to access the account, the sync adapter retries syncing with the information
+    <li><a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)"
+    >{@code getTokenWithNotification(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)}</a>:
+This method is for use in sync adapters. It displays a notification to the user when
+authentication errors occur. If a user clicks the notification and then authorizes the
+app to access the account, the sync adapter retries syncing with the information
     contained in the <code>syncBundle</code> parameter.</li>
   </ul>
   
    <p>See the sample in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/auth</code> for implementation details.</p>
 
+
+
+
 <h2 id="handle">Handling Exceptions</h2>
 <p>
     When requesting an authentication token with
-    <a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">GoogleAuthUtil.getToken()</a>,
+    <a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)"
+    >{@code GoogleAuthUtil.getToken()}</a>,
     the following exceptions can be thrown:
 </p>
 <ul>
     <li>
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a>: 
+<a href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html"
+>{@code UserRecoverableAuthException}</a>: 
         This exception is thrown when an error occurs that users can resolve, such as not yet granting access to their accounts or if they changed their password.
         This exception class contains a {@link android.app.Activity#getIntent getIntent()} 
         method that you can call to obtain an intent that you can use with
@@ -129,8 +153,10 @@ try {
         callback when this activity returns to take action based on the user's actions.
   </li>
   <li>
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html">GooglePlayServicesAvailabilityException</a>: 
-        This exception is a special case of <a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a>
+<a href="{@docRoot}reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html"
+>{@code GooglePlayServicesAvailabilityException}</a>: 
+        This exception is a special case of <a href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableAuthException.html"
+        >{@code UserRecoverableAuthException}</a>
         and occurs when the actual Google Play services APK is not installed or unavailable.
         This exception provides additional client support to
         handle and fix this issue by providing an error code that describes the exact cause of the problem.
@@ -138,23 +164,31 @@ try {
         an activity to resolve the issue.
     </li>
     <li>
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a>:
+<a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthException.html">{@code
+GoogleAuthException}</a>:
         This exception is thrown when the authorization fails, such as when an invalid scope is 
         specified or if the email address used to authenticate is actually not on the user's 
         device.
     </li>
     <li>
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a>:
-        This exception is thrown when the authorization fails using one of the <code>getTokenWithNotification()</code> methods and if the error
+<a href="{@docRoot}reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html"
+>{@code UserRecoverableNotifiedException}</a>:
+        This exception is thrown when the authorization fails using one of the
+<a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"
+      >{@code getTokenWithNotification()}</a> methods and if the error
         is recoverable with a user action.
     </li>
 </ul>
 <p>
     For more information on how to handle these exceptions and code snippets, see the reference 
     documentation for the 
-<a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html">GoogleAuthUtil</a>
-    class.
+<a href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html">{@code
+GoogleAuthUtil}</a> class.
 </p>
+
+
+
+
 <h2 id="use">Using the Token</h2>
 <p>
     Once you have successfully obtained a token, you can use it to access Google services.
@@ -192,5 +226,7 @@ if (serverCode == 200) {
     Notice that you must manually invalidate the token if the response from the server
     signifies an authentication error (401). This could mean the authentication token
     being used is invalid for the service's scope or the token may have expired. If this is the 
-    case, obtain a new token using <a href="{@docRoot}google/play-services/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">GoogleAuthUtil.getToken()</a>.
+    case, obtain a new token using <a
+href="{@docRoot}reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)"
+>{@code GoogleAuthUtil.getToken()}</a>.
 </p>
