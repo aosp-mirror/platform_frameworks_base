@@ -15,7 +15,7 @@
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play-services/index.html">
-      <span class="en">Google Play services</span></a>
+      <span class="en">Google Play Services</span></a>
     </div>
     <ul>
       <li><a href="<?cs var:toroot?>google/play-services/setup.html">
