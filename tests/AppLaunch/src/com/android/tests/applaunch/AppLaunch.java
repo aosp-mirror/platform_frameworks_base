@@ -17,6 +17,7 @@ package com.android.tests.applaunch;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
+import android.app.IActivityManager.WaitResult;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -31,7 +32,7 @@ import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +80,7 @@ public class AppLaunch extends InstrumentationTestCase {
     }
 
     private void parseArgs(Bundle args) {
-        mNameToResultKey = new HashMap<String, String>();
+        mNameToResultKey = new LinkedHashMap<String, String>();
         String appList = args.getString(KEY_APPS);
 
         if (appList == null)
@@ -98,8 +99,8 @@ public class AppLaunch extends InstrumentationTestCase {
     }
 
     private void createMappings() {
-        mNameToIntent = new HashMap<String, Intent>();
-        mNameToProcess = new HashMap<String, String>();
+        mNameToIntent = new LinkedHashMap<String, Intent>();
+        mNameToProcess = new LinkedHashMap<String, String>();
 
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
@@ -127,24 +128,26 @@ public class AppLaunch extends InstrumentationTestCase {
         Log.i(TAG, "Starting " + appName);
 
         Intent startIntent = mNameToIntent.get(appName);
+        if (startIntent == null) {
+            Log.w(TAG, "App does not exist: " + appName);
+            return;
+        }
         AppLaunchRunnable runnable = new AppLaunchRunnable(startIntent);
         Thread t = new Thread(runnable);
-        long startTime = System.currentTimeMillis();
         t.start();
         try {
             t.join(JOIN_TIMEOUT);
         } catch (InterruptedException e) {
             // ignore
         }
-        if(t.isAlive() || (runnable.getResult() != null &&
-                runnable.getResult().result != ActivityManager.START_SUCCESS)) {
+        WaitResult result = runnable.getResult();
+        if(t.isAlive() || (result != null && result.result != ActivityManager.START_SUCCESS)) {
             Log.w(TAG, "Assuming app " + appName + " crashed.");
             reportError(appName, mNameToProcess.get(appName), results);
             return;
         }
-        long startUpTime = System.currentTimeMillis() - startTime;
-        results.putString(mNameToResultKey.get(appName), String.valueOf(startUpTime));
-        sleep(5000);
+        results.putString(mNameToResultKey.get(appName), String.valueOf(result.thisTime));
+        sleep(1000);
     }
 
     private void closeApp() {
@@ -153,7 +156,7 @@ public class AppLaunch extends InstrumentationTestCase {
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         getInstrumentation().getContext().startActivity(homeIntent);
-        sleep(3000);
+        sleep(1000);
     }
 
     private void sleep(int time) {
@@ -198,6 +201,8 @@ public class AppLaunch extends InstrumentationTestCase {
 
         public void run() {
             try {
+                String packageName = mLaunchIntent.getComponent().getPackageName();
+                mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
                 String mimeType = mLaunchIntent.getType();
                 if (mimeType == null && mLaunchIntent.getData() != null
                         && "content".equals(mLaunchIntent.getData().getScheme())) {
