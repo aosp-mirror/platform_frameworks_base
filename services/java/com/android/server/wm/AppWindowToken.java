@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.WindowManager;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Version of WindowToken that is specifically for a particular application (or
@@ -42,7 +41,7 @@ class AppWindowToken extends WindowToken {
 
     // All of the windows and child windows that are included in this
     // application token.  Note this list is NOT sorted!
-    final ArrayList<WindowState> allAppWindows = new ArrayList<WindowState>();
+    final WindowList allAppWindows = new WindowList();
     final AppWindowAnimator mAppAnimator;
 
     final WindowAnimator mAnimator;

@@ -872,8 +872,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
-        mWinAnimator.destroyDeferredSurfaceLocked(false);
-        mWinAnimator.destroySurfaceLocked(false);
+        mWinAnimator.destroyDeferredSurfaceLocked();
+        mWinAnimator.destroySurfaceLocked();
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);
@@ -974,7 +974,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
         }
         if (requestAnim) {
-            mService.updateLayoutToAnimationLocked();
+            mService.scheduleAnimationLocked();
         }
         return true;
     }
@@ -1017,7 +1017,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
         }
         if (requestAnim) {
-            mService.updateLayoutToAnimationLocked();
+            mService.scheduleAnimationLocked();
         }
         return true;
     }
