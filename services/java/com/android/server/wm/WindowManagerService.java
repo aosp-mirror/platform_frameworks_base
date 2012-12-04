@@ -3200,7 +3200,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return info;
     }
 
-    private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
+    private AttributeCache.Entry getCachedAnimations(int userId, WindowManager.LayoutParams lp) {
         if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
                 + (lp != null ? lp.packageName : null)
                 + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
@@ -3215,13 +3215,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: picked package="
                     + packageName);
-            return AttributeCache.instance().get(packageName, resId,
+            return AttributeCache.instance().get(userId, packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);
         }
         return null;
     }
 
-    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
+    private AttributeCache.Entry getCachedAnimations(int userId, String packageName, int resId) {
         if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: package="
                 + packageName + " resId=0x" + Integer.toHexString(resId));
         if (packageName != null) {
@@ -3230,17 +3230,17 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: picked package="
                     + packageName);
-            return AttributeCache.instance().get(packageName, resId,
+            return AttributeCache.instance().get(userId, packageName, resId,
                     com.android.internal.R.styleable.WindowAnimation);
         }
         return null;
     }
 
-    Animation loadAnimation(WindowManager.LayoutParams lp, int animAttr) {
+    Animation loadAnimation(int userId, WindowManager.LayoutParams lp, int animAttr) {
         int anim = 0;
         Context context = mContext;
         if (animAttr >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations(lp);
+            AttributeCache.Entry ent = getCachedAnimations(userId, lp);
             if (ent != null) {
                 context = ent.context;
                 anim = ent.array.getResourceId(animAttr, 0);
@@ -3252,11 +3252,11 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
-    private Animation loadAnimation(String packageName, int resId) {
+    private Animation loadAnimation(int userId, String packageName, int resId) {
         int anim = 0;
         Context context = mContext;
         if (resId >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
+            AttributeCache.Entry ent = getCachedAnimations(userId, packageName, resId);
             if (ent != null) {
                 context = ent.context;
                 anim = resId;
@@ -3484,7 +3484,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Animation a;
             boolean initialized = false;
             if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
-                a = loadAnimation(mNextAppTransitionPackage, enter ?
+                a = loadAnimation(atoken.userId, mNextAppTransitionPackage, enter ?
                         mNextAppTransitionEnter : mNextAppTransitionExit);
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                         "applyAnimation: atoken=" + atoken
@@ -3565,7 +3565,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
                         break;
                 }
-                a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
+                a = animAttr != 0 ? loadAnimation(atoken.userId, lp, animAttr) : null;
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                         "applyAnimation: atoken=" + atoken
                         + " anim=" + a
@@ -3752,7 +3752,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void addAppToken(int addPos, IApplicationToken token,
+    public void addAppToken(int addPos, int userId, IApplicationToken token,
             int groupId, int requestedOrientation, boolean fullscreen, boolean showWhenLocked) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
@@ -3779,7 +3779,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "Attempted to add existing app token: " + token);
                 return;
             }
-            atoken = new AppWindowToken(this, token);
+            atoken = new AppWindowToken(this, userId, token);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.groupId = groupId;
             atoken.appFullscreen = fullscreen;
@@ -4396,8 +4396,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Checking theme of starting window: 0x"
                     + Integer.toHexString(theme));
             if (theme != 0) {
-                AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
-                        com.android.internal.R.styleable.Window);
+                AttributeCache.Entry ent = AttributeCache.instance().get(wtoken.userId,
+                        pkg, theme, com.android.internal.R.styleable.Window);
                 if (ent == null) {
                     // Whoops!  App doesn't exist.  Um.  Okay.  We'll just
                     // pretend like we didn't see that.

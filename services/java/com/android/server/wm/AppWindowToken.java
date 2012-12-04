@@ -37,6 +37,8 @@ import java.util.ArrayList;
  * really activity) that is displaying windows.
  */
 class AppWindowToken extends WindowToken {
+    // The user who owns this app window token.
+    final int userId;
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
@@ -98,9 +100,10 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
-    AppWindowToken(WindowManagerService _service, IApplicationToken _token) {
+    AppWindowToken(WindowManagerService _service, int _userId, IApplicationToken _token) {
         super(_service, _token.asBinder(),
                 WindowManager.LayoutParams.TYPE_APPLICATION, true);
+        userId = _userId;
         appWindowToken = this;
         appToken = _token;
         mInputApplicationHandle = new InputApplicationHandle(this);
@@ -225,7 +228,8 @@ class AppWindowToken extends WindowToken {
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {
-            pw.print(prefix); pw.println("app=true");
+            pw.print(prefix); pw.print("app=true");
+                    pw.print(" userId="); pw.println(userId);
         }
         if (allAppWindows.size() > 0) {
             pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
