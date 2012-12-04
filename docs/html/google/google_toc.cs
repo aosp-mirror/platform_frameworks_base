@@ -111,38 +111,50 @@
         </ul>
       </li>
     </ul>
+  </li>
+
+  <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>google/gcm/index.html">
+        <span class="en">Google Cloud Messaging</span></a>
+      </div>
+      <ul>
+        <li><a href="<?cs var:toroot?>google/gcm/gs.html">
+            <span class="en">Getting Started</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/demo.html">
+            <span class="en">Demo App Tutorial</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
+        <li><a href="<?cs var:toroot?>google/gcm/c2dm.html">
+            <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="<?cs var:toroot ?>reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
+        </li>
+      </ul>
+  </li>
 
 
-    <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>google/gcm/index.html">
-          <span class="en">Google Cloud Messaging</span></a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot?>google/gcm/gs.html">
-              <span class="en">Getting Started</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/gcm/gcm.html">
-              <span class="en">Architectural Overview</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/gcm/demo.html">
-              <span class="en">Demo App Tutorial</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/gcm/adv.html">
-              <span class="en">Advanced Topics</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/gcm/c2dm.html">
-              <span class="en">Migration</span></a>
-          </li>
-          <li id="gcm-tree-list" class="nav-section">
-            <div class="nav-section-header">
-              <a href="<?cs var:toroot ?>reference/gcm-packages.html">
-                <span class="en">Reference</span>
-              </a>
-            <div>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>google/backup/index.html">
+      Android Backup Service</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot?>google/backup/signup.html">
+          Register</a>
       </li>
+    </ul>
+  </li>
 
-        </ul>
-      </li>
 </ul>
 
 <script type="text/javascript">
