@@ -1711,6 +1711,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 r.disposeLocked(true);
             }
         }
+        // let the provider know if we just disposed its last update record
+        if (records.size() == 0) {
+            applyRequirementsLocked(provider);
+        }
     }
 
     private class LocationWorkerHandler extends Handler {
