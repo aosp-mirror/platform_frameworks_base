@@ -413,23 +413,23 @@ framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
-    -since ./frameworks/base/api/1.xml 1 \
-    -since ./frameworks/base/api/2.xml 2 \
-    -since ./frameworks/base/api/3.xml 3 \
-    -since ./frameworks/base/api/4.xml 4 \
-    -since ./frameworks/base/api/5.xml 5 \
-    -since ./frameworks/base/api/6.xml 6 \
-    -since ./frameworks/base/api/7.xml 7 \
-    -since ./frameworks/base/api/8.xml 8 \
-    -since ./frameworks/base/api/9.xml 9 \
-    -since ./frameworks/base/api/10.xml 10 \
-    -since ./frameworks/base/api/11.xml 11 \
-    -since ./frameworks/base/api/12.xml 12 \
-    -since ./frameworks/base/api/13.xml 13 \
-    -since ./frameworks/base/api/14.txt 14 \
-    -since ./frameworks/base/api/15.txt 15 \
-    -since ./frameworks/base/api/16.txt 16 \
-    -since ./frameworks/base/api/17.txt 17 \
+    -since $(SRC_API_DIR)/1.xml 1 \
+    -since $(SRC_API_DIR)/2.xml 2 \
+    -since $(SRC_API_DIR)/3.xml 3 \
+    -since $(SRC_API_DIR)/4.xml 4 \
+    -since $(SRC_API_DIR)/5.xml 5 \
+    -since $(SRC_API_DIR)/6.xml 6 \
+    -since $(SRC_API_DIR)/7.xml 7 \
+    -since $(SRC_API_DIR)/8.xml 8 \
+    -since $(SRC_API_DIR)/9.xml 9 \
+    -since $(SRC_API_DIR)/10.xml 10 \
+    -since $(SRC_API_DIR)/11.xml 11 \
+    -since $(SRC_API_DIR)/12.xml 12 \
+    -since $(SRC_API_DIR)/13.xml 13 \
+    -since $(SRC_API_DIR)/14.txt 14 \
+    -since $(SRC_API_DIR)/15.txt 15 \
+    -since $(SRC_API_DIR)/16.txt 16 \
+    -since $(SRC_API_DIR)/17.txt 17 \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
