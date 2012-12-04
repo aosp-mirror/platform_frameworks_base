@@ -97,7 +97,19 @@ interface ITextToSpeechService {
      *         be empty too.
      */
     String[] getLanguage();
-
+    
+    /**
+     * Returns a default TTS language, country and variant as set by the user.
+     *
+     * Can be called from multiple threads.
+     *
+     * @return A 3-element array, containing language (ISO 3-letter code),
+     *         country (ISO 3-letter code) and variant used by the engine.
+     *         The country and variant may be {@code ""}. If country is empty, then variant must
+     *         be empty too.
+     */
+    String[] getClientDefaultLanguage();
+    
     /**
      * Checks whether the engine supports a given language.
      *

@@ -850,6 +850,11 @@ public abstract class TextToSpeechService extends Service {
             return onGetLanguage();
         }
 
+        @Override
+        public String[] getClientDefaultLanguage() {
+            return getSettingsLocale();
+        }
+
         /*
          * If defaults are enforced, then no language is "available" except
          * perhaps the default language selected by the user.
