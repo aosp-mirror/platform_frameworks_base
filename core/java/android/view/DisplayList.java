@@ -28,6 +28,8 @@ import android.graphics.Matrix;
  * @hide 
  */
 public abstract class DisplayList {
+    private boolean mDirty;
+
     /**
      * Flag used when calling
      * {@link HardwareCanvas#drawDisplayList(DisplayList, android.graphics.Rect, int)} 
@@ -94,6 +96,28 @@ public abstract class DisplayList {
      * only invoke this method after {@link #invalidate()}.
      */
     public abstract void clear();
+
+    /**
+     * Sets the dirty flag. When a display list is dirty, both
+     * {@link #invalidate()} and {@link #clear()} should be invoked whenever
+     * possible.
+     *
+     * @param dirty True to mark the display list dirty, false otherwise
+     *
+     * @see #isDirty()
+     */
+    public void setDirty(boolean dirty) {
+        mDirty = dirty;
+    }
+
+    /**
+     * Indicates whether the display list is dirty.
+     *
+     * @see #setDirty(boolean)
+     */
+    public boolean isDirty() {
+        return mDirty;
+    }
 
     /**
      * Returns whether the display list is currently usable. If this returns false,
