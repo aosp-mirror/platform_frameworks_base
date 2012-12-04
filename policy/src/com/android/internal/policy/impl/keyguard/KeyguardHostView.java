@@ -283,6 +283,11 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
+
+        // Make sure at least this view is focusable in case nothing below it is. Otherwise,
+        // requestFocus() on this view will fail and allow events, such as volume keys, to be
+        // handled by the fallback handler.  See bug 7546960 for details.
+        setFocusableInTouchMode(true);
     }
 
     private boolean shouldEnableAddWidget() {
@@ -878,6 +883,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (mViewStateManager != null) {
             mViewStateManager.showUsabilityHints();
         }
+        requestFocus();
     }
 
     @Override
@@ -897,6 +903,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (cameraPage != null) {
             cameraPage.onScreenTurnedOff();
         }
+        clearFocus();
     }
 
     public void clearAppWidgetToShow() {
