@@ -863,16 +863,19 @@ public class StateMachine {
                 }
             }
 
-            if (mLogRecords.logOnlyTransitions()) {
-                /** Record only if there is a transition */
-                if (destState != null) {
+            // Log only if state machine has not quit
+            if (mSm != null) {
+                if (mLogRecords.logOnlyTransitions()) {
+                    /** Record only if there is a transition */
+                    if (destState != null) {
+                        mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
+                                orgState, destState);
+                    }
+                } else if (recordLogMsg) {
+                    /** Record message */
                     mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
                             orgState, destState);
                 }
-            } else if (recordLogMsg) {
-                /** Record message */
-                mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
-                        orgState, destState);
             }
         }
 
