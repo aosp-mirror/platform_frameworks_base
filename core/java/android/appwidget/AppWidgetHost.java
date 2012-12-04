@@ -60,6 +60,7 @@ public class AppWidgetHost {
         public void updateAppWidget(int appWidgetId, RemoteViews views) {
             if (isLocalBinder() && views != null) {
                 views = views.clone();
+                views.setUser(mUser);
             }
             Message msg = mHandler.obtainMessage(HANDLE_UPDATE);
             msg.arg1 = appWidgetId;
@@ -123,6 +124,8 @@ public class AppWidgetHost {
     Callbacks mCallbacks = new Callbacks();
     final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
     private OnClickHandler mOnClickHandler;
+    // Optionally set by lockscreen
+    private UserHandle mUser;
 
     public AppWidgetHost(Context context, int hostId) {
         this(context, hostId, null, context.getMainLooper());
@@ -137,7 +140,13 @@ public class AppWidgetHost {
         mOnClickHandler = handler;
         mHandler = new UpdateHandler(looper);
         mDisplayMetrics = context.getResources().getDisplayMetrics();
+        mUser = Process.myUserHandle();
         bindService();
+    }
+
+    /** @hide */
+    public void setUserId(int userId) {
+        mUser = new UserHandle(userId);
     }
 
     private static void bindService() {
@@ -179,6 +188,9 @@ public class AppWidgetHost {
 
         final int N = updatedIds.length;
         for (int i=0; i<N; i++) {
+            if (updatedViews.get(i) != null) {
+                updatedViews.get(i).setUser(new UserHandle(userId));
+            }
             updateAppWidgetView(updatedIds[i], updatedViews.get(i));
         }
     }
@@ -350,6 +362,7 @@ public class AppWidgetHost {
     public final AppWidgetHostView createView(Context context, int appWidgetId,
             AppWidgetProviderInfo appWidget) {
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
+        view.setUserId(mUser.getIdentifier());
         view.setOnClickHandler(mOnClickHandler);
         view.setAppWidget(appWidgetId, appWidget);
         synchronized (mViews) {
@@ -358,6 +371,9 @@ public class AppWidgetHost {
         RemoteViews views;
         try {
             views = sService.getAppWidgetViews(appWidgetId);
+            if (views != null) {
+                views.setUser(mUser);
+            }
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }

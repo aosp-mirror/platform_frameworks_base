@@ -31,7 +31,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -85,6 +87,7 @@ public class AppWidgetHostView extends FrameLayout {
     Bitmap mOld;
     Paint mOldPaint = new Paint();
     private OnClickHandler mOnClickHandler;
+    private UserHandle mUser;
 
     /**
      * Create a host view.  Uses default fade animations.
@@ -112,10 +115,15 @@ public class AppWidgetHostView extends FrameLayout {
     public AppWidgetHostView(Context context, int animationIn, int animationOut) {
         super(context);
         mContext = context;
-
+        mUser = Process.myUserHandle();
         // We want to segregate the view ids within AppWidgets to prevent
         // problems when those ids collide with view ids in the AppWidgetHost.
         setIsRootNamespace(true);
+    }
+
+    /** @hide */
+    public void setUserId(int userId) {
+        mUser = new UserHandle(userId);
     }
 
     /**
@@ -465,7 +473,8 @@ public class AppWidgetHostView extends FrameLayout {
 
         try {
             // Return if cloned successfully, otherwise default
-            return mContext.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
+            return mContext.createPackageContextAsUser(packageName, Context.CONTEXT_RESTRICTED,
+                    mUser);
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Package name " + packageName + " not found");
             return mContext;
@@ -539,8 +548,8 @@ public class AppWidgetHostView extends FrameLayout {
 
         try {
             if (mInfo != null) {
-                Context theirContext = mContext.createPackageContext(
-                        mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED);
+                Context theirContext = mContext.createPackageContextAsUser(
+                        mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED, mUser);
                 mRemoteContext = theirContext;
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
