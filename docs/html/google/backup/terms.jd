@@ -1,0 +1,505 @@
+page.title=Android Backup Service Terms of Service
+@jd:body
+
+
+
+<h3>1. Your relationship with Google</h3>
+
+<p>1.1
+Your use of the Android Backup Service (referred to as the &quot;Service&quot;
+in this document) is subject to the terms of a legal agreement between you and
+Google. &quot;Google&quot; means Google Inc., whose principal place of business
+is at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States. This
+document explains how the agreement is made up, and sets out some of the terms
+of that agreement.</p>
+
+<p>1.2
+Unless otherwise agreed in writing with Google, your agreement with Google will
+always include, at a minimum, the terms and conditions set out in this
+document. These are referred to below as the &quot;Terms&quot;.</p>
+
+<p>1.3 The
+Terms form a legally binding agreement between you and Google in relation to
+your use of the Service. It is important that you take the time to read them
+carefully.</p>
+
+
+
+
+
+<h2>2. Accepting the Terms</h2>
+
+<p>2.1 In
+order to use the Service, you must first agree to the Terms. You may not use
+the Service if you do not accept the Terms.</p>
+
+<p>2.2 You
+can accept the Terms by clicking to accept or agree to the Terms, where
+this option is made available to you by Google.</p>
+
+<p>2.3 You
+may not use the Service and may not accept the Terms if you are not of legal
+age to form a binding contract with Google.</p>
+
+<p>2.4
+You represent that you have full power,
+capacity and authority to accept these Terms. If you are accepting on behalf of your employer or
+another entity, you represent that you have full legal authority to bind your employer
+or such entity to these Terms. If
+you don't have the legal authority to bind, please ensure that an authorized
+person from your entity consents to and accepts these Terms.</p>
+
+
+
+
+
+<h2>3. Provision of the Service by Google</h2>
+
+<p>3.1
+Google has subsidiaries and affiliated legal entities around the world (&quot;Subsidiaries
+and Affiliates&quot;). Sometimes,
+these companies will be providing the Service to you on behalf of Google
+itself. You acknowledge and agree that Subsidiaries and Affiliates will be
+entitled to provide the Service to you.</p>
+
+<p>3.2
+Google is constantly innovating in order to provide the best possible
+experience for its users. You acknowledge and agree that the form and nature of
+the Service which Google provides may change from time to time without prior
+notice to you.</p>
+
+<p>3.3 As
+part of this continuing innovation, you acknowledge and agree that Google may
+stop (permanently or temporarily) providing the Service (or any features within
+the Service) to you or to users generally at Google's sole discretion, without
+prior notice to you. You may stop using the Service at any time. You do not
+need to specifically inform Google when you stop using the Service.</p>
+
+<p>3.4 You
+acknowledge and agree that if Google disables your Backup Service Key, you and the Android
+application(s) you developed (&quot;Application(s)&quot;) may be prevented from accessing
+the Service and any content that is stored with the Service.</p>
+
+<p>3.5 You
+acknowledge and agree that Google may set a fixed upper limit on the number of
+backup transmissions you may send or receive through the Service or on the
+amount of storage space used for the provision of the Service at any time, at
+Google's discretion. You agree to
+abide by any such fixed upper limits.</p>
+
+
+
+
+
+<h2>4. Use of the Service by you</h2>
+
+<p>4.1 In
+order to access the Service, you must have a unique application identifier
+(&quot;Package Name&quot;) for your Application as described in the documentation for the
+Service.</p>
+
+<p>4.2
+After supplying Google with the Package Name and accepting the Terms, you will
+be issued an alphanumeric key (&quot;Backup Service Key&quot;) assigned to you by Google that is
+uniquely associated with your Application. Your Application must include this Backup Service Key as
+described in the documentation for the Service.</p>
+
+<p>4.3
+There is currently no limit to the number of Backup Service Keys you may obtain in this
+manner provided that you use a different Package Name for each Backup Service Key you
+obtain. You agree that each Backup Service Key is only valid for Applications with the corresponding
+Package Name. You agree that Google may, in its sole
+discretion, impose a limit on the number of Backup Service Keys that may be obtained in
+the future. You agree that your
+continued use of any of the Backup Service Keys assigned by Google, or distribution of any
+Applications using such Backup Service Keys, constitutes your continued agreement to these
+Terms.</p>
+
+<p>4.4 You
+agree to use the Service only for purposes that are permitted by (a) the Terms
+and (b) any applicable law, regulation, third-party terms of service, or
+generally accepted practices or guidelines in the relevant jurisdictions
+(including any laws regarding the export of data or software to and from the
+United States or other relevant countries).</p>
+
+<p>4.5 You
+agree not to access (or attempt to access) any of the Service by any means
+other than through the interfaces, methods, and APIs that are provided by
+Google, unless you have been specifically allowed to do so in a separate
+agreement with Google.</p>
+
+<p>4.6 You
+agree that you will not engage in any activity that interferes with or disrupts
+the Service (or the servers and networks which are connected to the Service),
+or the servers or networks of any third-party.</p>
+
+<p>4.7 You
+agree that your use of the Service will be in compliance with any documentation
+guidelines provided by Google and that failure to comply with the documentation
+guidelines may result in the disabling of the Backup Service Key(s) for your
+Application(s).</p>
+
+<p>4.8
+Unless you have been specifically permitted to do so in a separate agreement
+with Google, you agree that you will not reproduce, duplicate, copy, sell,
+trade or resell (a) use of the Service, or (b) access to the Service.</p>
+
+<p>4.9 You
+agree that you are solely responsible for (and that Google has no
+responsibility to you or to any third party for) your and your Application's
+use of the Service, any breach of your obligations under the Terms, and for the
+consequences (including any loss or damage which Google may suffer) of any such
+breach.</p>
+
+<p>4.10 You agree that in your use of the Service, you and
+your Applications will protect the privacy and legal rights of users. You must
+provide legally adequate privacy notice and protection for users whose data
+your Applications back up to the Service. Further, your Application may only
+use that information for the limited purpose of backing up the data to the
+Service unless the user has given you permission for further use. If the user has not given you
+permission to back up information to the Service, you may not transmit such
+information to the Service.</p>
+
+<p>4.11 You agree
+that you and your Applications will not transmit or store sensitive user
+information, such as user names, passwords, or credit card numbers, through the
+Service.</p>
+
+
+
+
+
+<h2>5. Security</h2>
+
+<p>5.1 You
+agree and understand that you are responsible for maintaining the security
+associated with any information you provide to access the Service as well as of
+the Backup Service Key(s) assigned to you by Google. You agree that only you are authorized to use
+the Backup Service Key(s) assigned to you.</p>
+
+<p>5.2
+Accordingly, you agree that you will be solely responsible to Google for all
+activities that occur in connection with your access to the Service, as well as
+the Backup Service Key.</p>
+
+<p>5.3 If
+you become aware of any unauthorized use of your Backup Service Key(s) you agree to notify
+Google immediately.</p>
+
+
+
+
+
+<h2>6. Privacy and your personal information</h2>
+
+<p>6.1 For
+information about Google's data protection practices, please read Google's
+privacy policy at <a
+href="http://www.google.com/privacy.html">http://www.google.com/privacy.html</a>.
+This policy explains how Google treats your personal information when you use
+the Service.</p>
+
+<p>6.2 You
+agree to the use of your data in accordance with Google's privacy policies.</p>
+
+
+
+
+
+<h2>7. Content in the Service</h2>
+
+<p>7.1 You
+agree that you are solely responsible for (and that Google has no
+responsibility to you or to any third party for) any Content that you or your
+Applications transmit or store through the Service and for the consequences of
+your actions (including any loss or damage which Google may suffer) by doing
+so. You agree that you are solely
+responsible for (A) any Content that is transmitted through the Service by your
+Applications, and (B) any Content that Devices retrieve from the Service by
+virtue of your Applications. For
+purposes of the Terms, &quot;Content&quot; means information such as data, messages,
+settings information, written text, computer software, music, audio files or
+other sounds, photographs, videos or other images. &quot;Device(s)&quot; means device(s) powered by
+the Android operating system.</p>
+
+<p>7.2 You
+agree that you will not transmit any Content through the Service that is
+copyrighted, protected by trade secret or otherwise subject to third party
+proprietary rights, including patent, privacy and publicity rights, unless you
+are the owner of such rights or have permission from their rightful owner to
+transmit the Content through the Service.</p>
+
+
+
+
+
+<h2>8. Proprietary rights</h2>
+
+<p>8.1 You
+acknowledge and agree that Google (or Google's licensors) own all legal right,
+title and interest in and to the Service, including any intellectual property
+rights which subsist in the Service (whether those rights happen to be
+registered or not, and wherever in the world those rights may exist).</p>
+
+<p>8.2
+Unless you have agreed otherwise in writing with Google, nothing in the Terms
+gives you a right to use any of Google's trade names, trademarks, service
+marks, logos, domain names, and other distinctive brand features.</p>
+
+<p>8.3 If
+you have been given an explicit right to use any of these brand features in a
+separate written agreement with Google, then you agree that your use of such
+features shall be in compliance with that agreement, any applicable provisions
+of the Terms, and Google's brand feature use guidelines as updated from time to
+time. These guidelines can be viewed online at <a
+href="http://www.google.com/permissions/guidelines.html">http://www.google.com/permissions/
+guidelines.html</a> (or such other URL as Google may
+provide for this purpose from time to time).</p>
+
+<p>8.4 You
+agree that you shall not remove, obscure, or alter any proprietary rights
+notices (including copyright, trade mark notices) which may be affixed to or
+contained within the Service.</p>
+
+
+
+
+
+<h2>9. License from Google</h2>
+
+<p>9.1
+Subject to terms and conditions of these Terms, Google gives you a personal,
+worldwide, royalty-free, non-assignable and non-exclusive license to use the
+Service as provided to you by Google. This license is for the sole purpose of
+enabling you to use and enjoy the benefit of the Service as provided by Google,
+in the manner permitted by the Terms. </p>
+
+<p>9.2 You
+may not (and you may not permit anyone else to) copy, modify, create a
+derivative work of, reverse engineer, decompile or otherwise attempt to extract
+the source code from the Service or any part thereof, unless this is expressly
+permitted or required by law, or unless you have been specifically told that
+you may do so by Google, in writing.</p>
+
+<p>9.3
+Unless Google has given you specific written permission to do so, you may not
+assign (or grant a sub-license of) your rights to use the Service, grant a
+security interest in or over your rights to use the Service, or otherwise
+transfer any part of your rights to use the Service.</p>
+
+
+
+
+
+<h2>10. Your code</h2>
+
+<p>10.1
+Google claims no ownership or control over any source code written by you to be
+used with the Service. You retain copyright and any other rights you already
+hold in this code, and you are responsible for protecting those rights, as
+appropriate.</p>
+
+
+
+
+
+<h2>11. Ending your relationship
+with Google</h2>
+
+<p>11.1
+The Terms will continue to apply until terminated by either you or Google as
+set out below.</p>
+
+<p>11.2
+You may terminate your legal agreement with Google by discontinuing your use of
+the Service at any time.</p>
+
+<p>11.3
+Google may, at any time, terminate its legal agreement with you if:</p>
+
+<p style='margin-left:1.0em;'> (A) you have breached any provision of the Terms (or have
+acted in manner which clearly shows that you do not intend to, or are unable to
+comply with the provisions of the Terms); or</p>
+
+<p style='margin-left:1.0em;'> (B) Google is required to do so by law (for example, where
+the provision of the Service to you is, or becomes, unlawful); or</p>
+
+<p style='margin-left:1.0em;'> (C) Google is
+transitioning to no longer providing the Service; or</p>
+
+<p style='margin-left:1.0em;'> (D) your Application fails to meet the documentation
+guidelines provided by Google.</p>
+
+<p>11.4
+Nothing in this Section shall affect Google's rights regarding provision of the
+Service under Section 3 of the Terms.</p>
+
+<p>11.5
+When these Terms come to an end, all of the legal rights, obligations and
+liabilities that you and Google have benefited from, been subject to (or which
+have accrued over time whilst the Terms have been in force) or which are
+expressed to continue indefinitely, shall be unaffected by this cessation, and
+the provisions of Sections 12, 13 and Paragraph 16 shall continue to apply to
+such rights, obligations and liabilities indefinitely.</p>
+
+
+
+
+
+<h2>12. EXCLUSION OF WARRANTIES</h2>
+
+<p>12.1
+NOTHING IN THESE TERMS, INCLUDING SECTIONS 12 AND 13, SHALL EXCLUDE OR LIMIT
+GOOGLE'S WARRANTY OR LIABILITY FOR LOSSES WHICH MAY NOT BE LAWFULLY EXCLUDED OR
+LIMITED BY APPLICABLE LAW. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF
+CERTAIN WARRANTIES OR CONDITIONS OR THE LIMITATION OR EXCLUSION OF LIABILITY
+FOR LOSS OR DAMAGE CAUSED BY NEGLIGENCE, BREACH OF CONTRACT OR BREACH OF
+IMPLIED TERMS, OR INCIDENTAL OR CONSEQUENTIAL DAMAGES. ACCORDINGLY, ONLY THE
+LIMITATIONS WHICH ARE LAWFUL IN YOUR JURISDICTION WILL APPLY TO YOU AND OUR
+LIABILITY WILL BE LIMITED TO THE MAXIMUM EXTENT PERMITTED BY LAW.</p>
+
+<p>12.2
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SERVICE IS AT YOUR SOLE
+RISK AND THAT THE SERVICE AND CONTENT ARE PROVIDED &quot;AS IS&quot; AND
+&quot;AS AVAILABLE&quot;.</p>
+
+<p>12.3 IN
+PARTICULAR, GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS DO NOT
+REPRESENT OR WARRANT TO YOU THAT:</p>
+
+<p style='margin-left:1.0em;'>(A) YOUR USE OF THE SERVICE WILL MEET YOUR REQUIREMENTS,</p>
+
+<p style='margin-left:1.0em;'>(B) YOUR USE OF THE SERVICE WILL BE UNINTERRUPTED, TIMELY,
+SECURE OR FREE FROM ERROR, AND</p>
+
+<p style='margin-left:1.0em;'>(C) THAT DEFECTS IN THE OPERATION OR FUNCTIONALITY OF ANY
+SOFTWARE PROVIDED TO YOU AS PART OF THE SERVICE WILL BE CORRECTED.</p>
+
+<p>12.4 NO
+ADVICE OR INFORMATION, WHETHER ORAL OR WRITTEN, OBTAINED BY YOU FROM GOOGLE OR
+THROUGH OR FROM THE SERVICE SHALL CREATE ANY WARRANTY NOT EXPRESSLY STATED IN
+THE TERMS.</p>
+
+<p>12.5
+GOOGLE FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND,
+WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED
+WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NON-INFRINGEMENT.</p>
+
+
+
+
+
+<h2>13. LIMITATION OF LIABILITY</h2>
+
+<p>13.1
+SUBJECT TO OVERALL PROVISION IN PARAGRAPH 12.1 ABOVE, YOU EXPRESSLY UNDERSTAND
+AND AGREE THAT GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL
+NOT BE LIABLE TO YOU FOR:</p>
+
+<p style='margin-left:1.0em;'> (A) ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL CONSEQUENTIAL
+OR EXEMPLARY DAMAGES WHICH MAY BE INCURRED BY YOU, HOWEVER CAUSED AND UNDER ANY
+THEORY OF LIABILITY. THIS SHALL INCLUDE, BUT NOT BE LIMITED TO, ANY LOSS OF
+PROFIT (WHETHER INCURRED DIRECTLY OR INDIRECTLY), ANY LOSS OF GOODWILL OR
+BUSINESS REPUTATION, ANY LOSS OF DATA SUFFERED, COST OF PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICE, OR OTHER INTANGIBLE LOSS;</p>
+
+<p style='margin-left:1.0em;'> (B) ANY LOSS OR DAMAGE WHICH MAY BE INCURRED BY YOU,
+INCLUDING BUT NOT LIMITED TO LOSS OR DAMAGE AS A RESULT OF:</p>
+
+<p style='margin-left:2em;'> (I) ANY
+CHANGES WHICH GOOGLE MAY MAKE TO THE SERVICE, OR FOR ANY PERMANENT OR TEMPORARY
+CESSATION IN THE PROVISION OF THE SERVICE (OR ANY FEATURES WITHIN THE
+SERVICE);</p>
+
+<p style='margin-left:2em;'> (II) THE DELETION OF, CORRUPTION OF, OR FAILURE TO STORE,
+ANY CONTENT AND OTHER COMMUNICATIONS DATA MAINTAINED OR TRANSMITTED BY OR
+THROUGH YOUR USE OF THE SERVICE;</p>
+
+<p style='margin-left:2em;'> (III) YOUR FAILURE TO PROVIDE GOOGLE WITH ACCURATE ACCOUNT
+INFORMATION; OR</p>
+
+<p style='margin-left:2em;'> (IV) YOUR FAILURE TO KEEP YOUR PASSWORD OR ACCOUNT DETAILS
+SECURE AND CONFIDENTIAL.</p>
+
+<p>13.2
+THE LIMITATIONS ON GOOGLE'S LIABILITY TO YOU IN PARAGRAPH 13.1 ABOVE SHALL
+APPLY WHETHER OR NOT GOOGLE HAS BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF
+THE POSSIBILITY OF ANY SUCH LOSSES ARISING.</p>
+
+
+
+
+
+<h2>14. Indemnification</h2>
+
+<p>14.1 You agree to hold
+harmless and indemnify Google, and its subsidiaries, affiliates, officers,
+agents, employees, or licensors from and against any third party claim arising
+from or in any way related to (a) your breach of the Terms, (b) your use of the
+Service, or (c) your violation of applicable laws, rules or regulations in
+connection with the Service, including any liability or expense arising from
+all claims, losses, damages (actual and consequential), suits, judgments,
+litigation costs and attorneys' fees, of every kind and nature. In such a case,
+Google will provide you with written notice of such claim, suit or action.</p>
+
+
+
+
+
+<h2>15. Changes to the Terms</h2>
+
+<p>15.1
+Due to things like changes to the law or changes to
+functionality offered through the Service, Google may need to change these Terms from time to
+time. You should look at the Terms regularly. We'll post
+notice of the modified Terms within, or through, the Service. Once the modified Terms are posted,
+the changes will become effective immediately, and you are deemed to have accepted the modified
+Terms if you continue to use the Service. If you do not agree to the modified
+Terms for the Service, please stop using the Service.</p>
+
+
+
+
+
+<h2>16. General legal terms</h2>
+
+<p>16.1
+The Terms constitute the whole legal agreement between you and Google and
+govern your use of the Service (but excluding any service which Google may
+provide to you under a separate written agreement), and completely replace any
+prior agreements between you and Google in relation to the Service.</p>
+
+<p>16.2
+You agree that Google may provide you with notices, including those regarding
+changes to the Terms, by email, regular mail, or postings on the Service.</p>
+
+<p>16.3
+You agree that if Google does not exercise or enforce any legal right or remedy
+which is contained in the Terms (or which Google has the benefit of under any
+applicable law), this will not be taken to be a formal waiver of Google's
+rights and that those rights or remedies will still be available to Google.</p>
+
+<p>16.4 If
+any court of law, having the jurisdiction to decide on this matter, rules that
+any provision of these Terms is invalid, then that provision will be removed
+from the Terms without affecting the rest of the Terms. The remaining
+provisions of the Terms will continue to be valid and enforceable.</p>
+
+<p>16.5
+You acknowledge and agree that each member of the group of companies of which
+Google is the parent shall be third party beneficiaries to the Terms and that
+such other companies shall be entitled to directly enforce, and rely upon, any
+provision of the Terms which confers a benefit on (or rights in favor of) them.
+Other than this, no other person or company shall be third party beneficiaries
+to the Terms.</p>
+
+<p>16.6
+The Terms, and your relationship with Google under the Terms, shall be governed
+by the laws of the State of California without regard to its conflict of laws
+provisions. You and Google agree to submit to the exclusive jurisdiction of the
+courts located within the county of Santa Clara, California to resolve any
+legal matter arising from the Terms. Notwithstanding this, you agree that
+Google shall still be allowed to apply for injunctive remedies (or an
+equivalent type of urgent legal relief) in any jurisdiction.</p>
+
