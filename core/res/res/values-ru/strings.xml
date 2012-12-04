@@ -113,7 +113,7 @@
     <string name="httpError" msgid="7956392511146698522">"Ошибка сети."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Не удалось найти страницу по этому URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Схема аутентификации сайта не поддерживается."</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"Аутентификация не выполнена."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"Ошибка аутентификации."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Не удалось подключиться к серверу."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Не удалось подключиться к серверу. Повторите попытку позже."</string>
