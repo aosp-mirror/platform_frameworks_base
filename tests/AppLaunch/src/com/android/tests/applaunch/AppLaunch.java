@@ -17,9 +17,9 @@ package com.android.tests.applaunch;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
-import android.app.IActivityManager.WaitResult;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.IActivityManager.WaitResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -70,7 +70,9 @@ public class AppLaunch extends InstrumentationTestCase {
         for (String app : mNameToResultKey.keySet()) {
             try {
                 startApp(app, results);
-                closeApp();
+                sleep(750);
+                closeApp(app);
+                sleep(2000);
             } catch (NameNotFoundException e) {
                 Log.i(TAG, "Application " + app + " not found");
             }
@@ -147,16 +149,23 @@ public class AppLaunch extends InstrumentationTestCase {
             return;
         }
         results.putString(mNameToResultKey.get(appName), String.valueOf(result.thisTime));
-        sleep(1000);
     }
 
-    private void closeApp() {
+    private void closeApp(String appName) {
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         getInstrumentation().getContext().startActivity(homeIntent);
-        sleep(1000);
+        Intent startIntent = mNameToIntent.get(appName);
+        if (startIntent != null) {
+            String packageName = startIntent.getComponent().getPackageName();
+            try {
+                mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error closing app", e);
+            }
+        }
     }
 
     private void sleep(int time) {
