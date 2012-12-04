@@ -11562,8 +11562,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             imm.focusIn(this);
         }
 
-        if (mAttachInfo != null && mDisplayList != null) {
-            mAttachInfo.mViewRootImpl.dequeueDisplayList(mDisplayList);
+        if (mDisplayList != null) {
+            mDisplayList.setDirty(false);
         }
     }
 
@@ -11843,6 +11843,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (mAttachInfo != null) {
             if (mDisplayList != null) {
+                mDisplayList.setDirty(true);
                 mAttachInfo.mViewRootImpl.enqueueDisplayList(mDisplayList);
             }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);

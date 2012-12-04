@@ -297,7 +297,7 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
 
-    private final ArrayList<DisplayList> mDisplayLists = new ArrayList<DisplayList>(24);
+    private final ArrayList<DisplayList> mDisplayLists = new ArrayList<DisplayList>();
     
     /**
      * see {@link #playSoundEffect(int)}
@@ -2128,7 +2128,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
-        if (surface == null || !surface.isValid()) {
+        if (!surface.isValid()) {
             return;
         }
 
@@ -2208,6 +2208,8 @@ public final class ViewRootImpl implements ViewParent,
                     + surface + " surface.isValid()=" + surface.isValid() + ", appScale:" +
                     appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
+
+        invalidateDisplayLists();
 
         attachInfo.mTreeObserver.dispatchOnDraw();
 
@@ -2419,8 +2421,11 @@ public final class ViewRootImpl implements ViewParent,
 
         for (int i = 0; i < count; i++) {
             final DisplayList displayList = displayLists.get(i);
-            displayList.invalidate();
-            displayList.clear();
+            if (displayList.isDirty()) {
+                displayList.invalidate();
+                displayList.clear();
+                displayList.setDirty(false);
+            }
         }
 
         displayLists.clear();
@@ -2794,11 +2799,10 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_UPDATE_CONFIGURATION = 18;
     private final static int MSG_PROCESS_INPUT_EVENTS = 19;
     private final static int MSG_DISPATCH_SCREEN_STATE = 20;
-    private final static int MSG_INVALIDATE_DISPLAY_LIST = 21;
-    private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 22;
-    private final static int MSG_DISPATCH_DONE_ANIMATING = 23;
-    private final static int MSG_INVALIDATE_WORLD = 24;
-    private final static int MSG_WINDOW_MOVED = 25;
+    private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 21;
+    private final static int MSG_DISPATCH_DONE_ANIMATING = 22;
+    private final static int MSG_INVALIDATE_WORLD = 23;
+    private final static int MSG_WINDOW_MOVED = 24;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2844,8 +2848,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_PROCESS_INPUT_EVENTS";
                 case MSG_DISPATCH_SCREEN_STATE:
                     return "MSG_DISPATCH_SCREEN_STATE";
-                case MSG_INVALIDATE_DISPLAY_LIST:
-                    return "MSG_INVALIDATE_DISPLAY_LIST";
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST:
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
                 case MSG_DISPATCH_DONE_ANIMATING:
@@ -3052,7 +3054,7 @@ public final class ViewRootImpl implements ViewParent,
                 handleDragEvent(event);
             } break;
             case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
-                handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo)msg.obj);
+                handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo) msg.obj);
             } break;
             case MSG_UPDATE_CONFIGURATION: {
                 Configuration config = (Configuration)msg.obj;
@@ -3065,9 +3067,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mView != null) {
                     handleScreenStateChange(msg.arg1 == 1);
                 }
-            } break;
-            case MSG_INVALIDATE_DISPLAY_LIST: {
-                invalidateDisplayLists();
             } break;
             case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                 setAccessibilityFocus(null, null);
@@ -4153,6 +4152,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mAdded && !mFirst) {
+                invalidateDisplayLists();
                 destroyHardwareRenderer();
 
                 if (mView != null) {
@@ -4572,19 +4572,6 @@ public final class ViewRootImpl implements ViewParent,
 
     public void enqueueDisplayList(DisplayList displayList) {
         mDisplayLists.add(displayList);
-
-        mHandler.removeMessages(MSG_INVALIDATE_DISPLAY_LIST);
-        Message msg = mHandler.obtainMessage(MSG_INVALIDATE_DISPLAY_LIST);
-        mHandler.sendMessage(msg);
-    }
-
-    public void dequeueDisplayList(DisplayList displayList) {
-        if (mDisplayLists.remove(displayList)) {
-            displayList.invalidate();
-            if (mDisplayLists.size() == 0) {
-                mHandler.removeMessages(MSG_INVALIDATE_DISPLAY_LIST);
-            }
-        }
     }
 
     public void cancelInvalidate(View view) {
