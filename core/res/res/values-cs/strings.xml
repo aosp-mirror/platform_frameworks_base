@@ -91,7 +91,7 @@
     <string name="roamingText0" msgid="7170335472198694945">"Indikátor roamingu svítí"</string>
     <string name="roamingText1" msgid="5314861519752538922">"Indikátor roamingu nesvítí"</string>
     <string name="roamingText2" msgid="8969929049081268115">"Indikátor roamingu bliká"</string>
-    <string name="roamingText3" msgid="5148255027043943317">"Není v blízkosti"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"Není v okolí"</string>
     <string name="roamingText4" msgid="8808456682550796530">"Mimo budovu"</string>
     <string name="roamingText5" msgid="7604063252850354350">"Roaming – preferovaný systém"</string>
     <string name="roamingText6" msgid="2059440825782871513">"Roaming – dostupný systém"</string>
