@@ -41,6 +41,7 @@ import android.view.DisplayInfo;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages attached displays.
@@ -152,6 +153,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             new SparseArray<LogicalDisplay>();
     private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
 
+    // List of all display transaction listeners.
+    private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
+            new CopyOnWriteArrayList<DisplayTransactionListener>();
+
     // Set to true if all displays have been blanked by the power manager.
     private int mAllDisplayBlankStateFromPowerManager;
 
@@ -261,6 +266,36 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     /**
+     * Registers a display transaction listener to provide the client a chance to
+     * update its surfaces within the same transaction as any display layout updates.
+     *
+     * @param listener The listener to register.
+     */
+    public void registerDisplayTransactionListener(DisplayTransactionListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        // List is self-synchronized copy-on-write.
+        mDisplayTransactionListeners.add(listener);
+    }
+
+    /**
+     * Unregisters a display transaction listener to provide the client a chance to
+     * update its surfaces within the same transaction as any display layout updates.
+     *
+     * @param listener The listener to unregister.
+     */
+    public void unregisterDisplayTransactionListener(DisplayTransactionListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        // List is self-synchronized copy-on-write.
+        mDisplayTransactionListeners.remove(listener);
+    }
+
+    /**
      * Overrides the display information of a particular logical display.
      * This is used by the window manager to control the size and characteristics
      * of the default display.  It is expected to apply the requested change
@@ -297,6 +332,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             mPendingTraversal = false;
 
             performTraversalInTransactionLocked();
+        }
+
+        // List is self-synchronized copy-on-write.
+        for (DisplayTransactionListener listener : mDisplayTransactionListeners) {
+            listener.onDisplayTransaction();
         }
     }
 
