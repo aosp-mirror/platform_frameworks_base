@@ -62,7 +62,7 @@ Devices</a>.</p>
 </div>
 </div>
 
-<img src="{@docRoot}images/viewgroup.png" alt="" width="400" />
+<img src="{@docRoot}images/viewgroup.png" alt="" width="400" height="214" />
 <p class="img-caption"><strong>Figure 1.</strong> Illustration of how {@link
 android.view.ViewGroup} objects form branches in the layout and contain other {@link
 android.view.View} objects.</p>
@@ -83,7 +83,7 @@ the Graphical Layout editor. This is an editor that helps you build layouts usin
 lesson, you’re going to work directly with the XML, so click the <em>activity_main.xml</em> tab at
 the bottom of the screen to open the XML editor.</p>
 
-<p>The BlankActivity template you used to start this project creates the
+<p>The BlankActivity template you chose when you created this project includes the
 <code>activity_main.xml</code> file with a {@link
 android.widget.RelativeLayout} root view and a {@link android.widget.TextView} child view.</p>
 
@@ -225,9 +225,9 @@ localize your app to different languages by providing alternative definitions fo
 string resource.</p>
 
 <p>By default, your Android project includes a string resource file at
-<code>res/values/strings.xml</code>. Open this file and delete the {@code &lt;string>} element
-named <code>"hello_world"</code>. Then add a new one named
-<code>"edit_message"</code> and set the value to "Enter a message."</p>
+<code>res/values/strings.xml</code>. Add a new string named
+<code>"edit_message"</code> and set the value to "Enter a message." (You can delete
+the "hello_world" string.)</p>
 
 <p>While you’re in this file, also add a "Send" string for the button you’ll soon add, called
 <code>"button_send"</code>.</p>
