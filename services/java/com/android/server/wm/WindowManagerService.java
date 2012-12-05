@@ -3076,10 +3076,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         if (okToDisplay()) {
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+            final int width = displayInfo.appWidth;
+            final int height = displayInfo.appHeight;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
                     + atoken);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
-                    displayInfo.appWidth,  displayInfo.appHeight);
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
@@ -3089,7 +3090,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + atoken, e);
                 }
-                atoken.mAppAnimator.setAnimation(a);
+                atoken.mAppAnimator.setAnimation(a, width, height);
             }
         } else {
             atoken.mAppAnimator.clearAnimation();
@@ -6257,8 +6258,6 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.getAppMetrics(mDisplayMetrics, null);
             mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
-
-            mAnimator.setDisplayDimensions(dw, dh, appWidth, appHeight);
         }
         if (false) {
             Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
@@ -6562,11 +6561,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayReady = true;
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
-
-            final DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-            mAnimator.setDisplayDimensions(
-                    displayInfo.logicalWidth, displayInfo.logicalHeight,
-                    displayInfo.appWidth, displayInfo.appHeight);
 
             mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
                     displayContent.mInitialDisplayWidth,

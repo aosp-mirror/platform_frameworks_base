@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.graphics.PixelFormat;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceSession;
 
@@ -31,8 +32,11 @@ class DimSurface {
     int mDimColor = 0;
     int mLayer = -1;
     int mLastDimWidth, mLastDimHeight;
+    final DisplayContent mDisplayContent;
 
-    DimSurface(SurfaceSession session, final int layerStack) {
+    DimSurface(SurfaceSession session, DisplayContent displayContent) {
+        mDisplayContent = displayContent;
+        final int layerStack = displayContent.getDisplayId();
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
                 mDimSurface = new WindowStateAnimator.SurfaceTrace(session,
@@ -58,7 +62,10 @@ class DimSurface {
     /**
      * Show the dim surface.
      */
-    void show(int dw, int dh, int layer, int color) {
+    void show(int layer, int color) {
+        final DisplayInfo info = mDisplayContent.getDisplayInfo();
+        final int dw = info.logicalWidth;
+        final int dh = info.logicalHeight;
         if (mDimSurface == null) {
             Slog.e(TAG, "show: no Surface");
             return;

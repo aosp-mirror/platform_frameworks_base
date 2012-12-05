@@ -52,13 +52,6 @@ public class WindowAnimator {
     // Layout changes for individual Displays. Indexed by displayId.
     SparseIntArray mPendingLayoutChanges = new SparseIntArray();
 
-    // TODO: Assign these from each iteration through DisplayContent. Only valid between loops.
-    /** Overall window dimensions */
-    int mDw, mDh;
-
-    /** Interior window dimensions */
-    int mInnerDw, mInnerDh;
-
     /** Time of current animation step. Reset on each iteration */
     long mCurrentTime;
 
@@ -311,7 +304,7 @@ public class WindowAnimator {
             final AppWindowAnimator appAnimator = mAppAnimators.get(i);
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-            if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
+            if (appAnimator.stepAnimationLocked(mCurrentTime)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
@@ -327,7 +320,7 @@ public class WindowAnimator {
             final AppWindowAnimator appAnimator = mService.mExitingAppTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-            if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
+            if (appAnimator.stepAnimationLocked(mCurrentTime)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
@@ -579,7 +572,7 @@ public class WindowAnimator {
             }
 
             if (windowAnimationBackgroundSurface != null) {
-                windowAnimationBackgroundSurface.show(mDw, mDh,
+                windowAnimationBackgroundSurface.show(
                         animLayer - WindowManagerService.LAYER_OFFSET_DIM,
                         windowAnimationBackgroundColor);
             }
@@ -590,9 +583,9 @@ public class WindowAnimator {
         }
     }
 
+    /** See if any windows have been drawn, so they (and others associated with them) can now be
+     *  shown. */
     private void testTokenMayBeDrawnLocked() {
-        // See if any windows have been drawn, so they (and others
-        // associated with them) can now be shown.
         final int NT = mAppAnimators.size();
         for (int i=0; i<NT; i++) {
             AppWindowAnimator appAnimator = mAppAnimators.get(i);
@@ -750,14 +743,6 @@ public class WindowAnimator {
         mCurrentFocus = currentFocus;
     }
 
-    void setDisplayDimensions(final int curWidth, final int curHeight,
-                        final int appWidth, final int appHeight) {
-        mDw = curWidth;
-        mDh = curHeight;
-        mInnerDw = appWidth;
-        mInnerDh = appHeight;
-    }
-
     boolean isDimmingLocked(int displayId) {
         return getDisplayContentsAnimatorLocked(displayId).mDimParams != null;
     }
@@ -876,10 +861,6 @@ public class WindowAnimator {
                     pw.print(" mForceHiding="); pw.println(forceHidingToString());
             pw.print(prefix); pw.print("mCurrentTime=");
                     pw.println(TimeUtils.formatUptime(mCurrentTime));
-            pw.print(prefix); pw.print("mDw=");
-                    pw.print(mDw); pw.print(" mDh="); pw.print(mDh);
-                    pw.print(" mInnerDw="); pw.print(mInnerDw);
-                    pw.print(" mInnerDh="); pw.println(mInnerDh);
         }
         if (mBulkUpdateParams != 0) {
             pw.print(prefix); pw.print("mBulkUpdateParams=0x");
@@ -961,8 +942,8 @@ public class WindowAnimator {
 
         public DisplayContentsAnimator(int displayId) {
             mDimAnimator = new DimAnimator(mService.mFxSession, displayId);
-            mWindowAnimationBackgroundSurface =
-                    new DimSurface(mService.mFxSession, displayId);
+            mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession,
+                    mService.getDisplayContentLocked(displayId));
         }
     }
 }
