@@ -249,7 +249,11 @@ public class FusionEngine implements LocationListener {
             }
         }
 
-        mCallback.reportLocation(mFusedLocation);
+        if (mCallback != null) {
+          mCallback.reportLocation(mFusedLocation);
+        } else {
+          Log.w(TAG, "Location updates received while fusion engine not started");
+        }
     }
 
     /** Called on mLooper thread */
