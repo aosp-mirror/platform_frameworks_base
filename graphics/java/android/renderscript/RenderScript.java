@@ -261,6 +261,14 @@ public class RenderScript {
         validate();
         return rsnAllocationCreateFromBitmap(mContext, type, mip, bmp, usage);
     }
+
+    native int  rsnAllocationCreateBitmapBackedAllocation(int con, int type, int mip, Bitmap bmp, int usage);
+    synchronized int nAllocationCreateBitmapBackedAllocation(int type, int mip, Bitmap bmp, int usage) {
+        validate();
+        return rsnAllocationCreateBitmapBackedAllocation(mContext, type, mip, bmp, usage);
+    }
+
+
     native int  rsnAllocationCubeCreateFromBitmap(int con, int type, int mip, Bitmap bmp, int usage);
     synchronized int nAllocationCubeCreateFromBitmap(int type, int mip, Bitmap bmp, int usage) {
         validate();
