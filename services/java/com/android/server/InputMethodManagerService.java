@@ -444,7 +444,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final int userId = getChangingUserId();
             final boolean retval = userId == mSettings.getCurrentUserId();
             if (DEBUG) {
-                Slog.d(TAG, "--- ignore this call back from a background user: " + userId);
+                if (!retval) {
+                    Slog.d(TAG, "--- ignore this call back from a background user: " + userId);
+                }
             }
             return retval;
         }
@@ -658,7 +660,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
         }
-        mMyPackageMonitor.register(mContext, null, true);
+        mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
 
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
