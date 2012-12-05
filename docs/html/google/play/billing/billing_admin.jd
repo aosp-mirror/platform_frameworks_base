@@ -11,6 +11,7 @@ parent.link=index.html
     <li><a href="#billing-purchase-type">Choosing a Purchase Type</a></li>
     <li><a href="#billing-testing-setup">Setting up Test Accounts</a></li>
     <li><a href="#billing-refunds">Handling Refunds</a></li>
+    <li><a href="#billing-refunds">Working with Order Numbers</a></li>
     <li><a href="#billing-support">Where to Get Support</a></li>
   </ol>
   <h2>Downloads</h2>
@@ -39,13 +40,13 @@ few administrative tasks, including setting up and maintaining your product list
 site, registering test accounts, and handling refunds when necessary.</p>
 
 <p>You must have a Google Play publisher account to register test accounts. And you must have a
-Google Wallet merchant account to create a product list and issue refunds to your users. If you
+Google Checkout merchant account to create a product list and issue refunds to your users. If you
 already have a publisher account on Google Play, you can use your existing account. You do not
 need to register for a new account to support in-app billing. If you do not have a publisher
 account, you can register as a Google Play developer and set up a publisher account at the
 Google Play <a href="http://play.google.com/apps/publish">publisher site</a>. If you do not have a
-Google Wallet merchant account, you can register for one at the <a
-href="http://checkout.google.com">Google Wallet site</a>.</p>
+Google Checkout merchant account, you can register for one at the <a
+href="http://checkout.google.com">Google Checkout site</a>.</p>
 
 <h2 id="billing-list-setup">Creating a Product List</h2>
 
@@ -56,7 +57,7 @@ items that are listed in another application's product list.</p>
 
 <p>You can access an application's product list by clicking the <strong>In-App Products</strong>
 link that appears under each of the applications that are listed for your publisher account (see
-figure 1). The <strong>In-App Products</strong> link appears only if you have a Google Wallet
+figure 1). The <strong>In-App Products</strong> link appears only if you have a Google Checkout
 merchant account and an application's manifest includes the <code>com.android.vending.BILLING</code>
 permission.</p>
 
@@ -78,7 +79,7 @@ storing and delivering the digital content that you sell in your applications.</
 </p>
 
 <p>You can create a product list for any published application or any draft application that's been
-uploaded and saved to the Google Play site. However, you must have a Google Wallet merchant
+uploaded and saved to the Google Play site. However, you must have a Google Checkout merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
@@ -432,18 +433,48 @@ times.</p>
 
 <p>In-app billing does not allow users to send a refund request to Google Play. Refunds for
 in-app purchases must be directed to you (the application developer). You can then process the
-refund through your Google Wallet merchant account. When you do this, Google Play receives a
-refund notification from Google Wallet, and Google Play sends a refund message to your
+refund through your Google Checkout merchant account. When you do this, Google Play receives a
+refund notification from Google Checkout, and Google Play sends a refund message to your
 application. For more information, see <a
 href="{@docRoot}google/play/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
 href="http://www.google.com/support/androidmarket/bin/answer.py?answer=1153485">In-app Billing
 Pricing</a>.</p>
 
-<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to issue
+<p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to issue
 refunds or cancel in-app billing transactions. You must do this manually through your Google
-Wallet merchant account. However, you can use the Google Wallet API to retrieve order
+Checkout merchant account. However, you can use the Google Checkout API to retrieve order
 information.</p>
+
+<h2 id="orderId">Working with Order Numbers</h2>
+
+<p>When a user purchases an in-app item, Google Checkout assigns the transaction
+a unique and permanent order number. Google Play provides that order number to
+you at the conclusion of the purchase flow, as the value of the
+<code>orderId</code> field of the <code>PURCHASE_STATE_CHANGED</code>
+intent.</p>
+
+<p>In your app, you can use the order number as a general-purpose identifier for
+the in-app purchase transaction. After the purchase, you can use the order
+number as a means of tracking the transaction in reconciliation reports and for
+customer support.</p>
+
+<p>The order number itself is a string consisting of numbers only, with a format
+assigned and managed by Google Checkout.</p>
+
+<p>For transactions dated 5 December 2012 or later, Google Checkout assigns a
+Merchant Order Number (rather than a Google Order Number) and reports the Merchant
+Order Number as the value of <code>orderID</code>. Here's an
+example:</p>
+
+<pre>"orderId" : "12999556515565155651.5565135565155651"</pre>
+
+<p>For transactions dated previous to 5 December 2012, Google checkout assigned
+a Google Order Number and reported that number as the value of
+<code>orderID</code>. Here's an example of an <code>orderID</code> holding a
+Google Order Number:</p>
+
+<pre>"orderId" : "556515565155651"</pre>
 
 <h2 id="billing-testing-setup">Setting Up Test Accounts</h2>
 
