@@ -539,6 +539,22 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint typ
 }
 
 static int
+nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
+{
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    jint id = (jint)rsAllocationCreateTyped(con,
+                                            (RsType)type, (RsAllocationMipmapControl)mip,
+                                            (uint32_t)usage, (size_t)ptr);
+    bitmap.unlockPixels();
+    return id;
+}
+
+static int
 nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mip, jobject jbitmap, jint usage)
 {
     SkBitmap const * nativeBitmap =
@@ -1443,6 +1459,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnAllocationCreateTyped",         "(IIIII)I",                               (void*)nAllocationCreateTyped },
 {"rsnAllocationCreateFromBitmap",    "(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCreateFromBitmap },
+{"rsnAllocationCreateBitmapBackedAllocation",    "(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCreateBitmapBackedAllocation },
 {"rsnAllocationCubeCreateFromBitmap","(IIILandroid/graphics/Bitmap;I)I",      (void*)nAllocationCubeCreateFromBitmap },
 
 {"rsnAllocationCopyFromBitmap",      "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyFromBitmap },

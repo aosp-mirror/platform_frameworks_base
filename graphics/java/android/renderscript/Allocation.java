@@ -233,6 +233,10 @@ public class Allocation extends BaseObj {
         }
     }
 
+    private void setBitmap(Bitmap b) {
+        mBitmap = b;
+    }
+
     Allocation(int id, RenderScript rs, Type t, int usage) {
         super(id, rs);
         if ((usage & ~(USAGE_SCRIPT |
@@ -1150,6 +1154,22 @@ public class Allocation extends BaseObj {
                                               int usage) {
         rs.validate();
         Type t = typeFromBitmap(rs, b, mips);
+
+        // enable optimized bitmap path only with no mipmap and script-only usage
+        if (mips == MipmapControl.MIPMAP_NONE &&
+            t.getElement().isCompatible(Element.RGBA_8888(rs)) &&
+            usage == USAGE_SCRIPT) {
+            int id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
+            if (id == 0) {
+                throw new RSRuntimeException("Load failed.");
+            }
+
+            // keep a reference to the Bitmap around to prevent GC
+            Allocation alloc = new Allocation(id, rs, t, usage);
+            alloc.setBitmap(b);
+            return alloc;
+        }
+
 
         int id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if (id == 0) {
