@@ -285,6 +285,16 @@ public final class DisplayInfo implements Parcelable {
         getMetricsWithSize(outMetrics, cih, logicalWidth, logicalHeight);
     }
 
+    public int getNaturalWidth() {
+        return rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180 ?
+                logicalWidth : logicalHeight;
+    }
+
+    public int getNaturalHeight() {
+        return rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180 ?
+                logicalHeight : logicalWidth;
+    }
+
     private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfoHolder cih,
             int width, int height) {
         outMetrics.densityDpi = outMetrics.noncompatDensityDpi = logicalDensityDpi;
