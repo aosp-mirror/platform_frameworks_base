@@ -109,7 +109,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mIds = new int[size];
         mSpellCheckSpans = new SpellCheckSpan[size];
 
-        setLocale(mTextView.getTextServicesLocale());
+        setLocale(mTextView.getSpellCheckerLocale());
 
         mCookie = hashCode();
     }
@@ -120,7 +120,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mTextServicesManager = (TextServicesManager) mTextView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         if (!mTextServicesManager.isSpellCheckerEnabled()
-                ||  mTextServicesManager.getCurrentSpellCheckerSubtype(true) == null) {
+                || mCurrentLocale == null
+                || mTextServicesManager.getCurrentSpellCheckerSubtype(true) == null) {
             mSpellCheckerSession = null;
         } else {
             mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
@@ -146,8 +147,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         resetSession();
 
-        // Change SpellParsers' wordIterator locale
-        mWordIterator = new WordIterator(locale);
+        if (locale != null) {
+            // Change SpellParsers' wordIterator locale
+            mWordIterator = new WordIterator(locale);
+        }
 
         // This class is the listener for locale change: warn other locale-aware objects
         mTextView.onLocaleChanged();
@@ -222,9 +225,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
         if (DBG) {
             Log.d(TAG, "Start spell-checking: " + start + ", " + end);
         }
-        final Locale locale = mTextView.getTextServicesLocale();
+        final Locale locale = mTextView.getSpellCheckerLocale();
         final boolean isSessionActive = isSessionActive();
-        if (mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
+        if (locale == null || mCurrentLocale == null || (!(mCurrentLocale.equals(locale)))) {
             setLocale(locale);
             // Re-check the entire text
             start = 0;
