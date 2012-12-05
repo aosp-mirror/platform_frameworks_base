@@ -1001,6 +1001,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         long itemId = 0;
         try {
             remoteViews = factory.getViewAt(position);
+            remoteViews.setUser(new UserHandle(mUserId));
             itemId = factory.getItemId(position);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + e.getMessage());

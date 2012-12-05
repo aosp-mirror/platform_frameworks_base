@@ -133,6 +133,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         mUserId = mLockPatternUtils.getCurrentUser();
         mAppWidgetHost = new AppWidgetHost(
                 context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
+        mAppWidgetHost.setUserId(mUserId);
         cleanupAppWidgetIds();
 
         mAppWidgetManager = AppWidgetManager.getInstance(mContext);
