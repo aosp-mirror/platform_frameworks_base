@@ -107,7 +107,7 @@ other in-app products.</p>
 <p>When users purchase subscriptions in your apps, Google Play handles all
 checkout details so your apps never have to directly process any financial
 transactions. Google Play processes all payments for subscriptions through
-Google Wallet, just as it does for standard in-app products and app purchases.
+Google Checkout, just as it does for standard in-app products and app purchases.
 This ensures a consistent and familiar purchase flow for your users.</p>
 
 <img src="{@docRoot}images/billing_subscription_flow.png" style="border:4px solid ddd;">
@@ -221,10 +221,10 @@ the new price.</p>
 either of two intervals:</p>
 
 <ul>
-  <li>Monthly &mdash; Google Play bills the customer’s Google Wallet account at
+  <li>Monthly &mdash; Google Play bills the customer’s Google Checkout account at
   the time of purchase and monthly subsequent to the purchase date (exact billing
   intervals can vary slightly over time)</li>
-  <li>Annually &mdash; Google Play bills the customer's Google Wallet account at
+  <li>Annually &mdash; Google Play bills the customer's Google Checkout account at
   the time of purchase and again on the same date in subsequent years.</li>
 </ul>
 
@@ -238,7 +238,7 @@ cycles will always match subscription cycles, based on the purchase date.</p>
 Direct Carrier Billing) that was originally used to purchase the
 subscription.</p>
 
-<p>When the subscription payment is approved by Google Wallet, Google Play
+<p>When the subscription payment is approved by Google Checkout, Google Play
 provides a purchase token back to the purchasing app through the In-app Billing
 API. For details, see <a href="#token">Purchase token</a>, below. Your apps can
 store the token locally or pass it to your backend servers, which can then use
@@ -343,7 +343,7 @@ subscriptions are not available at this time.</p>
 <h3 id="payment">Payment processing and policies</h3>
 
 <p>In general, the terms of Google Play allow you to sell in-app subscriptions
-only through the standard payment processor, Google Wallet. For purchases of any
+only through the standard payment processor, Google Checkout. For purchases of any
 subscription products, just as for other in-app products and apps, the
 transaction fee for subscriptions, just as for other in-app purchases, is the
 same as the transaction fee for application purchases (30%).</p>
@@ -355,6 +355,22 @@ outside of the app and Google Play (such as to a web site).</p>
 <p>For complete details about terms and policies, see the <a
 href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">policies
 document</a>.</p>
+
+<h3 id="orderId">Subscription Order Numbers</h3>
+
+<p>To help you track transactions relating to a given subscription, Google
+Checkout provides a base Merchant Order Number for all recurrences of the subscription and denotes
+each recurring transaction by appending an integer as follows: </p>
+
+<p><span style="color:#777"><code style="color:#777">12999556515565155651.5565135565155651</code> (base order number)</span><br />
+<code>12999556515565155651.5565135565155651..0</code> (initial purchase orderID)<br />
+<code>12999556515565155651.5565135565155651..1</code> (first recurrence orderID)<br />
+<code>12999556515565155651.5565135565155651..2</code> (second recurrence orderID)<br />
+...<br /></p>
+
+<p>Google Play provides that order number to as the value of the
+<code>orderId</code> field of the <code>PURCHASE_STATE_CHANGED</code>
+intent.</p>
 
 <h3 id="requirements">System requirements for subscriptions</h3>
 
@@ -440,7 +456,7 @@ responses. Inside the requests and responses are two new fields described below.
 token, a string value that uniquely identifies (and associates) a user ID and a
 subscription ID. Google Play generates the purchase token when the user
 completes the purchase of a subscription product (and payment is approved by
-Google Wallet) and then sends it to the purchasing app on the device through the
+Google Checkout) and then sends it to the purchasing app on the device through the
 In-app Billing API. </p>
 
 <p>At the conclusion of a <code>PURCHASE_REQUEST</code> message flow, your app
@@ -456,7 +472,7 @@ is shown below. </p>
 <pre class="no-pretty-print" style="color:black">{ "nonce" : 1836535032137741465,
   "orders" :
     [{ "notificationId" : "android.test.purchased",
-       "orderId" : "transactionId.android.test.purchased",
+       "orderId" : "12999556515565155651.5565135565155651"
        "packageName" : "com.example.dungeons",
        "productId" : "android.test.purchased",
        "developerPayload" : "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
