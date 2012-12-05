@@ -158,7 +158,7 @@ access the class.</p>
 <p>For example, you can include the following class in your Android application:</p>
 
 <pre>
-public class JavaScriptInterface {
+public class WebAppInterface {
     Context mContext;
 
     /** Instantiate the interface and set the context */
@@ -167,13 +167,23 @@ public class JavaScriptInterface {
     }
 
     /** Show a toast from the web page */
+    &#64;JavascriptInterface
     public void showToast(String toast) {
         Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
     }
 }
 </pre>
 
-<p>In this example, the {@code JavaScriptInterface} class allows the web page to create a {@link
+<p class="caution"><strong>Caution:</strong> If you've set either your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+to 17 or higher, <strong>you
+must add the {@code &#64;JavascriptInterface} annotation</strong> to any method that you want
+available your web page code (the method must also be public). If you do not provide the
+annotation, then the method will not accessible by your web page when running on Android 4.2 or
+higher.</p>
+
+<p>In this example, the {@code WebAppInterface} class allows the web page to create a {@link
 android.widget.Toast} message, using the {@code showToast()} method.</p>
 
 <p>You can bind this class to the JavaScript that runs in your {@link android.webkit.WebView} with
@@ -182,12 +192,12 @@ name the interface {@code Android}. For example:</p>
 
 <pre>
 WebView webView = (WebView) findViewById(R.id.webview);
-webView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
+webView.addJavascriptInterface(new WebAppInterface(this), "Android");
 </pre>
 
 <p>This creates an interface called {@code Android} for JavaScript running in the {@link
 android.webkit.WebView}. At this point, your web application has access to the {@code
-JavaScriptInterface} class. For example, here's some HTML and JavaScript that creates a toast
+WebAppInterface} class. For example, here's some HTML and JavaScript that creates a toast
 message using the new interface when the user clicks a button:</p>
 
 <pre>
@@ -203,7 +213,7 @@ message using the new interface when the user clicks a button:</p>
 <p>There's no need to initialize the {@code Android} interface from JavaScript. The {@link
 android.webkit.WebView} automatically makes it
 available to your web page. So, at the click of the button, the {@code showAndroidToast()}
-function uses the {@code Android} interface to call the {@code JavaScriptInterface.showToast()}
+function uses the {@code Android} interface to call the {@code WebAppInterface.showToast()}
 method.</p>
 
 <p class="note"><strong>Note:</strong> The object that is bound to your JavaScript runs in
