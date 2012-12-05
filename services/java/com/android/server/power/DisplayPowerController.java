@@ -19,6 +19,7 @@ package com.android.server.power;
 import com.android.server.LightsService;
 import com.android.server.TwilightService;
 import com.android.server.TwilightService.TwilightState;
+import com.android.server.display.DisplayManagerService;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -29,7 +30,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
-import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -40,7 +40,6 @@ import android.util.FloatMath;
 import android.util.Slog;
 import android.util.Spline;
 import android.util.TimeUtils;
-import android.view.Display;
 
 import java.io.PrintWriter;
 
@@ -183,7 +182,7 @@ final class DisplayPowerController {
     private final TwilightService mTwilight;
 
     // The display manager.
-    private final DisplayManager mDisplayManager;
+    private final DisplayManagerService mDisplayManager;
 
     // The sensor manager.
     private final SensorManager mSensorManager;
@@ -346,6 +345,7 @@ final class DisplayPowerController {
      */
     public DisplayPowerController(Looper looper, Context context, Notifier notifier,
             LightsService lights, TwilightService twilight,
+            DisplayManagerService displayManager,
             DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
         mHandler = new DisplayControllerHandler(looper);
@@ -357,7 +357,7 @@ final class DisplayPowerController {
         mLights = lights;
         mTwilight = twilight;
         mSensorManager = new SystemSensorManager(mHandler.getLooper());
-        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+        mDisplayManager = displayManager;
 
         final Resources resources = context.getResources();
 
@@ -518,9 +518,8 @@ final class DisplayPowerController {
     }
 
     private void initialize() {
-        Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         mPowerState = new DisplayPowerState(
-                new ElectronBeam(display), mDisplayBlanker,
+                new ElectronBeam(mDisplayManager), mDisplayBlanker,
                 mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
