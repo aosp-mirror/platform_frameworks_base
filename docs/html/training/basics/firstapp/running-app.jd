@@ -102,10 +102,16 @@ Drivers</a> document.</li>
   </li>
 </ol>
 
-<p>To run the app from Eclipse, open one of your project's files and click
-Run <img src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
-from the toolbar. Eclipse installs the app on your connected device and starts
-it.</p>
+<p>To run the app from Eclipse:</p>
+<ol>
+  <li>Open one of your project's files and click
+<strong>Run</strong> <img
+src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
+from the toolbar.</li>
+  <li>In the <strong>Run as</strong> window that appears, select
+  <strong>Android Application</strong> and click <strong>OK</strong>.</li>
+</ol>
+<p>Eclipse installs the app on your connected device and starts it.</p>
 
 
 <p>Or to run your app from a command line:</p>
@@ -159,9 +165,16 @@ Give it a name, a platform target, an SD card size, and a skin (HVGA is default)
   <li>After the emulator boots up, unlock the emulator screen.</li>
 </ol>
 
-<p>To run the app from Eclipse, open one of your project's files and click
-Run <img src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
-from the toolbar. Eclipse installs the app on your AVD and starts it.</p>
+<p>To run the app from Eclipse:</p>
+<ol>
+  <li>Open one of your project's files and click
+<strong>Run</strong> <img
+src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
+from the toolbar.</li>
+  <li>In the <strong>Run as</strong> window that appears, select
+  <strong>Android Application</strong> and click <strong>OK</strong>.</li>
+</ol>
+<p>Eclipse installs the app on your AVD and starts it.</p>
 
 
 <p>Or to run your app from the command line:</p>
