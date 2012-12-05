@@ -16,6 +16,9 @@
 
 package com.android.server.power;
 
+import com.android.server.display.DisplayManagerService;
+import com.android.server.display.DisplayTransactionListener;
+
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.opengl.EGL14;
@@ -72,14 +75,13 @@ final class ElectronBeam {
     private boolean mPrepared;
     private int mMode;
 
-    private final Display mDisplay;
-    private final DisplayInfo mDisplayInfo = new DisplayInfo();
+    private final DisplayManagerService mDisplayManager;
     private int mDisplayLayerStack; // layer stack associated with primary display
-    private int mDisplayRotation;
     private int mDisplayWidth;      // real width, not rotated
     private int mDisplayHeight;     // real height, not rotated
     private SurfaceSession mSurfaceSession;
     private Surface mSurface;
+    private NaturalSurfaceLayout mSurfaceLayout;
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
     private EGLContext mEglContext;
@@ -111,8 +113,8 @@ final class ElectronBeam {
      */
     public static final int MODE_FADE = 2;
 
-    public ElectronBeam(Display display) {
-        mDisplay = display;
+    public ElectronBeam(DisplayManagerService displayManager) {
+        mDisplayManager = displayManager;
     }
 
     /**
@@ -129,18 +131,12 @@ final class ElectronBeam {
 
         mMode = mode;
 
-        // Get the display size and adjust it for rotation.
-        mDisplay.getDisplayInfo(mDisplayInfo);
-        mDisplayLayerStack = mDisplay.getLayerStack();
-        mDisplayRotation = mDisplayInfo.rotation;
-        if (mDisplayRotation == Surface.ROTATION_90
-                || mDisplayRotation == Surface.ROTATION_270) {
-            mDisplayWidth = mDisplayInfo.logicalHeight;
-            mDisplayHeight = mDisplayInfo.logicalWidth;
-        } else {
-            mDisplayWidth = mDisplayInfo.logicalWidth;
-            mDisplayHeight = mDisplayInfo.logicalHeight;
-        }
+        // Get the display size and layer stack.
+        // This is not expected to change while the electron beam surface is showing.
+        DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
+        mDisplayLayerStack = displayInfo.layerStack;
+        mDisplayWidth = displayInfo.getNaturalWidth();
+        mDisplayHeight = displayInfo.getNaturalHeight();
 
         // Prepare the surface for drawing.
         if (!tryPrepare()) {
@@ -551,24 +547,8 @@ final class ElectronBeam {
             mSurface.setLayerStack(mDisplayLayerStack);
             mSurface.setSize(mDisplayWidth, mDisplayHeight);
 
-            switch (mDisplayRotation) {
-                case Surface.ROTATION_0:
-                    mSurface.setPosition(0, 0);
-                    mSurface.setMatrix(1, 0, 0, 1);
-                    break;
-                case Surface.ROTATION_90:
-                    mSurface.setPosition(0, mDisplayWidth);
-                    mSurface.setMatrix(0, -1, 1, 0);
-                    break;
-                case Surface.ROTATION_180:
-                    mSurface.setPosition(mDisplayWidth, mDisplayHeight);
-                    mSurface.setMatrix(-1, 0, 0, -1);
-                    break;
-                case Surface.ROTATION_270:
-                    mSurface.setPosition(mDisplayHeight, 0);
-                    mSurface.setMatrix(0, 1, -1, 0);
-                    break;
-            }
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurface);
+            mSurfaceLayout.onDisplayTransaction();
         } finally {
             Surface.closeTransaction();
         }
@@ -601,6 +581,8 @@ final class ElectronBeam {
 
     private void destroySurface() {
         if (mSurface != null) {
+            mSurfaceLayout.dispose();
+            mSurfaceLayout = null;
             Surface.openTransaction();
             try {
                 mSurface.destroy();
@@ -711,10 +693,63 @@ final class ElectronBeam {
         pw.println("  mPrepared=" + mPrepared);
         pw.println("  mMode=" + mMode);
         pw.println("  mDisplayLayerStack=" + mDisplayLayerStack);
-        pw.println("  mDisplayRotation=" + mDisplayRotation);
         pw.println("  mDisplayWidth=" + mDisplayWidth);
         pw.println("  mDisplayHeight=" + mDisplayHeight);
         pw.println("  mSurfaceVisible=" + mSurfaceVisible);
         pw.println("  mSurfaceAlpha=" + mSurfaceAlpha);
+    }
+
+    /**
+     * Keeps a surface aligned with the natural orientation of the device.
+     * Updates the position and transformation of the matrix whenever the display
+     * is rotated.  This is a little tricky because the display transaction
+     * callback can be invoked on any thread, not necessarily the thread that
+     * owns the electron beam.
+     */
+    private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
+        private final DisplayManagerService mDisplayManager;
+        private Surface mSurface;
+
+        public NaturalSurfaceLayout(DisplayManagerService displayManager, Surface surface) {
+            mDisplayManager = displayManager;
+            mSurface = surface;
+            mDisplayManager.registerDisplayTransactionListener(this);
+        }
+
+        public void dispose() {
+            synchronized (this) {
+                mSurface = null;
+            }
+            mDisplayManager.unregisterDisplayTransactionListener(this);
+        }
+
+        @Override
+        public void onDisplayTransaction() {
+            synchronized (this) {
+                if (mSurface == null) {
+                    return;
+                }
+
+                DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
+                switch (displayInfo.rotation) {
+                    case Surface.ROTATION_0:
+                        mSurface.setPosition(0, 0);
+                        mSurface.setMatrix(1, 0, 0, 1);
+                        break;
+                    case Surface.ROTATION_90:
+                        mSurface.setPosition(0, displayInfo.logicalHeight);
+                        mSurface.setMatrix(0, -1, 1, 0);
+                        break;
+                    case Surface.ROTATION_180:
+                        mSurface.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
+                        mSurface.setMatrix(-1, 0, 0, -1);
+                        break;
+                    case Surface.ROTATION_270:
+                        mSurface.setPosition(displayInfo.logicalWidth, 0);
+                        mSurface.setMatrix(0, 1, -1, 0);
+                        break;
+                }
+            }
+        }
     }
 }
