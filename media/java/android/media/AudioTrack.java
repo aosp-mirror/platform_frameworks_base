@@ -182,7 +182,7 @@ public class AudioTrack
     /**
      * Looper associated with the thread that creates the AudioTrack instance.
      */
-    private Looper mInitializationLooper = null;
+    private final Looper mInitializationLooper;
     /**
      * The audio data sampling rate in Hz.
      */
@@ -313,9 +313,11 @@ public class AudioTrack
         mState = STATE_UNINITIALIZED;
 
         // remember which looper is associated with the AudioTrack instantiation
-        if ((mInitializationLooper = Looper.myLooper()) == null) {
-            mInitializationLooper = Looper.getMainLooper();
+        Looper looper;
+        if ((looper = Looper.myLooper()) == null) {
+            looper = Looper.getMainLooper();
         }
+        mInitializationLooper = looper;
 
         audioParamCheck(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
 
