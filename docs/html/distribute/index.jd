@@ -2,7 +2,37 @@ page.title=Distribute Apps
 header.hide=1
 
 @jd:body
+<style>
+#butterbar-wrapper {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+}
+#butterbar {
+  width:940px;
+  margin:0 auto;
+}
+#butterbar-message {
+  background-color:#f80;
+  float:right;
+  font-size:12px;
+  font-weight:bold;
+  padding:0 10px;
+  border-radius: 0 0 5px 5px;
+}
+#butterbar-message a {color:#fff !important}
+#butterbar-message a:hover {text-decoration:underline;}
+</style>
 
+ <div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/17EFbvdm4FYkocc83EcrKhyhP5Y6tbns_eiBSeQ6ojxU/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
     
     
     <div class="marquee">
