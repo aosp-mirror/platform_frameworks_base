@@ -322,7 +322,7 @@ public class Notification implements Parcelable
     /**
      * Bit to be bitwise-ored into the {@link #flags} field that should be
      * set if the notification should be canceled when it is clicked by the
-     * user.  On tablets, the
+     * user.
 
      */
     public static final int FLAG_AUTO_CANCEL        = 0x00000010;
