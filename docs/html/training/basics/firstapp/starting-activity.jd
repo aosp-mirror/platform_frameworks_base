@@ -19,11 +19,7 @@ previous.link=building-ui.html
   <li><a href="#RespondToButton">Respond to the Send Button</a></li>
   <li><a href="#BuildIntent">Build an Intent</a></li>
   <li><a href="#StartActivity">Start the Second Activity</a></li>
-  <li><a href="#CreateActivity">Create the Second Activity</a>
-    <ol>
-      <li><a href="#AddToManifest">Add it to the manifest</a></li>
-    </ol>
-  </li>
+  <li><a href="#CreateActivity">Create the Second Activity</a></li>
   <li><a href="#ReceiveIntent">Receive the Intent</a></li>
   <li><a href="#DisplayMessage">Display the Message</a></li>
 </ol>
@@ -49,8 +45,8 @@ starts a new activity when the user clicks the Send button.</p>
 
 <h2 id="RespondToButton">Respond to the Send Button</h2>
 
-<p>To respond to the button's on-click event, open the <code>main.xml</code> layout file and add the
-<a
+<p>To respond to the button's on-click event, open the <code>activity_main.xml</code>
+layout file and add the <a
 href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
 attribute to the {@link android.widget.Button &lt;Button>} element:</p>
 
@@ -67,13 +63,19 @@ href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code
 android:onClick}</a> attribute’s value, <code>"sendMessage"</code>, is the name of a method in your
 activity that the system calls when the user clicks the button.</p>
 
-<p>Open the <code>MainActivity</code> class and add the corresponding method:</p>
+<p>Open the <code>MainActivity</code> class (located in the project's
+<code>src/</code> directory) and add the corresponding method:</p>
 
 <pre>
 /** Called when the user clicks the Send button */
 public void sendMessage(View view) {
     // Do something in response to button
 }
+</pre>
+
+<p>This requires that you import the {@link android.view.View} class:</p>
+<pre>
+import android.view.View;
 </pre>
 
 <p class="note"><strong>Tip:</strong> In Eclipse, press Ctrl + Shift + O to import missing classes
@@ -137,7 +139,8 @@ will raise an error if you’re using an IDE such as Eclipse because the class d
 Ignore the error for now; you’ll create the class soon.</p>
 
 <p>An intent not only allows you to start another activity, but it can carry a bundle of data to the
-activity as well. So, use {@link android.app.Activity#findViewById findViewById()} to get the
+activity as well. Inside the {@code sendMessage()} method,
+use {@link android.app.Activity#findViewById findViewById()} to get the
 {@link android.widget.EditText} element and add its text value to the intent:</p>
 
 <pre>
@@ -147,11 +150,17 @@ String message = editText.getText().toString();
 intent.putExtra(EXTRA_MESSAGE, message);
 </pre>
 
+<p class="note"><strong>Note:</strong>
+You now need import statements for <code>android.content.Intent</code>
+and <code>android.widget.EditText</code>. You'll define the <code>EXTRA_MESSAGE</code>
+constant in a moment.</p>
+
 <p>An {@link android.content.Intent} can carry a collection of various data types as key-value
 pairs called <em>extras</em>. The {@link android.content.Intent#putExtra putExtra()} method takes the
 key name in the first parameter and the value in the second parameter.</p>
 
-<p>In order for the next activity to query the extra data, you should define your key using a
+<p>In order for the next activity to query the extra data, you should define the key
+for your intent's extra using a
 public constant. So add the {@code EXTRA_MESSAGE} definition to the top of the {@code
 MainActivity} class:</p>
 
@@ -166,9 +175,11 @@ public class MainActivity extends Activity {
 as a prefix. This ensures they are unique, in case your app interacts with other apps.</p>
 
 
+
+
 <h2 id="StartActivity">Start the Second Activity</h2>
 
-<p>To start an activity, you simply need to call {@link android.app.Activity#startActivity
+<p>To start an activity, call {@link android.app.Activity#startActivity
 startActivity()} and pass it your {@link android.content.Intent}. The system receives this call
 and starts an instance of the {@link android.app.Activity}
 specified by the {@link android.content.Intent}.</p>
@@ -202,19 +213,19 @@ work.</p>
 <p>To create a new activity using Eclipse:</p>
 
 <ol>
-  <li>Click New <img src="{@docRoot}images/tools/eclipse-new.png" 
+  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png" 
   style="vertical-align:baseline;margin:0" /> in the toolbar.</li>
   <li>In the window that appears, open the <strong>Android</strong> folder
   and select <strong>Android Activity</strong>. Click <strong>Next</strong>.</li>
   <li>Select <strong>BlankActivity</strong> and click <strong>Next</strong>.</li>
   <li>Fill in the activity details:
     <ul>
-      <li><em>Project</em>: MyFirstApp</li>
-      <li><em>Activity Name</em>: DisplayMessageActivity</li>
-      <li><em>Layout Name</em>: activity_display_message</li>
-      <li><em>Navigation Type</em>: None</li>
-      <li><em>Hierarchial Parent</em>: com.example.myfirstapp.MainActivity</li>
-      <li><em>Title</em>: My Message</li>
+      <li><strong>Project</strong>: MyFirstApp</li>
+      <li><strong>Activity Name</strong>: DisplayMessageActivity</li>
+      <li><strong>Layout Name</strong>: activity_display_message</li>
+      <li><strong>Title</strong>: My Message</li>
+      <li><strong>Hierarchial Parent</strong>: com.example.myfirstapp.MainActivity</li>
+      <li><strong>Navigation Type</strong>: None</li>
     </ul>
     <p>Click <strong>Finish</strong>.</p>
   </li>
@@ -224,44 +235,94 @@ work.</p>
 {@code DisplayMessageActivity.java} in the project's <code>src/</code> directory, next to
 the original {@code MainActivity.java} file.</p>
 
-<p>Open the {@code DisplayMessageActivity.java} file. If you used Eclipse to create it, the class
+<p>Open the {@code DisplayMessageActivity.java} file. If you used Eclipse to create this
+activity:</p>
+<ul>
+  <li>The class
 already includes an implementation of the required {@link android.app.Activity#onCreate onCreate()}
-method. There's also an implementation of the {@link android.app.Activity#onCreateOptionsMenu
+method.</li>
+  <li>There's also an implementation of the {@link android.app.Activity#onCreateOptionsMenu
 onCreateOptionsMenu()} method, but
-you won't need it for this app so you can remove it. The class should look like this:</p>
+you won't need it for this app so you can remove it.</li>
+  <li>There's also an implementation of {@link android.app.Activity#onOptionsItemSelected
+  onOptionsItemSelected()} which handles the behavior for the action bar's <em>Up</em> behavior.
+  Keep this one the way it is.</li>
+</ul>
+
+<p>The class should look like this:</p>
 
 <pre>
 public class DisplayMessageActivity extends Activity {
     &#64;Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
+        // Show the Up button in the action bar.
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    &#64;Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 </pre>
 
+<p>If you used an IDE other than Eclipse, update your {@code DisplayMessageActivity}
+class with the above code.</p>
+
 <p>All subclasses of {@link android.app.Activity} must implement the {@link
 android.app.Activity#onCreate onCreate()} method. The system calls this when creating a new
-instance of the activity. It is where you must define the activity layout and where you should
+instance of the activity. This method is where you must define the activity layout
+with the {@link android.app.Activity#setContentView setContentView()} method
+and is where you should
 perform initial setup for the activity components.</p>
+
+<p class="note"><strong>Note:</strong> If you are using an IDE other than Eclipse, your project
+does not contain the {@code activity_display_message} layout that's requested by
+{@link android.app.Activity#setContentView setContentView()}. That's OK because
+you will update this method later and won't be using that layout.</p>
+
+
+<h3 id="AddTitle">Add the title string</h3>
+
+<p>If you used Eclipse, you can skip to the <a href="#AddToManifest">next section</a>,
+because the template provides
+the title string for the new activity.</p>
+
+<p>If you're using an IDE other than Eclipse,
+add the new activity's title to the {@code strings.xml} file:</p>
+<pre>
+&lt;resources>
+    ...
+    &lt;string name="title_activity_display_message">My Message&lt;/string>
+&lt;/resources>
+</pre>
 
 
 
 <h3 id="AddToManifest">Add it to the manifest</h3>
 
-<p>You must declare all activities in your manifest file, <code>AndroidManifest.xml</code>, using an
+<p>All activities must be declared in your manifest file, <code>AndroidManifest.xml</code>, using an
 <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a> element.</p>
 
-<p>When you use the Eclipse tools to create the activity, it creates a default entry. It should
+<p>When you use the Eclipse tools to create the activity, it creates a default entry. If you're
+using a different IDE, you need to add the manifest entry yourself. It should
 look like this:</p>
 
 <pre>
 &lt;application ... >
     ...
     &lt;activity
-        android:name=".DisplayMessageActivity"
-        android:label="@string/title_activity_display_message" >
+        android:name="com.example.myfirstapp.DisplayMessageActivity"
+        android:label="@string/title_activity_display_message"
+        android:parentActivityName="com.example.myfirstapp.MainActivity" >
         &lt;meta-data
             android:name="android.support.PARENT_ACTIVITY"
             android:value="com.example.myfirstapp.MainActivity" />
@@ -269,24 +330,32 @@ look like this:</p>
 &lt;/application>
 </pre>
 
-<p>The <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
-  &lt;meta-data>}</a> element declares the name of this activity's parent activity
-  within the app's logical hierarchy. The Android <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a> uses this information
-  to implement default navigation behaviors, such as <a
-        href="{@docRoot}design/patterns/navigation.html">Up navigation</a>.</p>
+<p>The <a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
+android:parentActivityName}</a> attribute declares the name of this activity's parent activity
+within the app's logical hierarchy. The system uses this value
+to implement default navigation behaviors, such as <a
+href="{@docRoot}design/patterns/navigation.html">Up navigation</a> on
+Android 4.1 (API level 16) and higher. You can provide the same navigation behaviors for
+older versions of Android by using the
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> and adding
+the <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
+&lt;meta-data>}</a> element as shown here.</p>
 
-<p class="note"><strong>Note:</strong> During <a
-href="{@docRoot}sdk/installing/adding-packages.html">installation</a>, you should have downloaded
-the latest Support Library. Eclipse automatically includes this library in your app project (you
-can see the library's JAR file listed under <em>Android Dependencies</em>). If you're not using
-Eclipse, you may need to manually add the library to your project&mdash;follow this guide for <a
-href="{@docRoot}tools/extras/support-library.html#SettingUp">setting up the Support Library</a>.</p>
+<p class="note"><strong>Note:</strong> Your Android SDK should already include
+the latest Android Support Library. It's included with the ADT Bundle but if you're using
+a different IDE, you should have installed it during the
+<a href="{@docRoot}sdk/installing/adding-packages.html">Adding Platforms and Packages</a> step.
+When using the templates in Eclipse, the Support Library is automatically added to your app project
+(you can see the library's JAR file listed under <em>Android Dependencies</em>). If you're not using
+Eclipse, you need to manually add the library to your project&mdash;follow the guide for <a
+href="{@docRoot}tools/extras/support-library.html#SettingUp">setting up the Support Library</a>
+then return here.</p>
 
-<p>The app is now runnable because the {@link android.content.Intent} in the
-first activity now resolves to the {@code DisplayMessageActivity} class. If you run the app now,
-clicking the Send button starts the second activity, but it's still using the default
-"Hello world" layout.</p>
+<p>If you're developing with Eclipse, you can run the app now, but not much happens.
+Clicking the Send button starts the second activity but it uses
+a default "Hello world" layout provided by the template. You'll soon update the
+activity to instead display a custom text view, so if you're using a different IDE,
+don't worry that the app won't yet compile.</p>
 
 
 <h2 id="ReceiveIntent">Receive the Intent</h2>
