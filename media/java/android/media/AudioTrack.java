@@ -69,6 +69,11 @@ public class AudioTrack
     /** Maximum value for a channel volume */
     private static final float VOLUME_MAX = 1.0f;
 
+    /** Minimum value for sample rate */
+    private static final int SAMPLE_RATE_HZ_MIN = 4000;
+    /** Maximum value for sample rate */
+    private static final int SAMPLE_RATE_HZ_MAX = 48000;
+
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
     /** indicates AudioTrack state is paused */
@@ -685,8 +690,8 @@ public class AudioTrack
         }
 
         // sample rate, note these values are subject to change
-        if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
-            loge("getMinBufferSize(): " + sampleRateInHz +"Hz is not a supported sample rate.");
+        if ( (sampleRateInHz < SAMPLE_RATE_HZ_MIN) || (sampleRateInHz > SAMPLE_RATE_HZ_MAX) ) {
+            loge("getMinBufferSize(): " + sampleRateInHz + " Hz is not a supported sample rate.");
             return AudioTrack.ERROR_BAD_VALUE;
         }
 
