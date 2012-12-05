@@ -103,6 +103,11 @@
     </family>
     <family>
         <fileset>
+            <file>Lohit-Telugu.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>DroidSansFallback.ttf</file>
         </fileset>
     </family>
@@ -111,13 +116,10 @@
             <file lang="ja">MTLmr3m.ttf</file>
         </fileset>
     </family>
-    <!--
-        Fonts below this point have problematic glyphs and should not be moved
-        higher in the fallback list until those glyphs have been fixed.
+    <!-- Note: complex scripts (i.e. those requiring shaping in Harfbuzz) have
+         a cumulative limit of 64k glyphs. Thus, if they are placed after the
+         large fonts such as DroidSansFallback, they are likely to render
+         incorrectly. Please use caution when putting fonts toward the end of
+         the list.
     -->
-    <family>
-        <fileset>
-            <file>Lohit-Telugu.ttf</file> <!-- masks U+FFBC-10007 -->
-        </fileset>
-    </family>
 </familyset>
