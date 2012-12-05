@@ -21,18 +21,24 @@ Android SDK, then execute <code>android sdk</code>.</li>
 </ul>
 </li>
 
-<li>When the Android SDK Manager opens, it automatically selects a set of recommended packages,
-as shown in figure 1.
-Simply click <strong>Install</strong> to install the recommended packages. The Android SDK Manager
-installs the selected packages into
-your Android SDK environment.</li>
+<li>The SDK Manager shows all the SDK packages available for you to add to your Android SDK.
+As a minimum configuration for your SDK, we recommend you install the following:
+<ul>
+ <li>The latest Tools packages (check the <strong>Tools</strong> folder).</li>
+ <li>The latest version of Android (check the first <strong>Android</strong> folder).</li>
+ <li>The Android Support Library (open the <strong>Extras</strong> folder and check
+  <strong>Android Support Library</strong>).</li>
+</ul>
+
+<p>Once you've chosen your packages, click <strong>Install</strong>. The Android SDK Manager
+installs the selected packages into your Android SDK environment.</li>
 </ol>
 
-<p>If you install the recommended packages, you're now ready to start developing apps!
-To start developing, read <a href="{@docRoot}training/basics/firstapp/index.html"
+<p>With these packages installed, you're ready to start developing.
+To get started, read <a href="{@docRoot}training/basics/firstapp/index.html"
 >Building Your First App</a>.</p>
 
-<img src="/images/sdk_manager_packages.png" alt="" />
+<img src="/images/sdk_manager_packages.png" alt="" height="396" />
 <p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager shows the
 SDK packages that are available, already installed, or for which an update is available.</p>
 
@@ -40,15 +46,18 @@ SDK packages that are available, already installed, or for which an update is av
 
 <h3>Additional information</h3>
 
-<p>For more information about using the SDK Manager and some of the available packages,
-see the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> document.</p>
-
-<p>Everything you need to develop Android apps is on this web site, including <a
+<ul>
+  <li>For more information about using the SDK Manager and some of the available packages,
+see the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> document.</li>
+  <li>This web site provides all information you need to develop Android apps, including <a
 href="{@docRoot}design/index.html">design guidelines</a>,
 <a href="{@docRoot}training/index.html">developer training</a>, <a
 href="{@docRoot}reference/packages.html">API reference</a>, and information
-about how you can <a href="{@docRoot}distribute/index.html">distribute your app</a>.
-For additional resources about developing and distributing your app, see the
-<a href="{@docRoot}support.html">Developer Support Resources</a>.</p>
+about how you can <a href="{@docRoot}distribute/index.html">distribute your app</a>. We recommend
+you begin by reading <a href="{@docRoot}training/basics/firstapp/index.html"
+>Building Your First App</a>.</li>
+  <li>For additional resources about developing and distributing your app, see the
+<a href="{@docRoot}support.html">Developer Support Resources</a>.</li>
+</ul>
 
 

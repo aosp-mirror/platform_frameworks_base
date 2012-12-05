@@ -42,7 +42,7 @@ SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
 you're using Eclipse, you should also have the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
-plugin</a> installed (version 20.0.0 or higher). If you don't have these, follow the guide to <a
+plugin</a> installed (version 21.0.0 or higher). If you don't have these, follow the guide to <a
 href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> before you start this
 lesson.</p>
 
@@ -50,13 +50,10 @@ lesson.</p>
 <h2 id="Eclipse">Create a Project with Eclipse</h2>
 
 <ol>
-  <li>In Eclipse, click New Android
-    App Project <img src="{@docRoot}images/tools/new_adt_project.png" 
-             style="vertical-align:baseline;margin:0" />
-    in the toolbar.  (If you don’t see this button,
-then you have not installed the ADT plugin&mdash;see <a
-href="{@docRoot}sdk/installing/installing-adt.html">Installing the Eclipse Plugin</a>.)
-  </li>
+  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png" 
+  style="vertical-align:baseline;margin:0" /> in the toolbar.</li>
+  <li>In the window that appears, open the <strong>Android</strong> folder,
+  select <strong>Android Application Project</strong>, and click <strong>Next</strong>.</li>
 
 <div class="figure" style="width:420px">
 <img src="{@docRoot}images/training/firstapp/adt-firstapp-setup.png" alt="" />
@@ -65,16 +62,35 @@ href="{@docRoot}sdk/installing/installing-adt.html">Installing the Eclipse Plugi
 
   <li>Fill in the form that appears:
     <ul>
-      <li><em>Application Name</em> is the app name that appears to users.
+      <li><strong>Application Name</strong> is the app name that appears to users.
           For this project, use "My First App."</p></li>
-      <li><em>Project Name</em> is the name of your project directory and the name visible in Eclipse.</li>
-      <li><em>Package Name</em> is the package namespace for your app (following the same
+      <li><strong>Project Name</strong> is the name of your project directory and the name visible in Eclipse.</li>
+      <li><strong>Package Name</strong> is the package namespace for your app (following the same
 rules as packages in the Java programming language). Your package name
 must be unique across all packages installed on the Android system. For this reason, it's generally
 best if you use a name that begins with the reverse domain name of your organization or
 publisher entity. For this project, you can use something like "com.example.myfirstapp."
 However, you cannot publish your app on Google Play using the "com.example" namespace.</li>
-      <li><em>Build SDK</em> is the platform version against which you will compile your app.
+      <li><strong>Minimum Required SDK</strong> is the lowest version of Android that your app supports,
+      indicated using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"
+      >API level</a>.
+        To support as many devices as possible, you should set this to the lowest version available
+        that allows your app to provide its core feature set. If any feature of your app is possible
+        only on newer versions of Android and it's not critical to the app's core feature set, you
+        can enable the feature only when running on the versions that support it (as
+        discussed in <a href="{@docRoot}training/basics/supporting-devices/platforms.html"
+        >Supporting Different Platform Versions</a>).
+        Leave this set to the default value for this project.
+      </li>
+      <li><strong>Target SDK</strong> indicates the highest version of Android (also using the
+      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"
+      >API level</a>) with which you
+      have tested with your application.
+        <p>As new versions of Android become available, you should
+      test your app on the new version and update this value to match the latest API level
+      in order to take advantage of new platform features.</p>
+      </li>
+      <li><strong>Compile With</strong> is the platform version against which you will compile your app.
         By default, this is set to the latest version of Android available in your SDK. (It should
         be Android 4.1 or greater; if you don't have such a version available, you must install one
         using the <a href="{@docRoot}sdk/installing/adding-packages.html">SDK Manager</a>).
@@ -82,17 +98,14 @@ However, you cannot publish your app on Google Play using the "com.example" name
 support older versions, but setting the build target to the latest version allows you to
 enable new features and optimize your app for a great user experience on the latest
 devices.</li>
-      <li><em>Minimum Required SDK</em> is the lowest version of Android that your app supports.
-        To support as many devices as possible, you should set this to the lowest version available
-        that allows your app to provide its core feature set. If any feature of your app is possible
-        only on newer versions of Android and it's not critical to the app's core feature set, you
-        can enable the feature only when running on the versions that support it.
-        <p>Leave this set to the default value for this project.</p>
+       <li><strong>Theme</strong> specifies the Android UI style to apply for your app. You can leave
+       this alone.</li>
     </ul>
     <p>Click <strong>Next</strong>.</p>
   </li>
-  
-  <li>The following screen provides tools to help you create a launcher icon for your app.
+  <li>On the next screen to configure the project, leave the default selections and click
+  <strong>Next</strong>.</li>
+  <li>The next screen can help you create a launcher icon for your app.
     <p>You can customize an icon in several ways and the tool generates an icon for all
     screen densities. Before you publish your app, you should be sure your icon meets
     the specifications defined in the <a
