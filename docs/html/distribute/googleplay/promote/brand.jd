@@ -109,7 +109,7 @@ Play&trade; Store app."
     <p style="text-align:center">
        <a href="{@docRoot}images/brand/Google_Play_Store_48.png">48x48</a> |
        <a href="{@docRoot}images/brand/Google_Play_Store_96.png">96x96</a><br>
-       <a href="{@docRoot}images/brand/Google_Play_Store.ai">Illustrator (.ai)</a>
+       <a href="{@docRoot}downloads/brand/Google_Play_Store.ai">Illustrator (.ai)</a>
        </p>
   </div>
   
@@ -129,7 +129,7 @@ Play&trade; Store app."
     <p style="text-align:center">
        <a href="{@docRoot}images/brand/en_app_rgb_wo_45.png">129x45</a> |
        <a href="{@docRoot}images/brand/en_app_rgb_wo_60.png">172x60</a><br>
-       <a href="{@docRoot}images/brand/en_app_rgb_wo.ai">Illustrator (.ai)</a></p>
+       <a href="{@docRoot}downloads/brand/en_app_rgb_wo.ai">Illustrator (.ai)</a></p>
   </div>
       
   <div style="float:right;clear:right;width:172px;margin-left:30px">
@@ -137,7 +137,7 @@ Play&trade; Store app."
     <p style="text-align:center">
        <a href="{@docRoot}images/brand/en_generic_rgb_wo_45.png">129x45</a> |
        <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a><br>
-       <a href="{@docRoot}images/brand/en_generic_rgb_wo.ai">Illustrator (.ai)</a></p>
+       <a href="{@docRoot}downloads/brand/en_generic_rgb_wo.ai">Illustrator (.ai)</a></p>
   </div>
          
   <p>The "Get it on Google Play" and "Android App on Google Play" logos are badges that you
