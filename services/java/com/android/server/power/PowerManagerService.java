@@ -432,7 +432,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             // The display power controller runs on the power manager service's
             // own handler thread.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsService, twilight,
+                    mContext, mNotifier, mLightsService, twilight, mDisplayManagerService,
                     mDisplayBlanker, mDisplayPowerControllerCallbacks, mHandler);
 
             mSettingsObserver = new SettingsObserver(mHandler);
