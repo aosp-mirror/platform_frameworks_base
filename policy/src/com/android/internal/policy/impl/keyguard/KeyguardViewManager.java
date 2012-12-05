@@ -209,6 +209,7 @@ public class KeyguardViewManager {
 
         if (force || mKeyguardView == null) {
             inflateKeyguardView(options);
+            mKeyguardView.requestFocus();
         }
         updateUserActivityTimeoutInWindowLayoutParams();
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
