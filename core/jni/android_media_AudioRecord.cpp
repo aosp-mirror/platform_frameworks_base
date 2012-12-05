@@ -224,10 +224,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     // create an uninitialized AudioRecord object
     sp<AudioRecord> lpRecorder = new AudioRecord();
-    if (lpRecorder == NULL) {
-        ALOGE("Error creating AudioRecord instance.");
-        return AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED;
-    }
 
     // create the callback information:
     // this data will be passed with every AudioRecord callback

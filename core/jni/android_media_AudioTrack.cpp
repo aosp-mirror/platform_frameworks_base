@@ -295,10 +295,6 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // create the native AudioTrack object
     sp<AudioTrack> lpTrack = new AudioTrack();
-    if (lpTrack == NULL) {
-        ALOGE("Error creating uninitialized AudioTrack");
-        return AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
-    }
 
     // initialize the callback information:
     // this data will be passed with every AudioTrack callback
