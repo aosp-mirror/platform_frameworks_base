@@ -265,7 +265,7 @@ string for a subscription item is shown below:</p>
 <pre class="no-pretty-print" style="color:black">{ "nonce" : 1836535032137741465,
   "orders" :
     [{ "notificationId" : "android.test.purchased",
-       "orderId" : "transactionId.android.test.purchased",
+       "orderId" : "12999556515565155651.5565135565155651",
        "packageName" : "com.example.dungeons",
        "productId" : "android.test.purchased",
        "developerPayload" : "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
@@ -439,7 +439,7 @@ href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">pu
 to "managed per user account."</p>
 
 <p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
-when Google Play receives a refund notification from Google Wallet. In this case, Google
+when Google Play receives a refund notification from Google Checkout. In this case, Google
 Play sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
 this message the same way it handles responses from an application-initiated
 <code>REQUEST_PURCHASE</code> message so that ultimately your application receives a
@@ -448,9 +448,9 @@ refunded. The refund information is included in the JSON string that accompanies
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent. Also, the <code>purchaseState</code> field in
 the JSON string is set to 2.</p>
 
-<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to
+<p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to
 issue refunds or cancel in-app billing transactions. You must do this manually through your
-Google Wallet merchant account. However, you can use the Google Wallet API to retrieve order
+Google Checkout merchant account. However, you can use the Google Checkout API to retrieve order
 information.</p>
 
 <h2 id="billing-security">Security Controls</h2>
@@ -488,7 +488,7 @@ limitations.</p>
 <ul>
   <li>In-app billing can be implemented only in applications that you publish through Google
   Play.</li>
-  <li>You must have a Google Wallet Merchant account to use Google Play In-app Billing.</li>
+  <li>You must have a Google Checkout Merchant account to use Google Play In-app Billing.</li>
   <li>In-app billing requires version 2.3.4 (or higher) of the Android Market application.
   To support subscriptions, version 3.5 or higher of the Google Play app is required. On devices
   running Android 3.0, version 5.0.12 (or higher) of the MyApps application is required.</li>

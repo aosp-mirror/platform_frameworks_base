@@ -7,13 +7,20 @@ page.title=Setup
     downloadable package from the <a href="{@docRoot}tools/help/sdk-manager.html">SDK
     Manager</a>. The download includes the client library and code samples.
 </p>
+    
+<p>
+    To develop using the <a href="{@docRoot}reference/gms-packages.html">Google
+    Play services APIs</a>, you must download the Google Play services SDK.
+    Additionally, you must provide a physical <strong>development device</strong> on
+    which you can run and debug your app. You can develop on any compatible Android
+    device that runs Android 2.2 or higher and includes the Google Play Store.
+    Ideally, you would develop and test the app on a variety of devices, including
+    both phones and tablets. 
+</p>
 
-<p>You must download the Google Play services SDK in order to develop using the
-<a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>. However, <strong>you
-cannot use the Android emulator</strong> to test an app that depends on the Google Play services
-APIs&mdash;you must use a real device running Android 2.2 or higher that includes
-Google Play Store.</p>
-
+<p class="note"><strong>Note</strong>: Google Play services is not supported on the
+Android emulator &mdash; to develop using the APIs, you need to provide a development
+device such as an Android phone or tablet.</p>
 
 <p>To install the Google Play services SDK for development:</p>
 
