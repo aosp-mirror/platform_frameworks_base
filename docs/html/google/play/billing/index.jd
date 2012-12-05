@@ -8,8 +8,11 @@ and features, and more. You can use In-app Billing to sell products as</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-  <p><strong>Free trials for subscriptions</strong> <span class="new" style="font-size:.78em;">New!</span></p>
-  <p>You can now offer users a configurable <a href="{@docRoot}google/play/billing/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed. 
+  <h2><strong>New in In-App Billing</strong></h2>
+  <ul>
+  <li><strong>New order number format</strong>&mdash; Starting 5 December, orders are reported in Merchant Order Number format. See <a href="{@docRoot}google/play/billing/billing_admin.html#orderId">Working with Order Numbers</a> for an example.</li>
+  <li><strong>Free trials</strong>&mdash;You can now offer users a configurable <a href="/google/play/billing/billing_subscriptions.html#trials">free trial period</a> for your in-app subscriptions. You can set up trials with a simple change in the Developer Console&mdash;no change to your app code is needed.</li>
+ </ul>
 </div>
 </div>
 
@@ -29,7 +32,7 @@ purchases is the same as the transaction fee for application purchases
 
 <p>Any application that you publish through Google Play can implement In-app Billing. No special
 account or registration is required other than an Android Market publisher account and a Google
-Wallet Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+Checkout merchant account. Also, because the service uses no dedicated framework APIs, you can add
 in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK

@@ -62,7 +62,7 @@ product ID android.test.purchased.</p>
 
 <img src="{@docRoot}images/billing_test_flow.png" height="381" id="figure1" />
 <p class="img-caption">
-  <strong>Figure 1.</strong> Wallet flow for the special reserved item android.test.purchased.
+  <strong>Figure 1.</strong>Wallet flow for the special reserved item android.test.purchased.
 </p>
 
 <p>You do not need to list the reserved products in your application's product list. Google Play
@@ -91,8 +91,8 @@ reserved product IDs.</p>
     <p>When you make an in-app billing request with this product ID, Google Play responds as
     though the purchase was refunded. Refunds cannot be initiated through Google Play's in-app
     billing service. Refunds must be initiated by you (the merchant). After you process a refund
-    request through your Google Wallet account, a refund message is sent to your application by
-    Google Play. This occurs only when Google Play gets notification from Google Wallet that
+    request through your Google Checkout account, a refund message is sent to your application by
+    Google Play. This occurs only when Google Play gets notification from Google Checkout that
     a refund has been made. For more information about refunds, see <a
     href="{@docRoot}google/play/billing/billing_overview.html#billing-action-notify">Handling
     IN_APP_NOTIFY messages</a> and <a
@@ -216,7 +216,7 @@ testing.</p>
 
 <p>To test your in-app billing implementation with actual in-app purchases, you will need to
 register at least one test account on the Google Play publisher site. You cannot use your
-developer account to test the complete in-app purchase process because Google Wallet does not let
+developer account to test the complete in-app purchase process because Google Checkout does not let
 you buy items from yourself. If you have not set up test accounts before, see <a
 href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">Setting up test
 accounts</a>.</p>
@@ -224,8 +224,8 @@ accounts</a>.</p>
 <p>Also, a test account can purchase an item in your product list only if the item is published. The
 application does not need to be published, but the item does need to be published.</p>
 
-<p>When you use a test account to purchase items, the test account is billed through Google Wallet
-and your Google Wallet Merchant account receives a payout for the purchase. Therefore, you may
+<p>When you use a test account to purchase items, the test account is billed through Google Checkout
+and your Google Checkout Merchant account receives a payout for the purchase. Therefore, you may
 want to refund purchases that are made with test accounts, otherwise the purchases will show up as
 actual payouts to your merchant account.</p>
 
