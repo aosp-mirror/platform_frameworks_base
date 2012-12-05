@@ -1,0 +1,79 @@
+page.title=Android Backup Service
+@jd:body
+
+
+<p>Android Backup Service provides a <em>backup transport</em> for Android's <a
+href="{@docRoot}guide/topics/data/backup.html">data backup</a> framework, which allows you
+to copy a user's persistent app data to remote "cloud" storage. Backing up persistent data
+this way provides a restore point for the app on most devices running Android 2.2 or
+higher. The backup service is <em>not</em> designed for synchronizing application data with other
+clients or saving data that you'd like to access at random during the
+application lifecycle.</p>
+
+<p>The Android Backup Service offered by Google provides a backup
+transport on most devices that include Google Play Store and backs up your app data to Google
+servers. The backup transport may differ
+from device to device and which backup transport is available on any device is
+transparent to your application.</p>
+
+<p>In order to use Android Backup Service, you must <a href="{@docRoot}google/backup/signup.html"
+>register your app</a> with the service to receive a key that you must
+include in your Android manifest.</p>
+
+<p class="note"><strong>Note:</strong> Registering your application with Android Backup
+Service does not guarantee that it will always back up data using this service
+from Google. If you support
+data backup in your application, then it will back up using whichever transport is enabled
+on the device. Registering with Android Backup Service allows your application to back up
+when the backup transport on the device is provided by Android Backup Service.</p>
+
+<p>For more information about how data backup works on Android and how to use it in your app,
+read the <a href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> guide.</p>
+
+
+
+<h2>Adding the Backup Service Key to the Manifest</h2>
+
+<p>Once you <a href="{@docRoot}google/backup/signup.html"
+>register your app</a>, you'll receive a Backup Service Key,
+which you must include in your Android manifest file with the following syntax:</p>
+
+<pre class="prettyprint">
+&lt;application>
+    &lt;meta-data android:name="com.google.android.backup.api_key"
+               android:value="<em>your_backup_service_key</em>" /&gt;
+    ...
+&lt;/application>
+</pre>
+
+<p>Insert your Backup Service Key in the <code>android:value</code> attribute and place the
+<code>&lt;meta-data&gt;</code> element inside your Android manifest's
+<code>&lt;application&gt;</code> element.</p>
+
+<p>When a device that uses Android Backup Service runs your application,
+the system verifies that your Backup Service Key is valid and Android Backup Service saves the
+user's data to Google servers using the primary Google account on the device.</p>
+
+<p>If your application
+does not provide a valid Backup Service Key, then backup will not occur. If the device does not
+provide backup using Android Backup Service, then the <code>&lt;meta-data&gt;</code> element and
+Backup Service Key are ignored&mdash;your application will work normally, but will either back up
+data using a different backup transport or not perform backup at all. Either
+way, your application is unaware of what transport is used, if at all, and otherwise
+operates normally.</p>
+
+<p>For more information about how to provide data backup in your Android application, see the <a
+href="{@docRoot}guide/topics/data/backup.html">Data Backup</a> guide.</p>
+
+
+<h2>User Privacy</h2>
+
+<p>At Google, we are keenly aware of the trust users place in us and our responsibility to protect
+users' privacy. Google securely transmits backup data to and from Google servers in order to provide
+backup and restore features. Google treats this data as personal information in accordance with
+Google's <a href="http://www.google.com/privacypolicy.html">Privacy Policy</a>.</p>
+
+<p>In addition, users can disable data backup functionality through the Android
+system's privacy settings. When a user disables backup, Android Backup Service deletes all saved
+backup data. A user can re-enable backup on the device, but Android Backup Service will not restore
+any previously deleted data.</p>
