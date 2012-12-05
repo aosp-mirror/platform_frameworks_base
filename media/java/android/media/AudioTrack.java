@@ -523,7 +523,7 @@ public class AudioTrack
      * @return the minimum volume expressed as a linear attenuation.
      */
     static public float getMinVolume() {
-        return AudioTrack.VOLUME_MIN;
+        return VOLUME_MIN;
     }
 
     /**
@@ -532,7 +532,7 @@ public class AudioTrack
      * @return the maximum volume expressed as a linear attenuation.
      */
     static public float getMaxVolume() {
-        return AudioTrack.VOLUME_MAX;
+        return VOLUME_MAX;
     }
 
     /**
@@ -677,7 +677,7 @@ public class AudioTrack
             if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
                 // input channel configuration features unsupported channels
                 loge("getMinBufferSize(): Invalid channel configuration.");
-                return AudioTrack.ERROR_BAD_VALUE;
+                return ERROR_BAD_VALUE;
             } else {
                 channelCount = Integer.bitCount(channelConfig);
             }
@@ -686,19 +686,19 @@ public class AudioTrack
         if ((audioFormat != AudioFormat.ENCODING_PCM_16BIT)
             && (audioFormat != AudioFormat.ENCODING_PCM_8BIT)) {
             loge("getMinBufferSize(): Invalid audio format.");
-            return AudioTrack.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         // sample rate, note these values are subject to change
         if ( (sampleRateInHz < SAMPLE_RATE_HZ_MIN) || (sampleRateInHz > SAMPLE_RATE_HZ_MAX) ) {
             loge("getMinBufferSize(): " + sampleRateInHz + " Hz is not a supported sample rate.");
-            return AudioTrack.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
         if ((size == -1) || (size == 0)) {
             loge("getMinBufferSize(): error querying hardware");
-            return AudioTrack.ERROR;
+            return ERROR;
         }
         else {
             return size;
