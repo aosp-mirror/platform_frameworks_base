@@ -369,7 +369,7 @@ class WindowStateAnimator {
         final int displayId = mWin.mDisplayContent.getDisplayId();
         mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
-                "WindowStateAnimator", mAnimator.mPendingLayoutChanges.get(displayId));
+                "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
 
         if (mWin.mAppToken != null) {
             mWin.mAppToken.updateReportedVisibilityLocked();

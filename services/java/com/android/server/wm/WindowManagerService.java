@@ -9014,19 +9014,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mWallpaperActionPending = true;
         }
 
-        SparseIntArray pendingLayouts = mAnimator.mPendingLayoutChanges;
-        final int count = pendingLayouts.size();
-        if (count > 0) {
-            doRequest = true;
-        }
-        for (int i = 0; i < count; ++i) {
-            final DisplayContent displayContent =
-                    getDisplayContentLocked(pendingLayouts.keyAt(i));
-            if (displayContent != null) {
-                displayContent.pendingLayoutChanges |= pendingLayouts.valueAt(i);
-            }
-        }
-
         return doRequest;
     }
 
@@ -9190,7 +9177,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         return false;
     }
-    
+
     private void finishUpdateFocusedWindowAfterAssignLayersLocked(boolean updateInputWindows) {
         mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
     }
@@ -9342,7 +9329,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", mClientFreezingScreen=" + mClientFreezingScreen);
             return;
         }
-        
+
         mDisplayFrozen = false;
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
         mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
