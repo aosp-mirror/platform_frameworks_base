@@ -49,8 +49,6 @@ struct fields_t {
     jmethodID postNativeEventInJava; //... event post callback method
     int       PCM16;                 //...  format constants
     int       PCM8;                  //...  format constants
-    int       MODE_STREAM;           //...  memory mode
-    int       MODE_STATIC;           //...  memory mode
     jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
     jfieldID  jniData;      // stores in Java additional resources used by the native AudioTrack
 };
@@ -62,6 +60,10 @@ struct audiotrack_callback_cookie {
     bool        busy;
     Condition   cond;
 };
+
+// keep these values in sync with AudioTrack.java
+#define MODE_STATIC 0
+#define MODE_STREAM 1
 
 // ----------------------------------------------------------------------------
 class AudioTrackJniStorage {
@@ -258,7 +260,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
     // in android_media_AudioTrack_native_write_byte()
     if ((audioFormat == javaAudioTrackFields.PCM8)
-        && (memoryMode == javaAudioTrackFields.MODE_STATIC)) {
+        && (memoryMode == MODE_STATIC)) {
         ALOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
             buff size of %dbytes, switching to 16bit, buff size of %dbytes",
             buffSizeInBytes, 2*buffSizeInBytes);
@@ -306,7 +308,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     lpJniStorage->mCallbackData.busy = false;
 
     // initialize the native AudioTrack object
-    if (memoryMode == javaAudioTrackFields.MODE_STREAM) {
+    switch (memoryMode) {
+    case MODE_STREAM:
 
         lpTrack->set(
             atStreamType,// stream type
@@ -320,8 +323,9 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             0,// shared mem
             true,// thread can call Java
             sessionId);// audio session ID
+        break;
 
-    } else if (memoryMode == javaAudioTrackFields.MODE_STATIC) {
+    case MODE_STATIC:
         // AudioTrack is using shared memory
 
         if (!lpJniStorage->allocSharedMem(buffSizeInBytes)) {
@@ -341,6 +345,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             lpJniStorage->mMemBase,// shared mem
             true,// thread can call Java
             sessionId);// audio session ID
+        break;
+
+    default:
+        ALOGE("Unknown mode %d", memoryMode);
+        goto native_init_failure;
     }
 
     if (lpTrack->initCheck() != NO_ERROR) {
@@ -871,8 +880,6 @@ static JNINativeMethod gMethods[] = {
 #define JAVA_CONST_STREAM_NOTIFICATION_NAME             "STREAM_NOTIFICATION"
 #define JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME            "STREAM_BLUETOOTH_SCO"
 #define JAVA_CONST_STREAM_DTMF_NAME                     "STREAM_DTMF"
-#define JAVA_CONST_MODE_STREAM_NAME                     "MODE_STREAM"
-#define JAVA_CONST_MODE_STATIC_NAME                     "MODE_STATIC"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
 #define JAVA_JNIDATA_FIELD_NAME                         "mJniData"
 
@@ -933,17 +940,6 @@ int register_android_media_AudioTrack(JNIEnv *env)
             JAVA_JNIDATA_FIELD_NAME, "I");
     if (javaAudioTrackFields.jniData == NULL) {
         ALOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
-        return -1;
-    }
-
-    // Get the memory mode constants
-    if ( !android_media_getIntConstantFromClass(env, audioTrackClass,
-               kClassPathName,
-               JAVA_CONST_MODE_STATIC_NAME, &(javaAudioTrackFields.MODE_STATIC))
-         || !android_media_getIntConstantFromClass(env, audioTrackClass,
-               kClassPathName,
-               JAVA_CONST_MODE_STREAM_NAME, &(javaAudioTrackFields.MODE_STREAM)) ) {
-        // error log performed in android_media_getIntConstantFromClass()
         return -1;
     }
 
