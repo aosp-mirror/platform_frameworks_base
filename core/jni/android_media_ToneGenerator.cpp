@@ -103,6 +103,7 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
     if (!lpToneGen->isInited()) {
         ALOGE("ToneGenerator init failed");
         jniThrowRuntimeException(env, "Init failed");
+        delete lpToneGen;
         return;
     }
 
