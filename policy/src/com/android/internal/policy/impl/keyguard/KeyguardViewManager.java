@@ -153,11 +153,18 @@ public class KeyguardViewManager {
 
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN && mKeyguardView != null) {
-                int keyCode = event.getKeyCode();
-                if (keyCode == KeyEvent.KEYCODE_BACK && mKeyguardView.handleBackKey()) {
-                    return true;
-                } else if (keyCode == KeyEvent.KEYCODE_MENU && mKeyguardView.handleMenuKey()) {
+            if (mKeyguardView != null) {
+                // Always process back and menu keys, regardless of focus
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    int keyCode = event.getKeyCode();
+                    if (keyCode == KeyEvent.KEYCODE_BACK && mKeyguardView.handleBackKey()) {
+                        return true;
+                    } else if (keyCode == KeyEvent.KEYCODE_MENU && mKeyguardView.handleMenuKey()) {
+                        return true;
+                    }
+                }
+                // Always process media keys, regardless of focus
+                if (mKeyguardView.dispatchKeyEvent(event)) {
                     return true;
                 }
             }
