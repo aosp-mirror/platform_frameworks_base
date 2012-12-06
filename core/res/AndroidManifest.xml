@@ -164,9 +164,10 @@
     <protected-broadcast android:name="android.net.wifi.p2p.PERSISTENT_GROUPS_CHANGED" />
     <protected-broadcast android:name="android.net.conn.TETHER_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.conn.INET_CONDITION_ACTION" />
-
-
-
+    <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
+    <protected-broadcast android:name="android.intent.action.ADVANCED_SETTINGS" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
