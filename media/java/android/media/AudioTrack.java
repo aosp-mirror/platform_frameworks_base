@@ -17,13 +17,10 @@
 package android.media;
 
 import java.lang.ref.WeakReference;
-import java.lang.IllegalArgumentException;
-import java.lang.IllegalStateException;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.media.AudioManager;
 import android.util.Log;
 
 
