@@ -1262,8 +1262,6 @@ public class AudioTrack
     static private native final int native_get_min_buff_size(
             int sampleRateInHz, int channelConfig, int audioFormat);
 
-    private native final int native_get_session_id();
-
     private native final int native_attachAuxEffect(int effectId);
     private native final void native_setAuxEffectSendLevel(float level);
 
