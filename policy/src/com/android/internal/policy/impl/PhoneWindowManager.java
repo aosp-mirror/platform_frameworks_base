@@ -684,7 +684,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mVolumeDownKeyConsumedByScreenshotChord = true;
                 cancelPendingPowerKeyAction();
 
-                mHandler.postDelayed(mScreenshotChordLongPress, getScreenshotChordLongPressDelay());
+                mHandler.postDelayed(mScreenshotRunnable, getScreenshotChordLongPressDelay());
             }
         }
     }
@@ -700,7 +700,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPendingScreenshotChordAction() {
-        mHandler.removeCallbacks(mScreenshotChordLongPress);
+        mHandler.removeCallbacks(mScreenshotRunnable);
     }
 
     private final Runnable mPowerLongPress = new Runnable() {
@@ -738,7 +738,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private final Runnable mScreenshotChordLongPress = new Runnable() {
+    private final Runnable mScreenshotRunnable = new Runnable() {
         public void run() {
             takeScreenshot();
         }
@@ -1973,6 +1973,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         launchAssistAction();
                     }
                 }
+            }
+            return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
+            if (down && repeatCount == 0) {
+                mHandler.post(mScreenshotRunnable);
             }
             return -1;
         }
