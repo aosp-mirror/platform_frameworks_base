@@ -23,7 +23,6 @@ import com.android.internal.util.Protocol;
 public class DctConstants {
     /**
      * IDLE: ready to start data connection setup, default state
-     * INITING: state of issued setupDefaultPDP() but not finish yet
      * CONNECTING: state of issued startPppd() but not finish yet
      * SCANNING: data connection fails with one apn but other apns are available
      *           ready to start data connection on other apns (before INITING)
@@ -34,12 +33,11 @@ public class DctConstants {
      *
      * getDataConnectionState() maps State to DataState
      *      FAILED or IDLE : DISCONNECTED
-     *      INITING or CONNECTING or SCANNING: CONNECTING
+     *      CONNECTING or SCANNING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
     public enum State {
         IDLE,
-        INITING,
         CONNECTING,
         SCANNING,
         CONNECTED,
@@ -113,4 +111,3 @@ public class DctConstants {
         "com.android.internal.telephony";
     public static String EXTRA_MESSENGER = "EXTRA_MESSENGER";
 }
-
