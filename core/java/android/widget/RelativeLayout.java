@@ -419,7 +419,7 @@ public class RelativeLayout extends ViewGroup {
 
         // We need to know our size for doing the correct computation of positioning in RTL mode
         if (isLayoutRtl() && (myWidth == -1 || isWrapContentWidth)) {
-            myWidth = getPaddingStart() + getPaddingEnd();
+            int w = getPaddingStart() + getPaddingEnd();
             final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             for (int i = 0; i < count; i++) {
                 View child = views[i];
@@ -436,8 +436,18 @@ public class RelativeLayout extends ViewGroup {
                     }
                     child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
-                    myWidth += child.getMeasuredWidth();
-                    myWidth += params.leftMargin + params.rightMargin;
+                    w += child.getMeasuredWidth();
+                    w += params.leftMargin + params.rightMargin;
+                }
+            }
+            if (myWidth == -1) {
+                // Easy case: "myWidth" was undefined before so use the width we have just computed
+                myWidth = w;
+            } else {
+                // "myWidth" was defined before, so take the min of it and the computed width if it
+                // is a non null one
+                if (w > 0) {
+                    myWidth = Math.min(myWidth, w);
                 }
             }
         }
