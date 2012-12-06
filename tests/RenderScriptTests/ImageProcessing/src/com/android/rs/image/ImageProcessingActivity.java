@@ -275,7 +275,7 @@ public class ImageProcessingActivity extends Activity
             break;
         }
 
-        mTest.createBaseTest(this, mBitmapIn, mBitmapIn2);
+        mTest.createBaseTest(this, mBitmapIn, mBitmapIn2, mBitmapOut);
         setupBars();
 
         mTest.runTest();

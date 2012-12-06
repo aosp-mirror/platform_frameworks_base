@@ -106,7 +106,7 @@ public class TestBase  {
         return false;
     }
 
-    public final void createBaseTest(ImageProcessingActivity ipact, Bitmap b, Bitmap b2) {
+    public final void createBaseTest(ImageProcessingActivity ipact, Bitmap b, Bitmap b2, Bitmap outb) {
         act = ipact;
         mRS = RenderScript.create(act);
         mRS.setMessageHandler(new MessageProcessor(act));
@@ -117,7 +117,7 @@ public class TestBase  {
         mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2,
                                                           Allocation.MipmapControl.MIPMAP_NONE,
                                                           Allocation.USAGE_SCRIPT);
-        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, b,
+        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, outb,
                                                            Allocation.MipmapControl.MIPMAP_NONE,
                                                            Allocation.USAGE_SCRIPT);
         createTest(act.getResources());
