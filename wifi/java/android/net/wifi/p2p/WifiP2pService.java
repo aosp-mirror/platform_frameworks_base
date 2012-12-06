@@ -16,13 +16,10 @@
 
 package android.net.wifi.p2p;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -51,20 +48,16 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.Parcelable.Creator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -113,8 +106,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     INetworkManagementService mNwService;
     private DhcpStateMachine mDhcpStateMachine;
-
-    private ActivityManager mActivityMgr;
 
     private P2pStateMachine mP2pStateMachine;
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -211,13 +202,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* clients(application) information list. */
     private HashMap<Messenger, ClientInfo> mClientInfoList = new HashMap<Messenger, ClientInfo>();
 
-    /* The foreground application's messenger.
-     * The connection request is notified only to foreground application  */
-    private Messenger mForegroundAppMessenger;
-
-    /* the package name of foreground application. */
-    private String mForegroundAppPkgName;
-
     /* Is chosen as a unique range to avoid conflict with
        the range defined in Tethering.java */
     private static final String[] DHCP_RANGE = {"192.168.49.2", "192.168.49.254"};
@@ -306,8 +290,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         //STOPSHIP: get this from native side
         mInterface = "p2p0";
-        mActivityMgr = (ActivityManager)context.getSystemService(Activity.ACTIVITY_SERVICE);
-
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
 
         mP2pSupported = mContext.getPackageManager().hasSystemFeature(
@@ -420,9 +402,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         // Saved WifiP2pGroup from invitation request
         private WifiP2pGroup mSavedP2pGroup;
-
-        // Saved WifiP2pDevice from provisioning request
-        private WifiP2pDevice mSavedProvDiscDevice;
 
         P2pStateMachine(String name, boolean p2pSupported) {
             super(name);
@@ -562,18 +541,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.RESPONSE_PERSISTENT_GROUP_INFO,
                             new WifiP2pGroupList(mGroups, null));
                     break;
-                case WifiP2pManager.SET_DIALOG_LISTENER:
-                    String appPkgName = (String)message.getData().getString(
-                            WifiP2pManager.APP_PKG_BUNDLE_KEY);
-                    boolean isReset = message.getData().getBoolean(
-                            WifiP2pManager.RESET_DIALOG_LISTENER_BUNDLE_KEY);
-                    if (setDialogListenerApp(message.replyTo, appPkgName, isReset)) {
-                        replyToMessage(message, WifiP2pManager.DIALOG_LISTENER_ATTACHED);
-                    } else {
-                        replyToMessage(message, WifiP2pManager.DIALOG_LISTENER_DETACHED,
-                                WifiP2pManager.NOT_IN_FOREGROUND);
-                    }
-                    break;
                     // Ignore
                 case WifiMonitor.P2P_INVITATION_RESULT_EVENT:
                 case WifiMonitor.SCAN_RESULTS_EVENT:
@@ -664,10 +631,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiP2pManager.ADD_LOCAL_SERVICE:
                     replyToMessage(message, WifiP2pManager.ADD_LOCAL_SERVICE_FAILED,
-                            WifiP2pManager.P2P_UNSUPPORTED);
-                    break;
-                case WifiP2pManager.SET_DIALOG_LISTENER:
-                    replyToMessage(message, WifiP2pManager.DIALOG_LISTENER_DETACHED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
                 case WifiP2pManager.REMOVE_LOCAL_SERVICE:
@@ -1022,10 +985,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     mSavedPeerConfig = (WifiP2pConfig) message.obj;
                     mAutonomousGroup = false;
                     mJoinExistingGroup = false;
-                    if (!sendConnectNoticeToApp(mPeers.get(mSavedPeerConfig.deviceAddress),
-                            mSavedPeerConfig)) {
-                        transitionTo(mUserAuthorizingInvitationState);
-                    }
+                    transitionTo(mUserAuthorizingInvitationState);
                     break;
                 case WifiMonitor.P2P_INVITATION_RECEIVED_EVENT:
                     WifiP2pGroup group = (WifiP2pGroup) message.obj;
@@ -1053,11 +1013,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
                     mAutonomousGroup = false;
                     mJoinExistingGroup = true;
-                    //TODO In the p2p client case, we should set source address correctly.
-                    if (!sendConnectNoticeToApp(mPeers.get(mSavedPeerConfig.deviceAddress),
-                            mSavedPeerConfig)) {
-                        transitionTo(mUserAuthorizingInvitationState);
-                    }
+                    transitionTo(mUserAuthorizingInvitationState);
                     break;
                 case WifiMonitor.P2P_PROV_DISC_PBC_REQ_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT:
@@ -1251,10 +1207,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             transitionTo(mGroupNegotiationState);
                         } else {
                             mJoinExistingGroup = false;
-                            if (!sendConnectNoticeToApp(mPeers.get(mSavedPeerConfig.deviceAddress),
-                                    mSavedPeerConfig)) {
-                                transitionTo(mUserAuthorizingInvitationState);
-                            }
+                            transitionTo(mUserAuthorizingInvitationState);
                         }
                     }
                     break;
@@ -1267,9 +1220,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         if (DBG) logd("Found a match " + mSavedPeerConfig);
                         mSavedPeerConfig.wps.pin = provDisc.pin;
                         p2pConnectWithPinDisplay(mSavedPeerConfig);
-                        if (!sendShowPinReqToFrontApp(provDisc.pin)) {
-                            notifyInvitationSent(provDisc.pin, device.deviceAddress);
-                        }
+                        notifyInvitationSent(provDisc.pin, device.deviceAddress);
                         transitionTo(mGroupNegotiationState);
                     }
                     break;
@@ -1519,10 +1470,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
                     String deviceAddress = device.deviceAddress;
                     if (deviceAddress != null) {
-                        if (mSavedProvDiscDevice != null &&
-                                deviceAddress.equals(mSavedProvDiscDevice.deviceAddress)) {
-                            mSavedProvDiscDevice = null;
-                        }
                         if (mPeers.get(deviceAddress) != null) {
                             mGroup.addClient(mPeers.get(deviceAddress));
                         } else {
@@ -1622,34 +1569,26 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiP2pManager.CONNECT:
                     WifiP2pConfig config = (WifiP2pConfig) message.obj;
-                    if (config.deviceAddress == null ||
-                            (mSavedProvDiscDevice != null &&
-                                    mSavedProvDiscDevice.deviceAddress.equals(
-                                            config.deviceAddress))) {
-                        if (config.wps.setup == WpsInfo.PBC) {
-                            mWifiNative.startWpsPbc(mGroup.getInterface(), null);
-                        } else {
-                            if (config.wps.pin == null) {
-                                String pin = mWifiNative.startWpsPinDisplay(mGroup.getInterface());
-                                try {
-                                    Integer.parseInt(pin);
-                                    if (!sendShowPinReqToFrontApp(pin)) {
-                                        notifyInvitationSent(pin,
-                                                config.deviceAddress != null ?
-                                                        config.deviceAddress : "any");
-                                    }
-                                } catch (NumberFormatException ignore) {
-                                    // do nothing if pin is invalid
-                                }
-                            } else {
-                                mWifiNative.startWpsPinKeypad(mGroup.getInterface(),
-                                        config.wps.pin);
-                            }
-                        }
-                        if (config.deviceAddress != null) {
-                            mPeers.updateStatus(config.deviceAddress, WifiP2pDevice.INVITED);
-                            sendP2pPeersChangedBroadcast();
-                        }
+                    // This allows any client to join the GO during the
+                    // WPS window
+                    if (config.deviceAddress == null) {
+                         if (config.wps.setup == WpsInfo.PBC) {
+                             mWifiNative.startWpsPbc(mGroup.getInterface(), null);
+                         } else {
+                             if (config.wps.pin == null) {
+                                 String pin = mWifiNative.startWpsPinDisplay(mGroup.getInterface());
+                                 try {
+                                     Integer.parseInt(pin);
+                                     notifyInvitationSent(pin, config.deviceAddress != null ?
+                                             config.deviceAddress : "any");
+                                 } catch (NumberFormatException ignore) {
+                                     // do nothing if pin is invalid
+                                 }
+                             } else {
+                                 mWifiNative.startWpsPinKeypad(mGroup.getInterface(),
+                                         config.wps.pin);
+                             }
+                         }
                         replyToMessage(message, WifiP2pManager.CONNECT_SUCCEEDED);
                     } else {
                         logd("Inviting device : " + config.deviceAddress);
@@ -1692,7 +1631,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
                     WifiP2pProvDiscEvent provDisc = (WifiP2pProvDiscEvent) message.obj;
-                    mSavedProvDiscDevice = provDisc.device;
                     mSavedPeerConfig = new WifiP2pConfig();
                     mSavedPeerConfig.deviceAddress = provDisc.device.deviceAddress;
                     if (message.what == WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT) {
@@ -1703,9 +1641,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     } else {
                         mSavedPeerConfig.wps.setup = WpsInfo.PBC;
                     }
-                    if (!sendConnectNoticeToApp(mSavedProvDiscDevice, mSavedPeerConfig)) {
-                        transitionTo(mUserAuthorizingJoinState);
-                    }
+                    transitionTo(mUserAuthorizingJoinState);
                     break;
                 case WifiMonitor.P2P_GROUP_STARTED_EVENT:
                     Slog.e(TAG, "Duplicate group creation event notice, ignore");
@@ -1717,7 +1653,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
 
         public void exit() {
-            mSavedProvDiscDevice = null;
             updateThisDevice(WifiP2pDevice.AVAILABLE);
             resetWifiP2pInfo();
             mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
@@ -1799,7 +1734,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         pw.println("mGroup " + mGroup);
         pw.println("mSavedPeerConfig " + mSavedPeerConfig);
         pw.println("mSavedP2pGroup " + mSavedP2pGroup);
-        pw.println("mSavedProvDiscDevice " + mSavedProvDiscDevice);
         pw.println();
     }
 
@@ -2285,9 +2219,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         String pin = mWifiNative.p2pConnect(config, dev.isGroupOwner());
         try {
             Integer.parseInt(pin);
-            if (!sendShowPinReqToFrontApp(pin)) {
-                notifyInvitationSent(pin, config.deviceAddress);
-            }
+            notifyInvitationSent(pin, config.deviceAddress);
         } catch (NumberFormatException ignore) {
             // do nothing if p2pConnect did not return a pin
         }
@@ -2718,139 +2650,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
 
         return clientInfo;
-    }
-
-    /**
-     * Send detached message to dialog listener in the foreground application.
-     * @param reason
-     */
-    private void sendDetachedMsg(int reason) {
-        if (mForegroundAppMessenger == null) return;
-
-        Message msg = Message.obtain();
-        msg.what = WifiP2pManager.DIALOG_LISTENER_DETACHED;
-        msg.arg1 = reason;
-        try {
-            mForegroundAppMessenger.send(msg);
-        } catch (RemoteException e) {
-        }
-        mForegroundAppMessenger = null;
-        mForegroundAppPkgName = null;
-    }
-
-    /**
-     * Send a request to show wps pin to dialog listener in the foreground application.
-     * @param pin WPS pin
-     * @return
-     */
-    private boolean sendShowPinReqToFrontApp(String pin) {
-        if (!isForegroundApp(mForegroundAppPkgName)) {
-            sendDetachedMsg(WifiP2pManager.NOT_IN_FOREGROUND);
-            return false;
-        }
-        Message msg = Message.obtain();
-        msg.what = WifiP2pManager.SHOW_PIN_REQUESTED;
-        Bundle bundle = new Bundle();
-        bundle.putString(WifiP2pManager.WPS_PIN_BUNDLE_KEY, pin);
-        msg.setData(bundle);
-        return sendDialogMsgToFrontApp(msg);
-    }
-
-    /**
-     * Send a request to establish the connection to dialog listener in the foreground
-     * application.
-     * @param dev source device
-     * @param config
-     * @return
-     */
-    private boolean sendConnectNoticeToApp(WifiP2pDevice dev, WifiP2pConfig config) {
-        if (dev == null) {
-            dev = new WifiP2pDevice(config.deviceAddress);
-        }
-
-        if (!isForegroundApp(mForegroundAppPkgName)) {
-            if (DBG) logd("application is NOT foreground");
-            sendDetachedMsg(WifiP2pManager.NOT_IN_FOREGROUND);
-            return false;
-        }
-
-        Message msg = Message.obtain();
-        msg.what = WifiP2pManager.CONNECTION_REQUESTED;
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(WifiP2pManager.P2P_DEV_BUNDLE_KEY, dev);
-        bundle.putParcelable(WifiP2pManager.P2P_CONFIG_BUNDLE_KEY, config);
-        msg.setData(bundle);
-        return sendDialogMsgToFrontApp(msg);
-    }
-
-    /**
-     * Send dialog event message to front application's dialog listener.
-     * @param msg
-     * @return true if success.
-     */
-    private boolean sendDialogMsgToFrontApp(Message msg) {
-        try {
-            mForegroundAppMessenger.send(msg);
-        } catch (RemoteException e) {
-            mForegroundAppMessenger = null;
-            mForegroundAppPkgName = null;
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Set dialog listener application.
-     * @param m
-     * @param appPkgName if null, reset the listener.
-     * @param isReset if true, try to reset.
-     * @return
-     */
-    private boolean setDialogListenerApp(Messenger m,
-            String appPkgName, boolean isReset) {
-
-        if (mForegroundAppPkgName != null && !mForegroundAppPkgName.equals(appPkgName)) {
-            if (isForegroundApp(mForegroundAppPkgName)) {
-                // The current dialog listener is foreground app's.
-                if (DBG) logd("application is NOT foreground");
-                return false;
-            }
-            // detach an old listener.
-            sendDetachedMsg(WifiP2pManager.NOT_IN_FOREGROUND);
-        }
-
-        if (isReset) {
-            if (DBG) logd("reset dialog listener");
-            mForegroundAppMessenger = null;
-            mForegroundAppPkgName = null;
-            return true;
-        }
-
-        if (!isForegroundApp(appPkgName)) {
-            return false;
-        }
-
-        mForegroundAppMessenger = m;
-        mForegroundAppPkgName = appPkgName;
-        if (DBG) logd("set dialog listener. app=" + appPkgName);
-        return true;
-    }
-
-    /**
-     * Return true if the specified package name is foreground app's.
-     *
-     * @param pkgName application package name.
-     * @return
-     */
-    private boolean isForegroundApp(String pkgName) {
-        if (pkgName == null) return false;
-
-        List<RunningTaskInfo> tasks = mActivityMgr.getRunningTasks(1);
-        if (tasks.size() == 0) {
-            return false;
-        }
-
-        return pkgName.equals(tasks.get(0).baseActivity.getPackageName());
     }
 
     }
