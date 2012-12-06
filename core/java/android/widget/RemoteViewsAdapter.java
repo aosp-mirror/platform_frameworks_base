@@ -318,9 +318,13 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      */
     private class RemoteViewsFrameLayoutRefSet {
         private HashMap<Integer, LinkedList<RemoteViewsFrameLayout>> mReferences;
+        private HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>
+                mViewToLinkedList;
 
         public RemoteViewsFrameLayoutRefSet() {
             mReferences = new HashMap<Integer, LinkedList<RemoteViewsFrameLayout>>();
+            mViewToLinkedList =
+                    new HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>();
         }
 
         /**
@@ -337,6 +341,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 refs = new LinkedList<RemoteViewsFrameLayout>();
                 mReferences.put(pos, refs);
             }
+            mViewToLinkedList.put(layout, refs);
 
             // Add the references to the list
             refs.add(layout);
@@ -355,11 +360,23 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 final LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(pos);
                 for (final RemoteViewsFrameLayout ref : refs) {
                     ref.onRemoteViewsLoaded(view, mRemoteViewsOnClickHandler);
+                    if (mViewToLinkedList.containsKey(ref)) {
+                        mViewToLinkedList.remove(ref);
+                    }
                 }
                 refs.clear();
-
                 // Remove this set from the original mapping
                 mReferences.remove(pos);
+            }
+        }
+
+        /**
+         * We need to remove views from this set if they have been recycled by the AdapterView.
+         */
+        public void removeView(RemoteViewsFrameLayout rvfl) {
+            if (mViewToLinkedList.containsKey(rvfl)) {
+                mViewToLinkedList.get(rvfl).remove(rvfl);
+                mViewToLinkedList.remove(rvfl);
             }
         }
 
@@ -370,6 +387,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             // We currently just clear the references, and leave all the previous layouts returned
             // in their default state of the loading view.
             mReferences.clear();
+            mViewToLinkedList.clear();
         }
     }
 
@@ -1133,6 +1151,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             boolean isInCache = mCache.containsRemoteViewAt(position);
             boolean isConnected = mServiceConnection.isConnected();
             boolean hasNewItems = false;
+
+            if (convertView != null && convertView instanceof RemoteViewsFrameLayout) {
+                mRequestedViews.removeView((RemoteViewsFrameLayout) convertView);
+            }
 
             if (!isInCache && !isConnected) {
                 // Requesting bind service will trigger a super.notifyDataSetChanged(), which will
