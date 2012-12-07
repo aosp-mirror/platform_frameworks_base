@@ -336,7 +336,7 @@ public class ConnectivityManager {
      *             network default network preference can't really express
      *             the heirarchy.  Instead, the default is defined by the
      *             networkAttributes in config.xml.  You can determine
-     *             the current value by calling {@link getNetworkPreference()}
+     *             the current value by calling {@link #getNetworkPreference()}
      *             from an App.
      */
     @Deprecated
