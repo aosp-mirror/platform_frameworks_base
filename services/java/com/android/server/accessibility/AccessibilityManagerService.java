@@ -1123,7 +1123,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return;
             }
             mEnableTouchExplorationDialog = new AlertDialog.Builder(mContext)
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
                 .setPositiveButton(android.R.string.ok, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
