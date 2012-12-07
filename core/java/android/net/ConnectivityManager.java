@@ -328,6 +328,18 @@ public class ConnectivityManager {
     /** {@hide} */
     public static final int MAX_NETWORK_TYPE = TYPE_WIFI_P2P;
 
+    /**
+     * If you want to set the default network preference,you can directly
+     * change the networkAttributes array in framework's config.xml.
+     *
+     * @deprecated Since we support so many more networks now, the single
+     *             network default network preference can't really express
+     *             the heirarchy.  Instead, the default is defined by the
+     *             networkAttributes in config.xml.  You can determine
+     *             the current value by calling {@link getNetworkPreference()}
+     *             from an App.
+     */
+    @Deprecated
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
     /**
