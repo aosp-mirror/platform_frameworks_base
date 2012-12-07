@@ -66,7 +66,7 @@ public class ConfirmDialog extends AlertActivity implements
                     getString(R.string.prompt, app.loadLabel(pm)));
             ((CompoundButton) view.findViewById(R.id.check)).setOnCheckedChangeListener(this);
 
-            mAlertParams.mIconId = android.R.drawable.ic_dialog_alert;
+            mAlertParams.mIconAttrId = android.R.attr.alertDialogIcon;
             mAlertParams.mTitle = getText(android.R.string.dialog_alert_title);
             mAlertParams.mPositiveButtonText = getText(android.R.string.ok);
             mAlertParams.mPositiveButtonListener = this;
