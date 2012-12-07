@@ -174,8 +174,7 @@ public class WebAppInterface {
 }
 </pre>
 
-<p class="caution"><strong>Caution:</strong> If you've set either your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+<p class="caution"><strong>Caution:</strong> If you've set your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 to 17 or higher, <strong>you
 must add the {@code &#64;JavascriptInterface} annotation</strong> to any method that you want
