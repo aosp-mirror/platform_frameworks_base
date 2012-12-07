@@ -241,7 +241,7 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Ermöglicht der App, Notfall-Broadcasts zu empfangen und zu verarbeiten. Diese Berechtigung steht nur System-Apps zur Verfügung."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Cell Broadcast-Nachrichten lesen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ermöglicht der App, von Ihrem Gerät empfangene Cell Broadcast-Nachrichten zu lesen. Cell Broadcast-Benachrichtigungen werden an einigen Standorten gesendet, um Sie über Notfallsituationen zu informieren. Schädliche Apps können die Leistung oder den Betrieb Ihres Geräts beeinträchtigen, wenn eine Cell Broadcast-Notfallbenachrichtigung eingeht."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"Kurznachrichten senden"</string>
+    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS senden"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ermöglicht der App, SMS zu senden. Dies kann zu unerwarteten Kosten führen. Schädliche Apps können Kosten verursachen, indem sie Nachrichten ohne Ihre Bestätigung senden."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"SMS ohne Bestätigung senden"</string>
     <string name="permdesc_sendSmsNoConfirmation" msgid="402569800862935907">"Ermöglicht der App, SMS zu senden. Dies kann zu unerwarteten Kosten führen. Schädliche Apps können Kosten verursachen, indem sie Nachrichten ohne Ihre Bestätigung senden."</string>
@@ -253,7 +253,7 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ermöglicht der App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Apps können so Ihre Nachrichten löschen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"Textnachrichten (WAP) empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ermöglicht der App, WAP-Nachrichten zu empfangen und zu verarbeiten. Mit der Berechtigung können Nachrichten, die an Sie gesendet wurden, überwacht und gelöscht werden, bevor sie Ihnen angezeigt werden."</string>
-    <string name="permlab_getTasks" msgid="6466095396623933906">"aktive Apps abrufen"</string>
+    <string name="permlab_getTasks" msgid="6466095396623933906">"Aktive Apps abrufen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ermöglicht der App, Informationen zu aktuellen und kürzlich ausgeführten Aufgaben abzurufen. Damit kann die App möglicherweise ermitteln, welche Apps auf Ihrem Gerät zum Einsatz kommen."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"Nutzerübergreifend interagieren"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ermöglicht der App, auf dem Gerät nutzerübergreifend Aktionen durchzuführen. Schädliche Apps können so den zwischen den Nutzern bestehenden Schutz aufheben."</string>
@@ -295,7 +295,7 @@
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Ermöglicht einer App, einen Eingabefilter zu registrieren, der den Stream aller Nutzerereignisse vor ihrem Versand filtert. Eine schädliche App kann die System-UI ohne Eingriff des Nutzers kontrollieren."</string>
     <string name="permlab_magnify_display" msgid="5973626738170618775">"Anzeige vergrößern"</string>
     <string name="permdesc_magnify_display" msgid="7121235684515003792">"Erlaubt der App, den Inhalt einer Anzeige zu vergrößern. Schädliche Apps verändern eventuell die Ansicht, sodass Inhalte nicht richtig angezeigt werden."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"partielles Herunterfahren"</string>
+    <string name="permlab_shutdown" msgid="7185747824038909016">"Partielles Herunterfahren"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Versetzt den Aktivitätsmanager in einen heruntergefahrenen Zustand. Führt kein vollständiges Herunterfahren aus."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindert den Nutzer daran, zu einer anderen App zu wechseln"</string>
@@ -303,9 +303,9 @@
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ermöglicht der App, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Apps können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Nutzung benötigt."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Broadcast ohne Paket senden"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Ermöglicht der App, eine Benachrichtigung zu senden, dass ein App-Paket entfernt wurde. Schädliche Apps können so eine andere aktive App beenden."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"per SMS empfangenen Broadcast senden"</string>
+    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"Per SMS empfangenen Broadcast senden"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine SMS empfangen wurde. Schädliche Apps können so eingehende SMS fälschen."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"von WAP-PUSH empfangenen Broadcast senden"</string>
+    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"Von WAP-PUSH empfangenen Broadcast senden"</string>
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ermöglicht der App, eine Benachrichtigung zu senden, dass eine WAP PUSH-Nachricht empfangen wurde. Schädliche Apps können so den Empfang von MMS vortäuschen oder unbemerkt den Inhalt einer beliebigen Webseite durch schädliche Inhalte ersetzen."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"Anzahl der laufenden Prozesse beschränken"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ermöglicht der App, die maximale Anzahl an aktiven Prozessen zu steuern. Wird nie für normale Apps benötigt."</string>
@@ -319,7 +319,7 @@
     <string name="permdesc_backup" msgid="6912230525140589891">"Ermöglicht der App, den Sicherungs- und Wiederherstellungsmechanismus des Systems zu steuern. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Vollständige Sicherung oder Wiederherstellung bestätigen"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Ermöglicht der App, die Benutzeroberfläche zur Bestätigung der vollständigen Sicherung zu starten. Kann nicht von jeder App verwendet werden."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"nicht autorisierte Fenster anzeigen"</string>
+    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Nicht autorisierte Fenster anzeigen"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Ermöglicht der App die Erstellung von Fenstern, die von der Benutzeroberfläche des internen Systems verwendet werden. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Über andere Apps ziehen"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ermöglicht der App, über andere Apps oder Teile der Benutzeroberfläche zu zeichnen. Dies kann sich auf die Oberfläche in jeder App auswirken oder die erwartete Darstellung in anderen Apps verändern."</string>
@@ -397,7 +397,7 @@
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"Beim Start ausführen"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ermöglicht der App, sich selbst zu starten, sobald das System gebootet wurde. Dadurch kann es länger dauern, bis das Tablet gestartet wird, und durch die ständige Aktivität der App wird die gesamte Leistung des Tablets beeinträchtigt."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ermöglicht der App, sich selbst zu starten, sobald das System gebootet wurde. Dadurch kann es länger dauern, bis das Telefon gestartet wird, und durch die ständige Aktivität der App wird die gesamte Leistung des Telefons beeinträchtigt."</string>
-    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"dauerhaften Broadcast senden"</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"Dauerhaften Broadcast senden"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ermöglicht der App, weiluerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Tablet langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ermöglicht der App, weiluerhafte Broadcasts zu senden, die auch nach Ende des Broadcasts bestehen bleiben. Ein zu intensiver Einsatz kann das Telefon langsam oder instabil machen, weil zu viel Arbeitsspeicher belegt wird."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"Kontakte lesen"</string>
@@ -406,7 +406,7 @@
     <string name="permlab_writeContacts" msgid="5107492086416793544">"Meine Kontakte ändern"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Ermöglicht der App, Daten zu Kontakten, die auf Ihrem Tablet gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der Sie bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Ermöglicht der App, Daten zu Kontakten, die auf Ihrem Telefon gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der Sie bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert haben. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufprotokoll lesen"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufliste lesen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Ermöglicht der App, die Anrufliste Ihres Tablets zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Die Berechtigung erlaubt Apps, Ihre Anruflistendaten zu speichern, und schädliche Apps können diese Daten ohne Ihr Wissen weiterleiten."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Ermöglicht der App, die Anrufliste Ihres Telefons zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Die Berechtigung erlaubt Apps, Ihre Anruflistendaten zu speichern, und schädliche Apps können diese Daten ohne Ihr Wissen weiterleiten."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"Anrufprotokoll bearbeiten"</string>
@@ -432,9 +432,9 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Damit könnte die App die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Erstellen von simulierten Standortquellen für Testzwecke oder Installation eines neuen Standortanbieters. Damit kann die App den von anderen Standortquellen wie GPS oder Standortanbietern zurückgegebenen Standort und/oder Status überschreiben."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"genauer Standort (GPS- und netzwerkbasiert)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"Genauer Standort (GPS- und netzwerkbasiert)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ermöglicht der App, Ihre genaue Position anhand von GPS-Daten (Global Positioning System) oder über Netzwerkstandortquellen wie Sendemasten oder WLAN zu ermitteln. Diese Standortdienste müssen auf Ihrem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können Ihren Standort anhand dieser Daten ermitteln und verbrauchen eventuell zusätzliche Akkuleistung."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ungefährer Standort (netzwerkbasiert)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"Ungefährer Standort (netzwerkbasiert)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ermöglicht der App, Ihren ungefähren Standort zu ermitteln. Diese Standortangabe stammt von Standortdiensten, die Netzwerkstandortquellen wie etwa Sendemasten oder WLAN verwenden. Diese Standortdienste müssen auf Ihrem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können Ihren ungefähren Standort anhand dieser Daten ermitteln."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Auf SurfaceFlinger zugreifen"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ermöglicht der App, die systemnahen SurfaceFlinger-Funktionen zu verwenden"</string>
@@ -1094,7 +1094,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Benachrichtigungslautstärke"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standard-Klingelton"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard-Klingelton (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="4440324407807468713">"Lautlos"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Keine"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Klingeltöne"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Unbekannter Klingelton"</string>
   <plurals name="wifi_available">
@@ -1126,7 +1126,7 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" msgid="7363907213787469151">"Das Telefon wird vorübergehend vom WLAN getrennt, während eine Verbindung mit <xliff:g id="DEVICE_NAME">%1$s</xliff:g> hergestellt wird."</string>
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
-    <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
+    <string name="sms_control_title" msgid="7296612781128917719">"SMS werden gesendet"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sendet eine große Anzahl SMS. Möchten Sie zulassen, dass die App weiterhin Nachrichten sendet?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Zulassen"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nicht zulassen"</string>

@@ -1094,7 +1094,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Głośność powiadomień"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Dzwonek domyślny"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Dzwonek domyślny (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="4440324407807468713">"Cichy"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Brak"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Dzwonki"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nieznany dzwonek"</string>
   <plurals name="wifi_available">
@@ -1363,7 +1363,7 @@
     <string name="data_usage_limit_body" msgid="3317964706973601386">"Dotknij, aby włączyć."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Przekroczono limit danych 2G/3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Przekroczono limit danych 4G"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Przekroczono limit danych komór."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Przekroczenie limitu danych"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Przekroczono limit danych Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ponad określony limit"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Dane w tle są ograniczone"</string>

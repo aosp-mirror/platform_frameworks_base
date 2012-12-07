@@ -417,9 +417,9 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"ubah kartu kontak Anda"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Memungkinkan aplikasi mengubah atau menambah informasi profil pribadi yang tersimpan di perangkat Anda, seperti nama dan informasi kontak. Ini berarti aplikasi tersebut dapat mengenali Anda dan mengirim informasi profil Anda ke orang lain."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"membaca aliran sosial Anda"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Memungkinkan aplikasi mengakses dan menyinkronkan pembaruan sosial dari Anda dan teman. Hati-hati ketika berbagi informasi -- izin ini memungkinkan aplikasi membaca komunikasi antara Anda dan teman di jaringan sosial, terlepas dari kerahasiaan. Catatan: izin ini tidak dapat diberlakukan di semua jaringan sosial."</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Memungkinkan aplikasi mengakses dan menyinkronkan pembaruan sosial dari Anda dan teman. Hati-hati ketika berbagi informasi -- izin ini memungkinkan aplikasi membaca komunikasi antara Anda dan teman di jejaring sosial, terlepas dari kerahasiaan. Catatan: izin ini tidak dapat diberlakukan di semua jejaring sosial."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"menulis ke aliran sosial Anda"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Memungkinkan aplikasi menampilkan pembaruan sosial dari teman Anda. Berhati-hatilah saat berbagi informasi -- izin ini memungkinkan aplikasi menghasilkan pesan yang mungkin kelihatannya berasal dari seorang teman. Catatan: izin ini tidak dapat diberlakukan di semua jaringan sosial."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Memungkinkan aplikasi menampilkan pembaruan sosial dari teman Anda. Berhati-hatilah saat berbagi informasi -- izin ini memungkinkan aplikasi menghasilkan pesan yang mungkin kelihatannya berasal dari seorang teman. Catatan: izin ini tidak dapat diberlakukan di semua jejaring sosial."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalender serta informasi rahasia"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Memungkinkan aplikasi membaca semua acara kalender yang tersimpan di tablet Anda, termasuk milik teman atau rekan kerja. Izin ini memungkinkan aplikasi berbagi atau menyimpan data kalender Anda, terlepas dari kerahasiaan atau sensitivitas."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Memungkinkan aplikasi membaca semua acara kalender yang tersimpan di ponsel Anda, termasuk milik teman atau rekan kerja. Izin ini memungkinkan aplikasi berbagi atau menyimpan data kalender Anda, terlepas dari kerahasiaan atau sensitivitas."</string>
@@ -1094,7 +1094,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume pemberitahuan"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Nada dering default"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nada dering default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="4440324407807468713">"Senyap"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Tidak Ada"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Nada dering"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nada dering tidak dikenal"</string>
   <plurals name="wifi_available">
