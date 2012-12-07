@@ -18,7 +18,7 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+import android.telephony.Rlog;
 
 /**
  * CellIdentity is to represent a unique CDMA cell
@@ -219,6 +219,6 @@ public final class CellIdentityCdma implements Parcelable {
      * log
      */
     private static void log(String s) {
-        Log.w(LOG_TAG, s);
+        Rlog.w(LOG_TAG, s);
     }
 }

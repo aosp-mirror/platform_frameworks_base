@@ -19,7 +19,7 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+import android.telephony.Rlog;
 
 /**
  * Contains phone state and service related information.
@@ -460,7 +460,7 @@ public class ServiceState implements Parcelable {
                 break;
             default:
                 rtString = "Unexpected";
-                Log.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
+                Rlog.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
                 break;
         }
         return rtString;
