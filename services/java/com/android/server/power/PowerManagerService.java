@@ -1150,6 +1150,16 @@ public final class PowerManagerService extends IPowerManager.Stub
                 }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+
+                // Tell the notifier whether wireless charging has started so that
+                // it can provide feedback to the user.  Refer to
+                // shouldWakeUpWhenPluggedOrUnpluggedLocked for justification of the
+                // heuristics used here.
+                if (!wasPowered && mIsPowered
+                        && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                        && mBatteryLevel < WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
+                    mNotifier.onWirelessChargingStarted();
+                }
             }
         }
     }

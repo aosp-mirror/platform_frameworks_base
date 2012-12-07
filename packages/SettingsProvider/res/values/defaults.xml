@@ -75,6 +75,8 @@
     <integer name="def_lockscreen_sounds_enabled">1</integer>
     <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
     <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
+    <string name="def_wireless_charging_started_sound" translatable="false">/system/media/audio/ui/WirelessChargingStarted.ogg</string>
+
     <bool name="def_lockscreen_disabled">false</bool>
     <bool name="def_device_provisioned">false</bool>
 
