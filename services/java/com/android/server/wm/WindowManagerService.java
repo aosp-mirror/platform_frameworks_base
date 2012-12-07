@@ -5796,50 +5796,64 @@ public class WindowManagerService extends IWindowManager.Stub
             // Figure out the part of the screen that is actually the app.
             boolean including = false;
             final WindowList windows = displayContent.getWindowList();
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                WindowState ws = windows.get(i);
-                if (!ws.mHasSurface) {
-                    continue;
-                }
-                if (ws.mLayer >= aboveAppLayer) {
-                    continue;
-                }
-                // When we will skip windows: when we are not including
-                // ones behind a window we didn't skip, and we are actually
-                // taking a screenshot of a specific app.
-                if (!including && appToken != null) {
-                    // Also, we can possibly skip this window if it is not
-                    // an IME target or the application for the screenshot
-                    // is not the current IME target.
-                    if (!ws.mIsImWindow || !isImeTarget) {
-                        // And finally, this window is of no interest if it
-                        // is not associated with the screenshot app.
-                        if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
-                            continue;
+            try {
+                Surface.openTransaction();
+                for (int i = windows.size() - 1; i >= 0; i--) {
+                    WindowState ws = windows.get(i);
+                    if (!ws.mHasSurface) {
+                        continue;
+                    }
+                    if (ws.mLayer >= aboveAppLayer) {
+                        continue;
+                    }
+                    // When we will skip windows: when we are not including
+                    // ones behind a window we didn't skip, and we are actually
+                    // taking a screenshot of a specific app.
+                    if (!including && appToken != null) {
+                        // Also, we can possibly skip this window if it is not
+                        // an IME target or the application for the screenshot
+                        // is not the current IME target.
+                        if (!ws.mIsImWindow || !isImeTarget) {
+                            // And finally, this window is of no interest if it
+                            // is not associated with the screenshot app.
+                            if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
+                                continue;
+                            }
                         }
                     }
-                }
 
-                // We keep on including windows until we go past a full-screen
-                // window.
-                including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
+                    // We keep on including windows until we go past a full-screen
+                    // window.
+                    including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
 
-                if (maxLayer < ws.mWinAnimator.mSurfaceLayer) {
-                    maxLayer = ws.mWinAnimator.mSurfaceLayer;
+                    final WindowStateAnimator winAnimator = ws.mWinAnimator;
+
+                    // The setSize() method causes all previous Surface transactions to sync to
+                    // the SurfaceFlinger. This will force any outstanding setLayer calls to be
+                    // synced as well for screen capture. Without this we can get black bitmaps.
+                    Surface surface = winAnimator.mSurface;
+                    surface.setSize(surface.getWidth(), surface.getHeight());
+
+
+                    if (maxLayer < winAnimator.mSurfaceLayer) {
+                        maxLayer = winAnimator.mSurfaceLayer;
+                    }
+
+                    // Don't include wallpaper in bounds calculation
+                    if (!ws.mIsWallpaper) {
+                        final Rect wf = ws.mFrame;
+                        final Rect cr = ws.mContentInsets;
+                        int left = wf.left + cr.left;
+                        int top = wf.top + cr.top;
+                        int right = wf.right - cr.right;
+                        int bottom = wf.bottom - cr.bottom;
+                        frame.union(left, top, right, bottom);
+                    }
                 }
-                
-                // Don't include wallpaper in bounds calculation
-                if (!ws.mIsWallpaper) {
-                    final Rect wf = ws.mFrame;
-                    final Rect cr = ws.mContentInsets;
-                    int left = wf.left + cr.left;
-                    int top = wf.top + cr.top;
-                    int right = wf.right - cr.right;
-                    int bottom = wf.bottom - cr.bottom;
-                    frame.union(left, top, right, bottom);
-                }
+            } finally {
+                Surface.closeTransaction();
+                Binder.restoreCallingIdentity(ident);
             }
-            Binder.restoreCallingIdentity(ident);
 
             // Constrain frame to the screen size.
             frame.intersect(0, 0, dw, dh);
