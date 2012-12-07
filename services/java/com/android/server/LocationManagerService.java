@@ -1885,13 +1885,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public void removeTestProvider(String provider) {
         checkMockPermissionsSafe();
         synchronized (mLock) {
-            MockProvider mockProvider = mMockProviders.get(provider);
+            MockProvider mockProvider = mMockProviders.remove(provider);
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
             long identity = Binder.clearCallingIdentity();
             removeProviderLocked(mProvidersByName.get(provider));
-            mMockProviders.remove(mockProvider);
 
             // reinstate real provider if available
             LocationProviderInterface realProvider = mRealProviders.get(provider);
