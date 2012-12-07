@@ -70,7 +70,8 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     
     public IInputMethodSessionWrapper(Context context,
             InputMethodSession inputMethodSession) {
-        mCaller = new HandlerCaller(context, this);
+        mCaller = new HandlerCaller(context, null,
+                this, true /*asyncHandler*/);
         mInputMethodSession = inputMethodSession;
     }
 
