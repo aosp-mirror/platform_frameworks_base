@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Pools.SimplePool;
 import android.util.SparseArray;
@@ -199,18 +200,29 @@ public class RelativeLayout extends ViewGroup {
     private View[] mSortedVerticalChildren = new View[0];
     private final DependencyGraph mGraph = new DependencyGraph();
 
+    // Compatibility hack. Old versions of the platform had problems
+    // with MeasureSpec value overflow and RelativeLayout was one source of them.
+    // Some apps came to rely on them. :(
+    private boolean mAllowBrokenMeasureSpecs = false;
+
     public RelativeLayout(Context context) {
         super(context);
+        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
+                Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     public RelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         initFromAttributes(context, attrs);
+        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
+                Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     public RelativeLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initFromAttributes(context, attrs);
+        mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
+                Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     private void initFromAttributes(Context context, AttributeSet attrs) {
@@ -660,7 +672,7 @@ public class RelativeLayout extends ViewGroup {
                 mPaddingLeft, mPaddingRight,
                 myWidth);
         int childHeightMeasureSpec;
-        if (myHeight < 0) {
+        if (myHeight < 0 && !mAllowBrokenMeasureSpecs) {
             // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
             // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
             // Carry it forward.
@@ -692,7 +704,7 @@ public class RelativeLayout extends ViewGroup {
     private int getChildMeasureSpec(int childStart, int childEnd,
             int childSize, int startMargin, int endMargin, int startPadding,
             int endPadding, int mySize) {
-        if (mySize < 0) {
+        if (mySize < 0 && !mAllowBrokenMeasureSpecs) {
             // Negative values in a mySize/myWidth/myWidth value in RelativeLayout measurement
             // is code for, "we got an unspecified mode in the RelativeLayout's measurespec."
             // Carry it forward.
