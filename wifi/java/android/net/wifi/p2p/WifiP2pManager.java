@@ -171,10 +171,12 @@ public class WifiP2pManager {
      * Broadcast intent action indicating that the state of Wi-Fi p2p connectivity
      * has changed. One extra {@link #EXTRA_WIFI_P2P_INFO} provides the p2p connection info in
      * the form of a {@link WifiP2pInfo} object. Another extra {@link #EXTRA_NETWORK_INFO} provides
-     * the network info in the form of a {@link android.net.NetworkInfo}.
+     * the network info in the form of a {@link android.net.NetworkInfo}. A third extra provides
+     * the details of the group.
      *
      * @see #EXTRA_WIFI_P2P_INFO
      * @see #EXTRA_NETWORK_INFO
+     * @see #EXTRA_WIFI_P2P_GROUP
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_CONNECTION_CHANGED_ACTION =
@@ -188,41 +190,46 @@ public class WifiP2pManager {
 
     /**
      * The lookup key for a {@link android.net.NetworkInfo} object associated with the
-     * Wi-Fi network. Retrieve with
+     * p2p network. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
     public static final String EXTRA_NETWORK_INFO = "networkInfo";
 
     /**
-     * The lookup key for a {@link android.net.LinkProperties} object associated with the
-     * network. Retrieve with
+     * The lookup key for a {@link android.net.wifi.p2p.WifiP2pGroup} object
+     * associated with the p2p network. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
      */
-    public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
+    public static final String EXTRA_WIFI_P2P_GROUP = "p2pGroupInfo";
 
     /**
-     * The lookup key for a {@link android.net.LinkCapabilities} object associated with the
-     * network. Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
-     */
-    public static final String EXTRA_LINK_CAPABILITIES = "linkCapabilities";
-
-    /**
-     * Broadcast intent action indicating that the available peer list has changed. Fetch
-     * the changed list of peers with {@link #requestPeers}
+     * Broadcast intent action indicating that the available peer list has changed. This
+     * can be sent as a result of peers being found, lost or updated.
+     *
+     * <p> An extra {@link #EXTRA_P2P_DEVICE_LIST} provides the full list of
+     * current peers. The full list of peers can also be obtained any time with
+     * {@link #requestPeers}.
+     *
+     * @see #EXTRA_P2P_DEVICE_LIST
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String WIFI_P2P_PEERS_CHANGED_ACTION =
         "android.net.wifi.p2p.PEERS_CHANGED";
+
+     /**
+      * The lookup key for a {@link android.net.wifi.p2p.WifiP2pDeviceList} object representing
+      * the new peer list when {@link #WIFI_P2P_PEERS_CHANGED_ACTION} broadcast is sent.
+      *
+      * <p>Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
+      */
+     public static final String EXTRA_P2P_DEVICE_LIST = "wifiP2pDeviceList";
 
     /**
      * Broadcast intent action indicating that peer discovery has either started or stopped.
      * One extra {@link #EXTRA_DISCOVERY_STATE} indicates whether discovery has started
      * or stopped.
      *
-     * Note that discovery will be stopped during a connection setup. If the application tries
+     * <p>Note that discovery will be stopped during a connection setup. If the application tries
      * to re-initiate discovery during this time, it can fail.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
