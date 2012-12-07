@@ -273,6 +273,24 @@ public class ImageProcessingActivity extends Activity
         case 29:
             mTest = new Blur25G();
             break;
+        case 30:
+            mTest = new Vibrance();
+            break;
+        case 31:
+            mTest = new BWFilter();
+            break;
+        case 32:
+            mTest = new Shadows();
+            break;
+        case 33:
+            mTest = new Contrast();
+            break;
+        case 34:
+            mTest = new Exposure();
+            break;
+        case 35:
+            mTest = new WhiteBalance();
+            break;
         }
 
         mTest.createBaseTest(this, mBitmapIn, mBitmapIn2, mBitmapOut);
@@ -284,7 +302,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[30];
+        mTestNames = new String[36];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -315,6 +333,12 @@ public class ImageProcessingActivity extends Activity
         mTestNames[27] = "Mandelbrot";
         mTestNames[28] = "Intrinsics Blend";
         mTestNames[29] = "Intrinsics Blur 25 uchar";
+        mTestNames[30] = "Vibrance";
+        mTestNames[31] = "BW Filter";
+        mTestNames[32] = "Shadows";
+        mTestNames[33] = "Contrast";
+        mTestNames[34] = "Exposure";
+        mTestNames[35] = "White Balance";
 
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
