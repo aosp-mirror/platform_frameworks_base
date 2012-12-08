@@ -23,7 +23,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
 import android.telephony.CellInfo;
-import android.util.Log;
+import android.telephony.Rlog;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
@@ -348,7 +348,7 @@ public class PhoneStateListener {
 
     Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
-            //Log.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what) + " msg=" + msg);
+            //Rlog.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what) + " msg=" + msg);
             switch (msg.what) {
                 case LISTEN_SERVICE_STATE:
                     PhoneStateListener.this.onServiceStateChanged((ServiceState)msg.obj);

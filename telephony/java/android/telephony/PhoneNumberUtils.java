@@ -33,7 +33,7 @@ import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.util.Log;
+import android.telephony.Rlog;
 import android.util.SparseIntArray;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
@@ -353,7 +353,7 @@ public class PhoneNumberUtils
     }
 
     private static void log(String msg) {
-        Log.d(LOG_TAG, msg);
+        Rlog.d(LOG_TAG, msg);
     }
     /** index of the last character of the network portion
      *  (eg anything after is a post-dial string)
@@ -1711,7 +1711,7 @@ public class PhoneNumberUtils
             return false;
         }
 
-        Log.d(LOG_TAG, "System property doesn't provide any emergency numbers."
+        Rlog.d(LOG_TAG, "System property doesn't provide any emergency numbers."
                 + " Use embedded logic for determining ones.");
 
         // No ecclist system property, so use our own list.
@@ -1805,7 +1805,7 @@ public class PhoneNumberUtils
         } else {
             Locale locale = context.getResources().getConfiguration().locale;
             countryIso = locale.getCountry();
-            Log.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
+            Rlog.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
                     + countryIso);
         }
         return isEmergencyNumberInternal(number, countryIso, useExactMatch);
@@ -2015,7 +2015,7 @@ public class PhoneNumberUtils
                         // This should never happen since we checked the if dialStr is null
                         // and if it contains the plus sign in the beginning of this function.
                         // The plus sign is part of the network portion.
-                        Log.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
+                        Rlog.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
                         return dialStr;
                     }
                     postDialStr = extractPostDialPortion(tempDialStr);
@@ -2035,7 +2035,7 @@ public class PhoneNumberUtils
                             if (dialableIndex < 0) {
                                 postDialStr = "";
                             }
-                            Log.e("wrong postDialStr=", postDialStr);
+                            Rlog.e("wrong postDialStr=", postDialStr);
                         }
                     }
                     if (DBG) log("checkAndProcessPlusCode,postDialStr=" + postDialStr);
@@ -2044,7 +2044,7 @@ public class PhoneNumberUtils
                 // TODO: Support NANP international conversion and other telephone numbering plans.
                 // Currently the phone is never used in non-NANP system, so return the original
                 // dial string.
-                Log.e("checkAndProcessPlusCode:non-NANP not supported", dialStr);
+                Rlog.e("checkAndProcessPlusCode:non-NANP not supported", dialStr);
             }
         }
         return retStr;
@@ -2103,7 +2103,7 @@ public class PhoneNumberUtils
                 }
             }
         } else {
-            Log.e("isNanp: null dialStr passed in", dialStr);
+            Rlog.e("isNanp: null dialStr passed in", dialStr);
         }
         return retVal;
     }
@@ -2119,7 +2119,7 @@ public class PhoneNumberUtils
                 retVal = true;
             }
         } else {
-            Log.e("isOneNanp: null dialStr passed in", dialStr);
+            Rlog.e("isOneNanp: null dialStr passed in", dialStr);
         }
         return retVal;
     }
@@ -2158,7 +2158,7 @@ public class PhoneNumberUtils
             delimiterIndex = number.indexOf("%40");
         }
         if (delimiterIndex < 0) {
-            Log.w(LOG_TAG,
+            Rlog.w(LOG_TAG,
                   "getUsernameFromUriNumber: no delimiter found in SIP addr '" + number + "'");
             delimiterIndex = number.length();
         }
