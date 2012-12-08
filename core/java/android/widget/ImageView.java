@@ -30,6 +30,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -92,6 +93,9 @@ public class ImageView extends View {
 
     private int mBaseline = -1;
     private boolean mBaselineAlignBottom = false;
+
+    // AdjustViewBounds behavior will be in compatibility mode for older apps.
+    private boolean mAdjustViewBoundsCompat = false;
 
     private static final ScaleType[] sScaleTypeArray = {
         ScaleType.MATRIX,
@@ -167,6 +171,8 @@ public class ImageView extends View {
     private void initImageView() {
         mMatrix     = new Matrix();
         mScaleType  = ScaleType.FIT_CENTER;
+        mAdjustViewBoundsCompat = mContext.getApplicationInfo().targetSdkVersion <=
+                Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     @Override
@@ -801,7 +807,7 @@ public class ImageView extends View {
                                 pleft + pright;
 
                         // Allow the width to outgrow its original estimate if height is fixed.
-                        if (!resizeHeight) {
+                        if (!resizeHeight && !mAdjustViewBoundsCompat) {
                             widthSize = resolveAdjustedSize(newWidth, mMaxWidth, widthMeasureSpec);
                         }
 
@@ -817,7 +823,7 @@ public class ImageView extends View {
                                 ptop + pbottom;
 
                         // Allow the height to outgrow its original estimate if width is fixed.
-                        if (!resizeWidth) {
+                        if (!resizeWidth && !mAdjustViewBoundsCompat) {
                             heightSize = resolveAdjustedSize(newHeight, mMaxHeight,
                                     heightMeasureSpec);
                         }
