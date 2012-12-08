@@ -54,6 +54,21 @@ import static android.util.Log.d;
  * {@link #ALIGN_PARENT_BOTTOM}.
  * </p>
  *
+ * <p><strong>Note:</strong> In platform version 17 and lower, RelativeLayout was affected by
+ * a measurement bug that could cause child views to be measured with incorrect
+ * {@link android.view.View.MeasureSpec MeasureSpec} values. (See
+ * {@link android.view.View.MeasureSpec#makeMeasureSpec(int, int) MeasureSpec.makeMeasureSpec}
+ * for more details.) This was triggered when a RelativeLayout container was placed in
+ * a scrolling container, such as a ScrollView or HorizontalScrollView. If a custom view
+ * not equipped to properly measure with the MeasureSpec mode
+ * {@link android.view.View.MeasureSpec#UNSPECIFIED UNSPECIFIED} was placed in a RelativeLayout,
+ * this would silently work anyway as RelativeLayout would pass a very large
+ * {@link android.view.View.MeasureSpec#AT_MOST AT_MOST} MeasureSpec instead.</p>
+ *
+ * <p>This behavior has been preserved for apps that set <code>android:targetSdkVersion="17"</code>
+ * or older in their manifest's <code>uses-sdk</code> tag for compatibility. Apps targeting SDK
+ * version 18 or newer will receive the correct behavior</p>
+ *
  * <p>See the <a href="{@docRoot}guide/topics/ui/layout/relative.html">Relative
  * Layout</a> guide.</p>
  *

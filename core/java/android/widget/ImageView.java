@@ -234,8 +234,15 @@ public class ImageView extends View {
     /**
      * Set this to true if you want the ImageView to adjust its bounds
      * to preserve the aspect ratio of its drawable.
+     *
+     * <p><strong>Note:</strong> If the application targets API level 17 or lower,
+     * adjustViewBounds will allow the drawable to shrink the view bounds, but not grow
+     * to fill available measured space in all cases. This is for compatibility with
+     * legacy {@link android.view.View.MeasureSpec MeasureSpec} and
+     * {@link android.widget.RelativeLayout RelativeLayout} behavior.</p>
+     *
      * @param adjustViewBounds Whether to adjust the bounds of this view
-     * to presrve the original aspect ratio of the drawable
+     * to preserve the original aspect ratio of the drawable.
      * 
      * @see #getAdjustViewBounds()
      *
