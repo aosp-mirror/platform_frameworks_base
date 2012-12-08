@@ -40,6 +40,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -687,6 +688,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Used to mark a View that has no ID.
      */
     public static final int NO_ID = -1;
+
+    private static boolean sUseBrokenMakeMeasureSpec = false;
 
     /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
@@ -3234,6 +3237,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
+
+        if (!sUseBrokenMakeMeasureSpec && context.getApplicationInfo().targetSdkVersion <=
+                Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+            // Older apps may need this compatibility hack for measurement.
+            sUseBrokenMakeMeasureSpec = true;
+        }
     }
 
     /**
@@ -17328,7 +17337,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @return the measure specification based on size and mode
          */
         public static int makeMeasureSpec(int size, int mode) {
-            return (size & ~MODE_MASK) | (mode & MODE_MASK);
+            if (sUseBrokenMakeMeasureSpec) {
+                return size + mode;
+            } else {
+                return (size & ~MODE_MASK) | (mode & MODE_MASK);
+            }
         }
 
         /**
