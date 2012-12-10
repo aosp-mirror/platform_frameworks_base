@@ -25,6 +25,8 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -697,6 +699,69 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return width;
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+        final SavedState ss = new SavedState(super.onSaveInstanceState());
+        ss.showDropdown = mPopup != null && mPopup.isShowing();
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        if (ss.showDropdown) {
+            ViewTreeObserver vto = getViewTreeObserver();
+            if (vto != null) {
+                final OnGlobalLayoutListener listener = new OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (!mPopup.isShowing()) {
+                            mPopup.show();
+                        }
+                        final ViewTreeObserver vto = getViewTreeObserver();
+                        if (vto != null) {
+                            vto.removeOnGlobalLayoutListener(this);
+                        }
+                    }
+                };
+                vto.addOnGlobalLayoutListener(listener);
+            }
+        }
+    }
+
+    static class SavedState extends AbsSpinner.SavedState {
+        boolean showDropdown;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            showDropdown = in.readByte() != 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeByte((byte) (showDropdown ? 1 : 0));
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
     /**
      * <p>Wrapper class for an Adapter. Transforms the embedded Adapter instance
      * into a ListAdapter.</p>
@@ -941,8 +1006,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             mHintText = hintText;
         }
 
-        @Override
-        public void show() {
+        void computeContentWidth() {
             final Drawable background = getBackground();
             int hOffset = 0;
             if (background != null) {
@@ -955,6 +1019,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             final int spinnerPaddingLeft = Spinner.this.getPaddingLeft();
             final int spinnerPaddingRight = Spinner.this.getPaddingRight();
             final int spinnerWidth = Spinner.this.getWidth();
+
             if (mDropDownWidth == WRAP_CONTENT) {
                 int contentWidth =  measureContentWidth(
                         (SpinnerAdapter) mAdapter, getBackground());
@@ -977,10 +1042,24 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 hOffset += spinnerPaddingLeft;
             }
             setHorizontalOffset(hOffset);
+        }
+
+        @Override
+        public void show() {
+            final boolean wasShowing = isShowing();
+
+            computeContentWidth();
+
             setInputMethodMode(ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
+
+            if (wasShowing) {
+                // Skip setting up the layout/dismiss listener below. If we were previously
+                // showing it will still stick around.
+                return;
+            }
 
             // Make sure we hide if our anchor goes away.
             // TODO: This might be appropriate to push all the way down to PopupWindow,
@@ -992,6 +1071,12 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                     public void onGlobalLayout() {
                         if (!Spinner.this.isVisibleToUser()) {
                             dismiss();
+                        } else {
+                            computeContentWidth();
+
+                            // Use super.show here to update; we don't want to move the selected
+                            // position or adjust other things that would be reset otherwise.
+                            DropdownPopup.super.show();
                         }
                     }
                 };
