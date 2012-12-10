@@ -511,7 +511,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private InputFilter[] mFilters = NO_FILTERS;
 
-    private volatile Locale mCurrentTextServicesLocaleCache;
+    private volatile Locale mCurrentSpellCheckerLocaleCache;
     private final ReentrantLock mCurrentTextServicesLocaleLock = new ReentrantLock();
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
@@ -7825,27 +7825,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 (isTextSelectable() && mText instanceof Spannable && isEnabled());
     }
 
+    private Locale getTextServicesLocale(boolean allowNullLocale) {
+        // Start fetching the text services locale asynchronously.
+        updateTextServicesLocaleAsync();
+        // If !allowNullLocale and there is no cached text services locale, just return the default
+        // locale.
+        return (mCurrentSpellCheckerLocaleCache == null && !allowNullLocale) ? Locale.getDefault()
+                : mCurrentSpellCheckerLocaleCache;
+    }
+
     /**
      * This is a temporary method. Future versions may support multi-locale text.
      * Caveat: This method may not return the latest text services locale, but this should be
      * acceptable and it's more important to make this method asynchronous.
      *
-     * @return The locale that should be used for a word iterator and a spell checker
+     * @return The locale that should be used for a word iterator
      * in this TextView, based on the current spell checker settings,
      * the current IME's locale, or the system default locale.
+     * Please note that a word iterator in this TextView is different from another word iterator
+     * used by SpellChecker.java of TextView. This method should be used for the former.
      * @hide
      */
     // TODO: Support multi-locale
     // TODO: Update the text services locale immediately after the keyboard locale is switched
     // by catching intent of keyboard switch event
     public Locale getTextServicesLocale() {
-        if (mCurrentTextServicesLocaleCache == null) {
-            // If there is no cached text services locale, just return the default locale.
-            mCurrentTextServicesLocaleCache = Locale.getDefault();
-        }
-        // Start fetching the text services locale asynchronously.
-        updateTextServicesLocaleAsync();
-        return mCurrentTextServicesLocaleCache;
+        return getTextServicesLocale(false /* allowNullLocale */);
+    }
+
+    /**
+     * This is a temporary method. Future versions may support multi-locale text.
+     * Caveat: This method may not return the latest spell checker locale, but this should be
+     * acceptable and it's more important to make this method asynchronous.
+     *
+     * @return The locale that should be used for a spell checker in this TextView,
+     * based on the current spell checker settings, the current IME's locale, or the system default
+     * locale.
+     * @hide
+     */
+    public Locale getSpellCheckerLocale() {
+        return getTextServicesLocale(true /* allowNullLocale */);
     }
 
     private void updateTextServicesLocaleAsync() {
@@ -7864,14 +7883,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void updateTextServicesLocaleLocked() {
-        Locale locale = Locale.getDefault();
         final TextServicesManager textServicesManager = (TextServicesManager)
                 mContext.getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
         final SpellCheckerSubtype subtype = textServicesManager.getCurrentSpellCheckerSubtype(true);
+        final Locale locale;
         if (subtype != null) {
             locale = SpellCheckerSubtype.constructLocaleFromString(subtype.getLocale());
+        } else {
+            locale = null;
         }
-        mCurrentTextServicesLocaleCache = locale;
+        mCurrentSpellCheckerLocaleCache = locale;
     }
 
     void onLocaleChanged() {
