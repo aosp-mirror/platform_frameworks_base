@@ -967,7 +967,7 @@ public abstract class WallpaperService extends Service {
             mCaller = new HandlerCaller(context,
                     mCallbackLooper != null
                             ? mCallbackLooper : context.getMainLooper(),
-                    this);
+                    this, true /*asyncHandler*/);
             mConnection = conn;
             mWindowToken = windowToken;
             mWindowType = windowType;

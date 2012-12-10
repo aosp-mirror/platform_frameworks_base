@@ -40,7 +40,7 @@ class SimulatedTrackball {
     private static final int MAX_TAP_TIME = 250;
     // Where the cutoff is for determining an edge swipe
     private static final float EDGE_SWIPE_THRESHOLD = 0.9f;
-    private static final int FLICK_MSG_ID = 313;
+    private static final int MSG_FLICK = 313;
     // TODO: Pass touch slop from the input device
     private static final int TOUCH_SLOP = 30;
 
@@ -75,8 +75,11 @@ class SimulatedTrackball {
     // Has the TouchSlop constraint been invalidated
     private boolean mAlwaysInTapRegion = true;
 
-    // Most recent event. Used to determine what device sent the event.
-    private MotionEvent mRecentEvent;
+    // Information from the most recent event.
+    // Used to determine what device sent the event during a fling.
+    private int mLastSource;
+    private int mLastMetaState;
+    private int mLastDeviceId;
 
     // TODO: Currently using screen dimensions tuned to a Galaxy Nexus, need to
     // read this from a config file instead
@@ -101,33 +104,34 @@ class SimulatedTrackball {
         mTouchSlopSquared = mTouchSlop * mTouchSlop;
     }
 
-    private final Handler mHandler = new Handler(new Callback() {
+    private final Handler mHandler = new Handler(true /*async*/) {
             @Override
-        public boolean handleMessage(Message msg) {
-            if (msg.what != FLICK_MSG_ID)
-                return false;
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_FLICK: {
+                    final long time = SystemClock.uptimeMillis();
+                    ViewRootImpl viewroot = (ViewRootImpl) msg.obj;
+                    // Send the key
+                    viewroot.enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_DOWN, msg.arg2, 0, mLastMetaState,
+                            mLastDeviceId, 0, KeyEvent.FLAG_FALLBACK, mLastSource));
+                    viewroot.enqueueInputEvent(new KeyEvent(time, time,
+                            KeyEvent.ACTION_UP, msg.arg2, 0, mLastMetaState,
+                            mLastDeviceId, 0, KeyEvent.FLAG_FALLBACK, mLastSource));
 
-            final long time = SystemClock.uptimeMillis();
-            ViewRootImpl viewroot = (ViewRootImpl) msg.obj;
-            // Send the key
-            viewroot.enqueueInputEvent(new KeyEvent(time, time,
-                    KeyEvent.ACTION_DOWN, msg.arg2, 0, mRecentEvent.getMetaState(),
-                    mRecentEvent.getDeviceId(), 0,
-                    KeyEvent.FLAG_FALLBACK, mRecentEvent.getSource()));
-            viewroot.enqueueInputEvent(new KeyEvent(time, time,
-                    KeyEvent.ACTION_UP, msg.arg2, 0, mRecentEvent.getMetaState(),
-                    mRecentEvent.getDeviceId(), 0,
-                    KeyEvent.FLAG_FALLBACK, mRecentEvent.getSource()));
-            Message msgCopy = Message.obtain(msg);
-            // Increase the delay by the decay factor
-            msgCopy.arg1 = (int) Math.ceil(mFlickDecay * msgCopy.arg1);
-            if (msgCopy.arg1 <= mMaxRepeatDelay) {
-                // Send the key again in arg1 milliseconds
-                mHandler.sendMessageDelayed(msgCopy, msgCopy.arg1);
+                    // Increase the delay by the decay factor and resend
+                    final int delay = (int) Math.ceil(mFlickDecay * msg.arg1);
+                    if (delay <= mMaxRepeatDelay) {
+                        Message msgCopy = Message.obtain(msg);
+                        msgCopy.arg1 = delay;
+                        msgCopy.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(msgCopy, delay);
+                    }
+                    break;
+                }
             }
-            return false;
         }
-    });
+    };
 
     public void updateTrackballDirection(ViewRootImpl viewroot, MotionEvent event) {
         // Store what time the touchpad event occurred
@@ -148,7 +152,7 @@ class SimulatedTrackball {
                     mEdgeSwipePossible = true;
                 }
                 // Clear any flings
-                mHandler.removeMessages(FLICK_MSG_ID);
+                mHandler.removeMessages(MSG_FLICK);
 
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -245,15 +249,20 @@ class SimulatedTrackball {
                     if (mMinFlickDistanceSquared <= xMoveSquared + yMoveSquared &&
                             time - mLastTouchPadEventTimeMs <= MAX_TAP_TIME &&
                             mKeySendRateMs <= mMaxRepeatDelay && mKeySendRateMs > 0) {
-                        Message message = Message.obtain(mHandler, FLICK_MSG_ID,
+                        mLastDeviceId = event.getDeviceId();
+                        mLastSource = event.getSource();
+                        mLastMetaState = event.getMetaState();
+
+                        Message message = Message.obtain(mHandler, MSG_FLICK,
                                 mKeySendRateMs, mLastKeySent, viewroot);
-                        mRecentEvent = event;
+                        message.setAsynchronous(true);
                         mHandler.sendMessageDelayed(message, mKeySendRateMs);
                     }
                 }
                 mEdgeSwipePossible = false;
                 break;
         }
+
         // Store touch event position and time
         mLastTouchPadEventTimeMs = time;
         mLastTouchpadXPosition = event.getX();

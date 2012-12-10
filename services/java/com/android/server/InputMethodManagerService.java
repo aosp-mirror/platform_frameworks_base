@@ -602,12 +602,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHandler = new Handler(this);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
-        mCaller = new HandlerCaller(context, new HandlerCaller.Callback() {
+        mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
                 handleMessage(msg);
             }
-        });
+        }, true /*asyncHandler*/);
         mWindowManagerService = windowManager;
         mHardKeyboardListener = new HardKeyboardListener();
 
