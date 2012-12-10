@@ -1,0 +1,50 @@
+page.title=In-app Billing Version Notes
+@jd:body
+
+<p>The In-app Billing API is versioned, with each version offering additional features to your app. API support is provided by the Google Play Store app. On most devices, the Google Play Store app is updated automatically to support newer versions of the API. 
+
+<p>The sections below list the supported versions of the In-app Billing API.</p>
+
+<p id="api_check"><strong><em>How to check for In-app Billing version</em></strong></p>
+
+<p>At run time, your app can query the Google Play Store app to determine what version of the API it supports and what features are available. </p>
+
+<ul>
+<li>If you are using in-app  billing version 3, the version information is not directly returned the Google Play. Instead, you can check if Google Play supports the version of the In-app Billing API that you are using by sending a {@code isBillingSupported} request.</li>
+<li>If the In-app Billing API version that you are using is earlier than version 3, the version information is returned in the <code>API_VERSION</code> key of the Bundle object passed in the {@code sendBillingRequest} method. For more information, see <a href="{@docRoot}google/play/billing/v2/billing_reference.html#billing-interface-v2">In-app Billing Service Interface</a>.</li>
+</ul>
+
+<h3 id="version_3">In-app Billing version 3</h3>
+<p><em>December 2012</em></p>
+<ul>
+<li>Requires Google Play client version 3.9.16 or higher.
+<li>Provides a new Android Interface Definition Language (AIDL) file named {@code IInAppBillingService.aidl}. The new interface offers these features:
+<ul>
+<li>Provides a new API to get details of in-app items published for the app including price, type, title and description.</li>
+<li>The purchase flow is synchronous and purchase information is available immediately after it completes.</li>
+<li>Purchase information of in-app purchases is maintained within the Google Play system till the purchase is consumed.</li>
+<li>An API to consume a purchase of an inapp item. All purchases of one-time in-app items are consumable and thereafter can be purchased again.</li>
+<li>An API to get current purchases of the user immediately. This list will not contain any consumed purchases.</li>
+</ul>
+</li>
+<li>Subscriptions are not yet supported in this version of the API.</li>
+</ul>
+
+<h3 id="version_2">In-app Billing version 2</h3>
+<p><em>May 2012</em></p>
+<ul>
+  <li>Adds support for subscriptions, including free trial period.</li>
+  <li>Adds a new supported string value, "2", for the <code>API_VERSION</code> key of the Bundle object passed in the <code>sendBillingRequest()</code>.</li>
+  <li>Adds a new JSON field, <code>purchaseToken</code>, to the <code>orders</code> list returned in a <code>PURCHASE_STATE_CHANGED</code> intent. </li> 
+  <li>Adds a new <code>purchaseState</code> value, <code>3</code> (expired), to the <code>orders</code> list returned in a <code>PURCHASE_STATE_CHANGED</code> intent. The value indicates that a subscription has expired and is no longer valid.</li>
+<li>Requires Google Play (Play Store) version 3.5 or higher.</li>
+</ul>
+
+<h3 id="version_1">In-app Billing version 1</h3>
+<p><em>March 2011</em></p>
+<ul>
+<li>Initial release.</li>
+<li>Requires Google Play/Android Market 2.3.4 or higher.</li>
+</ul>
+
+

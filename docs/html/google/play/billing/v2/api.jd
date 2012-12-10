@@ -1,0 +1,523 @@
+page.title=In-app Billing Version 2
+@jd:body
+
+<div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">In-app Billing Version 2 is superseded. Please <a href="{@docRoot}google/play/billing/billing_overview.html#migration">migrate to Version 3</a> at your earliest convenience.</div>
+    <div id="qv-wrapper" style="margin-top:0;">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-types">Product and Purchase Types</a></li>
+    <li><a href="#billing-arch">Service Architecture</a></li>
+    <li><a href="#billing-msgs">Service Messages</a></li>
+    <ol>
+      <li><a href="#billing-request">Request messages</a></li>
+      <li><a href="#billing-response">Broadcast intents</a></li>
+      <li><a href="#billing-message-sequence">Messaging sequence</a></li>
+      <li><a href="#billing-action-notify">Handling IN_APP_NOTIFY messages</a></li>
+    </ol>
+    <li><a href="#billing-security">Security Controls</a></li>
+    <li><a href="#billing-limitations">Requirements and Limitations</a></li>
+  </ol>
+</div>
+</div>
+
+<p>In-app Billing version 2 is the legacy version of the Google Play In-app
+Billing. Like Version 3, it lets you interact with the Google Play purchase flow
+and payments system indirectly, by means of IPC communication with the Play
+Store app installed on the device. </p>
+
+<p>Unlike Version 3, the Version 2 API is
+asynchronous and uses service messages sent as broadcast intents, so
+it is more complicated than Version 3. </p>
+
+<p>Version 2 supports both unmanaged and managed products, as well as supports
+subscriptions, where Version 3 does not yet offer support for subscriptions. If
+you want to sell subscriptions in your app, you should implement In-app Billing
+Version 2, rather than Version 3. </p>
+
+<p>If you do not need to sell subscriptions, you
+should implement In-app Billing Version 3 instead.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h2>New in In-app Billing V2</h2>
+  <p><strong>Free trials</strong>—You can now offer users a configurable free trial period for
+  your in-app subscriptions. You can set up trials with a simple change in the Developer
+  Console—no change to your app code is needed.</p>
+</div>
+</div>
+
+<h2 id="billing-types">Product Types</h2>
+
+<p>In-app Billing Version supports three different product types
+to give you flexibility in how you monetize your app. In all cases, you define
+your products using the Google Play Developer Console, including product type,
+SKU, price, description, and so on. For more information, see <a
+href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app Billing</a>.</p>
+
+<ul>
+<li><em>Managed per user account</em> &mdash; Items that can be purchased only
+once per user account on Google Play. When a user purchases an item that uses
+the "managed per user account" product type, Google Play permanently stores the
+transaction information for each item on a per-user basis. This enables you to
+later query Google Play to restore the state of the items a specific user has
+purchased. If a user attempts to purchase a managed item that has already been
+purchased, Google Play prevents the user from purchasing the item again and
+displays an "Item already purchased" error.
+
+<p>The "managed" product type is useful if you are selling
+items such as game levels or application features. These items are not transient
+and usually need to be restored whenever a user reinstalls your application,
+wipes the data on their device, or installs your application on a new
+device.</p>
+
+<li><em>Unmanaged</em> &mdash; Items that do not have their transaction
+information stored on Google Play. This means that you cannot later query Google
+Play to retrieve transaction information for those items. For "unmanaged"
+purchases, you are responsible for managing the transaction information. Also,
+Google Play does not attempt to prevent the user from purchasing an item
+multiple times if it uses the "unmanaged" product type. It's up to you to
+control how many times an unmanaged item can be purchased.</p>
+
+<p>The "unmanaged" product type is useful if you are selling consumable items,
+such as fuel or magic spells. These items are consumed within your application
+and are usually purchased multiple times.</p></li>
+
+<li><em>Subscriptions</em> &mdash; Items that are sold with a
+developer-specified, recurring billing interval. When a user purchases a
+subscription, Google Play and its payment processor automatically bill the
+user's account at the specified interval and price, charging the amount to the
+original payment method. Once the user purchases a subscription, Google Play
+continues billing the account indefinitely, without requiring approval or action
+from the user. The user can cancel the subscription at any time. 
+
+<p>Subscriptions can only be sold using the "managed per user account" purchase
+type. As with in-app products, once the user has purchased an in-app product
+there is no refund window. Users desiring refunds must contact the developer
+directly. For more information about subscriptions and how to sell them in your
+apps, see the <a href="{@docRoot}google/play/billing/v2/billing_subscriptions.html">Subscriptions</a>
+document.</p></li>
+</ul>
+
+<h2 id="billing-arch">Service Architecture</h2>
+
+<p>Your app accesses the In-app Billing service using an API that is exposed by
+the Google Play app installed on the device. The Google Play app then uses an
+asynchronous message loop to convey billing requests and responses between your
+application and the Google Play server. In practice, your application never
+directly communicates with the Google Play server (see figure 1). Instead, your
+application sends billing requests to the Google Play application over
+interprocess communication (IPC) and receives purchase responses from the Google
+Play application in the form of asynchronous broadcast intents. Your application
+does not manage any network connections between itself and the Google Play
+server or use any special APIs from the Android platform.</p>
+
+<div class="figure" style="width:440px">
+<img src="/images/billing_arch.png" alt="" height="582" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Your application sends and receives billing messages through the
+  Google Play application, which handles all communication with the Google Play server.</p>
+</div>
+
+<p>Some in-app billing implementations may also use a private remote server to deliver content or
+validate transactions, but a remote server is not required to implement in-app billing. A remote
+server can be useful if you are selling digital content that needs to be delivered to a user's
+device, such as media files or photos. You might also use a remote server to store users'
+transaction history or perform various in-app billing security tasks, such as signature
+verification. Although you can handle all security-related tasks in your application, performing
+those tasks on a remote server is recommended because it helps make your application less vulnerable
+to security attacks.</p>
+
+<p>A typical in-app billing implementation relies on three components:</p>
+<ul>
+  <li>A {@link android.app.Service Service} (named <code>BillingService</code> in the sample application),
+  which processes purchase messages from the application and sends billing requests to the Google
+  Play in-app billing service.</li>
+  <li>A {@link android.content.BroadcastReceiver BroadcastReceiver} (named <code>BillingReceiver</code> in the sample
+  application), which receives all asynchronous billing responses from the Google Play
+  application.</li>
+  <li>A security component (named <code>Security</code> in the sample application), which performs
+  security-related tasks, such as signature verification and nonce generation. For more information
+  about in-app billing security, see <a href="#billing-security">Security controls</a> later in this
+  document.</li>
+</ul>
+
+<p>You may also want to incorporate two other components to support in-app billing:</p>
+<ul>
+  <li>A response {@link android.os.Handler Handler} (named <code>ResponseHandler</code> in the sample
+  application), which provides application-specific processing of purchase notifications, errors,
+  and other status messages.</li>
+  <li>An observer (named <code>PurchaseObserver</code> in the sample application), which is
+  responsible for sending callbacks to your application so you can update your user interface with
+  purchase information and status.</li>
+</ul>
+
+<p>In addition to these components, your application must provide a way to store information about
+users' purchases and some sort of user interface that lets users select items to purchase. You do
+not need to provide a checkout user interface. When a user initiates an in-app purchase, the Google
+Play application presents the checkout user interface to your user. When the user completes the
+checkout process, your application resumes.</p>
+
+<h2 id="billing-msgs">In-app Billing Messages</h2>
+
+<p>When the user initiates a purchase, your application sends billing messages to Google Play's
+in-app billing service (named <code>MarketBillingService</code>) using simple IPC method calls. The
+Google Play application responds to all billing requests synchronously, providing your
+application with status notifications and other information. The Google Play application also
+responds to some billing requests asynchronously, providing your application with error messages and
+detailed transaction information. The following section describes the basic request-response
+messaging that takes place between your application and the Google Play application.</p>
+
+<h3 id="billing-request">In-app billing requests</h3>
+
+<p>Your application sends in-app billing requests by invoking a single IPC method
+(<code>sendBillingRequest()</code>), which is exposed by the <code>MarketBillingService</code>
+interface. This interface is defined in an <a
+href="{@docRoot}guide/components/aidl.html">Android Interface Definition Language</a> file
+(<code>IMarketBillingService.aidl</code>). You can <a
+href="{@docRoot}google/play/billing/v2/billing_integrate.html#billing-download">download</a> this AIDL
+file with the in-app billing sample application.</p>
+
+<p>The <code>sendBillingRequest()</code> method has a single {@link android.os.Bundle Bundle} parameter.
+The Bundle that you deliver must include several key-value pairs that specify various parameters for
+the request, such as the type of billing request you are making, the item that is being purchased and
+its type, and the application that is making the request. For more information about the Bundle keys
+that are sent with a request, see <a
+href="{@docRoot}google/play/billing/v2/billing_reference.html#billing-interface">In-app Billing
+Service Interface</a>.
+
+<p>One of the most important keys that every request Bundle must have is the
+<code>BILLING_REQUEST</code> key. This key lets you specify the type of billing request you are
+making. Google Play's in-app billing service supports the following five types of billing
+requests:</p>
+
+<ul>
+  <li><code>CHECK_BILLING_SUPPORTED</code>
+    <p>This request verifies that the Google Play application supports in-app billing. You
+    usually send this request when your application first starts up. This request is useful if you
+    want to enable or disable certain UI features that are relevant only to in-app billing.</p>
+  </li>
+  <li><code>REQUEST_PURCHASE</code>
+    <p>This request sends a purchase message to the Google Play application and is the foundation
+    of in-app billing. You send this request when a user indicates that he or she wants to purchase
+    an item in your application. Google Play then handles the financial transaction by displaying
+    the checkout user interface.</p>
+  </li>
+  <li><code>GET_PURCHASE_INFORMATION</code>
+    <p>This request retrieves the details of a purchase state change. A purchase changes state when
+    a requested purchase is billed successfully or when a user cancels a transaction during
+    checkout. It can also occur when a previous purchase is refunded. Google Play notifies your
+    application when a purchase changes state, so you only need to send this request when there is
+    transaction information to retrieve.</p>
+  </li>
+  <li><code>CONFIRM_NOTIFICATIONS</code>
+    <p>This request acknowledges that your application received the details of a purchase state
+    change. Google Play sends purchase state change notifications to your application until you
+    confirm that you received them.</p>
+  </li>
+  <li><code>RESTORE_TRANSACTIONS</code>
+    <p>This request retrieves a user's transaction status for <a
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">managed
+    purchases</a> and <a
+    href="{@docRoot}google/play/billing/billing_admin.html#billing-purchase-type">subscriptions</a>.
+    You should send this request only when you need to retrieve a user's transaction
+    status, which is usually only when your application is reinstalled or installed for the first
+    time on a device.</p>
+  </li>
+</ul>
+
+<h3 id="billing-response">In-app Billing Responses</h3>
+
+<p>The Google Play application responds to in-app billing requests with both synchronous and
+asynchronous responses. The synchronous response is a {@link android.os.Bundle Bundle} with the following
+three keys:</p>
+
+<ul>
+  <li><code>RESPONSE_CODE</code>
+    <p>This key provides status information and error information about a request.</p>
+  </li>
+  <li><code>PURCHASE_INTENT</code>
+    <p>This key provides a {@link android.app.PendingIntent PendingIntent}, which you use to launch the checkout
+    activity.</p>
+  </li>
+  <li><code>REQUEST_ID</code>
+    <p>This key provides you with a request identifier, which you can use to match asynchronous
+    responses with requests.</p>
+  </li>
+</ul>
+<p>Some of these keys are not relevant to every request. For more information, see <a
+href="#billing-message-sequence">Messaging sequence</a> later in this document.</p>
+
+<p>The asynchronous response messages are sent in the form of individual broadcast intents and
+include the following:</p>
+
+<ul>
+    <li><code>com.android.vending.billing.RESPONSE_CODE</code>
+    <p>This response contains a Google Play server response code, and is sent after you make an
+    in-app billing request. A server response code can indicate that a billing request was
+    successfully sent to Google Play or it can indicate that some error occurred during a billing
+    request. This response is <em>not</em> used to report any purchase state changes (such as refund
+    or purchase information). For more information about the response codes that are sent with this
+    response, see <a
+    href="{@docRoot}google/play/billing/v2/billing_reference.html#billing-codes">Server Response Codes
+    for In-app Billing</a>.</p>
+  </li>
+  <li><code>com.android.vending.billing.IN_APP_NOTIFY</code>
+    <p>This response indicates that a purchase has changed state, which means a purchase succeeded,
+    was canceled, or was refunded. This response contains one or more notification IDs. Each
+    notification ID corresponds to a specific server-side message, and each messages contains
+    information about one or more transactions. After your application receives an
+    <code>IN_APP_NOTIFY</code> broadcast intent, you send a <code>GET_PURCHASE_INFORMATION</code>
+    request with the notification IDs to retrieve message details.</p>
+  </li>
+  <li><code>com.android.vending.billing.PURCHASE_STATE_CHANGED</code>
+    <p>This response contains detailed information about one or more transactions. The transaction
+    information is contained in a JSON string. The JSON string is signed and the signature is sent
+    to your application along with the JSON string (unencrypted). To help ensure the security of
+    your in-app billing messages, your application can verify the signature of this JSON string.</p>
+  </li>
+</ul>
+
+<p>The JSON string that is returned with the <code>PURCHASE_STATE_CHANGED</code> intent provides
+your application with the details of one or more billing transactions. An example of this JSON
+string for a subscription item is shown below:</p>
+<pre class="no-pretty-print" style="color:black">{ "nonce" : 1836535032137741465,
+  "orders" :
+    [{ "notificationId" : "android.test.purchased",
+       "orderId" : "transactionId.android.test.purchased",
+       "packageName" : "com.example.dungeons",
+       "productId" : "android.test.purchased",
+       "developerPayload" : "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
+       "purchaseTime" : 1290114783411,
+       "purchaseState" : 0,
+       "purchaseToken" : "rojeslcdyyiapnqcynkjyyjh" }]
+}
+</pre>
+
+<p>For more information about the fields in this JSON string, see <a
+href="{@docRoot}google/play/billing/v2/billing_reference.html#billing-intents">In-app Billing
+Broadcast Intents</a>.</p>
+
+<h3 id="billing-message-sequence">Messaging sequence</h3>
+
+<p>The messaging sequence for a typical purchase request is shown in figure 2. Request types for
+each <code>sendBillingRequest()</code> method are shown in <strong>bold</strong>, broadcast intents
+are shown in <em>italic</em>. For clarity, figure 2 does not show the <code>RESPONSE_CODE</code>
+broadcast intents that are sent for every request.</p>
+
+<p>The basic message sequence for an in-app purchase request is as follows:</p>
+
+<ol>
+  <li>Your application sends a purchase request (<code>REQUEST_PURCHASE</code> type), specifying a
+  product ID and other parameters.</li>
+  <li>The Google Play application sends your application a Bundle with the following keys:
+  <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and <code>REQUEST_ID</code>. The
+  <code>PURCHASE_INTENT</code> key provides a {@link android.app.PendingIntent PendingIntent}, which your
+  application uses to start the checkout UI for the given product ID.</li>
+  <li>Your application launches the pending intent, which launches the checkout UI.
+    <p class="note"><strong>Note:</strong> You must launch the pending intent from an activity
+    context and not an application context.</p>
+  </li>
+  <li>When the checkout flow finishes (that is, the user successfully purchases the item or cancels
+  the purchase), Google Play sends your application a notification message (an
+  <code>IN_APP_NOTIFY</code> broadcast intent). The notification message includes a notification ID,
+  which references the transaction.</li>
+  <li>Your application requests the transaction information by sending a
+  <code>GET_PURCHASE_STATE_CHANGED</code> request, specifying the notification ID for the
+  transaction.</li>
+  <li>The Google Play application sends a Bundle with a <code>RESPONSE_CODE</code> key and a 
+  <code>REQUEST_ID</code> key.
+  <li>Google Play sends the transaction information to your application in a
+  <code>PURCHASE_STATE_CHANGED</code> broadcast intent.</li>
+  <li>Your application confirms that you received the transaction information for the given
+  notification ID by sending a confirmation message (<code>CONFIRM_NOTIFICATIONS</code> type),
+  specifying the notification ID for which you received transaction information.</li>
+  <li>The Google Play application sends your application a Bundle with a
+  <code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key.</li>
+</ol>
+
+<img src="/images/billing_request_purchase.png" height="231" id="figure2" />
+<p class="img-caption">
+  <strong>Figure 2.</strong> Message sequence for a purchase request.
+</p>
+
+<p>Keep in mind, you must send a confirmation when you receive transaction information from Google
+Play (step 8 in figure 2). If you don't send a confirmation message, Google Play will
+continue sending <code>IN_APP_NOTIFY</code> messages for the transactions you have not
+confirmed. As a best practice, you should not send a <code>CONFIRM_NOTIFICATIONS</code> request for
+a purchased item until you have delivered the item to the user. This way, if your application
+crashes or something else prevents your application from delivering the product, your application
+will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Google Play indicating
+that you need to deliver the product. Also, as a best practice, your application must be able to
+handle <code>IN_APP_NOTIFY</code> messages that contain multiple orders.</p>
+
+<p>The messaging sequence for a restore transaction request is shown in figure 3. Request types for
+each <code>sendBillingRequest()</code> method are shown in <strong>bold</strong>, broadcast intents
+are shown in <em>italic</em>. For clarity, figure 3 does not show the <code>RESPONSE_CODE</code>
+broadcast intents that are sent for every request.</p>
+
+<div class="figure" style="width:490px">
+<img src="/images/billing_restore_transactions.png" alt="" height="168" />
+<p class="img-caption">
+  <strong>Figure 3.</strong> Message sequence for a restore transactions request.
+</p>
+</div>
+
+<p>The request triggers three responses. The first is a {@link android.os.Bundle Bundle} with a
+<code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key. Next, the Google Play
+application sends a <code>RESPONSE_CODE</code> broadcast intent, which provides status information
+or error information about the request. As always, the <code>RESPONSE_CODE</code> message references
+a specific request ID, so you can determine which request a <code>RESPONSE_CODE</code> message
+pertains to.</p>
+
+<p>The <code>RESTORE_TRANSACTIONS</code> request type also triggers a
+<code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the same type of transaction
+information that is sent during a purchase request. Unlike with a purchase request, however, the transactions
+are given without any associated notification IDs, so you do not need to respond to this
+intent with a <code>CONFIRM_NOTIFICATIONS</code> message. </p>
+
+<p class="note"><strong>Note:</strong> You should use the <code>RESTORE_TRANSACTIONS</code> request
+type only when your application is installed for the first time on a device or when your
+application has been removed from a device and reinstalled.</p>
+
+<p>The messaging sequence for checking whether in-app billing is supported is shown in figure 4. The
+request type for the <code>sendBillingRequest()</code> method is shown in <strong>bold</strong>.</p>
+
+<div class="figure" style="width:454px">
+<img src="/images/billing_check_supported.png" alt="" height="168" />
+<p class="img-caption">
+  <strong>Figure 4.</strong> Message sequence for checking whether in-app billing is supported.
+</p>
+</div>
+
+<p>The synchronous response for a <code>CHECK_BILLING_SUPPORTED</code> request provides a Bundle
+with a server response code.  A <code>RESULT_OK</code> response code indicates that in-app billing
+is supported; a <code>RESULT_BILLING_UNAVAILABLE</code> response code indicates that in-app billing
+is unavailable because the API version you specified is unrecognized or the user is not eligible to
+make in-app purchases (for example, the user resides in a country that does not allow in-app
+billing). A <code>SERVER_ERROR</code> can also be returned, indicating that there was a problem with
+the Google Play server.</p>
+
+<h3 id="billing-action-notify">Handling IN_APP_NOTIFY messages</h3>
+
+<p>Usually, your application receives an <code>IN_APP_NOTIFY</code> broadcast intent from Google
+Play in response to a <code>REQUEST_PURCHASE</code> message (see figure 2). The
+<code>IN_APP_NOTIFY</code> broadcast intent informs your application that the state of a requested
+purchase has changed. To retrieve the details of that purchase, your application sends a
+<code>GET_PURCHASE_INFORMATION</code> request. Google Play responds with a
+<code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the details of the purchase
+state change. Your application then sends a <code>CONFIRM_NOTIFICATIONS</code> message, informing
+Google Play that you have received the purchase state change information.</p>
+
+<p>In some special cases, you may receive multiple <code>IN_APP_NOTIFY</code> messages even though
+you have confirmed receipt of the purchase information, or you may receive
+<code>IN_APP_NOTIFY</code> messages for a purchase change even though you never initiated the
+purchase. Your application must handle both of these special cases.</p>
+
+<h4>Handling multiple IN_APP_NOTIFY messages</h4>
+
+<p>When Google Play receives a <code>CONFIRM_NOTIFICATIONS</code> message for a given
+<code>PURCHASE_STATE_CHANGED</code> message, it usually stops sending <code>IN_APP_NOTIFY</code>
+intents for that <code>PURCHASE_STATE_CHANGED</code> message. Sometimes, however, Google
+Play may send repeated <code>IN_APP_NOTIFY</code> intents for a
+<code>PURCHASE_STATE_CHANGED</code> message even though your application has sent a
+<code>CONFIRM_NOTIFICATIONS</code> message. This can occur if a device loses network connectivity
+while you are sending the <code>CONFIRM_NOTIFICATIONS</code> message. In this case, Google Play
+might not receive your <code>CONFIRM_NOTIFICATIONS</code> message and it could send multiple
+<code>IN_APP_NOTIFY</code> messages until it receives acknowledgement that you received the
+transaction message. Therefore, your application must be able to recognize that the subsequent
+<code>IN_APP_NOTIFY</code> messages are for a previously processed transaction. You can do this by
+checking the <code>orderID</code> that's contained in the JSON string because every transaction has
+a unique <code>orderId</code>.</p>
+
+<h4>Handling refunds and other unsolicited IN_APP_NOTIFY messages</h4>
+
+<p>There are two cases where your application may receive <code>IN_APP_NOTIFY</code> broadcast
+intents even though your application has not sent a <code>REQUEST_PURCHASE</code> message. Figure 5
+shows the messaging sequence for both of these cases. Request types for each
+<code>sendBillingRequest()</code> method are shown in <strong>bold</strong>, broadcast intents are
+shown in <em>italic</em>. For clarity, figure 5 does not show the <code>RESPONSE_CODE</code>
+broadcast intents that are sent for every request.</p>
+
+<div class="figure" style="width:481px">
+<img src="/images/billing_refund.png" alt="" height="189" />
+<p class="img-caption">
+  <strong>Figure 5.</strong> Message sequence for refunds and other unsolicited
+IN_APP_NOTIFY messages.</p>
+</div>
+
+<p>In the first case, your application may receive an <code>IN_APP_NOTIFY</code> broadcast intent
+when a user has your application installed on two (or more) devices and the user makes an in-app
+purchase from one of the devices. In this case, Google Play sends an <code>IN_APP_NOTIFY</code>
+message to the second device, informing the application that there is a purchase state change. Your
+application can handle this message the same way it handles the response from an
+application-initiated <code>REQUEST_PURCHASE</code> message, so that ultimately your application
+receives a <code>PURCHASE_STATE_CHANGED</code> broadcast intent message that includes information
+about the item that has been purchased. This applies only to items that have their product type
+set to "managed per user account."</p>
+
+<p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
+when Google Play receives a refund notification from Google Wallet. In this case, Google
+Play sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
+this message the same way it handles responses from an application-initiated
+<code>REQUEST_PURCHASE</code> message so that ultimately your application receives a
+<code>PURCHASE_STATE_CHANGED</code> message that includes information about the item that has been
+refunded. The refund information is included in the JSON string that accompanies the
+<code>PURCHASE_STATE_CHANGED</code> broadcast intent. Also, the <code>purchaseState</code> field in
+the JSON string is set to 2.</p>
+
+<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to
+issue refunds or cancel in-app billing transactions. You must do this manually through your
+Google Wallet merchant account. However, you can use the Google Wallet API to retrieve order
+information.</p>
+
+<h2 id="billing-security">Security Controls</h2>
+
+<p>To help ensure the integrity of the transaction information that is sent to your application,
+Google Play signs the JSON string that is contained in the <code>PURCHASE_STATE_CHANGED</code>
+broadcast intent. Google Play uses the private key that is associated with the app to create
+this signature. The Developer Console generates an RSA key pair for each app.
+You can find the public key portion of this key pair in the app's publishing details
+in the Developer Console, under <strong>Settings</strong>, in the License Key field.</p>
+
+<p>When Google Play signs a billing response, it includes the signed JSON string (unencrypted)
+and the signature. When your application receives this signed response you can use the public key
+portion of your RSA key pair to verify the signature. By performing signature verification you can
+help detect responses that have been tampered with or that have been spoofed. You can perform this
+signature verification step in your application; however, if your application connects to a secure
+remote server then we recommend that you perform the signature verification on that server.</p>
+
+<p>In-app billing also uses nonces (a random number used once) to help verify the integrity of the
+purchase information that's returned from Google Play. Your application must generate a nonce and
+send it with a <code>GET_PURCHASE_INFORMATION</code> request and a <code>RESTORE_TRANSACTIONS</code>
+request. When Google Play receives the request, it adds the nonce to the JSON string that
+contains the transaction information. The JSON string is then signed and returned to your
+application. When your application receives the JSON string, you need to verify the nonce as well as
+the signature of the JSON string.</p>
+
+<p>For more information about best practices for security and design, see <a
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
+
+<h2 id="billing-limitations">In-app Billing Requirements and Limitations</h2>
+
+<p>Before you get started with in-app billing, be sure to review the following requirements and
+limitations.</p>
+
+<ul>
+  <li>In-app billing can be implemented only in applications that you publish through Google
+  Play.</li>
+  <li>You must have a Google Wallet Merchant account to use Google Play In-app Billing.</li>
+  <li>In-app billing requires version 2.3.4 (or higher) of the Android Market application.
+  To support subscriptions, version 3.5 or higher of the Google Play app is required. On devices
+  running Android 3.0, version 5.0.12 (or higher) of the MyApps application is required.</li>
+  <li>An application can use in-app billing only if the device is running Android 1.6 (API level 4)
+  or higher.</li>
+  <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell
+  physical goods, personal services, or anything that requires physical delivery.</li>
+  <li>Google Play does not provide any form of content delivery. You are responsible for
+  delivering the digital content that you sell in your applications.</li>
+  <li>You cannot implement in-app billing on a device that never connects to the network. To
+  complete in-app purchase requests, a device must be able to access the Google Play server over
+  the network. </li>
+</ul>

@@ -8,78 +8,66 @@ parent.link=index.html
   <h2>In this document</h2>
   <ol>
     <li><a href="#billing-list-setup">Creating a Product List</a></li>
-    <li><a href="#billing-purchase-type">Choosing a Purchase Type</a></li>
+    <li><a href="#billing-purchase-type">Choosing a Product Type</a></li>
     <li><a href="#billing-testing-setup">Setting up Test Accounts</a></li>
     <li><a href="#billing-refunds">Handling Refunds</a></li>
     <li><a href="#billing-refunds">Working with Order Numbers</a></li>
     <li><a href="#billing-support">Where to Get Support</a></li>
   </ol>
-  <h2>Downloads</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample
-    Application</a></li>
+
   </ol>
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
     Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html">Implementing In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
-    Design</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
-    Reference</a></li>
   </ol>
 </div>
 </div>
 
 <p>In-app billing frees you from processing financial transactions, but you still need to perform a
-few administrative tasks, including setting up and maintaining your product list on the publisher
-site, registering test accounts, and handling refunds when necessary.</p>
+few administrative tasks, including setting up and maintaining your product list on the Google Play
+Developer Console, registering test accounts, and handling refunds when necessary.</p>
 
 <p>You must have a Google Play publisher account to register test accounts. And you must have a
 Google Checkout merchant account to create a product list and issue refunds to your users. If you
 already have a publisher account on Google Play, you can use your existing account. You do not
-need to register for a new account to support in-app billing. If you do not have a publisher
-account, you can register as a Google Play developer and set up a publisher account at the
-Google Play <a href="http://play.google.com/apps/publish">publisher site</a>. If you do not have a
-Google Checkout merchant account, you can register for one at the <a
+need to register for a new account to support in-app billing.</p>
+
+<p>If you do not have a publisher account, you can register as a Google Play
+developer and set up a publisher account at the <a
+href="http://play.google.com/apps/publish">Google Play Developer Console</a>. If you do not
+have a Google Checkout merchant account, you can register for one at the <a
 href="http://checkout.google.com">Google Checkout site</a>.</p>
 
 <h2 id="billing-list-setup">Creating a Product List</h2>
 
-<p>The Google Play publisher site provides a product list for each of your published
+<p>The Google Play Developer Console provides a product list for each of your published
 applications. You can sell an item using Google Play's in-app billing feature only if the item is
 listed on an application's product list. Each application has its own product list; you cannot sell
 items that are listed in another application's product list.</p>
 
 <p>You can access an application's product list by clicking the <strong>In-App Products</strong>
-link that appears under each of the applications that are listed for your publisher account (see
+link in applications listed in your developer account (see
 figure 1). The <strong>In-App Products</strong> link appears only if you have a Google Checkout
-merchant account and an application's manifest includes the <code>com.android.vending.BILLING</code>
+merchant account and the application's manifest includes the <code>com.android.vending.BILLING</code>
 permission.</p>
-
-<img src="{@docRoot}images/billing_product_list_entry.png" height="548" id="figure1" />
-<p class="img-caption">
-  <strong>Figure 1.</strong> You can access an application's product list by clicking the
-  <strong>In-App Products</strong> link.
-</p>
 
 <p>A product list specifies items you are selling in an application &mdash; in-app products,
 subscriptions, or a combination of both. For each item, the product list contains information such as a product id,
-product description, and price (see figure 2). The product list stores only metadata about the items
+product description, and price. The product list stores only metadata about the items
 you are selling in your application. It does not store any digital content. You are responsible for
 storing and delivering the digital content that you sell in your applications.</p>
 
-<img src="{@docRoot}images/billing_product_list.png" height="658" id="figure2" />
-<p class="img-caption">
-  <strong>Figure 2.</strong> An application's product list.
+<div style="margin:1em;">
+<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_product_list.png" xheight="548" id="figure1" />
+<p class="img-caption" style="padding-left:.5em;">
+  <strong>Figure 1.</strong> You can access an application's product list by clicking the
+  <strong>In-App Products</strong> link in the main Apps navigation.
 </p>
+</div>
 
 <p>You can create a product list for any published application or any draft application that's been
-uploaded and saved to the Google Play site. However, you must have a Google Checkout merchant
+uploaded and saved to the Developer Console. However, you must have a Google Checkout merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
@@ -95,8 +83,8 @@ associated with the application listing. You cannot create individual product li
 you are using the multiple APK feature.</p>
 
 <p>You can add items to a product list two ways: you can add items one at a time by using the In-app
-Products UI (see figure 3), or you can add a batch of items by importing the items from a
-comma-separated values (CSV) file (see figure 2). Adding items one at a time is useful if your
+Products UI (see figure 2), or you can add a batch of items by importing the items from a
+comma-separated values (CSV) file. Adding items one at a time is useful if your
 application has only a few in-app items or you are adding only a few items to a
 product list for testing purposes. The CSV file method is useful if your application has a large
 number of in-app items.</p>
@@ -111,16 +99,17 @@ number of in-app items.</p>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
   <li>In the <strong>All Google Play listings</strong> panel, under the application name, click
   <strong>In-app Products</strong>.</li>
-  <li>On the In-app Products List page, click <strong>Add in-app product</strong>.</li>
-  <li>On the Create New In-app Product page (see figure 3), provide details about the item you are
+  <li>Click <strong>Add new product</strong> (see figure 2) and provide details about the item you are
   selling and then click <strong>Save</strong> or <strong>Publish</strong>.</li>
 </ol>
 
-<img src="{@docRoot}images/billing_list_form.png" height="840" id="figure3" />
-<p class="img-caption">
-  <strong>Figure 3.</strong> The Create New In-app Product page lets you add items to an
+<div style="margin:1em;">
+<img style="border:1px solid #ddd;padding-bottom:.5em;" src="{@docRoot}images/in-app-billing/billing_add.png" height="300" id="figure2" />
+<p class="img-caption" style="padding-left:.5em;">
+  <strong>Figure 2.</strong> The Add New Product page lets you add items to an
   application's product list.
 </p>
+</div>
 
 <p>You must enter the following information for each item in a product list:</p>
 <ul>
@@ -132,10 +121,10 @@ number of in-app items.</p>
     <p>In addition, you cannot modify an item's product ID after it is created, and you cannot reuse
     a product ID.</p>
   </li>
-  <li><strong>Purchase Type</strong>
-    <p>The purchase type can be <strong>Managed per user account</strong>, <strong>Unmanaged</strong>,
-    or <strong>Subscription</strong>. You can never change an item's purchase type after you set it. For more
-    information, see <a href="#billing-purchase-type">Choosing a purchase type</a> later in this
+  <li><strong>Product Type</strong>
+    <p>The product type can be <strong>Managed per user account</strong>, <strong>Unmanaged</strong>,
+    or <strong>Subscription</strong>. You can never change an item's product type after you set it. For more
+    information, see <a href="#billing-purchase-type">Choosing a product type</a> later in this
     document.</p>
   </li>
   <li><strong>Publishing State</strong>
@@ -147,14 +136,14 @@ number of in-app items.</p>
     href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-real">Testing In-app
     Billing</a> for more information.</p>
   </li>
-  <li><strong>Language</strong>
-    <p>The language setting determines which languages are used to display the item title and
-    item description during checkout. A product list inherits its default language from the
-    parent application. You can add more languages by clicking <strong>add language</strong>. You
-    can also choose to have the title and description automatically translated from the default
-    language by selecting the <strong>Fill fields with auto translation</strong> checkbox (see
-    figure 4). If you do not use the auto translation feature, you must provide the translated
-    versions of the title and description.</p>
+  <li><strong>Languages and Translations</strong>
+    <p>You can provide localized titles and descriptions for your in-app
+    products using the Add Translations button. If you want Google Play to translate
+    your title and description for you, based on the title and description in the
+    default language, just click the languages that you want to offer. If you want
+    to provide custom translations in specific languages, you can also do that. By
+    default, an in-app product inherits its default language from the parent
+    application.</p>
   </li>
   <li><strong>Title</strong>
     <p>The title is a short descriptor for the item. For example, "Sleeping potion." Titles must be
@@ -174,20 +163,22 @@ number of in-app items.</p>
     page in the Google Play developer console.</p>
     <p>To specify prices in other currencies, you can manually enter the price for each
     currency or you can click <strong>Auto Fill</strong> and let Google Play do a one-time
-    conversion from your home currency to the currencies you are targeting (see figure 4).</p>
+    conversion from your home currency to the currencies you are targeting (see figure 3).</p>
     <p>For subscription items, note that you can not change the item's price once you have published it. </p>
   </li>
 </ul>
-<img src="{@docRoot}images/billing_list_form_2.png" height="1226" id="figure4" />
-<p class="img-caption">
-  <strong>Figure 4.</strong> Specifying additional currencies and additional languages for the
-  item title and description.
+
+<div style="margin:1em;">
+<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_list_form_2.png" xheight="1226" id="figure3" />
+<p class="img-caption" style="padding-left:.5em;">
+  <strong>Figure 3.</strong> Specifying additional currencies for an in-app product.
 </p>
+</div>
 
 <p>For more information about product IDs and product lists, see <a
-href="http://market.android.com/support/bin/answer.py?answer=1072599">Creating In-App Product
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1072599">Creating In-App Product
 IDs</a>. For more information about pricing, see <a
-href="http://market.android.com/support/bin/answer.py?answer=1153485">In-App Billing
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-App Billing
 Pricing</a>.</p>
 
 <p class="note"><strong>Note</strong>: Be sure to plan your product ID namespace. You cannot reuse
@@ -231,7 +222,7 @@ example, the syntax for the CSV file is as follows:</p>
     published</code> or <code>unpublished</code>.</p>
   </li>
   <li><em>purchase_type</em>
-    <p>This is equivalent to the Purchase Type setting in the In-app Products UI. Can be <code>
+    <p>This is equivalent to the Product Type setting in the In-app Products UI. Can be <code>
     managed_by_android</code>, which is equivalent to <strong>Managed per user account
     </strong> in the In-app Products UI, or <code>managed_by_publisher</code>, which is equivalent
     to <strong>Unmanaged</strong> in the In-app Products UI.</p>
@@ -393,41 +384,18 @@ file.
 </strong> on the In-app Product List page. This is useful if you have manually added items to
 a product list and you want to start managing the product list through a CSV file.</p>
 
-<h3 id="billing-purchase-type">Choosing a Purchase Type</h3>
+<h3 id="billing-purchase-type">Choosing a Product Type</h3>
 
-<p>An item's purchase type controls how Google Play manages the purchase of the item. There are
-two purchase types: "managed per user account" and "unmanaged."</p>
+<p>An item's product type controls how Google Play manages the purchase of the item. There are
+several product types, including "managed per user account", "unmanaged," and "subscription." However,
+note that the product types supported vary
+across In-app Billing Version, so you should always choose a product type that's valid for the
+version of In-app BIlling that your app uses. </p>
 
-<p>Items that are managed per user account can be purchased only once per user account. When an item
-is managed per user account, Google Play permanently stores the transaction information for each
-item on a per-user basis. This enables you to query Google Play with the
-<code>RESTORE_TRANSACTIONS</code> request and restore the state of the items a specific user has
-purchased.</p>
-
-<p>If a user attempts to purchase a managed item that has already been purchased, Google Play
-displays an "Item already purchased" error. This occurs during checkout, when Google Play
-displays the price and description information on the checkout page. When the user dismisses the
-error message, the checkout page disappears and the user returns to your user interface. As a best
-practice, your application should prevent the user from seeing this error. The sample application
-demonstrates how you can do this by keeping track of items that are managed and already purchased
-and not allowing users to select those items from the list. Your application should do something
-similar&mdash;either graying out the item or hiding it so that it cannot be selected.</p>
-
-<p>The "manage by user account" purchase type is useful if you are selling items such as game levels
-or application features. These items are not transient and usually need to be restored whenever a
-user reinstalls your application, wipes the data on their device, or installs your application on a
-new device.</p>
-
-<p>Items that are unmanaged do not have their transaction information stored on Google Play,
-which means you cannot query Google Play to retrieve transaction information for items whose
-purchase type is listed as unmanaged. You are responsible for managing the transaction information
-of unmanaged items. Also, unmanaged items can be purchased multiple times as far as Google Play
-is concerned, so it's also up to you to control how many times an unmanaged item can be
-purchased.</p>
-
-<p>The "unmanaged" purchase type is useful if you are selling consumable items, such as fuel or
-magic spells. These items are consumed within your application and are usually purchased multiple
-times.</p>
+<p>For details, refer to the documentation for <a
+href="{@docRoot}google/play/billing/api.html#producttype">In-app Billing Version
+3</a> or <a href="{@docRoot}google/play/billing/v2/api.html#producttype">In-app
+Billing Version 2</a>.
 
 <h2 id="billing-refunds">Handling Refunds</h2>
 
@@ -436,13 +404,13 @@ in-app purchases must be directed to you (the application developer). You can th
 refund through your Google Checkout merchant account. When you do this, Google Play receives a
 refund notification from Google Checkout, and Google Play sends a refund message to your
 application. For more information, see <a
-href="{@docRoot}google/play/billing/billing_overview.html#billing-action-notify">Handling
+href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
-href="http://www.google.com/support/androidmarket/bin/answer.py?answer=1153485">In-app Billing
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
 Pricing</a>.</p>
 
 <p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to issue
-refunds or cancel in-app billing transactions. You must do this manually through your Google
+refunds or cancel In-app Billing transactions. You must do this manually through your Google
 Checkout merchant account. However, you can use the Google Checkout API to retrieve order
 information.</p>
 
@@ -478,13 +446,13 @@ Google Order Number:</p>
 
 <h2 id="billing-testing-setup">Setting Up Test Accounts</h2>
 
-<p>The Google Play publisher site lets you set up one or more test accounts. A test account is a
-regular Google account that you register on the publisher site as a test account. Test accounts are
+<p>The Google Play Developer Console lets you set up one or more test accounts. A test account is a
+regular Google account that you register on the Developer Console as a test account. Test accounts are
 authorized to make in-app purchases from applications that you have uploaded to the Google Play
-site but have not yet published.</p>
+Developer Console but have not yet published.</p>
 
 <p>You can use any Google account as a test account. Test accounts are useful if you want to let
-multiple people test in-app billing on applications without giving them access to your publisher
+multiple people test In-app Billing on applications without giving them access to your publisher
 account's sign-in credentials. If you want to own and control the test accounts, you can create the
 accounts yourself and distribute the credentials to your developers or testers.</p>
 
@@ -503,28 +471,39 @@ accounts yourself and distribute the credentials to your developers or testers.<
 
 <ol>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
-  <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
-  <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure
-  5).</li>
-  <li>In Test Accounts, add the email addresses for the test accounts you want to register,
+  <li>Click the <strong>Settings</strong> icon. (If you are using the old Developer Console UI, click
+  <strong>Edit profile</strong> in the upper left part of the page, under your name,)</li>
+  <li>Locate the License Testing panel. (In the old UI, scroll down to the Licensing &amp; In-app Billing panel.)</li>
+  <li>Add the email addresses for the test accounts you want to register,
   separating each account with a comma.</li>
   <li>Click <strong>Save</strong> to save your profile changes.</li>
 </ol>
 
-<img src="{@docRoot}images/billing_public_key.png" height="510" id="figure5" />
-<p class="img-caption">
-  <strong>Figure 5.</strong> The Licensing and In-app Billing panel of your account's Edit Profile
-  page lets you register test accounts.
+<h3 id="license_key">Getting an app's license key</h3>
+
+<p>The Google Play Developer Console provides a public licensing key for each app. To get the key for an app,
+load the app's publishing details in the Developer Console and click the <strong>Settings</strong> icon. The key
+for the app is available for copy/paste in License Key for this Application field, as shown in the figure below.</p>
+
+<p>Previously, the Developer Console provided a single public key per developer account. To transition apps to the
+new per-app public key, the Developer Console set the app-specific key as the former developer key. This ensures
+compatibility for apps that depend on the (former) developer key. </p>
+
+<div style="margin:1em;">
+<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_app_key.png" xheight="510" id="figure4" />
+<p class="img-caption" style="padding-left:.5em;">
+  <strong>Figure 4.</strong> You can find the license key for each app in the <strong>Services & APIs</strong> panel.
 </p>
+</div>
 
 <h2 id="billing-support">Where to Get Support</h2>
 
-<p>If you have questions or encounter problems while implementing in-app billing, contact the
+<p>If you have questions or encounter problems while implementing In-app Billing, contact the
 support resources listed in the following table (see table 2). By directing your queries to the
 correct forum, you can get the support you need more quickly.</p>
 
 <p class="table-caption" id="support-table"><strong>Table 2.</strong> Developer support resources
-for Google Play in-app billing.</p>
+for Google Play In-app Billing.</p>
 
 <table>
 
@@ -549,7 +528,7 @@ android</a></td>
 <td>Billing issue tracker</td>
 <td><a href="http://code.google.com/p/marketbilling/issues/">Billing
 project issue tracker</a></td>
-<td>Bug and issue reports related specifically to in-app billing sample code.</td>
+<td>Bug and issue reports related specifically to In-app Billing sample code.</td>
 </tr>
 </table>
 
