@@ -1,9 +1,8 @@
-page.title=Subscriptions
-parent.title=In-app Billing
-parent.link=index.html
+page.title=Subscriptions  <span style="font-size:16px;">(IAB Version 2)</span>
 @jd:body
 
-<div id="qv-wrapper">
+<div style="background-color:#fffdeb;width:100%;margin-bottom:1em;padding:.5em;">In-app Billing Version 2 is superseded. Please <a href="{@docRoot}google/play/billing/billing_overview.html#migration">migrate to Version 3</a> at your earliest convenience.</div>
+    <div id="qv-wrapper" style="margin-top:0;">
 <div id="qv">
   <h2>In this document</h2>
   <ol>
@@ -46,25 +45,10 @@ parent.link=index.html
       </ol> -->
     </li>
 </ol>
-  <h2>Downloads</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">Sample Application</a></li>
-  </ol>
-  <h2>See also</h2>
-  <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_overview.html">Overview of In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
-    Design</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app
-    Billing</a></li>
-    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
-    Reference</a></li>
-  </ol>
 </div>
 </div>
+
+<p class="note"><strong>Important:</strong> This documentation describes how to implement subscriptions with the Version 2 API. Subscription support for the in-app billing <a href="{@docRoot}google/play/billing/api.html">Version 3 API</a> is coming soon.</p></li>
 
 <p>Subscriptions let you sell content, services, or features in your app with
 automated, recurring billing. Adding support for subscriptions is
@@ -78,12 +62,14 @@ subscriptions using the standard communication model, data structures, and user
 interactions as for other in-app products.subscriptions. Because the
 implementation of subscriptions follows the same path as for other in-app
 products, details are provided outside of this document, starting with the <a
-href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/v2/api.html">In-app Billing
 Overview</a>. </p>
 
 <p>This document is focused on highlighting implementation details that are
 specific to subscriptions, along with some strategies for the associated billing
 and business models.</p>
+
+<p class="note"><strong>Note:</strong> Subscriptions are supported in In-app Billing Version 2 only. Support for subscriptions will be added to Version 3 in the weeks ahead.</p>
 
 <h2 id="overview">Overview of Subscriptions</h2>
 
@@ -379,7 +365,7 @@ these minimum requirements:</p>
 
 <ul>
   <li>Must run Android 2.2 or higher</li>
-  <li>Google Play Store app, version 3.5 or higher, must be installed</li>
+  <li>Google Play Store app, Version 3.5 or higher, must be installed</li>
 </ul>
 
 <p>Google Play 3.5 and later versions include support for the In-app Billing
@@ -411,7 +397,7 @@ other in-app products.subscriptions. </p>
 
 <p>The full implementation details for In-app Billing are provided outside of
 this document, starting with the <a
-href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/v2/api.html">In-app Billing
 Overview</a>. This document is focused on highlighting implementation details
 that are specific to subscriptions, along with some strategies for the
 associated billing and business models.</p>
@@ -420,10 +406,10 @@ associated billing and business models.</p>
 <h3 id="sample">Sample application</h3>
 
 <p>To help you get started with your In-app Billing implementation and
-subscriptions, an updated version of the In-app Billing sample app is available.
+subscriptions, an updated Version of the In-app Billing sample app is available.
 You can download the sample app from the Android SDK repository using the
 Android SDK Manager. For details, see <a
-href="{@docRoot}google/play/billing/billing_integrate.html#billing-download">
+href="{@docRoot}google/play/billing/v2/billing_integrate.html#billing-download">
 Downloading the Sample Application</a>.</p>
 
 <h3 id="model">Application model</h3>
@@ -442,7 +428,7 @@ Play. Also recommended are a response Handler for processing notifications,
 errors, and status messages, and an observer for sending callbacks to your
 application as needed. All of these components and their interactions are
 described in full in the <a
-href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/v2/api.html">In-app Billing
 Overview</a> and related documents.</p>
 
 <p>To initiate different types of billing communication with Google Play, your
@@ -494,7 +480,7 @@ data.</p>
 
 <p>Subscriptions support is available only in versions of Google Play that
 support the In-app Billing v2 API (Google Play 3.5 and higher). For your app,
-an essential first step at launch is to check whether the version of Google Play
+an essential first step at launch is to check whether the Version of Google Play
 installed on the device supports the In-app Billing v2 API and
 subscriptions.</p>
 
@@ -571,7 +557,7 @@ indicates that subscriptions are supported.</p>
 
 <h3 id="purchase">Requesting a subscription purchase</h3>
 
-<p>Once you’ve checked the API version as described above and determined that
+<p>Once you’ve checked the API Version as described above and determined that
 subscriptions are supported, you can present subscription products to the user
 for purchase. When the user has selected a subscription product and initiated a
 purchase, your app handles the purchase just as it would for other in-app
@@ -581,7 +567,7 @@ transaction..
 
 <p>The REQUEST_PURCHASE includes a Bundle containing the item details, as
 described in the <a
-href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+href="{@docRoot}google/play/billing/v2/api.html">In-app Billing
 Overview</a>. For a subscription, the Bundle must also specify:</p>
 
 <ul>
@@ -597,7 +583,7 @@ Overview</a>. For a subscription, the Bundle must also specify:</p>
 <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and
 <code>REQUEST_ID</code>. Your app uses the <code>PURCHASE_INTENT</code> to
 launch the checkout UI and the message flow proceeds exactly as described in <a
-href="{@docRoot}google/play/billing/billing_overview.html#billing-message-
+href="{@docRoot}google/play/billing/v2/api.html#billing-message-
 sequence">Messaging sequence</a>.</p>
 
 <p>Here’s how the sample app initiates a purchase for a subscription, where
@@ -654,7 +640,7 @@ the subscriptions that the user has purchased.</p>
 
 <p>The process for restoring subscriptions transactions is the same as described
 in <a
-href="{@docRoot}google/play/billing/billing_overview.html#billing-message-
+href="{@docRoot}google/play/billing/v2/api.html#billing-message-
 sequence">Messaging sequence</a>. Your app sends a
 <code>RESTORE_TRANSACTIONS</code> request to Google Play. Google Play sends two
 broadcast intents as asynchronous responses &mdash; a <code>RESPONSE_CODE</code>
@@ -804,7 +790,7 @@ your app does not need to grant further access to the subscription content.</p>
 
 <p>For subscriptions, you make the same types of modifications to your app as
 are described in <a
-href="{@docRoot}google/play/billing/billing_integrate.html#billing-implement">
+href="{@docRoot}google/play/billing/v2/billing_integrate.html#billing-implement">
 Modifying your Application Code</a>.</p>
 
 <p>Note that, in your UI that lets users view and select subscriptions for

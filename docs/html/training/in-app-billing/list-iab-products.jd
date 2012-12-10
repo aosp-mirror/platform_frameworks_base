@@ -1,0 +1,91 @@
+page.title=Establishing In-app Billing Products for Sale
+parent.title=Selling In-app Products
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Preparing Your In-app Billing Application
+previous.link=preparing-iab-app.html
+next.title=Purchasing In-app Billing Products
+next.link=purchase-iab-products.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DefineProducts">Specify In-app Products in Google Play</a></li>
+  <li><a href="#QueryDetails">Query In-app Product Details</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+    Overview</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>Before publishing your In-app Billing application, you'll need to define the product list of digital goods available for purchase in the <a href="https://play.google.com/apps/publish/">Google Play Developer Console</a>. </p>
+
+<h2 id="DefineProducts">Specify In-app Products in Google Play</h2>
+<p>From the Developer Console, you can define product information for in-app products and associate the product list with your application.</p>
+
+<p>To add new in-app products to your product list:</p>
+<ol>
+<li>Build a signed APK file for your In-app Billing application. To learn how to build and sign your APK, see <a href="{@docRoot}tools/publishing/preparing.html#publishing-build">Building Your Application for Release</a>. Make sure that you are using your final (not debug) certificate and private key to sign your application.  
+</li>
+<li>In the Developer Console, open the application entry that you created earlier.</li>
+<li>Click on the APK tab then click on Upload new APK. Upload the signed APK file to the Developer Console. Don’t publish the app yet!</li>
+<li>Navigate to the uploaded app listing, and click on <strong>In-app Products</strong>.
+<li>Click on the option to add a new product, then complete the form to specify the product information such as the item’s unique product ID (also called its <em>SKU</em>), description, price, and country availability. Note down the product ID since you might need this information to query purchase details in your application later. <p class="note"><strong>Important:</strong> The In-app Billing Version 3 service only supports managed in-app products, so make sure that you specify that the purchase type is 'Managed' when you add new items to your product list in the Developer Console.</p></li>
+<li>Once you have completed the form, activate the product so that your application can purchase it. <p class="note"><strong>Warning:</strong> It may take up to 2-3 hours after uploading the APK for Google Play to recognize your updated APK version. If you try to test your application before your uploaded APK is recognized by Google Play, your application will receive a ‘purchase cancelled’ response with an error message “This version of the application is not enabled for In-app Billing.”</p></li>
+</ol>
+
+<h2 id="QueryDetails">Query Items Available for Purchase</h2>
+<p>You can query Google Play to programmatically retrieve details of the in-app products that are associated with your application (such as the product’s price, title, description, and type).  This is useful, for example, when you want to display a listing of unowned items that are still available for purchase to users.</p>
+<p class="note"><strong>Note:</strong> When making the query, you will need to specify the product IDs for the products explicitly. You can manually find the product IDs from the Developer Console by opening the <strong>In-app Products</strong> tab for your application. The product IDs are listed under the column labeled <strong>Name/ID</strong>.</p>
+<p>To retrieve the product details, call {@code queryInventoryAsync(boolean, List, QueryInventoryFinishedListener)} on your IabHelper instance. 
+<ul>
+<li>The first input argument indicates whether product details should be retrieved (should be set to {@code true}).</li> 
+<li>The {@code List} argument consists of one or more product IDs (also called SKUs) for the products that you want to query.</li>
+<li>Finally, the {@code QueryInventoryFinishedListener} argument specifies a listener is notified when the query operation has completed and handles the query response.</li>
+</ul>
+If you use the the convenience classes provided in the sample, the classes will handle background thread management for In-app Billing requests, so you can safely make queries from the main thread of your application.
+</p>
+<p>The following code shows how you can retrieve the details for two products with IDs {@code SKU_APPLE} and {@code SKU_BANANA} that you previously defined in the Developer Console.</p>
+
+<pre>
+List<String> additionalSkuList = new List<String>();
+additionalSkuList.add(SKU_APPLE);
+additionalSkuList.add(SKU_BANANA);
+mHelper.queryInventoryAsync(true, additionalSkuList,
+   mQueryFinishedListener);
+</pre>
+
+<p>If the query is successful, the query results are stored in an {@code Inventory} object that is passed back to the listener.</p>
+<p>The following code shows how you can retrieve the item prices from the result set.</p>
+
+<pre>
+IabHelper.QueryInventoryFinishedListener 
+   mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
+   public void onQueryInventoryFinished(IabResult result, Inventory inventory)   
+   {
+      if (result.isFailure()) {
+         // handle error
+         return;
+       }
+
+       String applePrice =
+          inventory.getSkuDetails(SKU_APPLE).getPrice();
+       String bananaPrice =
+          inventory.getSkuDetails(SKU_BANANA).getPrice();
+
+       // update the UI 
+   }
+}
+</pre>
+

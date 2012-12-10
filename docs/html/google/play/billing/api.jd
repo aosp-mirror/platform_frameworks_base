@@ -1,0 +1,116 @@
+page.title=In-app Billing Version 3
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Topics</h2>
+  <ol>
+    <li><a href="#producttypes">Product Types</a>
+       <ol>
+       <li><a href="#managed">Managed In-app Products</a><li>
+       </ol>
+    </li>
+    <li><a href="#purchase">Purchasing Items</a></li>
+    <li><a href="#consume">Consuming Items</a>
+       <ol>
+       <li><a href="#consumetypes">Non-consumable and Consumable Items</a><li>
+       <li><a href="#managingconsumables">Managing Consumable Purchases</a><li>
+       </ol>
+    </li>
+    <li><a href="#caching">Local Caching</a></li>
+  </ol>
+  
+  <h2>Reference</h2>
+  <ol>
+    <li><a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing
+    Reference (V3)</a></li>
+  </ol>
+  
+ <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/in-app-billing/index.html">Selling In-app Products</a></li>
+  </ol>  
+</div>
+</div>
+
+<p>The In-app Billing Version 3 API makes it easier for you to integrate In-app Billing into your applications. The features in this version include improved synchronous purchase flow, APIs to let you easily track ownership of consumable goods, and local caching of in-app purchase data.</p>
+
+<h2 id="producttypes">Product Types</h2>
+<p>You define your products using the Google Play Developer Console, including product type, SKU, price, description, and so on. For more information, see <a
+href="{@docRoot}google/play/billing/billing_admin.html">Administering In-app Billing</a>. The Version 3 API only supports the managed in-app product type.</p>
+<h3 id="managed">Managed In-app Products</h3>
+<p>Managed in-app products are items that have their ownership information tracked and managed by Google Play. When a user purchases a managed in-app item, Google Play stores the purchase information for each item on a per-user basis. This enables you to later query Google Play at any time to restore the state of the items a specific user has purchased. This information is persistent on the Google Play servers even if the user uninstalls the application or if they change devices.</p>
+<p>If you are using the Version 3 API, you can also consume managed items within your application. You would typically implement consumption for items that can be purchased multiple times (such as in-game currency, fuel, or magic spells). Once purchased, a managed item cannot be purchased again until you consume the item, by sending a consumption request to Google Play. To learn more about in-app product consumption, see <a href="#consume">Consuming Items</a></p>
+
+
+<h2 id="purchase">Purchasing Items</h2>
+
+<div class="figure" style="width:430px">
+<img src="{@docRoot}images/in-app-billing/v3/iab_v3_purchase_flow.png" id="figure1" height="530"/>
+<p class="img-caption">
+  <strong>Figure 1.</strong> The basic sequence for a purchase request.
+</p>
+</div>
+
+<p>A typical purchase flow with the Version 3 API is as follows:
+<ol>
+<li>Your application sends a {@code isBillingSupported} request to Google Play to determine that the target version of the In-app Billing API that you are using is supported.  </li>
+<li>When your application starts or user logs in, it's good practice to check with Google Play to determine what items are owned by the user. To query the user's in-app purchases, send a {@code getPurchases} request. If the request is successful, Google Play returns a {@code Bundle} containing a list of product IDs of the purchased items, a list of the individual purchase details, and a list of the signatures for the purchases.</li>
+<li>Usually, you'll want to inform the user of the products that are available for purchase. To query the details of the in-app products that you defined in Google Play, your application can send a {@code getSkuDetails} request. You must specify a list of product IDs in the query request. If the request is successful, Google Play returns a {@code Bundle} containing product details including the product’s price, title, description, and the purchase type. 
+</li>
+<li>If an in-app product is not owned by the user, you can initiate a purchase for it. To start a purchase request, your application sends a {@code getBuyIntent} request, specifying the product ID of the item to purchase, along with other parameters. You should record the product ID when you create a new in-app product in the Developer Console.
+  <ol type="a">
+  <li>Google Play returns a {@code Bundle} that contains a {@code PendingIntent} which you application uses to start the checkout UI for the purchase.</li>
+  <li>Your application launches the pending intent by calling the {@code startIntentSenderForResult} method.</li>
+  <li>When the checkout flow finishes (that is, the user successfully purchases the item or cancels the purchase), Google Play sends a response {@code Intent} to your {@code onActivityResult} method. The result code of the {@code onActivityResult} has a result code that indicates whether the purchase was successful or canceled. The response {@code Intent} contains information about the purchased item, including a {@code purchaseToken} String that is generated by Google Play to uniquely identify this purchase transaction. The {@code Intent} also contains the signature of the purchase, signed with your private developer key.</li> 
+  </ol>
+</li>
+</ol>
+</p>
+<p>To learn more about the Version 3 API calls and server responses, see <a href="{@docRoot}google/play/billing/billing_reference.html">In-app Billing Reference</a>.</p>
+
+<h2 id="consume">Consuming Items</h2>
+<p>You can use the consumption mechanism to track the user's ownership of in-app products.</p>
+<p>In Version 3, all in-app products are managed. This means that the user's ownership of all in-app item purchases is maintained by Google Play, and your application can query the user's purchase information when needed. When the user successfully purchases an item, that purchase is recorded in Google Play. Once an item is purchased, it is considered to be "owned". Items in the "owned" state cannot be purchased from Google Play. You must send a consumption request for the "owned" item before Google Play makes it available for purchase again. Consuming the item reverts it to the "unowned" state, and discards the previous purchase data.</p>
+<div class="figure" style="width:420px">
+<img src="{@docRoot}images/in-app-billing/v3/iab_v3_consumption_flow.png" id="figure2" height="300"/>
+<p class="img-caption">
+  <strong>Figure 2.</strong> The basic sequence for a consumption request.
+</p>
+</div>
+<p>To retrieve the list of product's owned by the user, your application sends a {@code getPurchases} call to Google Play. Your application can make a consumption request by sending a {@code consumePurchase} call. In the request argument, you must specify the item's unique {@code purchaseToken} String that you obtained from Google Play when it was purchased. Google Play returns a status code indicating if the consumption was recorded successfully.</p>
+
+<h3 id="consumetypes">Non-consumable and Consumable Items</h3>
+<p>It's up to you to decide if you want to handle your in-app products as non-consumable or consumable items.</p>
+<dl>
+<dt>Non-consumable Items</dt>
+<dd>Typically, you would not implement consumption for items that can only be purchased once in your application and provide a permanent benefit. Once purchased, these items will be permanently associated to the user's Google account. An example of a non-consumable item is a premium upgrade or a level pack.</dd>
+<dt>Consumable items</dt>
+<dd>In contrast, you can implement consumption for items that can be made available for purchase multiple times. Typically, these items provide certain temporary effects. For example, the user's in-game character might gain life points or gain extra gold coins in their inventory. Dispensing the benefits or effects of the purchased item in your application is called <em>provisioning</em> the in-app product. You are responsible for controlling and tracking how in-app products are provisioned to the users.
+<p class="note"><strong>Important:</strong> Before provisioning the consumable item in your application, you must send a consumption request to Google Play and receive a successful response indicating that the consumption was recorded.</p>
+</dd>
+</dl>
+<h3 id="managingconsumables">Managing consumable purchases in your application</h3>
+<p>Here is the basic flow for purchasing a consumable item:</p>
+<ol>
+<li>Launch a purchase flow with a {@code getBuyIntent} call</li>
+<li>Get a response {@code Bundle}from Google Play indicating if the purchase completed successfully.</li>
+<li>If the purchase was successful, consume the purchase by making a {@code consumePurchase} call.</li>
+<li>Get a response code from Google Play indicating if the consumption completed successfully.</li>
+<li>If the consumption was successful, provision the product in your application.</li>
+</ol>
+<p>Subsequently, when the user starts up or logs in to your application, you should check if the user owns any outstanding consumable items; if so, make sure to consume and provision those items. Here's the recommended application startup flow if you implement consumable items in your application:</p>
+<ol>
+<li>Send a {@code getPurchases} request to query the owned items for the user.</li>
+<li>If there are any consumable items, consume the items by calling {@code consumePurchase}. This step is necessary because the application might have completed the purchase order for the consumable item, but stopped or got disconnected before the application had the chance to send a consumption request.</li>
+<li>Get a response code from Google Play indicating if the consumption completed successfully.</li>
+<li>If the consumption was successful, provision the product in your application.</li>
+</ol>
+
+<h2 id="caching">Local Caching</h2>
+<p>Because the Google Play client now caches In-app Billing information locally on the device, you can use the Version 3 API to query for this information more frequently, for example through a {@code getPurchases} call. Unlike with previous versions of the API, many Version 3 API calls will be serviced through cache lookups instead of through a network connection to Google Play, which significantly speeds up the API's response time. </p>
+
+
