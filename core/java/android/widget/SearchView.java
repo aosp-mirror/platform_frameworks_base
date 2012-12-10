@@ -1247,6 +1247,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     @Override
     public void onActionViewCollapsed() {
+        setQuery("", false);
         clearFocus();
         updateViewsVisibility(true);
         mQueryTextView.setImeOptions(mCollapsedImeOptions);
