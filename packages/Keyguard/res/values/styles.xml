@@ -30,7 +30,7 @@
         <item name="android:textColor">#ffffff</item>
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingLeft">@dimen/kg_num_pad_key_padding_left</item>
         <item name="android:paddingRight">6dp</item>
     </style>
     <style name="TextAppearance.NumPadKey"

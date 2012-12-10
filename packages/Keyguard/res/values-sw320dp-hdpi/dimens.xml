@@ -2,7 +2,7 @@
 <!--
 /* //device/apps/common/assets/res/any/dimens.xml
 **
-** Copyright 2013, The Android Open Source Project
+** Copyright 2006, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -18,14 +18,9 @@
 */
 -->
 <resources>
-
     <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">300dp</dimen>
+    <dimen name="keyguard_security_height">345dp</dimen>
 
     <!-- Height of the sliding KeyguardSecurityContainer with hidden widget (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_no_widget_height">400dp</dimen>
-
-    <!-- Left padding of num pad key on keyguard -->
-    <dimen name="kg_num_pad_key_padding_left">10dp</dimen>
-
+    <dimen name="keyguard_security_no_widget_height">450dp</dimen>
 </resources>
