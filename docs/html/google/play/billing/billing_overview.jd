@@ -34,8 +34,8 @@ parent.link=index.html
 </div>
 
 <p>This documentation describes the fundamental In-app Billing components and 
-features that you need to understand in order to implement your own In-app 
-Billing application.</p>
+features that you need to understand in order to add In-app 
+Billing features into your application.</p>
 
 <h2 id="api">In-app Billing API</h2>
 <p>Your application accesses the In-app Billing service using an API that is 
@@ -148,7 +148,7 @@ providing the checkout user interface (middle screen). When checkout is
 complete, the application resumes.
 </p>
 
-<h2>The Sample Applications</h2>
+<h2 id="samples">Sample Applications</h2>
 <p>To help you integrate In-app Billing into your application, the Android SDK 
 provides two sample applications that demonstrate how to sell in-app products 
 from inside an app.</p>
