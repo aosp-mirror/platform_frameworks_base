@@ -17332,6 +17332,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *  <li>{@link android.view.View.MeasureSpec#AT_MOST}</li>
          * </ul>
          *
+         * <p><strong>Note:</strong> On API level 17 and lower, makeMeasureSpec's
+         * implementation was such that the order of arguments did not matter
+         * and overflow in either value could impact the resulting MeasureSpec.
+         * {@link android.widget.RelativeLayout} was affected by this bug.
+         * Apps targeting API levels greater than 17 will get the fixed, more strict
+         * behavior.</p>
+         *
          * @param size the size of the measure specification
          * @param mode the mode of the measure specification
          * @return the measure specification based on size and mode
