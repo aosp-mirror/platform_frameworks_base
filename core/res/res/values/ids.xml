@@ -79,4 +79,5 @@
   <item type="id" name="action_menu_presenter" />
   <item type="id" name="overflow_menu_presenter" />
   <item type="id" name="popup_submenu_presenter" />
+  <item type="id" name="action_bar_spinner" />
 </resources>

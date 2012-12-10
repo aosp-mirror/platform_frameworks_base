@@ -687,6 +687,7 @@ public class ActionBarView extends AbsActionBarView {
                 if (mSpinner == null) {
                     mSpinner = new Spinner(mContext, null,
                             com.android.internal.R.attr.actionDropDownStyle);
+                    mSpinner.setId(com.android.internal.R.id.action_bar_spinner);
                     mListNavLayout = new LinearLayout(mContext, null,
                             com.android.internal.R.attr.actionBarTabBarStyle);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
