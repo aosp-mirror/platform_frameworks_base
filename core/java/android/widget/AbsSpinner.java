@@ -375,7 +375,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         /**
          * Constructor called from {@link #CREATOR}
          */
-        private SavedState(Parcel in) {
+        SavedState(Parcel in) {
             super(in);
             selectedId = in.readLong();
             position = in.readInt();
