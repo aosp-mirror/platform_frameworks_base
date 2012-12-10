@@ -45,32 +45,47 @@
     </ul>
   </li>
 
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_overview.html">
-              <span class="en">In-app Billing Overview</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_integrate.html">
-              <span class="en">Implementing In-app Billing</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_subscriptions.html">
-              <span class="en">Subscriptions</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html">
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_overview.html">
+              <span class="en">Overview</span></a>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="<?cs var:toroot?>google/play/billing/api.html">
+              <span class="en">Version 3 API</span></a></div>
+              <ul>
+              <li><a href="<?cs var:toroot?>google/play/billing/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="<?cs var:toroot?>google/play/billing/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="<?cs var:toroot?>google/play/billing/v2/api.html">
+              <span class="en">Version 2 API</span></a></div>
+              <ul>
+              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a></li>
+              <li><a href="<?cs var:toroot?>google/play/billing/v2/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_testing.html">
+      </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
+      </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
-          </li>
-          <li><a href="<?cs var:toroot?>google/play/billing/billing_reference.html">
-              <span class="en">Reference</span></a>
-          </li>
+      </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/versions.html">
+              <span class="en">Version Notes</span></a>
+      </li>
     </ul>
   </li>
 
@@ -86,11 +101,9 @@
       <li><a href="<?cs var:toroot ?>google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
-
       <li><a href="<?cs var:toroot ?>google/play/expansion-files.html">
           <span class="en">APK Expansion Files</span></a>
       </li>
-
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/licensing/index.html">
           <span class="en">Application Licensing</span></a>

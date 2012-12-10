@@ -1,0 +1,46 @@
+page.title=Selling In-app Products
+
+trainingnavtop=true
+startpage=true
+next.title=Preparing Your In-app Billing Application
+next.link=preparing-iab-app.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.2 or higher</li>
+</ul>
+
+<h2>You Should Also Read</h2>
+<ul>
+<li><a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+    Overview</a></li>
+</ul>
+
+</div>
+</div>
+<p>In this class, you'll learn how to perform common In-app Billing operations from Android applications.</p>
+<p>In-app billing is a service hosted on Google Play that lets you charge for digital content or for upgrades in your app.  The In-app Billing API makes it easy for you to integrate In-app Billing into your applications. You can request product details from Google Play, issue orders for in-app products, and quickly retrieve ownership information based on users' purchase history. You can also query the Google Play service for details about in-app products, such as local pricing and availability. Google Play provides a checkout interface that makes user interactions with the In-app Billing service seamless, and provides a more intuitive experience to your users.</p>
+<p>This class describes how to get started with the Version 3 API. To learn how to use the version 2 API, see <a href="{@docRoot}google/play/billing/v2/billing_integrate.html">Implementing In-App Billing (V2)</a>.</p>
+
+<h2>Lessons</h2>
+
+<!-- Create a list of the lessons in this class along with a short description of each lesson.
+These should be short and to the point. It should be clear from reading the summary whether someone
+will want to jump to a lesson or not.-->
+
+<dl>
+  <dt><b><a href="preparing-iab-app.html">Preparing Your In-app Billing Application</a></b></dt>
+    <dd>In this lesson, you will learn how to prepare your application to use the In-app Billing API and communicate with Google Play. You will also learn how to establish a connection to communicate with Google Play and verify that the In-app Billing API version that you are using is supported.</dd>
+  <dt><b><a href="list-iab-products.html">Establishing In-app Billing Products for Sale</a></b></dt>
+    <dd>In this lesson, you will learn how to specify the In-app Billing products for your app in Google Play and query the product details.</dd>
+  <dt><b><a href="purchase-iab-products.html">Purchase In-app Billing Products</a></b></dt>
+    <dd>In this lesson, you will learn how to purchase In-app Billing products, track consumption of purchased items, and query for details of purchased items.</dd>
+  <dt><b><a href="test-iab-app.html">Testing Your In-app Billing Application</a></b></dt>
+    <dd>In this lesson, you will learn how to test your application to ensure that In-app Billing is functioning correctly.</dd>
+</dl>

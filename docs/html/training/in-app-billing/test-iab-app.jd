@@ -1,0 +1,56 @@
+page.title=Testing Your In-app Billing Application
+parent.title=Selling In-app Products
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Purchasing In-app Billing Products
+previous.link=purchase-iab-products.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#StaticTest">Test with Static Responses</a></li>
+  <li><a href="#PlayItemTest">Test with Your Own Product IDs</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+    Overview</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>To ensure that In-app Billing is functioning correctly in your application, you should test the test the application before you publish it on Google Play. Early testing also helps to ensure that the user flow for purchasing in-app items is not confusing or slow, and that users can see their newly purchased items in a timely way.</p>
+
+<h2 id="StaticTest">Test with Static Responses</h2>
+Test your In-app Billing application with static responses by using Google Play’s reserved product IDs.By using  reserved product IDs instead of actual product IDs, you can test the purchase flow without specifying an actual payment method or transferring money. To learn more about the reserved product IDs, see <a href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app Billing</a>.
+
+<h2 id="PlayItemTest">Test with Your Own Product IDs</h2>
+<p>Because Google Play does not allow you to use your developer account to directly purchase in-app products that you have created yourself, you'll need to create test acccounts under your developer account profile. To create a test account, simply enter a valid Google email address. Users with these test accounts will then be able to make in-app-billing purchases from uploaded, unpublished applications that you manage.</p>
+<p>To test your In-app Billing Version 3 application using your own product IDs:
+<ol>
+<li>In the Developer Console, add one or more tester accounts to the developer account that you are using to publish your application.
+  <ol type="a">
+  <li>Login to the <a href="https://play.google.com/apps/publish/" target="_blank">Developer Console</a> with your developer account.</li>
+  <li>Click <strong>Settings</strong> > <strong>Account</strong> details, then in the <strong>License Testing</strong> section, add the Google email addresses for your tester accounts.</li>
+</ol>
+<li>Build a signed APK file for your In-app Billing application. To learn how to build and sign your APK, see <a href="{@docRoot}tools/publishing/preparing.html#publishing-build">Building Your Application for Release</a>. Make sure that you are using your final (not debug) certificate and private key to sign your application.  
+</li>
+<li>Make sure that you have uploaded the signed APK for your application to the Developer Console, and associated one or more in-app products with your application. You don't need to publish the application on Google Play to test it. <p class="note"><strong>Warning:</strong> It may take up to 2-3 hours after uploading the APK for Google Play to recognize your updated APK version. If you try to test your application before your uploaded APK is recognized by Google Play, your application will receive a ‘purchase cancelled’ response with an error message “This version of the application is not enabled for In-app Billing.”</p></li>
+<li>Install the APK file to your physical test device by using the {@code adb} tool. To learn how to install the application, see <a href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">Running on a Device</a>. Make sure that:
+   <ul>
+   <li>Your test device is running on Android SDK Version 2.2 (API level 8) or higher, and is installed with Google Play client Version 3.9.16 or higher.</li>
+   <li>The {@code android:versionCode} and {@code android:versionName} attributes values in the {@code AndroidManifest.xml} of the application that you are installing matches the values of your APK in the Developer Console.</li>
+   <li>Your application is signed with the same certificate that you used for the APK that you uploaded to the Developer Console, before installing it on your device.</li>
+   </ul>
+</li>
+<li>Login to the test device by using a tester account. Test your In-app Billing application by purchasing a few items, and fix any issues that you encounter. Remember to refund the purchases if you don’t want your testers to be actually charged!</li>
+</ol>
+</p>
+
