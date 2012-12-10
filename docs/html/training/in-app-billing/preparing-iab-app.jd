@@ -1,0 +1,144 @@
+page.title=Preparing Your In-app Billing Application
+parent.title=Selling In-app Products
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Establishing In-app Billing Products for Sale
+next.link=list-iab-products.html
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#GetSample">Download the Sample App</a></li>
+  <li><a href="#AddToDevConsole">Add Your App to the Developer Console</a></li>
+  <li><a href="#AddLibrary">Add the In-app Billing Library</a></li>
+  <li><a href="#SetPermission">Set the Billing Permission</a></li>
+  <li><a href="#Connect">Initiate a Connection with Google Play</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}google/play/billing/billing_overview.html">In-app Billing
+    Overview</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>Before you can start using the In-app Billing service, you'll need to add the library that contains the In-app Billing Version 3 API to your Android project. You also need to setting the permissions for your application to communicate with Google Play. In addition, you'll need to establish a connection between your application and  Google Play. You should also verify that the In-app Billing API version that you are using in your application is supported by Google Play.</p>
+
+<h2 id="GetSample">Download the Sample Application</h2>
+<p>In this training class, you will use a reference implementation for the In-app Billing Version 3 API called the {@code TrivialDrive} sample application. The sample includes convenience classes to quickly set up the In-app Billing service, marshal and unmarshal data types, and handle In-app Billing requests from the main thread of your application.  </p>
+<p>To download the sample application:</p>
+<ol>
+<li>Open the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.</li>
+<li>In the SDK Manager, expand the {@code Extras} section.</li>
+<li>Select <strong>Google Play Billing Library</strong>. Make sure to select the download for In-app Billing Version 3 or above.</li>
+<li>Click <strong>Install</strong> to complete the download.</li>
+</ol>
+<p>The sample files will be installed to {@code /your/sdk/location/extras/google/play_billing/in-app-billing-v03}.</p>
+
+<h2 id="AddToDevConsole">Add Your Application to the Developer Console</h2>
+<p>The Google Play Developer Console is where you publish your In-app Billing application and  manage the various digital goods that are available for purchase from your application. When you create a new application entry in the Developer Console, it automatically generates a public license key for your application. You will need this key to establish a trusted connection from your application to the Google Play servers. You only need to generate this key once per application, and don’t need to repeat these steps when you update the APK file for your application.</p>
+<p>To add your application to the Developer Console:</p>
+<ol>
+<li>Go to the <a href="http://play.google.com/apps/publish">Google Play Developer Console</a> site and log in. You will need to register for a new developer account, if you have not registered previously. To sell in-app items, you also need to have a <a href="http://www.google.com/wallet/merchants.html">Google Checkout Merchant</a> account.</li>
+<li>Click on <strong>Try the new design</strong> to access the preview version of the Developer Console, if you are not already logged on to that version. </li>
+<li>In the <strong>All Applications</strong> tab, add a new application entry.
+<ol type="a">
+<li>Click <strong>Add new application</strong>.</li>
+<li>Enter a name for your new In-app Billing application.</li>
+<li>Click <strong>Prepare Store Listing</strong>.</li>
+</ol>
+</li>
+<li>In the <strong>Services & APIs</strong> tab, find and make a note of the public license key that Google Play generated for your application. This is a Base64 string that you will need to include in your application code later.</li>
+</ol>
+<p>Your application should now appear in the list of applications in Developer Console.</p>
+
+<h2 id="AddLibrary">Add the In-app Billing Library</h2>
+<p>To use the In-app Billing Version 3 features, you must add the {@code IInAppBillingService.aidl} file to your Android project. This Android Interface Definition Language (AIDL) file defines the interface to the Google Play service.</p>
+<p>You can find the {@code IInAppBillingService.aidl} file in the provided sample app. Depending on whether you are creating a new application or modifying an existing application, follow the instructions below to add the In-app Billing Library to your project.</p>
+<h3>New Project</h3>
+<p>To add the In-app Billing Version 3 library to your new In-app Billing project:</p>
+<ol>
+<li>Copy the {@code TrivialDrive} sample files into your Android project.</li>
+<li>Modify the package name in the files you copied to use the package name for your project. In Eclipse, you can use this shortcut: right-click the package name, then  select <strong>Refactor</strong> > <strong>Rename</strong>.</li>
+<li>Open the {@code AndroidManifest.xml} file and update the package attribute value to use the package name for your project.</li>
+<li>Fix import statements as needed so that your project compiles correctly.  In Eclipse, you can use this shortcut: press <strong>Ctrl+Shift+O</strong> in each file showing errors.</li>
+<li>Modify the sample to create your own application. Remember to copy the Base64 public license key for your application from the Developer Console over to your {@code MainActivity.java}.</li>
+</ol>
+
+<h3>Existing Project</h3>
+<p>To add the In-app Billing Version 3 library to your existing In-app Billing project:</p>
+<ol>
+<li>Copy the {@code IInAppBillingService.aidl} file to your Android project.
+  <ul>
+  <li>If you are using Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory.</li>
+  <li>If you are developing in a non-Eclipse environment: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory.</li>
+  </ul>
+</li>
+<li>Build your application. You should see a generated file named {@code IInAppBillingService.java} in the {@code /gen} directory of your project.</li>
+<li>Add the helper classes from the {@code /util} directory of the {@code TrivialDrive} sample to your project.  Remember to change the package name declarations in those files accordingly so that your project compiles correctly.</li>
+</ol>
+
+<p>Your project should now contain the In-app Billing Version 3 library.</p>
+
+<h2 id="SetPermission">Set the Billing Permission</h2>
+<p>Your app needs to have permission to communicate request and response messages to the Google Play’s billing service. To give your app the necessary permission, add this line in your {@code AndroidManifest.xml} manifest file:</p>
+<pre>
+&lt;uses-permission android:name="com.android.vending.BILLING" /&gt;
+</pre>
+
+<h2 id="Connect">Initiate a Connection with Google Play</h2>
+<p>You must bind your Activity to Google Play’s In-app Billing service to send In-app Billing requests to Google Play from your application. The convenience classes provided in the sample handles the binding to the In-app Billing service, so you don’t have to manage the network connection directly.</p>
+<p>To set up synchronous communication with Google Play, create an {@code IabHelper} instance in your activity's {@code onCreate} method. In the constructor, pass in the {@code Context} for the activity, along with a string containing the public license key that was generated earlier by the Google Play Developer Console. </p>
+<p class="note"><strong>Security Recommendation:</strong> It is highly recommended that you do not hard-code the exact public license key string value as provided by Google Play. Instead, you can construct the whole public license key string at runtime from substrings, or retrieve it from an encrypted store, before passing it to the constructor. This approach makes it more difficult for malicious third-parties to modify the public license key string in your APK file.</p>
+
+<pre>
+IabHelper mHelper;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+   // ...
+   String base64EncodedPublicKey;
+   
+   // compute your public key and store it in base64EncodedPublicKey
+   mHelper = new IabHelper(this, base64EncodedPublicKey);
+}
+</pre>
+
+<p>Next, perform the service binding by calling the {@code startSetup} method on the {@code IabHelper} instance that you created.  Pass the method an {@code OnIabSetupFinishedListener} instance, which is called once the {@code IabHelper} completes the asynchronous setup operation. As part of the setup process, the {@code IabHelper} also checks if the In-app Billing Version 3 API is supported by Google Play. If the API version is not supported, or if an error occured while establishing the service binding, the listener is notified and passed an {@code IabResult} object with the error message.</p>
+
+<pre>
+mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+   public void onIabSetupFinished(IabResult result) {
+      if (!result.isSuccess()) {
+         // Oh noes, there was a problem.
+         Log.d(TAG, "Problem setting up In-app Billing: " + result);
+      }            
+         // Hooray, IAB is fully set up!  
+   }
+});
+</pre>
+
+<p>If the setup completed successfully, you can now use the {@code mHelper} reference to communicate with the Google Play service. When your application is launched, it is a good practice to query Google Play to find out what in-app items are owned by a user. This is covered further in the <a href="{@docRoot}training/in-app-billing/purchase-iab-products.html#QueryPurchases">Query Purchased Items</a> section.</p>
+
+<p class="note"><strong>Important:</strong> Remember to unbind from the In-app Billing service when you are done with your activity. If you don’t unbind, the open service connection could cause your device’s performance to degrade. To unbind and free your system resources, call the {@code IabHelper}'s {@code dispose} method when your {@code Activity} gets destroyed.</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+   if (mHelper != null) mHelper.dispose();
+   mHelper = null;
+}
+</pre>
+
+
+
+
+

@@ -954,6 +954,30 @@
       </a>
     </div>
     <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/in-app-billing/index.html"
+         description="How to sell in-app products from your application using In-app Billing.">
+            Selling In-app Products
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/in-app-billing/preparing-iab-app.html">
+            <span class="en">Preparing Your App</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/in-app-billing/list-iab-products.html">
+            <span class="en">Establishing Products for Sale</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/in-app-billing/purchase-iab-products.html">
+            <span class="en">Purchasing Products</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/in-app-billing/test-iab-app.html">
+            <span class="en">Testing Your App</span>
+          </a>
+          </li>
+        </ul>
+      </li>
       
       <li class="nav-section">
         <div class="nav-section-header">
