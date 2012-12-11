@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 94;
+    private static final int DATABASE_VERSION = 95;
 
     private Context mContext;
     private int mUserHandle;
@@ -1505,6 +1505,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 94;
         }
 
+        if (upgradeVersion == 94) {
+            // Add wireless charging started sound setting
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
+                        + " VALUES(?,?);");
+                loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                        R.string.def_wireless_charging_started_sound);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 95;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2188,6 +2205,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_dock_sound);
             loadStringSetting(stmt, Settings.Global.CAR_UNDOCK_SOUND,
                     R.string.def_car_undock_sound);
+            loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                    R.string.def_wireless_charging_started_sound);
 
             loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
             loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
