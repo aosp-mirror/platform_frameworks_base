@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
 import java.util.ArrayList;
 
-import android.content.ContentService.ObserverCall;
-import android.content.ContentService.ObserverNode;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
+
+import com.android.server.content.ContentService.ObserverCall;
+import com.android.server.content.ContentService.ObserverNode;
 
 public class ObserverNodeTest extends AndroidTestCase {
     static class TestObserver  extends ContentObserver {
