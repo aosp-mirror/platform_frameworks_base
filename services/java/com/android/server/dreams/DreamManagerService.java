@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,6 +39,8 @@ import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import libcore.util.Objects;
 
@@ -279,7 +282,37 @@ public final class DreamManagerService extends IDreamManager.Stub {
         String names = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.SCREENSAVER_COMPONENTS,
                 userId);
-        return names == null ? null : componentsFromString(names);
+        ComponentName[] components = componentsFromString(names);
+
+        // first, ensure components point to valid services
+        List<ComponentName> validComponents = new ArrayList<ComponentName>();
+        if (components != null) {
+            for (ComponentName component : components) {
+                if (serviceExists(component)) {
+                    validComponents.add(component);
+                } else {
+                    Slog.w(TAG, "Dream " + component + " does not exist");
+                }
+            }
+        }
+
+        // fallback to the default dream component if necessary
+        if (validComponents.isEmpty()) {
+            ComponentName defaultDream = getDefaultDreamComponent();
+            if (defaultDream != null) {
+                Slog.w(TAG, "Falling back to default dream " + defaultDream);
+                validComponents.add(defaultDream);
+            }
+        }
+        return validComponents.toArray(new ComponentName[validComponents.size()]);
+    }
+
+    private boolean serviceExists(ComponentName name) {
+        try {
+            return name != null && mContext.getPackageManager().getServiceInfo(name, 0) != null;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
     }
 
     private void startDreamLocked(final ComponentName name,
