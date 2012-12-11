@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
 import android.accounts.Account;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.PeriodicSync;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
