@@ -1818,5 +1818,4 @@
 
   <!-- From PinyinIME(!!!) -->
   <java-symbol type="string" name="inputMethod" />
-
 </resources>
