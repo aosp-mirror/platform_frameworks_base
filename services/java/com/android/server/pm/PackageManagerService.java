@@ -6353,6 +6353,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 pkgLite = mContainerService.getMinimalPackageInfo(packageFilePath,
                                         flags, lowThreshold);
                             }
+                            /*
+                             * The cache free must have deleted the file we
+                             * downloaded to install.
+                             *
+                             * TODO: fix the "freeCache" call to not delete
+                             *       the file we care about.
+                             */
+                            if (pkgLite.recommendedInstallLocation
+                                    == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                                pkgLite.recommendedInstallLocation
+                                    = PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+                            }
                         }
                     }
                 } finally {
