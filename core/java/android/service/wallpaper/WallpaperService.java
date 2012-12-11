@@ -960,7 +960,13 @@ public abstract class WallpaperService extends Service {
         IWallpaperEngineWrapper(WallpaperService context,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight) {
-            mCaller = new HandlerCaller(context, context.getMainLooper(), this);
+            if (DEBUG && mCallbackLooper != null) {
+                mCallbackLooper.setMessageLogging(new LogPrinter(Log.VERBOSE, TAG));
+            }
+            mCaller = new HandlerCaller(context,
+                    mCallbackLooper != null
+                            ? mCallbackLooper : context.getMainLooper(),
+                    this, true /*asyncHandler*/);
             mConnection = conn;
             mWindowToken = windowToken;
             mWindowType = windowType;
