@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server.content;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerService;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.SyncStorageEngine.OnSyncRequestListener;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ISyncAdapter;
+import android.content.ISyncContext;
+import android.content.ISyncStatusObserver;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SyncActivityTooManyDeletes;
+import android.content.SyncAdapterType;
+import android.content.SyncAdaptersCache;
+import android.content.SyncInfo;
+import android.content.SyncResult;
+import android.content.SyncStatusInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -55,11 +69,12 @@ import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.accounts.AccountManagerService;
+import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;

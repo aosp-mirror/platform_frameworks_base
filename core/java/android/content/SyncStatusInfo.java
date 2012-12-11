@@ -46,7 +46,7 @@ public class SyncStatusInfo implements Parcelable {
 
     private static final String TAG = "Sync";
 
-    SyncStatusInfo(int authorityId) {
+    public SyncStatusInfo(int authorityId) {
         this.authorityId = authorityId;
     }
 
@@ -92,7 +92,7 @@ public class SyncStatusInfo implements Parcelable {
         }
     }
 
-    SyncStatusInfo(Parcel parcel) {
+    public SyncStatusInfo(Parcel parcel) {
         int version = parcel.readInt();
         if (version != VERSION && version != 1) {
             Log.w("SyncStatusInfo", "Unknown version: " + version);

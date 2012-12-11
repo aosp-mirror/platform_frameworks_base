@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package android.content;
+package com.android.server;
 
 import android.accounts.Account;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.server.content.SyncOperation;
 
 /**
  * You can run those tests with:

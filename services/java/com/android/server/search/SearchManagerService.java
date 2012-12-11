@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package android.server.search;
-
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.util.IndentingPrintWriter;
+package com.android.server.search;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -44,6 +41,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

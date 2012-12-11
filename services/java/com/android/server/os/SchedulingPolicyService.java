@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.server.os;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.ISchedulingPolicyService;
 import android.os.Process;
-import android.util.Log;
 
 /**
  * The implementation of the scheduling policy service interface.
