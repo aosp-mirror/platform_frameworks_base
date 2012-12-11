@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.server.search;
+package com.android.server.search;
 
 import android.app.AppGlobals;
 import android.app.SearchManager;

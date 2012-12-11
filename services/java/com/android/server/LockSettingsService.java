@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.widget;
+package com.android.server;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -31,6 +31,9 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Slog;
+
+import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -79,6 +79,25 @@ public class PeriodicSync implements Parcelable {
         return account.equals(other.account)
                 && authority.equals(other.authority)
                 && period == other.period
-                && SyncStorageEngine.equals(extras, other.extras);
+                && syncExtrasEquals(extras, other.extras);
+    }
+
+    /** {@hide} */
+    public static boolean syncExtrasEquals(Bundle b1, Bundle b2) {
+        if (b1.size() != b2.size()) {
+            return false;
+        }
+        if (b1.isEmpty()) {
+            return true;
+        }
+        for (String key : b1.keySet()) {
+            if (!b2.containsKey(key)) {
+                return false;
+            }
+            if (!b1.get(key).equals(b2.get(key))) {
+                return false;
+            }
+        }
+        return true;
     }
 }
