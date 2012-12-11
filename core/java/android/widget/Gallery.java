@@ -891,7 +891,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             lp = (Gallery.LayoutParams) generateDefaultLayoutParams();
         }
 
-        addViewInLayout(child, fromLeft != mIsRtl ? -1 : 0, lp);
+        addViewInLayout(child, fromLeft != mIsRtl ? -1 : 0, lp, true);
 
         child.setSelected(offset == 0);
 
