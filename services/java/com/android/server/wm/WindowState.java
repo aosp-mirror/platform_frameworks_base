@@ -730,7 +730,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
             return ((!mAttachedHidden && !atoken.hiddenRequested)
-                            || mWinAnimator.mAnimation != null || atoken.mAppAnimator.animation != null);
+                    || mWinAnimator.mAnimation != null || atoken.mAppAnimator.animation != null);
         }
         return !mAttachedHidden || mWinAnimator.mAnimation != null;
     }
@@ -805,6 +805,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
                 || mAttachedHidden
                 || mExiting || mDestroying;
+    }
+
+    /**
+     * Returns true if the window has a surface that it has drawn a
+     * complete UI in to.
+     */
+    public boolean isDrawFinishedLw() {
+        return mHasSurface && !mDestroying &&
+                (mWinAnimator.mDrawState == WindowStateAnimator.COMMIT_DRAW_PENDING
+                || mWinAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW
+                || mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN);
     }
 
     /**

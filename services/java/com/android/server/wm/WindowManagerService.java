@@ -7688,7 +7688,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // soon won't be visible, to avoid wasting time and funky
             // changes while a window is animating away.
             final boolean gone = (behindDream && mPolicy.canBeForceHidden(win, win.mAttrs))
-                    || (win.isGoneForLayoutLw() && !win.isOnScreen());
+                    || (win.isGoneForLayoutLw() && !(win.isOnScreen() && win.isDrawFinishedLw()));
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
                 Slog.v(TAG, "1ST PASS " + win
