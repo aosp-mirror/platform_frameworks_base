@@ -40,6 +40,10 @@
     <!-- Label for current user in power menu options dialog -->
     <string name="global_action_current_user">Current</string>
 
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cursor left</string>
+    <string name="accessibility_dpad_right">Cursor right</string>
+
     <!-- Custom QS tiles -->
     <!-- ADB over network QS tile -->
     <string name="quick_settings_network_adb_label">ADB over network</string>
