@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app;
+package com.android.server.search;
 
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -30,7 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.RemoteException;
-import android.server.search.Searchables;
+import com.android.server.search.Searchables;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.mock.MockContext;
