@@ -21,10 +21,10 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LayerRenderer.cpp \
 		Matrix.cpp \
 		OpenGLRenderer.cpp \
-		PathRenderer.cpp \
 		Patch.cpp \
 		PatchCache.cpp \
 		PathCache.cpp \
+		PathTessellator.cpp \
 		Program.cpp \
 		ProgramCache.cpp \
 		ResourceCache.cpp \

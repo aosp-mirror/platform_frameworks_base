@@ -53,6 +53,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DisplayList;
+class VertexBuffer;
 
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
@@ -582,12 +583,22 @@ private:
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
     /**
+     * Renders a strip of polygons with the specified paint, used for tessellated geometry.
+     *
+     * @param vertexBuffer The VertexBuffer to be drawn
+     * @param paint The paint to render with
+     * @param useOffset Offset the vertexBuffer (used in drawing non-AA lines)
+     */
+    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
+            bool useOffset = false);
+
+    /**
      * Renders the convex hull defined by the specified path as a strip of polygons.
      *
      * @param path The hull of the path to draw
      * @param paint The paint to render with
      */
-    void drawConvexPath(const SkPath& path, SkPaint* paint);
+    status_t drawConvexPath(const SkPath& path, SkPaint* paint);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -754,7 +765,6 @@ private:
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
     void setupDrawAA();
-    void setupDrawVertexShape();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
@@ -788,9 +798,6 @@ private:
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
     void setupDrawVertices(GLvoid* vertices);
-    void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, GLvoid* lengthCoords,
-            float strokeWidth, int& widthSlot, int& lengthSlot);
-    void finishDrawAALine(const int widthSlot, const int lengthSlot);
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 

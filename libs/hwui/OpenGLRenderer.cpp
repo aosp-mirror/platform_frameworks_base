@@ -33,7 +33,7 @@
 
 #include "OpenGLRenderer.h"
 #include "DisplayListRenderer.h"
-#include "PathRenderer.h"
+#include "PathTessellator.h"
 #include "Properties.h"
 #include "Vector.h"
 
@@ -1469,10 +1469,6 @@ void OpenGLRenderer::setupDrawAA() {
     mDescription.isAA = true;
 }
 
-void OpenGLRenderer::setupDrawVertexShape() {
-    mDescription.isVertexShape = true;
-}
-
 void OpenGLRenderer::setupDrawPoint(float pointSize) {
     mDescription.isPoint = true;
     mDescription.pointSize = pointSize;
@@ -1686,41 +1682,6 @@ void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
     mCaches.unbindIndicesBuffer();
-}
-
-/**
- * Sets up the shader to draw an AA line. We draw AA lines with quads, where there is an
- * outer boundary that fades out to 0. The variables set in the shader define the proportion of
- * the width and length of the primitive occupied by the AA region. The vtxWidth and vtxLength
- * attributes (one per vertex) are values from zero to one that tells the fragment
- * shader where the fragment is in relation to the line width/length overall; these values are
- * then used to compute the proper color, based on whether the fragment lies in the fading AA
- * region of the line.
- * Note that we only pass down the width values in this setup function. The length coordinates
- * are set up for each individual segment.
- */
-void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
-        GLvoid* lengthCoords, float boundaryWidthProportion, int& widthSlot, int& lengthSlot) {
-    bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, vertices, gAAVertexStride);
-    mCaches.resetTexCoordsVertexPointer();
-    mCaches.unbindIndicesBuffer();
-
-    widthSlot = mCaches.currentProgram->getAttrib("vtxWidth");
-    glEnableVertexAttribArray(widthSlot);
-    glVertexAttribPointer(widthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, widthCoords);
-
-    lengthSlot = mCaches.currentProgram->getAttrib("vtxLength");
-    glEnableVertexAttribArray(lengthSlot);
-    glVertexAttribPointer(lengthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, lengthCoords);
-
-    int boundaryWidthSlot = mCaches.currentProgram->getUniform("boundaryWidth");
-    glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
-}
-
-void OpenGLRenderer::finishDrawAALine(const int widthSlot, const int lengthSlot) {
-    glDisableVertexAttribArray(widthSlot);
-    glDisableVertexAttribArray(lengthSlot);
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -2083,39 +2044,26 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const
     return DrawGlInfo::kStatusDrew;
 }
 
-/**
- * Renders a convex path via tessellation. For AA paths, this function uses a similar approach to
- * that of AA lines in the drawLines() function.  We expand the convex path by a half pixel in
- * screen space in all directions. However, instead of using a fragment shader to compute the
- * translucency of the color from its position, we simply use a varying parameter to define how far
- * a given pixel is from the edge. For non-AA paths, the expansion and alpha varying are not used.
- *
- * Doesn't yet support joins, caps, or path effects.
- */
-void OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
+status_t OpenGLRenderer::drawVertexBuffer(const VertexBuffer& vertexBuffer, SkPaint* paint,
+        bool useOffset) {
+    if (!vertexBuffer.getSize()) {
+        // no vertices to draw
+        return DrawGlInfo::kStatusDone;
+    }
+
     int color = paint->getColor();
     SkXfermode::Mode mode = getXfermode(paint->getXfermode());
     bool isAA = paint->isAntiAlias();
 
-    VertexBuffer vertexBuffer;
-    // TODO: try clipping large paths to viewport
-    PathRenderer::convexPathVertices(path, paint, mSnapshot->transform, vertexBuffer);
-
-    if (!vertexBuffer.getSize()) {
-        // no vertices to draw
-        return;
-    }
-
     setupDraw();
     setupDrawNoTexture();
     if (isAA) setupDrawAA();
-    setupDrawVertexShape();
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawColorFilter();
     setupDrawShader();
     setupDrawBlending(isAA, mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity();
+    setupDrawModelViewIdentity(useOffset);
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderIdentityUniforms();
@@ -2136,286 +2084,59 @@ void OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
     }
 
-    SkRect bounds = PathRenderer::computePathBounds(path, paint);
-    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
-
     glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getSize());
 
     if (isAA) {
         glDisableVertexAttribArray(alphaSlot);
     }
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 /**
- * We draw lines as quads (tristrips). Using GL_LINES can be difficult because the rasterization
- * rules for those lines produces some unexpected results, and may vary between hardware devices.
- * The basics of lines-as-quads is easy; we simply find the normal to the line and position the
- * corners of the quads on either side of each line endpoint, separated by the strokeWidth
- * of the line. Hairlines are more involved because we need to account for transform scaling
- * to end up with a one-pixel-wide line in screen space..
- * Anti-aliased lines add another factor to the approach. We use a specialized fragment shader
- * in combination with values that we calculate and pass down in this method. The basic approach
- * is that the quad we create contains both the core line area plus a bounding area in which
- * the translucent/AA pixels are drawn. The values we calculate tell the shader what
- * proportion of the width and the length of a given segment is represented by the boundary
- * region. The quad ends up being exactly .5 pixel larger in all directions than the non-AA quad.
- * The bounding region is actually 1 pixel wide on all sides (half pixel on the outside, half pixel
- * on the inside). This ends up giving the result we want, with pixels that are completely
- * 'inside' the line area being filled opaquely and the other pixels being filled according to
- * how far into the boundary region they are, which is determined by shader interpolation.
+ * Renders a convex path via tessellation. For AA paths, this function uses a similar approach to
+ * that of AA lines in the drawLines() function.  We expand the convex path by a half pixel in
+ * screen space in all directions. However, instead of using a fragment shader to compute the
+ * translucency of the color from its position, we simply use a varying parameter to define how far
+ * a given pixel is from the edge. For non-AA paths, the expansion and alpha varying are not used.
+ *
+ * Doesn't yet support joins, caps, or path effects.
+ */
+status_t OpenGLRenderer::drawConvexPath(const SkPath& path, SkPaint* paint) {
+    VertexBuffer vertexBuffer;
+    // TODO: try clipping large paths to viewport
+    PathTessellator::tessellatePath(path, paint, mSnapshot->transform, vertexBuffer);
+
+    SkRect bounds = path.getBounds();
+    PathTessellator::expandBoundsForStroke(bounds, paint, false);
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
+
+    return drawVertexBuffer(vertexBuffer, paint);
+}
+
+/**
+ * We create tristrips for the lines much like shape stroke tessellation, using a per-vertex alpha
+ * and additional geometry for defining an alpha slope perimeter.
+ *
+ * Using GL_LINES can be difficult because the rasterization rules for those lines produces some
+ * unexpected results, and may vary between hardware devices. Previously we used a varying-base
+ * in-shader alpha region, but found it to be taxing on some GPUs.
+ *
+ * TODO: try using a fixed input buffer for non-capped lines as in text rendering. this may reduce
+ * memory transfer by removing need for degenerate vertices.
  */
 status_t OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
+    if (mSnapshot->isIgnored() || count < 4) return DrawGlInfo::kStatusDone;
 
-    const bool isAA = paint->isAntiAlias();
-    // We use half the stroke width here because we're going to position the quad
-    // corner vertices half of the width away from the line endpoints
-    float halfStrokeWidth = paint->getStrokeWidth() * 0.5f;
-    // A stroke width of 0 has a special meaning in Skia:
-    // it draws a line 1 px wide regardless of current transform
-    bool isHairLine = paint->getStrokeWidth() == 0.0f;
+    count &= ~0x3; // round down to nearest four
 
-    float inverseScaleX = 1.0f;
-    float inverseScaleY = 1.0f;
-    bool scaled = false;
+    VertexBuffer buffer;
+    SkRect bounds;
+    PathTessellator::tessellateLines(points, count, paint, mSnapshot->transform, bounds, buffer);
+    dirtyLayer(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, *mSnapshot->transform);
 
-    int alpha;
-    SkXfermode::Mode mode;
-
-    int generatedVerticesCount = 0;
-    int verticesCount = count;
-    if (count > 4) {
-        // Polyline: account for extra vertices needed for continuous tri-strip
-        verticesCount += (count - 4);
-    }
-
-    if (isHairLine || isAA) {
-        // The quad that we use for AA and hairlines needs to account for scaling. For hairlines
-        // the line on the screen should always be one pixel wide regardless of scale. For
-        // AA lines, we only want one pixel of translucent boundary around the quad.
-        if (CC_UNLIKELY(!mSnapshot->transform->isPureTranslate())) {
-            Matrix4 *mat = mSnapshot->transform;
-            float m00 = mat->data[Matrix4::kScaleX];
-            float m01 = mat->data[Matrix4::kSkewY];
-            float m10 = mat->data[Matrix4::kSkewX];
-            float m11 = mat->data[Matrix4::kScaleY];
-
-            float scaleX = sqrtf(m00 * m00 + m01 * m01);
-            float scaleY = sqrtf(m10 * m10 + m11 * m11);
-
-            inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
-            inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
-
-            if (inverseScaleX != 1.0f || inverseScaleY != 1.0f) {
-                scaled = true;
-            }
-        }
-    }
-
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    mCaches.enableScissor();
-
-    setupDraw();
-    setupDrawNoTexture();
-    if (isAA) {
-        setupDrawAA();
-    }
-    setupDrawColor(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(isAA, mode);
-    setupDrawProgram();
-    setupDrawModelViewIdentity(true);
-    setupDrawColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderIdentityUniforms();
-
-    if (isHairLine) {
-        // Set a real stroke width to be used in quad construction
-        halfStrokeWidth = isAA? 1 : .5;
-    } else if (isAA && !scaled) {
-        // Expand boundary to enable AA calculations on the quad border
-        halfStrokeWidth += .5f;
-    }
-
-    int widthSlot;
-    int lengthSlot;
-
-    Vertex lines[verticesCount];
-    Vertex* vertices = &lines[0];
-
-    AAVertex wLines[verticesCount];
-    AAVertex* aaVertices = &wLines[0];
-
-    if (CC_UNLIKELY(!isAA)) {
-        setupDrawVertices(vertices);
-    } else {
-        void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
-        void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
-        // innerProportion is the ratio of the inner (non-AA) part of the line to the total
-        // AA stroke width (the base stroke width expanded by a half pixel on either side).
-        // This value is used in the fragment shader to determine how to fill fragments.
-        // We will need to calculate the actual width proportion on each segment for
-        // scaled non-hairlines, since the boundary proportion may differ per-axis when scaled.
-        float boundaryWidthProportion = .5 - 1 / (2 * halfStrokeWidth);
-        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
-                boundaryWidthProportion, widthSlot, lengthSlot);
-    }
-
-    AAVertex* prevAAVertex = NULL;
-    Vertex* prevVertex = NULL;
-
-    int boundaryLengthSlot = -1;
-    int boundaryWidthSlot = -1;
-
-    for (int i = 0; i < count; i += 4) {
-        // a = start point, b = end point
-        vec2 a(points[i], points[i + 1]);
-        vec2 b(points[i + 2], points[i + 3]);
-
-        float length = 0;
-        float boundaryLengthProportion = 0;
-        float boundaryWidthProportion = 0;
-
-        // Find the normal to the line
-        vec2 n = (b - a).copyNormalized() * halfStrokeWidth;
-        float x = n.x;
-        n.x = -n.y;
-        n.y = x;
-
-        if (isHairLine) {
-            if (isAA) {
-                float wideningFactor;
-                if (fabs(n.x) >= fabs(n.y)) {
-                    wideningFactor = fabs(1.0f / n.x);
-                } else {
-                    wideningFactor = fabs(1.0f / n.y);
-                }
-                n *= wideningFactor;
-            }
-
-            if (scaled) {
-                n.x *= inverseScaleX;
-                n.y *= inverseScaleY;
-            }
-        } else if (scaled) {
-            // Extend n by .5 pixel on each side, post-transform
-            vec2 extendedN = n.copyNormalized();
-            extendedN /= 2;
-            extendedN.x *= inverseScaleX;
-            extendedN.y *= inverseScaleY;
-
-            float extendedNLength = extendedN.length();
-            // We need to set this value on the shader prior to drawing
-            boundaryWidthProportion = .5 - extendedNLength / (halfStrokeWidth + extendedNLength);
-            n += extendedN;
-        }
-
-        // aa lines expand the endpoint vertices to encompass the AA boundary
-        if (isAA) {
-            vec2 abVector = (b - a);
-            length = abVector.length();
-            abVector.normalize();
-
-            if (scaled) {
-                abVector.x *= inverseScaleX;
-                abVector.y *= inverseScaleY;
-                float abLength = abVector.length();
-                boundaryLengthProportion = .5 - abLength / (length + abLength);
-            } else {
-                boundaryLengthProportion = .5 - .5 / (length + 1);
-            }
-
-            abVector /= 2;
-            a -= abVector;
-            b += abVector;
-        }
-
-        // Four corners of the rectangle defining a thick line
-        vec2 p1 = a - n;
-        vec2 p2 = a + n;
-        vec2 p3 = b + n;
-        vec2 p4 = b - n;
-
-
-        const float left = fmin(p1.x, fmin(p2.x, fmin(p3.x, p4.x)));
-        const float right = fmax(p1.x, fmax(p2.x, fmax(p3.x, p4.x)));
-        const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
-        const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
-
-        if (!quickRejectNoScissor(left, top, right, bottom)) {
-            if (!isAA) {
-                if (prevVertex != NULL) {
-                    // Issue two repeat vertices to create degenerate triangles to bridge
-                    // between the previous line and the new one. This is necessary because
-                    // we are creating a single triangle_strip which will contain
-                    // potentially discontinuous line segments.
-                    Vertex::set(vertices++, prevVertex->position[0], prevVertex->position[1]);
-                    Vertex::set(vertices++, p1.x, p1.y);
-                    generatedVerticesCount += 2;
-                }
-
-                Vertex::set(vertices++, p1.x, p1.y);
-                Vertex::set(vertices++, p2.x, p2.y);
-                Vertex::set(vertices++, p4.x, p4.y);
-                Vertex::set(vertices++, p3.x, p3.y);
-
-                prevVertex = vertices - 1;
-                generatedVerticesCount += 4;
-            } else {
-                if (!isHairLine && scaled) {
-                    // Must set width proportions per-segment for scaled non-hairlines to use the
-                    // correct AA boundary dimensions
-                    if (boundaryWidthSlot < 0) {
-                        boundaryWidthSlot =
-                                mCaches.currentProgram->getUniform("boundaryWidth");
-                    }
-
-                    glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
-                }
-
-                if (boundaryLengthSlot < 0) {
-                    boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
-                }
-
-                glUniform1f(boundaryLengthSlot, boundaryLengthProportion);
-
-                if (prevAAVertex != NULL) {
-                    // Issue two repeat vertices to create degenerate triangles to bridge
-                    // between the previous line and the new one. This is necessary because
-                    // we are creating a single triangle_strip which will contain
-                    // potentially discontinuous line segments.
-                    AAVertex::set(aaVertices++,prevAAVertex->position[0],
-                            prevAAVertex->position[1], prevAAVertex->width, prevAAVertex->length);
-                    AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
-                    generatedVerticesCount += 2;
-                }
-
-                AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
-                AAVertex::set(aaVertices++, p1.x, p1.y, 1, 0);
-                AAVertex::set(aaVertices++, p3.x, p3.y, 0, 1);
-                AAVertex::set(aaVertices++, p2.x, p2.y, 0, 0);
-
-                prevAAVertex = aaVertices - 1;
-                generatedVerticesCount += 4;
-            }
-
-            dirtyLayer(a.x == b.x ? left - 1 : left, a.y == b.y ? top - 1 : top,
-                    a.x == b.x ? right: right, a.y == b.y ? bottom: bottom,
-                    *mSnapshot->transform);
-        }
-    }
-
-    if (generatedVerticesCount > 0) {
-       glDrawArrays(GL_TRIANGLE_STRIP, 0, generatedVerticesCount);
-    }
-
-    if (isAA) {
-        finishDrawAALine(widthSlot, lengthSlot);
-    }
-
-    return DrawGlInfo::kStatusDrew;
+    bool useOffset = !paint->isAntiAlias();
+    return drawVertexBuffer(buffer, paint, useOffset);
 }
 
 status_t OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
@@ -2526,9 +2247,7 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
         ry += outset;
     }
     path.addRoundRect(rect, rx, ry);
-    drawConvexPath(path, p);
-
-    return DrawGlInfo::kStatusDrew;
+    return drawConvexPath(path, p);
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) {
@@ -2548,9 +2267,7 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* p) 
     } else {
         path.addCircle(x, y, radius);
     }
-    drawConvexPath(path, p);
-
-    return DrawGlInfo::kStatusDrew;
+    return drawConvexPath(path, p);
 }
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
@@ -2571,9 +2288,7 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
         rect.outset(p->getStrokeWidth() / 2, p->getStrokeWidth() / 2);
     }
     path.addOval(rect);
-    drawConvexPath(path, p);
-
-    return DrawGlInfo::kStatusDrew;
+    return drawConvexPath(path, p);
 }
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
@@ -2587,8 +2302,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     }
 
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
-    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 ||
-            p->getStrokeCap() != SkPaint::kButt_Cap || useCenter) {
+    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || useCenter) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
@@ -2608,9 +2322,7 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     if (useCenter) {
         path.close();
     }
-    drawConvexPath(path, p);
-
-    return DrawGlInfo::kStatusDrew;
+    return drawConvexPath(path, p);
 }
 
 // See SkPaintDefaults.h
@@ -2637,20 +2349,17 @@ status_t OpenGLRenderer::drawRect(float left, float top, float right, float bott
             rect.outset(p->getStrokeWidth() / 2, p->getStrokeWidth() / 2);
         }
         path.addRect(rect);
-        drawConvexPath(path, p);
-
-        return DrawGlInfo::kStatusDrew;
+        return drawConvexPath(path, p);
     }
 
     if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
         SkPath path;
         path.addRect(left, top, right, bottom);
-        drawConvexPath(path, p);
+        return drawConvexPath(path, p);
     } else {
         drawColorRect(left, top, right, bottom, p->getColor(), getXfermode(p->getXfermode()));
+        return DrawGlInfo::kStatusDrew;
     }
-
-    return DrawGlInfo::kStatusDrew;
 }
 
 void OpenGLRenderer::drawTextShadow(SkPaint* paint, const char* text, int bytesCount, int count,

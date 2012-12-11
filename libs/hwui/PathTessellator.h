@@ -14,43 +14,65 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_PATH_RENDERER_H
-#define ANDROID_HWUI_PATH_RENDERER_H
+#ifndef ANDROID_HWUI_PATH_TESSELLATOR_H
+#define ANDROID_HWUI_PATH_TESSELLATOR_H
 
 #include <utils/Vector.h>
 
+#include "Matrix.h"
+#include "Rect.h"
 #include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
-
-class Matrix4;
-typedef Matrix4 mat4;
 
 class VertexBuffer {
 public:
     VertexBuffer():
         mBuffer(0),
         mSize(0),
-        mCleanupMethod(0)
+        mCleanupMethod(NULL)
     {}
 
     ~VertexBuffer() {
-        if (mCleanupMethod)
-            mCleanupMethod(mBuffer);
+        if (mCleanupMethod) mCleanupMethod(mBuffer);
     }
 
+    /**
+       This should be the only method used by the PathTessellator. Subsequent calls to alloc will
+       allocate space within the first allocation (useful if you want to eventually allocate
+       multiple regions within a single VertexBuffer, such as with PathTessellator::tesselateLines()
+     */
     template <class TYPE>
     TYPE* alloc(int size) {
+        if (mSize) {
+            TYPE* reallocBuffer = (TYPE*)mReallocBuffer;
+            // already have allocated the buffer, re-allocate space within
+            if (mReallocBuffer != mBuffer) {
+                // not first re-allocation, leave space for degenerate triangles to separate strips
+                reallocBuffer += 2;
+            }
+            mReallocBuffer = reallocBuffer + size;
+            return reallocBuffer;
+        }
         mSize = size;
-        mBuffer = (void*)new TYPE[size];
+        mReallocBuffer = mBuffer = (void*)new TYPE[size];
         mCleanupMethod = &(cleanup<TYPE>);
 
         return (TYPE*)mBuffer;
     }
 
-    void* getBuffer() { return mBuffer; }
-    unsigned int getSize() { return mSize; }
+    void* getBuffer() const { return mBuffer; }
+    unsigned int getSize() const { return mSize; }
+
+    template <class TYPE>
+    void createDegenerateSeparators(int allocSize) {
+        TYPE* end = (TYPE*)mBuffer + mSize;
+        for (TYPE* degen = (TYPE*)mBuffer + allocSize; degen < end; degen += 2 + allocSize) {
+            memcpy(degen, degen - 1, sizeof(TYPE));
+            memcpy(degen + 1, degen + 2, sizeof(TYPE));
+        }
+    }
 
 private:
     template <class TYPE>
@@ -60,18 +82,24 @@ private:
 
     void* mBuffer;
     unsigned int mSize;
+
+    void* mReallocBuffer; // used for multi-allocation
+
     void (*mCleanupMethod)(void*);
 };
 
-class PathRenderer {
+class PathTessellator {
 public:
-    static SkRect computePathBounds(const SkPath& path, const SkPaint* paint);
+    static void expandBoundsForStroke(SkRect& bounds, const SkPaint* paint, bool forceExpand);
 
-    static void convexPathVertices(const SkPath& path, const SkPaint* paint,
+    static void tessellatePath(const SkPath& path, const SkPaint* paint,
             const mat4 *transform, VertexBuffer& vertexBuffer);
 
+    static void tessellateLines(const float* points, int count, SkPaint* paint,
+            const mat4* transform, SkRect& bounds, VertexBuffer& vertexBuffer);
+
 private:
-    static bool convexPathPerimeterVertices(const SkPath &path, bool forceClose,
+    static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
         float sqrInvScaleX, float sqrInvScaleY, Vector<Vertex> &outputVertices);
 
 /*
@@ -101,4 +129,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_PATH_RENDERER_H
+#endif // ANDROID_HWUI_PATH_TESSELLATOR_H
