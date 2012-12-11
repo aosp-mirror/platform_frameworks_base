@@ -226,7 +226,7 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
             mLocalAnimating = false;
-            destroySurfaceLocked(true);
+            destroySurfaceLocked();
         }
     }
 
@@ -413,7 +413,7 @@ class WindowStateAnimator {
             mService.mPendingRemove.add(mWin);
             mWin.mRemoveOnExit = false;
         }
-        mAnimator.hideWallpapersLocked(mWin, true);
+        mAnimator.hideWallpapersLocked(mWin);
     }
 
     void hide() {
@@ -752,7 +752,7 @@ class WindowStateAnimator {
         return mSurface;
     }
 
-    void destroySurfaceLocked(boolean fromAnimator) {
+    void destroySurfaceLocked() {
         if (mWin.mAppToken != null && mWin == mWin.mAppToken.startingWindow) {
             mWin.mAppToken.startingDisplayed = false;
         }
@@ -802,7 +802,7 @@ class WindowStateAnimator {
                     }
                     mSurface.destroy();
                 }
-                mAnimator.hideWallpapersLocked(mWin, fromAnimator);
+                mAnimator.hideWallpapersLocked(mWin);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurface + " session " + mSession
@@ -816,7 +816,7 @@ class WindowStateAnimator {
         }
     }
 
-    void destroyDeferredSurfaceLocked(boolean fromAnimator) {
+    void destroyDeferredSurfaceLocked() {
         try {
             if (mPendingDestroySurface != null) {
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
@@ -828,7 +828,7 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
                 }
                 mPendingDestroySurface.destroy();
-                mAnimator.hideWallpapersLocked(mWin, fromAnimator);
+                mAnimator.hideWallpapersLocked(mWin);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window "
@@ -849,9 +849,9 @@ class WindowStateAnimator {
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
-        if (mIsWallpaper && mAnimator.mLowerWallpaperTarget == null
-                && mAnimator.mWallpaperTarget != null) {
-            final WindowStateAnimator wallpaperAnimator = mAnimator.mWallpaperTarget.mWinAnimator;
+        if (mIsWallpaper && mService.mLowerWallpaperTarget == null
+                && mService.mWallpaperTarget != null) {
+            final WindowStateAnimator wallpaperAnimator = mService.mWallpaperTarget.mWinAnimator;
             if (wallpaperAnimator.mHasLocalTransformation &&
                     wallpaperAnimator.mAnimation != null &&
                     !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
@@ -860,7 +860,7 @@ class WindowStateAnimator {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
-            final AppWindowAnimator wpAppAnimator = mAnimator.mWpAppAnimator;
+            final AppWindowAnimator wpAppAnimator = mAnimator.getWallpaperAppAnimator();
             if (wpAppAnimator != null && wpAppAnimator.hasTransformation
                     && wpAppAnimator.animation != null
                     && !wpAppAnimator.animation.getDetachWallpaper()) {
@@ -986,8 +986,7 @@ class WindowStateAnimator {
                     + " screen=" + (screenAnimation ?
                             screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
             return;
-        } else if (mIsWallpaper &&
-                    (mAnimator.mPendingActions & WindowAnimator.WALLPAPER_ACTION_PENDING) != 0) {
+        } else if (mIsWallpaper && mService.mInnerFields.mWallpaperActionPending) {
             return;
         }
 
@@ -1220,7 +1219,7 @@ class WindowStateAnimator {
             hide();
         } else if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             hide();
-            mAnimator.hideWallpapersLocked(w, true);
+            mAnimator.hideWallpapersLocked(w);
 
             // If we are waiting for this window to handle an
             // orientation change, well, it is hidden, so
@@ -1414,7 +1413,7 @@ class WindowStateAnimator {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
                 Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + this);
             mDrawState = HAS_DRAWN;
-            mService.updateLayoutToAnimationLocked();
+            mService.scheduleAnimationLocked();
 
             int i = mWin.mChildWindows.size();
             while (i > 0) {

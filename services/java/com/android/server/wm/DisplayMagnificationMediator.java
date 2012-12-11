@@ -183,8 +183,6 @@ final class DisplayMagnificationMediator extends IDisplayMagnificationMediator.S
             displayState.mMagnificationSpec.initialize(spec.scale, spec.offsetX,
                     spec.offsetY);
             spec.recycle();
-        }
-        synchronized (mWindowManagerService.mLayoutToAnim) {
             mWindowManagerService.scheduleAnimationLocked();
         }
     }
