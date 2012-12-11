@@ -65,7 +65,6 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.IDisplayMagnificationMediator;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.InputDevice;
@@ -158,8 +157,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final SecurityPolicy mSecurityPolicy;
 
     private final MainHandler mMainHandler;
-
-    private IDisplayMagnificationMediator mMagnificationMediator;
 
     private Service mUiAutomationService;
 
@@ -539,7 +536,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     accessibilityServiceInfo, true);
             mUiAutomationService.onServiceConnected(componentName, serviceClient.asBinder());
 
-            updateInputFilterLocked(userState);
+            scheduleUpdateInputFilter(userState);
             scheduleSendStateToClientsLocked(userState);
         }
     }
@@ -570,7 +567,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mTouchExplorationGrantedServices.add(service);
             // Update the internal state.
             performServiceManagementLocked(userState);
-            updateInputFilterLocked(userState);
+            scheduleUpdateInputFilter(userState);
             scheduleSendStateToClientsLocked(userState);
         }
     }
@@ -736,7 +733,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mTempStateChangeForCurrentUserMemento.clear();
                 // Update the internal state.
                 performServiceManagementLocked(userState);
-                updateInputFilterLocked(userState);
+                scheduleUpdateInputFilter(userState);
                 scheduleSendStateToClientsLocked(userState);
             }
         }
@@ -890,7 +887,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             service.linkToOwnDeath();
             userState.mServices.add(service);
             userState.mComponentNameToServiceMap.put(service.mComponentName, service);
-            updateInputFilterLocked(userState);
+            scheduleUpdateInputFilter(userState);
             tryEnableTouchExplorationLocked(service);
         } catch (RemoteException e) {
             /* do nothing */
@@ -912,7 +909,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         userState.mComponentNameToServiceMap.remove(service.mComponentName);
         service.unlinkToOwnDeath();
         service.dispose();
-        updateInputFilterLocked(userState);
+        scheduleUpdateInputFilter(userState);
         tryDisableTouchExplorationLocked(service);
         return removed;
     }
@@ -1090,7 +1087,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void updateInputFilterLocked(UserState userState) {
+    private void scheduleUpdateInputFilter(UserState userState) {
+        mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_INPUT_FILTER, userState).sendToTarget();
+    }
+
+    private void updateInputFilter(UserState userState) {
         boolean setInputFilter = false;
         AccessibilityInputFilter inputFilter = null;
         synchronized (mLock) {
@@ -1200,7 +1201,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         handleAccessibilityEnabledSettingChangedLocked(userState);
 
         performServiceManagementLocked(userState);
-        updateInputFilterLocked(userState);
+        scheduleUpdateInputFilter(userState);
         scheduleSendStateToClientsLocked(userState);
     }
 
@@ -1355,6 +1356,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_RECREATE_INTERNAL_STATE = 4;
         public static final int MSG_UPDATE_ACTIVE_WINDOW = 5;
         public static final int MSG_ANNOUNCE_NEW_USER_IF_NEEDED = 6;
+        public static final int MSG_UPDATE_INPUT_FILTER = 7;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -1397,6 +1399,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 } break;
                 case MSG_ANNOUNCE_NEW_USER_IF_NEEDED: {
                     announceNewUserIfNeeded();
+                } break;
+                case MSG_UPDATE_INPUT_FILTER: {
+                    UserState userState = (UserState) msg.obj;
+                    updateInputFilter(userState);                        
                 } break;
             }
         }
@@ -2220,16 +2226,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private MagnificationSpec getCompatibleMagnificationSpec(int windowId) {
             try {
-                if (mMagnificationMediator == null) {
-                    mMagnificationMediator = mWindowManagerService
-                            .getDisplayMagnificationMediator();
-                }
                 IBinder windowToken = mGlobalWindowTokens.get(windowId);
                 if (windowToken == null) {
                     windowToken = getCurrentUserStateLocked().mWindowTokens.get(windowId);
                 }                    
                 if (windowToken != null) {
-                    return mMagnificationMediator.getCompatibleMagnificationSpec(windowToken);
+                    return mWindowManagerService.getCompatibleMagnificationSpecForWindow(
+                            windowToken);
                 }
             } catch (RemoteException re) {
                 /* ignore */
@@ -2581,7 +2584,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         UserState userState = getCurrentUserStateLocked();
                         handleAccessibilityEnabledSettingChangedLocked(userState);
                         performServiceManagementLocked(userState);
-                        updateInputFilterLocked(userState);
+                        scheduleUpdateInputFilter(userState);
                         scheduleSendStateToClientsLocked(userState);
                     }
                 }
@@ -2591,7 +2594,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (mUiAutomationService == null) {
                         UserState userState = getCurrentUserStateLocked();
                         handleTouchExplorationEnabledSettingChangedLocked(userState);
-                        updateInputFilterLocked(userState);
+                        scheduleUpdateInputFilter(userState);
                         scheduleSendStateToClientsLocked(userState);
                     }
                 }
@@ -2601,7 +2604,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (mUiAutomationService == null) {
                         UserState userState = getCurrentUserStateLocked();
                         handleDisplayMagnificationEnabledSettingChangedLocked(userState);
-                        updateInputFilterLocked(userState);
+                        scheduleUpdateInputFilter(userState);
                         scheduleSendStateToClientsLocked(userState);
                     }
                 }

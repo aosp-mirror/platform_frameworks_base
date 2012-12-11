@@ -18,7 +18,9 @@ package com.android.server.accessibility;
 
 import android.content.Context;
 import android.os.PowerManager;
+import android.util.Pools.SimplePool;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -27,6 +29,12 @@ import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 
+/**
+ * This class is an input filter for implementing accessibility features such
+ * as display magnification and explore by touch.
+ *
+ * NOTE: This class has to be created and poked only from the main thread.
+ */
 class AccessibilityInputFilter extends InputFilter implements EventStreamTransformation {
 
     private static final String TAG = AccessibilityInputFilter.class.getSimpleName();
@@ -49,11 +57,30 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_TOUCH_EXPLORATION = 0x00000002;
 
+    private final Runnable mProcessBatchedEventsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            final long frameTimeNanos = mChoreographer.getFrameTimeNanos();
+            if (DEBUG) {
+                Slog.i(TAG, "Begin batch processing for frame: " + frameTimeNanos);
+            }
+            processBatchedEvents(frameTimeNanos);
+            if (DEBUG) {
+                Slog.i(TAG, "End batch processing.");
+            }
+            if (mEventQueue != null) {
+                scheduleProcessBatchedEvents();
+            }
+        }
+    };
+
     private final Context mContext;
 
     private final PowerManager mPm;
 
     private final AccessibilityManagerService mAms;
+
+    private final Choreographer mChoreographer;
 
     private int mCurrentDeviceId;
 
@@ -65,11 +92,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private ScreenMagnifier mScreenMagnifier;
     private EventStreamTransformation mEventHandler;
 
+    private MotionEventHolder mEventQueue;
+
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         super(context.getMainLooper());
         mContext = context;
         mAms = service;
         mPm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mChoreographer = Choreographer.getInstance();
     }
 
     @Override
@@ -119,10 +149,61 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             }
             mCurrentDeviceId = deviceId;
         }
+        batchMotionEvent((MotionEvent) event, policyFlags);
+    }
+
+    private void scheduleProcessBatchedEvents() {
+        mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
+                mProcessBatchedEventsRunnable, null);
+    }
+
+    private void batchMotionEvent(MotionEvent event, int policyFlags) {
+        if (DEBUG) {
+            Slog.i(TAG, "Batching event: " + event + ", policyFlags: " + policyFlags);
+        }
+        if (mEventQueue == null) {
+            mEventQueue = MotionEventHolder.obtain(event, policyFlags);
+            scheduleProcessBatchedEvents();
+            return;
+        }
+        if (mEventQueue.event.addBatch(event)) {
+            return;
+        }
+        MotionEventHolder holder = MotionEventHolder.obtain(event, policyFlags);
+        holder.next = mEventQueue;
+        mEventQueue.previous = holder;
+        mEventQueue = holder;
+    }
+
+    private void processBatchedEvents(long frameNanos) {
+        MotionEventHolder current = mEventQueue;
+        while (current.next != null) {
+            current = current.next;
+        }
+        while (true) {
+            if (current == null) {
+                mEventQueue = null;
+                break;
+            }
+            if (current.event.getEventTimeNano() >= frameNanos) {
+                // Finished with this choreographer frame. Do the rest on the next one.
+                current.next = null;
+                break;
+            }
+            handleMotionEvent(current.event, current.policyFlags);
+            MotionEventHolder prior = current;
+            current = current.previous;
+            prior.recycle();
+        }
+    }
+
+    private void handleMotionEvent(MotionEvent event, int policyFlags) {
+        if (DEBUG) {
+            Slog.i(TAG, "Handling batched event: " + event + ", policyFlags: " + policyFlags);
+        }
         mPm.userActivity(event.getEventTime(), false);
-        MotionEvent rawEvent = (MotionEvent) event;
-        MotionEvent transformedEvent = MotionEvent.obtain(rawEvent);
-        mEventHandler.onMotionEvent(transformedEvent, rawEvent, policyFlags);
+        MotionEvent transformedEvent = MotionEvent.obtain(event);
+        mEventHandler.onMotionEvent(transformedEvent, event, policyFlags);
         transformedEvent.recycle();
     }
 
@@ -202,5 +283,35 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onDestroy() {
         /* ignore */
+    }
+
+    private static class MotionEventHolder {
+        private static final int MAX_POOL_SIZE = 32;
+        private static final SimplePool<MotionEventHolder> sPool =
+                new SimplePool<MotionEventHolder>(MAX_POOL_SIZE);
+
+        public int policyFlags;
+        public MotionEvent event;
+        public MotionEventHolder next;
+        public MotionEventHolder previous;
+
+        public static MotionEventHolder obtain(MotionEvent event, int policyFlags) {
+            MotionEventHolder holder = sPool.acquire();
+            if (holder == null) {
+                holder = new MotionEventHolder();
+            }
+            holder.event = MotionEvent.obtain(event);
+            holder.policyFlags = policyFlags;
+            return holder;
+        }
+
+        public void recycle() {
+            event.recycle();
+            event = null;
+            policyFlags = 0;
+            next = null;
+            previous = null;
+            sPool.release(this);
+        }
     }
 }

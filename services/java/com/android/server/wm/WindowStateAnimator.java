@@ -15,6 +15,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
 import android.util.Slog;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.Surface;
@@ -919,9 +920,11 @@ class WindowStateAnimator {
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
-            if (mService.mMagnificationMediator != null) {
-                MagnificationSpec spec = mService.mMagnificationMediator
-                        .getMagnificationSpecLw(mWin);
+            //TODO (multidisplay): Magnification is supported only for the default display.
+            if (mService.mDisplayMagnifier != null
+                    && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                MagnificationSpec spec = mService.mDisplayMagnifier
+                        .getMagnificationSpecForWindowLocked(mWin);
                 if (spec != null && !spec.isNop()) {
                     tmpMatrix.postScale(spec.scale, spec.scale);
                     tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
@@ -997,8 +1000,11 @@ class WindowStateAnimator {
         final boolean applyUniverseTransformation = (mAnimator.mUniverseBackground != null
                 && mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
                 && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
-        MagnificationSpec spec = (mService.mMagnificationMediator != null)
-                ? mService.mMagnificationMediator.getMagnificationSpecLw(mWin) : null;
+        MagnificationSpec spec = null;
+        //TODO (multidisplay): Magnification is supported only for the default display.
+        if (mService.mDisplayMagnifier != null && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            spec = mService.mDisplayMagnifier.getMagnificationSpecForWindowLocked(mWin);
+        }
         if (applyUniverseTransformation || spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
@@ -1498,8 +1504,10 @@ class WindowStateAnimator {
             transit = WindowManagerPolicy.TRANSIT_SHOW;
         }
         applyAnimationLocked(transit, true);
-        if (mService.mMagnificationMediator != null) {
-            mService.mMagnificationMediator.onWindowTransitionLw(mWin, transit);
+        //TODO (multidisplay): Magnification is supported only for the default display.
+        if (mService.mDisplayMagnifier != null
+                && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            mService.mDisplayMagnifier.onWindowTransitionLocked(mWin, transit);
         }
     }
 

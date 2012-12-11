@@ -1134,4 +1134,23 @@ public interface WindowManagerPolicy {
      * {@link android.content.Intent#ACTION_ASSIST}
      */
     public void showAssistant();
+
+    /**
+     * Returns whether a given window type can be magnified.
+     *
+     * @param windowType The window type.
+     * @return True if the window can be magnified.
+     */
+    public boolean canMagnifyWindow(int windowType);
+
+    /**
+     * Returns whether a given window type is considered a top level one.
+     * A top level window does not have a container, i.e. attached window,
+     * or if it has a container it is laid out as a top-level window, not
+     * as a child of its container.
+     *
+     * @param windowType The window type.
+     * @return True if the window is a top level one.
+     */
+    public boolean isTopLevelWindow(int windowType);
 }
