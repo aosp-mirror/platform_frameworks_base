@@ -627,7 +627,11 @@ not_valid_surface:
         goto exit;
     }
     surfaceTexture = android::SurfaceTexture_getSurfaceTexture(_env, win);
-    window = new android::SurfaceTextureClient(surfaceTexture);
+
+    if (surfaceTexture == NULL)
+        goto not_valid_surface;
+
+    window = new android::SurfaceTextureClient(surfaceTexture->getBufferQueue());
 
     if (window == NULL)
         goto not_valid_surface;

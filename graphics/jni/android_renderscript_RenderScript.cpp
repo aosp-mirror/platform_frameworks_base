@@ -247,7 +247,7 @@ nContextSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con, jint width
 
     } else {
         st = SurfaceTexture_getSurfaceTexture(_env, sur);
-        window = new SurfaceTextureClient(st);
+        window = new SurfaceTextureClient(st->getBufferQueue());
     }
 
     rsContextSetSurface(con, width, height, window.get());
