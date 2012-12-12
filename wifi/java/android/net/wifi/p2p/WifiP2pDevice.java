@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 /**
  * A class representing a Wi-Fi p2p device
  *
+ * Note that the operations are not thread safe
  * {@see WifiP2pManager}
  */
 public class WifiP2pDevice implements Parcelable {
@@ -260,9 +261,29 @@ public class WifiP2pDevice implements Parcelable {
         return (groupCapability & GROUP_CAPAB_GROUP_LIMIT) != 0;
     }
 
-    /** @hide */
+    /**
+     * Update device details. This will be throw an exception if the device address
+     * does not match.
+     * @param device to be updated
+     * @throws IllegalArgumentException if the device is null or device address does not match
+     * @hide
+     */
     public void update(WifiP2pDevice device) {
-        if (device == null || device.deviceAddress == null) return;
+        updateSupplicantDetails(device);
+        status = device.status;
+    }
+
+    /** Updates details obtained from supplicant @hide */
+    void updateSupplicantDetails(WifiP2pDevice device) {
+        if (device == null) {
+            throw new IllegalArgumentException("device is null");
+        }
+        if (device.deviceAddress == null) {
+            throw new IllegalArgumentException("deviceAddress is null");
+        }
+        if (!deviceAddress.equals(device.deviceAddress)) {
+            throw new IllegalArgumentException("deviceAddress does not match");
+        }
         deviceName = device.deviceName;
         primaryDeviceType = device.primaryDeviceType;
         secondaryDeviceType = device.secondaryDeviceType;
