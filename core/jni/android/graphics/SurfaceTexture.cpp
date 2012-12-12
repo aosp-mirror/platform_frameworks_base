@@ -87,7 +87,7 @@ sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
 {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
-            new SurfaceTextureClient(surfaceTexture) : NULL);
+            new SurfaceTextureClient(surfaceTexture->getBufferQueue()) : NULL);
     return surfaceTextureClient;
 }
 
