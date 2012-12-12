@@ -115,6 +115,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.Time;
@@ -191,6 +192,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_POWER = localLOGV || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean DEBUG_MU = localLOGV || false;
+    static final boolean DEBUG_IMMERSIVE = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -827,6 +829,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     long mLastWriteTime = 0;
 
     /**
+     * Used to retain an update lock when the foreground activity is in
+     * immersive mode.
+     */
+    final UpdateLock mUpdateLock = new UpdateLock("immersive");
+
+    /**
      * Set to true after the system has finished booting.
      */
     boolean mBooted = false;
@@ -895,6 +903,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int REPORT_USER_SWITCH_MSG = 34;
     static final int CONTINUE_USER_SWITCH_MSG = 35;
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
+    static final int IMMERSIVE_MODE_LOCK_MSG = 37;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1354,6 +1363,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case USER_SWITCH_TIMEOUT_MSG: {
                 timeoutUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
+                break;
+            }
+            case IMMERSIVE_MODE_LOCK_MSG: {
+                final boolean nextState = (msg.arg1 != 0);
+                if (mUpdateLock.isHeld() != nextState) {
+                    if (DEBUG_IMMERSIVE) {
+                        final ActivityRecord r = (ActivityRecord) msg.obj;
+                        Slog.d(TAG, "Applying new update lock state '" + nextState + "' for " + r);
+                    }
+                    if (nextState) {
+                        mUpdateLock.acquire();
+                    } else {
+                        mUpdateLock.release();
+                    }
+                }
                 break;
             }
             }
@@ -1822,7 +1846,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r != null) {
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
+            applyUpdateLockStateLocked(r);
         }
+    }
+
+    final void applyUpdateLockStateLocked(ActivityRecord r) {
+        // Modifications to the UpdateLock state are done on our handler, outside
+        // the activity manager's locks.  The new state is determined based on the
+        // state *now* of the relevant activity record.  The object is passed to
+        // the handler solely for logging detail, not to be consulted/modified.
+        final boolean nextState = r != null && r.immersive;
+        mHandler.sendMessage(
+                mHandler.obtainMessage(IMMERSIVE_MODE_LOCK_MSG, (nextState) ? 1 : 0, 0, r));
     }
 
     private final void updateLruProcessInternalLocked(ProcessRecord app, int bestPos) {
@@ -7421,11 +7456,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void setImmersive(IBinder token, boolean immersive) {
         synchronized(this) {
-            ActivityRecord r = mMainStack.isInStackLocked(token);
+            final ActivityRecord r = mMainStack.isInStackLocked(token);
             if (r == null) {
                 throw new IllegalArgumentException();
             }
             r.immersive = immersive;
+
+            // update associated state if we're frontmost
+            if (r == mFocusedActivity) {
+                if (DEBUG_IMMERSIVE) {
+                    Slog.d(TAG, "Frontmost changed immersion: "+ r);
+                }
+                applyUpdateLockStateLocked(r);
+            }
         }
     }
 
