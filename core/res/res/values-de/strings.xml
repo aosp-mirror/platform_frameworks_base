@@ -170,7 +170,7 @@
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Kostenpflichtige Aktionen"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Ihre Nachrichten"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, E-Mails und andere Nachrichten lesen und schreiben"</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre persönlichen Informationen"</string>
+    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre personenbezogenen Daten"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Direkter Zugriff auf Informationen über Sie, die in Ihrer Kontaktkarte gespeichert sind"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ihre sozialen Informationen"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkter Zugriff auf Informationen über Ihre Kontakte und sozialen Verbindungen"</string>
@@ -375,8 +375,8 @@
     <string name="permlab_movePackage" msgid="3289890271645921411">"App-Ressourcen verschieben"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Ermöglicht der App, App-Ressourcen von internen auf externe Medien zu verschieben und umgekehrt"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"Vertrauliche Protokolldaten lesen"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Tablet durchgeführten Aktionen eingesehen werden, darunter auch persönliche oder geheime Daten."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Telefon durchgeführten Aktionen eingesehen werden, darunter auch persönliche oder geheime Daten."</string>
+    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Tablet durchgeführten Aktionen eingesehen werden, darunter auch personenbezogene oder vertrauliche Daten."</string>
+    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Telefon durchgeführten Aktionen eingesehen werden, darunter auch personenbezogene oder vertrauliche Daten."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Für Wiedergabe beliebigen Mediendecodierer verwenden"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ermöglicht der App, alle installierten Mediendecodierer zur Wiedergabe zu verwenden."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
@@ -413,9 +413,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, das Anrufprotokoll Ihres Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihr Anrufprotokoll löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, das Anrufprotokoll Ihres Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so Ihr Anrufprotokoll löschen oder ändern."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"Meine Kontaktkarten lesen"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profildaten zu lesen, einschließlich Ihres Namens und Ihrer Kontaktdaten. Die App kann Sie somit identifizieren und Ihre Profildaten an andere senden."</string>
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Ermöglicht der App, auf Ihrem Gerät gespeicherte personenbezogene Profildaten zu lesen, einschließlich Ihres Namens und Ihrer Kontaktdaten. Die App kann Sie somit identifizieren und Ihre Profildaten an andere senden."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"Meine Kontaktkarten ändern"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ermöglicht der App, auf Ihrem Gerät gespeicherte persönliche Profildaten zu ändern, einschließlich Ihres Namens und Ihrer Kontaktdaten, sowie Daten hinzuzufügen. Die App kann Sie so identifizieren und Ihre Profildaten an andere senden."</string>
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Ermöglicht der App, auf Ihrem Gerät gespeicherte personenbezogene Profildaten zu ändern, einschließlich Ihres Namens und Ihrer Kontaktdaten, sowie Daten hinzuzufügen. Die App kann Sie so identifizieren und Ihre Profildaten an andere senden."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"In sozialem Stream lesen"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Ermöglicht der App, auf Updates aus sozialen Netzwerken von Ihnen und Ihren Freunden zuzugreifen und diese zu synchronisieren. Seien Sie vorsichtig, wenn Sie Informationen teilen: Der App wird erlaubt, die Kommunikation zwischen Ihnen und Ihren Freunden in sozialen Netzwerken zu lesen, unabhängig von der Vertraulichkeit der kommunizierten Informationen. Hinweis: Diese Berechtigung kann möglicherweise nicht in allen sozialen Netzwerken erzwungen werden."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"In sozialem Stream schreiben"</string>
@@ -496,7 +496,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"Auf Check-in-Eigenschaften zugreifen"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Ermöglicht der App Schreib-/Lesezugriff auf vom Check-in-Service hochgeladene Elemente. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"Widgets auswählen"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Ermöglicht der App, dem System zu melden, welche Widgets von welcher App verwendet werden können. Mit dieser Berechtigung können Apps anderen Apps Zugriff auf persönliche Daten gewähren. Nicht für normale Apps vorgesehen."</string>
+    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Ermöglicht der App, dem System zu melden, welche Widgets von welcher App verwendet werden können. Mit dieser Berechtigung können Apps anderen Apps Zugriff auf personenbezogene Daten gewähren. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"Telefonstatus ändern"</string>
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ermöglicht der App, die Telefonfunktionen des Geräts zu steuern. Eine App mit dieser Berechtigung kann das Netzwerk wechseln oder das Radio des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"Telefonstatus und Identität abrufen"</string>
