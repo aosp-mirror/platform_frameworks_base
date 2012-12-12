@@ -49,6 +49,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.photography.CameraManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
@@ -539,6 +540,11 @@ class ContextImpl extends Context {
                 IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
                 IAppOpsService service = IAppOpsService.Stub.asInterface(b);
                 return new AppOpsManager(ctx, service);
+            }});
+
+        registerService(CAMERA_SERVICE, new StaticServiceFetcher() {
+            public Object createStaticService() {
+                return new CameraManager();
             }});
     }
 

@@ -5735,6 +5735,7 @@ package android.content {
     field public static final int BIND_NOT_FOREGROUND = 4; // 0x4
     field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
     field public static final java.lang.String BLUETOOTH_SERVICE = "bluetooth";
+    field public static final java.lang.String CAMERA_SERVICE = "camera";
     field public static final java.lang.String CLIPBOARD_SERVICE = "clipboard";
     field public static final java.lang.String CONNECTIVITY_SERVICE = "connectivity";
     field public static final int CONTEXT_IGNORE_SECURITY = 2; // 0x2
@@ -9002,8 +9003,10 @@ package android.graphics {
     field public static final int JPEG = 256; // 0x100
     field public static final int NV16 = 16; // 0x10
     field public static final int NV21 = 17; // 0x11
+    field public static final int RAW_SENSOR = 513; // 0x201
     field public static final int RGB_565 = 4; // 0x4
     field public static final int UNKNOWN = 0; // 0x0
+    field public static final int YUV_420_888 = 35; // 0x23
     field public static final int YUY2 = 20; // 0x14
     field public static final int YV12 = 842094169; // 0x32315659
   }
@@ -10626,6 +10629,133 @@ package android.hardware.location {
 
 }
 
+package android.hardware.photography {
+
+  public class CameraAccessException extends java.lang.Exception {
+    ctor public CameraAccessException(int);
+    ctor public CameraAccessException(int, java.lang.String);
+    ctor public CameraAccessException(int, java.lang.String, java.lang.Throwable);
+    ctor public CameraAccessException(int, java.lang.Throwable);
+    method public final int getReason();
+    field public static final int CAMERA_DISABLED = 3; // 0x3
+    field public static final int CAMERA_DISCONNECTED = 4; // 0x4
+    field public static final int CAMERA_IN_USE = 1; // 0x1
+    field public static final int MAX_CAMERAS_IN_USE = 2; // 0x2
+  }
+
+  public final class CameraDevice implements java.lang.AutoCloseable {
+    ctor public CameraDevice();
+    method public void capture(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void captureBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void close();
+    method public void configureOutputs(java.util.List<android.view.Surface>);
+    method public android.hardware.photography.CaptureRequest createCaptureRequest(int) throws android.hardware.photography.CameraAccessException;
+    method public android.hardware.photography.CameraProperties getProperties() throws android.hardware.photography.CameraAccessException;
+    method public void setErrorListener(android.hardware.photography.CameraDevice.ErrorListener);
+    method public void setRepeatingBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void setRepeatingRequest(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void stopRepeating() throws android.hardware.photography.CameraAccessException;
+    method public void waitUntilIdle() throws android.hardware.photography.CameraAccessException;
+    field public static final int TEMPLATE_MANUAL = 5; // 0x5
+    field public static final int TEMPLATE_PREVIEW = 1; // 0x1
+    field public static final int TEMPLATE_RECORD = 2; // 0x2
+    field public static final int TEMPLATE_STILL_CAPTURE = 3; // 0x3
+    field public static final int TEMPLATE_VIDEO_SNAPSHOT = 4; // 0x4
+  }
+
+  public static abstract interface CameraDevice.CaptureListener {
+    method public abstract void onCaptureComplete(android.hardware.photography.CameraDevice, android.hardware.photography.CaptureRequest, android.hardware.photography.CaptureResult);
+    method public abstract void onCaptureFailed(android.hardware.photography.CameraDevice, android.hardware.photography.CaptureRequest);
+  }
+
+  public static abstract interface CameraDevice.ErrorListener {
+    method public abstract void onCameraDeviceError(android.hardware.photography.CameraDevice, int);
+    field public static final int DEVICE_DISCONNECTED = 1; // 0x1
+    field public static final int DEVICE_ERROR = 2; // 0x2
+    field public static final int SERVICE_ERROR = 3; // 0x3
+  }
+
+  public final class CameraManager {
+    method public android.hardware.photography.CameraProperties getCameraProperties(java.lang.String) throws android.hardware.photography.CameraAccessException;
+    method public java.lang.String[] getDeviceIdList();
+    method public android.hardware.photography.CameraDevice openCamera(java.lang.String) throws android.hardware.photography.CameraAccessException;
+    method public void registerCameraListener(android.hardware.photography.CameraManager.CameraListener);
+    method public void unregisterCameraListener(android.hardware.photography.CameraManager.CameraListener);
+  }
+
+  public static abstract interface CameraManager.CameraListener {
+    method public abstract void onCameraAvailable(java.lang.String);
+    method public abstract void onCameraUnavailable(java.lang.String);
+  }
+
+  public class CameraMetadata implements android.os.Parcelable {
+    ctor public CameraMetadata();
+    method public int describeContents();
+    method public T get(android.hardware.photography.CameraMetadata.Key<T>);
+    method public void set(android.hardware.photography.CameraMetadata.Key<T>, T);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class CameraMetadata.Key {
+    ctor public CameraMetadata.Key(java.lang.String);
+    method public final boolean equals(java.lang.Object);
+    method public final java.lang.String getName();
+    method public final int hashCode();
+  }
+
+  public final class CameraProperties extends android.hardware.photography.CameraMetadata {
+    ctor public CameraProperties();
+    field public static final android.hardware.photography.CameraMetadata.Key INFO_IDENTIFIER;
+    field public static final android.hardware.photography.CameraMetadata.Key INFO_MODEL;
+    field public static final android.hardware.photography.CameraMetadata.Key INFO_REMOVABLE;
+    field public static final android.hardware.photography.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
+    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1; // 0x1
+    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
+    field public static final android.hardware.photography.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
+    field public static final android.hardware.photography.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
+    field public static final android.hardware.photography.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
+    field public static final android.hardware.photography.CameraMetadata.Key SCALER_AVAILABLE_RAW_SIZES;
+    field public static final android.hardware.photography.CameraMetadata.Key SENSOR_ACTIVE_ARRAY_SIZE;
+    field public static final android.hardware.photography.CameraMetadata.Key SENSOR_PIXEL_ARRAY_SIZE;
+  }
+
+  public final class CaptureRequest extends android.hardware.photography.CameraMetadata {
+    method public void addTarget(android.view.Surface);
+    method public void removeTarget(android.view.Surface);
+    field public static final android.hardware.photography.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
+    field public static final android.hardware.photography.CameraMetadata.Key SENSOR_SENSITIVITY;
+  }
+
+  public final class CaptureResult extends android.hardware.photography.CameraMetadata {
+    field public static final android.hardware.photography.CameraMetadata.Key CONTROL_AE_STATE;
+    field public static final int CONTROL_AE_STATE_CONVERGED = 2; // 0x2
+    field public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4; // 0x4
+    field public static final int CONTROL_AE_STATE_INACTIVE = 0; // 0x0
+    field public static final int CONTROL_AE_STATE_LOCKED = 3; // 0x3
+    field public static final int CONTROL_AE_STATE_PRECAPTURE = 5; // 0x5
+    field public static final int CONTROL_AE_STATE_SEARCHING = 1; // 0x1
+    field public static final android.hardware.photography.CameraMetadata.Key SENSOR_TIMESTAMP;
+    field public static final android.hardware.photography.CameraMetadata.Key STATISTICS_DETECTED_FACES;
+  }
+
+  public static class CaptureResult.Face {
+    ctor public CaptureResult.Face();
+    method public android.graphics.Rect getBounds();
+    method public int getId();
+    method public android.graphics.Point getLeftEye();
+    method public android.graphics.Point getMouth();
+    method public android.graphics.Point getRightEye();
+    method public int getScore();
+  }
+
+  public final class Size {
+    method public final int getHeight();
+    method public final int getWidth();
+  }
+
+}
+
 package android.hardware.usb {
 
   public class UsbAccessory implements android.os.Parcelable {
@@ -11660,6 +11790,40 @@ package android.media {
     field public static final int EULER_X = 0; // 0x0
     field public static final int EULER_Y = 1; // 0x1
     field public static final int EULER_Z = 2; // 0x2
+  }
+
+  public abstract class Image implements java.lang.AutoCloseable {
+    ctor public Image();
+    method public abstract void close();
+    method protected final void finalize();
+    method public int getFormat();
+    method public int getHeight();
+    method public android.media.Image.Plane[] getPlanes();
+    method public long getTimestamp();
+    method public int getWidth();
+  }
+
+  public static final class Image.Plane {
+    ctor public Image.Plane();
+    method public java.nio.ByteBuffer getBuffer();
+    method public int getPixelStride();
+    method public int getRowStride();
+  }
+
+  public final class ImageReader {
+    ctor public ImageReader(int, int, int, int);
+    method public int getHeight();
+    method public int getImageFormat();
+    method public int getMaxImages();
+    method public android.media.Image getNextImage();
+    method public android.view.Surface getSurface();
+    method public int getWidth();
+    method public void releaseImage(android.media.Image);
+    method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener);
+  }
+
+  public static abstract interface ImageReader.OnImageAvailableListener {
+    method public abstract void onImageAvailable(android.media.ImageReader);
   }
 
   public class JetPlayer {

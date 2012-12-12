@@ -2284,6 +2284,16 @@ public abstract class Context {
     public static final String APP_OPS_SERVICE = "appops";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.photography.CameraManager} for interacting with
+     * camera devices.
+     *
+     * @see #getSystemService
+     * @see android.hardware.camera.CameraManager
+     */
+    public static final String CAMERA_SERVICE = "camera";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

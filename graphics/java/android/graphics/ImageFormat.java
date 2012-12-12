@@ -100,6 +100,41 @@ public class ImageFormat {
     public static final int JPEG = 0x100;
 
     /**
+     * <p>Multi-plane Android YUV format</p>
+     *
+     * <p>This format is a generic YCbCr format, capable of describing any 4:2:0
+     * chroma-subsampled planar or semiplanar buffer, with 8 bits per color
+     * sample.</p>
+     *
+     * <p>Images in this format are always represented by three separate buffers
+     * of data, one for each color plane. Additional information always
+     * accompanies the buffers, describing the row stride and the pixel stride
+     * for each plane.</p>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * through a {@link android.media.ImageReader} object.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.ImageReader
+     * @see android.hardware.camera.CameraDevice
+     */
+    public static final int YUV_420_888 = 0x23;
+
+    /**
+     * <p>General raw camera sensor image format, usually representing a
+     * single-channel Bayer-mosaic image. Each pixel color sample is stored with
+     * 16 bits of precision.</p>
+     *
+     * <p>The layout of the color mosaic, the maximum and minimum encoding
+     * values of the raw pixel data, the color space of the image, and all other
+     * needed information to interpret a raw sensor image must be queried from
+     * the {@link android.hardware.photography.CameraDevice} which produced the
+     * image.</p>
+     */
+    public static final int RAW_SENSOR = 0x201;
+
+    /**
      * Raw bayer format used for images, which is 10 bit precision samples
      * stored in 16 bit words. The filter pattern is RGGB. Whether this format
      * is supported by the camera hardware can be determined by
@@ -129,6 +164,10 @@ public class ImageFormat {
                 return 12;
             case NV21:
                 return 12;
+            case YUV_420_888:
+                return 12;
+            case RAW_SENSOR:
+                return 16;
             case BAYER_RGGB:
                 return 16;
         }
