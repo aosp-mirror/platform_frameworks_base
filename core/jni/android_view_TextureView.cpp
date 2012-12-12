@@ -102,7 +102,7 @@ static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject tex
         jobject surface) {
 
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
-    sp<ANativeWindow> window = new SurfaceTextureClient(surfaceTexture);
+    sp<ANativeWindow> window = new SurfaceTextureClient(surfaceTexture->getBufferQueue());
 
     window->incStrong(0);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));

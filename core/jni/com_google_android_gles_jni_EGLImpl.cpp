@@ -355,7 +355,7 @@ not_valid_surface:
     
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(_env, native_window));
 
-    window = new SurfaceTextureClient(surfaceTexture);
+    window = new SurfaceTextureClient(surfaceTexture->getBufferQueue());
     if (window == NULL)
         goto not_valid_surface;
 
