@@ -12372,7 +12372,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
-                Slog.i(TAG, "Config changed: " + newConfig);
+                Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
 
                 final Configuration configCopy = new Configuration(mConfiguration);
                 

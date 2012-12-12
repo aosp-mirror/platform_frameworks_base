@@ -788,12 +788,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
-     * Return true if this window (or a window it is attached to, but not
-     * considering its app token) is currently animating.
+     * Return true if this window or its app token is currently animating.
      */
     @Override
     public boolean isAnimatingLw() {
-        return mWinAnimator.mAnimation != null;
+        return mWinAnimator.mAnimation != null
+                || (mAppToken != null && mAppToken.mAppAnimator.animation != null);
     }
 
     @Override
