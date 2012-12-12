@@ -29074,6 +29074,7 @@ package android.widget {
     method public void setRelativeScrollPosition(int, int);
     method public deprecated void setRemoteAdapter(int, int, android.content.Intent);
     method public void setRemoteAdapter(int, android.content.Intent);
+    method public void setRemoteAdapter(int, java.util.ArrayList<android.widget.RemoteViews>);
     method public void setScrollPosition(int, int);
     method public void setShort(int, java.lang.String, short);
     method public void setString(int, java.lang.String, java.lang.String);
@@ -41391,8 +41392,8 @@ package java.util.zip {
 
   public class ZipFile {
     ctor public ZipFile(java.io.File) throws java.io.IOException, java.util.zip.ZipException;
-    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     ctor public ZipFile(java.lang.String) throws java.io.IOException;
+    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public java.util.Enumeration<? extends java.util.zip.ZipEntry> entries();
     method public java.util.zip.ZipEntry getEntry(java.lang.String);
