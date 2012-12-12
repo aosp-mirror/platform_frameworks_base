@@ -240,28 +240,8 @@ public class SearchManagerService extends ISearchManager.Stub {
     @Override
     public ComponentName getAssistIntent(int userHandle) {
         try {
-            if (userHandle != UserHandle.getCallingUserId()) {
-                // Requesting a different user, make sure that they have the permission
-                if (ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                        Binder.getCallingUid(), -1, true)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    // Translate to the current user id, if caller wasn't aware
-                    if (userHandle == UserHandle.USER_CURRENT) {
-                        long identity = Binder.clearCallingIdentity();
-                        userHandle = ActivityManagerNative.getDefault().getCurrentUser().id;
-                        Binder.restoreCallingIdentity(identity);
-                    }
-                } else {
-                    String msg = "Permission Denial: "
-                            + "Request to getAssistIntent for " + userHandle
-                            + " but is calling from user " + UserHandle.getCallingUserId()
-                            + "; this requires "
-                            + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-                    Slog.w(TAG, msg);
-                    return null;
-                }
-            }
+            userHandle = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userHandle, true, false, "getAssistIntent", null);
             IPackageManager pm = AppGlobals.getPackageManager();
             Intent assistIntent = new Intent(Intent.ACTION_ASSIST);
             ResolveInfo info =
