@@ -1507,17 +1507,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 94) {
             // Add wireless charging started sound setting
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
-                        + " VALUES(?,?);");
-                loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
-                        R.string.def_wireless_charging_started_sound);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                            R.string.def_wireless_charging_started_sound);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
             }
             upgradeVersion = 95;
         }
