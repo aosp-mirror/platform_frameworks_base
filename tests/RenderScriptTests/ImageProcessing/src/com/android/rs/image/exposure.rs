@@ -16,24 +16,18 @@
 
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.image)
-#pragma rs_fp_relaxed
+#pragma rs_fp_full
 
-float bright = 0.f;
+static float bright = 0.f;
 
-static unsigned char contrastClamp(int c)
-{
-    int N = 255;
-    c &= ~(c >> 31);
-    c -= N;
-    c &= (c >> 31);
-    c += N;
-    return  (unsigned char) c;
+void setBright(float v) {
+    bright = 255.f / (255.f - v);
 }
 
 void exposure(const uchar4 *in, uchar4 *out)
 {
-    int m = 255 - bright;
-    out->r = contrastClamp((255 * in->r)/m);
-    out->g = contrastClamp((255 * in->g)/m);
-    out->b = contrastClamp((255 * in->b)/m);
+    out->r = rsClamp((int)(bright * in->r), 0, 255);
+    out->g = rsClamp((int)(bright * in->g), 0, 255);
+    out->b = rsClamp((int)(bright * in->b), 0, 255);
 }
+

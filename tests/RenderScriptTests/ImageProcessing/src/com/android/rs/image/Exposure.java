@@ -28,7 +28,7 @@ public class Exposure extends TestBase {
     }
 
     public void runTest() {
-        mScript.set_bright(50.f);
+        mScript.invoke_setBright(50.f);
         mScript.forEach_exposure(mInPixelsAllocation, mOutPixelsAllocation);
     }
 
