@@ -58,15 +58,27 @@ public class WifiP2pDeviceList implements Parcelable {
         }
     }
 
-    /** @hide */
+    /** Clear the list @hide */
     public boolean clear() {
         if (mDevices.isEmpty()) return false;
         mDevices.clear();
         return true;
     }
 
-    /** @hide */
+    /**
+     * Add/update a device to the list. If the device is not found, a new device entry
+     * is created. If the device is already found, the device details are updated
+     * @param device to be updated
+     * @hide
+     */
     public void update(WifiP2pDevice device) {
+        if (device == null || device.deviceAddress == null) return;
+        updateSupplicantDetails(device);
+        mDevices.get(device.deviceAddress).status = device.status;
+    }
+
+    /** Only updates details fetched from the supplicant @hide */
+    void updateSupplicantDetails(WifiP2pDevice device) {
         if (device == null || device.deviceAddress == null) return;
         WifiP2pDevice d = mDevices.get(device.deviceAddress);
         if (d != null) {
@@ -84,7 +96,7 @@ public class WifiP2pDeviceList implements Parcelable {
     }
 
     /** @hide */
-    public void updateGroupCapability(String deviceAddress, int groupCapab) {
+    void updateGroupCapability(String deviceAddress, int groupCapab) {
         if (TextUtils.isEmpty(deviceAddress)) return;
         WifiP2pDevice d = mDevices.get(deviceAddress);
         if (d != null) {
@@ -93,7 +105,7 @@ public class WifiP2pDeviceList implements Parcelable {
     }
 
     /** @hide */
-    public void updateStatus(String deviceAddress, int status) {
+    void updateStatus(String deviceAddress, int status) {
         if (TextUtils.isEmpty(deviceAddress)) return;
         WifiP2pDevice d = mDevices.get(deviceAddress);
         if (d != null) {
@@ -101,7 +113,11 @@ public class WifiP2pDeviceList implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * Fetch a device from the list
+     * @param deviceAddress is the address of the device
+     * @return WifiP2pDevice device found, or null if none found
+     */
     public WifiP2pDevice get(String deviceAddress) {
         if (deviceAddress == null) return null;
 
@@ -112,6 +128,17 @@ public class WifiP2pDeviceList implements Parcelable {
     public boolean remove(WifiP2pDevice device) {
         if (device == null || device.deviceAddress == null) return false;
         return mDevices.remove(device.deviceAddress) != null;
+    }
+
+    /**
+     * Remove a device from the list
+     * @param deviceAddress is the address of the device
+     * @return WifiP2pDevice device removed, or null if none removed
+     * @hide
+     */
+    public WifiP2pDevice remove(String deviceAddress) {
+        if (deviceAddress == null) return null;
+        return mDevices.remove(deviceAddress);
     }
 
     /** Returns true if any device the list was removed @hide */

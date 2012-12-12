@@ -13563,6 +13563,7 @@ package android.net.wifi.p2p {
     ctor public WifiP2pDeviceList();
     ctor public WifiP2pDeviceList(android.net.wifi.p2p.WifiP2pDeviceList);
     method public int describeContents();
+    method public android.net.wifi.p2p.WifiP2pDevice get(java.lang.String);
     method public java.util.Collection<android.net.wifi.p2p.WifiP2pDevice> getDeviceList();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -13618,7 +13619,9 @@ package android.net.wifi.p2p {
     field public static final int ERROR = 0; // 0x0
     field public static final java.lang.String EXTRA_DISCOVERY_STATE = "discoveryState";
     field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
+    field public static final java.lang.String EXTRA_P2P_DEVICE_LIST = "wifiP2pDeviceList";
     field public static final java.lang.String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
+    field public static final java.lang.String EXTRA_WIFI_P2P_GROUP = "p2pGroupInfo";
     field public static final java.lang.String EXTRA_WIFI_P2P_INFO = "wifiP2pInfo";
     field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_p2p_state";
     field public static final int NO_SERVICE_REQUESTS = 3; // 0x3
@@ -41394,8 +41397,8 @@ package java.util.zip {
 
   public class ZipFile {
     ctor public ZipFile(java.io.File) throws java.io.IOException, java.util.zip.ZipException;
-    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     ctor public ZipFile(java.lang.String) throws java.io.IOException;
+    ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public java.util.Enumeration<? extends java.util.zip.ZipEntry> entries();
     method public java.util.zip.ZipEntry getEntry(java.lang.String);
