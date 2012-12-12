@@ -40,6 +40,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
@@ -570,7 +572,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mWallpaperForceHidingChanged = false;
         boolean mWallpaperMayChange = false;
         boolean mOrientationChangeComplete = true;
-        int mAdjResult = 0;
         private Session mHoldScreen = null;
         private boolean mObscured = false;
         boolean mDimming = false;
@@ -1540,7 +1541,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     int adjustWallpaperWindowsLocked() {
         mInnerFields.mWallpaperMayChange = false;
-        int changed = 0;
         boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
@@ -1579,10 +1579,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
             }
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": readyfordisplay="
-                    + w.isReadyForDisplay() + " mDrawState=" + w.mWinAnimator.mDrawState);
-            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
-                    && (mWallpaperTarget == w || w.isDrawnLw())) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": isOnScreen="
+                    + w.isOnScreen() + " mDrawState=" + w.mWinAnimator.mDrawState);
+            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isOnScreen()
+                    && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Found wallpaper target: #" + i + "=" + w);
                 foundW = w;
@@ -1608,27 +1608,6 @@ public class WindowManagerService extends IWindowManager.Stub
             foundI = windowDetachedI;
         }
 
-        if (mAppTransition.isTransitionSet()) {
-            // If we are currently waiting for an app transition, and either
-            // the current target or the next target are involved with it,
-            // then hold off on doing anything with the wallpaper.
-            // Note that we are checking here for just whether the target
-            // is part of an app token...  which is potentially overly aggressive
-            // (the app token may not be involved in the transition), but good
-            // enough (we'll just wait until whatever transition is pending
-            // executes).
-            if (mWallpaperTarget != null && mWallpaperTarget.mAppToken != null) {
-                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                        "Wallpaper not changing: waiting for app anim in current target");
-                return 0;
-            }
-            if (foundW != null && foundW.mAppToken != null) {
-                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                        "Wallpaper not changing: waiting for app anim in found target");
-                return 0;
-            }
-        }
-
         if (mWallpaperTarget != foundW
                 && (mLowerWallpaperTarget == null || mLowerWallpaperTarget != foundW)) {
             if (DEBUG_WALLPAPER_LIGHT) {
@@ -1646,12 +1625,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // Now what is happening...  if the current and new targets are
             // animating, then we are in our super special mode!
             if (foundW != null && oldW != null) {
-                boolean oldAnim = oldW.mWinAnimator.mAnimation != null
-                        || (oldW.mAppToken != null
-                            && oldW.mAppToken.mAppAnimator.animation != null);
-                boolean foundAnim = foundW.mWinAnimator.mAnimation != null
-                        || (foundW.mAppToken != null &&
-                            foundW.mAppToken.mAppAnimator.animation != null);
+                boolean oldAnim = oldW.isAnimatingLw();
+                boolean foundAnim = foundW.isAnimatingLw();
                 if (DEBUG_WALLPAPER_LIGHT) {
                     Slog.v(TAG, "New animation: " + foundAnim
                             + " old animation: " + oldAnim);
@@ -1703,13 +1678,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         } else if (mLowerWallpaperTarget != null) {
             // Is it time to stop animating?
-            boolean lowerAnimating = mLowerWallpaperTarget.mWinAnimator.mAnimation != null
-                    || (mLowerWallpaperTarget.mAppToken != null
-                            && mLowerWallpaperTarget.mAppToken.mAppAnimator.animation != null);
-            boolean upperAnimating = mUpperWallpaperTarget.mWinAnimator.mAnimation != null
-                    || (mUpperWallpaperTarget.mAppToken != null
-                            && mUpperWallpaperTarget.mAppToken.mAppAnimator.animation != null);
-            if (!lowerAnimating || !upperAnimating) {
+            if (!mLowerWallpaperTarget.isAnimatingLw() || !mUpperWallpaperTarget.isAnimatingLw()) {
                 if (DEBUG_WALLPAPER_LIGHT) {
                     Slog.v(TAG, "No longer animating wallpaper targets!");
                 }
@@ -1785,6 +1754,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Start stepping backwards from here, ensuring that our wallpaper windows
         // are correctly placed.
+        int changed = 0;
         int curTokenIndex = mWallpaperTokens.size();
         while (curTokenIndex > 0) {
             curTokenIndex--;
@@ -2229,9 +2199,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 addWindowToListInOrderLocked(win, true);
                 if (type == TYPE_WALLPAPER) {
                     mLastWallpaperTimeoutTime = 0;
-                    adjustWallpaperWindowsLocked();
+                    displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
-                    adjustWallpaperWindowsLocked();
+                    displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 } else if (mWallpaperTarget != null
                         && mWallpaperTarget.mLayer >= win.mBaseLayer) {
                     // If there is currently a wallpaper being shown, and
@@ -2239,7 +2209,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // layer of the target window, then adjust the wallpaper.
                     // This is to avoid a new window being placed between the
                     // wallpaper and its target.
-                    adjustWallpaperWindowsLocked();
+                    displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 }
             }
 
@@ -2473,9 +2443,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {
             mLastWallpaperTimeoutTime = 0;
-            adjustWallpaperWindowsLocked();
+            getDefaultDisplayContentLocked().pendingLayoutChanges |=
+                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
         } else if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
-            adjustWallpaperWindowsLocked();
+            getDefaultDisplayContentLocked().pendingLayoutChanges |=
+                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
         if (!mInLayout) {
@@ -2912,16 +2884,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             if (wallpaperMayMove) {
-                if ((adjustWallpaperWindowsLocked()&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
-                    assignLayers = true;
-                }
+                getDefaultDisplayContentLocked().pendingLayoutChanges |=
+                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
             win.mDisplayContent.layoutNeeded = true;
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
-            if (assignLayers) {
-                assignLayersLocked(win.getWindowList());
-            }
             configChanged = updateOrientationFromAppTokensLocked(false);
             performLayoutAndPlaceSurfacesLocked();
             if (toBeDisplayed && win.mIsWallpaper) {
@@ -2975,7 +2943,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         try {
-            synchronized(mWindowMap) {
+            synchronized (mWindowMap) {
                 WindowState win = windowForClientLocked(session, client, false);
                 if (win == null) {
                     return;
@@ -2991,7 +2959,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         try {
-            synchronized(mWindowMap) {
+            synchronized (mWindowMap) {
                 WindowState win = windowForClientLocked(session, client, false);
                 if (win == null) {
                     return false;
@@ -3005,11 +2973,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void finishDrawingWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
-        synchronized(mWindowMap) {
+        synchronized (mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
             if (win != null && win.mWinAnimator.finishDrawingLocked()) {
-                if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
-                    adjustWallpaperWindowsLocked();
+                if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                    getDefaultDisplayContentLocked().pendingLayoutChanges |=
+                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 win.mDisplayContent.layoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
@@ -3676,7 +3645,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "Execute app transition: " + mAppTransition, e);
             }
             if (mAppTransition.isTransitionSet()) {
-                mAppTransition.setReady(true);
+                mAppTransition.setReady();
                 final long origId = Binder.clearCallingIdentity();
                 performLayoutAndPlaceSurfacesLocked();
                 Binder.restoreCallingIdentity(origId);
@@ -4223,6 +4192,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void removeAppToken(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "removeAppToken()")) {
@@ -4441,6 +4411,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
+    @Override
     public void moveAppToken(int index, IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppToken()")) {
@@ -6885,7 +6856,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mAppTransition.isTransitionSet()) {
                             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                                     "*** APP TRANSITION TIMEOUT");
-                            mAppTransition.setReady(true);
+                            mAppTransition.setReady();
                             mAppTransition.setTimeout(true);
                             mAnimatingAppTokens.clear();
                             mAnimatingAppTokens.addAll(mAppTokens);
@@ -7643,7 +7614,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // soon won't be visible, to avoid wasting time and funky
             // changes while a window is animating away.
             final boolean gone = (behindDream && mPolicy.canBeForceHidden(win, win.mAttrs))
-                    || (win.isGoneForLayoutLw() && !(win.isOnScreen() && win.isDrawFinishedLw()));
+                    || win.isGoneForLayoutLw();
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
                 Slog.v(TAG, "1ST PASS " + win
@@ -7833,7 +7804,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         && !mWallpaperTarget.mWinAnimator.isDummyAnimation()
                     ? null : mWallpaperTarget;
 
-            adjustWallpaperWindowsLocked();
             mInnerFields.mWallpaperMayChange = false;
 
             // The top-most window will supply the layout params,
@@ -7847,7 +7817,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ", oldWallpaper=" + oldWallpaper
                     + ", lower target=" + mLowerWallpaperTarget
                     + ", upper target=" + mUpperWallpaperTarget);
-            int foundWallpapers = 0;
+
+            boolean openingAppHasWallpaper = false;
+            boolean closingAppHasWallpaper = false;
+            final AppWindowToken lowerWallpaperAppToken;
+            final AppWindowToken upperWallpaperAppToken;
+            if (mLowerWallpaperTarget == null) {
+                lowerWallpaperAppToken = upperWallpaperAppToken = null;
+            } else {
+                lowerWallpaperAppToken = mLowerWallpaperTarget.mAppToken;
+                upperWallpaperAppToken = mUpperWallpaperTarget.mAppToken;
+            }
+
             // Do a first pass through the tokens for two
             // things:
             // (1) Determine if both the closing and opening
@@ -7861,21 +7842,19 @@ public class WindowManagerService extends IWindowManager.Stub
             final int NC = mClosingApps.size();
             NN = NC + mOpeningApps.size();
             for (i=0; i<NN; i++) {
-                AppWindowToken wtoken;
-                int mode;
+                final AppWindowToken wtoken;
                 if (i < NC) {
                     wtoken = mClosingApps.get(i);
-                    mode = 1;
+                    if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                        closingAppHasWallpaper = true;
+                    }
                 } else {
-                    wtoken = mOpeningApps.get(i-NC);
-                    mode = 2;
-                }
-                if (mLowerWallpaperTarget != null) {
-                    if (mLowerWallpaperTarget.mAppToken == wtoken
-                            || mUpperWallpaperTarget.mAppToken == wtoken) {
-                        foundWallpapers |= mode;
+                    wtoken = mOpeningApps.get(i - NC);
+                    if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
+                        openingAppHasWallpaper = true;
                     }
                 }
+
                 if (wtoken.appFullscreen) {
                     WindowState ws = wtoken.findMainWindow();
                     if (ws != null) {
@@ -7894,9 +7873,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (foundWallpapers == 3) {
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Wallpaper animation!");
+            if (closingAppHasWallpaper && openingAppHasWallpaper) {
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
                 switch (transit) {
                     case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
                     case WindowManagerPolicy.TRANSIT_TASK_OPEN:
@@ -7909,8 +7887,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         transit = WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE;
                         break;
                 }
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "New transit: " + transit);
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit: " + transit);
             } else if ((oldWallpaper != null) && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
@@ -8074,7 +8051,8 @@ public class WindowManagerService extends IWindowManager.Stub
         rebuildAppWindowListLocked();
 
         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
-        mInnerFields.mAdjResult |= ADJUST_WALLPAPER_LAYERS_CHANGED;
+        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                "Wallpaper layer changed: assigning layers + relayout");
         moveInputMethodWindowsIfNeededLocked(true);
         mInnerFields.mWallpaperMayChange = true;
         // Since the window list has been rebuilt, focus might
@@ -8082,37 +8060,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // might have changed again.
         mFocusMayChange = true;
 
-        return changes;
-    }
-
-    /**
-     * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     *
-     * @return bitmap indicating if another pass through layout must be made.
-     */
-    private int animateAwayWallpaperLocked() {
-        int changes = 0;
-        WindowState oldWallpaper = mWallpaperTarget;
-        if (mLowerWallpaperTarget != null
-                && mLowerWallpaperTarget.mAppToken != null) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "wallpaperForceHiding changed with lower="
-                    + mLowerWallpaperTarget);
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "hidden=" + mLowerWallpaperTarget.mAppToken.hidden +
-                    " hiddenRequested=" + mLowerWallpaperTarget.mAppToken.hiddenRequested);
-            if (mLowerWallpaperTarget.mAppToken.hidden) {
-                // The lower target has become hidden before we
-                // actually started the animation...  let's completely
-                // re-evaluate everything.
-                mLowerWallpaperTarget = mUpperWallpaperTarget = null;
-                changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
-            }
-        }
-        mInnerFields.mAdjResult |= adjustWallpaperWindowsLocked();
-        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "****** OLD: " + oldWallpaper
-                + " NEW: " + mWallpaperTarget
-                + " LOWER: " + mLowerWallpaperTarget);
         return changes;
     }
 
@@ -8139,7 +8086,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Resize reasons: "
                             + " contentInsetsChanged=" + w.mContentInsetsChanged
+                            + " " + w.mContentInsets.toShortString()
                             + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
+                            + " " + w.mVisibleInsets.toShortString()
                             + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged);
                 }
@@ -8366,10 +8315,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("On entry to LockedInner",
                         displayContent.pendingLayoutChanges);
 
-                    if (isDefaultDisplay && ((displayContent.pendingLayoutChanges
-                            & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0)
-                            && ((adjustWallpaperWindowsLocked()
-                                    & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0)) {
+                    if ((adjustWallpaperWindowsLocked() & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
                         assignLayersLocked(windows);
                         displayContent.layoutNeeded = true;
                     }
@@ -8612,10 +8558,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAppTransition.isReady()) {
             defaultDisplay.pendingLayoutChanges |= handleAppTransitionReadyLocked(defaultWindows);
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after handleAppTransitionReadyLocked",
-                defaultDisplay.pendingLayoutChanges);
+                    defaultDisplay.pendingLayoutChanges);
         }
-
-        mInnerFields.mAdjResult = 0;
 
         if (!mAnimator.mAnimating && mAppTransition.isRunning()) {
             // We have finished the animation of an app transition.  To do
@@ -8637,7 +8581,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // away the wallpaper and its window -- or it may be
             // hard -- the wallpaper now needs to be shown behind
             // something that was hidden.
-            defaultDisplay.pendingLayoutChanges |= animateAwayWallpaperLocked();
+            defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after animateAwayWallpaperLocked",
                 defaultDisplay.pendingLayoutChanges);
         }
@@ -8646,18 +8590,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mInnerFields.mWallpaperMayChange) {
             if (WindowManagerService.DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Wallpaper may change!  Adjusting");
-            mInnerFields.mAdjResult |= adjustWallpaperWindowsLocked();
-        }
-
-        if ((mInnerFields.mAdjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "Wallpaper layer changed: assigning layers + relayout");
-            defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
-            assignLayersLocked(defaultWindows);
-        } else if ((mInnerFields.mAdjResult&ADJUST_WALLPAPER_VISIBILITY_CHANGED) != 0) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "Wallpaper visibility changed: relayout");
-            defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
+            defaultDisplay.pendingLayoutChanges |=
+                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("WallpaperMayChange",
+                    defaultDisplay.pendingLayoutChanges);
         }
 
         if (mFocusMayChange) {
@@ -8665,7 +8601,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                     false /*updateInputWindows*/)) {
                 defaultDisplay.pendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-                mInnerFields.mAdjResult = 0;
             }
         }
 
@@ -8778,8 +8713,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mRelayoutWhileAnimating.clear();
         }
 
-        if (wallpaperDestroyed && (adjustWallpaperWindowsLocked() != 0)) {
-            getDefaultDisplayContentLocked().layoutNeeded = true;
+        if (wallpaperDestroyed) {
+            defaultDisplay.pendingLayoutChanges |=
+                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+            defaultDisplay.layoutNeeded = true;
         }
 
         DisplayContentsIterator iterator = new DisplayContentsIterator();
@@ -9287,7 +9224,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAppTransition.isTransitionSet()) {
             mAppTransition.setAppTransition(WindowManagerPolicy.TRANSIT_UNSET);
             mAppTransition.clear();
-            mAppTransition.setReady(true);
+            mAppTransition.setReady();
         }
 
         if (PROFILE_ORIENTATION) {

@@ -110,8 +110,8 @@ public class AppTransition implements Dump {
         return mAppTransitionReady;
     }
 
-    void setReady(boolean ready) {
-        mAppTransitionReady = ready;
+    void setReady() {
+        mAppTransitionReady = true;
     }
 
     boolean isRunning() {

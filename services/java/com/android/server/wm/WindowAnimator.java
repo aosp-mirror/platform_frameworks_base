@@ -54,10 +54,10 @@ public class WindowAnimator {
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
     private int mAnimTransactionSequence;
 
-    // Window currently running an animation that has requested it be detached
-    // from the wallpaper.  This means we need to ensure the wallpaper is
-    // visible behind it in case it animates in a way that would allow it to be
-    // seen. If multiple windows satisfy this, use the lowest window.
+    /** Window currently running an animation that has requested it be detached
+     * from the wallpaper.  This means we need to ensure the wallpaper is
+     * visible behind it in case it animates in a way that would allow it to be
+     * seen. If multiple windows satisfy this, use the lowest window. */
     WindowState mWindowDetachedWallpaper = null;
 
     WindowStateAnimator mUniverseBackground = null;
