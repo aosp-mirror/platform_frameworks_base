@@ -842,6 +842,12 @@
     <string name="permdesc_updateBatteryStats">Allows the app to modify
         collected battery statistics. Not for use by normal apps.</string>
 
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_updateAppOpsStats">modify app ops statistics</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_updateAppOpsStats">Allows the app to modify
+        collected application operation statistics. Not for use by normal apps.</string>
+    
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_backup">control system backup and restore</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -1327,21 +1327,6 @@
         android:label="@string/permlab_writeGservices"
         android:description="@string/permdesc_writeGservices" />
 
-    <!-- @hide Change the screen compatibility mode of applications -->
-    <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature"
-        android:label="@string/permlab_setScreenCompatibility"
-        android:description="@string/permdesc_setScreenCompatibility" />
-
-    <!-- Allows an application to modify the current configuration, such
-         as locale. -->
-    <permission android:name="android.permission.CHANGE_CONFIGURATION"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="system|signature"
-        android:label="@string/permlab_changeConfiguration"
-        android:description="@string/permdesc_changeConfiguration" />
-
     <!-- Allows an application to call
         {@link android.app.ActivityManager#forceStopPackage}.
         @hide -->
@@ -1619,6 +1604,13 @@
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
         android:label="@string/permlab_updateBatteryStats"
         android:description="@string/permdesc_updateBatteryStats"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to update application operation statistics. Not for
+         use by third party apps. @hide -->
+    <permission android:name="android.permission.UPDATE_APP_OPS_STATS"
+        android:label="@string/permlab_updateAppOpsStats"
+        android:description="@string/permdesc_updateAppOpsStats"
         android:protectionLevel="signature|system" />
 
     <!-- Allows an application to open windows that are for use by parts

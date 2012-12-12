@@ -47,11 +47,9 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.ISerialManager;
-import android.hardware.SensorManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.display.DisplayManager;
-import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
@@ -109,6 +107,8 @@ import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
+
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.File;
@@ -499,7 +499,7 @@ class ContextImpl extends Context {
 
         registerService(VIBRATOR_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
-                    return new SystemVibrator();
+                    return new SystemVibrator(ctx);
                 }});
 
         registerService(WALLPAPER_SERVICE, WALLPAPER_FETCHER);
@@ -530,10 +530,17 @@ class ContextImpl extends Context {
                 }});
 
         registerService(USER_SERVICE, new ServiceFetcher() {
-            public Object getService(ContextImpl ctx) {
+            public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(USER_SERVICE);
                 IUserManager service = IUserManager.Stub.asInterface(b);
                 return new UserManager(ctx, service);
+            }});
+
+        registerService(APP_OPS_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
+                IAppOpsService service = IAppOpsService.Stub.asInterface(b);
+                return new AppOpsManager(ctx, service);
             }});
     }
 

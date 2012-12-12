@@ -47,7 +47,7 @@ interface ILocationManager
 
     Location getLastLocation(in LocationRequest request, String packageName);
 
-    boolean addGpsStatusListener(IGpsStatusListener listener);
+    boolean addGpsStatusListener(IGpsStatusListener listener, String packageName);
     void removeGpsStatusListener(IGpsStatusListener listener);
 
     boolean geocoderIsPresent();
