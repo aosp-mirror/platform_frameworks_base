@@ -27,6 +27,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := android.support.v8.renderscript
 LOCAL_PACKAGE_NAME := ImageProcessing2
 LOCAL_SDK_VERSION := 8
 LOCAL_RENDERSCRIPT_TARGET_API := 17
+LOCAL_RENDERSCRIPT_COMPATIBILITY := 17
 LOCAL_RENDERSCRIPT_INCLUDES_OVERRIDE := $(TOPDIR)external/clang/lib/Headers \
                                         $(TOPDIR)frameworks/rs/scriptc
 
