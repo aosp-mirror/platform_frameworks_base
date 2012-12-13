@@ -1526,7 +1526,8 @@ int ResTable_config::diff(const ResTable_config& o) const {
     if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
     if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
     if (version != o.version) diffs |= CONFIG_VERSION;
-    if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
+    if ((screenLayout & MASK_LAYOUTDIR) != (o.screenLayout & MASK_LAYOUTDIR)) diffs |= CONFIG_LAYOUTDIR;
+    if ((screenLayout & ~MASK_LAYOUTDIR) != (o.screenLayout & ~MASK_LAYOUTDIR)) diffs |= CONFIG_SCREEN_LAYOUT;
     if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
     if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
     if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
