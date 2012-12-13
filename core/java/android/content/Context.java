@@ -64,30 +64,44 @@ public abstract class Context {
      */
     public static final int MODE_PRIVATE = 0x0000;
     /**
-     * @deprecated Creating world-readable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
      * File creation mode: allow all other applications to have read access
      * to the created file.
+     *
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, world-readable files created within the
+     * application's home directory will not be accessible to other applications.
+     *
+     * @deprecated Creating world-readable files is very dangerous, and likely
+     *     to cause security holes in applications.  It is strongly discouraged;
+     *     instead, applications should use more formal mechanism for interactions
+     *     such as {@link ContentProvider}, {@link BroadcastReceiver}, and
+     *     {@link android.app.Service}.  There are no guarantees that this
+     *     access mode will remain on a file, such as when it goes through a
+     *     backup and restore.
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_WRITEABLE
      */
     @Deprecated
     public static final int MODE_WORLD_READABLE = 0x0001;
     /**
-     * @deprecated Creating world-writable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
      * File creation mode: allow all other applications to have write access
      * to the created file.
+     *
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, world-writable files created within the
+     * application's home directory will not be accessible to other applications.
+     *
+     * @deprecated Creating world-writable files is very dangerous, and likely
+     *     to cause security holes in applications.  It is strongly discouraged;
+     *     instead, applications should use more formal mechanism for interactions
+     *     such as {@link ContentProvider}, {@link BroadcastReceiver}, and
+     *     {@link android.app.Service}.  There are no guarantees that this
+     *     access mode will remain on a file, such as when it goes through a
+     *     backup and restore.
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      */
@@ -501,18 +515,22 @@ public abstract class Context {
         throws FileNotFoundException;
 
     /**
-     * Open a private file associated with this Context's application package
+     * Open a file associated with this Context's application package
      * for writing.  Creates the file if it doesn't already exist.
      *
-     * @param name The name of the file to open; can not contain path
-     *             separators.
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, files created with {@code mode}
+     * {@link #MODE_WORLD_READABLE} or {@link #MODE_WORLD_WRITEABLE} will not be
+     * accessible to other applications.
+     *
+     * @param name The name of the file to open; can not contain path separators.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_APPEND} to append to an existing file,
-     * {@link #MODE_WORLD_READABLE} and {@link #MODE_WORLD_WRITEABLE} to control
-     * permissions.
-     *
+     *     default operation, {@link #MODE_APPEND} to append to an existing file,
+     *     {@link #MODE_WORLD_READABLE} and {@link #MODE_WORLD_WRITEABLE} to control
+     *     permissions.
      * @return FileOutputStream Resulting output stream.
-     *
      * @see #MODE_APPEND
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
@@ -738,14 +756,19 @@ public abstract class Context {
      * application; you can only set the mode of the entire directory, not
      * of individual files.
      *
-     * @param name Name of the directory to retrieve.  This is a directory
-     * that is created as part of your application data.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE} and
-     * {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, world-readable / world-writable directories
+     * created using this method will not be accessible to other applications.
      *
+     * @param name Name of the directory to retrieve.  This is a directory
+     *     that is created as part of your application data.
+     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
+     *     default operation, {@link #MODE_WORLD_READABLE} and
+     *     {@link #MODE_WORLD_WRITEABLE} to control permissions.
      * @return Returns a File object for the requested directory.  The directory
-     * will have been created if it does not already exist.
+     *     will have been created if it does not already exist.
      *
      * @see #openFileOutput(String, int)
      */
@@ -755,6 +778,13 @@ public abstract class Context {
      * Open a new private SQLiteDatabase associated with this Context's
      * application package.  Create the database file if it doesn't exist.
      *
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, {@code SQLiteDatabase}s created with {@code mode}
+     * {@link #MODE_WORLD_READABLE} or {@link #MODE_WORLD_WRITEABLE} will not be
+     * accessible to other applications.
+     *
      * @param name The name (unique in the application package) of the database.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      *     default operation, {@link #MODE_WORLD_READABLE}
@@ -762,10 +792,8 @@ public abstract class Context {
      *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
-     *
      * @return The contents of a newly created database with the given name.
      * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
@@ -782,6 +810,13 @@ public abstract class Context {
      * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
      * used to handle corruption when sqlite reports database corruption.</p>
      *
+     * <b>Note:</b> Applications with {@code targetSdkVersion}
+     * {@link android.os.Build.VERSION_CODES#K} or greater have home directories
+     * with {@code 0700} permissions. Because an application's home directory
+     * is no longer world-accessible, {@code SQLiteDatabase}s created with {@code mode}
+     * {@link #MODE_WORLD_READABLE} or {@link #MODE_WORLD_WRITEABLE} will not be
+     * accessible to other applications.
+     *
      * @param name The name (unique in the application package) of the database.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      *     default operation, {@link #MODE_WORLD_READABLE}
@@ -790,10 +825,9 @@ public abstract class Context {
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
-     * corruption. if null, {@link android.database.DefaultDatabaseErrorHandler} is assumed.
+     *     corruption. if null, {@link android.database.DefaultDatabaseErrorHandler} is assumed.
      * @return The contents of a newly created database with the given name.
      * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE

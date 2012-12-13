@@ -188,7 +188,12 @@ public final class Installer {
         }
     }
 
-    public int install(String name, int uid, int gid) {
+    /**
+     * @param restrictHomeDir if {@code true}, installd will create the application's
+     *     home directory with {@code 0700} permissions.  If false, {@code 0751} will
+     *     be used instead.
+     */
+    public int install(String name, int uid, int gid, boolean restrictHomeDir) {
         StringBuilder builder = new StringBuilder("install");
         builder.append(' ');
         builder.append(name);
@@ -196,6 +201,8 @@ public final class Installer {
         builder.append(uid);
         builder.append(' ');
         builder.append(gid);
+        builder.append(' ');
+        builder.append(restrictHomeDir);
         return execute(builder.toString());
     }
 
@@ -263,7 +270,12 @@ public final class Installer {
         return execute(builder.toString());
     }
 
-    public int createUserData(String name, int uid, int userId) {
+    /**
+     * @param restrictHomeDir if {@code true}, installd will create the application's
+     *     home directory with {@code 0700} permissions.  If false, {@code 0751} will
+     *     be used instead.
+     */
+    public int createUserData(String name, int uid, int userId, boolean restrictHomeDir) {
         StringBuilder builder = new StringBuilder("mkuserdata");
         builder.append(' ');
         builder.append(name);
@@ -271,6 +283,8 @@ public final class Installer {
         builder.append(uid);
         builder.append(' ');
         builder.append(userId);
+        builder.append(' ');
+        builder.append(restrictHomeDir);
         return execute(builder.toString());
     }
 
