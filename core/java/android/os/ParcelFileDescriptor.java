@@ -108,13 +108,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     public static ParcelFileDescriptor open(File file, int mode)
             throws FileNotFoundException {
         String path = file.getPath();
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkRead(path);
-            if ((mode&MODE_WRITE_ONLY) != 0) {
-                security.checkWrite(path);
-            }
-        }
 
         if ((mode&MODE_READ_WRITE) == 0) {
             throw new IllegalArgumentException(
