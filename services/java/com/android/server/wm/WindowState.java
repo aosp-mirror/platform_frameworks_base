@@ -215,10 +215,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mXOffset;
     int mYOffset;
 
-    // This is set after IWindowSession.relayout() has been called at
-    // least once for the window.  It allows us to detect the situation
-    // where we don't yet have a surface, but should have one soon, so
-    // we can give the window focus before waiting for the relayout.
+    /**
+     * This is set after IWindowSession.relayout() has been called at
+     * least once for the window.  It allows us to detect the situation
+     * where we don't yet have a surface, but should have one soon, so
+     * we can give the window focus before waiting for the relayout.
+     */
     boolean mRelayoutCalled;
 
     // If the application has called relayout() with changes that can

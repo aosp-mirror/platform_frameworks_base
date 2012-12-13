@@ -2247,8 +2247,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
 
-            //dump();
-
             if (focusChanged) {
                 finishUpdateFocusedWindowAfterAssignLayersLocked(false /*updateInputWindows*/);
             }
@@ -2349,9 +2347,7 @@ public class WindowManagerService extends IWindowManager.Stub
         removeWindowInnerLocked(session, win);
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
-        if (wasVisible && computeForcedAppOrientationLocked()
-                != mForcedAppOrientation
-                && updateOrientationFromAppTokensLocked(false)) {
+        if (wasVisible && updateOrientationFromAppTokensLocked(false)) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
@@ -3405,11 +3401,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (updateOrientationFromAppTokensLocked(false)) {
             if (freezeThisOneIfNeeded != null) {
-                AppWindowToken atoken = findAppWindowToken(
-                        freezeThisOneIfNeeded);
+                AppWindowToken atoken = findAppWindowToken(freezeThisOneIfNeeded);
                 if (atoken != null) {
-                    startAppFreezingScreenLocked(atoken,
-                            ActivityInfo.CONFIG_ORIENTATION);
+                    startAppFreezingScreenLocked(atoken, ActivityInfo.CONFIG_ORIENTATION);
                 }
             }
             config = computeNewConfigurationLocked();
@@ -3451,7 +3445,10 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
         long ident = Binder.clearCallingIdentity();
         try {
-            int req = computeForcedAppOrientationLocked();
+            int req = getOrientationFromWindowsLocked();
+            if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                req = getOrientationFromAppTokensLocked();
+            }
 
             if (req != mForcedAppOrientation) {
                 mForcedAppOrientation = req;
@@ -3468,14 +3465,6 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    int computeForcedAppOrientationLocked() {
-        int req = getOrientationFromWindowsLocked();
-        if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-            req = getOrientationFromAppTokensLocked();
-        }
-        return req;
     }
 
     @Override
@@ -4495,40 +4484,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void moveAppWindowsLocked(AppWindowToken wtoken, int tokenPos,
-            boolean updateFocusAndLayout) {
-        // First remove all of the windows from the list.
-        tmpRemoveAppWindowsLocked(wtoken);
-
-        // And now add them back at the correct place.
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            final DisplayContent displayContent = iterator.next();
-            final WindowList windows = displayContent.getWindowList();
-            final int pos = findWindowOffsetLocked(windows, tokenPos);
-            final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
-            if (pos != newPos) {
-                displayContent.layoutNeeded = true;
-            }
-
-            if (updateFocusAndLayout && !updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                    false /*updateInputWindows*/)) {
-                assignLayersLocked(windows);
-            }
-        }
-
-        if (updateFocusAndLayout) {
-            mInputMonitor.setUpdateInputWindowsNeededLw();
-
-            // Note that the above updateFocusedWindowLocked conditional used to sit here.
-
-            if (!mInLayout) {
-                performLayoutAndPlaceSurfacesLocked();
-            }
-            mInputMonitor.updateInputWindowsLw(false /*force*/);
-        }
-    }
-
     private void moveAppWindowsLocked(List<IBinder> tokens, int tokenPos) {
         // First remove all of the windows from the list.
         final int N = tokens.size();
@@ -4573,6 +4528,7 @@ public class WindowManagerService extends IWindowManager.Stub
         //dump();
     }
 
+    @Override
     public void moveAppTokensToTop(List<IBinder> tokens) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppTokensToTop()")) {
@@ -4714,12 +4670,14 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
+    @Override
     public void exitKeyguardSecurely(final IOnKeyguardExitResult callback) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
         mPolicy.exitKeyguardSecurely(new WindowManagerPolicy.OnKeyguardExitResult() {
+            @Override
             public void onKeyguardExitResult(boolean success) {
                 try {
                     callback.onKeyguardExitResult(success);
@@ -4730,18 +4688,22 @@ public class WindowManagerService extends IWindowManager.Stub
         });
     }
 
+    @Override
     public boolean inKeyguardRestrictedInputMode() {
         return mPolicy.inKeyguardRestrictedKeyInputMode();
     }
 
+    @Override
     public boolean isKeyguardLocked() {
         return mPolicy.isKeyguardLocked();
     }
 
+    @Override
     public boolean isKeyguardSecure() {
         return mPolicy.isKeyguardSecure();
     }
 
+    @Override
     public void dismissKeyguard() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -8837,6 +8799,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         if (token != null && callback != null) {
             synchronized (mWindowMap) {
@@ -9360,9 +9323,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         File file = new File("/system/etc/setup.conf");
         FileInputStream in = null;
+        DataInputStream ind = null;
         try {
             in = new FileInputStream(file);
-            DataInputStream ind = new DataInputStream(in);
+            ind = new DataInputStream(in);
             String line = ind.readLine();
             if (line != null) {
                 String[] toks = line.split("%");
@@ -9377,6 +9341,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (in != null) {
                 try {
                     in.close();
+                } catch (IOException e) {
+                }
+            }
+            if (ind != null) {
+                try {
+                    ind.close();
                 } catch (IOException e) {
                 }
             }
