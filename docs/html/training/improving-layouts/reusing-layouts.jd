@@ -109,6 +109,10 @@ example:</p>
          layout=”@layout/title”/>
 </pre>
 
+<p>However, if you want to override layout attributes using
+the <code>&lt;include&gt;</code> tag, you must override both
+<code>android:layout_height</code> and <code>android:layout_width</code> in order for
+other layout attributes to take effect.</p>
 
 
 <h2 id="Merge">Use the &lt;merge&gt; Tag</h2>
