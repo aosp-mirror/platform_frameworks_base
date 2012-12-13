@@ -29,6 +29,8 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -52,9 +54,14 @@ public class DrmManagerClient {
      */
     public static final int ERROR_UNKNOWN = -2000;
 
+    /** {@hide} */
+    public static final int INVALID_SESSION = -1;
+
     HandlerThread mInfoThread;
     HandlerThread mEventThread;
     private static final String TAG = "DrmManagerClient";
+
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     static {
         // Load the respective library
@@ -110,7 +117,7 @@ public class DrmManagerClient {
 
     private int mUniqueId;
     private int mNativeContext;
-    private boolean mReleased;
+    private volatile boolean mReleased;
     private Context mContext;
     private InfoHandler mInfoHandler;
     private EventHandler mEventHandler;
@@ -244,17 +251,22 @@ public class DrmManagerClient {
      */
     public DrmManagerClient(Context context) {
         mContext = context;
-        mReleased = false;
         createEventThreads();
 
         // save the unique id
         mUniqueId = _initialize();
+        mCloseGuard.open("release");
     }
 
-    protected void finalize() {
-        if (!mReleased) {
-            Log.w(TAG, "You should have called release()");
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
             release();
+        } finally {
+            super.finalize();
         }
     }
 
@@ -266,11 +278,9 @@ public class DrmManagerClient {
      * {@link DrmManagerClient} is no longer usable since it has lost all of its required resource.
      */
     public void release() {
-        if (mReleased) {
-            Log.w(TAG, "You have already called release()");
-            return;
-        }
+        if (mReleased) return;
         mReleased = true;
+
         if (mEventHandler != null) {
             mEventThread.quit();
             mEventThread = null;
@@ -285,6 +295,7 @@ public class DrmManagerClient {
         mOnInfoListener = null;
         mOnErrorListener = null;
         _release(mUniqueId);
+        mCloseGuard.close();
     }
 
     /**
