@@ -1024,6 +1024,24 @@ public class TextToSpeech {
     }
 
     /**
+     * Returns a Locale instance describing the language currently being used as the default
+     * Text-to-speech language.
+     *
+     * @return language, country (if any) and variant (if any) used by the client stored in a
+     *     Locale instance, or {@code null} on error.
+     */
+    public Locale getDefaultLanguage() {
+        return runAction(new Action<Locale>() {
+            @Override
+            public Locale run(ITextToSpeechService service) throws RemoteException {
+                String[] defaultLanguage = service.getClientDefaultLanguage();
+
+                return new Locale(defaultLanguage[0], defaultLanguage[1], defaultLanguage[2]);
+            }
+        }, null, "getDefaultLanguage");
+    }
+
+    /**
      * Sets the text-to-speech language.
      * The TTS engine will try to use the closest match to the specified
      * language as represented by the Locale, but there is no guarantee that the exact same Locale
@@ -1338,7 +1356,13 @@ public class TextToSpeech {
 
                     try {
                         mConnectedService.setCallback(getCallerIdentity(), mCallback);
-                        Log.i(TAG, "Setuped connection to " + mName);
+                        String[] defaultLanguage = mConnectedService.getClientDefaultLanguage();
+
+                        mParams.putString(Engine.KEY_PARAM_LANGUAGE, defaultLanguage[0]);
+                        mParams.putString(Engine.KEY_PARAM_COUNTRY, defaultLanguage[1]);
+                        mParams.putString(Engine.KEY_PARAM_VARIANT, defaultLanguage[2]);
+
+                        Log.i(TAG, "Set up connection to " + mName);
                         return SUCCESS;
                     } catch (RemoteException re) {
                         Log.e(TAG, "Error connecting to service, setCallback() failed");
