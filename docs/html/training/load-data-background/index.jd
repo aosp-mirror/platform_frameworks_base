@@ -1,0 +1,77 @@
+page.title=Loading Data in the Background
+trainingnavtop=true
+startpage=true
+
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+    <li>
+        Android 1.6 or later
+    </li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/loaders.html">Loaders</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/data/data-storage.html#db">Using Databases</a>
+    </li>
+    <li>
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">Content Provider Basics</a>
+    </li>
+</ul>
+
+<h2>Try it out</h2>
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    Querying a {@link android.content.ContentProvider} for data you want to display takes time.
+    If you run the query directly from an {@link android.app.Activity}, it may get blocked and
+    cause the system to issue an "Application Not Responding" message. Even if it doesn't, users
+    will see an annoying delay in the UI. To avoid these problems, you should initiate a query on a
+    separate thread, wait for it to finish, and then display the results.
+</p>
+<p>
+    You can do this in a straightforward way by using an object that runs a query asynchronously in
+    the background and reconnects to your {@link android.app.Activity} when it's finished. This
+    object is a {@link android.support.v4.content.CursorLoader}. Besides doing the initial
+    background query, a {@link android.support.v4.content.CursorLoader} automatically re-runs the
+    query when data associated with the query changes.
+</p>
+<p>
+    This class describes how to use a {@link android.support.v4.content.CursorLoader} to run a
+    background query. Examples in this class use the {@link android.support.v4 v4 support library}
+    versions of classes, which support platforms starting with Android 1.6.
+</p>
+<h2>Lessons</h2>
+<dl>
+    <dt>
+        <strong><a href="setup-loader.html">Running a Query with a CursorLoader</a></strong>
+    </dt>
+    <dd>
+        Learn how to run a query in the background, using a
+        {@link android.support.v4.content.CursorLoader}.
+    </dd>
+    <dt>
+        <strong>
+        <a href="handle-results.html">Handling the Results</a>
+        </strong>
+    </dt>
+    <dd>
+        Learn how to handle the {@link android.database.Cursor} returned from the query, and how
+        to remove references to the current {@link android.database.Cursor} when the loader
+        framework re-sets the {@link android.support.v4.content.CursorLoader}.
+    </dd>
+</dl>
