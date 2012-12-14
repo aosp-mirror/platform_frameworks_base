@@ -998,8 +998,6 @@
           </li>
         </ul>
       </li>
-      
-      
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/monetization/index.html"
@@ -1020,7 +1018,6 @@
   <!-- End best Publishing -->
 
 </ul><!-- nav -->
-
 <script type="text/javascript">
 <!--
     buildToggleLists();
