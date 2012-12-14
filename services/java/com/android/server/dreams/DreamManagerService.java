@@ -385,6 +385,9 @@ public final class DreamManagerService extends IDreamManager.Stub {
     }
 
     private static ComponentName[] componentsFromString(String names) {
+        if (names == null) {
+            return null;
+        }
         String[] namesArray = names.split(",");
         ComponentName[] componentNames = new ComponentName[namesArray.length];
         for (int i = 0; i < namesArray.length; i++) {
