@@ -53,7 +53,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 /**
  * A class that describes a view hierarchy that can be displayed in
  * another process. The hierarchy is inflated from a layout resource
@@ -340,7 +339,7 @@ public class RemoteViews implements Parcelable, Filter {
             if (target == null) return;
 
             if (!mIsWidgetCollectionChild) {
-                Log.e("RemoteViews", "The method setOnClickFillInIntent is available " +
+                Log.e(LOG_TAG, "The method setOnClickFillInIntent is available " +
                         "only from RemoteViewsFactory (ie. on collection items).");
                 return;
             }
@@ -359,13 +358,13 @@ public class RemoteViews implements Parcelable, Filter {
                         if (parent instanceof AppWidgetHostView || parent == null) {
                             // Somehow they've managed to get this far without having
                             // and AdapterView as a parent.
-                            Log.e("RemoteViews", "Collection item doesn't have AdapterView parent");
+                            Log.e(LOG_TAG, "Collection item doesn't have AdapterView parent");
                             return;
                         }
 
                         // Insure that a template pending intent has been set on an ancestor
                         if (!(parent.getTag() instanceof PendingIntent)) {
-                            Log.e("RemoteViews", "Attempting setOnClickFillInIntent without" +
+                            Log.e(LOG_TAG, "Attempting setOnClickFillInIntent without" +
                                     " calling setPendingIntentTemplate on parent.");
                             return;
                         }
@@ -472,7 +471,7 @@ public class RemoteViews implements Parcelable, Filter {
                 av.setOnItemClickListener(listener);
                 av.setTag(pendingIntentTemplate);
             } else {
-                Log.e("RemoteViews", "Cannot setPendingIntentTemplate on a view which is not" +
+                Log.e(LOG_TAG, "Cannot setPendingIntentTemplate on a view which is not" +
                         "an AdapterView (id: " + viewId + ")");
                 return;
             }
@@ -485,6 +484,84 @@ public class RemoteViews implements Parcelable, Filter {
         PendingIntent pendingIntentTemplate;
 
         public final static int TAG = 8;
+    }
+
+    private class SetRemoteViewsAdapterList extends Action {
+        public SetRemoteViewsAdapterList(int id, ArrayList<RemoteViews> list) {
+            this.viewId = id;
+            this.list = list;
+        }
+
+        public SetRemoteViewsAdapterList(Parcel parcel) {
+            viewId = parcel.readInt();
+            int count = parcel.readInt();
+            list = new ArrayList<RemoteViews>();
+
+            for (int i = 0; i < count; i++) {
+                RemoteViews rv = RemoteViews.CREATOR.createFromParcel(parcel);
+                list.add(rv);
+            }
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+
+            if (list == null || list.size() == 0) {
+                dest.writeInt(0);
+            } else {
+                int count = list.size();
+                dest.writeInt(count);
+                for (int i = 0; i < count; i++) {
+                    RemoteViews rv = list.get(i);
+                    rv.writeToParcel(dest, flags);
+                }
+            }
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            // Ensure that we are applying to an AppWidget root
+            if (!(rootParent instanceof AppWidgetHostView)) {
+                Log.e(LOG_TAG, "SetRemoteViewsAdapterIntent action can only be used for " +
+                        "AppWidgets (root id: " + viewId + ")");
+                return;
+            }
+            // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
+            if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
+                Log.e(LOG_TAG, "Cannot setRemoteViewsAdapter on a view which is not " +
+                        "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
+                return;
+            }
+
+            if (target instanceof AbsListView) {
+                AbsListView v = (AbsListView) target;
+                Adapter a = v.getAdapter();
+                if (a instanceof RemoteViewsListAdapter) {
+                    ((RemoteViewsListAdapter) a).setViewsList(list);
+                } else {
+                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list));
+                }
+            } else if (target instanceof AdapterViewAnimator) {
+                AdapterViewAnimator v = (AdapterViewAnimator) target;
+                Adapter a = v.getAdapter();
+                if (a instanceof RemoteViewsListAdapter) {
+                    ((RemoteViewsListAdapter) a).setViewsList(list);
+                } else {
+                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list));
+                }
+            }
+        }
+
+        public String getActionName() {
+            return "SetRemoteViewsAdapterList";
+        }
+
+        ArrayList<RemoteViews> list;
+        public final static int TAG = 15;
     }
 
     private class SetRemoteViewsAdapterIntent extends Action {
@@ -511,13 +588,13 @@ public class RemoteViews implements Parcelable, Filter {
 
             // Ensure that we are applying to an AppWidget root
             if (!(rootParent instanceof AppWidgetHostView)) {
-                Log.e("RemoteViews", "SetRemoteViewsAdapterIntent action can only be used for " +
+                Log.e(LOG_TAG, "SetRemoteViewsAdapterIntent action can only be used for " +
                         "AppWidgets (root id: " + viewId + ")");
                 return;
             }
             // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
             if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
-                Log.e("RemoteViews", "Cannot setRemoteViewsAdapter on a view which is not " +
+                Log.e(LOG_TAG, "Cannot setRemoteViewsAdapter on a view which is not " +
                         "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
                 return;
             }
@@ -585,7 +662,7 @@ public class RemoteViews implements Parcelable, Filter {
             // If the view is an AdapterView, setting a PendingIntent on click doesn't make much
             // sense, do they mean to set a PendingIntent template for the AdapterView's children?
             if (mIsWidgetCollectionChild) {
-                Log.w("RemoteViews", "Cannot setOnClickPendingIntent for collection item " +
+                Log.w(LOG_TAG, "Cannot setOnClickPendingIntent for collection item " +
                         "(id: " + viewId + ")");
                 ApplicationInfo appInfo = root.getContext().getApplicationInfo();
 
@@ -772,7 +849,7 @@ public class RemoteViews implements Parcelable, Filter {
             try {
                 //noinspection ConstantIfStatement
                 if (false) {
-                    Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
+                    Log.d(LOG_TAG, "view: " + klass.getName() + " calling method: "
                         + this.methodName + "()");
                 }
                 method.invoke(view);
@@ -945,7 +1022,7 @@ public class RemoteViews implements Parcelable, Filter {
             this.type = in.readInt();
             //noinspection ConstantIfStatement
             if (false) {
-                Log.d("RemoteViews", "read viewId=0x" + Integer.toHexString(this.viewId)
+                Log.d(LOG_TAG, "read viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
 
@@ -1012,7 +1089,7 @@ public class RemoteViews implements Parcelable, Filter {
             out.writeInt(this.type);
             //noinspection ConstantIfStatement
             if (false) {
-                Log.d("RemoteViews", "write viewId=0x" + Integer.toHexString(this.viewId)
+                Log.d(LOG_TAG, "write viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
 
@@ -1139,7 +1216,7 @@ public class RemoteViews implements Parcelable, Filter {
             try {
                 //noinspection ConstantIfStatement
                 if (false) {
-                    Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
+                    Log.d(LOG_TAG, "view: " + klass.getName() + " calling method: "
                         + this.methodName + "(" + param.getName() + ") with "
                         + (this.value == null ? "null" : this.value.getClass().getName()));
                 }
@@ -1562,6 +1639,9 @@ public class RemoteViews implements Parcelable, Filter {
                     case BitmapReflectionAction.TAG:
                         mActions.add(new BitmapReflectionAction(parcel));
                         break;
+                    case SetRemoteViewsAdapterList.TAG:
+                        mActions.add(new SetRemoteViewsAdapterList(parcel));
+                        break;
                     default:
                         throw new ActionException("Tag " + tag + " not found");
                     }
@@ -1978,11 +2058,11 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
+     * Equivalent to calling {@link android.widget.AdapterView#setRemoteViewsAdapter(Intent)}.
      *
      * @param appWidgetId The id of the app widget which contains the specified view. (This
      *      parameter is ignored in this deprecated method)
-     * @param viewId The id of the {@link AbsListView}
+     * @param viewId The id of the {@link AdapterView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
      * @deprecated This method has been deprecated. See
@@ -1997,12 +2077,31 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      * Can only be used for App Widgets.
      *
-     * @param viewId The id of the {@link AbsListView}
+     * @param viewId The id of the {@link AdapterView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
      */
     public void setRemoteAdapter(int viewId, Intent intent) {
         addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
+    }
+
+    /**
+     * Creates a simple Adapter for the viewId specified. The viewId must point to an AdapterView,
+     * ie. {@link ListView}, {@link GridView}, {@link StackView} or {@link AdapterViewAnimator}.
+     * This is a simpler but less flexible approach to populating collection widgets. Its use is
+     * encouraged for most scenarios, as long as the total memory within the list of RemoteViews
+     * is relatively small (ie. doesn't contain large or numerous Bitmaps, see {@link
+     * RemoteViews#setImageViewBitmap}). In the case of numerous images, the use of API is still
+     * possible by setting image URIs instead of Bitmaps, see {@link RemoteViews#setImageViewUri}.
+     *
+     * This API is supported in the compatibility library for previous API levels, see
+     * RemoteViewsCompat.
+     *
+     * @param viewId The id of the {@link AdapterView}
+     * @param list The list of RemoteViews which will populate the view specified by viewId.
+     */
+    public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list) {
+        addAction(new SetRemoteViewsAdapterList(viewId, list));
     }
 
     /**
