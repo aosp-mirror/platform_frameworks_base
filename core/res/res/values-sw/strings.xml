@@ -492,7 +492,7 @@
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"anzisha moja kwa moja usanidi wa simu ya CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Inaruhusu programu kuanza ugawaji wa CDMA. Programu hasidi zinaweza anza ugawaji wa CDMA usio wa lazima."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"dhibiti arifa za usasishaji mahali"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Inaruhusu programu kuwezesha/kulemeza arifa za usasishaji za eneo kutoka kwa redio. Si ya matumizi na programu za kawaida."</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Huruhusu kuwasha au kuzima arifa za masasisho ya mahali kutoka kwa redio. Sio ya kutumiwa kwenye programu za kawaida."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"fikia mipangilio ya ukaguzi"</string>
     <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Inaruhusu kusoma/kuandika kwa programu kufikia mipangilio iliyopakiwa na huduma ya kuangalia. Si ya matumizi na programu za kawaida."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"chagua wijeti"</string>
