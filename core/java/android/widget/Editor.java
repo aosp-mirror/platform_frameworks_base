@@ -36,6 +36,8 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.DynamicLayout;
@@ -186,6 +188,8 @@ public class Editor {
     private Rect mTempRect;
 
     private TextView mTextView;
+
+    private final UserDictionaryListener mUserDictionaryListener = new UserDictionaryListener();
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -2602,6 +2606,11 @@ public class Editor {
                 Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
                 intent.putExtra("word", originalText);
                 intent.putExtra("locale", mTextView.getTextServicesLocale().toString());
+                // Put a listener to replace the original text with a word which the user
+                // modified in a user dictionary dialog.
+                mUserDictionaryListener.waitForUserDictionaryAdded(
+                        mTextView, originalText, spanStart, spanEnd);
+                intent.putExtra("listener", new Messenger(mUserDictionaryListener));
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mTextView.getContext().startActivity(intent);
                 // There is no way to know if the word was indeed added. Re-check.
@@ -3814,5 +3823,62 @@ public class Editor {
         boolean mSelectionModeChanged;
         boolean mContentChanged;
         int mChangedStart, mChangedEnd, mChangedDelta;
+    }
+
+    /**
+     * @hide
+     */
+    public static class UserDictionaryListener extends Handler {
+        public TextView mTextView;
+        public String mOriginalWord;
+        public int mWordStart;
+        public int mWordEnd;
+
+        public void waitForUserDictionaryAdded(
+                TextView tv, String originalWord, int spanStart, int spanEnd) {
+            mTextView = tv;
+            mOriginalWord = originalWord;
+            mWordStart = spanStart;
+            mWordEnd = spanEnd;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final int code = msg.what;
+            if (code == 0) { /* CODE_WORD_ADDED */
+                if (!(msg.obj instanceof Bundle)) {
+                    Log.w(TAG, "Illegal message. Abort handling onUserDictionaryAdded.");
+                    return;
+                }
+                final Bundle bundle = (Bundle)msg.obj;
+                final String originalWord = bundle.getString("originalWord");
+                final String addedWord = bundle.getString("word");
+                onUserDictionaryAdded(originalWord, addedWord);
+            }
+        }
+
+        private void onUserDictionaryAdded(String originalWord, String addedWord) {
+            if (TextUtils.isEmpty(mOriginalWord) || TextUtils.isEmpty(addedWord)) {
+                return;
+            }
+            if (mWordStart < 0 || mWordEnd >= mTextView.length()) {
+                return;
+            }
+            if (!mOriginalWord.equals(originalWord)) {
+                return;
+            }
+            if (originalWord.equals(addedWord)) {
+                return;
+            }
+            final Editable editable = (Editable) mTextView.getText();
+            final String currentWord = editable.toString().substring(mWordStart, mWordEnd);
+            if (!currentWord.equals(originalWord)) {
+                return;
+            }
+            mTextView.replaceText_internal(mWordStart, mWordEnd, addedWord);
+            // Move cursor at the end of the replaced word
+            final int newCursorPosition = mWordStart + addedWord.length();
+            mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
+        }
     }
 }
