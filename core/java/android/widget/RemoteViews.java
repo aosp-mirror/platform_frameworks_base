@@ -2058,7 +2058,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link android.widget.AdapterView#setRemoteViewsAdapter(Intent)}.
+     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      *
      * @param appWidgetId The id of the app widget which contains the specified view. (This
      *      parameter is ignored in this deprecated method)
