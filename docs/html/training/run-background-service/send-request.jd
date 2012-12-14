@@ -1,0 +1,82 @@
+page.title=Sending Work Requests to the Background Service
+trainingnavtop=true
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li>
+<a href="#CreateRequest">Create and Send a Work Request to an IntentService</a>
+    </li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+</ul>
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    The previous lesson showed you how to create an {@link android.app.IntentService} class. This
+    lesson shows you how to trigger the {@link android.app.IntentService} to run an operation by
+    sending it an {@link android.content.Intent}. This {@link android.content.Intent} can
+    contain optionally contain data for the {@link android.app.IntentService} to process. You can
+    send an {@link android.content.Intent} to an {@link android.app.IntentService} from any point
+    in an {@link android.app.Activity} or {@link android.app.Fragment}
+</p>
+<h2 id="CreateRequest">Create and Send a Work Request to an IntentService</h2>
+<p>
+    To create a work request and send it to an {@link android.app.IntentService}, create an
+    explicit {@link android.content.Intent}, add work request data to it, and send it to
+    {@link android.app.IntentService} by calling
+    {@link android.content.Context#startService startService()}.
+</p>
+<p>
+    The next snippets demonstrate this:
+</p>
+<ol>
+    <li>
+        Create a new, explicit {@link android.content.Intent} for the
+        {@link android.app.IntentService} called <code>RSSPullService</code>.
+        <br>
+<pre>
+/*
+ * Creates a new Intent to start the RSSPullService
+ * IntentService. Passes a URI in the
+ * Intent's "data" field.
+ */
+mServiceIntent = new Intent(getActivity(), RSSPullService.class);
+mServiceIntent.setData(Uri.parse(dataUrl));
+</pre>
+    </li>
+    <li>
+        Call {@link android.content.Context#startService startService()}
+        <br>
+<pre>
+// Starts the IntentService
+getActivity().startService(mServiceIntent);
+</pre>
+</ol>
+<p>
+    Notice that you can send the work request from anywhere in an Activity or Fragment.
+    For example, if you need to get user input first, you can send the request from a callback
+    that responds to a button click or similar gesture.
+</p>
+<p>
+    Once you call {@link android.content.Context#startService startService()},
+    the {@link android.app.IntentService} does the work defined in its
+    {@link android.app.IntentService#onHandleIntent onHandleIntent()} method, and then stops itself.
+</p>
+<p>
+    The next step is to report the results of the work request back to the originating Activity
+    or Fragment. The next lesson shows you how to do this with a
+    {@link android.content.BroadcastReceiver}.
+</p>
