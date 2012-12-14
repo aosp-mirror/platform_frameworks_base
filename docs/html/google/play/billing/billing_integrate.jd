@@ -14,8 +14,8 @@ parent.link=index.html
        <ol>
        <li><a href="#QueryDetails">Querying Items Available for Purchase</a><li>
        <li><a href="#Purchase">Purchasing an Item</a></li>
-       <li><a href="QueryPurchases">Querying Purchased Items</a></li>
-       <li><a href="Consume">Consuming a Purchase</a><li>
+       <li><a href="#QueryPurchases">Querying Purchased Items</a></li>
+       <li><a href="#Consume">Consuming a Purchase</a><li>
        </ol>
     </li>
   </ol>
