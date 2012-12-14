@@ -69,23 +69,15 @@ public final class Pools {
         /* do nothing - hiding constructor */
     }
 
-    private static class PoolableHolder<T> {
-        T mPoolable;
-        PoolableHolder<T> mNext;
-    }
-
     /**
      * Simple (non-synchronized) pool of objects.
      *
      * @param <T> The pooled type.
      */
     public static class SimplePool<T> implements Pool<T> {
-        private final int mMaxPoolSize;
+        private final Object[] mPool;
 
         private int mPoolSize;
-
-        private PoolableHolder<T> mEmptyHolders;
-        private PoolableHolder<T> mPool;
 
         /**
          * Creates a new instance.
@@ -98,20 +90,18 @@ public final class Pools {
             if (maxPoolSize <= 0) {
                 throw new IllegalArgumentException("The max pool size must be > 0");
             }
-            mMaxPoolSize = maxPoolSize;
+            mPool = new Object[maxPoolSize];
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public T acquire() {
-            if (mPool != null) {
-                PoolableHolder<T> holder = mPool;
-                mPool = holder.mNext;
-                T poolable = holder.mPoolable;
-                holder.mPoolable = null;
-                holder.mNext = mEmptyHolders;
-                mEmptyHolders = holder;
+            if (mPoolSize > 0) {
+                final int lastPooledIndex = mPoolSize - 1;
+                T instance = (T) mPool[lastPooledIndex];
+                mPool[lastPooledIndex] = null;
                 mPoolSize--;
-                return poolable;
+                return instance;
             }
             return null;
         }
@@ -121,16 +111,8 @@ public final class Pools {
             if (isInPool(instance)) {
                 throw new IllegalStateException("Already in the pool!");
             }
-            if (mPoolSize < mMaxPoolSize) {
-                PoolableHolder<T> holder = mEmptyHolders;
-                if (holder == null) {
-                    holder = new PoolableHolder<T>();
-                } else {
-                    mEmptyHolders = holder.mNext;
-                }
-                holder.mPoolable = instance;
-                holder.mNext = mPool;
-                mPool = holder;
+            if (mPoolSize < mPool.length) {
+                mPool[mPoolSize] = instance;
                 mPoolSize++;
                 return true;
             }
@@ -138,12 +120,10 @@ public final class Pools {
         }
 
         private boolean isInPool(T instance) {
-            PoolableHolder<T> current = mPool;
-            while (current != null) {
-                if (current.mPoolable == instance) {
+            for (int i = 0; i < mPoolSize; i++) {
+                if (mPool[i] == instance) {
                     return true;
                 }
-                current = current.mNext;
             }
             return false;
         }
