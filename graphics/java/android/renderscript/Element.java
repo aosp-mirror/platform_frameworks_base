@@ -171,7 +171,8 @@ public class Element extends BaseObj {
         PIXEL_LA (9),
         PIXEL_RGB (10),
         PIXEL_RGBA (11),
-        PIXEL_DEPTH (12);
+        PIXEL_DEPTH (12),
+        PIXEL_YUV(13);
 
         int mID;
         DataKind(int id) {
