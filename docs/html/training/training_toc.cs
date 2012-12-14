@@ -192,7 +192,7 @@
         </ul>
       </li>
     </ul>
-  </li><!-- end getting started -->    
+  </li><!-- end getting started -->
   
 
   <li class="nav-section">
@@ -605,7 +605,7 @@
           <div class="nav-section-header">
               <a href="<?cs var:toroot ?>training/notify-user/index.html"
                  description=
-                 "How to display messages called notifications outside of 
+                 "How to display messages called notifications outside of
                  your application's UI."
                >Notifying the User</a>
           </div>
@@ -679,19 +679,19 @@
             zh-CN-lang="支持各种屏幕尺寸"
             ko-lang="다양한 화면 크기 지원"
             ja-lang="さまざまな画面サイズのサポート"
-            es-lang="Cómo admitir varios tamaños de pantalla"               
+            es-lang="Cómo admitir varios tamaños de pantalla"
             >Supporting Different Screen Sizes</a>
           </li>
           <li><a href="/training/multiscreen/screendensities.html"
             zh-CN-lang="支持各种屏幕密度"
             ja-lang="さまざまな画面密度のサポート"
-            es-lang="Cómo admitir varias densidades de pantalla"               
+            es-lang="Cómo admitir varias densidades de pantalla"
             >Supporting Different Screen Densities</a>
           </li>
           <li><a href="/training/multiscreen/adaptui.html"
             zh-CN-lang="实施自适应用户界面流程"
             ja-lang="順応性のある UI フローの実装"
-            es-lang="Cómo implementar interfaces de usuario adaptables"               
+            es-lang="Cómo implementar interfaces de usuario adaptables"
             >Implementing Adaptive UI Flows</a>
           </li>
         </ul>
@@ -845,7 +845,29 @@
           </li>
         </ul>
       </li>
-
+<!--  Background Service -->
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/run-background-service/index.html"
+             description=
+             "How to improve UI performance and responsiveness by sending work to a
+             Service running in the background">Running in a Background Service</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/create-service.html">
+            Creating a Background Service
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/send-request.html">
+            Sending Work Requests to the Background Service
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/report-status.html">
+            Reporting Work Status
+          </a>
+          </li>
+        </ul>
+      </li>
       
       <li class="nav-section">
         <div class="nav-section-header">
@@ -862,25 +884,25 @@
           <li><a href="/training/monitoring-device-state/battery-monitoring.html"
             zh-CN-lang="监控电池电量和充电状态"
             ja-lang="電池残量と充電状態の監視"
-            es-lang="Cómo controlar el nivel de batería y el estado de carga"               
+            es-lang="Cómo controlar el nivel de batería y el estado de carga"
             >Monitoring the Battery Level and Charging State</a>
           </li>
           <li><a href="/training/monitoring-device-state/docking-monitoring.html"
             zh-CN-lang="确定和监控基座对接状态和类型"
             ja-lang="ホルダーの装着状態とタイプの特定と監視"
-            es-lang="Cómo determinar y controlar el tipo de conector y el estado de la conexión"               
+            es-lang="Cómo determinar y controlar el tipo de conector y el estado de la conexión"
             >Determining and Monitoring the Docking State and Type</a>
           </li>
           <li><a href="/training/monitoring-device-state/connectivity-monitoring.html"
             zh-CN-lang="确定和监控网络连接状态"
             ja-lang="接続状態の特定と監視"
-            es-lang="Cómo determinar y controlar el estado de la conectividad"               
+            es-lang="Cómo determinar y controlar el estado de la conectividad"
             >Determining and Monitoring the Connectivity Status</a>
           </li>
           <li><a href="/training/monitoring-device-state/manifest-receivers.html"
             zh-CN-lang="根据需要操作广播接收器"
             ja-lang="オンデマンドでのブロードキャスト レシーバ操作"
-            es-lang="Cómo manipular los receptores de emisión bajo demanda"               
+            es-lang="Cómo manipular los receptores de emisión bajo demanda"
             >Manipulating Broadcast Receivers On Demand</a>
           </li>
         </ul>

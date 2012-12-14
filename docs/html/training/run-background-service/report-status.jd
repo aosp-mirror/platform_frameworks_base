@@ -1,0 +1,199 @@
+page.title=Reporting Work Status
+trainingnavtop=true
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li>
+        <a href="#ReportStatus">Report Status From an IntentService</a>
+    </li>
+    <li>
+        <a href="#ReceiveStatus">Receive Status Broadcasts from an IntentService</a>
+    </li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+    <li>
+        The section <b>Broadcast receivers</b> in the
+    <a href="{@docRoot}guide/components/fundamentals.html#Components">Application Components</a>
+        API guide.
+    </li>
+</ul>
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    This lesson shows you how to report the status of a work request run in a background service
+    to the component that sent the request. This allows you, for example, to report the status of
+    the request in an {@link android.app.Activity} object's UI. The recommended way to send and
+    receive status is to use a {@link android.support.v4.content.LocalBroadcastManager}, which
+    limits broadcast {@link android.content.Intent} objects to components in your own app.
+</p>
+<h2 id="ReportStatus">Report Status From an IntentService</h2>
+
+<p>
+    To send the status of a work request in an {@link android.app.IntentService} to other
+    components, first create an {@link android.content.Intent} that contains the status in its
+    extended data. As an option, you can add an action and data URI to this
+    {@link android.content.Intent}.
+</p>
+<p>
+    Next, send the {@link android.content.Intent} by calling
+    {@link android.support.v4.content.LocalBroadcastManager#sendBroadcast
+    LocalBroadcastManager.sendBroadcast()}. This sends the {@link android.content.Intent} to any
+    component in your application that has registered to receive it.
+    To get an instance of {@link android.support.v4.content.LocalBroadcastManager}, call
+    {@link android.support.v4.content.LocalBroadcastManager#getInstance getInstance()}.
+</p>
+<p>
+    For example:
+</p>
+<pre>
+public final class Constants {
+    ...
+    // Defines a custom Intent action
+    public static final String BROADCAST_ACTION =
+        "com.example.android.threadsample.BROADCAST";
+    ...
+    // Defines the key for the status "extra" in an Intent
+    public static final String EXTENDED_DATA_STATUS =
+        "com.example.android.threadsample.STATUS";
+    ...
+}
+public class RSSPullService extends IntentService {
+...
+    /*
+     * Creates a new Intent containing a Uri object
+     * BROADCAST_ACTION is a custom Intent action
+     */
+    Intent localIntent =
+            new Intent(Constants.BROADCAST_ACTION)
+            // Puts the status into the Intent
+            .putExtra(Constants.EXTENDED_DATA_STATUS, status);
+    // Broadcasts the Intent to receivers in this app.
+    LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+...
+}
+</pre>
+<p>
+    The next step is to handle the incoming broadcast {@link android.content.Intent} objects in
+    the component that sent the original work request.
+</p>
+<h2 id="ReceiveStatus">Receive Status Broadcasts from an IntentService</h2>
+<p>
+    
+    To receive broadcast {@link android.content.Intent} objects, use a subclass of
+    {@link android.content.BroadcastReceiver}. In the subclass, implement the
+    {@link android.content.BroadcastReceiver#onReceive BroadcastReceiver.onReceive()} callback
+    method, which {@link android.support.v4.content.LocalBroadcastManager} invokes when it receives
+    an {@link android.content.Intent}. {@link android.support.v4.content.LocalBroadcastManager}
+    passes the incoming {@link android.content.Intent} to
+    {@link android.content.BroadcastReceiver#onReceive BroadcastReceiver.onReceive()}.
+</p>
+<p>
+    For example:
+</p>
+<pre>
+// Broadcast receiver for receiving status updates from the IntentService
+private class ResponseReceiver extends BroadcastReceiver
+{
+    // Prevents instantiation
+    private DownloadStateReceiver() {
+    }
+    // Called when the BroadcastReceiver gets an Intent it's registered to receive
+    &#64;
+    public void onReceive(Context context, Intent intent) {
+...
+        /*
+         * Handle Intents here.
+         */
+...
+    }
+}
+</pre>
+<p>
+    Once you've defined the {@link android.content.BroadcastReceiver}, you can define filters
+    for it that match specific actions, categories, and data. To do this, create
+    an {@link android.content.IntentFilter}. This first snippet shows how to define the filter:
+</p>
+<pre>
+// Class that displays photos
+public class DisplayActivity extends FragmentActivity {
+    ...
+    public void onCreate(Bundle stateBundle) {
+        ...
+        super.onCreate(stateBundle);
+        ...
+        // The filter's action is BROADCAST_ACTION
+        IntentFilter mStatusIntentFilter = new IntentFilter(
+                Constants.BROADCAST_ACTION);
+    
+        // Adds a data filter for the HTTP scheme
+        mStatusIntentFilter.addDataScheme("http");
+        ...
+</pre>
+<p>
+    To register the {@link android.content.BroadcastReceiver} and the
+    {@link android.content.IntentFilter} with the system, get an instance of
+    {@link android.support.v4.content.LocalBroadcastManager} and call its
+    {@link android.support.v4.content.LocalBroadcastManager#registerReceiver registerReceiver()}
+    method. This next snippet shows how to register the {@link android.content.BroadcastReceiver}
+    and its {@link android.content.IntentFilter}:
+</p>
+<pre>
+        // Instantiates a new DownloadStateReceiver
+        DownloadStateReceiver mDownloadStateReceiver =
+                new DownloadStateReceiver();
+        // Registers the DownloadStateReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mDownloadStateReceiver,
+                mStatusIntentFilter);
+        ...
+</pre>
+<p>
+    A single {@link android.content.BroadcastReceiver} can handle more than one type of broadcast
+    {@link android.content.Intent} object, each with its own action. This feature allows you to
+    run different code for each action, without having to define a separate
+    {@link android.content.BroadcastReceiver} for each action. To define another
+    {@link android.content.IntentFilter} for the same
+    {@link android.content.BroadcastReceiver}, create the {@link android.content.IntentFilter} and
+    repeat the call to
+    {@link android.support.v4.content.LocalBroadcastManager#registerReceiver registerReceiver()}.
+    For example:
+</p>
+<pre>
+        /*
+         * Instantiates a new action filter.
+         * No data filter is needed.
+         */
+        statusIntentFilter = new IntentFilter(Constants.ACTION_ZOOM_IMAGE);
+        ...
+        // Registers the receiver with the new filter
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mDownloadStateReceiver,
+                mIntentFilter);
+</pre>
+<p>
+    Sending an broadcast {@link android.content.Intent} doesn't start or resume an
+    {@link android.app.Activity}. The {@link android.content.BroadcastReceiver} for an
+    {@link android.app.Activity} receives and processes {@link android.content.Intent} objects even
+    when your app is in the background, but doesn't force your app to the foreground. If you
+    want to notify the user about an event that happened in the background while your app was not
+    visible, use a {@link android.app.Notification}. <i>Never</i> start an
+    {@link android.app.Activity} in response to an incoming broadcast
+    {@link android.content.Intent}.
+</p>
+<p>
+    
+</p>
+
