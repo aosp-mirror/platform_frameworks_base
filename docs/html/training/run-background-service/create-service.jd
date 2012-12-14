@@ -1,0 +1,131 @@
+page.title=Creating a Background Service
+trainingnavtop=true
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li>
+        <a href="#CreateClass">Create an IntentService</a>
+    </li>
+    <li>
+        <a href="#DefineManifest">Define the IntentService in the Manifest</a>
+    </li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+    <li>
+<a href="{@docRoot}guide/components/services.html#ExtendingIntentService">Extending the IntentService Class</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+    </li>
+</ul>
+<h2>Try it out</h2>
+
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    The {@link android.app.IntentService} class provides a straightforward structure for running
+    an operation on a single background thread. This allows it to handle long-running operations
+    without affecting your user interface's responsiveness. Also, an
+    {@link android.app.IntentService} isn't affected by most user interface lifecycle events, so it
+    continues to run in circumstances that would shut down an {@link android.os.AsyncTask}
+</p>
+<p>
+    An {@link android.app.IntentService} has a few limitations:
+</p>
+<ul>
+    <li>
+        It can't interact directly with your user interface. To put its results in the UI, you
+        have to send them to an {@link android.app.Activity}.
+    </li>
+    <li>
+        Work requests run sequentially. If an operation is running in an
+        {@link android.app.IntentService}, and you send it another request, the request waits until
+        the first operation is finished.
+    </li>
+    <li>
+        An operation running on an {@link android.app.IntentService} can't be interrupted.
+    </li>
+</ul>
+<p>
+    However, in most cases an {@link android.app.IntentService} is the preferred way to simple
+    background operations.
+</p>
+<p>
+    This lesson shows you how to create your own subclass of {@link android.app.IntentService}.
+    The lesson also shows you how to create the required callback method
+    {@link android.app.IntentService#onHandleIntent onHandleIntent()}. Finally, the lesson describes
+    shows you how to define the {@link android.app.IntentService} in your manifest file.
+</p>
+<h2 id="CreateClass">Create an IntentService</h2>
+<p>
+    To create an {@link android.app.IntentService} component for your app, define a class that
+    extends {@link android.app.IntentService}, and within it, define a method that
+    overrides {@link android.app.IntentService#onHandleIntent onHandleIntent()}. For example:
+</p>
+<pre>
+public class RSSPullService extends IntentService {
+    &#64;Override
+    protected void onHandleIntent(Intent workIntent) {
+        // Gets data from the incoming Intent
+        String dataString = workIntent.getDataString();
+        ...
+        // Do work here, based on the contents of dataString
+        ...
+    }
+}
+</pre>
+<p>
+    Notice that the other callbacks of a regular {@link android.app.Service} component, such as
+    {@link android.app.Service#onStartCommand onStartCommand()} are automatically invoked by
+    {@link android.app.IntentService}. In an {@link android.app.IntentService}, you should avoid
+    overriding these callbacks.
+</p>
+<h2 id="DefineManifest">Define the IntentService in the Manifest</h2>
+<p>
+    An {@link android.app.IntentService} also needs an entry in your application manifest.
+    Provide this entry as a
+    <code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+    element that's a child of the
+    <code><a href="{@docRoot}guide/topics/manifest/application-element.html">
+    &lt;application&gt;</a></code> element:
+</p>
+<pre>
+    &lt;application
+        android:icon="&#64;drawable/icon"
+        android:label="&#64;string/app_name"&gt;
+        ...
+        &lt;!--
+            Because android:exported is set to "false",
+            the service is only available to this app.
+        --&gt;
+        &lt;service
+            android:name=".RSSPullService"
+            android:exported="false"/&gt;
+        ...
+    &lt;application/&gt;
+</pre>
+<p>
+    The attribute <code>android:name</code> specifies the class name of the
+    {@link android.app.IntentService}.
+</p>
+<p>
+    Notice that the
+    <code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+    element doesn't contain an intent filter. The {@link android.app.Activity} that sends work
+    requests to the service uses an explicit {@link android.content.Intent}, so no filter is needed.
+    This also means that only components in the same app or other applications with the same user ID
+    can access the service.
+</p>
+<p>
+    Now that you have the basic {@link android.app.IntentService} class, you can send work requests
+    to it with {@link android.content.Intent} objects. The procedure for constructing these objects
+    and sending them to your {@link android.app.IntentService} is described in the next lesson.
+</p>
