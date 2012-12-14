@@ -845,13 +845,14 @@
           </li>
         </ul>
       </li>
-<!--  Background Service -->
+
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/run-background-service/index.html"
              description=
              "How to improve UI performance and responsiveness by sending work to a
-             Service running in the background">Running in a Background Service</a>
+             Service running in the background"
+            >Running in a Background Service</a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/run-background-service/create-service.html">
@@ -865,6 +866,23 @@
           <li><a href="<?cs var:toroot ?>training/run-background-service/report-status.html">
             Reporting Work Status
           </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/load-data-background/index.html"
+             description="How to use CursorLoader to query data without
+             affecting UI responsiveness."
+            >Loading Data in the Background</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/setup-loader.html">
+            Running a Query with a CursorLoader</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/handle-results.html">
+            Handling the Results</a>
           </li>
         </ul>
       </li>
