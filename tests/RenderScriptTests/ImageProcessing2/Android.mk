@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-ifeq (1,0)
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -38,4 +37,4 @@ LOCAL_REQUIRED_MODULES := librsjni
 include $(BUILD_PACKAGE)
 
 #include $(call all-makefiles-under, $(LOCAL_PATH))
-endif
+
