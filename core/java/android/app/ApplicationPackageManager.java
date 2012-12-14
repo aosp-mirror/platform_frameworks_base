@@ -50,6 +50,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 
@@ -1064,7 +1065,7 @@ final class ApplicationPackageManager extends PackageManager {
     public int installExistingPackage(String packageName)
             throws NameNotFoundException {
         try {
-            int res = mPM.installExistingPackage(packageName);
+            int res = mPM.installExistingPackageAsUser(packageName, UserHandle.myUserId());
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
@@ -1126,7 +1127,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
         try {
-            mPM.deletePackage(packageName, observer, flags);
+            mPM.deletePackageAsUser(packageName, observer, UserHandle.myUserId(), flags);
         } catch (RemoteException e) {
             // Should never happen!
         }

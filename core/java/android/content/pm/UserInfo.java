@@ -97,6 +97,10 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_GUEST) == FLAG_GUEST;
     }
 
+    public boolean isRestricted() {
+        return (flags & FLAG_RESTRICTED) == FLAG_RESTRICTED;
+    }
+
     public UserInfo() {
     }
 

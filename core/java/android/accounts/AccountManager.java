@@ -1123,6 +1123,57 @@ public class AccountManager {
     }
 
     /**
+     * Adds a shared account from the primary user to a secondary user. Adding the shared account
+     * doesn't take effect immediately. When the target user starts up, any pending shared accounts
+     * are attempted to be copied to the target user from the primary via calls to the
+     * authenticator.
+     * @param account the account to share
+     * @param user the target user
+     * @return
+     * @hide
+     */
+    public boolean addSharedAccount(final Account account, UserHandle user) {
+        try {
+            boolean val = mService.addSharedAccountAsUser(account, user.getIdentifier());
+            return val;
+        } catch (RemoteException re) {
+            // won't ever happen
+            throw new RuntimeException(re);
+        }
+    }
+
+    /**
+     * @hide
+     * Removes the shared account.
+     * @param account the account to remove
+     * @param user the user to remove the account from
+     * @return
+     */
+    public boolean removeSharedAccount(final Account account, UserHandle user) {
+        try {
+            boolean val = mService.removeSharedAccountAsUser(account, user.getIdentifier());
+            return val;
+        } catch (RemoteException re) {
+            // won't ever happen
+            throw new RuntimeException(re);
+        }
+    }
+
+    /**
+     * @hide
+     * @param user
+     * @return
+     */
+    public Account[] getSharedAccounts(UserHandle user) {
+        try {
+            return mService.getSharedAccountsAsUser(user.getIdentifier());
+        } catch (RemoteException re) {
+            // won't ever happen
+            throw new RuntimeException(re);
+        }
+    }
+
+    /**
      * Confirms that the user knows the password for an account to make extra
      * sure they are the owner of the account.  The user-entered password can
      * be supplied directly, otherwise the authenticator for this account type

@@ -542,16 +542,16 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void fallbackToSingleUserLocked() {
         // Create the primary user
-        UserInfo primary = new UserInfo(0,
+        UserInfo primary = new UserInfo(UserHandle.USER_OWNER,
                 mContext.getResources().getString(com.android.internal.R.string.owner_name), null,
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
         mUsers.put(0, primary);
         mNextSerialNumber = MIN_USER_ID;
-        
+
         Bundle restrictions = new Bundle();
         initRestrictionsToDefaults(restrictions);
-        mUserRestrictions.append(0, restrictions);
-        
+        mUserRestrictions.append(UserHandle.USER_OWNER, restrictions);
+
         updateUserIdsLocked();
 
         writeUserListLocked();

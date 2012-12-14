@@ -275,6 +275,38 @@ public abstract class AbstractAccountAuthenticator {
                 handleException(response, "getAccountRemovalAllowed", account.toString(), e);
             }
         }
+
+        public void getAccountCredentialsForCloning(IAccountAuthenticatorResponse response,
+                Account account) throws RemoteException {
+            checkBinderPermission();
+            try {
+                final Bundle result =
+                        AbstractAccountAuthenticator.this.getAccountCredentialsForCloning(
+                                new AccountAuthenticatorResponse(response), account);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "getAccountCredentialsForCloning", account.toString(), e);
+            }
+        }
+
+        public void addAccountFromCredentials(IAccountAuthenticatorResponse response,
+                Account account,
+                Bundle accountCredentials) throws RemoteException {
+            checkBinderPermission();
+            try {
+                final Bundle result =
+                        AbstractAccountAuthenticator.this.addAccountFromCredentials(
+                                new AccountAuthenticatorResponse(response), account,
+                                accountCredentials);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "addAccountFromCredentials", account.toString(), e);
+            }
+        }
     }
 
     private void handleException(IAccountAuthenticatorResponse response, String method,
@@ -470,5 +502,55 @@ public abstract class AbstractAccountAuthenticator {
         final Bundle result = new Bundle();
         result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
         return result;
+    }
+
+    /**
+     * @hide
+     * Returns a Bundle that contains whatever is required to clone the account on a different
+     * user. The Bundle is passed to the authenticator instance in the target user via
+     * {@link #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)}.
+     * The default implementation returns null, indicating that cloning is not supported.
+     * @param response to send the result back to the AccountManager, will never be null
+     * @param account the account to clone, will never be null
+     * @return a Bundle result or null if the result is to be returned via the response.
+     * @throws NetworkErrorException
+     * @see {@link #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)}
+     */
+    public Bundle getAccountCredentialsForCloning(final AccountAuthenticatorResponse response,
+            final Account account) throws NetworkErrorException {
+        new Thread(new Runnable() {
+            public void run() {
+                Bundle result = new Bundle();
+                result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+                response.onResult(result);
+            }
+        }).start();
+        return null;
+    }
+
+    /**
+     * @hide
+     * Creates an account based on credentials provided by the authenticator instance of another
+     * user on the device, who has chosen to share the account with this user.
+     * @param response to send the result back to the AccountManager, will never be null
+     * @param account the account to clone, will never be null
+     * @param accountCredentials the Bundle containing the required credentials to create the
+     * account. Contents of the Bundle are only meaningful to the authenticator. This Bundle is
+     * provided by {@link #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)}.
+     * @return a Bundle result or null if the result is to be returned via the response.
+     * @throws NetworkErrorException
+     * @see {@link #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)}
+     */
+    public Bundle addAccountFromCredentials(final AccountAuthenticatorResponse response,
+            Account account,
+            Bundle accountCredentials) throws NetworkErrorException {
+        new Thread(new Runnable() {
+            public void run() {
+                Bundle result = new Bundle();
+                result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+                response.onResult(result);
+            }
+        }).start();
+        return null;
     }
 }
