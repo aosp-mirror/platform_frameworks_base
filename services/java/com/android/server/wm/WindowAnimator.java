@@ -570,6 +570,10 @@ public class WindowAnimator {
                     mAnimating |= dimAnimator.updateSurface(isDimmingLocked(displayId),
                             mCurrentTime, !mService.okToDisplay());
                 }
+                //TODO (multidisplay): Magnification is supported only for the default display.
+                if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
+                    mService.mDisplayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
+                }
             }
 
             if (mService.mWatermark != null) {

@@ -39,6 +39,9 @@ public class MagnificationSpec implements Parcelable {
     }
 
     public void initialize(float scale, float offsetX, float offsetY) {
+        if (scale < 1) {
+            throw new IllegalArgumentException("Scale must be greater than or equal to one!");
+        }
         this.scale = scale;
         this.offsetX = offsetX;
         this.offsetY = offsetY;

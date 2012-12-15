@@ -4544,6 +4544,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardMediator.showAssistant();
     }
 
+    @Override
+    public boolean canMagnifyWindow(int windowType) {
+        switch (windowType) {
+            case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
+            case WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG:
+            case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR:
+            case WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY: {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isTopLevelWindow(int windowType) {
+        if (windowType >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
+                && windowType <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+            return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
+        }
+        return true;
+    }
+
     /**
      * Returns the human readable name of a window transition.
      *

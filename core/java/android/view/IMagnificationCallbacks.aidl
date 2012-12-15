@@ -16,16 +16,14 @@
 
 package android.view;
 
-import android.view.IDisplayMagnificationController;
-import android.view.MagnificationSpec;
+import android.graphics.Region;
 
 /**
  * {@hide}
  */
-interface IDisplayMagnificationMediator {
-    void addController(int displayId, in IDisplayMagnificationController controller);
-    void removeController(in IDisplayMagnificationController controller);
-    void setMagnificationSpec(in IDisplayMagnificationController controller,
-            in MagnificationSpec spec);
-    MagnificationSpec getCompatibleMagnificationSpec(in IBinder windowToken);
+oneway interface IMagnificationCallbacks {
+    void onMagnifedBoundsChanged(in Region bounds);
+    void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
+    void onRotationChanged(int rotation);
+    void onUserContextChanged();
 }
