@@ -4277,7 +4277,7 @@ public final class ActivityThread {
 
         // Enable OpenGL tracing if required
         if (data.enableOpenGlTrace) {
-            GLUtils.enableTracing();
+            GLUtils.setTracingLevel(1);
         }
 
         /**
