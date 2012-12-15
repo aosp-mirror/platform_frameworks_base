@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
@@ -37,6 +38,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.WorkSource;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
@@ -421,6 +423,13 @@ public class WifiP2pManager {
     /** @hide */
     public static final int SET_WFD_INFO_SUCCEEDED                  = BASE + 61;
 
+    /** @hide */
+    public static final int START_WPS                               = BASE + 62;
+    /** @hide */
+    public static final int START_WPS_FAILED                        = BASE + 63;
+    /** @hide */
+    public static final int START_WPS_SUCCEEDED                     = BASE + 64;
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -641,70 +650,72 @@ public class WifiP2pManager {
                         }
                         break;
                     /* ActionListeners grouped together */
-                    case WifiP2pManager.DISCOVER_PEERS_FAILED:
-                    case WifiP2pManager.STOP_DISCOVERY_FAILED:
-                    case WifiP2pManager.DISCOVER_SERVICES_FAILED:
-                    case WifiP2pManager.CONNECT_FAILED:
-                    case WifiP2pManager.CANCEL_CONNECT_FAILED:
-                    case WifiP2pManager.CREATE_GROUP_FAILED:
-                    case WifiP2pManager.REMOVE_GROUP_FAILED:
-                    case WifiP2pManager.ADD_LOCAL_SERVICE_FAILED:
-                    case WifiP2pManager.REMOVE_LOCAL_SERVICE_FAILED:
-                    case WifiP2pManager.CLEAR_LOCAL_SERVICES_FAILED:
-                    case WifiP2pManager.ADD_SERVICE_REQUEST_FAILED:
-                    case WifiP2pManager.REMOVE_SERVICE_REQUEST_FAILED:
-                    case WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED:
-                    case WifiP2pManager.SET_DEVICE_NAME_FAILED:
-                    case WifiP2pManager.DELETE_PERSISTENT_GROUP_FAILED:
-                    case WifiP2pManager.SET_WFD_INFO_FAILED:
+                    case DISCOVER_PEERS_FAILED:
+                    case STOP_DISCOVERY_FAILED:
+                    case DISCOVER_SERVICES_FAILED:
+                    case CONNECT_FAILED:
+                    case CANCEL_CONNECT_FAILED:
+                    case CREATE_GROUP_FAILED:
+                    case REMOVE_GROUP_FAILED:
+                    case ADD_LOCAL_SERVICE_FAILED:
+                    case REMOVE_LOCAL_SERVICE_FAILED:
+                    case CLEAR_LOCAL_SERVICES_FAILED:
+                    case ADD_SERVICE_REQUEST_FAILED:
+                    case REMOVE_SERVICE_REQUEST_FAILED:
+                    case CLEAR_SERVICE_REQUESTS_FAILED:
+                    case SET_DEVICE_NAME_FAILED:
+                    case DELETE_PERSISTENT_GROUP_FAILED:
+                    case SET_WFD_INFO_FAILED:
+                    case START_WPS_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
                         break;
                     /* ActionListeners grouped together */
-                    case WifiP2pManager.DISCOVER_PEERS_SUCCEEDED:
-                    case WifiP2pManager.STOP_DISCOVERY_SUCCEEDED:
-                    case WifiP2pManager.DISCOVER_SERVICES_SUCCEEDED:
-                    case WifiP2pManager.CONNECT_SUCCEEDED:
-                    case WifiP2pManager.CANCEL_CONNECT_SUCCEEDED:
-                    case WifiP2pManager.CREATE_GROUP_SUCCEEDED:
-                    case WifiP2pManager.REMOVE_GROUP_SUCCEEDED:
-                    case WifiP2pManager.ADD_LOCAL_SERVICE_SUCCEEDED:
-                    case WifiP2pManager.REMOVE_LOCAL_SERVICE_SUCCEEDED:
-                    case WifiP2pManager.CLEAR_LOCAL_SERVICES_SUCCEEDED:
-                    case WifiP2pManager.ADD_SERVICE_REQUEST_SUCCEEDED:
-                    case WifiP2pManager.REMOVE_SERVICE_REQUEST_SUCCEEDED:
-                    case WifiP2pManager.CLEAR_SERVICE_REQUESTS_SUCCEEDED:
-                    case WifiP2pManager.SET_DEVICE_NAME_SUCCEEDED:
-                    case WifiP2pManager.DELETE_PERSISTENT_GROUP_SUCCEEDED:
-                    case WifiP2pManager.SET_WFD_INFO_SUCCEEDED:
+                    case DISCOVER_PEERS_SUCCEEDED:
+                    case STOP_DISCOVERY_SUCCEEDED:
+                    case DISCOVER_SERVICES_SUCCEEDED:
+                    case CONNECT_SUCCEEDED:
+                    case CANCEL_CONNECT_SUCCEEDED:
+                    case CREATE_GROUP_SUCCEEDED:
+                    case REMOVE_GROUP_SUCCEEDED:
+                    case ADD_LOCAL_SERVICE_SUCCEEDED:
+                    case REMOVE_LOCAL_SERVICE_SUCCEEDED:
+                    case CLEAR_LOCAL_SERVICES_SUCCEEDED:
+                    case ADD_SERVICE_REQUEST_SUCCEEDED:
+                    case REMOVE_SERVICE_REQUEST_SUCCEEDED:
+                    case CLEAR_SERVICE_REQUESTS_SUCCEEDED:
+                    case SET_DEVICE_NAME_SUCCEEDED:
+                    case DELETE_PERSISTENT_GROUP_SUCCEEDED:
+                    case SET_WFD_INFO_SUCCEEDED:
+                    case START_WPS_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
                         break;
-                    case WifiP2pManager.RESPONSE_PEERS:
+                    case RESPONSE_PEERS:
                         WifiP2pDeviceList peers = (WifiP2pDeviceList) message.obj;
                         if (listener != null) {
                             ((PeerListListener) listener).onPeersAvailable(peers);
                         }
                         break;
-                    case WifiP2pManager.RESPONSE_CONNECTION_INFO:
+                    case RESPONSE_CONNECTION_INFO:
                         WifiP2pInfo wifiP2pInfo = (WifiP2pInfo) message.obj;
                         if (listener != null) {
                             ((ConnectionInfoListener) listener).onConnectionInfoAvailable(wifiP2pInfo);
                         }
                         break;
-                    case WifiP2pManager.RESPONSE_GROUP_INFO:
+                    case RESPONSE_GROUP_INFO:
                         WifiP2pGroup group = (WifiP2pGroup) message.obj;
                         if (listener != null) {
                             ((GroupInfoListener) listener).onGroupInfoAvailable(group);
                         }
                         break;
-                    case WifiP2pManager.RESPONSE_SERVICE:
+                    case RESPONSE_SERVICE:
                         WifiP2pServiceResponse resp = (WifiP2pServiceResponse) message.obj;
                         handleServiceResponse(resp);
                         break;
-                    case WifiP2pManager.RESPONSE_PERSISTENT_GROUP_INFO:
+                    case RESPONSE_PERSISTENT_GROUP_INFO:
                         WifiP2pGroupList groups = (WifiP2pGroupList) message.obj;
                         if (listener != null) {
                             ((PersistentGroupInfoListener) listener).
@@ -788,6 +799,13 @@ public class WifiP2pManager {
 
     private static void checkServiceRequest(WifiP2pServiceRequest req) {
         if (req == null) throw new IllegalArgumentException("service request is null");
+    }
+
+    private static void checkP2pConfig(WifiP2pConfig c) {
+        if (c == null) throw new IllegalArgumentException("config cannot be null");
+        if (TextUtils.isEmpty(c.deviceAddress)) {
+            throw new IllegalArgumentException("deviceAddress cannot be empty");
+        }
     }
 
     /**
@@ -876,6 +894,7 @@ public class WifiP2pManager {
      */
     public void connect(Channel c, WifiP2pConfig config, ActionListener listener) {
         checkChannel(c);
+        checkP2pConfig(config);
         c.mAsyncChannel.sendMessage(CONNECT, 0, c.putListener(listener), config);
     }
 
@@ -934,6 +953,21 @@ public class WifiP2pManager {
     public void removeGroup(Channel c, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(REMOVE_GROUP, 0, c.putListener(listener));
+    }
+
+    /**
+     * Start a Wi-Fi Protected Setup (WPS) session.
+     *
+     * <p> The function call immediately returns after sending a request to start a
+     * WPS session. Currently, this is only valid if the current device is running
+     * as a group owner to allow any new clients to join the group. The application
+     * is notified of a success or failure to initiate WPS through listener callbacks
+     * {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}.
+     * @hide
+     */
+    public void startWps(Channel c, WpsInfo wps, ActionListener listener) {
+        checkChannel(c);
+        c.mAsyncChannel.sendMessage(START_WPS, 0, c.putListener(listener), wps);
     }
 
     /**
