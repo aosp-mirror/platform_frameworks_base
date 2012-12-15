@@ -812,6 +812,8 @@ public class Surface implements Parcelable {
      *
      * @param rotation The rotation.
      * @return The rotation symbolic name.
+     *
+     * @hide
      */
     public static String rotationToString(int rotation) {
         switch (rotation) {
