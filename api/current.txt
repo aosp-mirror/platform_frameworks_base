@@ -20072,6 +20072,21 @@ package android.renderscript {
   public static final class Script.KernelID extends android.renderscript.BaseObj {
   }
 
+  public static final class Script.LaunchOptions {
+    ctor public Script.LaunchOptions();
+    method public int getXEnd();
+    method public int getXStart();
+    method public int getYEnd();
+    method public int getYStart();
+    method public void setX(int, int);
+    method public void setY(int, int);
+    field protected int strategy;
+    field protected int xend;
+    field protected int xstart;
+    field protected int yend;
+    field protected int ystart;
+  }
+
   public class ScriptC extends android.renderscript.Script {
     ctor protected ScriptC(int, android.renderscript.RenderScript);
     ctor protected ScriptC(android.renderscript.RenderScript, android.content.res.Resources, int);
