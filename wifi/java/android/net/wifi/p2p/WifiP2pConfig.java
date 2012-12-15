@@ -30,7 +30,7 @@ public class WifiP2pConfig implements Parcelable {
     /**
      * The device MAC address uniquely identifies a Wi-Fi p2p device
      */
-    public String deviceAddress;
+    public String deviceAddress = "";
 
     /**
      * Wi-Fi Protected Setup information
@@ -58,6 +58,10 @@ public class WifiP2pConfig implements Parcelable {
         //set defaults
         wps = new WpsInfo();
         wps.setup = WpsInfo.PBC;
+    }
+
+    void invalidate() {
+        deviceAddress = "";
     }
 
     /** P2P-GO-NEG-REQUEST 42:fc:89:a8:96:09 dev_passwd_id=4 {@hide}*/
