@@ -23,7 +23,7 @@
       </li>
 
       <li><a href="<?cs var:toroot?>google/play-services/auth.html">
-          <span class="en">Authentication</span></a>
+          <span class="en">Authorization</span></a>
       </li>
 
       <li><a href="<?cs var:toroot?>google/play-services/plus.html">
