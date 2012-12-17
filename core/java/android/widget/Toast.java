@@ -374,8 +374,13 @@ public class Toast {
                 // remove the old view if necessary
                 handleHide();
                 mView = mNextView;
-                mWM = (WindowManager)mView.getContext().getApplicationContext()
-                        .getSystemService(Context.WINDOW_SERVICE);
+                Context context = mView.getContext();
+                if (context.getApplicationContext() != null) {
+                    // Use application context, except when called from system
+                    // service where there is no application context.
+                    context = context.getApplicationContext();
+                }
+                mWM = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
                 // We can resolve the Gravity here by using the Locale for getting
                 // the layout direction
                 final Configuration config = mView.getContext().getResources().getConfiguration();
