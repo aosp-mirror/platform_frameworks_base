@@ -318,5 +318,44 @@ public class Script extends BaseObj {
         public void updateAllocation() {
         }
     }
+
+    public static final class LaunchOptions {
+        protected int xstart = -1;
+        protected int ystart = -1;
+        protected int xend = -1 ;
+        protected int yend = -1;
+
+        protected int strategy;
+
+        public void setX(int xstartArg, int xendArg) {
+            if (xstartArg < 0 || xendArg <= xstartArg) {
+                throw new RSIllegalArgumentException("Invalid dimensions");
+            }
+            xstart = xstartArg;
+            xend = xendArg;
+        }
+
+        public void setY(int ystartArg, int yendArg) {
+            if (ystartArg < 0 || yendArg <= ystartArg) {
+                throw new RSIllegalArgumentException("Invalid dimensions");
+            }
+            ystart = ystartArg;
+            yend = yendArg;
+        }
+
+        public int getXStart() {
+            return xstart;
+        }
+        public int getXEnd() {
+            return xend;
+        }
+        public int getYStart() {
+            return ystart;
+        }
+        public int getYEnd() {
+            return yend;
+        }
+
+    }
 }
 
