@@ -816,6 +816,10 @@ public class WebSettingsClassic extends WebSettings {
      */
     @Override
     public synchronized void setLayoutAlgorithm(LayoutAlgorithm l) {
+        if (l == LayoutAlgorithm.TEXT_AUTOSIZING) {
+            throw new IllegalArgumentException(
+                    "WebViewClassic does not support TEXT_AUTOSIZING layout mode");
+        }
         // XXX: This will only be affective if libwebcore was built with
         // ANDROID_LAYOUT defined.
         if (mLayoutAlgorithm != l) {

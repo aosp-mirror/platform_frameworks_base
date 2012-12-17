@@ -37,6 +37,10 @@ public abstract class WebSettings {
      *   <li>SINGLE_COLUMN moves all content into one column that is the width of the
      *       view.</li>
      *   <li>NARROW_COLUMNS makes all columns no wider than the screen if possible.</li>
+     *   <li>TEXT_AUTOSIZING boosts font size of paragraphs based on heuristics to make
+     *       the text readable when viewing a wide-viewport layout in the overview mode.
+     *       It is recommended to enable zoom support {@link #setSupportZoom} when
+     *       using this mode.</li>
      * </ul>
      */
     // XXX: These must match LayoutAlgorithm in Settings.h in WebCore.
@@ -47,7 +51,11 @@ public abstract class WebSettings {
          */
         @Deprecated
         SINGLE_COLUMN,
-        NARROW_COLUMNS
+        NARROW_COLUMNS,
+        /**
+         * @hide
+         */
+        TEXT_AUTOSIZING
     }
 
     /**
