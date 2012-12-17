@@ -1,0 +1,33 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.systemui;
+
+# ---------------------------
+# PhoneStatusBar.java
+# ---------------------------
+36000 sysui_statusbar_touch (type|1),(x|1),(y|1),(enabled|1)
+
+# ---------------------------
+# PhoneStatusBarView.java
+# ---------------------------
+36010 sysui_panelbar_touch (type|1),(x|1),(y|1),(enabled|1)
+
+# ---------------------------
+# NotificationPanelView.java
+# ---------------------------
+36020 sysui_notificationpanel_touch (type|1),(x|1),(y|1)
+
+# ---------------------------
+# SettingsPanelView.java
+# ---------------------------
+36030 sysui_quickpanel_touch (type|1),(x|1),(y|1)
+
+# ---------------------------
+# PanelHolder.java
+# ---------------------------
+36040 sysui_panelholder_touch (type|1),(x|1),(y|1)
+
+# ---------------------------
+# SearchPanelView.java
+# ---------------------------
+36050 sysui_searchpanel_touch (type|1),(x|1),(y|1)

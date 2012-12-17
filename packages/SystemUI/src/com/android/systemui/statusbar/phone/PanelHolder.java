@@ -18,10 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
+import com.android.systemui.EventLogTags;
+
 public class PanelHolder extends FrameLayout {
+    public static final boolean DEBUG_GESTURES = true;
 
     private int mSelectedPanelIndex = -1;
     private PanelBar mBar;
@@ -67,6 +71,12 @@ public class PanelHolder extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_PANELHOLDER_TOUCH,
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
+            }
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 PanelBar.LOG("PanelHolder got touch in open air, closing panels");
