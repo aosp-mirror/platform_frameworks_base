@@ -37,10 +37,10 @@ each service that let you implement the functionality you want easier and faster
   </div>
   <div class="layout-content-col span-4">
 
-<h4>Standard Authentication</h4>
-<p>All products in Google Play services share a common authentication API
+<h4>Standard Authorization</h4>
+<p>All products in Google Play services share a common authorization API
   that leverages the existing Google accounts on the device. You and your
-  users have a consistent and safe way to grant and receive OAuth2 authentication
+  users have a consistent and safe way to grant and receive OAuth2 access tokens
   to Google services.</p>
 
   </div>
@@ -66,7 +66,7 @@ about your users' Android version.</p>
 <h4 id="client-lib">The Google Play services client library</h4>
 <p>
     The client library contains the interfaces to the individual Google
-    services and allows you to obtain authorization from users to authenticate
+    services and allows you to obtain authorization from users to gain access
     to these services with their credentials. It also contains APIs that allow
     you to resolve any issues at  runtime, such as a missing, disabled, or out-of-date
     Google Play services APK. The client library has a light footprint if you use
@@ -90,7 +90,7 @@ about your users' Android version.</p>
         The Google Play services APK contains the individual Google services and runs
         as a background service in the Android OS. You interact with the background service
         through the client library and the service carries out the actions on your behalf.
-        An easy-to-use authentication flow is also
+        An easy-to-use authorization flow is also
         provided to gain access to the each Google service, which provides consistency for both
         you and your users. 
     </p>
