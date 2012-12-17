@@ -710,7 +710,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     }
 
 cleanup:
-    delete [] buf;
+    free(buf);
 done:
     close(fd);
     return err;
