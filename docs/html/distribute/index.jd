@@ -2,53 +2,21 @@ page.title=Distribute Apps
 header.hide=1
 
 @jd:body
-<style>
-#butterbar-wrapper {
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-}
-#butterbar {
-  width:940px;
-  margin:0 auto;
-}
-#butterbar-message {
-  background-color:#f80;
-  float:right;
-  font-size:12px;
-  font-weight:bold;
-  padding:0 10px;
-  border-radius: 0 0 5px 5px;
-}
-#butterbar-message a {color:#fff !important}
-#butterbar-message a:hover {text-decoration:underline;}
-</style>
-
- <div id="butterbar-wrapper" >
-  <div id="butterbar" >
-    <div id="butterbar-message">
-<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/17EFbvdm4FYkocc83EcrKhyhP5Y6tbns_eiBSeQ6ojxU/viewform">
-      Take the Android Developer Survey</a>
-    </div>
-  </div>
-</div>
     
     
-    <div class="marquee">
-    
-    <div continer>
-    
+<div class="marquee">
   <div class="madin-img" style="position:absolute;margin-left:42px;margin-top:76px;">
-    <img src="/images/home/google-play.png">
+    <img src="{@docRoot}images/home/google-play.png">
   </div>
   <div class="copy" style="position:relative;left:480px;width:360;">
     <h1 style="margin-bottom:10px;">Your Apps on Google Play</h1>
-    <p>The most visited store in the world for Android apps.  Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
-    
-    <p><a class="button" href="https://play.google.com/apps/publish/">Go to Developer Console &raquo;</a></p>
-  </div>    </div>
+    <p>The most visited store in the world for Android apps.  Cloud-connected and always synced,
+    it's never been easierfor users to find and download your apps.</p>
+    <p><a class="button" href="https://play.google.com/apps/publish/"
+      >Go to Developer Console &raquo;</a></p>
+  </div>
 </div>
+
 <div class="distribute-features col-13" style="clear:both;margin-top:246px;">
   <ul>
     <li><h5>Growth Engine</h5>
