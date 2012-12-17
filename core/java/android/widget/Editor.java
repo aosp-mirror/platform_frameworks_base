@@ -3844,16 +3844,20 @@ public class Editor {
 
         @Override
         public void handleMessage(Message msg) {
-            final int code = msg.what;
-            if (code == 0) { /* CODE_WORD_ADDED */
-                if (!(msg.obj instanceof Bundle)) {
-                    Log.w(TAG, "Illegal message. Abort handling onUserDictionaryAdded.");
+            switch(msg.what) {
+                case 0: /* CODE_WORD_ADDED */
+                case 2: /* CODE_ALREADY_PRESENT */
+                    if (!(msg.obj instanceof Bundle)) {
+                        Log.w(TAG, "Illegal message. Abort handling onUserDictionaryAdded.");
+                        return;
+                    }
+                    final Bundle bundle = (Bundle)msg.obj;
+                    final String originalWord = bundle.getString("originalWord");
+                    final String addedWord = bundle.getString("word");
+                    onUserDictionaryAdded(originalWord, addedWord);
                     return;
-                }
-                final Bundle bundle = (Bundle)msg.obj;
-                final String originalWord = bundle.getString("originalWord");
-                final String addedWord = bundle.getString("word");
-                onUserDictionaryAdded(originalWord, addedWord);
+                default:
+                    return;
             }
         }
 
