@@ -27,7 +27,7 @@ parent.link=index.html
 
   <p>Eclipse and the ADT plugin provide GUIs and wizards to create all three types of projects
   (Android project, Library project, and Test project):
-  
+
   <ul>
     <li>An Android project contains all of the files and resources that are needed to build a project into
   an .apk file for installation. You need to create an Android project for any application that you
@@ -44,99 +44,132 @@ parent.link=index.html
 
   <h2 id="CreatingAProject">Creating an Android Project</h2>
 
-  <p>The ADT plugin provides a <em>New Project Wizard</em> that you can use to quickly create a new Android
-  project (or a project from existing code). To create a new project:</p>
+  <p>The ADT plugin provides a <em>New Project Wizard</em> that you can use to quickly create a new
+  Android project (or a project from existing code). To create a new project:</p>
 
   <ol>
     <li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong>.</li>
 
-    <li>Select <strong>Android</strong> &gt; <strong>Android Project</strong>, and click
+    <li>Select <strong>Android</strong> &gt; <strong>Android Application Project</strong>, and click
     <strong>Next</strong>.</li>
 
-    <li>Select the contents for the project:
+    <li>Enter the basic settings for the project:
 
       <ul>
-        <li>Enter a <em>Project Name</em>. This will be the name of the folder where your project
-        is created.</li>
+        <li>Enter an <strong>Application Name</strong>. This name is used as the title of your
+        application launcher icon when it is installed on a device.</li>
 
-        <li>Under Contents, select <strong>Create new project in workspace</strong>. Select your
-        project workspace location.</li>
+        <li>Enter a <strong>Project Name</strong>. This text is used as the name of the folder where
+        your project is created.</li>
 
-        <li>Under Target, select an Android target to be used as the project's Build Target. The
-        Build Target specifies which Android platform you'd like your application built against.
+        <li>Enter a <strong>Package Name</strong>. This class package namespace creates the initial
+        package structure for your applications code files and is added as the
+        <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">{@code package}</a>
+        attribute in your application's
+        <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">Android manifest file</a>.
+        This manifest value serves as the unique identifier for your application app when you
+        distribute it to users. The package name must follow the same rules as packages in the Java
+        programming language.</li>
 
-          <p>Select the lowest platform with which your application is compatible.</p>
+        <li>Select a <strong>Minimum Required SDK</strong>. This setting indicates the lowest
+        version of the Android platform that your application supports. This value sets the
+        <code>minSdkVersion</code> attribute in the
+        <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a>
+        element of your manifest file.</li>
 
-          <p class="note"><strong>Note:</strong> You can change your the Build Target for your
+        <li>Select a <strong>Target SDK</strong>. This setting indicates the highest version of
+        Android with which you have tested with your application and sets the
+        <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+        targetSdkVersion}</a> attribute in your application's' manifest file.
+
+          <p class="note"><strong>Note:</strong> You can change the target SDK for your
           project at any time: Right-click the project in the Package Explorer, select
           <strong>Properties</strong>, select <strong>Android</strong> and then check the desired
-          Project Target.</p>
+          <strong>Project Build Target</strong>.</p>
         </li>
 
-        <li>Under Properties, fill in all necessary fields.
+        <li>Select a <strong>Compile With</strong> API version. This setting specifies what version
+        of the SDK to compile your project against. We strongly recommend using the most recent
+        version of the API.</li>
 
-          <ul>
-            <li>Enter an <em>Application name</em>. This is the human-readable title for your
-            application &mdash; the name that will appear on the Android device.</li>
+        <li>Select a <strong>Theme</strong>. This setting specifies which standard Android
+        <a href="{@docRoot}design/style/themes.html">visual style</a> is applied to your
+        application.</li>
 
-            <li>Enter a <em>Package name</em>. This is the package namespace (following the same
-            rules as for packages in the Java programming language) where all your source code will
-            reside.</li>
-
-            <li>Select <em>Create Activity</em> (optional, of course, but common) and enter a name
-            for your main Activity class.</li>
-
-            <li>Enter a <em>Min SDK Version</em>. This is an integer that indicates the minimum API
-            Level required to properly run your application. Entering this here automatically sets
-            the <code>minSdkVersion</code> attribute in the <a href=
-            "{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a> of your
-            Android Manifest file. If you're unsure of the appropriate <a href=
-            "{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> to use, copy the API Level
-            listed for the Build Target you selected in the Target tab.</li>
-          </ul>
-        </li>
+        <li>Click <strong>Next</strong>.</li>
       </ul>
     </li>
 
-    <li>Click <strong>Finish</strong>.</li>
+    <li>In the <strong>Configure Project</strong> page, select the desired settings and click
+      <strong>Next</strong>. Leave the <strong>Create activity</strong> option checked so you can
+      start your application with some essential components.</li>
+
+    <li>In the <strong>Configure Launcher Icon</strong> page, create an icon and click
+      <strong>Next</strong>.</li>
+
+    <li>In the <strong>Create Activity</strong> page, select activity template and click
+      <strong>Next</strong>. For more information about Android code templates, see
+      <a href="{@docRoot}tools/projects/templates.html">Using Code Templates</a>.
+      </li>
+
+    <li>Click <strong>Finish</strong> and the wizard creates a new project according to the options
+      you have chosen.</li>
   </ol>
 
-  <p class="note"><strong>Tip:</strong> You can also start the New Project Wizard from the
-  <em>New</em> icon in the toolbar.</p>
+  <p class="note"><strong>Tip:</strong> You can also start the New Project Wizard by clicking the
+  <strong>New</strong> <img src="/images/tools/eclipse-new.png"
+  style="vertical-align:baseline;margin:0"> icon in the toolbar.</p>
+
 
   <h2 id="SettingUpLibraryProject">Setting up a Library Project</h2>
 
   <p>A library project is a standard Android project, so you can create a new one in the same way
   as you would a new application project.</p>
 
-  <p>When you are creating the library project, you can select any application name, package, and
-  set other fields as needed, as shown in figure 1.</p>
+  <p>To create a new library project:</p>
 
-  <p>Next, set the project's properties to indicate that it is a library project:</p>
+  <ol>
+    <li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong>.</li>
+
+    <li>Select <strong>Android</strong> &gt; <strong>Android Application Project</strong>, and click
+    <strong>Next</strong>.</li>
+
+    <li>Enter the basic settings for the project, including <strong>Application Name</strong>,
+    <strong>Project Name</strong>, <strong>Package Name</strong>, and SDK settings.</li>
+
+    <li>In the <strong>Configure Project</strong> page, select the <strong>Mark this project as a
+    library</strong> option to flag the project as a library.</li>
+
+    <li>Set the other options as desired and click <strong>Next</strong>.</li>
+
+    <li>Follow the instructions to complete the wizard and create a new library project.</li>
+  </ol>
+
+  <p>You can also convert an existing application project into a library. To do so, simply open the
+    Properties for the project and select the <strong>is Library</strong> checkbox, as shown in
+    the figure below.</p>
+
+  <img src= "{@docRoot}images/developing/adt-props-isLib.png">
+  <p class="img-caption"><strong>Figure 1.</strong> Marking a project as an Android library.</p>
+
+  <p>To set the a project's properties to indicate that it is a library project:</p>
 
   <ol>
     <li>In the <strong>Package Explorer</strong>, right-click the library project and select
     <strong>Properties</strong>.</li>
 
-    <li>In the <strong>Properties</strong> window, select the "Android" properties group at left
-    and locate the <strong>Library</strong> properties at right.</li>
+    <li>In the <strong>Properties</strong> window, select the <strong>Android</strong> properties
+    group in the left pane and locate the <strong>Library</strong> properties in the right pane.</li>
 
-    <li>Select the "is Library" checkbox and click <strong>Apply</strong>.</li>
+    <li>Select the <strong>is Library</strong> check box and click <strong>Apply</strong>.</li>
 
-    <li>Click <strong>OK</strong> to close the <em>Properties</em> window.</li>
+    <li>Click <strong>OK</strong> to close the <strong>Properties</strong> window.</li>
   </ol>
 
-  <p>The new project is now marked as a library project. You can begin moving source code and
-  resources into it, as described in the sections below.</p>
+  <p>Once you create a library project or mark an existing project as a library, you can reference
+  the library project in other Android application projects. For more information, see the
+  <a href="#ReferencingLibraryProject">Referencing a library project</a> section.
 
-  <p>You can also convert an existing application project into a library. To do so, simply open the
-  Properties for the project and select the "is Library" checkbox. Other application projects can
-  now reference the existing project as a library project.</p>
-  
-  <img src= "{@docRoot}images/developing/adt-props-isLib.png">
-
-  <p class="img-caption"><strong>Figure 1.</strong> Marking a project as an
-     Android library project.</p>
 
   <h3>Creating the manifest file</h3>
 
@@ -146,7 +179,7 @@ parent.link=index.html
 
   <p>For example, the <a href=
   "{@docRoot}resources/samples/TicTacToeLib/AndroidManifest.html">TicTacToeLib</a> example library
-  project declares the Activity <code>GameActivity</code>:</p>
+  project declares the activity <code>GameActivity</code>:</p>
   <pre>
 &lt;manifest&gt;
   ...
@@ -167,6 +200,9 @@ parent.link=index.html
   <p>To add a reference to a library project, follow these steps:</p>
 
   <ol>
+    <li>Make sure that both the project library and the application project that depends on it are
+      in your workspace. If one of the projects is missing, import it into your workspace.</li>
+
     <li>In the <strong>Package Explorer</strong>, right-click the dependent project and select
     <strong>Properties</strong>.</li>
 
@@ -214,7 +250,7 @@ parent.link=index.html
 
   <p>For example, the <a href=
   "{@docRoot}resources/samples/TicTacToeMain/AndroidManifest.html">TicTacToeMain</a> example
-  application declares the library Activity <code>GameActivity</code> like this:</p>
+  application declares the library activity <code>GameActivity</code> like this:</p>
   <pre>
 &lt;manifest&gt;
   ...
