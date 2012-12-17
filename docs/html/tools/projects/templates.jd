@@ -1,0 +1,347 @@
+page.title=Using Code Templates
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#app-templates">Application Templates</a>
+          <ol>
+            <li><a href="#blank-activity">BlankActivity Template</a></li>
+            <li><a href="#full-screen-activity">Full Screen Activity Template</a></li>
+            <li><a href="#master-detail-activity">Master Detail Flow Template</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#activity-templates">Activity Templates</a>
+          <ol>
+            <li><a href="#login-activity">Login Activity Template</a></li>
+            <li><a href="#settings-activity">Settings Activity Template</a></li>
+          </ol>
+        </li>
+        <li><a href="#object-templates">Other Templates</a></li>
+      </ol>
+
+    </div>
+  </div>
+
+
+<p>The SDK tools provide templates for quickly creating Android application projects with the basic
+  structure or for adding components to your existing projects. The code templates
+  provided by the Android SDK follow the Android design and development guidelines to get you on the
+  right track to creating a beautiful, functional application.</p>
+
+<p>There are several types of Android code templates, which can create anything from an entire
+  application down to specific application components. The main categories of code templates are as
+  follows:</p>
+
+<ul>
+  <li><a href="#app-templates">Application Templates</a></li>
+  <li><a href="#activity-templates">Activity Templates</a></li>
+  <li><a href="#object-templates">Other Templates</a></li>
+</ul>
+
+
+<h2 id="app-templates">Application Templates</h2>
+
+<p>Application templates create basic Android applications that you can immediately run and test
+  on your Android device. These templates are available when you create a new Android project,
+  though you can also use these templates to <a href="#activity-templates">add new activities</a>
+  to an existing project.</p>
+
+<p>To use Android application templates:</p>
+
+<ol>
+  <li>In Eclipse, with the Android Development Tools (ADT) plugin installed, select <strong>File
+    &gt; New &gt; Android</strong>.</li>
+  <li>Select <strong>Android &gt; Android Application Project</strong>, and click
+    <strong>Next</strong>.</li>
+  <li>Enter the settings for your application, including <strong>Application Name</strong>,
+    <strong>Project Name</strong>, <strong>Package Name</strong>, API level settings and
+    presentation <strong>Theme</strong>, and click <strong>Next</strong>.</li>
+  <li>Enter the project configuration options, and click <strong>Next</strong>.</li>
+  <li>Optionally enter launcher icon settings, and click <strong>Next</strong>.</li>
+  <li>In the <strong>Create Activity</strong> page, select an application template to use.
+    <ul>
+      <li><a href="#blank-activity">BlankActivity</a></li>
+      <li><a href="#full-screen-activity">FullScreenActivity</a></li>
+      <li><a href="#master-detail-activity">MasterDetailFlow</a></li>
+    </ul>
+  </li>
+</ol>
+
+<p class="note">
+  <strong>Note:</strong> The other activity template options also create applications, however these
+  applications require further modification before they can be launched on an Android device.
+</p>
+
+
+<h3 id="blank-activity">Blank Activity Template</h3>
+
+<table>
+  <tr>
+    <th width="206px">Example</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/ba-no-navigation.png" alt="" />
+    </td>
+
+    <td><p>The <strong>BlankActivity</strong> template with the <strong>Navigation Type:
+      None</strong> option creates a simple application that follows the
+      <a href="{@docRoot}design/index.html">Android Design</a> guidelines. Use this template to
+      create a basic, minimal app as a starting point for your project.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>Title bar ({@link android.app.ActionBar} on Android 3.0 and later)</li>
+        <li>Options menu (action overflow on Android 3.0 and later) </li>
+        <li>Basic layout</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/ba-tabs.png" alt="" />
+    </td>
+
+    <td><p>The <strong>BlankActivity</strong> template with the <strong>Navigation Type:
+      Tabs</strong> or <strong>Tabs + Swipe</strong> option creates an application with
+      three sections based on the {@link android.app.Fragment} class and a tabbed user
+      interface.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>{@link android.app.ActionBar} for tab controls</li>
+        <li>{@link android.app.Fragment} objects for section content</li>
+        <li>Optional swipe gesture support based on the
+          <a href="{@docRoot}design/patterns/swipe-views.html">swipe view</a> design pattern,
+          which extends {@link android.support.v4.app.FragmentPagerAdapter} to manage section
+          fragments</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/ba-title-strip.png" alt="" />
+    </td>
+
+    <td><p>The <strong>BlankActivity</strong> template with the <strong>Navigation Type:
+      Swipe Views + Title Strip</strong> option creates an application with three
+      {@link android.app.Fragment} sections, a compact title strip header (known as
+      <a href="{@docRoot}design/building-blocks/tabs.html#scrollable">Scrollable Tabs</a> in the
+      <a href="{@docRoot}design/index.html">Android Design</a> guide) and swipe navigation between
+      the sections, based on the <a href="{@docRoot}design/patterns/swipe-views.html">swipe
+      view</a> design pattern.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>{@link android.support.v4.view.PagerTitleStrip} for section titles</li>
+        <li>{@link android.app.Fragment} objects for section content</li>
+        <li>{@link android.support.v4.app.FragmentPagerAdapter} to manage section fragments</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/ba-dropdown.png" alt="" />
+    </td>
+
+    <td><p>The <strong>BlankActivity</strong> template with the <strong>Navigation Type:
+      Dropdown</strong> option creates an application that extends
+      {@link android.support.v4.app.FragmentActivity}, containing three
+      {@link android.app.Fragment} sections, with an {@link android.app.ActionBar} using list mode
+      navigation.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>{@link android.app.ActionBar} for list mode navigation</li>
+        <li>{@link android.app.Fragment} objects for section content</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+
+<h3 id="full-screen-activity">Full Screen Activity Template</h3>
+
+<table>
+  <tr>
+    <th width="240px">Example</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/full-screen-activity.png" alt="" />
+    </td>
+
+    <td><p>This template provides an implementation of an activity which alternates between a
+      primary, full screen view and a view with standard user interface controls, including the
+      notification bar and application title bar. The full screen view is the default and a user
+      can activate the standard view by touching the device screen.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>{@code SystemUiHider} implementation that manages hiding of the system user interface
+          using a version-compatible approach</li>
+        <li>Basic layout</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+
+<h3 id="master-detail-activity">Master Detail Flow Template</h3>
+
+<table>
+  <tr>
+    <th width="350px">Example</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/master-detail-flow.png" alt=""/>
+    </td>
+
+    <td><p>This template creates an adaptive layout for a set of items and associated details. On a
+      tablet device, the item list and item details are displayed on the same screen. On a smaller
+      device, the list and details are displayed on separate screens.</p>
+
+      <p class="note">
+        <strong>Note:</strong> This template follows the recommendations of the
+        <a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a>
+        Android training.
+      </p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>Adaptive layout using
+          <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources"
+          >alternative resource</a> XML files</li>
+        <li>{@link android.support.v4.app.FragmentActivity}, {@link android.app.Fragment} and
+          {@link android.support.v4.app.ListFragment} implementations</li>
+      </ul></td>
+  </tr>
+</table>
+
+
+<h2 id="activity-templates">Activity Templates</h2>
+
+<p>Android activity templates provide options to add new activities to your existing
+  application.</p>
+
+<p>To use Android activity templates:</p>
+
+<ol>
+  <li>Right click the project folder of the Android application where you want to add an
+    activity.</li>
+  <li>Select <strong>New &gt; Other...</strong></li>
+  <li>Select <strong>Android &gt; Android Activity</strong>, and click <strong>Next</strong>.</li>
+  <li>Select an activity template, then follow the instructions to add it to your existing
+    application.
+    <ul>
+      <li><a href="#login-activity">LoginActivity</a></li>
+      <li><a href="#settings-activity">SettingsActivity</a></li>
+      <li><a href="#blank-activity">BlankActivity</a></li>
+      <li><a href="#full-screen-activity">FullScreenActivity</a></li>
+      <li><a href="#master-detail-activity">MasterDetailFlow</a></li>
+    </ul>
+  </li>
+</ol>
+
+<p>These templates create the same type of activity as they do when used as an application template,
+however the following templates create activities which are specifically intended to be used as part
+of an existing application.</p>
+
+
+<h3 id="login-activity">Login Activity Template</h3>
+
+<table>
+  <tr>
+    <th width="206px">Example</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/login-activity.png" alt="" />
+    </td>
+
+    <td><p>This activity template provides input fields and a sample implementation of
+      an {@link android.os.AsyncTask} that asks users to login or register with their credentials.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>Recommended user interface for requesting login information</li>
+        <li>{@link android.os.AsyncTask} implementation for handing network operations separately
+          from the main user interface thread</li>
+        <li>Progress indicator during network operations</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+
+<h3 id="settings-activity">Settings Activity Template</h3>
+
+<table>
+  <tr>
+    <th width="206px">Example</th>
+
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><img src="{@docRoot}images/code_templates/settings-activity.png" alt="" />
+    </td>
+
+    <td><p>This template extends the {@link android.preference.PreferenceActivity} class and uses an
+      XML file to create preference settings. This template also demonstrates how to implement
+      several data types for settings.</p>
+
+      <p>This template includes:</p>
+
+      <ul>
+        <li>Activity extending {@link android.preference.PreferenceActivity}</li>
+        <li>Preference values defined using XML files added to the {@code res/xml/} directory of
+          your project.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+
+<h2 id="object-templates">Other Templates</h2>
+
+<p>Android object templates provide options to add new components to your existing application,
+including the previously mentioned activities as well as the following additional items:</p>
+
+<p>To use Android object templates:</p>
+
+<ol>
+  <li>Right click the project folder of the Android application where you want to add a code
+    component.</li>
+  <li>Select <strong>New &gt; Other...</strong></li>
+  <li>Select <strong>Android &gt; Android Object</strong>, and click <strong>Next</strong>.</li>
+  <li>Select an object template, then follow the instructions to add it to your existing
+    application.
+    <ul>
+      <li>{@link android.content.BroadcastReceiver}</li>
+      <li>{@link android.content.ContentProvider}</li>
+      <li><a href="{@docRoot}guide/topics/ui/custom-components.html">Custom View</a></li>
+      <li>{@link android.app.Service}</li>
+    </ul>
+  </li>
+</ol>
