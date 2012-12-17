@@ -1889,7 +1889,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mHandler.post(new Runnable() {
                 public void run() {
                     try {
-                        ActivityManagerNative.getDefault().switchUser(0);
+                        ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
                         ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
                                 .removeUser(userHandle);
                     } catch (RemoteException re) {
