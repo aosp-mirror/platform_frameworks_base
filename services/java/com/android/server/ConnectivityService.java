@@ -1193,8 +1193,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("startUsingNetworkFeature reconnecting to " + networkType + ": " +
                                 feature);
                     }
-                    network.reconnect();
-                    return PhoneConstants.APN_REQUEST_STARTED;
+                    if (network.reconnect()) {
+                        return PhoneConstants.APN_REQUEST_STARTED;
+                    } else {
+                        return PhoneConstants.APN_REQUEST_FAILED;
+                    }
                 } else {
                     // need to remember this unsupported request so we respond appropriately on stop
                     synchronized(this) {
