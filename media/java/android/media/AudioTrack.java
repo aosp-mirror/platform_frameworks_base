@@ -55,6 +55,8 @@ import android.util.Log;
  * be played from it.<br>
  * For the streaming mode, data will be written to the hardware in chunks of
  * sizes less than or equal to the total buffer size.
+ *
+ * AudioTrack is not final and thus permits subclasses, but such use is not recommended.
  */
 public class AudioTrack
 {
@@ -601,7 +603,11 @@ public class AudioTrack
 
     /**
      *  Returns the native frame count used by the hardware.
+     *  @deprecated Only accessible by subclasses, which are not recommended for AudioTrack.
+     *  See {@link AudioManager#getProperty(String)} for key
+     *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      */
+    @Deprecated
     protected int getNativeFrameCount() {
         return native_get_native_frame_count();
     }
@@ -865,10 +871,13 @@ public class AudioTrack
     }
 
     /**
-     * Sets the initialization state of the instance. To be used in an AudioTrack subclass
-     * constructor to set a subclass-specific post-initialization state.
+     * Sets the initialization state of the instance. This method was originally intended to be used
+     * in an AudioTrack subclass constructor to set a subclass-specific post-initialization state.
+     * However, subclasses of AudioTrack are no longer recommended, so this method is obsolete.
      * @param state the state of the AudioTrack instance
+     * @deprecated Only accessible by subclasses, which are not recommended for AudioTrack.
      */
+    @Deprecated
     protected void setState(int state) {
         mState = state;
     }
