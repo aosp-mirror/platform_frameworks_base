@@ -17,8 +17,10 @@
 package android.drm;
 
 import static android.drm.DrmConvertedStatus.STATUS_OK;
+import static android.drm.DrmManagerClient.INVALID_SESSION;
 
-import java.io.File;
+import android.util.Log;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,8 +28,7 @@ import java.io.RandomAccessFile;
 import java.net.UnknownServiceException;
 import java.util.Arrays;
 
-import libcore.io.IoUtils;
-import libcore.util.SneakyThrow;
+import libcore.io.Streams;
 
 /**
  * Stream that applies a {@link DrmManagerClient} transformation to data before
@@ -36,45 +37,45 @@ import libcore.util.SneakyThrow;
  * @hide
  */
 public class DrmOutputStream extends OutputStream {
+    private static final String TAG = "DrmOutputStream";
 
     private final DrmManagerClient mClient;
+    private final RandomAccessFile mFile;
 
-    private int mSessionId;
-    private RandomAccessFile mOutput;
+    private int mSessionId = INVALID_SESSION;
 
-    public DrmOutputStream(DrmManagerClient client, File file, String mimeType) throws IOException {
+    /**
+     * @param file Opened with "rw" mode.
+     */
+    public DrmOutputStream(DrmManagerClient client, RandomAccessFile file, String mimeType)
+            throws IOException {
         mClient = client;
-        mOutput = new RandomAccessFile(file, "rw");
+        mFile = file;
 
-        try {
-            mSessionId = mClient.openConvertSession(mimeType);
-            if (mSessionId == DrmManagerClient.INVALID_SESSION) {
-                throw new UnknownServiceException("Failed to open DRM session for " + mimeType);
-            }
-        } catch (Throwable thrown) {
-            IoUtils.closeQuietly(mOutput);
-            SneakyThrow.sneakyThrow(thrown);
+        mSessionId = mClient.openConvertSession(mimeType);
+        if (mSessionId == INVALID_SESSION) {
+            throw new UnknownServiceException("Failed to open DRM session for " + mimeType);
+        }
+    }
+
+    public void finish() throws IOException {
+        final DrmConvertedStatus status = mClient.closeConvertSession(mSessionId);
+        if (status.statusCode == STATUS_OK) {
+            mFile.seek(status.offset);
+            mFile.write(status.convertedData);
+            mSessionId = INVALID_SESSION;
+        } else {
+            throw new IOException("Unexpected DRM status: " + status.statusCode);
         }
     }
 
     @Override
     public void close() throws IOException {
-        try {
-            final DrmConvertedStatus status = mClient.closeConvertSession(mSessionId);
-            if (status.statusCode == STATUS_OK) {
-                mOutput.seek(status.offset);
-                mOutput.write(status.convertedData);
-            } else {
-                throw new IOException("Unexpected DRM status: " + status.statusCode);
-            }
-        } finally {
-            try {
-                mOutput.getFD().sync();
-            } finally {
-                mOutput.close();
-                mOutput = null;
-            }
+        if (mSessionId == INVALID_SESSION) {
+            Log.w(TAG, "Closing stream without finishing");
         }
+
+        mFile.close();
     }
 
     @Override
@@ -91,7 +92,7 @@ public class DrmOutputStream extends OutputStream {
 
         final DrmConvertedStatus status = mClient.convertData(mSessionId, exactBuffer);
         if (status.statusCode == STATUS_OK) {
-            mOutput.write(status.convertedData);
+            mFile.write(status.convertedData);
         } else {
             throw new IOException("Unexpected DRM status: " + status.statusCode);
         }
@@ -99,6 +100,6 @@ public class DrmOutputStream extends OutputStream {
 
     @Override
     public void write(int oneByte) throws IOException {
-        write(new byte[] { (byte) oneByte });
+        Streams.writeSingleByte(this, oneByte);
     }
 }
