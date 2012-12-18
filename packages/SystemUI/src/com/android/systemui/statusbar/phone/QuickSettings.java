@@ -113,6 +113,7 @@ class QuickSettings {
     private LevelListDrawable mChargingBatteryLevels;
 
     boolean mTilesSetUp = false;
+    boolean mUseDefaultAvatar = false;
 
     private Handler mHandler;
 
@@ -155,6 +156,7 @@ class QuickSettings {
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
         IntentFilter profileFilter = new IntentFilter();
@@ -228,6 +230,7 @@ class QuickSettings {
                     avatar = new BitmapDrawable(mContext.getResources(), rawAvatar);
                 } else {
                     avatar = mContext.getResources().getDrawable(R.drawable.ic_qs_default_user);
+                    mUseDefaultAvatar = true;
                 }
 
                 // If it's a single-user device, get the profile name, since the nickname is not
@@ -916,6 +919,10 @@ class QuickSettings {
                 applyBluetoothStatus();
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 reloadUserInfo();
+            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                if (mUseDefaultAvatar) {
+                    queryForUserInformation();
+                }
             }
         }
     };

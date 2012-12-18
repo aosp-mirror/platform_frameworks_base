@@ -226,7 +226,7 @@ public class TabletTicker
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, mLargeIconHeight,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.gravity = Gravity.BOTTOM | Gravity.END;
 //        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
 
         mLayoutTransition = new LayoutTransition();

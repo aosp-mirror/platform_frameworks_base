@@ -247,6 +247,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mNotificationPanel.show(false, false);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
+        mNotificationPanel.setLayoutDirection(mLayoutDirection);
 
         // the battery icon
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
@@ -291,7 +292,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.gravity = Gravity.BOTTOM | Gravity.END;
         lp.setTitle("NotificationPanel");
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
                 | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -312,6 +313,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
         mInputMethodsPanel.setImeSwitchButton(mInputMethodSwitchButton);
+        mInputMethodsPanel.setLayoutDirection(mLayoutDirection);
         mStatusBarView.setIgnoreChildren(2, mInputMethodSwitchButton, mInputMethodsPanel);
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -322,7 +324,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.gravity = Gravity.BOTTOM | Gravity.END;
         lp.setTitle("InputMethodsPanel");
         lp.windowAnimations = R.style.Animation_RecentPanel;
 
@@ -335,6 +337,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
         mCompatModePanel.setTrigger(mCompatModeButton);
         mCompatModePanel.setVisibility(View.GONE);
+        mCompatModePanel.setLayoutDirection(mLayoutDirection);
         mStatusBarView.setIgnoreChildren(3, mCompatModeButton, mCompatModePanel);
         lp = new WindowManager.LayoutParams(
                 250,
@@ -345,7 +348,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.gravity = Gravity.BOTTOM | Gravity.END;
         lp.setTitle("CompatModePanel");
         lp.windowAnimations = android.R.style.Animation_Dialog;
 
@@ -381,12 +384,24 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
         mWindowManager.updateViewLayout(mNotificationPanel, mNotificationPanelParams);
         mShowSearchHoldoff = mContext.getResources().getInteger(
                 R.integer.config_show_search_delay);
         updateSearchPanel();
+    }
+
+    @Override
+    protected void refreshLayout(int layoutDirection) {
+        mStatusBarView.setLayoutDirection(layoutDirection);
+        if (mCompatibilityHelpDialog != null) {
+            mCompatibilityHelpDialog.setLayoutDirection(layoutDirection);
+        }
+        mNotificationPanel.refreshLayout(layoutDirection);
+        mInputMethodsPanel.setLayoutDirection(layoutDirection);
+        mCompatModePanel.setLayoutDirection(layoutDirection);
     }
 
     protected void loadDimens() {
@@ -448,6 +463,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
                 context, R.layout.system_bar, null);
         mStatusBarView = sb;
+        mStatusBarView.setLayoutDirection(mLayoutDirection);
 
         sb.setHandler(mHandler);
 
@@ -612,7 +628,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.gravity = Gravity.BOTTOM | Gravity.START;
         lp.setTitle("RecentsPanel");
         lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
@@ -638,7 +654,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
             lp.dimAmount = 0.7f;
         }
-        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.gravity = Gravity.BOTTOM | Gravity.START;
         lp.setTitle("SearchPanel");
         // TODO: Define custom animation for Search panel
         lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
@@ -1118,6 +1134,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
 
         mCompatibilityHelpDialog = View.inflate(mContext, R.layout.compat_mode_help, null);
+        mCompatibilityHelpDialog.setLayoutDirection(mLayoutDirection);
         View button = mCompatibilityHelpDialog.findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {

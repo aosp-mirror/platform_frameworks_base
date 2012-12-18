@@ -68,7 +68,8 @@
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
-        android:icon="@*android:drawable/platlogo">
+        android:icon="@*android:drawable/platlogo"
+        android:supportsRtl="true">
 
         <!-- Broadcast receiver that gets the broadcast at boot time and starts
              up everything else.

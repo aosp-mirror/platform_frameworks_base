@@ -24,9 +24,9 @@
     <dimen name="notification_panel_margin_left">16dp</dimen>
 
     <!-- Gravity for the notification & quick settings panels -->
-    <!-- 0x33 = left|top ; 0x35 = right|top -->
-    <integer name="notification_panel_layout_gravity">0x33</integer>
-    <integer name="settings_panel_layout_gravity">0x35</integer>
+    <!-- 0x800033 = start|top ; 0x800035 = end|top -->
+    <integer name="notification_panel_layout_gravity">0x800033</integer>
+    <integer name="settings_panel_layout_gravity">0x800035</integer>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">430dip</dimen>

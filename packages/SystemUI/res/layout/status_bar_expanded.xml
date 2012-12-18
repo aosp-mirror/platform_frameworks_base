@@ -26,7 +26,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/notification_panel_bg"
     android:paddingTop="@dimen/notification_panel_padding_top"
-    android:layout_marginLeft="@dimen/notification_panel_margin_left"
+    android:layout_marginStart="@dimen/notification_panel_margin_left"
     >
 
     <View

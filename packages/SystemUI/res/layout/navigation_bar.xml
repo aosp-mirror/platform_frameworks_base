@@ -111,7 +111,7 @@
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="40dp"
+                android:layout_marginStart="40dp"
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
@@ -137,7 +137,7 @@
                 />
             <ImageView
                 android:layout_width="80dp"
-                android:layout_marginRight="40dp"
+                android:layout_marginEnd="40dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"

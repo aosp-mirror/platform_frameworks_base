@@ -39,13 +39,13 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">18sp</item>
     </style>
 
     <style name="SystemBarPanelSettingsPanelSeparator">
-        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@android:drawable/divider_horizontal_dark</item>

@@ -36,7 +36,7 @@
         <LinearLayout
             android:layout_width="450dip"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dip"
+            android:layout_marginStart="20dip"
             android:orientation="vertical"
             android:background="@drawable/notify_panel_clock_bg">
             <!-- Hard keyboard switch -->
@@ -71,7 +71,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginRight="16dip" />
+                        android:layout_marginEnd="16dip" />
                 </LinearLayout>
                 <View
                     android:layout_width="match_parent"

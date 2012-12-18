@@ -32,7 +32,7 @@
         android:id="@+id/icons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
@@ -86,7 +86,7 @@
             <TextView
                 android:id="@+id/mobile_text"
                 style="@style/SystemBarNotificationText"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="12dp"
@@ -122,7 +122,7 @@
             <TextView
                 android:id="@+id/wifi_text"
                 style="@style/SystemBarNotificationText"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="12dp"
@@ -147,7 +147,7 @@
                 style="@style/SystemBarNotificationText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:paddingRight="2dp"
                 android:singleLine="true"
                 android:text="@string/status_bar_settings_settings_button"
@@ -209,8 +209,8 @@
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.SystemBar.Expanded.Date"
             />
 

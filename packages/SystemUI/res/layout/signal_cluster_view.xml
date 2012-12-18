@@ -28,13 +28,13 @@
         android:id="@+id/wifi_combo"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginRight="-6dp"
+        android:layout_marginEnd="-6dp"
         >
         <ImageView
             android:id="@+id/wifi_signal"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:scaleType="center"
             />
@@ -55,13 +55,13 @@
         android:id="@+id/wimax_combo"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginRight="-6dp"
+        android:layout_marginEnd="-6dp"
         >
         <ImageView
             android:id="@+id/wimax_signal"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:scaleType="center"
             />
@@ -101,7 +101,7 @@
                 android:id="@+id/mobile_inout"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="right|bottom"
+                android:layout_gravity="end|bottom"
                 />
         </FrameLayout>
     </FrameLayout>

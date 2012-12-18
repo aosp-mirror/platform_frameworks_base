@@ -106,6 +106,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public PanelView selectPanelForTouch(MotionEvent touch) {
         final float x = touch.getX();
+        final boolean isLayoutRtl = isLayoutRtl();
 
         if (mFullWidthNotifications) {
             // No double swiping. If either panel is open, nothing else can be pulled down.
@@ -130,7 +131,8 @@ public class PhoneStatusBarView extends PanelBar {
 
         if (region < mSettingsPanelDragzoneMin) region = mSettingsPanelDragzoneMin;
 
-        return (w - x < region) ? mSettingsPanel : mNotificationPanel;
+        final boolean showSettings = isLayoutRtl ? (x < region) : (w - region < x);
+        return showSettings ? mSettingsPanel : mNotificationPanel;
     }
 
     @Override
