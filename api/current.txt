@@ -19226,6 +19226,7 @@ package android.renderscript {
     field public static final int USAGE_IO_INPUT = 32; // 0x20
     field public static final int USAGE_IO_OUTPUT = 64; // 0x40
     field public static final int USAGE_SCRIPT = 1; // 0x1
+    field public static final int USAGE_SHARED = 128; // 0x80
   }
 
   public static final class Allocation.MipmapControl extends java.lang.Enum {

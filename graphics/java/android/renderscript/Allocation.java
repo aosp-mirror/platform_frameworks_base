@@ -148,6 +148,19 @@ public class Allocation extends BaseObj {
     public static final int USAGE_IO_OUTPUT = 0x0040;
 
     /**
+     * USAGE_SHARED The allocation's backing store will be inherited
+     * from another object (usually a Bitmap); calling appropriate
+     * copy methods will be significantly faster than if the entire
+     * allocation were copied every time.
+     *
+     * This is set by default for allocations created with
+     * CreateFromBitmap(RenderScript, Bitmap) in API version 18 and
+     * higher.
+     *
+     */
+    public static final int USAGE_SHARED = 0x0080;
+
+    /**
      * Controls mipmap behavior when using the bitmap creation and
      * update functions.
      */
@@ -245,7 +258,8 @@ public class Allocation extends BaseObj {
                        USAGE_GRAPHICS_CONSTANTS |
                        USAGE_GRAPHICS_RENDER_TARGET |
                        USAGE_IO_INPUT |
-                       USAGE_IO_OUTPUT)) != 0) {
+                       USAGE_IO_OUTPUT |
+                       USAGE_SHARED)) != 0) {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
 
@@ -1236,8 +1250,11 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * Creates a non-mipmapped renderscript allocation to use as a
-     * graphics texture
+     * Creates a RenderScript allocation from a bitmap.
+     *
+     * With target API version 18 or greater, this allocation will be
+     * created with USAGE_SHARED. With target API version 17 or lower,
+     * this allocation will be created with USAGE_GRAPHICS_TEXTURE.
      *
      * @param rs Context to which the allocation will belong.
      * @param b bitmap source for the allocation data
@@ -1246,6 +1263,10 @@ public class Allocation extends BaseObj {
      *
      */
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b) {
+        if (rs.getApplicationContext().getApplicationInfo().targetSdkVersion >= 18) {
+            return createFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
+                                    USAGE_SHARED | USAGE_SCRIPT);
+        }
         return createFromBitmap(rs, b, MipmapControl.MIPMAP_NONE,
                                 USAGE_GRAPHICS_TEXTURE);
     }
