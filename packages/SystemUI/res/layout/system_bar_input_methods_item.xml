@@ -71,7 +71,7 @@
                 <TextView
                     android:id="@+id/item_subtitle"
                     android:layout_marginTop="-4dip"
-                    android:layout_gravity="center_vertical|left"
+                    android:layout_gravity="center_vertical|start"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -87,7 +87,7 @@
             android:id="@+id/item_settings_icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="5dip"
+            android:layout_marginStart="5dip"
             android:layout_gravity="center_vertical"
             android:paddingRight="10dip"
             android:paddingLeft="10dip"

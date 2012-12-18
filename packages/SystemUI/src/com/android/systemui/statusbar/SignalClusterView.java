@@ -172,8 +172,9 @@ public class SignalClusterView
         }
 
         if (mIsAirplaneMode) {
-            mAirplane.setVisibility(View.VISIBLE);
+            mAirplane.setImageDrawable(null);
             mAirplane.setImageResource(mAirplaneIconId);
+            mAirplane.setVisibility(View.VISIBLE);
         } else {
             mAirplane.setVisibility(View.GONE);
         }

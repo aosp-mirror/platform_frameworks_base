@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.ExpandHelper;
@@ -54,8 +55,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     boolean mHasClearableNotifications = false;
     int mNotificationCount = 0;
     NotificationPanelTitle mTitleArea;
-    View mSettingsButton;
-    View mNotificationButton;
+    ImageView mSettingsButton;
+    ImageView mNotificationButton;
     View mNotificationScroller;
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
@@ -94,8 +95,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mTitleArea = (NotificationPanelTitle) findViewById(R.id.title_area);
         mTitleArea.setPanel(this);
 
-        mSettingsButton = findViewById(R.id.settings_button);
-        mNotificationButton = findViewById(R.id.notification_button);
+        mSettingsButton = (ImageView) findViewById(R.id.settings_button);
+        mNotificationButton = (ImageView) findViewById(R.id.notification_button);
 
         mNotificationScroller = findViewById(R.id.notification_scroller);
         mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
@@ -448,6 +449,16 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             mSettingsButton.setEnabled(settingsEnabled);
             mSettingsButton.setVisibility(settingsEnabled ? View.VISIBLE : View.GONE);
         }
+    }
+
+    public void refreshLayout(int layoutDirection) {
+        // Force asset reloading
+        mSettingsButton.setImageDrawable(null);
+        mSettingsButton.setImageResource(R.drawable.ic_notify_settings);
+
+        // Force asset reloading
+        mNotificationButton.setImageDrawable(null);
+        mNotificationButton.setImageResource(R.drawable.ic_notifications);
     }
 }
 

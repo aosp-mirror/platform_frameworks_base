@@ -17,6 +17,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.content.res.Configuration;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -44,7 +45,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -80,6 +80,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -124,6 +125,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mCurrentUserId = 0;
 
+    protected int mLayoutDirection;
+    private Locale mLocale;
+
     // UI-specific methods
 
     /**
@@ -134,6 +138,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
+    protected abstract void refreshLayout(int layoutDirection);
+
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
@@ -202,6 +208,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        mLocale = mContext.getResources().getConfiguration().locale;
+        mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
@@ -274,6 +283,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                     userSwitched(mCurrentUserId);
                 }
             }}, filter);
+
+        mLocale = mContext.getResources().getConfiguration().locale;
     }
 
     public void userSwitched(int newUserId) {
@@ -289,6 +300,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         return notificationUserId == UserHandle.USER_ALL
                 || thisUserId == notificationUserId;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        final Locale newLocale = mContext.getResources().getConfiguration().locale;
+        if (! newLocale.equals(mLocale)) {
+            mLocale = newLocale;
+            mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
+            refreshLayout(mLayoutDirection);
+        }
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
@@ -426,7 +447,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 
-
     protected void updateSearchPanel() {
         // Search Panel
         boolean visible = false;
@@ -442,6 +462,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
+        mSearchPanelView.setLayoutDirection(mLayoutDirection);
 
         WindowManager.LayoutParams lp = getSearchLayoutParams(mSearchPanelView.getLayoutParams());
 
@@ -714,6 +735,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+        row.setLayoutDirection(mLayoutDirection);
 
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.pkg);
@@ -761,6 +783,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             params.minHeight = minHeight;
             params.maxHeight = minHeight;
             adaptive.addView(expandedOneU, params);
+            expandedOneU.setLayoutDirection(mLayoutDirection);
         }
         if (expandedLarge != null) {
             SizeAdaptiveLayout.LayoutParams params =
@@ -768,6 +791,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
             adaptive.addView(expandedLarge, params);
+            expandedLarge.setLayoutDirection(mLayoutDirection);
         }
         row.setDrawingCacheEnabled(true);
 

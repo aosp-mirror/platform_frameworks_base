@@ -41,12 +41,12 @@
         <include layout="@layout/status_bar_expanded"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|top"
+            android:layout_gravity="start|top"
             />
         <include layout="@layout/quick_settings"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|top"
+            android:layout_gravity="end|top"
             />
     </com.android.systemui.statusbar.phone.PanelHolder>
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
