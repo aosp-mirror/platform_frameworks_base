@@ -71,6 +71,14 @@ public abstract class WebSettings {
         TextSize(int size) {
             value = size;
         }
+
+        /**
+         * @hide Only for use by WebViewProvider implementations
+         */
+        public int getValue() {
+            return value;
+        }
+
         int value;
     }
 
@@ -89,6 +97,14 @@ public abstract class WebSettings {
         ZoomDensity(int size) {
             value = size;
         }
+
+        /**
+         * @hide Only for use by WebViewProvider implementations
+         */
+        public int getValue() {
+            return value;
+        }
+
         int value;
     }
 
