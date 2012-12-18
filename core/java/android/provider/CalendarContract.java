@@ -302,7 +302,14 @@ public final class CalendarContract {
          * Used to indicate that local, unsynced, changes are present.
          * <P>Type: INTEGER (long)</P>
          */
+
         public static final String DIRTY = "dirty";
+
+        /**
+         * Used in conjunction with {@link #DIRTY} to indicate what packages wrote local changes.
+         * <P>Type: TEXT</P>
+         */
+        public static final String MUTATORS = "mutators";
 
         /**
          * Whether the row has been deleted but not synced to the server. A
@@ -525,6 +532,7 @@ public final class CalendarContract {
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, MUTATORS);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC2);
@@ -647,6 +655,7 @@ public final class CalendarContract {
      * <li>{@link #CALENDAR_COLOR}</li>
      * <li>{@link #_SYNC_ID}</li>
      * <li>{@link #DIRTY}</li>
+     * <li>{@link #MUTATORS}</li>
      * <li>{@link #OWNER_ACCOUNT}</li>
      * <li>{@link #MAX_REMINDERS}</li>
      * <li>{@link #ALLOWED_REMINDERS}</li>
@@ -714,6 +723,7 @@ public final class CalendarContract {
             ACCOUNT_TYPE,
             _SYNC_ID,
             DIRTY,
+            MUTATORS,
             OWNER_ACCOUNT,
             MAX_REMINDERS,
             ALLOWED_REMINDERS,
@@ -1393,6 +1403,7 @@ public final class CalendarContract {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, IS_ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, MUTATORS);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, LAST_SYNCED);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC_DATA1);
@@ -1599,6 +1610,7 @@ public final class CalendarContract {
      * The following Events columns are writable only by a sync adapter
      * <ul>
      * <li>{@link #DIRTY}</li>
+     * <li>{@link #MUTATORS}</li>
      * <li>{@link #_SYNC_ID}</li>
      * <li>{@link #SYNC_DATA1}</li>
      * <li>{@link #SYNC_DATA2}</li>
@@ -1688,6 +1700,7 @@ public final class CalendarContract {
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
             DIRTY,
+            MUTATORS,
             SYNC_DATA1,
             SYNC_DATA2,
             SYNC_DATA3,

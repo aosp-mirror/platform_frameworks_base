@@ -17360,6 +17360,7 @@ package android.provider {
     field public static final java.lang.String CAN_PARTIALLY_UPDATE = "canPartiallyUpdate";
     field public static final java.lang.String DELETED = "deleted";
     field public static final java.lang.String DIRTY = "dirty";
+    field public static final java.lang.String MUTATORS = "mutators";
     field public static final java.lang.String _SYNC_ID = "_sync_id";
   }
 
