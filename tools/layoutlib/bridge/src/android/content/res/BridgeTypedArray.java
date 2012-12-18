@@ -894,7 +894,7 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     /**
-     * Give back a previously retrieved StyledAttributes, for later re-use.
+     * Give back a previously retrieved TypedArray, for later re-use.
      */
     @Override
     public void recycle() {

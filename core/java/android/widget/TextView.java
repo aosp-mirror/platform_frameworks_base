@@ -7727,7 +7727,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns the TextView_textColor attribute from the
-     * Resources.StyledAttributes, if set, or the TextAppearance_textColor
+     * TypedArray, if set, or the TextAppearance_textColor
      * from the TextView_textAppearance attribute, if TextView_textColor
      * was not set directly.
      */
