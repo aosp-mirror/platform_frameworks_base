@@ -159,9 +159,9 @@ bool GLEnv::InitWithNewContext() {
     return false;
   }
 
-  // Create dummy surface using a SurfaceTexture
-  surfaceTexture_ = new SurfaceTexture(0);
-  window_ = new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >(
+  // Create dummy surface using a GLConsumer
+  surfaceTexture_ = new GLConsumer(0);
+  window_ = new SurfaceTextureClient(static_cast<sp<IGraphicBufferProducer> >(
           surfaceTexture_->getBufferQueue()));
 
   surfaces_[0] = SurfaceWindowPair(eglCreateWindowSurface(display(), config, window_.get(), NULL), NULL);

@@ -39,7 +39,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
-#include <gui/ISurfaceTexture.h>
+#include <gui/IGraphicBufferProducer.h>
 #include <gui/Surface.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -236,10 +236,10 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
 }
 
-static sp<ISurfaceTexture>
+static sp<IGraphicBufferProducer>
 getVideoSurfaceTexture(JNIEnv* env, jobject thiz) {
-    ISurfaceTexture * const p = (ISurfaceTexture*)env->GetIntField(thiz, fields.surface_texture);
-    return sp<ISurfaceTexture>(p);
+    IGraphicBufferProducer * const p = (IGraphicBufferProducer*)env->GetIntField(thiz, fields.surface_texture);
+    return sp<IGraphicBufferProducer>(p);
 }
 
 static void
@@ -250,7 +250,7 @@ decVideoSurfaceRef(JNIEnv *env, jobject thiz)
         return;
     }
 
-    sp<ISurfaceTexture> old_st = getVideoSurfaceTexture(env, thiz);
+    sp<IGraphicBufferProducer> old_st = getVideoSurfaceTexture(env, thiz);
     if (old_st != NULL) {
         old_st->decStrong(thiz);
     }
@@ -269,7 +269,7 @@ setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlaye
 
     decVideoSurfaceRef(env, thiz);
 
-    sp<ISurfaceTexture> new_st;
+    sp<IGraphicBufferProducer> new_st;
     if (jsurface) {
         sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
         if (surface != NULL) {
@@ -313,7 +313,7 @@ android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
 
     // Handle the case where the display surface was set before the mp was
     // initialized. We try again to make it stick.
-    sp<ISurfaceTexture> st = getVideoSurfaceTexture(env, thiz);
+    sp<IGraphicBufferProducer> st = getVideoSurfaceTexture(env, thiz);
     mp->setVideoSurfaceTexture(st);
 
     process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
@@ -330,7 +330,7 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
 
     // Handle the case where the display surface was set before the mp was
     // initialized. We try again to make it stick.
-    sp<ISurfaceTexture> st = getVideoSurfaceTexture(env, thiz);
+    sp<IGraphicBufferProducer> st = getVideoSurfaceTexture(env, thiz);
     mp->setVideoSurfaceTexture(st);
 
     process_media_player_call( env, thiz, mp->prepareAsync(), "java/io/IOException", "Prepare Async failed." );

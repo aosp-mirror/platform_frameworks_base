@@ -42,7 +42,7 @@
 #include <rs.h>
 #include <rsEnv.h>
 #include <gui/Surface.h>
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 #include <gui/SurfaceTextureClient.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
@@ -242,7 +242,7 @@ nContextSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con, jint width
     LOG_API("nContextSetSurfaceTexture, con(%p), width(%i), height(%i), surface(%p)", con, width, height, (Surface *)sur);
 
     sp<ANativeWindow> window;
-    sp<SurfaceTexture> st;
+    sp<GLConsumer> st;
     if (sur == 0) {
 
     } else {
@@ -481,9 +481,9 @@ static void
 nAllocationGetSurfaceTextureID2(JNIEnv *_env, jobject _this, RsContext con, jint a, jobject jst)
 {
     LOG_API("nAllocationGetSurfaceTextureID2, con(%p), a(%p)", con, (RsAllocation)a);
-    sp<SurfaceTexture> st = SurfaceTexture_getSurfaceTexture(_env, jst);
+    sp<GLConsumer> st = SurfaceTexture_getSurfaceTexture(_env, jst);
 
-    rsAllocationGetSurfaceTextureID2(con, (RsAllocation)a, st.get(), sizeof(SurfaceTexture *));
+    rsAllocationGetSurfaceTextureID2(con, (RsAllocation)a, st.get(), sizeof(GLConsumer *));
 }
 
 static void
