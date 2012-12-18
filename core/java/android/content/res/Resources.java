@@ -1118,7 +1118,7 @@ public class Resources {
         }
 
         /**
-         * Return a StyledAttributes holding the values defined by
+         * Return a TypedArray holding the values defined by
          * <var>Theme</var> which are listed in <var>attrs</var>.
          * 
          * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
@@ -1146,7 +1146,7 @@ public class Resources {
         }
 
         /**
-         * Return a StyledAttributes holding the values defined by the style
+         * Return a TypedArray holding the values defined by the style
          * resource <var>resid</var> which are listed in <var>attrs</var>.
          * 
          * <p>Be sure to call {@link TypedArray#recycle() TypedArray.recycle()} when you are done
@@ -1203,7 +1203,7 @@ public class Resources {
         }
 
         /**
-         * Return a StyledAttributes holding the attribute values in
+         * Return a TypedArray holding the attribute values in
          * <var>set</var>
          * that are listed in <var>attrs</var>.  In addition, if the given
          * AttributeSet specifies a style class (through the "style" attribute),
@@ -1235,10 +1235,10 @@ public class Resources {
          * @param attrs The desired attributes to be retrieved.
          * @param defStyleAttr An attribute in the current theme that contains a
          *                     reference to a style resource that supplies
-         *                     defaults values for the StyledAttributes.  Can be
+         *                     defaults values for the TypedArray.  Can be
          *                     0 to not look for defaults.
          * @param defStyleRes A resource identifier of a style resource that
-         *                    supplies default values for the StyledAttributes,
+         *                    supplies default values for the TypedArray,
          *                    used only if defStyleAttr is 0 or can not be found
          *                    in the theme.  Can be 0 to not look for defaults.
          * 
