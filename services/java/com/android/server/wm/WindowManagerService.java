@@ -268,6 +268,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
+    /** Fraction of animation at which the recents thumbnail becomes completely transparent */
+    static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
+
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
@@ -3383,13 +3386,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
                         computePivot(mNextAppTransitionStartX, 1 / scaleW),
                         computePivot(mNextAppTransitionStartY, 1 / scaleH));
-                AnimationSet set = new AnimationSet(true);
+                AnimationSet set = new AnimationSet(false);
                 Animation alpha = new AlphaAnimation(1, 0);
                 scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                scale.setInterpolator(AnimationUtils.loadInterpolator(mContext,
+                        com.android.internal.R.interpolator.decelerate_quad));
                 set.addAnimation(scale);
                 alpha.setDuration(duration);
+                alpha.setInterpolator(new Interpolator() {
+                    @Override
+                    public float getInterpolation(float input) {
+                        if (input < RECENTS_THUMBNAIL_FADEOUT_FRACTION) {
+                            // linear response
+                            return input / RECENTS_THUMBNAIL_FADEOUT_FRACTION;
+                        }
+                        // complete
+                        return 1;
+                    }
+                });
                 set.addAnimation(alpha);
                 set.setFillBefore(true);
                 a = set;
