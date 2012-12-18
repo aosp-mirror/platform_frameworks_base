@@ -82,6 +82,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_FILE_PATH_TEMPLATE = "%s/%s/%s";
+    private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
     private int mNotificationId;
     private NotificationManager mNotificationManager;
@@ -184,9 +185,13 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
+            String subjectDate = new SimpleDateFormat("hh:mma, MMM dd, yyyy")
+                .format(new Date(mImageTime));
+            String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
             Intent chooserIntent = Intent.createChooser(sharingIntent, null);
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK 
@@ -600,14 +605,17 @@ class GlobalScreenshot {
         Resources r = context.getResources();
 
         // Clear all existing notification, compose the new notification and show it
-        Notification n = new Notification.Builder(context)
+        Notification.Builder b = new Notification.Builder(context)
             .setTicker(r.getString(R.string.screenshot_failed_title))
             .setContentTitle(r.getString(R.string.screenshot_failed_title))
             .setContentText(r.getString(R.string.screenshot_failed_text))
             .setSmallIcon(R.drawable.stat_notify_image_error)
             .setWhen(System.currentTimeMillis())
-            .setAutoCancel(true)
-            .getNotification();
+            .setAutoCancel(true);
+        Notification n =
+            new Notification.BigTextStyle(b)
+                .bigText(r.getString(R.string.screenshot_failed_text))
+                .build();
         nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
     }
 }
