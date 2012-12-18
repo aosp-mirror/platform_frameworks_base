@@ -1,18 +1,19 @@
 ndk=true
 
-ndk.win_download=android-ndk-r8d-windows.zip
-ndk.win_bytes=327014028
-ndk.win_checksum=d78ec3d4ec15ad3b18b9f488a5763c23
+ndk.win_download=android-ndk-r8c-windows.zip
+ndk.win_bytes=233787657
+ndk.win_checksum=3ff1570fa4ea865b7702507ea43dbae4
 
-ndk.mac_download=android-ndk-r8d-darwin-x86.tar.bz2
-ndk.mac_bytes=308328942
-ndk.mac_checksum=5cd9ef9fb7e03943ee8c9e147e42e571
+ndk.mac_download=android-ndk-r8c-darwin-x86.tar.bz2
+ndk.mac_bytes=214270840
+ndk.mac_checksum=74a23e9e058512121835e0d6932e72d5
 
-ndk.linux_download=android-ndk-r8d-linux-x86.tar.bz2
-ndk.linux_bytes=254644383
-ndk.linux_checksum=e1fa0379a3feb59f2f0865f1a90bd382
+ndk.linux_download=android-ndk-r8c-linux-x86.tar.bz2
+ndk.linux_bytes=179945337
+ndk.linux_checksum=b0851346ff90c9266bc050016a228319
 
 page.title=Android NDK
+
 @jd:body
 
 
@@ -249,170 +250,6 @@ the NDK, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt="">Android NDK, Revision 8d</a> <em>(December 2012)</em>
-  </p>
-
-  <div class="toggle-content-toggleme">
-    <dl>
-      <dt>Important changes:</dt>
-      <dd>
-        <ul>
-          <li>Added the GNU Compiler Collection (GCC) 4.7 compiler to the NDK. The GCC 4.6 compiler
-            is still the default, so you must to explicitly enable the new version as follows:
-            <ul>
-              <li>For {@code ndk-build}, export the {@code NDK_TOOLCHAIN_VERSION=4.7} variable
-                <em>or</em> add it to {@code Application.mk}.</li>
-              <li>For standalone builds, add the {@code --toolchain=} option to
-                {@code make-standalone-toolchain.sh}, for example:
-                <pre>--toolchain=arm-linux-androideabi-4.7</pre></li>
-            </ul>
-            <p class="note">
-              <strong>Note:</strong> This feature is experimental. Please try it and
-              <a href="http://code.google.com/p/android/issues/list">report any issues</a>.</p>
-          </li>
-          <li>Added {@code stlport} exception support via gabi++.  Note that the new gabi++
-            depends on {@code dlopen} and related code, meaning that:
-            <ul>
-              <li>You can no longer build a <em>static</em> executable using the {@code -static}
-                option or include {@code libstlport_static.a} using
-                {@code APP_STL := stlport_static}. (You can still use the {@code -static} option
-                with a standalone toolchain.) Compiling a <em>dynamic</em> executable using
-                {@code include $(BUILD_EXECUTABLE)} continues to work because the compiler
-                automatically adds the {@code -ldl} option.</li>
-              <li>If your project links using {@code -nostdlib} and {-Wl,--no-undefined}, you
-                must manually include the {@code -ldl} option.</li>
-            </ul>
-              For more information, see {@code CPLUSPLUS-SUPPORT.html}.
-
-              <p class="note">
-                <strong>Note:</strong> This feature is experimental and works better with the GCC
-                4.6/4.7 compilers than with GCC 4.4.3 or Clang 3.1. Please try it and
-                <a href="http://code.google.com/p/android/issues/list">report any issues</a>.</p>
-          </li>
-          <li>Added a {@code -mstack-protector-guard=} option for x86 to choose between a
-            <em>global</em> default path which is compatible with older Android C library (bionic)
-            and a new <em>tls</em> path (%gs:20) for {@code -fstack-protector},
-            {@code -fstack-protector-all} and {@code -fstack-protector-strong} using the GCC 4.6
-            and higher compilers.
-
-            <p class="note">
-              <strong>Note:</strong> The {@code -mstack-protector-guard} setting itself does not
-              enable any {@code -fstack-protector*} options.</p>
-          </li>
-          <li>Added {@code android_setCpu()} function to
-            {@code sources/android/cpufeatures/cpu-features.c} for use when auto-detection via
-            {@code /proc} is not possible in Android 4.1 and higher.
-            (<a href="http://code.google.com/p/chromium/issues/detail?id=164154">Chromium Issue
-            164154</a>)</li>
-        </ul>
-      </dd>
-
-      <dt>Important bug fixes:</dt>
-      <dd>
-        <ul>
-          <li>Fixed unnecessary rebuild of object files when using the {@code ndk-build} script.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39810">Issue 39810</a>)</li>
-          <li>Fixed a linker failure with the NDK 8c release for Mac OS X 10.6.x that produced the
-            following error:
-            <pre>
-dyld: lazy symbol binding failed: Symbol not found: _memmem
-Referenced from: ...../arm-linux-androideabi/bin/ld
-Expected in: /usr/lib/libSystem.B.dylib</pre>
-            This problem was caused by building on Mac OS X 10.7, which produced binaries that were
-            not compatible with Mac OS 10.6.x and the NDK.
-          </li>
-          <li>Removed the {@code -x c++} options from the Clang++ standalone build script.
-          (<a href="http://code.google.com/p/android/issues/detail?id=39089">Issue 39089</a>)</li>
-          <li>Fixed issues using the {@code NDK_TOOLCHAIN_VERSION=clang3.1} option in Cygwin.
-           (<a href="http://code.google.com/p/android/issues/detail?id=39585">Issue 39585</a>)</li>
-          <li>Fixed the {@code make-standalone-toolchain.sh} script to allow generation of a
-            standalone toolchain using the Cygwin or MinGW environments. The resulting toolchain
-            can be used in Cygwin, MingGW or CMD.exe environments.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39915">Issue 39915</a>,
-            <a href="http://code.google.com/p/android/issues/detail?id=39585">Issue 39585</a>)</li>
-          <li>Added missing {@code SL_IID_ANDROIDBUFFERQUEUESOURCE} option in android-14 builds for
-            ARM and X86.
-            (<a href="http://code.google.com/p/android/issues/detail?id=40625">Issue 40625</a>)</li>
-          <li>Fixed x86 CPU detection for the {@code ANDROID_CPU_X86_FEATURE_MOVBE} feature.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39317">Issue 39317</a>)</li>
-          <li>Fixed an issue preventing the Standard Template Library (STL) from using C++
-            sources that do not have a {@code .cpp} file extension.</li>
-          <li>Fixed GCC 4.6 ARM internal compiler error <em>at reload1.c:1061</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=20862">Issue 20862</a>)</li>
-          <li>Fixed GCC 4.4.3 ARM internal compiler error <em>at emit-rtl.c:1954</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=22336">Issue 22336</a>)</li>
-          <li>Fixed GCC 4.4.3 ARM internal compiler error <em>at postreload.c:396</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=22345">Issue 22345</a>)</li>
-          <li>Fixed problem with GCC 4.6/4.7 skipping lambda functions.
-            (<a href="http://code.google.com/p/android/issues/detail?id=35933">Issue 35933</a>)</li>
-        </ul>
-      </dd>
-
-      <dt>Other bug fixes:</dt>
-      <dd>
-        <ul>
-          <li>NDK header file fixes:
-            <ul>
-              <li>Fixed {@code __WINT_TYPE__} and {@code wint_t} to be the same type.</li>
-              <li>Corrected typo in {@code android/bitmap.h}.
-                (<a href="http://code.google.com/p/android/issues/detail?id=15134">Issue 15134</a>)
-              </li>
-              <li>Corrected typo in {@code errno.h}.</li>
-              <li>Added check for the presence of {@code __STDC_VERSION__} in {@code sys/cdefs.h}.
-                (<a href="http://code.google.com/p/android/issues/detail?id=14627">Issue 14627</a>)
-              </li>
-              <li>Reorganized headers in {@code byteswap.h} and {@code dirent.h}.</li>
-              <li>Fixed {@code limits.h} to include {@code page.h} which provides {@code PAGE_SIZE}
-                settings.
-                (<a href="http://code.google.com/p/android/issues/detail?id=39983">Issue 39983</a>)
-              </li>
-              <li>Fixed return type of {@code glGetAttribLocation()} and
-                {@code glGetUniformLocation()} from {@code int} to {@code GLint}.</li>
-              <li>Fixed {@code __BYTE_ORDER} constant for x86 builds.
-                (<a href="http://code.google.com/p/android/issues/detail?id=39824">Issue 39824</a>)
-              </li>
-            </ul>
-          </li>
-          <li>Fixed {@code ndk-build} script to not overwrite {@code -Os} with {@code -O2} for ARM
-            builds.</li>
-          <li>Fixed build scripts to allow overwriting of {@code HOST_AWK}, {@code HOST_SED}, and
-            {@code HOST_MAKE} settings.</li>
-          <li>Fixed issue for {@code ld.gold} on {@code fsck_msdos} builds linking objects built by
-            the Intel C/C++ compiler (ICC).</li>
-          <li>Fixed ARM EHABI support in Clang to conform to specifications.</li>
-          <li>Fixed GNU Debugger (GDB) to shorten the time spent on walking the target's link map
-            during {@code solib} events.
-            (<a href="http://code.google.com/p/android/issues/detail?id=38402">Issue 38402</a>)</li>
-          <li>Fixed missing {@code libgcc.a} file when linking shared libraries.</li>
-        </ul>
-      </dd>
-
-      <dt>Other changes:</dt>
-      <dd>
-        <ul>
-          <li>Backported 64-bit built-in atomic functions for ARM to GCC 4.6.</li>
-          <li>Added documentation for audio output latency, along with other documentation and
-            fixes.</li>
-          <li>Fixed debug builds with Clang so that non-void functions now raise a {@code SIGILL}
-            signal for paths without a return statement.</li>
-          <li>Updated {@code make-standalone-toolchain.sh} to accept the suffix {@code -clang3.1}
-            which is equivalent to adding {@code --llvm-version=3.1} to the GCC 4.6 toolchain.</li>
-          <li>Updated GCC and Clang bug report URL to:
-            <a href="http://source.android.com/source/report-bugs.html">http://source.android.com/source/report-bugs.html</a></li>
-          <li>Added ARM ELF support to {@code llvm-objdump}.</li>
-          <li>Suppressed <em>treating c input as c++</em> warning for Clang builds.</li>
-          <li>Updated build so that only the 32-bit version of {@code libiberty.a} is built and
-            placed in {@code lib32/}.</li>
-        </ul>
-      </dd>
-    </dl>
-  </div>
-</div>
-
-
-<div class="toggle-content closed">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8c</a> <em>(November 2012)</em>
   </p>
 
