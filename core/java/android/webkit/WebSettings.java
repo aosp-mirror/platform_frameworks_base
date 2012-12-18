@@ -1311,7 +1311,7 @@ public abstract class WebSettings {
      * and content is re-validated as needed. When navigating back, content is
      * not revalidated, instead the content is just retrieved from the cache.
      * This method allows the client to override this behavior by specifying
-     * one of {@link #LOAD_DEFAULT}, {@link #LOAD_NORMAL},
+     * one of {@link #LOAD_DEFAULT},
      * {@link #LOAD_CACHE_ELSE_NETWORK}, {@link #LOAD_NO_CACHE} or
      * {@link #LOAD_CACHE_ONLY}. The default value is {@link #LOAD_DEFAULT}.
      *
