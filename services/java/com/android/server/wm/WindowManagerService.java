@@ -475,7 +475,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
-    PowerManager.WakeLock mScreenFrozenLock;
+    private PowerManager.WakeLock mScreenFrozenLock;
 
     final AppTransition mAppTransition;
     boolean mStartingIconInTransition = false;
@@ -761,8 +761,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPowerManager = pm;
         mPowerManager.setPolicy(mPolicy);
         PowerManager pmc = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "SCREEN_FROZEN");
+        mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
         mAppTransition = new AppTransition(context, mH);
@@ -4714,6 +4713,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             final AllWindowsIterator iterator = new AllWindowsIterator();
@@ -4735,6 +4735,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return Math.abs(scale);
     }
 
+    @Override
     public void setAnimationScale(int which, float scale) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ANIMATION_SCALE,
                 "setAnimationScale()")) {
@@ -5468,8 +5469,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
-                WINDOW_FREEZE_TIMEOUT_DURATION);
+        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction, 0, 0);
@@ -5540,13 +5540,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
+    @Override
     public int getRotation() {
         return mRotation;
     }
 
+    @Override
     public int watchRotation(IRotationWatcher watcher) {
         final IBinder watcherBinder = watcher.asBinder();
         IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
+            @Override
             public void binderDied() {
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
@@ -8277,7 +8280,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("On entry to LockedInner",
                         displayContent.pendingLayoutChanges);
 
-                    if ((adjustWallpaperWindowsLocked() & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
+                    if ((displayContent.pendingLayoutChanges &
+                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
+                            (adjustWallpaperWindowsLocked() &
+                                    ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
                         assignLayersLocked(windows);
                         displayContent.layoutNeeded = true;
                     }
@@ -9270,7 +9276,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.thawInputDispatchingLw();
 
         boolean configChanged;
-        
+
         // While the display is frozen we don't re-compute the orientation
         // to avoid inconsistent states.  However, something interesting
         // could have actually changed during that time so re-evaluate it
@@ -9338,15 +9344,14 @@ public class WindowManagerService extends IWindowManager.Stub
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
-            }
             if (ind != null) {
                 try {
                     ind.close();
+                } catch (IOException e) {
+                }
+            } else if (in != null) {
+                try {
+                    in.close();
                 } catch (IOException e) {
                 }
             }
