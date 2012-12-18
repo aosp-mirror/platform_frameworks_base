@@ -246,7 +246,7 @@ public class SurfaceTexture {
      * release() frees all the buffers and puts the SurfaceTexture into the
      * 'abandoned' state. Once put in this state the SurfaceTexture can never
      * leave it. When in the 'abandoned' state, all methods of the
-     * ISurfaceTexture interface will fail with the NO_INIT error.
+     * IGraphicBufferProducer interface will fail with the NO_INIT error.
      *
      * Note that while calling this method causes all the buffers to be freed
      * from the perspective of the the SurfaceTexture, if there are additional

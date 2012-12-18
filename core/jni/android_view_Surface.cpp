@@ -28,7 +28,7 @@
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 
 #include <ui/DisplayInfo.h>
 #include <ui/Rect.h>
@@ -234,7 +234,7 @@ static void setSurface(JNIEnv* env, jobject surfaceObj, const sp<Surface>& surfa
     }
 }
 
-static sp<ISurfaceTexture> getISurfaceTexture(JNIEnv* env, jobject surfaceObj) {
+static sp<IGraphicBufferProducer> getISurfaceTexture(JNIEnv* env, jobject surfaceObj) {
     if (surfaceObj) {
         sp<Surface> surface(getSurface(env, surfaceObj));
         if (surface != NULL) {
@@ -245,12 +245,12 @@ static sp<ISurfaceTexture> getISurfaceTexture(JNIEnv* env, jobject surfaceObj) {
 }
 
 jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
-        const sp<ISurfaceTexture>& surfaceTexture) {
-    if (surfaceTexture == NULL) {
+        const sp<IGraphicBufferProducer>& bufferProducer) {
+    if (bufferProducer == NULL) {
         return NULL;
     }
 
-    sp<Surface> surface(new Surface(surfaceTexture));
+    sp<Surface> surface(new Surface(bufferProducer));
     if (surface == NULL) {
         return NULL;
     }
@@ -258,7 +258,7 @@ jobject android_view_Surface_createFromISurfaceTexture(JNIEnv* env,
     jobject surfaceObj = env->NewObject(gSurfaceClassInfo.clazz, gSurfaceClassInfo.ctor);
     if (surfaceObj == NULL) {
         if (env->ExceptionCheck()) {
-            ALOGE("Could not create instance of Surface from ISurfaceTexture.");
+            ALOGE("Could not create instance of Surface from IGraphicBufferProducer.");
             LOGE_EX(env);
             env->ExceptionClear();
         }
@@ -289,14 +289,14 @@ static void nativeCreate(JNIEnv* env, jobject surfaceObj, jobject sessionObj,
 
 static void nativeCreateFromSurfaceTexture(JNIEnv* env, jobject surfaceObj,
         jobject surfaceTextureObj) {
-    sp<SurfaceTexture> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
+    sp<GLConsumer> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
     if (st == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "SurfaceTexture has already been released");
         return;
     }
 
-    sp<ISurfaceTexture> bq = st->getBufferQueue();
+    sp<IGraphicBufferProducer> bq = st->getBufferQueue();
 
     sp<Surface> surface(new Surface(bq));
     if (surface == NULL) {
@@ -667,8 +667,8 @@ static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    sp<ISurfaceTexture> surfaceTexture(getISurfaceTexture(env, surfaceObj));
-    SurfaceComposerClient::setDisplaySurface(token, surfaceTexture);
+    sp<IGraphicBufferProducer> bufferProducer(getISurfaceTexture(env, surfaceObj));
+    SurfaceComposerClient::setDisplaySurface(token, bufferProducer);
 }
 
 static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,

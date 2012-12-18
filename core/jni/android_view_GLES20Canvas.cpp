@@ -24,7 +24,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 
 #include <androidfw/ResourceTypes.h>
 
@@ -806,7 +806,7 @@ static void android_view_GLES20Canvas_setOpaqueLayer(JNIEnv* env, jobject clazz,
 static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject clazz,
         Layer* layer, jint width, jint height, jboolean isOpaque, jobject surface) {
     float transform[16];
-    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
+    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
 
     if (surfaceTexture->updateTexImage() == NO_ERROR) {
         surfaceTexture->getTransformMatrix(transform);

@@ -68,7 +68,7 @@ Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceWidthHeight(JNIEnv* env
 // The call to hook up the SurfaceMediaSource (in MediaServer)  to the GL.
 // We get a sp<ISurfaceTexure> from the MediaServer and talks to MediaServer
 // over a binder interface. GL hooked up to the MediaServer by using the native
-// window created using the <ISurfaceTexture> handle
+// window created using the <IGraphicBufferProducer> handle
 JNIEXPORT jint JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
                                                       JNIEnv* env,

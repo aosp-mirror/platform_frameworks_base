@@ -27,7 +27,7 @@
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 
-#include <gui/ISurfaceTexture.h>
+#include <gui/IGraphicBufferProducer.h>
 #include <gui/SurfaceTextureClient.h>
 
 namespace android {
@@ -236,8 +236,8 @@ class GLEnv {
     // Dummy surface for context
     sp<ANativeWindow> window_;
 
-    // Dummy SurfaceTexture for context
-    sp<SurfaceTexture> surfaceTexture_;
+    // Dummy GLConsumer for context
+    sp<GLConsumer> surfaceTexture_;
 
     // The maximum surface id used.
     int max_surface_id_;
