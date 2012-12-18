@@ -27,7 +27,7 @@
 #include <cutils/properties.h>
 #include <utils/Vector.h>
 
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 #include <camera/Camera.h>
 #include <binder/IMemory.h>
@@ -555,7 +555,7 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
 
     sp<BufferQueue> bufferQueue = NULL;
     if (jSurfaceTexture != NULL) {
-        sp<SurfaceTexture> surfaceTexture =
+        sp<GLConsumer> surfaceTexture =
             SurfaceTexture_getSurfaceTexture(env, jSurfaceTexture);
         if (surfaceTexture != NULL) {
             bufferQueue = surfaceTexture->getBufferQueue();

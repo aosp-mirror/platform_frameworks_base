@@ -22,7 +22,7 @@
 #include <ui/Region.h>
 #include <ui/Rect.h>
 
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 #include <gui/SurfaceTextureClient.h>
 
 #include <SkBitmap.h>
@@ -67,8 +67,8 @@ static struct {
 static void android_view_TextureView_setDefaultBufferSize(JNIEnv* env, jobject,
     jobject surface, jint width, jint height) {
 
-    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
-    surfaceTexture->setDefaultBufferSize(width, height);
+    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
+    glConsumer->setDefaultBufferSize(width, height);
 }
 
 static inline SkBitmap::Config convertPixelFormat(int32_t format) {
@@ -101,8 +101,8 @@ static int32_t native_window_unlockAndPost(ANativeWindow* window) {
 static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject textureView,
         jobject surface) {
 
-    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
-    sp<ANativeWindow> window = new SurfaceTextureClient(surfaceTexture->getBufferQueue());
+    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
+    sp<ANativeWindow> window = new SurfaceTextureClient(glConsumer->getBufferQueue());
 
     window->incStrong(0);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));

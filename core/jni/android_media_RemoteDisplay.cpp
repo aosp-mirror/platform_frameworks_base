@@ -27,7 +27,7 @@
 
 #include <binder/IServiceManager.h>
 
-#include <gui/ISurfaceTexture.h>
+#include <gui/IGraphicBufferProducer.h>
 
 #include <media/IMediaPlayerService.h>
 #include <media/IRemoteDisplay.h>
@@ -60,14 +60,14 @@ protected:
     }
 
 public:
-    virtual void onDisplayConnected(const sp<ISurfaceTexture>& surfaceTexture,
+    virtual void onDisplayConnected(const sp<IGraphicBufferProducer>& bufferProducer,
             uint32_t width, uint32_t height, uint32_t flags) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-        jobject surfaceObj = android_view_Surface_createFromISurfaceTexture(env, surfaceTexture);
+        jobject surfaceObj = android_view_Surface_createFromISurfaceTexture(env, bufferProducer);
         if (surfaceObj == NULL) {
             ALOGE("Could not create Surface from surface texture %p provided by media server.",
-                    surfaceTexture.get());
+                  bufferProducer.get());
             return;
         }
 

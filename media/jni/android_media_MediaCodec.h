@@ -30,7 +30,7 @@ struct ALooper;
 struct AMessage;
 struct AString;
 struct ICrypto;
-struct ISurfaceTexture;
+struct IGraphicBufferProducer;
 struct MediaCodec;
 struct SurfaceTextureClient;
 
@@ -43,7 +43,7 @@ struct JMediaCodec : public RefBase {
 
     status_t configure(
             const sp<AMessage> &format,
-            const sp<ISurfaceTexture> &surfaceTexture,
+            const sp<IGraphicBufferProducer> &bufferProducer,
             const sp<ICrypto> &crypto,
             int flags);
 

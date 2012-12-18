@@ -28,7 +28,7 @@
 #include <EGL/egl.h>
 
 #include <gui/Surface.h>
-#include <gui/SurfaceTexture.h>
+#include <gui/GLConsumer.h>
 #include <gui/SurfaceTextureClient.h>
 
 #include <ui/ANativeObjectBase.h>
@@ -605,7 +605,7 @@ android_eglCreateWindowSurfaceTexture
     jint _remaining;
     EGLint *attrib_list = (EGLint *) 0;
     android::sp<ANativeWindow> window;
-    android::sp<android::SurfaceTexture> surfaceTexture;
+    android::sp<android::GLConsumer> surfaceTexture;
 
     if (!attrib_list_ref) {
         _exception = 1;
