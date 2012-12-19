@@ -1894,22 +1894,37 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Called by {@link android.view.View#requestLayout()} if the view hiearchy is currently
-     * undergoing a layout pass. requestLayout() should not be called during layout, but if it
-     * is called anyway, we handle the situation here rather than leave the hierarchy in an
-     * indeterminate state. The solution is to queue up all requests during layout, apply those
-     * requests as soon as layout is complete, and then run layout once more immediately. If
+     * Called by {@link android.view.View#requestLayout()} if the view hierarchy is currently
+     * undergoing a layout pass. requestLayout() should not generally be called during layout,
+     * unless the container hierarchy knows what it is doing (i.e., it is fine as long as
+     * all children in that container hierarchy are measured and laid out at the end of the layout
+     * pass for that container). If requestLayout() is called anyway, we handle it correctly
+     * by registering all requesters during a frame as it proceeds. At the end of the frame,
+     * we check all of those views to see if any still have pending layout requests, which
+     * indicates that they were not correctly handled by their container hierarchy. If that is
+     * the case, we clear all such flags in the tree, to remove the buggy flag state that leads
+     * to blank containers, and force a second request/measure/layout pass in this frame. If
      * more requestLayout() calls are received during that second layout pass, we post those
-     * requests to the next frame, to avoid possible infinite loops.
+     * requests to the next frame to avoid possible infinite loops.
+     *
+     * <p>The return value from this method indicates whether the request should proceed
+     * (if it is a request during the first layout pass) or should be skipped and posted to the
+     * next frame (if it is a request during the second layout pass).</p>
      *
      * @param view the view that requested the layout.
+     *
+     * @return true if request should proceed, false otherwise.
      */
-    void requestLayoutDuringLayout(final View view) {
+    boolean requestLayoutDuringLayout(final View view) {
+        if (view.mParent == null || view.mAttachInfo == null) {
+            // Would not normally trigger another layout, so just let it pass through as usual
+            return true;
+        }
         if (!mHandlingLayoutInLayoutRequest) {
             if (!mLayoutRequesters.contains(view)) {
-                Log.w("View", "requestLayout() called by " + view + " during layout pass");
                 mLayoutRequesters.add(view);
             }
+            return true;
         } else {
             Log.w("View", "requestLayout() called by " + view + " during second layout pass: " +
                     "posting to next frame");
@@ -1919,6 +1934,7 @@ public final class ViewRootImpl implements ViewParent,
                     view.requestLayout();
                 }
             });
+            return false;
         }
     }
 
@@ -1937,20 +1953,66 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "layout");
         try {
             host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+
             mInLayout = false;
             int numViewsRequestingLayout = mLayoutRequesters.size();
             if (numViewsRequestingLayout > 0) {
-                // requestLayout() was called during layout: unusual, but try to handle correctly
-                mHandlingLayoutInLayoutRequest = true;
+                // requestLayout() was called during layout.
+                // If no layout-request flags are set on the requesting views, there is no problem.
+                // If some requests are still pending, then we need to clear those flags and do
+                // a full request/measure/layout pass to handle this situation.
+
+                // Check state of layout flags for all requesters
+                ArrayList<View> mValidLayoutRequesters = null;
                 for (int i = 0; i < numViewsRequestingLayout; ++i) {
-                    mLayoutRequesters.get(i).requestLayout();
+                    View view = mLayoutRequesters.get(i);
+                    if ((view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) == View.PFLAG_FORCE_LAYOUT) {
+                        while (view != null && view.mAttachInfo != null && view.mParent != null &&
+                                (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) != 0) {
+                            if ((view.mViewFlags & View.VISIBILITY_MASK) != View.GONE) {
+                                // Only trigger new requests for non-GONE views
+                                Log.w(TAG, "requestLayout() improperly called during " +
+                                        "layout: running second layout pass for " + view);
+                                if (mValidLayoutRequesters == null) {
+                                    mValidLayoutRequesters = new ArrayList<View>();
+                                }
+                                mValidLayoutRequesters.add(view);
+                                break;
+                            }
+                            if (view.mParent instanceof View) {
+                                view = (View) view.mParent;
+                            } else {
+                                view = null;
+                            }
+                        }
+                    }
                 }
-                measureHierarchy(host, lp, mView.getContext().getResources(),
-                        desiredWindowWidth, desiredWindowHeight);
-                // Now run layout one more time
-                mInLayout = true;
-                host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
-                mHandlingLayoutInLayoutRequest = false;
+                if (mValidLayoutRequesters != null) {
+                    // Clear flags throughout hierarchy, walking up from each flagged requester
+                    for (int i = 0; i < numViewsRequestingLayout; ++i) {
+                        View view = mLayoutRequesters.get(i);
+                        while (view != null &&
+                                (view.mPrivateFlags & View.PFLAG_FORCE_LAYOUT) != 0) {
+                            view.mPrivateFlags &= ~View.PFLAG_FORCE_LAYOUT;
+                            if (view.mParent instanceof View) {
+                                view = (View) view.mParent;
+                            } else {
+                                view = null;
+                            }
+                        }
+                    }
+                    // Process fresh layout requests, then measure and layout
+                    mHandlingLayoutInLayoutRequest = true;
+                    int numValidRequests = mValidLayoutRequesters.size();
+                    for (int i = 0; i < numValidRequests; ++i) {
+                        mValidLayoutRequesters.get(i).requestLayout();
+                    }
+                    measureHierarchy(host, lp, mView.getContext().getResources(),
+                            desiredWindowWidth, desiredWindowHeight);
+                    mInLayout = true;
+                    host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+                    mHandlingLayoutInLayoutRequest = false;
+                }
                 mLayoutRequesters.clear();
             }
         } finally {

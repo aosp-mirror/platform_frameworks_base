@@ -15509,16 +15509,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * handle possible request-during-layout errors correctly.</p>
      */
     public void requestLayout() {
-        ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot != null && viewRoot.isInLayout()) {
-            viewRoot.requestLayoutDuringLayout(this);
-            return;
+        if (mAttachInfo != null && mAttachInfo.mViewRequestingLayout == null) {
+            // Only trigger request-during-layout logic if this is the view requesting it,
+            // not the views in its parent hierarchy
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null && viewRoot.isInLayout()) {
+                if (!viewRoot.requestLayoutDuringLayout(this)) {
+                    return;
+                }
+            }
+            mAttachInfo.mViewRequestingLayout = this;
         }
+
         mPrivateFlags |= PFLAG_FORCE_LAYOUT;
         mPrivateFlags |= PFLAG_INVALIDATED;
 
         if (mParent != null && !mParent.isLayoutRequested()) {
             mParent.requestLayout();
+        }
+        if (mAttachInfo != null && mAttachInfo.mViewRequestingLayout == this) {
+            mAttachInfo.mViewRequestingLayout = null;
         }
     }
 
@@ -17998,6 +18008,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Point used to compute visible regions.
          */
         final Point mPoint = new Point();
+
+        /**
+         * Used to track which View originated a requestLayout() call, used when
+         * requestLayout() is called during layout.
+         */
+        View mViewRequestingLayout;
 
         /**
          * Creates a new set of attachment information with the specified
