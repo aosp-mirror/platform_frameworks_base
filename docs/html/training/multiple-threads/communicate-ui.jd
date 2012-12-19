@@ -1,0 +1,263 @@
+page.title=Communicating with the UI Thread
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Handler">Define a Handler on the UI Thread</a></li>
+  <li><a href="#MoveValues">Move Data from a Task to the UI Thread</a>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threads</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    In the previous lesson you learned how to start a task on a thread managed by
+    {@link java.util.concurrent.ThreadPoolExecutor}. This final lesson shows you how to send data
+    from the task to objects running on the user interface (UI) thread. This feature allows your
+    tasks to do background work and then move the results to UI elements such as bitmaps.
+</p>
+<p>
+    Every app has its own special thread that runs UI objects such as {@link android.view.View}
+    objects; this thread is called the UI thread. Only objects running on the UI thread have access
+    to other objects on that thread. Because tasks that you run on a thread from a thread pool
+    <em>aren't</em> running on your UI thread, they don't have access to UI objects. To move data
+    from a background thread to the UI thread, use a {@link android.os.Handler} that's
+    running on the UI thread.
+</p>
+<h2 id="Handler">Define a Handler on the UI Thread</h2>
+<p>
+    {@link android.os.Handler} is part of the Android system's framework for managing threads. A
+    {@link android.os.Handler} object receives messages and runs code to handle the messages.
+    Normally, you create a {@link android.os.Handler} for a new thread, but you can
+    also create a {@link android.os.Handler} that's connected to an existing thread.
+    When you connect a {@link android.os.Handler} to your UI thread, the code that handles messages
+    runs on the UI thread.
+</p>
+<p>
+    Instantiate the {@link android.os.Handler} object in the constructor for the class that
+    creates your thread pools, and store the object in a global variable. Connect it to the UI
+    thread by instantiating it with the {@link android.os.Handler#Handler(Looper) Handler(Looper)}
+    constructor. This constructor uses a {@link android.os.Looper} object, which is another part of
+    the Android system's thread management framework. When you instantiate a
+    {@link android.os.Handler} based on a particular {@link android.os.Looper} instance, the
+    {@link android.os.Handler} runs on the same thread as the {@link android.os.Looper}.
+    For example:
+</p>
+<pre>
+private PhotoManager() {
+...
+    // Defines a Handler object that's attached to the UI thread
+    mHandler = new Handler(Looper.getMainLooper()) {
+    ...
+</pre>
+<p>
+    Inside the {@link android.os.Handler}, override the {@link android.os.Handler#handleMessage
+    handleMessage()} method. The Android system invokes this method when it receives a new message
+    for a thread it's managing; all of the {@link android.os.Handler} objects for a particular
+    thread receive the same message. For example:
+</p>
+<pre>
+        /*
+         * handleMessage() defines the operations to perform when
+         * the Handler receives a new Message to process.
+         */
+        &#64;Override
+        public void handleMessage(Message inputMessage) {
+            // Gets the image task from the incoming Message object.
+            PhotoTask photoTask = (PhotoTask) inputMessage.obj;
+            ...
+        }
+    ...
+    }
+}
+The next section shows how to tell the {@link android.os.Handler} to move data.
+</pre>
+<h2 id="MoveValues">Move Data from a Task to the UI Thread</h2>
+<p>
+    To move data from a task object running on a background thread to an object on the UI thread,
+    start by storing references to the data and the UI object in the task object. Next, pass the
+    task object and a status code to the object that instantiated the {@link android.os.Handler}.
+    In this object, send a {@link android.os.Message} containing the status and the task object to
+    the {@link android.os.Handler}. Because {@link android.os.Handler} is running on the UI thread,
+    it can move the data to the UI object.
+
+<h3>Store data in the task object</h3>
+<p>
+    For example, here's a {@link java.lang.Runnable}, running on a background thread, that decodes a
+    {@link android.graphics.Bitmap} and stores it in its parent object <code>PhotoTask</code>.
+    The {@link java.lang.Runnable} also stores the status code <code>DECODE_STATE_COMPLETED</code>.
+</p>
+<pre>
+// A class that decodes photo files into Bitmaps
+class PhotoDecodeRunnable implements Runnable {
+    ...
+    PhotoDecodeRunnable(PhotoTask downloadTask) {
+        mPhotoTask = downloadTask;
+    }
+    ...
+    // Gets the downloaded byte array
+    byte[] imageBuffer = mPhotoTask.getByteBuffer();
+    ...
+    // Runs the code for this task
+    public void run() {
+        ...
+        // Tries to decode the image buffer
+        returnBitmap = BitmapFactory.decodeByteArray(
+                imageBuffer,
+                0,
+                imageBuffer.length,
+                bitmapOptions
+        );
+        ...
+        // Sets the ImageView Bitmap
+        mPhotoTask.setImage(returnBitmap);
+        // Reports a status of "completed"
+        mPhotoTask.handleDecodeState(DECODE_STATE_COMPLETED);
+        ...
+    }
+    ...
+}
+...
+</pre>
+<p>
+    <code>PhotoTask</code> also contains a handle to the {@link android.widget.ImageView} that
+    displays the {@link android.graphics.Bitmap}. Even though references to
+    the {@link android.graphics.Bitmap} and {@link android.widget.ImageView} are in the same object,
+    you can't assign the {@link android.graphics.Bitmap} to the {@link android.widget.ImageView},
+    because you're not currently running on the UI thread.
+</p>
+<p>
+    Instead, the next step is to send this status to the <code>PhotoTask</code> object.
+</p>
+<h3>Send status up the object hierarchy</h3>
+<p>
+    <code>PhotoTask</code> is the next higher object in the hierarchy. It maintains references to
+    the decoded data and the {@link android.view.View} object that will show the data. It receives
+    a status code from <code>PhotoDecodeRunnable</code> and passes it along to the object that
+    maintains thread pools and instantiates {@link android.os.Handler}:
+</p>
+<pre>
+public class PhotoTask {
+    ...
+    // Gets a handle to the object that creates the thread pools
+    sPhotoManager = PhotoManager.getInstance();
+    ...
+    public void handleDecodeState(int state) {
+        int outState;
+        // Converts the decode state to the overall state.
+        switch(state) {
+            case PhotoDecodeRunnable.DECODE_STATE_COMPLETED:
+                outState = PhotoManager.TASK_COMPLETE;
+                break;
+            ...
+        }
+        ...
+        // Calls the generalized state method
+        handleState(outState);
+    }
+    ...
+    // Passes the state to PhotoManager
+    void handleState(int state) {
+        /*
+         * Passes a handle to this task and the
+         * current state to the class that created
+         * the thread pools
+         */
+        sPhotoManager.handleState(this, state);
+    }
+    ...
+}
+</pre>
+<h3>Move data to the UI</h3>
+<p>
+    From the <code>PhotoTask</code> object, the <code>PhotoManager</code> object receives a status
+    code and a handle to the <code>PhotoTask</code> object. Because the status is
+    <code>TASK_COMPLETE</code>, creates a {@link android.os.Message} containing the state and task
+    object and sends it to the {@link android.os.Handler}:
+</p>
+<pre>
+public class PhotoManager {
+    ...
+    // Handle status messages from tasks
+    public void handleState(PhotoTask photoTask, int state) {
+        switch (state) {
+            ...
+            // The task finished downloading and decoding the image
+            case TASK_COMPLETE:
+                /*
+                 * Creates a message for the Handler
+                 * with the state and the task object
+                 */
+                Message completeMessage =
+                        mHandler.obtainMessage(state, photoTask);
+                completeMessage.sendToTarget();
+                break;
+            ...
+        }
+        ...
+    }
+</pre>
+<p>
+    Finally, {@link android.os.Handler#handleMessage Handler.handleMessage()} checks the status
+    code for each incoming {@link android.os.Message}. If the status code is
+    <code>TASK_COMPLETE</code>, then the task is finished, and the <code>PhotoTask</code> object
+    in the {@link android.os.Message} contains both a {@link android.graphics.Bitmap} and an
+    {@link android.widget.ImageView}. Because
+    {@link android.os.Handler#handleMessage Handler.handleMessage()} is
+    running on the UI thread, it can safely move the {@link android.graphics.Bitmap} to the
+    {@link android.widget.ImageView}:
+</p>
+<pre>
+    private PhotoManager() {
+        ...
+            mHandler = new Handler(Looper.getMainLooper()) {
+                &#64;Override
+                public void handleMessage(Message inputMessage) {
+                    // Gets the task from the incoming Message object.
+                    PhotoTask photoTask = (PhotoTask) inputMessage.obj;
+                    // Gets the ImageView for this task
+                    PhotoView localView = photoTask.getPhotoView();
+                    ...
+                    switch (inputMessage.what) {
+                        ...
+                        // The decoding is done
+                        case TASK_COMPLETE:
+                            /*
+                             * Moves the Bitmap from the task
+                             * to the View
+                             */
+                            localView.setImageBitmap(photoTask.getImage());
+                            break;
+                        ...
+                        default:
+                            /*
+                             * Pass along other messages from the UI
+                             */
+                            super.handleMessage(inputMessage);
+                    }
+                    ...
+                }
+                ...
+            }
+            ...
+    }
+...
+}
+</pre>

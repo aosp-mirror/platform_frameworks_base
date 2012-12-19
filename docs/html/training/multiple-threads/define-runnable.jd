@@ -1,0 +1,110 @@
+page.title=Specifying the Code to Run on a Thread
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ExtendClass">Define a Class that Implements Runnable</a></li>
+  <li><a href="#RunMethod">Implement the run() Method</a>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threads</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+</div>
+
+</div>
+</div>
+
+<p>
+    This lesson shows you how to implement a {@link java.lang.Runnable} class, which runs the code
+    in its {@link java.lang.Runnable#run Runnable.run()} method on a separate thread. You can also
+    pass a {@link java.lang.Runnable} to another object that can then attach it to a thread and
+    run it. One or more {@link java.lang.Runnable} objects that perform a particular operation are
+    sometimes called a <i>task</i>.
+</p>
+<p>
+    {@link java.lang.Thread} and {@link java.lang.Runnable} are basic classes that, on their own,
+    have only limited power. Instead, they're the basis of powerful Android classes such as
+    {@link android.os.HandlerThread}, {@link android.os.AsyncTask}, and
+    {@link android.app.IntentService}. {@link java.lang.Thread} and {@link java.lang.Runnable} are
+    also the basis of the class {@link java.util.concurrent.ThreadPoolExecutor}. This class
+    automatically manages threads and task queues, and can even run multiple threads in parallel.
+</p>
+<h2 id="ExtendClass">Define a Class that Implements Runnable</h2>
+<p>
+    Implementing a class that implements {@link java.lang.Runnable} is straightforward. For example:
+</p>
+<pre>
+public class PhotoDecodeRunnable implements Runnable {
+    ...
+    &#64;Override
+    public void run() {
+        /*
+         * Code you want to run on the thread goes here
+         */
+        ...
+    }
+    ...
+}
+</pre>
+<h2 id="RunMethod">Implement the run() Method</h2>
+<p>
+    In the class, the {@link java.lang.Runnable#run Runnable.run()} method contains the
+    code that's executed. Usually, anything is allowable in a {@link java.lang.Runnable}. Remember,
+    though, that the {@link java.lang.Runnable} won't be running on the UI thread, so it can't
+    directly modify UI objects such as {@link android.view.View} objects. To communicate with
+    the UI thread, you have to use the techniques described in the lesson
+    <a href="communicate-ui.html">Communicate with the UI Thread</a>.
+</p>
+<p>
+    At the beginning of the {@link java.lang.Runnable#run run()} method, set the thread to use
+    background priority by calling
+    {@link android.os.Process#setThreadPriority Process.setThreadPriority()} with
+    {@link android.os.Process#THREAD_PRIORITY_BACKGROUND}. This approach reduces
+    resource competition between the {@link java.lang.Runnable} object's thread and the UI
+    thread.
+</p>
+<p>
+    You should also store a reference to the {@link java.lang.Runnable} object's
+    {@link java.lang.Thread} in the {@link java.lang.Runnable} itself, by calling
+    {@link java.lang.Thread#currentThread() Thread.currentThread()}.
+</p>
+<p>
+    The following snippet shows how to set up the {@link java.lang.Runnable#run run()} method:
+</p>
+<pre>
+class PhotoDecodeRunnable implements Runnable {
+...
+    /*
+     * Defines the code to run for this task.
+     */
+    &#64;Override
+    public void run() {
+        // Moves the current Thread into the background
+        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        ...
+        /*
+         * Stores the current Thread in the the PhotoTask instance,
+         * so that the instance
+         * can interrupt the Thread.
+         */
+        mPhotoTask.setImageDecodeThread(Thread.currentThread());
+        ...
+    }
+...
+}
+</pre>

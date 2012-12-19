@@ -925,6 +925,33 @@
           </li>
         </ul>
       </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/multiple-threads/index.html"
+             description=
+             "How to improve the performance and scalability of long-running operations by
+              dispatching work to multiple threads.">
+             Sending Operations to Multiple Threads</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/multiple-threads/define-runnable.html">
+            Specifying the Code to Run on a Thread
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/multiple-threads/create-threadpool.html">
+            Creating a Manager for Multiple Threads
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/multiple-threads/run-code.html">
+            Running Code on a Thread Pool Thread
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/multiple-threads/communicate-ui.html">
+            Communicating with the UI Thread
+          </a>
+          </li>
+        </ul>
+      </li>
       
       <li>
         <a href="<?cs var:toroot ?>training/articles/perf-anr.html"
