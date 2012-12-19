@@ -111,15 +111,11 @@ public class TestBase  {
         mRS = RenderScript.create(act);
         mRS.setMessageHandler(new MessageProcessor(act));
         mMessageScript = new ScriptC_msg(mRS);
-        mInPixelsAllocation = Allocation.createFromBitmap(mRS, b,
-                                                          Allocation.MipmapControl.MIPMAP_NONE,
-                                                          Allocation.USAGE_SCRIPT);
-        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2,
-                                                          Allocation.MipmapControl.MIPMAP_NONE,
-                                                          Allocation.USAGE_SCRIPT);
-        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, outb,
-                                                           Allocation.MipmapControl.MIPMAP_NONE,
-                                                           Allocation.USAGE_SCRIPT);
+
+        mInPixelsAllocation = Allocation.createFromBitmap(mRS, b);
+        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2);
+        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, outb);
+
         createTest(act.getResources());
     }
 
