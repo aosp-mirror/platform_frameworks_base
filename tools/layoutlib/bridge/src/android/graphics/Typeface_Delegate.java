@@ -188,11 +188,6 @@ public final class Typeface_Delegate {
         return delegate.mStyle;
     }
 
-    @LayoutlibDelegate
-    /*package*/ static void setGammaForText(float blackGamma, float whiteGamma) {
-        // This is for device testing only: pass
-    }
-
     // ---- Private delegate/helper methods ----
 
     private Typeface_Delegate(String family, int style) {

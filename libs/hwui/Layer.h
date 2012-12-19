@@ -23,6 +23,7 @@
 
 #include <ui/Region.h>
 
+#include <SkPaint.h>
 #include <SkXfermode.h>
 
 #include "Rect.h"

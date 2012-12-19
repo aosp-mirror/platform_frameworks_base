@@ -706,7 +706,7 @@ public class Canvas {
      *              does not intersect with the canvas' clip
      */
     public boolean quickReject(RectF rect, EdgeType type) {
-        return native_quickReject(mNativeCanvas, rect, type.nativeInt);
+        return native_quickReject(mNativeCanvas, rect);
     }
 
     /**
@@ -726,7 +726,7 @@ public class Canvas {
      *                    does not intersect with the canvas' clip
      */
     public boolean quickReject(Path path, EdgeType type) {
-        return native_quickReject(mNativeCanvas, path.ni(), type.nativeInt);
+        return native_quickReject(mNativeCanvas, path.ni());
     }
 
     /**
@@ -749,9 +749,9 @@ public class Canvas {
      * @return            true if the rect (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
      */
-    public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
-        return native_quickReject(mNativeCanvas, left, top, right, bottom,
-                                  type.nativeInt);
+    public boolean quickReject(float left, float top, float right, float bottom,
+                               EdgeType type) {
+        return native_quickReject(mNativeCanvas, left, top, right, bottom);
     }
 
     /**
@@ -1656,15 +1656,12 @@ public class Canvas {
                                                        Rect bounds);
     private static native void native_getCTM(int canvas, int matrix);
     private static native boolean native_quickReject(int nativeCanvas,
-                                                     RectF rect,
-                                                     int native_edgeType);
+                                                     RectF rect);
     private static native boolean native_quickReject(int nativeCanvas,
-                                                     int path,
-                                                     int native_edgeType);
+                                                     int path);
     private static native boolean native_quickReject(int nativeCanvas,
                                                      float left, float top,
-                                                     float right, float bottom,
-                                                     int native_edgeType);
+                                                     float right, float bottom);
     private static native void native_drawRGB(int nativeCanvas, int r, int g,
                                               int b);
     private static native void native_drawARGB(int nativeCanvas, int a, int r,
