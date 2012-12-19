@@ -58,9 +58,9 @@ public class AppWindowAnimator {
     }
 
     public void setAnimation(Animation anim, int width, int height) {
-        if (WindowManagerService.localLOGV) Slog.v(
-            TAG, "Setting animation in " + mAppToken + ": " + anim
-                    + " wxh=" + width + "x" + height);
+        if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting animation in " + mAppToken
+                + ": " + anim + " wxh=" + width + "x" + height
+                + " isVisible=" + mAppToken.isVisible());
         animation = anim;
         animating = false;
         if (!anim.isInitialized()) {
@@ -82,16 +82,17 @@ public class AppWindowAnimator {
         }
         // Start out animation gone if window is gone, or visible if window is visible.
         transformation.clear();
-        transformation.setAlpha(mAppToken.reportedVisible ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
     }
 
     public void setDummyAnimation() {
-        if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting dummy animation in " + mAppToken);
+        if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting dummy animation in " + mAppToken
+                + " isVisible=" + mAppToken.isVisible());
         animation = sDummyAnimation;
         hasTransformation = true;
         transformation.clear();
-        transformation.setAlpha(mAppToken.reportedVisible ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
     }
 
     public void clearAnimation() {
