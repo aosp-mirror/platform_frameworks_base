@@ -144,7 +144,7 @@ public final class ViewRootImpl implements ViewParent,
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
 
-    final SimulatedTrackball mSimulatedTrackball = new SimulatedTrackball();
+    final SimulatedTrackball mSimulatedTrackball;
 
     int mLastJoystickXDirection;
     int mLastJoystickYDirection;
@@ -387,6 +387,7 @@ public final class ViewRootImpl implements ViewParent,
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAttachInfo.mScreenOn = powerManager.isScreenOn();
         loadSystemProperties();
+        mSimulatedTrackball = new SimulatedTrackball(context);
     }
 
     /**
