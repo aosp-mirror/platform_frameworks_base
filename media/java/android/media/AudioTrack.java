@@ -159,23 +159,13 @@ public class AudioTrack
      */
     private final Object mPlayStateLock = new Object();
     /**
-     * The listener the AudioTrack notifies when the playback position reaches a marker
-     * or for periodic updates during the progression of the playback head.
-     *  @see #setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener)
-     */
-    private OnPlaybackPositionUpdateListener mPositionListener = null;
-    /**
-     * Lock to protect event listener updates against event notifications.
-     */
-    private final Object mPositionListenerLock = new Object();
-    /**
      * Size of the native audio buffer.
      */
     private int mNativeBufferSizeInBytes = 0;
     /**
      * Handler for marker events coming from the native code.
      */
-    private NativeEventHandlerDelegate mEventHandlerDelegate = null;
+    private NativeEventHandlerDelegate mEventHandlerDelegate;
     /**
      * Looper associated with the thread that creates the AudioTrack instance.
      */
@@ -737,13 +727,11 @@ public class AudioTrack
      */
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener,
                                                     Handler handler) {
-        synchronized (mPositionListenerLock) {
-            mPositionListener = listener;
-        }
         if (listener != null) {
-            mEventHandlerDelegate = new NativeEventHandlerDelegate(this, handler);
+            mEventHandlerDelegate = new NativeEventHandlerDelegate(this, listener, handler);
+        } else {
+            mEventHandlerDelegate = null;
         }
-
     }
 
 
@@ -1149,11 +1137,11 @@ public class AudioTrack
      * (potentially) handled in a different thread
      */
     private class NativeEventHandlerDelegate {
-        private final AudioTrack mAudioTrack;
         private final Handler mHandler;
 
-        NativeEventHandlerDelegate(AudioTrack track, Handler handler) {
-            mAudioTrack = track;
+        NativeEventHandlerDelegate(final AudioTrack track,
+                                   final OnPlaybackPositionUpdateListener listener,
+                                   Handler handler) {
             // find the looper for our new event handler
             Looper looper;
             if (handler != null) {
@@ -1169,22 +1157,18 @@ public class AudioTrack
                 mHandler = new Handler(looper) {
                     @Override
                     public void handleMessage(Message msg) {
-                        if (mAudioTrack == null) {
+                        if (track == null) {
                             return;
-                        }
-                        OnPlaybackPositionUpdateListener listener = null;
-                        synchronized (mPositionListenerLock) {
-                            listener = mAudioTrack.mPositionListener;
                         }
                         switch(msg.what) {
                         case NATIVE_EVENT_MARKER:
                             if (listener != null) {
-                                listener.onMarkerReached(mAudioTrack);
+                                listener.onMarkerReached(track);
                             }
                             break;
                         case NATIVE_EVENT_NEW_POS:
                             if (listener != null) {
-                                listener.onPeriodicNotification(mAudioTrack);
+                                listener.onPeriodicNotification(track);
                             }
                             break;
                         default:
@@ -1216,10 +1200,13 @@ public class AudioTrack
             return;
         }
 
-        if (track.mEventHandlerDelegate != null) {
-            Message m =
-                track.mEventHandlerDelegate.getHandler().obtainMessage(what, arg1, arg2, obj);
-            track.mEventHandlerDelegate.getHandler().sendMessage(m);
+        NativeEventHandlerDelegate delegate = track.mEventHandlerDelegate;
+        if (delegate != null) {
+            Handler handler = delegate.getHandler();
+            if (handler != null) {
+                Message m = handler.obtainMessage(what, arg1, arg2, obj);
+                handler.sendMessage(m);
+            }
         }
 
     }
