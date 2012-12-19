@@ -22,6 +22,7 @@ import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
 import static android.net.NetworkIdentity.scrubSubscriberId;
+import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
@@ -279,7 +280,8 @@ public class NetworkTemplate implements Parcelable {
     private boolean matchesWifi(NetworkIdentity ident) {
         switch (ident.mType) {
             case TYPE_WIFI:
-                return Objects.equal(mNetworkId, ident.mNetworkId);
+                return Objects.equal(
+                        removeDoubleQuotes(mNetworkId), removeDoubleQuotes(ident.mNetworkId));
             default:
                 return false;
         }
