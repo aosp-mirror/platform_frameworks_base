@@ -16,13 +16,15 @@
 
 package android.view;
 
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Log;
 
 /**
@@ -30,6 +32,8 @@ import android.util.Log;
  * 
  * @see ViewRootImpl
  */
+
+//TODO: Make this class an internal class of ViewRootImpl.java
 class SimulatedTrackball {
 
     private static final String TAG = "SimulatedTrackball";
@@ -43,7 +47,6 @@ class SimulatedTrackball {
     private static final int MSG_FLICK = 313;
     // TODO: Pass touch slop from the input device
     private static final int TOUCH_SLOP = 30;
-
     // The position of the previous touchpad event
     private float mLastTouchpadXPosition;
     private float mLastTouchpadYPosition;
@@ -58,6 +61,8 @@ class SimulatedTrackball {
     private long mLastTouchPadEventTimeMs = 0;
     // Did the swipe begin in a valid region
     private boolean mEdgeSwipePossible;
+
+    private final Context mContext;
 
     // How quickly keys were sent;
     private int mKeySendRateMs = 0;
@@ -92,7 +97,7 @@ class SimulatedTrackball {
     // How quickly the repeated events die off
     private float mFlickDecay;
 
-    public SimulatedTrackball() {
+    public SimulatedTrackball(Context context) {
         mDistancePerTick = SystemProperties.getInt("persist.vr_dist_tick", 64);
         mDistancePerTickSquared = mDistancePerTick * mDistancePerTick;
         mMaxRepeatDelay = SystemProperties.getInt("persist.vr_repeat_delay", 300);
@@ -102,6 +107,8 @@ class SimulatedTrackball {
                 "persist.sys.vr_flick_decay", "1.3"));
         mTouchSlop = TOUCH_SLOP;
         mTouchSlopSquared = mTouchSlop * mTouchSlop;
+
+        mContext = context;
     }
 
     private final Handler mHandler = new Handler(true /*async*/) {
@@ -167,12 +174,19 @@ class SimulatedTrackball {
                 if (event.getY() < (event.getDevice().getMotionRange(MotionEvent.AXIS_Y).getMax()
                         * .5) && mEdgeSwipePossible) {
                     mEdgeSwipePossible = false;
-                    Intent intent = new Intent("android.search.action.GLOBAL_SEARCH");
-                    intent.addCategory("android.intent.category.DEFAULT");
-                    try {
-                        viewroot.mView.getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG,"Search activity not found.");
+
+                    Intent intent =
+                            ((SearchManager)mContext.getSystemService(Context.SEARCH_SERVICE))
+                            .getAssistIntent(mContext, UserHandle.USER_CURRENT_OR_SELF);
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            mContext.startActivity(intent);
+                        } catch (ActivityNotFoundException e){
+                            Log.e(TAG, "Could not start search activity");
+                        }
+                    } else {
+                        Log.e(TAG, "Could not find a search activity");
                     }
                 }
                 // Find the difference in position between the two most recent
