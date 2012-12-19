@@ -52,7 +52,6 @@ import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 import static android.net.wifi.WifiManager.CHANGE_REASON_ADDED;
 import static android.net.wifi.WifiManager.CHANGE_REASON_REMOVED;
 import static android.net.wifi.WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION;
@@ -551,8 +550,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final WifiConfiguration config = intent.getParcelableExtra(
                         EXTRA_WIFI_CONFIGURATION);
                 if (config.SSID != null) {
-                    final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
-                            removeDoubleQuotes(config.SSID));
+                    final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(config.SSID);
                     synchronized (mRulesLock) {
                         if (mNetworkPolicy.containsKey(template)) {
                             mNetworkPolicy.remove(template);
@@ -581,8 +579,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final WifiInfo info = intent.getParcelableExtra(EXTRA_WIFI_INFO);
             final boolean meteredHint = info.getMeteredHint();
 
-            final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
-                    removeDoubleQuotes(info.getSSID()));
+            final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(info.getSSID());
             synchronized (mRulesLock) {
                 NetworkPolicy policy = mNetworkPolicy.get(template);
                 if (policy == null && meteredHint) {
