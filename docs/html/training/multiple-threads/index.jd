@@ -1,0 +1,83 @@
+page.title=Sending Operations to Multiple Threads
+
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+    <li>Android 3.0 (API Level 11) or higher</li>
+    <li>
+        <a href="{@docRoot}training/load-data-background/index.html">
+        Loading Data in the Background</a> training class
+    </li>
+    <li>
+        <a href="{@docRoot}training/run-background-service/index.html">
+        Running in a Background Service</a> training class
+    </li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/processes-and-threads.html">Processes and Threads</a></li>
+</ul>
+
+<h2>Try it out</h2>
+<div class="download-box">
+    <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
+    <p class="filename">ThreadSample.zip</p>
+</div>
+
+</div>
+</div>
+<p>
+    The speed and efficiency of a long-running, data-intensive operation often improves when you
+    split it into smaller operations running on multiple threads. On a device that has a CPU with
+    multiple processors (cores), the system can run the threads in parallel, rather than making each
+    sub-operation wait for a chance to run. For example, decoding multiple image files in order to
+    display them on a thumbnail screen runs substantially faster when you do each decode on a
+    separate thread.
+</p>
+<p>
+    This class shows you how to set up and use multiple threads in an Android app, using a
+    thread pool object. You'll also learn how to define code to run on a thread and how to
+    communicate between one of these threads and the UI thread.
+</p>
+<h2>Lessons</h2>
+<dl>
+    <dt>
+        <b><a href="define-runnable.html">Specifying the Code to Run on a Thread</a></b>
+    </dt>
+    <dd>
+        Learn how to write code to run on a separate {@link java.lang.Thread}, by
+        defining a class that implements the {@link java.lang.Runnable} interface.
+    </dd>
+    <dt>
+        <b><a href="create-threadpool.html">Creating a Manager for Multiple Threads</a></b>
+    </dt>
+    <dd>
+        Learn how to create an object that manages a pool of {@link java.lang.Thread} objects and
+        a queue of {@link java.lang.Runnable} objects. This object is called a
+        {@link java.util.concurrent.ThreadPoolExecutor}.
+    </dd>
+    <dt>
+        <b><a href="run-code.html">Running Code on a Thread Pool Thread</a></b>
+    </dt>
+    <dd>
+        Learn how to run a {@link java.lang.Runnable} on a thread from the thread pool.
+    </dd>
+    <dt>
+        <b><a href="communicate-ui.html">Communicating with the UI Thread</a></b>
+    </dt>
+    <dd>
+        Learn how to communicate from a thread in the thread pool to the UI thread.
+    </dd>
+</dl>
+
