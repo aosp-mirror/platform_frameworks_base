@@ -31,12 +31,11 @@ page.title=JNI Tips
 code (written in C/C++).  It's vendor-neutral, has support for loading code from
 dynamic shared libraries, and while cumbersome at times is reasonably efficient.</p>
 
-<p>You really should read through the
-<a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/jniTOC.html">JNI spec for J2SE 6</a>
+<p>If you're not already familiar with it, read through the
+<a href="http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html">Java Native Interface Specification</a>
 to get a sense for how JNI works and what features are available.  Some
 aspects of the interface aren't immediately obvious on
-first reading, so you may find the next few sections handy.
-There's a more detailed <a href="http://java.sun.com/docs/books/jni/html/jniTOC.html">JNI Programmer's Guide and Specification</a>.</p>
+first reading, so you may find the next few sections handy.</p>
 
 
 <a name="JavaVM_and_JNIEnv" id="JavaVM_and_JNIEnv"></a>
