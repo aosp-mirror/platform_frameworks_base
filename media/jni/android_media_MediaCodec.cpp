@@ -237,15 +237,27 @@ status_t JMediaCodec::getBuffers(
 
     *bufArray = (jobjectArray)env->NewObjectArray(
             buffers.size(), byteBufferClass, NULL);
+    if (*bufArray == NULL) {
+        env->DeleteLocalRef(nativeByteOrderObj);
+        return NO_MEMORY;
+    }
 
     for (size_t i = 0; i < buffers.size(); ++i) {
         const sp<ABuffer> &buffer = buffers.itemAt(i);
 
+        // if this is an ABuffer that doesn't actually hold any accessible memory,
+        // use a null ByteBuffer
+        if (buffer->base() == NULL) {
+            continue;
+        }
         jobject byteBuffer =
             env->NewDirectByteBuffer(
                 buffer->base(),
                 buffer->capacity());
-
+        if (byteBuffer == NULL) {
+            env->DeleteLocalRef(nativeByteOrderObj);
+            return NO_MEMORY;
+        }
         jobject me = env->CallObjectMethod(
                 byteBuffer, orderID, nativeByteOrderObj);
         env->DeleteLocalRef(me);
@@ -715,7 +727,10 @@ static jobjectArray android_media_MediaCodec_getBuffers(
         return buffers;
     }
 
-    throwExceptionAsNecessary(env, err);
+    // if we're out of memory, an exception was already thrown
+    if (err != NO_MEMORY) {
+        throwExceptionAsNecessary(env, err);
+    }
 
     return NULL;
 }
