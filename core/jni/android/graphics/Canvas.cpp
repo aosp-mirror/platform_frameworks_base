@@ -93,14 +93,6 @@ public:
         return canvas->getDevice()->accessBitmap(false).height();
     }
 
-    static void setBitmap(JNIEnv* env, jobject, SkCanvas* canvas, SkBitmap* bitmap) {
-        if (bitmap) {
-            canvas->setBitmapDevice(*bitmap);
-        } else {
-            canvas->setDevice(NULL);
-        }
-    }
- 
     static int saveAll(JNIEnv* env, jobject jcanvas) {
         NPE_CHECK_RETURN_ZERO(env, jcanvas);
         return GraphicsJNI::getNativeCanvas(env, jcanvas)->save();
@@ -967,7 +959,6 @@ static JNINativeMethod gCanvasMethods[] = {
     {"isOpaque","()Z", (void*) SkCanvasGlue::isOpaque},
     {"getWidth","()I", (void*) SkCanvasGlue::getWidth},
     {"getHeight","()I", (void*) SkCanvasGlue::getHeight},
-    {"native_setBitmap","(II)V", (void*) SkCanvasGlue::setBitmap},
     {"save","()I", (void*) SkCanvasGlue::saveAll},
     {"save","(I)I", (void*) SkCanvasGlue::save},
     {"native_saveLayer","(ILandroid/graphics/RectF;II)I",
