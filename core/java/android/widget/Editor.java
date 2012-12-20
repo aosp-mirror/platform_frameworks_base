@@ -1468,20 +1468,24 @@ public class Editor {
             middle = (top + bottom) >> 1;
         }
 
-        updateCursorPosition(0, top, middle, getPrimaryHorizontal(layout, hintLayout, offset));
+        boolean clamped = layout.shouldClampCursor(line);
+        updateCursorPosition(0, top, middle,
+                getPrimaryHorizontal(layout, hintLayout, offset, clamped));
 
         if (mCursorCount == 2) {
-            updateCursorPosition(1, middle, bottom, layout.getSecondaryHorizontal(offset));
+            updateCursorPosition(1, middle, bottom,
+                    layout.getSecondaryHorizontal(offset, clamped));
         }
     }
 
-    private float getPrimaryHorizontal(Layout layout, Layout hintLayout, int offset) {
+    private float getPrimaryHorizontal(Layout layout, Layout hintLayout, int offset,
+            boolean clamped) {
         if (TextUtils.isEmpty(layout.getText()) &&
                 hintLayout != null &&
                 !TextUtils.isEmpty(hintLayout.getText())) {
-            return hintLayout.getPrimaryHorizontal(offset);
+            return hintLayout.getPrimaryHorizontal(offset, clamped);
         } else {
-            return layout.getPrimaryHorizontal(offset);
+            return layout.getPrimaryHorizontal(offset, clamped);
         }
     }
 
