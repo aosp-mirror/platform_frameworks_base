@@ -215,36 +215,44 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mXOffset;
     int mYOffset;
 
-    // This is set after IWindowSession.relayout() has been called at
-    // least once for the window.  It allows us to detect the situation
-    // where we don't yet have a surface, but should have one soon, so
-    // we can give the window focus before waiting for the relayout.
+    /**
+     * This is set after IWindowSession.relayout() has been called at
+     * least once for the window.  It allows us to detect the situation
+     * where we don't yet have a surface, but should have one soon, so
+     * we can give the window focus before waiting for the relayout.
+     */
     boolean mRelayoutCalled;
 
-    // If the application has called relayout() with changes that can
-    // impact its window's size, we need to perform a layout pass on it
-    // even if it is not currently visible for layout.  This is set
-    // when in that case until the layout is done.
+    /**
+     * If the application has called relayout() with changes that can
+     * impact its window's size, we need to perform a layout pass on it
+     * even if it is not currently visible for layout.  This is set
+     * when in that case until the layout is done.
+     */
     boolean mLayoutNeeded;
 
-    // Currently running an exit animation?
+    /** Currently running an exit animation? */
     boolean mExiting;
 
-    // Currently on the mDestroySurface list?
+    /** Currently on the mDestroySurface list? */
     boolean mDestroying;
 
-    // Completely remove from window manager after exit animation?
+    /** Completely remove from window manager after exit animation? */
     boolean mRemoveOnExit;
 
-    // Set when the orientation is changing and this window has not yet
-    // been updated for the new orientation.
+    /**
+     * Set when the orientation is changing and this window has not yet
+     * been updated for the new orientation.
+     */
     boolean mOrientationChanging;
 
-    // Is this window now (or just being) removed?
+    /** Is this window now (or just being) removed? */
     boolean mRemoved;
 
-    // Temp for keeping track of windows that have been removed when
-    // rebuilding window list.
+    /**
+     * Temp for keeping track of windows that have been removed when
+     * rebuilding window list.
+     */
     boolean mRebuilding;
 
     // Input channel and input window handle used by the input dispatcher.
