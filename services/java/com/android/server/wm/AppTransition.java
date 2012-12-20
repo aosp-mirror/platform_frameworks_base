@@ -30,7 +30,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 
@@ -50,9 +49,14 @@ import static android.view.WindowManagerPolicy.TRANSIT_UNSET;
 // made visible or hidden at the next transition.
 public class AppTransition implements Dump {
     private static final String TAG = "AppTransition";
-    private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
-    private static final boolean DEBUG_APP_TRANSITIONS = WindowManagerService.DEBUG_APP_TRANSITIONS;
-    private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_APP_TRANSITIONS;
+    private static final boolean DEBUG_APP_TRANSITIONS =
+            WindowManagerService.DEBUG_APP_TRANSITIONS;
+    private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
+
+    /** Fraction of animation at which the recents thumbnail becomes completely transparent */
+    static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
+
+    static final long DEFAULT_APP_TRANSITION_DURATION = 250;
 
     final Context mContext;
     final Handler mH;
@@ -75,15 +79,26 @@ public class AppTransition implements Dump {
     boolean mAppTransitionTimeout = false;
 
     final int mConfigShortAnimTime;
-    final Interpolator mInterpolator;
+    private final Interpolator mDecelerateInterpolator;
+    private final Interpolator mThumbnailFadeoutInterpolator;
 
     AppTransition(Context context, Handler h) {
         mContext = context;
         mH = h;
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
-        mInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.decelerate_quad);
+        mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.decelerate_cubic);
+        mThumbnailFadeoutInterpolator = new Interpolator() {
+            @Override
+            public float getInterpolation(float input) {
+                // Linear response for first fraction, then complete after that.
+                if (input < RECENTS_THUMBNAIL_FADEOUT_FRACTION) {
+                    return input / RECENTS_THUMBNAIL_FADEOUT_FRACTION;
+                }
+                return 1.0f;
+            }
+        };
     }
 
     boolean isTransitionSet() {
@@ -99,7 +114,7 @@ public class AppTransition implements Dump {
     }
 
     int getAppTransition() {
-        return mNextAppTransition; 
+        return mNextAppTransition;
      }
 
     void setAppTransition(int transit) {
@@ -229,24 +244,6 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    private Animation createExitAnimationLocked(int transit, int duration) {
-        if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN ||
-                transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE) {
-            // If we are on top of the wallpaper, we need an animation that
-            // correctly handles the wallpaper staying static behind all of
-            // the animated elements.  To do this, will just have the existing
-            // element fade out.
-            Animation a = new AlphaAnimation(1, 0);
-            a.setDetachWallpaper(true);
-            a.setDuration(duration);
-            return a;
-        }
-        // For normal animations, the exiting element just holds in place.
-        Animation a = new AlphaAnimation(1, 1);
-        a.setDuration(duration);
-        return a;
-    }
-
     /**
      * Compute the pivot point for an animation that is scaling from a small
      * rect on screen to a larger rect.  The pivot point varies depending on
@@ -268,20 +265,6 @@ public class AppTransition implements Dump {
     private Animation createScaleUpAnimationLocked(int transit, boolean enter,
                                                    int appWidth, int appHeight) {
         Animation a = null;
-        // Pick the desired duration.  If this is an inter-activity transition,
-        // it  is the standard duration for that.  Otherwise we use the longer
-        // task transition duration.
-        int duration;
-        switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                duration = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_shortAnimTime);
-                break;
-            default:
-                duration = 300;
-                break;
-        }
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
             float scaleW = mNextAppTransitionStartWidth / (float) appWidth;
@@ -289,22 +272,45 @@ public class AppTransition implements Dump {
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mNextAppTransitionStartX, scaleW),
                     computePivot(mNextAppTransitionStartY, scaleH));
-            scale.setDuration(duration);
-            AnimationSet set = new AnimationSet(true);
+            scale.setInterpolator(mDecelerateInterpolator);
+
             Animation alpha = new AlphaAnimation(0, 1);
-            scale.setDuration(duration);
+            alpha.setInterpolator(mThumbnailFadeoutInterpolator);
+
+            AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            alpha.setDuration(duration);
             set.addAnimation(alpha);
             set.setDetachWallpaper(true);
             a = set;
+        } else  if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN ||
+                    transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE) {
+            // If we are on top of the wallpaper, we need an animation that
+            // correctly handles the wallpaper staying static behind all of
+            // the animated elements.  To do this, will just have the existing
+            // element fade out.
+            a = new AlphaAnimation(1, 0);
+            a.setDetachWallpaper(true);
         } else {
-            a = createExitAnimationLocked(transit, duration);
+            // For normal animations, the exiting element just holds in place.
+            a = new AlphaAnimation(1, 1);
         }
+
+        // Pick the desired duration.  If this is an inter-activity transition,
+        // it  is the standard duration for that.  Otherwise we use the longer
+        // task transition duration.
+        final long duration;
+        switch (transit) {
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                duration = mConfigShortAnimTime;
+                break;
+            default:
+                duration = DEFAULT_APP_TRANSITION_DURATION;
+                break;
+        }
+        a.setDuration(duration);
         a.setFillAfter(true);
-        final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_cubic);
-        a.setInterpolator(interpolator);
+        a.setInterpolator(mDecelerateInterpolator);
         a.initialize(appWidth, appHeight, appWidth, appHeight);
         return a;
     }
@@ -316,75 +322,43 @@ public class AppTransition implements Dump {
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
-        // Pick the desired duration.  If this is an inter-activity transition,
-        // it  is the standard duration for that.  Otherwise we use the longer
-        // task transition duration.
-        int duration;
-        switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                duration = mConfigShortAnimTime;
-                break;
-            default:
-                duration = 250;
-                break;
-        }
         if (thumb) {
             // Animation for zooming thumbnail from its initial size to
             // filling the screen.
             if (mNextAppTransitionScaleUp) {
                 float scaleW = appWidth / thumbWidth;
                 float scaleH = appHeight / thumbHeight;
-
                 Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
                         computePivot(mNextAppTransitionStartX, 1 / scaleW),
                         computePivot(mNextAppTransitionStartY, 1 / scaleH));
-                AnimationSet set = new AnimationSet(true);
+                scale.setInterpolator(mDecelerateInterpolator);
+
                 Animation alpha = new AlphaAnimation(1, 0);
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                alpha.setInterpolator(mThumbnailFadeoutInterpolator);
+
+                // This AnimationSet uses the Interpolators assigned above.
+                AnimationSet set = new AnimationSet(false);
                 set.addAnimation(scale);
-                alpha.setDuration(duration);
                 set.addAnimation(alpha);
-                set.setFillBefore(true);
                 a = set;
             } else {
                 float scaleW = appWidth / thumbWidth;
                 float scaleH = appHeight / thumbHeight;
-
-                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                a = new ScaleAnimation(scaleW, 1, scaleH, 1,
                         computePivot(mNextAppTransitionStartX, 1 / scaleW),
                         computePivot(mNextAppTransitionStartY, 1 / scaleH));
-                AnimationSet set = new AnimationSet(true);
-                Animation alpha = new AlphaAnimation(1, 1);
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                set.addAnimation(scale);
-                alpha.setDuration(duration);
-                set.addAnimation(alpha);
-                set.setFillBefore(true);
-
-                a = set;
             }
         } else if (enter) {
             // Entering app zooms out from the center of the thumbnail.
             if (mNextAppTransitionScaleUp) {
                 float scaleW = thumbWidth / appWidth;
                 float scaleH = thumbHeight / appHeight;
-                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                a = new ScaleAnimation(scaleW, 1, scaleH, 1,
                         computePivot(mNextAppTransitionStartX, scaleW),
                         computePivot(mNextAppTransitionStartY, scaleH));
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                scale.setFillBefore(true);
-                a = scale;
             } else {
                 // noop animation
                 a = new AlphaAnimation(1, 1);
-                a.setDuration(duration);
             }
         } else {
             // Exiting app
@@ -398,31 +372,39 @@ public class AppTransition implements Dump {
                     // noop animation
                     a = new AlphaAnimation(1, 1);
                 }
-                a.setDuration(duration);
             } else {
                 float scaleW = thumbWidth / appWidth;
                 float scaleH = thumbHeight / appHeight;
                 Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
                         computePivot(mNextAppTransitionStartX, scaleW),
                         computePivot(mNextAppTransitionStartY, scaleH));
-                scale.setDuration(duration);
-                scale.setInterpolator(
-                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-                scale.setFillBefore(true);
-                AnimationSet set = new AnimationSet(true);
+
                 Animation alpha = new AlphaAnimation(1, 0);
+
+                AnimationSet set = new AnimationSet(true);
                 set.addAnimation(scale);
-                alpha.setDuration(duration);
-                alpha.setInterpolator(new DecelerateInterpolator(
-                        THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
                 set.addAnimation(alpha);
-                set.setFillBefore(true);
                 set.setZAdjustment(Animation.ZORDER_TOP);
                 a = set;
             }
         }
+
+        // Pick the desired duration.  If this is an inter-activity transition,
+        // it  is the standard duration for that.  Otherwise we use the longer
+        // task transition duration.
+        final long duration;
+        switch (transit) {
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                duration = mConfigShortAnimTime;
+                break;
+            default:
+                duration = DEFAULT_APP_TRANSITION_DURATION;
+                break;
+        }
+        a.setDuration(duration);
         a.setFillAfter(true);
-        a.setInterpolator(mInterpolator);
+        a.setInterpolator(mDecelerateInterpolator);
         a.initialize(appWidth, appHeight, appWidth, appHeight);
         return a;
     }
