@@ -121,7 +121,7 @@ more</a></p>
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
           <ul>
-            <li><a href="https://plus.google.com/108967384991768947849">
+            <li><a href="http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html">
               <div class="feed-image" style="background:url('{@docRoot}images/home/play_logo.png') no-repeat 0 0"></div>
               <h4>Localized Promo Graphics on Google Play</h4>
               <p>Google Play now lets you provide different promotional graphics, screenshots, and videos for each language you support...</p>
