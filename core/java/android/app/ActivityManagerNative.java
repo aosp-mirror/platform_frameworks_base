@@ -1147,6 +1147,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IActivityController watcher = IActivityController.Stub.asInterface(
                     data.readStrongBinder());
             setActivityController(watcher);
+            reply.writeNoException();
             return true;
         }
 
