@@ -52,6 +52,7 @@ static jint android_content_StringBlock_nativeCreate(JNIEnv* env, jobject clazz,
 
     if (osb == NULL || osb->getError() != NO_ERROR) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        delete osb;
         return 0;
     }
 
