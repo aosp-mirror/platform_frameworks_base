@@ -1172,7 +1172,7 @@ public class Allocation extends BaseObj {
         // enable optimized bitmap path only with no mipmap and script-only usage
         if (mips == MipmapControl.MIPMAP_NONE &&
             t.getElement().isCompatible(Element.RGBA_8888(rs)) &&
-            usage == USAGE_SCRIPT) {
+            usage == (USAGE_SHARED | USAGE_SCRIPT)) {
             int id = rs.nAllocationCreateBitmapBackedAllocation(t.getID(rs), mips.mID, b, usage);
             if (id == 0) {
                 throw new RSRuntimeException("Load failed.");
