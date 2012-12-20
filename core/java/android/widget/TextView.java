@@ -6553,15 +6553,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int line = layout.getLineForOffset(offset);
 
-        // FIXME: Is it okay to truncate this, or should we round?
-        final int x = (int)layout.getPrimaryHorizontal(offset);
-        final int top = layout.getLineTop(line);
-        final int bottom = layout.getLineTop(line + 1);
-
-        int left = (int) FloatMath.floor(layout.getLineLeft(line));
-        int right = (int) FloatMath.ceil(layout.getLineRight(line));
-        int ht = layout.getHeight();
-
         int grav;
 
         switch (layout.getParagraphAlignment(line)) {
@@ -6583,8 +6574,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
         }
 
+        // We only want to clamp the cursor to fit within the layout width
+        // in left-to-right modes, because in a right to left alignment,
+        // we want to scroll to keep the line-right on the screen, as other
+        // lines are likely to have text flush with the right margin, which
+        // we want to keep visible.
+        // A better long-term solution would probably be to measure both
+        // the full line and a blank-trimmed version, and, for example, use
+        // the latter measurement for centering and right alignment, but for
+        // the time being we only implement the cursor clamping in left to
+        // right where it is most likely to be annoying.
+        final boolean clamped = grav > 0;
+        // FIXME: Is it okay to truncate this, or should we round?
+        final int x = (int)layout.getPrimaryHorizontal(offset, clamped);
+        final int top = layout.getLineTop(line);
+        final int bottom = layout.getLineTop(line + 1);
+
+        int left = (int) FloatMath.floor(layout.getLineLeft(line));
+        int right = (int) FloatMath.ceil(layout.getLineRight(line));
+        int ht = layout.getHeight();
+
         int hspace = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();
         int vspace = mBottom - mTop - getExtendedPaddingTop() - getExtendedPaddingBottom();
+        if (!mHorizontallyScrolling && right - left > hspace && right > x) {
+            // If cursor has been clamped, make sure we don't scroll.
+            right = Math.max(x, left + hspace);
+        }
 
         int hslack = (bottom - top) / 2;
         int vslack = hslack;
