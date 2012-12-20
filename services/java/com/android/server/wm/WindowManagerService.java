@@ -476,7 +476,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
-    PowerManager.WakeLock mScreenFrozenLock;
+    private PowerManager.WakeLock mScreenFrozenLock;
 
     final AppTransition mAppTransition;
     boolean mStartingIconInTransition = false;
@@ -762,8 +762,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPowerManager = pm;
         mPowerManager.setPolicy(mPolicy);
         PowerManager pmc = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "SCREEN_FROZEN");
+        mScreenFrozenLock = pmc.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
         mAppTransition = new AppTransition(context, mH);
@@ -2248,8 +2247,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
 
-            //dump();
-
             if (focusChanged) {
                 finishUpdateFocusedWindowAfterAssignLayersLocked(false /*updateInputWindows*/);
             }
@@ -2352,9 +2349,7 @@ public class WindowManagerService extends IWindowManager.Stub
         removeWindowInnerLocked(session, win);
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
-        if (wasVisible && computeForcedAppOrientationLocked()
-                != mForcedAppOrientation
-                && updateOrientationFromAppTokensLocked(false)) {
+        if (wasVisible && updateOrientationFromAppTokensLocked(false)) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
         updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
@@ -3461,11 +3456,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (updateOrientationFromAppTokensLocked(false)) {
             if (freezeThisOneIfNeeded != null) {
-                AppWindowToken atoken = findAppWindowToken(
-                        freezeThisOneIfNeeded);
+                AppWindowToken atoken = findAppWindowToken(freezeThisOneIfNeeded);
                 if (atoken != null) {
-                    startAppFreezingScreenLocked(atoken,
-                            ActivityInfo.CONFIG_ORIENTATION);
+                    startAppFreezingScreenLocked(atoken, ActivityInfo.CONFIG_ORIENTATION);
                 }
             }
             config = computeNewConfigurationLocked();
@@ -3507,7 +3500,10 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
         long ident = Binder.clearCallingIdentity();
         try {
-            int req = computeForcedAppOrientationLocked();
+            int req = getOrientationFromWindowsLocked();
+            if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                req = getOrientationFromAppTokensLocked();
+            }
 
             if (req != mForcedAppOrientation) {
                 mForcedAppOrientation = req;
@@ -3524,14 +3520,6 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    int computeForcedAppOrientationLocked() {
-        int req = getOrientationFromWindowsLocked();
-        if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-            req = getOrientationFromAppTokensLocked();
-        }
-        return req;
     }
 
     @Override
@@ -4557,40 +4545,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void moveAppWindowsLocked(AppWindowToken wtoken, int tokenPos,
-            boolean updateFocusAndLayout) {
-        // First remove all of the windows from the list.
-        tmpRemoveAppWindowsLocked(wtoken);
-
-        // And now add them back at the correct place.
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            final DisplayContent displayContent = iterator.next();
-            final WindowList windows = displayContent.getWindowList();
-            final int pos = findWindowOffsetLocked(windows, tokenPos);
-            final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
-            if (pos != newPos) {
-                displayContent.layoutNeeded = true;
-            }
-
-            if (updateFocusAndLayout && !updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                    false /*updateInputWindows*/)) {
-                assignLayersLocked(windows);
-            }
-        }
-
-        if (updateFocusAndLayout) {
-            mInputMonitor.setUpdateInputWindowsNeededLw();
-
-            // Note that the above updateFocusedWindowLocked conditional used to sit here.
-
-            if (!mInLayout) {
-                performLayoutAndPlaceSurfacesLocked();
-            }
-            mInputMonitor.updateInputWindowsLw(false /*force*/);
-        }
-    }
-
     private void moveAppWindowsLocked(List<IBinder> tokens, int tokenPos) {
         // First remove all of the windows from the list.
         final int N = tokens.size();
@@ -4635,6 +4589,7 @@ public class WindowManagerService extends IWindowManager.Stub
         //dump();
     }
 
+    @Override
     public void moveAppTokensToTop(List<IBinder> tokens) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "moveAppTokensToTop()")) {
@@ -4776,12 +4731,14 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
+    @Override
     public void exitKeyguardSecurely(final IOnKeyguardExitResult callback) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
         mPolicy.exitKeyguardSecurely(new WindowManagerPolicy.OnKeyguardExitResult() {
+            @Override
             public void onKeyguardExitResult(boolean success) {
                 try {
                     callback.onKeyguardExitResult(success);
@@ -4792,18 +4749,22 @@ public class WindowManagerService extends IWindowManager.Stub
         });
     }
 
+    @Override
     public boolean inKeyguardRestrictedInputMode() {
         return mPolicy.inKeyguardRestrictedKeyInputMode();
     }
 
+    @Override
     public boolean isKeyguardLocked() {
         return mPolicy.isKeyguardLocked();
     }
 
+    @Override
     public boolean isKeyguardSecure() {
         return mPolicy.isKeyguardSecure();
     }
 
+    @Override
     public void dismissKeyguard() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -4814,6 +4775,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             final AllWindowsIterator iterator = new AllWindowsIterator();
@@ -4835,6 +4797,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return Math.abs(scale);
     }
 
+    @Override
     public void setAnimationScale(int which, float scale) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ANIMATION_SCALE,
                 "setAnimationScale()")) {
@@ -5568,8 +5531,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
-                WINDOW_FREEZE_TIMEOUT_DURATION);
+        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
         startFreezingDisplayLocked(inTransaction, 0, 0);
@@ -5642,13 +5604,16 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
+    @Override
     public int getRotation() {
         return mRotation;
     }
 
+    @Override
     public int watchRotation(IRotationWatcher watcher) {
         final IBinder watcherBinder = watcher.asBinder();
         IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
+            @Override
             public void binderDied() {
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
@@ -8380,7 +8345,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("On entry to LockedInner",
                         displayContent.pendingLayoutChanges);
 
-                    if ((adjustWallpaperWindowsLocked() & ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
+                    if ((displayContent.pendingLayoutChanges &
+                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
+                            (adjustWallpaperWindowsLocked() &
+                                    ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
                         assignLayersLocked(windows);
                         displayContent.layoutNeeded = true;
                     }
@@ -8902,6 +8870,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public boolean waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         if (token != null && callback != null) {
             synchronized (mWindowMap) {
@@ -9372,7 +9341,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.thawInputDispatchingLw();
 
         boolean configChanged;
-        
+
         // While the display is frozen we don't re-compute the orientation
         // to avoid inconsistent states.  However, something interesting
         // could have actually changed during that time so re-evaluate it
@@ -9425,9 +9394,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         File file = new File("/system/etc/setup.conf");
         FileInputStream in = null;
+        DataInputStream ind = null;
         try {
             in = new FileInputStream(file);
-            DataInputStream ind = new DataInputStream(in);
+            ind = new DataInputStream(in);
             String line = ind.readLine();
             if (line != null) {
                 String[] toks = line.split("%");
@@ -9439,7 +9409,12 @@ public class WindowManagerService extends IWindowManager.Stub
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         } finally {
-            if (in != null) {
+            if (ind != null) {
+                try {
+                    ind.close();
+                } catch (IOException e) {
+                }
+            } else if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {

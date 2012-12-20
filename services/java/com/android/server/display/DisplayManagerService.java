@@ -118,6 +118,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
+    // NOTE: This is synchronized on while holding WindowManagerService.mWindowMap so never call
+    // into WindowManagerService methods that require mWindowMap while holding this unless you are
+    // very very sure that no deadlock can occur.
     private final SyncRoot mSyncRoot = new SyncRoot();
 
     // True if in safe mode.
@@ -158,7 +161,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             new CopyOnWriteArrayList<DisplayTransactionListener>();
 
     // Set to true if all displays have been blanked by the power manager.
-    private int mAllDisplayBlankStateFromPowerManager;
+    private int mAllDisplayBlankStateFromPowerManager = DISPLAY_BLANK_STATE_UNKNOWN;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -541,9 +544,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             synchronized (mSyncRoot) {
                 if (mWifiDisplayAdapter != null) {
                     return mWifiDisplayAdapter.getWifiDisplayStatusLocked();
-                } else {
-                    return new WifiDisplayStatus();
                 }
+                return new WifiDisplayStatus();
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -812,11 +814,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
             Slog.w(TAG, "Missing logical display to use for physical display device: "
                     + device.getDisplayDeviceInfoLocked());
             return;
-        } else {
-            boolean isBlanked = (mAllDisplayBlankStateFromPowerManager
-                    == DISPLAY_BLANK_STATE_BLANKED);
-            display.configureDisplayInTransactionLocked(device, isBlanked);
         }
+        boolean isBlanked = (mAllDisplayBlankStateFromPowerManager == DISPLAY_BLANK_STATE_BLANKED);
+        display.configureDisplayInTransactionLocked(device, isBlanked);
 
         // Update the viewports if needed.
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();

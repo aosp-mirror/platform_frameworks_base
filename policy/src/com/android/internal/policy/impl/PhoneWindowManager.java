@@ -228,7 +228,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * manager with lock held.  (This lock will be acquired in places
      * where the window manager is calling in with its own lock held.)
      */
-    final Object mLock = new Object();
+    private final Object mLock = new Object();
 
     Context mContext;
     IWindowManager mWindowManager;
@@ -694,9 +694,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Double the time it takes to take a screenshot from the keyguard
             return (long) (KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER *
                     ViewConfiguration.getGlobalActionKeyTimeout());
-        } else {
-            return ViewConfiguration.getGlobalActionKeyTimeout();
         }
+        return ViewConfiguration.getGlobalActionKeyTimeout();
     }
 
     private void cancelPendingScreenshotChordAction() {
@@ -739,6 +738,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     private final Runnable mScreenshotRunnable = new Runnable() {
+        @Override
         public void run() {
             takeScreenshot();
         }
@@ -845,6 +845,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
@@ -947,6 +948,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         mDisplay = display;
 
