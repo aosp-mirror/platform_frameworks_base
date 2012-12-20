@@ -121,26 +121,26 @@ more</a></p>
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
           <ul>
-            <li><a href="http://android-developers.blogspot.com/2012/10/google-play-seller-support-in-india.html">
-              <div class="feed-image" style="background:url('http://4.bp.blogspot.com/-ekT-9XQi0YY/UH7WT2XjSdI/AAAAAAAABwc/fI5QaPi7QEk/s320/india-apps1.png') no-repeat 0 0"></div>
-              <h4>Google Play Seller Support in India</h4>
-              <p>Developers in India can sell paid applications, in-app products, and subscriptions in Google Play, with monthly payouts to their local bank accounts...</p>
+            <li><a href="https://plus.google.com/108967384991768947849">
+              <div class="feed-image" style="background:url('{@docRoot}images/home/play_logo.png') no-repeat 0 0"></div>
+              <h4>Localized Promo Graphics on Google Play</h4>
+              <p>Google Play now lets you provide different promotional graphics, screenshots, and videos for each language you support...</p>
               </a></li>
-            <li><a href="http://android-developers.blogspot.com/2012/09/google-play-services-and-oauth-identity.html">
-              <div class="feed-image" style="background:url('https://lh4.ggpht.com/7z4NItEg-X21zvFGAarKonk-VaysBYthJ30u1JjaQ0-5fjyHNawnmoNeG--4FCACog=w124') no-repeat 0 0"></div>
+            <li><a href="//android-developers.blogspot.com/2012/12/in-app-billing-version-3.html">
+              <div class="feed-image" style="background:url('{@docRoot}images/iab-thumb.png') no-repeat 0 0;background-position:center right;"></div>
+              <h4>In-app Billing Version 3 Now Available</h4>
+              <p>A new version of In-app Billing is available that lets you sell digital goods in your app with just a few lines of code...</p>
+              </a></li>
+            <li><a href="//android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html">
+              <div class="feed-image" style="background:url('{@docRoot}design/media/multipane_expand.png') no-repeat 0 0; background-position:right top;"></div>
+              <h4>Designing for Tablets?</h4>
+              <p>Essential resources for everyone in the app development pipeline—from product managers, to designers, to developers, and QA engineers...</p>
+              </a></li>
+            <li><a href="//developer.android.com/google/play-services/index.html">
+              <div class="feed-image" style="background:url('//lh4.ggpht.com/7z4NItEg-X21zvFGAarKonk-VaysBYthJ30u1JjaQ0-5fjyHNawnmoNeG--4FCACog=w124') no-repeat 0 0"></div>
               <h4>Google Play services and OAuth Tools</h4>
               <p>The rollout of Google Play services to all Android 2.2+ devices worldwide is now complete, and all of those devices now have new tools for working with OAuth 2.0 tokens...</p>
               </a></li>
-            <li><a href="http://android-developers.blogspot.com/2012/08/creating-your-own-spelling-checker.html">
-              <div class="feed-image" style="background:url('http://2.bp.blogspot.com/-QKlztEdM1aA/UC1bH6Kv4UI/AAAAAAAAADo/fQS8-EfBYIQ/s320/spell-check-framed-new.png') no-repeat 0 0"></div>
-              <h4>Creating A Spelling Checker Service</h4>
-              <p>If you are an IME developer, the Spelling Checker framework gives you a great way to provide an even better experience for your users...</p>
-              </a></li>
-            <li><a href="http://android-developers.blogspot.com/2012/04/accessibility-are-you-serving-all-your.html">
-              <div class="feed-image"></div>
-              <h4>Accessibility</h4>
-              <p>We recently published some new resources to help developers make their Android applications more accessible... </p>
-              </a></li>                         
           </ul>
                                 <!-- FEATURED DOCS -->
           <ul>
