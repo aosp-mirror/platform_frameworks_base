@@ -52,7 +52,7 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
                 break;
         }
     }
-    return ANDROID_BITMAP_RESUT_SUCCESS;
+    return ANDROID_BITMAP_RESULT_SUCCESS;
 }
 
 int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
@@ -75,7 +75,7 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
     if (addrPtr) {
         *addrPtr = addr;
     }
-    return ANDROID_BITMAP_RESUT_SUCCESS;
+    return ANDROID_BITMAP_RESULT_SUCCESS;
 }
 
 int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
@@ -95,6 +95,6 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
     bm->notifyPixelsChanged();
 
     bm->unlockPixels();
-    return ANDROID_BITMAP_RESUT_SUCCESS;
+    return ANDROID_BITMAP_RESULT_SUCCESS;
 }
 
