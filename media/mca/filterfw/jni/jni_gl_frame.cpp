@@ -221,10 +221,10 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeBitmap(JNIEnv* env,
   if (frame && bitmap) {
     uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
-    if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
+    if (result == ANDROID_BITMAP_RESULT_SUCCESS) {
       const bool success = frame->WriteData(pixels, size);
       return ToJBool(success &&
-                     AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);
+                     AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESULT_SUCCESS);
     }
   }
   return JNI_FALSE;
@@ -237,9 +237,9 @@ jboolean Java_android_filterfw_core_GLFrame_getNativeBitmap(JNIEnv* env,
   if (frame && bitmap) {
     uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
-    if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
+    if (result == ANDROID_BITMAP_RESULT_SUCCESS) {
       frame->CopyDataTo(pixels, frame->Size());
-      return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);
+      return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESULT_SUCCESS);
     }
   }
   return JNI_FALSE;
