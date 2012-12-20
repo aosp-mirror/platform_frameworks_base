@@ -57,6 +57,125 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 21.0.1</a> <em>(December 2012)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 21.0.1.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.0.1.</li>
+      <li>ADT 21.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r21.0.1</a>. If you haven't already installed SDK Tools r21.0.1 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Build
+        <ul>
+          <li>Updated build to detect and handle package name conflicts between an application and
+            the libraries it depends on. Libraries cannot share package names unless all of them
+            share the same package name.
+            (<a href="http://code.google.com/p/android/issues/detail?id=40152">Issue 40152</a>,
+             <a href="http://code.google.com/p/android/issues/detail?id=40273">Issue 40273</a>)
+          </li>
+          <li>Added a flag to disable dex merging to deal with cases where merging could generate
+            a broken dex file. If this happens to your project, add the following setting to your
+            {@code project.properties} file: {@code dex.disable.merger=true} This setting
+            causes the build system to revert to the older, slower dex processing that does not
+            pre-dex libraries.</li>
+        </ul>
+      </li>
+    </ul>
+  </dd>
+
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Lint
+        <ul>
+          <li>Corrected check for {@code 0px} values in style XML elements.
+            (<a href="http://code.google.com/p/android/issues/detail?id=39601">Issue 39601</a>)
+            </li>
+          <li>Fixed incorrect flagging of formatting strings.
+            (<a href="http://code.google.com/p/android/issues/detail?id=39758">Issue 39758</a>)
+            </li>
+          <li>Fixed problem where {@code tools:ignore} directive in the manifest file was ignored
+            by the Lint tool.
+            (<a href="http://code.google.com/p/android/issues/detail?id=40136">Issue 40136</a>)
+            </li>
+          <li>Fixed problem with flagging a wakelock release inside a conditional.
+            (<a href="http://code.google.com/p/android/issues/detail?id=40424">Issue 40424</a>)
+            </li>
+          <li>Fixed incorrect reporting of missing {@code layout_width} and {@code layout_height}
+            XML fields.
+            (<a href="http://code.google.com/p/android/issues/detail?id=38958">Issue 38958</a>)
+            </li>
+          <li>Fixed handling of custom namespace attributes.</li>
+          <li>Added fixes for filtering out library project warnings.</li>
+          <li>Removed warnings about missing classes before a build.</li>
+        </ul>
+      </li>
+
+      <li>Android Virtual Device Manager
+        <ul>
+          <li>Fixed handling of {@code devices.xml} file in other locales.
+            (<a href="http://code.google.com/p/android/issues/detail?id=39704">Issue 39704</a>)
+            </li>
+          <li>Fixed problem where the AVD Manager would not allow you to create a new AVD using
+            the <strong>4.0" WVGA</strong> or <strong> 4.65" 720p</strong> device definitions.
+            (<a href="http://code.google.com/p/android/issues/detail?id=39939">Issue 39939</a>)
+            </li>
+          <li>Fixed problem where deleted device definitions were not removed.</li>
+          <li>Fixed incorrect screen resolution setting for the Nexus One device definition.</li>
+          <li>Fixed problem where writing of an AVD settings file does not properly escape
+            {@code \\} path characters.</li>
+        </ul>
+      </li>
+
+      <li>Layout Editor
+        <ul>
+          <li>Fixed problem where layout cannot render strings starting with {@code \@}.
+            (<a href="http://code.google.com/p/android/issues/detail?id=40222">Issue 40222</a>)
+            </li>
+          <li>Fixed preview error when using the {@code android:numColumns} attribute in a layout.
+            (<a href="http://code.google.com/p/android/issues/detail?id=21296">Issue 21296</a>)
+            </li>
+          <li>Fixed compatibility issue with IntelliJ layout preview caused by layout editor
+            deleting the {@code .android/devices.xml} file.</li>
+          <li>Added fixes to editor for {@link android.widget.GridLayout}.</li>
+        </ul>
+      </li>
+
+      <li>Added support for {@code ldrtl} and {@code ldltr} resource qualifiers.</li>
+      <li>Fixed problem where Android XML resources mistakenly get compiled into {@code *.out.xml}
+        output files, causing project errors.
+        (<a href="http://code.google.com/p/android/issues/detail?id=3767">Issue 3767</a>)</li>
+      <li>Fixed error which caused resource refresh operations to fail.
+        (<a href="http://code.google.com/p/android/issues/detail?id=39213">Issue 39213</a>)</li>
+      <li>Updated the Custom View code template handle to library projects properly.</li>
+      <li>Fixed support for library string resources ({@code strings.xml}) when exporting an
+        application that references a library with string resources.
+        (<a href="http://code.google.com/p/android/issues/detail?id=39751">Issue 39751</a>)</li>
+      <li>Fixed problem where bad AVD setting files caused Device Manager and graphical XML editors
+        to crash.
+        (<a href="http://code.google.com/p/android/issues/detail?id=40400">Issue 40400</a>)</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 21.0.0</a> <em>(November 2012)</em>
   </p>
 
