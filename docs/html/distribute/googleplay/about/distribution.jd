@@ -24,7 +24,7 @@ the rollout across your customer base, Google Play also lets users accept
 automatic updates of your app, so that your updates are delivered and installed
 as soon as you publish them.</p>
 
-<h2>Reaching the customers you want</h2>
+<h2 id="targeting">Reaching the customers you want</h2>
 
 <p>Google Play does more than connect your app with users&mdash;it helps you
 reach the broadest possible distribution across the Android ecosystem, while
@@ -45,7 +45,12 @@ distribute to, and even which carriers (for some countries). </p>
 <p>When users visit the store, Google Play makes sure that they are in one of
 your targeted countries before downloading your app. You can change your country
 and carrier targeting at any time just by saving changes in the Google Play
-Android Developer Console</p>
+Android Developer Console.</p>
+
+<p>To help you market to users around the world, you
+can <a href="{@docRoot}distribute/googleplay/publish/preparing.html#localize">localize
+your store listing</a>, including app details and description,
+promotional graphics, screenshots, and more.</p>
 
 <div style="float:right;margin-left:18px;border:1px solid #DDD;margin:1.5em;">
 <img src="{@docRoot}images/gp-supported-dev-requirements.png"

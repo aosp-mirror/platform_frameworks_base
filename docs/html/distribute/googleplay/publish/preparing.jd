@@ -347,11 +347,12 @@ in all available currencies through the Developer Console.</p>
 needs and start the work of localizing well in advance of your target
 launch date.</p>
 
-<p>There are at least two aspects of localization to consider:</p>
+<p>There are at least three aspects of localization to consider:</p>
 
 <ul>
 <li>Localizing the strings, images, and other resources in your app</li>
-<li>Localizing you app's store listing details on Google Play</li>
+<li>Localizing your app's store listing details on Google Play</li>
+<li>Localizing the app's graphic assets, screenshots, and videos that accompany your store listing.</li>
 </ul>
 
 <p>To get started localizing your app, work with your development team to extract
@@ -361,7 +362,18 @@ a translator.</p>
 
 <p>To localize your store listing, first create and finalize your app title, description, 
 and promotional text. Collect and send all of these for localization. You can optionally
-translate the "Recent Changes" text for app updates as well.</p>
+translate the "Recent Changes" text for app updates as well. Later you can add your localized
+listing details in the Developer Console, or you can  choose to let Google Play auto-translate
+your listing details into the languages you support.</p>
+
+<p>A key part of making your app listing attractive to a global customer base is
+creating localized versions of your promotional graphics, screenshots and
+videos. For example, your app's feature graphic might include text that should
+be translated, for maximum effectiveness. You can create different versions of
+your promotional graphics for each language and upload them to the Developer
+Console. If you offer a promotional video, you can create localized versions of
+it and then add a link to the correct localized video for each language you
+support.</p>
 
 <p>When your translations are complete, move them into your app resources as needed and test
 that they are loaded properly. Save your app's translated listing details for later,
@@ -377,7 +389,7 @@ when you upload assets and configure your product details.</p>
 </tr>
 </table>
 
-<h2 id="graphics">12. Prepare promotional graphics</h2>
+<h2 id="graphics">12. Prepare promotional graphics, screenshots, and videos</h2>
 
 <p>When you publish on Google Play, you can supply a variety of high-quality
 graphic assets to showcase your app or brand. After you publish, these appear on
@@ -385,8 +397,16 @@ your product details page, in store listings and search results, and elsewhere.
 These graphic assets are key parts of a successful product details page that
 attracts and engages users, so you should consider having a professional produce
 them for you. Screen shots and videos are also very important, because they show
-what your app looks like, how it's used or played, and what makes it different.
+what your app looks like, how it's used or played, and what makes it different.</p>
 
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h3>Localize your promotional graphics and videos<span class="new"> new!</span></h3>
+<p>Google Play now lets you provide different promotional graphics for each
+language you support. Localizing your graphics helps you reach your global
+user base more effectively and is highly recommended.</p>
+</div>
+</div>
 <p>All of your graphic assets should be designed so that they are easy to see
 and highlight your app or brand in a colorful, interesting way. The assets
 should reference the same logo and icon as users will actually find in the All
@@ -394,8 +414,24 @@ Apps launcher once they have downloaded the app. Your graphic assets should also
 fit in well with the graphic assets of other apps published by you, which will
 be also be displayed to users on your product details page. </p>
 
-<p>Because these assets are so important, you should get started on them well in
-advance of your target publishing date. </p>
+<p>To help you market your app more effectively to a global audience, Google
+Play lets you create localized versions of your promotional graphics,
+screenshots, and videos and upload them to the Developer Console. When a user
+visits your app's store listing, Google Play displays the promotional graphic
+and video that you've provided for the user's language.</p>
+
+<p>To localize your promotional graphics, you can translate any embedded text, use
+different imagery or presentation, or change your marketing approach to best address the needs
+of users in specific languages. For example, if your feature or promotional graphic
+includes and embedded product name or tag line, you can translate that text
+and add it to a localized version of the promotional graphic.</p>
+
+<p>Because your localized graphic assets and videos are so important, you should get
+started on creating them and localizing them as needed, well in advance of your target
+publishing date. </p>
+
+<p class="note"><strong>Note:</strong> Localized promotional graphics and videos are supported
+in the Developer Console Preview only.</p>
 
 <table>
 <tr>
@@ -403,6 +439,8 @@ advance of your target publishing date. </p>
 <ul style="margin-top:-.5em;">
 <li><strong><a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1078870">Graphic Assets for your Application
 </a></strong> &mdash; Details about the graphic assets you need to upload before publishing.</li>
+<li><strong><a href="http://android-developers.blogspot.com/b/post-preview?token=hbE_njsBAAA.dLFzPbe-VFYCS6R3xP16HQ.Z4XO2iUmCqyYpoFPQ4OhiQ&postId=687446965502713273&type=POST">Google Play Featured Image Guidelines
+</a></strong> &mdash; Blog post that highlights key design considerations for your app's featured image.</li>
 </ul>
 </td>
 </tr>
@@ -463,6 +501,10 @@ all the fields, options, and assets associated with the product details configur
 page in the Developer Console. As you collect the information and assets for the
 page, make sure that you can enter or upload it to the Developer Console, until 
 the page is complete and ready for publishing. </p>
+
+<p>After you've set your app's geographic targeting in the Developer Console,
+remember to add your localized product details, promotional graphics, and so on, for all of the
+languages that you support.</p>
 
 <p>If your app is targeting tablet devices, make sure to include at least one screen
 shot of the app running on a tablet, and highlight your app's support for tablets
