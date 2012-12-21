@@ -1,0 +1,168 @@
+page.title=Handling Multi-Touch Gestures
+parent.title=Using Touch Gestures
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Dragging and Scaling
+next.link=scale.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#track">Track Multiple Pointers</a></li>
+  <li><a href="#action">Get a MotionEvent's Action</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+   <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>A multi-touch gesture is when multiple pointers (fingers) touch the screen
+at the same time. This lesson describes how to detect gestures that involve
+multiple pointers.</p>
+
+<h2 id="track">Track Multiple Pointers</h2>
+
+<p>When multiple pointers touch the screen at the same time, the system generates the 
+following touch events:</p>
+
+<ul>
+  <li>{@link android.view.MotionEvent#ACTION_DOWN}&mdash;For the first pointer that 
+touches the screen. This starts the gesture. The pointer data for this pointer is 
+always at index 0 in the {@link android.view.MotionEvent}.</li>
+  <li>{@link android.support.v4.view.MotionEventCompat#ACTION_POINTER_DOWN}&mdash;For 
+extra pointers that enter the screen beyond the first. The pointer data for this 
+pointer is at the index returned by {@link android.support.v4.view.MotionEventCompat#getActionIndex getActionIndex()}.</li>
+  <li>{@link android.view.MotionEvent#ACTION_MOVE}&mdash;A change has happened during a press gesture.</li>
+  <li>{@link android.support.v4.view.MotionEventCompat#ACTION_POINTER_UP}&mdash;Sent when a non-primary pointer goes up.</li>
+  <li>{@link android.view.MotionEvent#ACTION_UP}&mdash;Sent when the last pointer leaves the screen.</li>
+</ul>
+
+<p>You keep track of individual pointers within a {@link
+android.view.MotionEvent} via each pointer's index and ID:</p>
+
+<ul>
+<li><strong>Index</strong>: A {@link android.view.MotionEvent} effectively 
+stores information about each pointer in an array. The index of a pointer is its position 
+within this array. Most of the {@link
+android.view.MotionEvent} methods you use to interact with pointers take the
+pointer index as a parameter, not the pointer ID. </li>
+  
+  
+  <li><strong>ID</strong>: Each pointer also has an ID mapping that stays
+persistent across touch events to allow tracking an individual pointer across 
+the entire gesture.</li>
+  
+</ul>
+
+<p>The  order in which individual pointers appear within a motion event is 
+undefined. Thus the index of a pointer can change from one event to the
+next, but the pointer ID of a pointer is guaranteed to remain  constant as long
+as the pointer remains active. Use the  {@link
+android.view.MotionEvent#getPointerId getPointerId()} method to obtain a
+pointer's ID to track the pointer across all subsequent motion events in a
+gesture. Then for successive  motion events, use the {@link
+android.view.MotionEvent#findPointerIndex findPointerIndex()} method to obtain
+the pointer index for a given pointer ID in that motion event. For example:</p>
+
+
+<pre>private int mActivePointerId;
+ 
+public boolean onTouchEvent(MotionEvent event) {
+    ....
+    // Get the pointer ID
+    mActivePointerId = event.getPointerId(0);
+
+    // ... Many touch events later...
+
+    // Use the pointer ID to find the index of the active pointer 
+    // and fetch its position
+    int pointerIndex = event.findPointerIndex(mActivePointerId);
+    // Get the pointer's current position
+    float x = event.getX(pointerIndex);
+    float y = event.getY(pointerIndex);
+}</pre>
+
+<h2 id="action">Get a MotionEvent's Action</h2>
+
+<p>You should always use the method  
+{@link android.view.MotionEvent#getActionMasked getActionMasked()} (or better yet, the compatability version 
+{@link android.support.v4.view.MotionEventCompat#getActionMasked MotionEventCompat.getActionMasked()}) to retrieve 
+the action of a
+{@link android.view.MotionEvent}. Unlike the older {@link android.view.MotionEvent#getAction getAction()} 
+method, {@link android.support.v4.view.MotionEventCompat#getActionMasked getActionMasked()} is designed to work with 
+multiple pointers. It returns the masked action 
+being performed, without including the pointer index bits. You can then use 
+{@link android.support.v4.view.MotionEventCompat#getActionIndex getActionIndex()} to return the index of 
+the pointer associated with the action. This is illustrated in the snippet below.</p>
+
+<p class="note"><strong>Note:</strong> This example uses the 
+{@link android.support.v4.view.MotionEventCompat}
+class. This class is in the 
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>. You should use
+{@link android.support.v4.view.MotionEventCompat} to provide the best support for a wide range of
+platforms. Note that {@link android.support.v4.view.MotionEventCompat} is <em>not</em> a 
+replacement for the {@link android.view.MotionEvent} class. Rather, it provides static utility 
+methods to which you pass your {@link android.view.MotionEvent} object in order to receive 
+the desired action associated with that event.</p>
+
+<pre>int action = MotionEventCompat.getActionMasked(event);
+// Get the index of the pointer associated with the action.
+int index = MotionEventCompat.getActionIndex(event);
+int xPos = -1;
+int yPos = -1;
+
+Log.d(DEBUG_TAG,"The action is " + actionToString(action));
+	    
+if (event.getPointerCount() > 1) {
+    Log.d(DEBUG_TAG,"Multitouch event"); 
+    // The coordinates of the current screen contact, relative to 
+    // the responding View or Activity.  
+    xPos = (int)MotionEventCompat.getX(event, index);
+    yPos = (int)MotionEventCompat.getY(event, index);
+
+} else {
+    // Single touch event
+    Log.d(DEBUG_TAG,"Single touch event"); 
+    xPos = (int)MotionEventCompat.getX(event, index);
+    yPos = (int)MotionEventCompat.getY(event, index);
+}
+...
+
+// Given an action int, returns a string description
+public static String actionToString(int action) {
+    switch (action) {
+	        
+        case MotionEvent.ACTION_DOWN: return "Down";
+	case MotionEvent.ACTION_MOVE: return "Move";
+	case MotionEvent.ACTION_POINTER_DOWN: return "Pointer Down";
+	case MotionEvent.ACTION_UP: return "Up";
+	case MotionEvent.ACTION_POINTER_UP: return "Pointer Up";
+	case MotionEvent.ACTION_OUTSIDE: return "Outside";
+	case MotionEvent.ACTION_CANCEL: return "Cancel";
+    }
+    return "";
+}</pre>
+
+ 
+
+
+<p>For more discussion of multi-touch and some examples, see the lesson <a href="scale.html">Dragging and Scaling</a>.
