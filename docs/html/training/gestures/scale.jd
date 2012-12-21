@@ -1,0 +1,240 @@
+page.title=Dragging and Scaling
+parent.title=Using Touch Gestures
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Managing Touch Events in a ViewGroup
+next.link=viewgroup.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#drag">Drag an Object</a></li>
+  <li><a href="#scale">Use Touch to Perform Scaling</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+<p>This lesson describes how to use touch gestures to drag and scale on-screen
+objects, using {@link android.view.View#onTouchEvent onTouchEvent()} to intercept
+touch events. Here is the original <a
+href="http://code.google.com/p/android-touchexample/">source code</a>
+for the examples used in this lesson.
+</p>
+
+<h2 id="drag">Drag an Object</h2>
+
+<p class="note">If you are targeting Android 3.0 or higher, you can use the built-in drag-and-drop event 
+listeners with {@link android.view.View.OnDragListener}, as described in 
+<a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a>.
+
+<p>A common operation for a touch gesture is to use it to drag an object across
+the screen. The following snippet lets the user drag an on-screen image. Note
+the following:</p>
+
+<ul>
+
+<li>In a drag (or scroll) operation, the app has to keep track of the original pointer
+(finger), even if additional fingers get placed on the screen. For example,
+imagine that while dragging the image around, the user places a second finger on
+the touch screen and lifts the first finger. If your app is just tracking
+individual pointers, it will regard the second pointer as the default and move
+the image to that location.</li>
+
+<li>To prevent this from happening, your app needs to distinguish between the 
+original pointer and any follow-on pointers. To do this, it tracks the 
+{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and 
+{@link android.view.MotionEvent#ACTION_POINTER_UP} events described in 
+<a href="multi.html">Handling Multi-Touch Gestures</a>. 
+{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and 
+{@link android.view.MotionEvent#ACTION_POINTER_UP} are 
+passed to the {@link android.view.View#onTouchEvent onTouchEvent()} callback 
+whenever a secondary pointer goes down or up. </li>
+
+
+<li>In the {@link android.view.MotionEvent#ACTION_POINTER_UP} case, the example
+extracts this index and ensures that the active pointer ID is not referring to a
+pointer that is no longer touching the screen. If it is, the app selects a
+different pointer to be active and saves its current X and Y position. Since
+this saved position is used in the {@link android.view.MotionEvent#ACTION_MOVE}
+case to calculate the distance to move the onscreen object, the app will always
+calculate the distance to move using data from the correct pointer.</li>
+
+</ul>
+
+<p>The following snippet enables a user to drag an object around on the screen. It records the initial
+position of the active pointer, calculates the distance the pointer traveled, and moves the object to the
+new position. It correctly manages the possibility of additional pointers, as described
+above.</p> 
+
+<p>Notice that the snippet uses the {@link android.view.MotionEvent#getActionMasked getActionMasked()} method. 
+You should always use this method (or better yet, the compatability version 
+{@link android.support.v4.view.MotionEventCompat#getActionMasked MotionEventCompat.getActionMasked()}) 
+to retrieve the action of a
+{@link android.view.MotionEvent}. Unlike the older 
+{@link android.view.MotionEvent#getAction getAction()} 
+method, {@link android.support.v4.view.MotionEventCompat#getActionMasked getActionMasked()} 
+is designed to work with multiple pointers. It returns the masked action 
+being performed, without including the pointer index bits.</p>
+
+<pre>// The ‘active pointer’ is the one currently moving our object.
+private int mActivePointerId = INVALID_POINTER_ID;
+
+&#64;Override
+public boolean onTouchEvent(MotionEvent ev) {
+    // Let the ScaleGestureDetector inspect all events.
+    mScaleDetector.onTouchEvent(ev);
+             
+    final int action = MotionEventCompat.getActionMasked(ev); 
+        
+    switch (action) { 
+    case MotionEvent.ACTION_DOWN: {
+        final int pointerIndex = MotionEventCompat.getActionIndex(ev); 
+        final float x = MotionEventCompat.getX(ev, pointerIndex); 
+        final float y = MotionEventCompat.getY(ev, pointerIndex); 
+            
+        // Remember where we started (for dragging)
+        mLastTouchX = x;
+        mLastTouchY = y;
+        // Save the ID of this pointer (for dragging)
+        mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+        break;
+    }
+            
+    case MotionEvent.ACTION_MOVE: {
+        // Find the index of the active pointer and fetch its position
+        final int pointerIndex = 
+                MotionEventCompat.findPointerIndex(ev, mActivePointerId);  
+            
+        final float x = MotionEventCompat.getX(ev, pointerIndex);
+        final float y = MotionEventCompat.getY(ev, pointerIndex);
+            
+        // Only move if the ScaleGestureDetector isn't processing a gesture.
+        if (!mScaleDetector.isInProgress()) {
+            // Calculate the distance moved
+            final float dx = x - mLastTouchX;
+            final float dy = y - mLastTouchY;
+
+            mPosX += dx;
+            mPosY += dy;
+
+            invalidate();
+        }
+        // Remember this touch position for the next move event
+        mLastTouchX = x;
+        mLastTouchY = y;
+
+        break;
+    }
+            
+    case MotionEvent.ACTION_UP: {
+        mActivePointerId = INVALID_POINTER_ID;
+        break;
+    }
+            
+    case MotionEvent.ACTION_CANCEL: {
+        mActivePointerId = INVALID_POINTER_ID;
+        break;
+    }
+        
+    case MotionEvent.ACTION_POINTER_UP: {
+            
+        final int pointerIndex = MotionEventCompat.getActionIndex(ev); 
+        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex); 
+
+        if (pointerId == mActivePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mLastTouchX = MotionEventCompat.getX(ev, newPointerIndex); 
+            mLastTouchY = MotionEventCompat.getY(ev, newPointerIndex); 
+            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+        }
+        break;
+    }
+    }       
+    return true;
+}</pre>
+
+<h2 id="scale">Use Touch to Perform Scaling</h2>
+
+<p>As discussed in <a href="detector.html">Detecting Common Gestures</a>,
+{@link android.view.GestureDetector} helps you detect common gestures used by
+Android such as scrolling, flinging, and long press. For scaling, Android
+provides {@link android.view.ScaleGestureDetector}. {@link
+android.view.GestureDetector} and {@link android.view.ScaleGestureDetector} can
+be used together when you  want a view to recognize additional gestures.</p>
+
+<p>To report detected  gesture events, gesture detectors use listener objects 
+passed to their constructors. {@link android.view.ScaleGestureDetector} uses 
+{@link android.view.ScaleGestureDetector.OnScaleGestureListener}. 
+Android provides 
+{@link android.view.ScaleGestureDetector.SimpleOnScaleGestureListener} 
+as a helper class that you can extend if you don’t care about all of the reported events.</p>
+
+<p>Here is a snippet that gives you the basic idea of how to perform scaling.
+Here is the original <a
+href="http://code.google.com/p/android-touchexample/">source code</a>
+for the examples.</p>
+
+<pre>private ScaleGestureDetector mScaleDetector;
+private float mScaleFactor = 1.f;
+
+public MyCustomView(Context mContext){
+    ...
+    // View code goes here
+    ...
+    mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+}
+
+&#64;Override
+public boolean onTouchEvent(MotionEvent ev) {
+    // Let the ScaleGestureDetector inspect all events.
+    mScaleDetector.onTouchEvent(ev);
+    return true;
+}
+
+&#64;Override
+public void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+
+    canvas.save();
+    canvas.scale(mScaleFactor, mScaleFactor);
+    ...
+    // onDraw() code goes here
+    ...
+    canvas.restore();
+}
+
+private class ScaleListener 
+        extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    &#64;Override
+    public boolean onScale(ScaleGestureDetector detector) {
+        mScaleFactor *= detector.getScaleFactor();
+
+        // Don't let the object get too small or too large.
+        mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+
+        invalidate();
+        return true;
+    }
+}</pre>
