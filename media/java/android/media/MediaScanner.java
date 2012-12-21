@@ -441,6 +441,7 @@ public class MediaScanner
             mMimeType = mimeType;
             mFileType = 0;
             mFileSize = fileSize;
+            mIsDrm = false;
 
             if (!isDirectory) {
                 if (!noMedia && isNoMediaFile(path)) {
@@ -503,7 +504,6 @@ public class MediaScanner
             mLastModified = lastModified;
             mWriter = null;
             mCompilation = 0;
-            mIsDrm = false;
             mWidth = 0;
             mHeight = 0;
 
@@ -1039,6 +1039,7 @@ public class MediaScanner
             }
 
             if (mDrmManagerClient.canHandle(path, null)) {
+                mIsDrm = true;
                 String drmMimetype = mDrmManagerClient.getOriginalMimeType(path);
                 if (drmMimetype != null) {
                     mMimeType = drmMimetype;
