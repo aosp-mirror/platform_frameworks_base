@@ -1957,9 +1957,8 @@ public class WebView extends AbsoluteLayout
     @Override
     public void setOverScrollMode(int mode) {
         super.setOverScrollMode(mode);
-        // This method may called in the constructor chain, before the WebView provider is
-        // created. (Fortunately, this is the only method we override that can get called by
-        // any of the base class constructors).
+        // This method may be called in the constructor chain, before the WebView provider is
+        // created.
         ensureProviderCreated();
         mProvider.getViewDelegate().setOverScrollMode(mode);
     }
@@ -2119,6 +2118,9 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
+        // This method may be called in the constructor chain, before the WebView provider is
+        // created.
+        ensureProviderCreated();
         mProvider.getViewDelegate().onVisibilityChanged(changedView, visibility);
     }
 
