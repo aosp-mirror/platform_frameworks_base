@@ -5037,11 +5037,14 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         } else {
             group = mPackageGroups.itemAt(idx-1);
             if (group == NULL) {
+                delete package;
                 return (mError=UNKNOWN_ERROR);
             }
         }
         err = group->packages.add(package);
         if (err < NO_ERROR) {
+            delete group;
+            delete package;
             return (mError=err);
         }
     } else {
