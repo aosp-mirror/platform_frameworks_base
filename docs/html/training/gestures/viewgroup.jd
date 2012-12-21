@@ -1,0 +1,302 @@
+page.title=Managing Touch Events in a ViewGroup
+parent.title=Using Touch Gestures
+parent.link=index.html
+
+trainingnavtop=true
+next.title=
+next.link=
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#intercept">Intercept Touch Events in a ViewGroup</a></li>
+  <li><a href="#vc">Use ViewConfiguration Constants</a></li>
+  <li><a href="#delegate">Extend a Child View's Touchable Area</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>Handling touch events in a {@link android.view.ViewGroup} takes special care,
+because it's common for a {@link android.view.ViewGroup} to have children that
+are targets for different touch events than the {@link android.view.ViewGroup}
+itself. To make sure that each view correctly receives the touch events intended
+for it, override the {@link android.view.ViewGroup#onInterceptTouchEvent
+onInterceptTouchEvent()} method.</p>
+
+<h2 id="intercept">Intercept Touch Events in a ViewGroup</h2>
+
+<p>The {@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()} 
+method is called whenever a touch event is detected on the surface of a 
+{@link android.view.ViewGroup}, including on the surface of its children. If 
+{@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()} 
+returns {@code true}, the {@link android.view.MotionEvent} is intercepted, 
+meaning it will be not be passed on to the child, but rather to the 
+{@link android.view.View#onTouchEvent onTouchEvent()} method of the parent.</p>
+
+<p>The {@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()} 
+method gives a parent the chance to see any touch event before its children do. 
+If you return {@code true} from 
+{@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()}, 
+the child view that was previously handling touch events 
+receives an {@link android.view.MotionEvent#ACTION_CANCEL}, and the events from that 
+point forward are sent to the parent's 
+{@link android.view.View#onTouchEvent onTouchEvent()} method for the usual handling. 
+{@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()} can also 
+return {@code false} and simply spy on events as they travel down the view hierarchy 
+to their usual targets, which will handle the events with their own
+{@link android.view.View#onTouchEvent onTouchEvent()}.
+
+
+<p>In the following snippet, the class {@code MyViewGroup} extends  
+{@link android.view.ViewGroup}. 
+{@code MyViewGroup} contains multiple child views. If you drag your finger across 
+a child view horizontally, the child view should no longer get touch events, and 
+{@code MyViewGroup} should handle touch events by scrolling its contents. However, 
+if you press buttons in the child view, or scroll the child view vertically, 
+the parent shouldn't intercept those touch events, because the child is the 
+intended target. In those cases, 
+{@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()} should
+return {@code false}, and {@code MyViewGroup}'s 
+{@link android.view.View#onTouchEvent onTouchEvent()} won't be called.</p>
+
+<pre>public class MyViewGroup extends ViewGroup {
+
+    private int mTouchSlop;
+
+    ...
+
+    ViewConfiguration vc = ViewConfiguration.get(view.getContext());
+    mTouchSlop = vc.getScaledTouchSlop();
+
+    ...
+
+    &#64;Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        /*
+         * This method JUST determines whether we want to intercept the motion.
+         * If we return true, onTouchEvent will be called and we do the actual
+         * scrolling there.
+         */
+
+
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        // Always handle the case of the touch gesture being complete.
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+            // Release the scroll.
+            mIsScrolling = false;
+            return false; // Do not intercept touch event, let the child handle it
+        }
+
+        switch (action) {
+            case MotionEvent.ACTION_MOVE: {
+                if (mIsScrolling) {
+                    // We're currently scrolling, so yes, intercept the 
+                    // touch event!
+                    return true;
+                }
+
+                // If the user has dragged her finger horizontally more than 
+                // the touch slop, start the scroll
+
+                // left as an exercise for the reader
+                final int xDiff = calculateDistanceX(ev); 
+
+                // Touch slop should be calculated using ViewConfiguration 
+                // constants.
+                if (xDiff > mTouchSlop) { 
+                    // Start scrolling!
+                    mIsScrolling = true;
+                    return true;
+                }
+                break;
+            }
+            ...
+        }
+
+        // In general, we don't want to intercept touch events. They should be 
+        // handled by the child view.
+        return false;
+    }
+
+    &#64;Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Here we actually handle the touch event (e.g. if the action is ACTION_MOVE, 
+        // scroll this container).
+        // This method will only be called if the touch event was intercepted in 
+        // onInterceptTouchEvent
+        ...
+    }
+}</pre>
+
+<p>Note that {@link android.view.ViewGroup} also provides a 
+{@link android.view.ViewGroup#requestDisallowInterceptTouchEvent requestDisallowInterceptTouchEvent()} method. 
+The {@link android.view.ViewGroup} calls this method when a child does not want the parent and its 
+ancestors to intercept touch events with 
+{@link android.view.ViewGroup#onInterceptTouchEvent onInterceptTouchEvent()}. 
+</p>
+
+<h2 id="vc">Use ViewConfiguration Constants</h2>
+
+<p>The above snippet uses the current {@link android.view.ViewConfiguration} to initialize
+a variable called {@code mTouchSlop}. You can use the {@link
+android.view.ViewConfiguration} class to access common distances, speeds, and
+times used by the Android system.</p>
+
+
+<p>"Touch slop" refers to the distance in pixels a user's touch can wander
+before the gesture is interpreted as scrolling. Touch slop is typically used to
+prevent accidental scrolling when the user is performing some other touch
+operation, such as touching on-screen elements.</p>
+
+<p>Two other commonly used {@link android.view.ViewConfiguration} methods are 
+{@link android.view.ViewConfiguration#getScaledMinimumFlingVelocity getScaledMinimumFlingVelocity()} 
+and {@link android.view.ViewConfiguration#getScaledMaximumFlingVelocity getScaledMaximumFlingVelocity()}.
+These methods  return the minimum and maximum velocity (respectively) to initiate a fling, 
+as measured in pixels per second. For example:</p>
+
+<pre>ViewConfiguration vc = ViewConfiguration.get(view.getContext());
+private int mSlop = vc.getScaledTouchSlop();
+private int mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
+private int mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
+
+...
+
+case MotionEvent.ACTION_MOVE: {
+    ...
+    float deltaX = motionEvent.getRawX() - mDownX;
+    if (Math.abs(deltaX) > mSlop) {
+        // A swipe occurred, do something
+    }
+
+...
+
+case MotionEvent.ACTION_UP: {
+    ...
+    } if (mMinFlingVelocity <= velocityX && velocityX <= mMaxFlingVelocity
+            && velocityY < velocityX) {
+        // The criteria have been satisfied, do something
+    }
+}</pre>
+
+
+<h2 id="delegate">Extend a Child View's Touchable Area</h2>
+
+<p>Android provides the {@link android.view.TouchDelegate} class to make it possible 
+for a parent to extend the touchable area of a child view beyond the child's bounds. 
+
+This is useful when the child has to be small, but should have a larger touch region. You can
+also use this approach to shrink the child's touch region if need be.</p>
+
+<p>In the following example, an {@link android.widget.ImageButton} is the  
+"delegate view" (that is, the child whose touch area the parent will extend). 
+Here is the layout file:</p>
+
+<pre>
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+     android:id=&quot;@+id/parent_layout&quot;
+     android:layout_width=&quot;match_parent&quot;
+     android:layout_height=&quot;match_parent&quot;
+     tools:context=&quot;.MainActivity&quot; &gt;
+ 
+     &lt;ImageButton android:id=&quot;@+id/button&quot;
+          android:layout_width=&quot;wrap_content&quot;
+          android:layout_height=&quot;wrap_content&quot;
+          android:background=&quot;@null&quot;
+          android:src=&quot;@drawable/icon&quot; /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>The snippet below does the following:</p>
+
+<ul>
+<li>Gets the parent view and posts a {@link java.lang.Runnable} on the UI thread. This ensures that the parent lays out its children before calling the {@link android.view.View#getHitRect getHitRect()} method. The {@link android.view.View#getHitRect getHitRect()} method gets the child's hit rectangle (touchable area) in the parent's coordinates.</li>
+<li>Finds the {@link android.widget.ImageButton} child view and calls {@link android.view.View#getHitRect getHitRect()} to get the bounds of the child's touchable area.</li>
+<li>Extends the bounds of the {@link android.widget.ImageButton}'s hit rectangle.</li>
+<li>Instantiates a {@link android.view.TouchDelegate}, passing in the expanded hit rectangle and the {@link android.widget.ImageButton} child view as parameters.</li>
+<li>Sets the {@link android.view.TouchDelegate} on the parent view, such that touches within the touch delegate bounds are routed to the child.</li>
+
+</ul>
+
+In its capacity as touch delegate for the {@link android.widget.ImageButton} child view, the 
+parent view will receive all touch events. If the touch event occurred within the child's hit
+rectangle, the parent will pass the touch 
+event to the child for handling.</p>
+
+
+
+<pre>
+public class MainActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        // Get the parent view
+        View parentView = findViewById(R.id.parent_layout);
+        
+        parentView.post(new Runnable() {
+            // Post in the parent's message queue to make sure the parent
+            // lays out its children before you call getHitRect()
+            &#64;Override
+            public void run() {
+                // The bounds for the delegate view (an ImageButton
+                // in this example)
+                Rect delegateArea = new Rect();
+                ImageButton myButton = (ImageButton) findViewById(R.id.button);
+                myButton.setEnabled(true);
+                myButton.setOnClickListener(new View.OnClickListener() {
+                    &#64;Override
+                    public void onClick(View view) {
+                        Toast.makeText(MainActivity.this, 
+                                "Touch occurred within ImageButton touch region.", 
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+     
+                // The hit rectangle for the ImageButton
+                myButton.getHitRect(delegateArea);
+            
+                // Extend the touch area of the ImageButton beyond its bounds
+                // on the right and bottom.
+                delegateArea.right += 100;
+                delegateArea.bottom += 100;
+            
+                // Instantiate a TouchDelegate.
+                // "delegateArea" is the bounds in local coordinates of 
+                // the containing view to be mapped to the delegate view.
+                // "myButton" is the child view that should receive motion
+                // events.
+                TouchDelegate touchDelegate = new TouchDelegate(delegateArea, 
+                        myButton);
+     
+                // Sets the TouchDelegate on the parent view, such that touches 
+                // within the touch delegate bounds are routed to the child.
+                if (View.class.isInstance(myButton.getParent())) {
+                    ((View) myButton.getParent()).setTouchDelegate(touchDelegate);
+                }
+            }
+        });
+    }
+}</pre>
+

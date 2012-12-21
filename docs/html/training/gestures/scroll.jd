@@ -1,0 +1,161 @@
+page.title=Animating a Scroll Gesture
+parent.title=Using Touch Gestures
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Handling Multi-Touch Gestures
+next.link=multi.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#scroll">Implement Touch-Based Scrolling</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>In Android, scrolling is typically achieved by using the 
+{@link android.widget.ScrollView}
+class. Any standard layout that might extend beyond the bounds of its container should be 
+nested in a {@link android.widget.ScrollView} to provide a scrollable view that's 
+managed by the framework. Implementing a custom scroller should only be 
+necessary for special scenarios. This lesson describes such a scenario: displaying 
+a scrolling effect in response to touch gestures using <em>scrollers</em>.
+
+
+<p>You can use scrollers ({@link android.widget.Scroller} or {@link
+android.widget.OverScroller}) to collect the data you need to produce a
+scrolling animation in response to a touch event. {@link
+android.widget.Scroller} and {@link android.widget.OverScroller} are largely
+interchangeable&mdash;the difference is that {@link android.widget.OverScroller}
+allows temporarily scrolling beyond the minimum/maximum boundaries and springing
+back to the bounds. This is normally rendered using a "glow" effect, provided by
+the {@link android.widget.EdgeEffect} or {@link
+android.support.v4.widget.EdgeEffectCompat} classes. </p>
+
+<p>A scroller is used  to animate scrolling over time, using platform-standard
+scrolling physics (friction, velocity, etc.). The scroller itself doesn't
+actually draw anything. Scrollers track scroll offsets for you over time, but
+they don't  automatically apply those positions to your view. It's your
+responsibility to get and apply new coordinates at a rate that will make the
+scrolling animation look smooth.</p>
+
+<p class="note"><strong>Note:</strong> You generally only need to use scrollers
+when implementing scrolling yourself. {@link android.widget.ScrollView} and
+{@link android.widget.HorizontalScrollView} do all this for you do all of this for you if you nest your layout within them.</p>
+
+<h2 id = "scroll">Implement Touch-Based Scrolling</h2>
+
+
+<p>This snippet illustrates the basics of using a scroller. It uses a 
+{@link android.view.GestureDetector}, and overrides the  
+{@link android.view.GestureDetector.SimpleOnGestureListener} methods 
+{@link android.view.GestureDetector.OnGestureListener#onDown onDown()} and 
+{@link android.view.GestureDetector.OnGestureListener#onFling onFling()}. It also 
+overrides {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} 
+to return {@code false} since you don't need to animate a scroll.</p>
+
+
+<p>It's common to use scrollers in conjunction with a fling gesture, but they
+can be used in pretty much any context where you want the UI to display
+scrolling in response to a touch event. For example, you could override {@link
+android.view.View#onTouchEvent onTouchEvent()} to process touch events directly,
+and produce a scrolling effect in response to those touch events.</p>
+
+<pre>
+private OverScroller mScroller = new OverScroller(context);
+
+private GestureDetector.SimpleOnGestureListener mGestureListener
+        = new GestureDetector.SimpleOnGestureListener() {
+    &#64;Override
+    public boolean onDown(MotionEvent e) {
+        // Abort any active scroll animations and invalidate.
+        mScroller.forceFinished(true);
+        // There is also a compatibility version: 
+        // ViewCompat.postInvalidateOnAnimation
+        postInvalidateOnAnimation();
+        return true;
+    }
+
+    &#64;Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, 
+            float distanceX, float distanceY) {
+        // You don't use a scroller in onScroll because you don't need to animate
+        // a scroll. The scroll occurs instantly in response to touch feedback.
+        return false;
+    }
+
+    &#64;Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, 
+            float velocityX, float velocityY) {
+        // Before flinging, abort the current animation.
+        mScroller.forceFinished(true);
+        // Begin the scroll animation
+        mScroller.fling(
+                // Current scroll position
+                startX,
+                startY,
+                // Velocities, negated for natural touch response
+                (int) -velocityX,
+                (int) -velocityY,
+                // Minimum and maximum scroll positions. The minimum scroll 
+                // position is generally zero and the maximum scroll position 
+                // is generally the content size less the screen size. So if the 
+                // content width is 1000 pixels and the screen width is 200  
+                // pixels, the maximum scroll offset should be 800 pixels.
+                minX, maxX,
+                minY, maxY,
+                // The maximum overscroll bounds. This is useful when using
+                // the EdgeEffect class to draw overscroll "glow" overlays.
+                mContentRect.width() / 2,
+                mContentRect.height() / 2);
+        // Invalidate to trigger computeScroll()
+        postInvalidateOnAnimation();
+        return true;
+    }
+};
+
+&#64;Override
+public void computeScroll() {
+    super.computeScroll();
+
+    // Compute the current scroll offsets. If this returns true, then the 
+    // scroll has not yet finished.
+    if (mScroller.computeScrollOffset()) {
+        int currX = mScroller.getCurrX();
+        int currY = mScroller.getCurrY();
+
+        // Actually render the scrolled viewport, or actually scroll the 
+        // view using View.scrollTo.
+
+        // If currX or currY are outside the bounds, render the overscroll 
+        // glow using EdgeEffect.
+
+    } else {
+        // The scroll has finished.
+    }
+}</pre>
+
+<p>For another example of scroller usage, see the <a href="http://github.com/android/platform_frameworks_support/blob/master/v4/java/android/support/v4/view/ViewPager.java">source code</a> for the 
+{@link android.support.v4.view.ViewPager} class. It scrolls in response to flings, 
+and uses scrolling to implement the "snapping to page" animation.</p>

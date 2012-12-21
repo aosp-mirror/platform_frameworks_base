@@ -1,0 +1,94 @@
+page.title=Using Touch Gestures
+trainingnavtop=true
+startpage=true
+next.title=Detect Built-in Gestures
+next.link=detector.html
+
+
+@jd:body
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.6 (API Level 4) or higher</li>
+</ul>
+<h2>You should also read</h2>
+<ul>
+    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p> This class describes how to write apps that allow users to interact with an
+app via touch gestures. Android provides a variety of APIs to
+help you create and detect gestures.</p>
+
+<p>Although your app should not depend on touch gestures for basic behaviors (since the gestures
+may not be available to all users in all contexts), adding touch-based
+interaction to your app can greatly increase its usefulness and appeal.</p>
+
+<p>To
+provide users with a consistent, intuitive experience, your app should follow
+the accepted Android conventions for touch gestures. The <a
+href="http://developer.android.com/design/patterns/gestures.html">Gestures
+design guide</a><a href="{@docRoot}design/patterns/notifications.html"></a>
+shows you how to use common gestures in Android apps. Also see the Design Guide
+for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a>.  </p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+    <dt>
+        <strong><a href="detector.html">Detecting Common Gestures</a></strong>
+    </dt>
+    <dd>
+        Learn how to detect basic touch gestures such as scrolling, flinging, and double-tapping, using 
+       {@link android.view.GestureDetector}.
+    </dd>
+
+<dt>
+        <strong><a href="movement.html">Tracking Movement</a></strong>
+    </dt>
+    <dd>
+        Learn how to track movement.
+    </dd>
+
+<dt>
+        <strong><a href="scroll.html">Animating a Scroll Gesture</a></strong>
+    </dt>
+    <dd>
+        Learn how to use scrollers ({@link android.widget.Scroller} or {@link
+android.widget.OverScroller}) to produce a scrolling animation in response to a
+touch event. </dd>
+
+<dt>
+        <strong><a href="multi.html">Handling Multi-Touch Gestures</a></strong>
+    </dt>
+    <dd>
+        Learn how to detect multi-pointer (finger) gestures.
+    </dd> 
+<dt>
+        <strong><a href="scale.html">Dragging and Scaling</a></strong>
+    </dt>
+    <dd>
+        Learn how to implement touch-based dragging and scaling.
+    </dd>
+
+
+<dt><strong><a href="viewgroup.html">Managing Touch Events in a ViewGroup</a></strong></dt>
+
+    <dd>Learn how to manage touch events in a {@link android.view.ViewGroup} to
+ensure that touch events are correctly dispatched to their target views.</dd>
+</dl>
