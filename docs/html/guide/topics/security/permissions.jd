@@ -61,6 +61,7 @@ NDK</a>). All types of applications &mdash; Java, native, and hybrid &mdash;
 are sandboxed in the same way and have the same degree of security from each
 other.</p>
 
+
 <a name="signing"></a>
 <h2>Application Signing</h2>
 
@@ -112,7 +113,7 @@ been set appropriately so any other application can see it.</p>
 <a name="permissions"></a>
 <h2>Using Permissions</h2>
 
-<p>A basic Android application has no permissions associated with it,
+<p>A basic Android application has no permissions associated with it by default,
 meaning it can not do anything that would adversely impact the user experience
 or any data on the device.  To make use of protected features of the device,
 you must include in your <code>AndroidManifest.xml</code> one or more
@@ -163,6 +164,33 @@ your broadcast or who can send a broadcast to you.</li>
 <li>When accessing and operating on a content provider.</li>
 <li>Binding to or starting a service.</li>
 </ul>
+
+
+
+<div class="caution">
+<p><strong>Caution:</strong> Over time,
+new restrictions may be added to the platform such that, in order
+to use certain APIs, your app must request a permission that it previously did not need.
+Because existing apps assume access to those APIs is freely available,
+Android may apply the new permission request to the app's manifest to avoid
+breaking the app on the new platform version.
+Android makes the decision as to whether an app might need the permission based on
+the value provided for the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+attribute. If the value is lower than the version in which the permission was added, then
+Android adds the permission.</p>
+<p>For example, the {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission was
+added in API level 4 to restrict access to the shared storage space. If your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+is 3 or lower, this permission is added to your app on newer versions of Android.</p>
+<p>Beware that if this happens to your app, your app listing on Google Play will show these
+required permissions even though your app might not actually require them.</p>
+<p>To avoid this and remove the default permissions you don't need, always update your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+to be as high as possible. You can see which permissions were added with each release in the
+{@link android.os.Build.VERSION_CODES} documentation.</p>
+</div>
+
 
 
 <a name="declaring"></a>
