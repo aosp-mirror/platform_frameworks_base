@@ -1,0 +1,54 @@
+page.title=Handling Keyboard Input
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 1.6 (API Level 3) or higher</li>
+</ul>
+
+</div>
+</div>
+
+<p>The Android system shows an on-screen keyboard&mdash;known as a
+<em>soft input method</em>&mdash;when a text field in your UI receives focus.
+To provide the best user experience, you can specify characteristics
+about the type of input you expect (such as
+whether it's a phone number or email address) and how the input method should behave (such as
+whether it performs auto-correct for spelling mistakes).</p>
+
+<p>In addition to the on-screen input methods, Android also supports hardware keyboards, so it's
+important that your app optimize its user experience for interaction that might occur
+through an attached keyboard.</p>
+
+<p>These topics and more are discussed in the following lessons.</p>
+
+
+<h2>Lessons</h2> 
+ 
+<dl> 
+  <dt><b><a href="style.html">Specifying the Input Method Type</a></b></dt>
+    <dd>Learn how to show certain soft input methods, such as those designed for phone numbers, web
+    addresses, or other formats. Also learn how to specify characteristics such
+    as spelling suggestion behavior and action buttons such as <b>Done</b> or <b>Next</b>.
+    </dd>
+  <dt><b><a href="visibility.html">Handling Input Method Visibility</a></b></dt>
+    <dd>Learn how to specify when to show the soft input method and how
+    your layout should adjust to the reduced screen space.
+    </dd>
+  <dt><b><a href="navigation.html">Supporting Keyboard Navigation</a></b></dt>
+    <dd>Learn how to verify that users can navigate your app using a keyboard
+    and how to make any necessary changes to the navigation order.
+    </dd>
+  <dt><b><a href="commands.html">Handling Keyboard Actions</a></b></dt>
+    <dd>Learn how to respond directly to keyboard input for user actions.
+    </dd>
+ 
+</dl> 
