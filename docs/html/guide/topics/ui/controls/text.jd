@@ -79,15 +79,23 @@ should use the {@code textEmailAddress} input type:</p>
 </pre>
 
 
-<p>There are several different input types available for different situations. You can find
-them all listed with the documentation for <a
-href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
-android:inputType}</a>.</p>
+<p>There are several different input types available for different situations.
+Here are some of the more common values for
+<a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType"
+>{@code android:inputType}</a>:</p>
 
-<p class="note"><strong>Tip:</strong> To allow users to input long strings of text with line
-breaks, use the {@code "textMultiLine"} input type. By default, an {@link android.widget.EditText}
-object is restricted to one line of text and scrolls horizontally when the text exceeds the
-available width.</p>
+<dl>
+  <dt>{@code "text"}</dt>
+    <dd>Normal text keyboard.</dd>
+  <dt>{@code "textEmailAddress"}</dt>
+    <dd>Normal text keyboard with the @ character.</dd>
+  <dt>{@code "textUri"}</dt>
+    <dd>Normal text keyboard with the / character.</dd>
+  <dt>{@code "number"}</dt>
+    <dd>Basic number keypad.</dd>
+  <dt>{@code "phone"}</dt>
+    <dd>Phone-style keypad.</dd>
+</dl>
 
 
 <h3 id="Behaviors">Controlling other behaviors</h3>
@@ -98,7 +106,25 @@ capitalize all new words or use features like auto-complete and spelling suggest
 
 <p>The <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
 android:inputType}</a> attribute allows bitwise combinations so you can specify both a keyboard
-layout and one or more behaviors at once. For example, here's how you can collect a postal
+layout and one or more behaviors at once.</p>
+
+<p>Here are some of the common input type values that define keyboard behaviors:</p>
+
+<dl>
+  <dt>{@code "textCapSentences"}</dt>
+    <dd>Normal text keyboard that capitalizes the first letter for each new sentence.</dd>
+  <dt>{@code "textCapWords"}</dt>
+    <dd>Normal text keyboard that capitalizes every word. Good for titles or person names.</dd>
+  <dt>{@code "textAutoCorrect"}</dt>
+    <dd>Normal text keyboard that corrects commonly misspelled words.</dd>
+  <dt>{@code "textPassword"}</dt>
+    <dd>Normal text keyboard, but the characters entered turn into dots.</dd>
+  <dt>{@code "textMultiLine"}</dt>
+    <dd>Normal text keyboard that allow users to input long strings of text that include line
+breaks (carriage returns).</dd>
+</dl>
+
+<p>For example, here's how you can collect a postal
 address, capitalize each word, and disable text suggestions:</p>
 
 <pre>
@@ -177,7 +203,7 @@ editText.setOnEditorActionListener(new OnEditorActionListener() {
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         boolean handled = false;
         if (actionId == EditorInfo.IME_ACTION_SEND) {
-            // Send the user message
+            sendMessage();
             handled = true;
         }
         return handled;
