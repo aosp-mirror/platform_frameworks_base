@@ -1,0 +1,113 @@
+page.title=Handling Keyboard Actions
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#SingleKey">Handle Single Key Events</a></li>
+  <li><a href="#ModifierKey">Handle Modifier Keys</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>When the user gives focus to an editable text view such as an {@link android.widget.EditText}
+element and the user has a hardware keyboard attached, all
+input is handled by the system. If, however, you'd like to intercept
+or directly handle the keyboard input yourself, you can do so by implementing callback methods
+from the {@link android.view.KeyEvent.Callback} interface, such as {@link
+android.view.KeyEvent.Callback#onKeyDown onKeyDown()} and {@link
+android.view.KeyEvent.Callback#onKeyMultiple onKeyMultiple()}.</p>
+
+<p>Both the {@link
+android.app.Activity} and {@link android.view.View} class implement the
+{@link android.view.KeyEvent.Callback} interface, so you
+should generally override the callback methods in your extension of these classes as
+appropriate.</p>
+
+<p class="note"><strong>Note:</strong> When handling keyboard events with the {@link
+android.view.KeyEvent} class and related APIs, you should expect that such keyboard
+events come only from a hardware keyboard. You should never rely on receiving key events
+for any key on a soft input method (an on-screen keyboard).</p>
+
+
+<h2 id="SingleKey">Handle Single Key Events</h2>
+
+<p>To handle an individual key press, implement {@link
+android.app.Activity#onKeyDown onKeyDown()} or {@link
+android.app.Activity#onKeyUp onKeyUp()} as appropriate. Usually, you should
+use {@link android.app.Activity#onKeyUp onKeyUp()} if you want to be sure that you receive
+only one event. If the user presses and holds the button, then {@link
+android.app.Activity#onKeyDown onKeyDown()} is called multiple times.</p>
+
+<p>For example, this implementation responds to some keyboard keys to control a game:</p>
+
+<pre>
+&#64;Override
+public boolean onKeyUp(int keyCode, KeyEvent event) {
+    switch (keyCode) {
+        case KeyEvent.KEYCODE_D:
+            moveShip(MOVE_LEFT);
+            return true;
+        case KeyEvent.KEYCODE_F:
+            moveShip(MOVE_RIGHT);
+            return true;
+        case KeyEvent.KEYCODE_J:
+            fireMachineGun();
+            return true;
+        case KeyEvent.KEYCODE_K:
+            fireMissile();
+            return true;
+        default:
+            return super.onKeyUp(keyCode, event);
+    }
+}
+</pre>
+
+
+<h2 id="ModifierKey">Handle Modifier Keys</h2>
+
+<p>To respond to modifier key events such as when a key is combined with Shift or Control, you can
+query the {@link android.view.KeyEvent} that's passed to the callback method. Several methods
+provide information about modifier keys such as {@link android.view.KeyEvent#getModifiers()}
+and {@link android.view.KeyEvent#getMetaState()}. However, the simplest solution is to check whether
+the exact modifier key you care about is being pressed with methods such as
+{@link android.view.KeyEvent#isShiftPressed()} and {@link android.view.KeyEvent#isCtrlPressed()}.
+</p>
+
+<p>For example, here's the {@link android.app.Activity#onKeyDown onKeyDown()} implementation
+again, with some extra handling for when the Shift key is held down with one of the keys:</p>
+
+<pre>
+&#64;Override
+public boolean onKeyUp(int keyCode, KeyEvent event) {
+    switch (keyCode) {
+        ...
+        case KeyEvent.KEYCODE_J:
+            if (event.isShiftPressed()) {
+                fireLaser();
+            } else {
+                fireMachineGun();
+            }
+            return true;
+        case KeyEvent.KEYCODE_K:
+            if (event.isShiftPressed()) {
+                fireSeekingMissle();
+            } else {
+                fireMissile();
+            }
+            return true;
+        default:
+            return super.onKeyUp(keyCode, event);
+    }
+}
+</pre>
+
+
+
