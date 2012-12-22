@@ -151,6 +151,7 @@ public class UsbDebuggingManager implements Runnable {
         private static final int MESSAGE_ADB_ALLOW = 3;
         private static final int MESSAGE_ADB_DENY = 4;
         private static final int MESSAGE_ADB_CONFIRM = 5;
+        private static final int MESSAGE_ADB_CLEAR = 6;
 
         public UsbDebuggingHandler(Looper looper) {
             super(looper);
@@ -214,6 +215,10 @@ public class UsbDebuggingManager implements Runnable {
                     showConfirmationDialog(key, mFingerprints);
                     break;
                 }
+
+                case MESSAGE_ADB_CLEAR:
+                    deleteKeyFile();
+                    break;
             }
         }
     }
@@ -257,17 +262,25 @@ public class UsbDebuggingManager implements Runnable {
         }
     }
 
-    private void writeKey(String key) {
+    private File getUserKeyFile() {
         File dataDir = Environment.getDataDirectory();
         File adbDir = new File(dataDir, ADB_DIRECTORY);
 
         if (!adbDir.exists()) {
             Slog.e(TAG, "ADB data directory does not exist");
-            return;
+            return null;
         }
 
+        return new File(adbDir, ADB_KEYS_FILE);
+    }
+
+    private void writeKey(String key) {
         try {
-            File keyFile = new File(adbDir, ADB_KEYS_FILE);
+            File keyFile = getUserKeyFile();
+
+            if (keyFile == null) {
+                return;
+            }
 
             if (!keyFile.exists()) {
                 keyFile.createNewFile();
@@ -286,6 +299,12 @@ public class UsbDebuggingManager implements Runnable {
         }
     }
 
+    private void deleteKeyFile() {
+        File keyFile = getUserKeyFile();
+        if (keyFile != null) {
+            keyFile.delete();
+        }
+    }
 
     public void setAdbEnabled(boolean enabled) {
         mHandler.sendEmptyMessage(enabled ? UsbDebuggingHandler.MESSAGE_ADB_ENABLED
@@ -303,6 +322,9 @@ public class UsbDebuggingManager implements Runnable {
         mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_DENY);
     }
 
+    public void clearUsbDebuggingKeys() {
+        mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_CLEAR);
+    }
 
     public void dump(FileDescriptor fd, PrintWriter pw) {
         pw.println("  USB Debugging State:");
