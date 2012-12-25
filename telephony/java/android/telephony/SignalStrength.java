@@ -463,6 +463,7 @@ public class SignalStrength implements Parcelable {
         return mLteCqi;
     }
 
+    /** @hide */
     public boolean needsOldRilFeature(String feature) {
         String[] features = SystemProperties.get("ro.telephony.ril.v3", "").split(",");
         for (String found: features) {
