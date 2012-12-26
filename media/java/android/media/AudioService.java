@@ -4163,7 +4163,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Display in the log the current entries in the audio focus stack
      */
     private void dumpFocusStack(PrintWriter pw) {
-        pw.println("\nAudio Focus stack entries:");
+        pw.println("\nAudio Focus stack entries (last is top of stack):");
         synchronized(mAudioFocusLock) {
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
@@ -4204,6 +4204,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         } else {
             // focus is abandoned by a client that's not at the top of the stack,
             // no need to update focus.
+            // (using an iterator on the stack so we can safely remove an entry after having
+            //  evaluated it, traversal order doesn't matter here)
             Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
@@ -4226,6 +4228,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // is the owner of the audio focus part of the client to remove?
         boolean isTopOfStackForClientToRemove = !mFocusStack.isEmpty() &&
                 mFocusStack.peek().mSourceRef.equals(cb);
+        // (using an iterator on the stack so we can safely remove an entry after having
+        //  evaluated it, traversal order doesn't matter here)
         Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
         while(stackIterator.hasNext()) {
             FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
@@ -4846,7 +4850,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Display in the log the current entries in the remote control focus stack
      */
     private void dumpRCStack(PrintWriter pw) {
-        pw.println("\nRemote Control stack entries:");
+        pw.println("\nRemote Control stack entries (last is top of stack):");
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
@@ -4868,7 +4872,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * on RemoteControlClient data
      */
     private void dumpRCCStack(PrintWriter pw) {
-        pw.println("\nRemote Control Client stack entries:");
+        pw.println("\nRemote Control Client stack entries (last is top of stack):");
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
@@ -4910,6 +4914,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 RemoteControlStackEntry oldTop = mRCStack.peek();
                 Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
                 // iterate over the stack entries
+                // (using an iterator on the stack so we can safely remove an entry after having
+                //  evaluated it, traversal order doesn't matter here)
                 while(stackIterator.hasNext()) {
                     RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
                     if (packageName.equalsIgnoreCase(rcse.mReceiverComponent.getPackageName())) {
@@ -5039,6 +5045,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * Update the remote control clients with the new "focused" client generation
      */
     private void setNewRcClientGenerationOnClients_syncRcsCurrc(int newClientGeneration) {
+        // (using an iterator on the stack so we can safely remove an entry if needed,
+        //  traversal order doesn't matter here as we update all entries)
         Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
         while(stackIterator.hasNext()) {
             RemoteControlStackEntry se = stackIterator.next();
