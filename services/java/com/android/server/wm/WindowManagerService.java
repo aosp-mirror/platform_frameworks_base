@@ -4476,8 +4476,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_REORDER) Slog.v(TAG,
                     "Start moving token " + wtoken + " initially at "
                     + oldIndex);
-            if (oldIndex > index && mAppTransition.isTransitionSet()
-                    && !mAppTransition.isRunning()) {
+            if (oldIndex > index && mAppTransition.isTransitionSet()) {
                 // animation towards back has not started, copy old list for duration of animation.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -4491,7 +4490,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_REORDER) Slog.v(TAG, "Moved " + token + " to " + index + ":");
             else if (DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "Moved " + token + " to " + index);
             if (DEBUG_REORDER) dumpAppTokensLocked();
-            if (!mAppTransition.isTransitionSet() && !mAppTransition.isRunning()) {
+            if (!mAppTransition.isTransitionSet()) {
                 // Not animating, bring animating app list in line with mAppTokens.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -4612,11 +4611,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (!mAppTransition.isRunning()) {
-                mAnimatingAppTokens.clear();
-                mAnimatingAppTokens.addAll(mAppTokens);
-                moveAppWindowsLocked(tokens, mAppTokens.size());
-            }
+            mAnimatingAppTokens.clear();
+            mAnimatingAppTokens.addAll(mAppTokens);
+            moveAppWindowsLocked(tokens, mAppTokens.size());
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -4631,7 +4628,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             final int N = tokens.size();
-            if (N > 0 && !mAppTransition.isRunning()) {
+            if (N > 0) {
                 // animating towards back, hang onto old list for duration of animation.
                 mAnimatingAppTokens.clear();
                 mAnimatingAppTokens.addAll(mAppTokens);
@@ -4651,11 +4648,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (!mAppTransition.isRunning()) {
-                mAnimatingAppTokens.clear();
-                mAnimatingAppTokens.addAll(mAppTokens);
-                moveAppWindowsLocked(tokens, 0);
-            }
+            mAnimatingAppTokens.clear();
+            mAnimatingAppTokens.addAll(mAppTokens);
+            moveAppWindowsLocked(tokens, 0);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -7949,7 +7944,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
                 appAnimator.clearThumbnail();
-                wtoken.reportedVisible = false;
                 wtoken.inPendingTransaction = false;
                 appAnimator.animation = null;
                 setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
