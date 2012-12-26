@@ -4963,28 +4963,34 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /**
      * Helper function:
      * Set the new remote control receiver at the top of the RC focus stack.
+     * Called synchronized on mAudioFocusLock, then mRCStack
      * precondition: mediaIntent != null, target != null
      */
-    private void pushMediaButtonReceiver(PendingIntent mediaIntent, ComponentName target) {
+    private void pushMediaButtonReceiver_syncAfRcs(PendingIntent mediaIntent, ComponentName target) {
         // already at top of stack?
         if (!mRCStack.empty() && mRCStack.peek().mMediaIntent.equals(mediaIntent)) {
             return;
         }
-        Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
         RemoteControlStackEntry rcse = null;
         boolean wasInsideStack = false;
-        while(stackIterator.hasNext()) {
-            rcse = (RemoteControlStackEntry)stackIterator.next();
-            if(rcse.mMediaIntent.equals(mediaIntent)) {
-                wasInsideStack = true;
-                stackIterator.remove();
-                break;
+        try {
+            for (int index = mRCStack.size()-1; index >= 0; index--) {
+                rcse = mRCStack.elementAt(index);
+                if(rcse.mMediaIntent.equals(mediaIntent)) {
+                    // ok to remove element while traversing the stack since we're leaving the loop
+                    mRCStack.removeElementAt(index);
+                    wasInsideStack = true;
+                    break;
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // not expected to happen, indicates improper concurrent modification
+            Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
         }
         if (!wasInsideStack) {
             rcse = new RemoteControlStackEntry(mediaIntent, target);
         }
-        mRCStack.push(rcse);
+        mRCStack.push(rcse); // rcse is never null
 
         // post message to persist the default media button receiver
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
@@ -4994,17 +5000,23 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /**
      * Helper function:
      * Remove the remote control receiver from the RC focus stack.
+     * Called synchronized on mAudioFocusLock, then mRCStack
      * precondition: pi != null
      */
-    private void removeMediaButtonReceiver(PendingIntent pi) {
-        Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-        while(stackIterator.hasNext()) {
-            RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
-            if(rcse.mMediaIntent.equals(pi)) {
-                stackIterator.remove();
-                rcse.unlinkToRcClientDeath();
-                break;
+    private void removeMediaButtonReceiver_syncAfRcs(PendingIntent pi) {
+        try {
+            for (int index = mRCStack.size()-1; index >= 0; index--) {
+                final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                if (rcse.mMediaIntent.equals(pi)) {
+                    rcse.unlinkToRcClientDeath();
+                    // ok to remove element while traversing the stack since we're leaving the loop
+                    mRCStack.removeElementAt(index);
+                    break;
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // not expected to happen, indicates improper concurrent modification
+            Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
         }
     }
 
@@ -5242,7 +5254,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
-                pushMediaButtonReceiver(mediaIntent, eventReceiver);
+                pushMediaButtonReceiver_syncAfRcs(mediaIntent, eventReceiver);
                 // new RC client, assume every type of information shall be queried
                 checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
             }
@@ -5260,7 +5272,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 boolean topOfStackWillChange = isCurrentRcController(mediaIntent);
-                removeMediaButtonReceiver(mediaIntent);
+                removeMediaButtonReceiver_syncAfRcs(mediaIntent);
                 if (topOfStackWillChange) {
                     // current RC client will change, assume every type of info needs to be queried
                     checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
