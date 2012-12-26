@@ -223,6 +223,22 @@ class AppWindowToken extends WindowToken {
         return null;
     }
 
+    boolean isVisible() {
+        final int N = allAppWindows.size();
+        // TODO: Consider using allDrawn instead of a single window.
+        for (int i=0; i<N; i++) {
+            WindowState win = allAppWindows.get(i);
+            if (!win.mAppFreezing
+                    && (win.mViewVisibility == View.VISIBLE ||
+                        (win.mWinAnimator.isAnimating() &&
+                                !service.mAppTransition.isTransitionSet()))
+                    && !win.mDestroying && win.isDrawnLw()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);

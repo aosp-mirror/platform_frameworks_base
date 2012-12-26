@@ -1223,7 +1223,7 @@ class WindowStateAnimator {
         if (mIsWallpaper && !mWin.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
             hide();
-        } else if (w.mAttachedHidden || !w.isReadyForDisplay()) {
+        } else if (w.mAttachedHidden || !w.isOnScreen()) {
             hide();
             mAnimator.hideWallpapersLocked(w);
 
