@@ -1511,10 +1511,9 @@ class WindowStateAnimator {
         }
     }
 
-    // TODO(cmautner): Move back to WindowState?
     /**
      * Choose the correct animation and set it to the passed WindowState.
-     * @param transit If WindowManagerPolicy.TRANSIT_PREVIEW_DONE and the app window has been drawn
+     * @param transit If AppTransition.TRANSIT_PREVIEW_DONE and the app window has been drawn
      *      then the animation will be app_starting_exit. Any other value loads the animation from
      *      the switch statement below.
      * @param isEntrance The animation type the last time this was called. Used to keep from

@@ -3622,14 +3622,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!mAppTransition.isTransitionSet() || mAppTransition.isTransitionNone()) {
                     mAppTransition.setAppTransition(transit);
                 } else if (!alwaysKeepCurrent) {
-                    if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
+                    if (transit == AppTransition.TRANSIT_TASK_OPEN
                             && mAppTransition.isTransitionEqual(
-                                    WindowManagerPolicy.TRANSIT_TASK_CLOSE)) {
+                                    AppTransition.TRANSIT_TASK_CLOSE)) {
                         // Opening a new task always supersedes a close for the anim.
                         mAppTransition.setAppTransition(transit);
-                    } else if (transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                    } else if (transit == AppTransition.TRANSIT_ACTIVITY_OPEN
                             && mAppTransition.isTransitionEqual(
-                                WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE)) {
+                                AppTransition.TRANSIT_ACTIVITY_CLOSE)) {
                         // Opening a new activity always supersedes a close for the anim.
                         mAppTransition.setAppTransition(transit);
                     }
@@ -3948,7 +3948,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean runningAppAnimation = false;
 
-            if (transit != WindowManagerPolicy.TRANSIT_UNSET) {
+            if (transit != AppTransition.TRANSIT_UNSET) {
                 if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
                     wtoken.mAppAnimator.animation = null;
                 }
@@ -3959,7 +3959,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (window != null && mDisplayMagnifier != null
                         && window.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    mDisplayMagnifier.onWindowTransitionLocked(window, transit);
+                    mDisplayMagnifier.onAppWindowTransitionLocked(window, transit);
                 }
                 changed = true;
             }
@@ -4127,7 +4127,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            setTokenVisibilityLocked(wtoken, null, visible, WindowManagerPolicy.TRANSIT_UNSET,
+            setTokenVisibilityLocked(wtoken, null, visible, AppTransition.TRANSIT_UNSET,
                     true);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
@@ -4259,7 +4259,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Removing app token: " + wtoken);
                 delayed = setTokenVisibilityLocked(wtoken, null, false,
-                        WindowManagerPolicy.TRANSIT_UNSET, true);
+                        AppTransition.TRANSIT_UNSET, true);
                 wtoken.inPendingTransaction = false;
                 mOpeningApps.remove(wtoken);
                 wtoken.waitingToShow = false;
@@ -4812,6 +4812,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessage(H.PERSIST_ANIMATION_SCALE);
     }
 
+    @Override
     public void setAnimationScales(float[] scales) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ANIMATION_SCALE,
                 "setAnimationScale()")) {
@@ -4839,6 +4840,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ValueAnimator.setDurationScale(scale);
     }
 
+    @Override
     public float getAnimationScale(int which) {
         switch (which) {
             case 0: return mWindowAnimationScale;
@@ -4848,6 +4850,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
+    @Override
     public float[] getAnimationScales() {
         return new float[] { mWindowAnimationScale, mTransitionAnimationScale,
                 mAnimatorDurationScale };
@@ -7813,7 +7816,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
             int transit = mAppTransition.getAppTransition();
             if (mSkipAppTransitionAnimation) {
-                transit = WindowManagerPolicy.TRANSIT_UNSET;
+                transit = AppTransition.TRANSIT_UNSET;
             }
             mAppTransition.goodToGo();
             mStartingIconInTransition = false;
@@ -7901,28 +7904,28 @@ public class WindowManagerService extends IWindowManager.Stub
             if (closingAppHasWallpaper && openingAppHasWallpaper) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
                 switch (transit) {
-                    case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-                    case WindowManagerPolicy.TRANSIT_TASK_OPEN:
-                    case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
-                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN;
+                    case AppTransition.TRANSIT_ACTIVITY_OPEN:
+                    case AppTransition.TRANSIT_TASK_OPEN:
+                    case AppTransition.TRANSIT_TASK_TO_FRONT:
+                        transit = AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
                         break;
-                    case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                    case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
-                    case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
-                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE;
+                    case AppTransition.TRANSIT_ACTIVITY_CLOSE:
+                    case AppTransition.TRANSIT_TASK_CLOSE:
+                    case AppTransition.TRANSIT_TASK_TO_BACK:
+                        transit = AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
                         break;
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit: " + transit);
             } else if ((oldWallpaper != null) && !mOpeningApps.contains(oldWallpaper.mAppToken)) {
                 // We are transitioning from an activity with
                 // a wallpaper to one without.
-                transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
+                transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit away from wallpaper: " + transit);
             } else if (mWallpaperTarget != null && mWallpaperTarget.isVisibleLw()) {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
-                transit = WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN;
+                transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "New transit into wallpaper: " + transit);
             }
@@ -9250,7 +9253,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.setLastInputMethodWindowLw(null, null);
 
         if (mAppTransition.isTransitionSet()) {
-            mAppTransition.setAppTransition(WindowManagerPolicy.TRANSIT_UNSET);
+            mAppTransition.setAppTransition(AppTransition.TRANSIT_UNSET);
             mAppTransition.clear();
             mAppTransition.setReady();
         }

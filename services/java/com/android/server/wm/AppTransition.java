@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.util.Slog;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -39,9 +38,6 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 
-import static android.view.WindowManagerPolicy.TRANSIT_NONE;
-import static android.view.WindowManagerPolicy.TRANSIT_UNSET;
-
 // State management of app transitions.  When we are preparing for a
 // transition, mNextAppTransition will be the kind of transition to
 // perform or TRANSIT_NONE if we are not waiting.  If we are waiting,
@@ -52,6 +48,50 @@ public class AppTransition implements Dump {
     private static final boolean DEBUG_APP_TRANSITIONS =
             WindowManagerService.DEBUG_APP_TRANSITIONS;
     private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
+
+    /**
+     * Bit mask that is set for all enter transition.
+     */
+    public static final int TRANSIT_ENTER_MASK = 0x1000;
+    
+    /**
+     * Bit mask that is set for all exit transitions.
+     */
+    public static final int TRANSIT_EXIT_MASK = 0x2000;
+    
+    /** Not set up for a transition. */
+    public static final int TRANSIT_UNSET = -1;
+    /** No animation for transition. */
+    public static final int TRANSIT_NONE = 0;
+    /** A window in a new activity is being opened on top of an existing one in the same task. */
+    public static final int TRANSIT_ACTIVITY_OPEN = 6 | TRANSIT_ENTER_MASK;
+    /** The window in the top-most activity is being closed to reveal the
+     * previous activity in the same task. */
+    public static final int TRANSIT_ACTIVITY_CLOSE = 7 | TRANSIT_EXIT_MASK;
+    /** A window in a new task is being opened on top of an existing one
+     * in another activity's task. */
+    public static final int TRANSIT_TASK_OPEN = 8 | TRANSIT_ENTER_MASK;
+    /** A window in the top-most activity is being closed to reveal the
+     * previous activity in a different task. */
+    public static final int TRANSIT_TASK_CLOSE = 9 | TRANSIT_EXIT_MASK;
+    /** A window in an existing task is being displayed on top of an existing one
+     * in another activity's task. */
+    public static final int TRANSIT_TASK_TO_FRONT = 10 | TRANSIT_ENTER_MASK;
+    /** A window in an existing task is being put below all other tasks. */
+    public static final int TRANSIT_TASK_TO_BACK = 11 | TRANSIT_EXIT_MASK;
+    /** A window in a new activity that doesn't have a wallpaper is being
+     * opened on top of one that does, effectively closing the wallpaper. */
+    public static final int TRANSIT_WALLPAPER_CLOSE = 12 | TRANSIT_EXIT_MASK;
+    /** A window in a new activity that does have a wallpaper is being
+     * opened on one that didn't, effectively opening the wallpaper. */
+    public static final int TRANSIT_WALLPAPER_OPEN = 13 | TRANSIT_ENTER_MASK;
+    /** A window in a new activity is being opened on top of an existing one,
+     * and both are on top of the wallpaper. */
+    public static final int TRANSIT_WALLPAPER_INTRA_OPEN = 14 | TRANSIT_ENTER_MASK;
+    /** The window in the top-most activity is being closed to reveal the
+     * previous activity, and both are on top of he wallpaper. */
+    public static final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15 | TRANSIT_EXIT_MASK;
+    
 
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
     static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
@@ -164,7 +204,7 @@ public class AppTransition implements Dump {
     }
 
     void goodToGo() {
-        mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+        mNextAppTransition = TRANSIT_UNSET;
         mAppTransitionReady = false;
         mAppTransitionRunning = true;
         mAppTransitionTimeout = false;
@@ -282,8 +322,8 @@ public class AppTransition implements Dump {
             set.addAnimation(alpha);
             set.setDetachWallpaper(true);
             a = set;
-        } else  if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN ||
-                    transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE) {
+        } else  if (transit == TRANSIT_WALLPAPER_INTRA_OPEN ||
+                    transit == TRANSIT_WALLPAPER_INTRA_CLOSE) {
             // If we are on top of the wallpaper, we need an animation that
             // correctly handles the wallpaper staying static behind all of
             // the animated elements.  To do this, will just have the existing
@@ -300,8 +340,8 @@ public class AppTransition implements Dump {
         // task transition duration.
         final long duration;
         switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+            case TRANSIT_ACTIVITY_OPEN:
+            case TRANSIT_ACTIVITY_CLOSE:
                 duration = mConfigShortAnimTime;
                 break;
             default:
@@ -363,7 +403,7 @@ public class AppTransition implements Dump {
         } else {
             // Exiting app
             if (mNextAppTransitionScaleUp) {
-                if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN) {
+                if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
                     // Fade out while bringing up selected activity. This keeps the
                     // current activity from showing through a launching wallpaper
                     // activity.
@@ -394,8 +434,8 @@ public class AppTransition implements Dump {
         // task transition duration.
         final long duration;
         switch (transit) {
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+            case TRANSIT_ACTIVITY_OPEN:
+            case TRANSIT_ACTIVITY_CLOSE:
                 duration = mConfigShortAnimTime;
                 break;
             default:
@@ -444,52 +484,52 @@ public class AppTransition implements Dump {
         } else {
             int animAttr = 0;
             switch (transit) {
-                case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+                case TRANSIT_ACTIVITY_OPEN:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                case TRANSIT_ACTIVITY_CLOSE:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_TASK_OPEN:
+                case TRANSIT_TASK_OPEN:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
+                case TRANSIT_TASK_CLOSE:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
+                case TRANSIT_TASK_TO_FRONT:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
+                case TRANSIT_TASK_TO_BACK:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN:
+                case TRANSIT_WALLPAPER_OPEN:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE:
+                case TRANSIT_WALLPAPER_CLOSE:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN:
+                case TRANSIT_WALLPAPER_INTRA_OPEN:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
                     break;
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE:
+                case TRANSIT_WALLPAPER_INTRA_CLOSE:
                     animAttr = enter
                             ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
                             : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
@@ -563,6 +603,59 @@ public class AppTransition implements Dump {
     @Override
     public String toString() {
         return "mNextAppTransition=0x" + Integer.toHexString(mNextAppTransition);
+    }
+
+    /**
+     * Returns the human readable name of a window transition.
+     *
+     * @param transition The window transition.
+     * @return The transition symbolic name.
+     */
+    public static String appTransitionToString(int transition) {
+        switch (transition) {
+            case TRANSIT_UNSET: {
+                return "TRANSIT_UNSET";
+            }
+            case TRANSIT_NONE: {
+                return "TRANSIT_NONE";
+            }
+            case TRANSIT_EXIT_MASK: {
+                return "TRANSIT_EXIT_MASK";
+            }
+            case TRANSIT_ACTIVITY_OPEN: {
+                return "TRANSIT_ACTIVITY_OPEN";
+            }
+            case TRANSIT_ACTIVITY_CLOSE: {
+                return "TRANSIT_ACTIVITY_CLOSE";
+            }
+            case TRANSIT_TASK_OPEN: {
+                return "TRANSIT_TASK_OPEN";
+            }
+            case TRANSIT_TASK_CLOSE: {
+                return "TRANSIT_TASK_CLOSE";
+            }
+            case TRANSIT_TASK_TO_FRONT: {
+                return "TRANSIT_TASK_TO_FRONT";
+            }
+            case TRANSIT_TASK_TO_BACK: {
+                return "TRANSIT_TASK_TO_BACK";
+            }
+            case TRANSIT_WALLPAPER_CLOSE: {
+                return "TRANSIT_WALLPAPER_CLOSE";
+            }
+            case TRANSIT_WALLPAPER_OPEN: {
+                return "TRANSIT_WALLPAPER_OPEN";
+            }
+            case TRANSIT_WALLPAPER_INTRA_OPEN: {
+                return "TRANSIT_WALLPAPER_INTRA_OPEN";
+            }
+            case TRANSIT_WALLPAPER_INTRA_CLOSE: {
+                return "TRANSIT_WALLPAPER_INTRA_CLOSE";
+            }
+            default: {
+                return "<UNKNOWN>";
+            }
+        }
     }
 
     @Override

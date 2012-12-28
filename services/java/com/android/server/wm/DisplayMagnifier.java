@@ -50,7 +50,6 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.policy.impl.PhoneWindowManager;
 
 /**
  * This class is a part of the window manager and encapsulates the
@@ -137,25 +136,34 @@ final class DisplayMagnifier {
         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_ROTATION_CHANGED);
     }
 
-    public void onWindowTransitionLocked(WindowState windowState, int transition) {
+    public void onAppWindowTransitionLocked(WindowState windowState, int transition) {
         if (DEBUG_WINDOW_TRANSITIONS) {
             Slog.i(LOG_TAG, "Window transition: "
-                    + PhoneWindowManager.windowTransitionToString(transition)
+                    + AppTransition.appTransitionToString(transition)
                     + " displayId: " + windowState.getDisplayId());
         }
         final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
         if (magnifying) {
             switch (transition) {
-                case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-                case WindowManagerPolicy.TRANSIT_TASK_OPEN:
-                case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN:
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE:
-                case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN: {
+                case AppTransition.TRANSIT_ACTIVITY_OPEN:
+                case AppTransition.TRANSIT_TASK_OPEN:
+                case AppTransition.TRANSIT_TASK_TO_FRONT:
+                case AppTransition.TRANSIT_WALLPAPER_OPEN:
+                case AppTransition.TRANSIT_WALLPAPER_CLOSE:
+                case AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN: {
                     mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                 }
             }
         }
+    }
+
+    public void onWindowTransitionLocked(WindowState windowState, int transition) {
+        if (DEBUG_WINDOW_TRANSITIONS) {
+            Slog.i(LOG_TAG, "Window transition: "
+                    + AppTransition.appTransitionToString(transition)
+                    + " displayId: " + windowState.getDisplayId());
+        }
+        final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
         final int type = windowState.mAttrs.type;
         switch (transition) {
             case WindowManagerPolicy.TRANSIT_ENTER:
@@ -459,7 +467,6 @@ final class DisplayMagnifier {
             private static final int MIN_ALPHA = 0;
             private static final int MAX_ALPHA = 255;
 
-            private final Point mTempPoint = new Point();
             private final Region mBounds = new Region();
             private final Rect mDirtyRect = new Rect();
             private final Paint mPaint = new Paint();

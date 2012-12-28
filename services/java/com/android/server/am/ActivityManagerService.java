@@ -28,6 +28,7 @@ import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.pm.UserManagerService;
+import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -130,7 +131,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -1970,9 +1970,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     boolean isNextTransitionForward() {
         int transit = mWindowManager.getPendingAppTransition();
-        return transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
-                || transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
-                || transit == WindowManagerPolicy.TRANSIT_TASK_TO_FRONT;
+        return transit == AppTransition.TRANSIT_ACTIVITY_OPEN
+                || transit == AppTransition.TRANSIT_TASK_OPEN
+                || transit == AppTransition.TRANSIT_TASK_TO_FRONT;
     }
     
     final ProcessRecord startProcessLocked(String processName,

@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
+import com.android.server.wm.AppTransition;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -61,7 +62,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
-import android.view.WindowManagerPolicy;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -423,8 +423,8 @@ final class ActivityStack {
                 }
             }
         }
-    };
-    
+    }
+
     ActivityStack(ActivityManagerService service, Context context, boolean mainStack, Looper looper) {
         mHandler = new ActivityStackHandler(looper);
         mService = service;
@@ -1612,11 +1612,11 @@ final class ActivityStack {
                         "Prepare close transition: prev=" + prev);
                 if (mNoAnimActivities.contains(prev)) {
                     mService.mWindowManager.prepareAppTransition(
-                            WindowManagerPolicy.TRANSIT_NONE, false);
+                            AppTransition.TRANSIT_NONE, false);
                 } else {
                     mService.mWindowManager.prepareAppTransition(prev.task == next.task
-                            ? WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE
-                            : WindowManagerPolicy.TRANSIT_TASK_CLOSE, false);
+                            ? AppTransition.TRANSIT_ACTIVITY_CLOSE
+                            : AppTransition.TRANSIT_TASK_CLOSE, false);
                 }
                 mService.mWindowManager.setAppWillBeHidden(prev.appToken);
                 mService.mWindowManager.setAppVisibility(prev.appToken, false);
@@ -1626,11 +1626,11 @@ final class ActivityStack {
                 if (mNoAnimActivities.contains(next)) {
                     noAnim = true;
                     mService.mWindowManager.prepareAppTransition(
-                            WindowManagerPolicy.TRANSIT_NONE, false);
+                            AppTransition.TRANSIT_NONE, false);
                 } else {
                     mService.mWindowManager.prepareAppTransition(prev.task == next.task
-                            ? WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
-                            : WindowManagerPolicy.TRANSIT_TASK_OPEN, false);
+                            ? AppTransition.TRANSIT_ACTIVITY_OPEN
+                            : AppTransition.TRANSIT_TASK_OPEN, false);
                 }
             }
             if (false) {
@@ -1643,10 +1643,10 @@ final class ActivityStack {
             if (mNoAnimActivities.contains(next)) {
                 noAnim = true;
                 mService.mWindowManager.prepareAppTransition(
-                        WindowManagerPolicy.TRANSIT_NONE, false);
+                        AppTransition.TRANSIT_NONE, false);
             } else {
                 mService.mWindowManager.prepareAppTransition(
-                        WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN, false);
+                        AppTransition.TRANSIT_ACTIVITY_OPEN, false);
             }
         }
         if (!noAnim) {
@@ -1890,12 +1890,12 @@ final class ActivityStack {
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
                 mService.mWindowManager.prepareAppTransition(
-                        WindowManagerPolicy.TRANSIT_NONE, keepCurTransition);
+                        AppTransition.TRANSIT_NONE, keepCurTransition);
                 mNoAnimActivities.add(r);
             } else {
                 mService.mWindowManager.prepareAppTransition(newTask
-                        ? WindowManagerPolicy.TRANSIT_TASK_OPEN
-                        : WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
+                        ? AppTransition.TRANSIT_TASK_OPEN
+                        : AppTransition.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
             r.updateOptionsLocked(options);
@@ -3812,8 +3812,8 @@ final class ActivityStack {
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare close transition: finishing " + r);
             mService.mWindowManager.prepareAppTransition(endTask
-                    ? WindowManagerPolicy.TRANSIT_TASK_CLOSE
-                    : WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE, false);
+                    ? AppTransition.TRANSIT_TASK_CLOSE
+                    : AppTransition.TRANSIT_ACTIVITY_CLOSE, false);
     
             // Tell window manager to prepare for this one to be removed.
             mService.mWindowManager.setAppVisibility(r.appToken, false);
@@ -4300,7 +4300,7 @@ final class ActivityStack {
                     (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
             }
             return;
         }
@@ -4338,14 +4338,14 @@ final class ActivityStack {
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
             mService.mWindowManager.prepareAppTransition(
-                    WindowManagerPolicy.TRANSIT_NONE, false);
+                    AppTransition.TRANSIT_NONE, false);
             ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
             }
             ActivityOptions.abort(options);
         } else {
-            updateTransitLocked(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, options);
+            updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
         
         mService.mWindowManager.moveAppTokensToTop(moved);
@@ -4431,14 +4431,14 @@ final class ActivityStack {
         if (reason != null &&
                 (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
             mService.mWindowManager.prepareAppTransition(
-                    WindowManagerPolicy.TRANSIT_NONE, false);
+                    AppTransition.TRANSIT_NONE, false);
             ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
             }
         } else {
             mService.mWindowManager.prepareAppTransition(
-                    WindowManagerPolicy.TRANSIT_TASK_TO_BACK, false);
+                    AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
         mService.mWindowManager.moveAppTokensToBottom(moved);
         if (VALIDATE_TOKENS) {
