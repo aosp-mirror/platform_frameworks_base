@@ -1,0 +1,133 @@
+page.title=Handling Input Method Visibility
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>  <li><a href="#ShowOnStart">Show the Input Method When the Activity Starts</a></li>  <li><a href="#ShowOnDemand">Show the Input Method On Demand</a></li>  <li><a href="#Respond">Specify How Your UI Should Respond</a></li></ol>
+
+</div>
+</div>
+
+
+<p>When input focus moves into or out of an editable text field, Android shows
+or hides the input method (such as the on-screen keyboard) as appropriate.
+The system also makes decisions about
+how your UI and the text field appear above the input method. For example, when the vertical
+space on the screen is constrained, the text field might fill all space above the input method.
+For most apps, these default behaviors are all that's needed.</p>
+
+<p>In some cases, though, you might want to more directly control
+the visibility of the input method and specify how you'd like your layout to appear
+when the input method is visible. This lesson explains how to control and respond to
+the input method visibility.</p>
+
+
+<h2 id="ShowOnStart">Show the Input Method When the Activity Starts</h2>
+
+<p>Although Android gives focus to the first text field in your layout
+when the activity starts, it does not show the input method. This behavior is appropriate because
+entering text might not be the primary task in the activity. However, if entering
+text is indeed the primary task (such as in a login screen), then you probably want
+the input method to appear by default.</p>
+
+<p>To show the input method when your activity starts, add the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#wsoft">{@code
+android:windowSoftInputMode}</a> attribute to the {@code &lt;activity>} element with the
+{@code "stateVisible"} value. For example:</p>
+
+<pre>
+&lt;application ... >
+    &lt;activity
+        android:windowSoftInputMode="stateVisible" ... >
+        ...
+    &lt;/activity>
+    ...
+&lt;/application>
+</pre>
+
+<p class="note"><strong>Note:</strong> If the user's device has an attached hardware keyboard,
+the soft input method <em>does not</em> appear.</p>
+
+
+<h2 id="ShowOnDemand">Show the Input Method On Demand</h2>
+
+<p>If there is a method in your activity's lifecycle where you want to ensure that
+the input method is visible, you can use the {@link android.view.inputmethod.InputMethodManager}
+to show it.</p>
+
+<p>For example, the following method takes a {@link android.view.View} in which the user should type
+something, calls {@link android.view.View#requestFocus requestFocus()} to give it focus, then
+{@link android.view.inputmethod.InputMethodManager#showSoftInput showSoftInput()} to open
+the input method:</p>
+
+<pre>
+public void showSoftKeyboard(View view) {
+    if (view.requestFocus()) {
+        InputMethodManager imm = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong>
+Once the input method is visible, you should not programmatically hide it. The system
+hides the input method when the user finishes the task in the text field or the user can hide
+it with a system control (such as with the <em>Back</em> button).</p>
+
+
+
+
+<h2 id="Respond">Specify How Your UI Should Respond</h2>
+
+<p>When the input method appears on the screen, it reduces the amount of space available
+for your app's UI. The system makes a decision as to how it should adjust the visible portion
+of your UI, but it might not get it right. To ensure the best behavior for your app,
+you should specify how you'd like the system to display your UI in the remaining space.</p>
+
+<p>To declare your preferred treatment in an activity, use the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#wsoft">{@code
+android:windowSoftInputMode}</a> attribute in your manifest's {@code &lt;activity>} element
+with one of the "adjust" values.</p>
+
+<p>For example, to ensure that the system resizes your layout to the available space&mdash;which
+ensures that all of your layout content is accessible (even though it probably requires
+scrolling)&mdash;use {@code "adjustResize"}:</p>
+
+<pre>
+&lt;application ... >
+    &lt;activity
+        android:windowSoftInputMode="adjustResize" ... >
+        ...
+    &lt;/activity>
+    ...
+&lt;/application>
+</pre>
+
+<p>You can combine the adjustment specification with the <a
+href="#ShowOnStart">initial input method visibility</a> specification from above:</p>
+
+<pre>
+    &lt;activity
+        android:windowSoftInputMode="stateVisible|adjustResize" ... >
+        ...
+    &lt;/activity>
+</pre>
+
+
+<p>Specifying {@code "adjustResize"} is important if your UI includes controls that the
+user might need to access immediately after or while performing text input. For example,
+if you use a relative layout to place a button bar at the bottom of the screen, using
+{@code "adjustResize"} resizes the layout so the button bar appears above the input method.</p>
+
+
+
+
+
+
+
