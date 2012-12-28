@@ -244,6 +244,14 @@ public class Type extends BaseObj {
             return this;
         }
 
+        public Builder setZ(int value) {
+            if(value < 1) {
+                throw new RSIllegalArgumentException("Values of less than 1 for Dimension Z are not valid.");
+            }
+            mDimZ = value;
+            return this;
+        }
+
         public Builder setMipmaps(boolean value) {
             mDimMipmaps = value;
             return this;

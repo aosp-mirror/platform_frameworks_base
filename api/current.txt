@@ -20247,6 +20247,7 @@ package android.renderscript {
     method public android.renderscript.Type.Builder setMipmaps(boolean);
     method public android.renderscript.Type.Builder setX(int);
     method public android.renderscript.Type.Builder setY(int);
+    method public android.renderscript.Type.Builder setZ(int);
   }
 
   public static final class Type.CubemapFace extends java.lang.Enum {
