@@ -225,7 +225,6 @@ class AppWindowToken extends WindowToken {
 
     boolean isVisible() {
         final int N = allAppWindows.size();
-        // TODO: Consider using allDrawn instead of a single window.
         for (int i=0; i<N; i++) {
             WindowState win = allAppWindows.get(i);
             if (!win.mAppFreezing
