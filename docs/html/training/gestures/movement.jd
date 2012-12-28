@@ -1,0 +1,151 @@
+page.title=Tracking Movement
+parent.title=Using Touch Gestures
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Animating a Scroll Gesture
+next.link=scroll.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#velocity">Track Velocity</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+
+<ul>
+    <li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a> API Guide
+    </li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="http://android-developers.blogspot.com/2010/06/making-sense-of-multitouch.html">Making Sense of Multitouch</a> blog post</li>
+    <li><a href="{@docRoot}training/custom-views/making-interactive.html">Making the View Interactive</a> </li>
+    <li>Design Guide for <a href="{@docRoot}design/patterns/gestures.html">Gestures</a></li>
+    <li>Design Guide for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>This lesson describes how to track movement in touch events.</p>
+
+<p>A new {@link
+android.view.View#onTouchEvent onTouchEvent()} is triggered with an {@link
+android.view.MotionEvent#ACTION_MOVE} event whenever the current touch contact
+position, pressure, or size changes. As described in <a
+href="detector.html">Detecting Common Gestures</a>, all of these events are
+recorded in the {@link android.view.MotionEvent} parameter of {@link
+android.view.View#onTouchEvent onTouchEvent()}.</p>
+
+<p>Because finger-based touch isn't always the most precise form of interaction,
+detecting touch events is often based more on movement than on simple contact.
+To help apps distinguish between movement-based gestures (such as a swipe) and
+non-movement gestures (such as a single tap), Android includes the notion of
+"touch slop." Touch slop refers to the distance in pixels a user's touch can wander
+before the gesture is interpreted as a movement-based gesture. For more discussion of this 
+topic, see <a href="viewgroup.html#vc">Managing Touch Events in a ViewGroup</a>.</p>
+
+
+
+<p>There are several different ways to track movement in a gesture, depending on
+the needs of your application. For example:</p> 
+
+<ul>
+
+<li>The starting and ending position of a pointer (for example, move an
+on-screen object from point A to point B).</li>
+
+<li>The direction the pointer is traveling in, as determined by the x and y coordinates.</li>
+
+<li>History. You can find the size of a gesture's history by calling the {@link
+android.view.MotionEvent} method {@link android.view.MotionEvent#getHistorySize
+getHistorySize()}. You can then obtain the positions, sizes, time, and pressures
+of each of the historical events by using the motion event's {@code
+getHistorical<em>&lt;Value&gt;</em>} methods. History is useful when rendering a trail of the user's finger, 
+such as for touch drawing. See the {@link android.view.MotionEvent} reference for
+details.</li>
+
+<li>The velocity of the pointer as it moves across the touch screen.</li>
+
+</ul>
+
+
+
+<h2 id="velocity">Track Velocity</h2>
+
+<p> You could have a movement-based gesture that is simply based on the distance and/or direction the pointer traveled. But velocity often is a
+determining factor in tracking a gesture's characteristics or even deciding
+whether the gesture occurred. To make velocity calculation easier, Android
+provides the {@link android.view.VelocityTracker} class and the  	
+{@link android.support.v4.view.VelocityTrackerCompat} class in the 
+<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>.
+{@link
+android.view.VelocityTracker} helps you track the velocity of touch events. This
+is useful for gestures in which velocity is part of the criteria for the
+gesture, such as a fling.</p>
+
+
+<p>Here is a simple example that illustrates the purpose of the methods in the 
+{@link android.view.VelocityTracker} API:</p>
+
+<pre>public class MainActivity extends Activity {
+    private static final String DEBUG_TAG = "Velocity";
+        ...
+    private VelocityTracker mVelocityTracker = null;
+    &#64;Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
+
+        switch(action) {
+            case MotionEvent.ACTION_DOWN:
+                if(mVelocityTracker == null) {
+                    // Retrieve a new VelocityTracker object to watch the velocity of a motion.
+                    mVelocityTracker = VelocityTracker.obtain();
+                }
+                else {
+                    // Reset the velocity tracker back to its initial state.
+                    mVelocityTracker.clear();
+                }
+                // Add a user's movement to the tracker.
+                mVelocityTracker.addMovement(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mVelocityTracker.addMovement(event);
+                // When you want to determine the velocity, call 
+                // computeCurrentVelocity(). Then call getXVelocity() 
+                // and getYVelocity() to retrieve the velocity for each pointer ID. 
+                mVelocityTracker.computeCurrentVelocity(1000);
+                // Log velocity of pixels per second
+                // Best practice to use VelocityTrackerCompat where possible.
+                Log.d("", "X velocity: " + 
+                        VelocityTrackerCompat.getXVelocity(mVelocityTracker, 
+                        pointerId));
+                Log.d("", "Y velocity: " + 
+                        VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+                        pointerId));
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                // Return a VelocityTracker object back to be re-used by others.
+                mVelocityTracker.recycle();
+                break;
+        }
+        return true;
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Note that you should calculate velocity after an 
+{@link android.view.MotionEvent#ACTION_MOVE} event, 
+not after {@link android.view.MotionEvent#ACTION_UP}. After an {@link android.view.MotionEvent#ACTION_UP}, 
+the X and Y velocities will be 0.
+</p>
