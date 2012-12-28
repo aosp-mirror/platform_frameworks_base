@@ -53,10 +53,10 @@ public class ColorCube extends TestBase {
             for (int y = 0; y < sy; y++) {
                 for (int x = 0; x < sx; x++ ) {
 
-                    dat[z*sy*sx + y*sx + x] = 0xff000000 |
-                        ((x | (x<<2)) << 16) |
-                        ((y | (y<<2)) << 8) |
-                        ((z | (z<<2)) << 0);
+                    dat[z*sy*sx + y*sx + x] = //0xff000000 |
+                        (((x >> 2) | (x<<3)) << 0) |
+                        (((y >> 2) | (y<<3)) << 8) |
+                        ((z | (z<<4)) << 16);
 
 
                 }
