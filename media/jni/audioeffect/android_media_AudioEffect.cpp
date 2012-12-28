@@ -705,7 +705,7 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
 {
     effect_descriptor_t desc;
     char str[EFFECT_STRING_LEN_MAX];
-    uint32_t numEffects;
+    uint32_t numEffects = 0;
     uint32_t i = 0;
     jstring jdescType;
     jstring jdescUuid;
@@ -714,7 +714,10 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
     jstring jdescImplementor;
     jobject jdesc;
 
-    AudioEffect::queryNumberEffects(&numEffects);
+    if (AudioEffect::queryNumberEffects(&numEffects) != NO_ERROR) {
+        return NULL;
+    }
+
     jobjectArray ret = env->NewObjectArray(numEffects, fields.clazzDesc, NULL);
     if (ret == NULL) {
         return ret;
