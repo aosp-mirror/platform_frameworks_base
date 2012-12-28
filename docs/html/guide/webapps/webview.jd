@@ -162,7 +162,7 @@ public class WebAppInterface {
     Context mContext;
 
     /** Instantiate the interface and set the context */
-    JavaScriptInterface(Context c) {
+    WebAppInterface(Context c) {
         mContext = c;
     }
 
