@@ -194,6 +194,8 @@
     </ul>
   </li><!-- end getting started -->
   
+  
+  
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -799,9 +801,10 @@
   </li>
   <!-- End best UX and UI -->
   
+
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>training/best-performance.html">
+      <a href="<?cs var:toroot ?>training/best-user-input.html">
       <span class="small">Best Practices for</span><br/>
               User Input
       </a>
@@ -841,8 +844,37 @@
           </a>
           </li>
         </ul>
-      </li> 
-      </ul>
+      </li>
+      
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/keyboard-input/index.html"
+             description=
+             "How to specify the appearance and behaviors of soft input methods (such
+             as on-screen keyboards) and how to optimize the experience with
+             hardware keyboards."
+            >Handling Keyboard Input</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/keyboard-input/style.html">
+            Specifying the Input Method Type
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/keyboard-input/visibility.html">
+            Handling Input Method Visibility
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/keyboard-input/navigation.html">
+            Supporting Keyboard Navigation
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/keyboard-input/commands.html">
+            Handling Keyboard Actions
+          </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </li> <!-- end of User Input -->    
 
   <li class="nav-section">

@@ -1,0 +1,171 @@
+page.title=Specifying the Input Method Type
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Type">Specify the Keyboard Type</a></li>
+  <li><a href="#Spelling">Enable Spelling Suggestions and Other Behaviors</a></li>
+  <li><a href="#Action">Specify the Input Method Action</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Every text field expects a certain type of text input, such as an
+email address, phone number, or just plain text. So it's important
+that you specify the input type for each text field in your app
+so the system displays the appropriate soft input method (such as an on-screen keyboard).</p>
+
+<p>Beyond the type of buttons available with an input method, you should specify
+behaviors such as whether the input method provides spelling suggestions,
+capitalizes new sentences, and replaces the carriage return button with an
+action button such as a <b>Done</b> or <b>Next</b>.
+This lesson shows how to specify these characteristics.</p>
+
+
+
+<h2 id="Type">Specify the Keyboard Type</h2>
+
+<p>You should always declare the input method for your text fields by adding
+the <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType"
+>{@code android:inputType}</a> attribute to the {@link android.widget.EditText
+&lt;EditText&gt;} element.</p>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/ui/edittext-phone.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The {@code phone} input type.</p>
+</div>
+
+<p>For example, if you'd like an input method for entering a phone number,
+use the {@code "phone"} value:</p>
+<pre>
+&lt;EditText
+    android:id="@+id/phone"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/phone_hint"
+    android:inputType="phone" />
+</pre>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/training/input/ime_password.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The {@code textPassword} input type.</p>
+</div>
+
+<p>Or if the text field is for a password, use the {@code "textPassword"} value
+so the text field conceals the user's input:</p>
+<pre>
+&lt;EditText
+    android:id="@+id/password"
+    android:hint="@string/password_hint"
+    android:inputType="textPassword"
+    ... />    
+</pre>
+
+<p>There are several possible values documented with the
+<a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType"
+>{@code android:inputType}</a> attribute and
+some of the values can be combined to specify the input method
+appearance and additional behaviors.</p>
+
+
+
+<h2 id="Spelling">Enable Spelling Suggestions and Other Behaviors</h2>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/training/input/ime_autocorrect.png" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> Adding {@code textAutoCorrect}
+provides auto-correction for misspellings.</p>
+</div>
+
+<p>The <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType"
+>{@code android:inputType}</a> attribute allows you to specify various behaviors for the
+input method. Most importantly, if your text field is intended for basic text input (such
+as for a text message), you should enable auto spelling correction with the
+{@code "textAutoCorrect"} value.</p>
+
+<p>You can combine different behaviors and input method styles with the
+<a href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType"
+>{@code android:inputType}</a> attribute. For example,
+here's how to create a text field that capitalizes the first word of a sentence
+and also auto-corrects misspellings:</p>
+
+<pre>
+&lt;EditText
+    android:id="@+id/message"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:inputType=
+        "textCapSentences|textAutoCorrect"
+    ... />
+</pre>
+
+
+
+
+<h2 id="Action">Specify the Input Method Action</h2>
+
+<p>Most soft input methods provide a user action button in the
+bottom corner that's appropriate for the current text field.
+By default, the system uses this button for either a <b>Next</b> or
+<b>Done</b> action unless your text field allows multi-line text (such as with {@code
+android:inputType="textMultiLine"}), in which case the action button is a carriage return.
+However, you can specify additional actions that might be more appropriate for your
+text field, such as <b>Send</b> or <b>Go</b>.</p>
+
+<p>To specify the keyboard action button, use the <a
+href="{@docRoot}reference/android/widget/TextView.html#attr_android:imeOptions">{@code
+android:imeOptions}</a> attribute with an action value such as {@code "actionSend"} or
+{@code "actionSearch"}. For example:</p>
+
+<div class="figure" style="width:300px">
+<img src="{@docRoot}images/ui/edittext-actionsend.png" alt="" />
+<p class="img-caption"><strong>Figure 4.</strong> The Send button appears when you declare
+{@code android:imeOptions="actionSend"}.</p>
+</div>
+
+<pre>
+&lt;EditText
+    android:id="@+id/search"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/search_hint"
+    android:inputType="text"
+    android:imeOptions="actionSend" />
+</pre>
+
+<p>You can then listen for presses on the action button by defining a
+{@link android.widget.TextView.OnEditorActionListener} for the {@link android.widget.EditText}
+element. In your listener, respond to the appropriate IME action ID defined in the
+{@link android.view.inputmethod.EditorInfo} class, such as
+{@link android.view.inputmethod.EditorInfo#IME_ACTION_SEND}. For example:</p>
+
+<pre>
+EditText editText = (EditText) findViewById(R.id.search);
+editText.setOnEditorActionListener(new OnEditorActionListener() {
+    &#64;Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        boolean handled = false;
+        if (actionId == EditorInfo.IME_ACTION_SEND) {
+            sendMessage();
+            handled = true;
+        }
+        return handled;
+    }
+});
+</pre>
+
+
+
