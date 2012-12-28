@@ -799,7 +799,51 @@
   </li>
   <!-- End best UX and UI -->
   
-      
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/best-performance.html">
+      <span class="small">Best Practices for</span><br/>
+              User Input
+      </a>
+    </div>
+    <ul>
+         
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/gestures/index.html"
+             description=
+             "How to write apps that allow users to interact with the touch screen via touch gestures."
+            >Using Touch Gestures</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/gestures/detector.html">
+            Detecting Common Gestures
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/gestures/movement.html">
+            Tracking Movement
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/gestures/scroll.html">
+            Animating a Scroll Gesture
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/gestures/multi.html">
+            Handling Multi-Touch Gestures
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/gestures/scale.html">
+            Dragging and Scaling
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/gestures/viewgroup.html">
+            Managing Touch Events in a ViewGroup
+          </a>
+          </li>
+        </ul>
+      </li> 
+      </ul>
+  </li> <!-- end of User Input -->    
 
   <li class="nav-section">
     <div class="nav-section-header">
