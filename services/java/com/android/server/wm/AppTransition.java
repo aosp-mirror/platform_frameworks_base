@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -38,6 +37,27 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 
+import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
+
 // State management of app transitions.  When we are preparing for a
 // transition, mNextAppTransition will be the kind of transition to
 // perform or TRANSIT_NONE if we are not waiting.  If we are waiting,
@@ -49,16 +69,12 @@ public class AppTransition implements Dump {
             WindowManagerService.DEBUG_APP_TRANSITIONS;
     private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
 
-    /**
-     * Bit mask that is set for all enter transition.
-     */
+    /** Bit mask that is set for all enter transition. */
     public static final int TRANSIT_ENTER_MASK = 0x1000;
-    
-    /**
-     * Bit mask that is set for all exit transitions.
-     */
+
+    /** Bit mask that is set for all exit transitions. */
     public static final int TRANSIT_EXIT_MASK = 0x2000;
-    
+
     /** Not set up for a transition. */
     public static final int TRANSIT_UNSET = -1;
     /** No animation for transition. */
@@ -79,46 +95,55 @@ public class AppTransition implements Dump {
     public static final int TRANSIT_TASK_TO_FRONT = 10 | TRANSIT_ENTER_MASK;
     /** A window in an existing task is being put below all other tasks. */
     public static final int TRANSIT_TASK_TO_BACK = 11 | TRANSIT_EXIT_MASK;
-    /** A window in a new activity that doesn't have a wallpaper is being
-     * opened on top of one that does, effectively closing the wallpaper. */
+    /** A window in a new activity that doesn't have a wallpaper is being opened on top of one that
+     * does, effectively closing the wallpaper. */
     public static final int TRANSIT_WALLPAPER_CLOSE = 12 | TRANSIT_EXIT_MASK;
-    /** A window in a new activity that does have a wallpaper is being
-     * opened on one that didn't, effectively opening the wallpaper. */
+    /** A window in a new activity that does have a wallpaper is being opened on one that didn't,
+     * effectively opening the wallpaper. */
     public static final int TRANSIT_WALLPAPER_OPEN = 13 | TRANSIT_ENTER_MASK;
-    /** A window in a new activity is being opened on top of an existing one,
-     * and both are on top of the wallpaper. */
+    /** A window in a new activity is being opened on top of an existing one, and both are on top
+     * of the wallpaper. */
     public static final int TRANSIT_WALLPAPER_INTRA_OPEN = 14 | TRANSIT_ENTER_MASK;
-    /** The window in the top-most activity is being closed to reveal the
-     * previous activity, and both are on top of he wallpaper. */
+    /** The window in the top-most activity is being closed to reveal the previous activity, and
+     * both are on top of the wallpaper. */
     public static final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15 | TRANSIT_EXIT_MASK;
-    
 
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
-    static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
+    private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
 
-    static final long DEFAULT_APP_TRANSITION_DURATION = 250;
+    private static final long DEFAULT_APP_TRANSITION_DURATION = 250;
 
-    final Context mContext;
-    final Handler mH;
+    private final Context mContext;
+    private final Handler mH;
 
-    int mNextAppTransition = TRANSIT_UNSET;
-    int mNextAppTransitionType = ActivityOptions.ANIM_NONE;
-    String mNextAppTransitionPackage;
-    Bitmap mNextAppTransitionThumbnail;
+    private int mNextAppTransition = TRANSIT_UNSET;
+
+    private static final int NEXT_TRANSIT_TYPE_NONE = 0;
+    private static final int NEXT_TRANSIT_TYPE_CUSTOM = 1;
+    private static final int NEXT_TRANSIT_TYPE_SCALE_UP = 2;
+    private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP = 3;
+    private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN = 4;
+    private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
+
+    private String mNextAppTransitionPackage;
+    private Bitmap mNextAppTransitionThumbnail;
     // Used for thumbnail transitions. True if we're scaling up, false if scaling down
-    boolean mNextAppTransitionScaleUp;
-    IRemoteCallback mNextAppTransitionCallback;
-    int mNextAppTransitionEnter;
-    int mNextAppTransitionExit;
-    int mNextAppTransitionStartX;
-    int mNextAppTransitionStartY;
-    int mNextAppTransitionStartWidth;
-    int mNextAppTransitionStartHeight;
-    boolean mAppTransitionReady = false;
-    boolean mAppTransitionRunning = false;
-    boolean mAppTransitionTimeout = false;
+    private boolean mNextAppTransitionScaleUp;
+    private IRemoteCallback mNextAppTransitionCallback;
+    private int mNextAppTransitionEnter;
+    private int mNextAppTransitionExit;
+    private int mNextAppTransitionStartX;
+    private int mNextAppTransitionStartY;
+    private int mNextAppTransitionStartWidth;
+    private int mNextAppTransitionStartHeight;
 
-    final int mConfigShortAnimTime;
+    private final static int APP_STATE_IDLE = 0;
+    private final static int APP_STATE_READY = 1;
+    private final static int APP_STATE_RUNNING = 2;
+    private final static int APP_STATE_TIMEOUT = 3;
+    private int mAppTransitionState = APP_STATE_IDLE;
+
+    private final int mConfigShortAnimTime;
     private final Interpolator mDecelerateInterpolator;
     private final Interpolator mThumbnailFadeoutInterpolator;
 
@@ -162,27 +187,28 @@ public class AppTransition implements Dump {
     }
 
     boolean isReady() {
-        return mAppTransitionReady;
+        return mAppTransitionState == APP_STATE_READY
+                || mAppTransitionState == APP_STATE_TIMEOUT;
     }
 
     void setReady() {
-        mAppTransitionReady = true;
+        mAppTransitionState = APP_STATE_READY;
     }
 
     boolean isRunning() {
-        return mAppTransitionRunning;
+        return mAppTransitionState == APP_STATE_RUNNING;
     }
 
-    void setRunning(boolean running) {
-        mAppTransitionRunning = running;
+    void setIdle() {
+        mAppTransitionState = APP_STATE_IDLE;
     }
 
     boolean isTimeout() {
-        return mAppTransitionTimeout;
+        return mAppTransitionState == APP_STATE_TIMEOUT;
     }
 
-    void setTimeout(boolean timeout) {
-        mAppTransitionTimeout = timeout;
+    void setTimeout() {
+        mAppTransitionState = APP_STATE_TIMEOUT;
     }
 
     Bitmap getNextAppTransitionThumbnail() {
@@ -194,26 +220,27 @@ public class AppTransition implements Dump {
         outPoint.y = mNextAppTransitionStartY;
     }
 
-    int getType() {
-        return mNextAppTransitionType;
-    }
-
     void prepare() {
-        mAppTransitionReady = false;
-        mAppTransitionTimeout = false;
+        if (!isRunning()) {
+            mAppTransitionState = APP_STATE_IDLE;
+        }
     }
 
     void goodToGo() {
         mNextAppTransition = TRANSIT_UNSET;
-        mAppTransitionReady = false;
-        mAppTransitionRunning = true;
-        mAppTransitionTimeout = false;
+        mAppTransitionState = APP_STATE_RUNNING;
     }
 
     void clear() {
-        mNextAppTransitionType = ActivityOptions.ANIM_NONE;
+        mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
         mNextAppTransitionPackage = null;
         mNextAppTransitionThumbnail = null;
+    }
+
+    void freeze() {
+        setAppTransition(AppTransition.TRANSIT_UNSET);
+        clear();
+        setReady();
     }
 
     private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
@@ -453,7 +480,7 @@ public class AppTransition implements Dump {
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
                             int appWidth, int appHeight) {
         Animation a;
-        if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
+        if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimation(mNextAppTransitionPackage, enter ?
                     mNextAppTransitionEnter : mNextAppTransitionExit);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
@@ -461,17 +488,17 @@ public class AppTransition implements Dump {
                     + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
                     + " transit=" + transit + " isEntrance=" + enter
                     + " Callers=" + Debug.getCallers(3));
-        } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
             a = createScaleUpAnimationLocked(transit, enter, appWidth, appHeight);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                     + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
                     + " transit=" + transit + " isEntrance=" + enter
                     + " Callers=" + Debug.getCallers(3));
-        } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP ||
-                mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN) {
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP ||
+                mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
-                    (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP);
+                    (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             a = createThumbnailAnimationLocked(transit, enter, false, appWidth, appHeight);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 String animName = mNextAppTransitionScaleUp ?
@@ -486,53 +513,53 @@ public class AppTransition implements Dump {
             switch (transit) {
                 case TRANSIT_ACTIVITY_OPEN:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+                            ? WindowAnimation_activityOpenEnterAnimation
+                            : WindowAnimation_activityOpenExitAnimation;
                     break;
                 case TRANSIT_ACTIVITY_CLOSE:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
+                            ? WindowAnimation_activityCloseEnterAnimation
+                            : WindowAnimation_activityCloseExitAnimation;
                     break;
                 case TRANSIT_TASK_OPEN:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+                            ? WindowAnimation_taskOpenEnterAnimation
+                            : WindowAnimation_taskOpenExitAnimation;
                     break;
                 case TRANSIT_TASK_CLOSE:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
+                            ? WindowAnimation_taskCloseEnterAnimation
+                            : WindowAnimation_taskCloseExitAnimation;
                     break;
                 case TRANSIT_TASK_TO_FRONT:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
+                            ? WindowAnimation_taskToFrontEnterAnimation
+                            : WindowAnimation_taskToFrontExitAnimation;
                     break;
                 case TRANSIT_TASK_TO_BACK:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+                            ? WindowAnimation_taskToBackEnterAnimation
+                            : WindowAnimation_taskToBackExitAnimation;
                     break;
                 case TRANSIT_WALLPAPER_OPEN:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+                            ? WindowAnimation_wallpaperOpenEnterAnimation
+                            : WindowAnimation_wallpaperOpenExitAnimation;
                     break;
                 case TRANSIT_WALLPAPER_CLOSE:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+                            ? WindowAnimation_wallpaperCloseEnterAnimation
+                            : WindowAnimation_wallpaperCloseExitAnimation;
                     break;
                 case TRANSIT_WALLPAPER_INTRA_OPEN:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
+                            ? WindowAnimation_wallpaperIntraOpenEnterAnimation
+                            : WindowAnimation_wallpaperIntraOpenExitAnimation;
                     break;
                 case TRANSIT_WALLPAPER_INTRA_CLOSE:
                     animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
+                            ? WindowAnimation_wallpaperIntraCloseEnterAnimation
+                            : WindowAnimation_wallpaperIntraCloseExitAnimation;
                     break;
             }
             a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
@@ -556,7 +583,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
                                              IRemoteCallback startedCallback) {
         if (isTransitionSet()) {
-            mNextAppTransitionType = ActivityOptions.ANIM_CUSTOM;
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionThumbnail = null;
             mNextAppTransitionEnter = enterAnim;
@@ -571,7 +598,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
                                                     int startHeight) {
         if (isTransitionSet()) {
-            mNextAppTransitionType = ActivityOptions.ANIM_SCALE_UP;
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = null;
             mNextAppTransitionStartX = startX;
@@ -586,8 +613,8 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
                                            IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
-            mNextAppTransitionType = scaleUp ? ActivityOptions.ANIM_THUMBNAIL_SCALE_UP
-                    : ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+            mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP
+                    : NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = srcThumb;
             mNextAppTransitionScaleUp = scaleUp;
@@ -658,17 +685,47 @@ public class AppTransition implements Dump {
         }
     }
 
+    private String appStateToString() {
+        switch (mAppTransitionState) {
+            case APP_STATE_IDLE:
+                return "APP_STATE_IDLE";
+            case APP_STATE_READY:
+                return "APP_STATE_READY";
+            case APP_STATE_RUNNING:
+                return "APP_STATE_RUNNING";
+            case APP_STATE_TIMEOUT:
+                return "APP_STATE_TIMEOUT";
+            default:
+                return "unknown state=" + mAppTransitionState;
+        }
+    }
+
+    private String transitTypeToString() {
+        switch (mNextAppTransitionType) {
+            case NEXT_TRANSIT_TYPE_NONE:
+                return "NEXT_TRANSIT_TYPE_NONE";
+            case NEXT_TRANSIT_TYPE_CUSTOM:
+                return "NEXT_TRANSIT_TYPE_CUSTOM";
+            case NEXT_TRANSIT_TYPE_SCALE_UP:
+                return "NEXT_TRANSIT_TYPE_SCALE_UP";
+            case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP:
+                return "NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP";
+            case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN:
+                return "NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN";
+            default:
+                return "unknown type=" + mNextAppTransitionType;
+        }
+    }
+
     @Override
     public void dump(PrintWriter pw) {
         pw.print(" " + this);
-        pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
-        pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
-        pw.print(" mAppTransitionTimeout="); pw.println(mAppTransitionTimeout);
-        if (mNextAppTransitionType != ActivityOptions.ANIM_NONE) {
-            pw.print("  mNextAppTransitionType="); pw.println(mNextAppTransitionType);
+        pw.print(" mAppTransitionState="); pw.println(appStateToString());
+        if (mNextAppTransitionType != NEXT_TRANSIT_TYPE_NONE) {
+            pw.print("  mNextAppTransitionType="); pw.println(transitTypeToString());
         }
         switch (mNextAppTransitionType) {
-            case ActivityOptions.ANIM_CUSTOM:
+            case NEXT_TRANSIT_TYPE_CUSTOM:
                 pw.print("  mNextAppTransitionPackage=");
                         pw.println(mNextAppTransitionPackage);
                 pw.print("  mNextAppTransitionEnter=0x");
@@ -676,7 +733,7 @@ public class AppTransition implements Dump {
                         pw.print(" mNextAppTransitionExit=0x");
                         pw.println(Integer.toHexString(mNextAppTransitionExit));
                 break;
-            case ActivityOptions.ANIM_SCALE_UP:
+            case NEXT_TRANSIT_TYPE_SCALE_UP:
                 pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
                         pw.print(" mNextAppTransitionStartY=");
                         pw.println(mNextAppTransitionStartY);
@@ -685,8 +742,8 @@ public class AppTransition implements Dump {
                         pw.print(" mNextAppTransitionStartHeight=");
                         pw.println(mNextAppTransitionStartHeight);
                 break;
-            case ActivityOptions.ANIM_THUMBNAIL_SCALE_UP:
-            case ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN:
+            case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP:
+            case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN:
                 pw.print("  mNextAppTransitionThumbnail=");
                         pw.print(mNextAppTransitionThumbnail);
                         pw.print(" mNextAppTransitionStartX=");

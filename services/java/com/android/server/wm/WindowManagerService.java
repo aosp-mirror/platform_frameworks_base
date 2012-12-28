@@ -6881,10 +6881,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case APP_TRANSITION_TIMEOUT: {
                     synchronized (mWindowMap) {
                         if (mAppTransition.isTransitionSet()) {
-                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                                    "*** APP TRANSITION TIMEOUT");
-                            mAppTransition.setReady();
-                            mAppTransition.setTimeout(true);
+                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** APP TRANSITION TIMEOUT");
+                            mAppTransition.setTimeout();
                             mAnimatingAppTokens.clear();
                             mAnimatingAppTokens.addAll(mAppTokens);
                             performLayoutAndPlaceSurfacesLocked();
@@ -8068,7 +8066,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private int handleAnimatingStoppedAndTransitionLocked() {
         int changes = 0;
 
-        mAppTransition.setRunning(false);
+        mAppTransition.setIdle();
         // Restore window app tokens to the ActivityManager views
         for (int i = mAnimatingAppTokens.size() - 1; i >= 0; i--) {
             mAnimatingAppTokens.get(i).sendingToBottom = false;
@@ -9253,9 +9251,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.setLastInputMethodWindowLw(null, null);
 
         if (mAppTransition.isTransitionSet()) {
-            mAppTransition.setAppTransition(AppTransition.TRANSIT_UNSET);
-            mAppTransition.clear();
-            mAppTransition.setReady();
+            mAppTransition.freeze();
         }
 
         if (PROFILE_ORIENTATION) {
