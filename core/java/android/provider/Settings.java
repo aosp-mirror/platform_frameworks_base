@@ -4920,6 +4920,39 @@ public final class Settings {
         public static final Validator VOLUME_ANSWER_CALL_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * What happens when the user presses the Home button when the
+         * phone is ringing.<br/>
+         * <b>Values:</b><br/>
+         * 1 - Nothing happens. (Default behavior)<br/>
+         * 2 - The Home button answer the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String RING_HOME_BUTTON_BEHAVIOR = "ring_home_button_behavior";
+
+        /** @hide */
+        public static final Validator RING_HOME_BUTTON_BEHAVIOR_VALIDATOR = NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR value for "do nothing".
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_DO_NOTHING = 0x1;
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR value for "answer".
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_ANSWER = 0x2;
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_DEFAULT =
+                RING_HOME_BUTTON_BEHAVIOR_DO_NOTHING;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5151,6 +5184,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLUME_KEY_CURSOR_CONTROL);
             PRIVATE_SETTINGS.add(VOLBTN_MUSIC_CONTROLS);
             PRIVATE_SETTINGS.add(VOLUME_ANSWER_CALL);
+            PRIVATE_SETTINGS.add(RING_HOME_BUTTON_BEHAVIOR);
         }
 
         /**
@@ -5285,6 +5319,7 @@ public final class Settings {
             VALIDATORS.put(VOLUME_KEY_CURSOR_CONTROL, VOLUME_KEY_CURSOR_CONTROL_VALIDATOR);
             VALIDATORS.put(VOLBTN_MUSIC_CONTROLS, VOLBTN_MUSIC_CONTROLS_VALIDATOR);
             VALIDATORS.put(VOLUME_ANSWER_CALL, VOLUME_ANSWER_CALL_VALIDATOR);
+            VALIDATORS.put(RING_HOME_BUTTON_BEHAVIOR, RING_HOME_BUTTON_BEHAVIOR_VALIDATOR);
         }
 
         /**
