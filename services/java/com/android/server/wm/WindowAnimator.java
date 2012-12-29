@@ -19,6 +19,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
@@ -36,6 +37,10 @@ import java.util.ArrayList;
  */
 public class WindowAnimator {
     private static final String TAG = "WindowAnimator";
+
+    /** Amount of time in milliseconds to animate the dim surface from one value to another,
+     * when no window animation is driving it. */
+    static final int DEFAULT_DIM_DURATION = 200;
 
     final WindowManagerService mService;
     final Context mContext;
@@ -115,7 +120,7 @@ public class WindowAnimator {
         final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
         if (displayAnimator != null) {
             if (displayAnimator.mWindowAnimationBackgroundSurface != null) {
-                displayAnimator.mWindowAnimationBackgroundSurface.kill();
+                displayAnimator.mWindowAnimationBackgroundSurface.destroySurface();
                 displayAnimator.mWindowAnimationBackgroundSurface = null;
             }
             if (displayAnimator.mScreenRotationAnimation != null) {
@@ -123,7 +128,7 @@ public class WindowAnimator {
                 displayAnimator.mScreenRotationAnimation = null;
             }
             if (displayAnimator.mDimAnimator != null) {
-                displayAnimator.mDimAnimator.kill();
+                displayAnimator.mDimAnimator.destroySurface();
                 displayAnimator.mDimAnimator = null;
             }
         }
@@ -359,8 +364,6 @@ public class WindowAnimator {
         WindowStateAnimator windowAnimationBackground = null;
         int windowAnimationBackgroundColor = 0;
         WindowState detachedWallpaper = null;
-        final DimSurface windowAnimationBackgroundSurface =
-                displayAnimator.mWindowAnimationBackgroundSurface;
 
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
@@ -440,15 +443,11 @@ public class WindowAnimator {
                 }
             }
 
-            if (windowAnimationBackgroundSurface != null) {
-                windowAnimationBackgroundSurface.show(
-                        animLayer - WindowManagerService.LAYER_OFFSET_DIM,
-                        windowAnimationBackgroundColor);
-            }
+            displayAnimator.mWindowAnimationBackgroundSurface.show(
+                    animLayer - WindowManagerService.LAYER_OFFSET_DIM,
+                    ((windowAnimationBackgroundColor >> 24) & 0xff) / 255f, 0);
         } else {
-            if (windowAnimationBackgroundSurface != null) {
-                windowAnimationBackgroundSurface.hide();
-            }
+            displayAnimator.mWindowAnimationBackgroundSurface.hide();
         }
     }
 
@@ -499,8 +498,19 @@ public class WindowAnimator {
         updateWallpaperLocked(displayId);
     }
 
-    // TODO(cmautner): Change the following comment when no longer locked on mWindowMap */
-    /** Locked on mService.mWindowMap and this. */
+    private long getDimBehindFadeDuration(long duration) {
+        TypedValue tv = new TypedValue();
+        mContext.getResources().getValue(
+            com.android.internal.R.fraction.config_dimBehindFadeDuration, tv, true);
+        if (tv.type == TypedValue.TYPE_FRACTION) {
+            duration = (long)tv.getFraction(duration, duration);
+        } else if (tv.type >= TypedValue.TYPE_FIRST_INT && tv.type <= TypedValue.TYPE_LAST_INT) {
+            duration = tv.data;
+        }
+        return duration;
+    }
+
+    /** Locked on mService.mWindowMap. */
     private void animateLocked() {
         if (!mInitialized) {
             return;
@@ -561,15 +571,38 @@ public class WindowAnimator {
                     screenRotationAnimation.updateSurfacesInTransaction();
                 }
 
-                final DimAnimator.Parameters dimParams = displayAnimator.mDimParams;
-                final DimAnimator dimAnimator = displayAnimator.mDimAnimator;
-                if (dimAnimator != null && dimParams != null) {
-                    dimAnimator.updateParameters(mContext.getResources(), dimParams, mCurrentTime);
+                final DimLayer dimAnimator = displayAnimator.mDimAnimator;
+                final WindowStateAnimator winAnimator = displayAnimator.mDimWinAnimator;
+                final float dimAmount;
+                if (winAnimator == null) {
+                    dimAmount = 0;
+                } else {
+                    dimAmount = winAnimator.mWin.mAttrs.dimAmount;
                 }
-                if (dimAnimator != null && dimAnimator.mDimShown) {
-                    mAnimating |= dimAnimator.updateSurface(isDimmingLocked(displayId),
-                            mCurrentTime, !mService.okToDisplay());
+                final float targetAlpha = dimAnimator.getTargetAlpha();
+                if (targetAlpha != dimAmount) {
+                    if (winAnimator == null) {
+                        dimAnimator.hide(DEFAULT_DIM_DURATION);
+                    } else {
+                        long duration = (winAnimator.mAnimating && winAnimator.mAnimation != null)
+                                ? winAnimator.mAnimation.computeDurationHint()
+                                : DEFAULT_DIM_DURATION;
+                        if (targetAlpha > dimAmount) {
+                            duration = getDimBehindFadeDuration(duration);
+                        }
+                        dimAnimator.show(winAnimator.mAnimLayer -
+                                WindowManagerService.LAYER_OFFSET_DIM, dimAmount, duration);
+                    }
                 }
+                if (dimAnimator.isAnimating()) {
+                    if (!mService.okToDisplay()) {
+                        // Jump to the end of the animation.
+                        dimAnimator.show();
+                    } else {
+                        mAnimating |= dimAnimator.stepAnimation();
+                    }
+                }
+
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (mService.mDisplayMagnifier != null && displayId == Display.DEFAULT_DISPLAY) {
                     mService.mDisplayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
@@ -628,13 +661,18 @@ public class WindowAnimator {
     }
 
     boolean isDimmingLocked(int displayId) {
-        return getDisplayContentsAnimatorLocked(displayId).mDimParams != null;
+        return getDisplayContentsAnimatorLocked(displayId).mDimAnimator.isDimming();
     }
 
     boolean isDimmingLocked(final WindowStateAnimator winAnimator) {
-        DimAnimator.Parameters dimParams =
-                getDisplayContentsAnimatorLocked(winAnimator.mWin.getDisplayId()).mDimParams;
-        return dimParams != null && dimParams.mDimWinAnimator == winAnimator;
+        final int displayId = winAnimator.mWin.getDisplayId();
+        DisplayContentsAnimator displayAnimator =
+                getDisplayContentsAnimatorLocked(displayId);
+        if (displayAnimator != null) {
+            return displayAnimator.mDimWinAnimator == winAnimator
+                    && displayAnimator.mDimAnimator.isDimming();
+        }
+        return false;
     }
 
     static String bulkUpdateParamsToString(int bulkUpdateParams) {
@@ -675,24 +713,16 @@ public class WindowAnimator {
                         pw.print(": "); pw.println(wanim);
             }
             if (displayAnimator.mWindowAnimationBackgroundSurface != null) {
-                if (dumpAll || displayAnimator.mWindowAnimationBackgroundSurface.mDimShown) {
+                if (dumpAll || displayAnimator.mWindowAnimationBackgroundSurface.isDimming()) {
                     pw.print(subPrefix); pw.println("mWindowAnimationBackgroundSurface:");
                     displayAnimator.mWindowAnimationBackgroundSurface.printTo(subSubPrefix, pw);
                 }
             }
-            if (displayAnimator.mDimAnimator != null) {
-                if (dumpAll || displayAnimator.mDimAnimator.mDimShown) {
-                    pw.print(subPrefix); pw.println("mDimAnimator:");
-                    displayAnimator.mDimAnimator.printTo(subSubPrefix, pw);
-                }
-            } else if (dumpAll) {
-                pw.print(subPrefix); pw.println("no DimAnimator ");
-            }
-            if (displayAnimator.mDimParams != null) {
-                pw.print(subPrefix); pw.println("mDimParams:");
-                displayAnimator.mDimParams.printTo(subSubPrefix, pw);
-            } else if (dumpAll) {
-                pw.print(subPrefix); pw.println("no DimParams ");
+            if (dumpAll || displayAnimator.mDimAnimator.isDimming()) {
+                pw.print(subPrefix); pw.println("mDimAnimator:");
+                displayAnimator.mDimAnimator.printTo(subSubPrefix, pw);
+                pw.print(subPrefix); pw.print("mDimWinAnimator=");
+                        pw.println(displayAnimator.mDimWinAnimator);
             }
             if (displayAnimator.mScreenRotationAnimation != null) {
                 pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
@@ -751,23 +781,18 @@ public class WindowAnimator {
         }
     }
 
-    void setDimParamsLocked(int displayId, DimAnimator.Parameters dimParams) {
+    void setDimWinAnimatorLocked(int displayId, WindowStateAnimator newWinAnimator) {
         DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
-        if (dimParams == null) {
-            displayAnimator.mDimParams = null;
+        if (newWinAnimator == null) {
+            displayAnimator.mDimWinAnimator = null;
         } else {
-            final WindowStateAnimator newWinAnimator = dimParams.mDimWinAnimator;
-
             // Only set dim params on the highest dimmed layer.
-            final WindowStateAnimator existingDimWinAnimator =
-                    displayAnimator.mDimParams == null ?
-                            null : displayAnimator.mDimParams.mDimWinAnimator;
-            // Don't turn on for an unshown surface, or for any layer but the highest
-            // dimmed layer.
+            final WindowStateAnimator existingDimWinAnimator = displayAnimator.mDimWinAnimator;
+            // Don't turn on for an unshown surface, or for any layer but the highest dimmed layer.
             if (newWinAnimator.mSurfaceShown && (existingDimWinAnimator == null
                     || !existingDimWinAnimator.mSurfaceShown
                     || existingDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
-                displayAnimator.mDimParams = new DimAnimator.Parameters(dimParams);
+                displayAnimator.mDimWinAnimator = newWinAnimator;
             }
         }
     }
@@ -790,15 +815,14 @@ public class WindowAnimator {
     }
 
     private class DisplayContentsAnimator {
-        DimAnimator mDimAnimator = null;
-        DimAnimator.Parameters mDimParams = null;
-        DimSurface mWindowAnimationBackgroundSurface = null;
+        DimLayer mDimAnimator = null;
+        WindowStateAnimator mDimWinAnimator = null;
+        DimLayer mWindowAnimationBackgroundSurface = null;
         ScreenRotationAnimation mScreenRotationAnimation = null;
 
         public DisplayContentsAnimator(int displayId) {
-            mDimAnimator = new DimAnimator(mService.mFxSession, displayId);
-            mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession,
-                    mService.getDisplayContentLocked(displayId));
+            mDimAnimator = new DimLayer(mService, displayId);
+            mWindowAnimationBackgroundSurface = new DimLayer(mService, displayId);
         }
     }
 }
