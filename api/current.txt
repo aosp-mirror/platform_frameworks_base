@@ -2103,6 +2103,7 @@ package android.accessibilityservice {
     field public static final int FEEDBACK_SPOKEN = 1; // 0x1
     field public static final int FEEDBACK_VISUAL = 8; // 0x8
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
+    field public static final int FLAG_REPORT_VIEW_IDS = 8; // 0x8
     field public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 4; // 0x4
     field public int eventTypes;
     field public int feedbackType;
@@ -3579,6 +3580,7 @@ package android.app {
     method public android.content.ComponentName getComponentName();
     method public android.content.Context getContext();
     method public android.content.Context getTargetContext();
+    method public android.app.UiAutomation getUiAutomation();
     method public boolean invokeContextMenuAction(android.app.Activity, int, int);
     method public boolean invokeMenuActionSync(android.app.Activity, int, int);
     method public boolean isProfiling();
@@ -4134,6 +4136,26 @@ package android.app {
 
   public static abstract interface TimePickerDialog.OnTimeSetListener {
     method public abstract void onTimeSet(android.widget.TimePicker, int, int);
+  }
+
+  public final class UiAutomation {
+    method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, com.android.internal.util.Predicate<android.view.accessibility.AccessibilityEvent>, long) throws java.util.concurrent.TimeoutException;
+    method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
+    method public boolean injectInputEvent(android.view.InputEvent, boolean);
+    method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
+    method public boolean setRotation(int);
+    method public android.graphics.Bitmap takeScreenshot();
+    method public void waitForIdle(long, long) throws java.util.concurrent.TimeoutException;
+    field public static final int ROTATION_FREEZE_0 = 0; // 0x0
+    field public static final int ROTATION_FREEZE_180 = 2; // 0x2
+    field public static final int ROTATION_FREEZE_270 = 3; // 0x3
+    field public static final int ROTATION_FREEZE_90 = 1; // 0x1
+    field public static final int ROTATION_FREEZE_CURRENT = -1; // 0xffffffff
+    field public static final int ROTATION_UNFREEZE = -2; // 0xfffffffe
+  }
+
+  public static abstract interface UiAutomation.OnAccessibilityEventListener {
+    method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
   }
 
   public class UiModeManager {
@@ -21294,6 +21316,7 @@ package android.test {
     ctor public InstrumentationTestRunner();
     method public junit.framework.TestSuite getAllTests();
     method protected android.test.AndroidTestRunner getAndroidTestRunner();
+    method protected android.os.Bundle getArguments();
     method public java.lang.ClassLoader getLoader();
     method public junit.framework.TestSuite getTestSuite();
     field public static final java.lang.String REPORT_KEY_NAME_CLASS = "class";
@@ -26240,6 +26263,7 @@ package android.view.accessibility {
     method public void addChild(android.view.View, int);
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(java.lang.String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo focusSearch(int);
     method public int getActions();
@@ -26255,6 +26279,7 @@ package android.view.accessibility {
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
+    method public java.lang.CharSequence getViewId();
     method public int getWindowId();
     method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
@@ -26302,6 +26327,7 @@ package android.view.accessibility {
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
+    method public void setViewId(java.lang.CharSequence);
     method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40

@@ -190,6 +190,13 @@ interface IWindowManager
     void thawRotation();
 
     /**
+     * Gets whether the rotation is frozen. 
+     *
+     * @return Whether the rotation is frozen.
+     */
+    boolean isRotationFrozen();
+
+    /**
      * Create a screenshot of the applications currently displayed.
      */
     Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);

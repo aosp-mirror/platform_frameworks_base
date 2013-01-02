@@ -267,6 +267,9 @@ public abstract class ApplicationThreadNative extends Binder
             Bundle testArgs = data.readBundle();
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
+            binder = data.readStrongBinder();
+            IUiAutomationConnection uiAutomationConnection =
+                    IUiAutomationConnection.Stub.asInterface(binder);
             int testMode = data.readInt();
             boolean openGlTrace = data.readInt() != 0;
             boolean restrictedBackupMode = (data.readInt() != 0);
@@ -277,8 +280,9 @@ public abstract class ApplicationThreadNative extends Binder
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
                             providers, testName, profileName, profileFd, autoStopProfiler,
-                            testArgs, testWatcher, testMode, openGlTrace, restrictedBackupMode,
-                            persistent, config, compatInfo, services, coreSettings);
+                            testArgs, testWatcher, uiAutomationConnection, testMode,
+                            openGlTrace, restrictedBackupMode, persistent, config, compatInfo,
+                            services, coreSettings);
             return true;
         }
 
@@ -863,10 +867,11 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName, String profileName,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler, Bundle testArgs,
-            IInstrumentationWatcher testWatcher, int debugMode, boolean openGlTrace,
-            boolean restrictedBackupMode, boolean persistent,
-            Configuration config, CompatibilityInfo compatInfo,
-            Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
+            IInstrumentationWatcher testWatcher,
+            IUiAutomationConnection uiAutomationConnection, int debugMode,
+            boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
+            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
+            Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -888,6 +893,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(autoStopProfiler ? 1 : 0);
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
+        data.writeStrongInterface(uiAutomationConnection);
         data.writeInt(debugMode);
         data.writeInt(openGlTrace ? 1 : 0);
         data.writeInt(restrictedBackupMode ? 1 : 0);

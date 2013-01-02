@@ -85,15 +85,15 @@ interface IAccessibilityServiceConnection {
      *     where to start the search. Use
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
-     * @param id The id of the node.
+     * @param viewId The fully qualified resource name of the view id to find.
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
      * @return Whether the call succeeded.
      */
-    boolean findAccessibilityNodeInfoByViewId(int accessibilityWindowId, long accessibilityNodeId,
-        int viewId, int interactionId, IAccessibilityInteractionConnectionCallback callback,
-        long threadId);
+    boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
+        long accessibilityNodeId, String viewId, int interactionId,
+        IAccessibilityInteractionConnectionCallback callback, long threadId);
 
     /**
      * Finds the {@link android.view.accessibility.AccessibilityNodeInfo} that has the specified

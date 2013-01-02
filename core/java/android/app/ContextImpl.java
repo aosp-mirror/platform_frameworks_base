@@ -1475,7 +1475,7 @@ class ContextImpl extends Context {
                 arguments.setAllowFds(false);
             }
             return ActivityManagerNative.getDefault().startInstrumentation(
-                    className, profileFile, 0, arguments, null, getUserId());
+                    className, profileFile, 0, arguments, null, null, getUserId());
         } catch (RemoteException e) {
             // System has crashed, nothing we can do.
         }

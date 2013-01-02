@@ -22,6 +22,7 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
+import android.app.IUiAutomationConnection;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -95,6 +96,7 @@ class ProcessRecord {
     ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
     IInstrumentationWatcher instrumentationWatcher; // who is waiting
+    IUiAutomationConnection instrumentationUiAutomationConnection; // Connection to use the UI introspection APIs.
     Bundle instrumentationArguments;// as given to us
     ComponentName instrumentationResultClass;// copy of instrumentationClass
     boolean usingWrapper;       // Set to true when process was launched with a wrapper attached
