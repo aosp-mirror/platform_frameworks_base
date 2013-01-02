@@ -46,6 +46,7 @@ import android.location.LocationRequest;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -86,7 +87,7 @@ import java.util.Set;
  * The service class that manages LocationProviders and issues location
  * updates and alerts.
  */
-public class LocationManagerService extends ILocationManager.Stub implements Runnable {
+public class LocationManagerService extends ILocationManager.Stub {
     private static final String TAG = "LocationManagerService";
     public static final boolean D = false;
 
@@ -127,7 +128,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     // used internally for synchronization
     private final Object mLock = new Object();
 
-    // --- fields below are final after init() ---
+    // --- fields below are final after systemReady() ---
     private LocationFudger mLocationFudger;
     private GeofenceManager mGeofenceManager;
     private PowerManager.WakeLock mWakeLock;
@@ -138,6 +139,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
+    private HandlerThread mHandlerThread;
 
     // --- fields below are protected by mWakeLock ---
     private int mPendingBroadcasts;
@@ -192,48 +194,45 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public void systemReady() {
-        Thread thread = new Thread(null, this, THREAD_NAME);
-        thread.start();
-    }
-
-    @Override
-    public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Looper.prepare();
-        mLocationHandler = new LocationWorkerHandler();
-        init();
-        Looper.loop();
-    }
-
-    private void init() {
-        if (D) Log.d(TAG, "init()");
-
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
-        mPackageManager = mContext.getPackageManager();
-
-        mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
-        mBlacklist.init();
-        mLocationFudger = new LocationFudger(mContext, mLocationHandler);
-
         synchronized (mLock) {
-            loadProvidersLocked();
-        }
+            if (D) Log.d(TAG, "systemReady()");
 
-        mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
+            // fetch package manager
+            mPackageManager = mContext.getPackageManager();
+
+            // prepare wake lock
+            PowerManager powerManager =
+                    (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+
+            // prepare worker thread
+            mHandlerThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
+            mHandlerThread.start();
+            mLocationHandler = new LocationWorkerHandler(mHandlerThread.getLooper());
+
+            // prepare mLocationHandler's dependents
+            mLocationFudger = new LocationFudger(mContext, mLocationHandler);
+            mBlacklist = new LocationBlacklist(mContext, mLocationHandler);
+            mBlacklist.init();
+            mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
+
+            // prepare providers
+            loadProvidersLocked();
+            updateProvidersLocked();
+        }
 
         // listen for settings changes
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true,
                 new ContentObserver(mLocationHandler) {
-           @Override
-            public void onChange(boolean selfChange) {
-               synchronized (mLock) {
-                   updateProvidersLocked();
-               }
-            }
-        }, UserHandle.USER_ALL);
-        mPackageMonitor.register(mContext, Looper.myLooper(), true);
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        synchronized (mLock) {
+                            updateProvidersLocked();
+                        }
+                    }
+                }, UserHandle.USER_ALL);
+        mPackageMonitor.register(mContext, mLocationHandler.getLooper(), true);
 
         // listen for user change
         IntentFilter intentFilter = new IntentFilter();
@@ -247,9 +246,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 }
             }
-        }, UserHandle.ALL, intentFilter, null, null);
-
-        updateProvidersLocked();
+        }, UserHandle.ALL, intentFilter, null, mLocationHandler);
     }
 
     private void ensureFallbackFusedProviderPresentLocked(ArrayList<String> pkgs) {
@@ -329,7 +326,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         if (GpsLocationProvider.isSupported()) {
             // Create a gps location provider
-            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this);
+            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
+                    mLocationHandler.getLooper());
             mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
             mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
             addProviderLocked(gpsProvider);
@@ -389,7 +387,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         // bind to geocoder provider
         mGeocodeProvider = GeocoderProxy.createAndBind(mContext, providerPackageNames,
-                mCurrentUserId);
+                mLocationHandler, mCurrentUserId);
         if (mGeocodeProvider == null) {
             Slog.e(TAG,  "no geocoder provider found");
         }
@@ -1715,6 +1713,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     private class LocationWorkerHandler extends Handler {
+        public LocationWorkerHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

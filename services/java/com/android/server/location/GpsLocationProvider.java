@@ -40,6 +40,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -413,7 +414,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return native_is_supported();
     }
 
-    public GpsLocationProvider(Context context, ILocationManager ilocationManager) {
+    public GpsLocationProvider(Context context, ILocationManager ilocationManager,
+            Looper looper) {
         mContext = context;
         mNtpTime = NtpTrustedTime.getInstance(context);
         mILocationManager = ilocationManager;
@@ -466,7 +468,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         // construct handler, listen for events
-        mHandler = new ProviderHandler();
+        mHandler = new ProviderHandler(looper);
         listenForBroadcasts();
 
         // also listen for PASSIVE_PROVIDER updates
@@ -1488,8 +1490,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private final class ProviderHandler extends Handler {
-        public ProviderHandler() {
-            super(true /*async*/);
+        public ProviderHandler(Looper looper) {
+            super(looper, null, true /*async*/);
         }
 
         @Override
