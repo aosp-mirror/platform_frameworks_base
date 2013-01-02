@@ -36,6 +36,7 @@ public class DdmHandleHello extends ChunkHandler {
 
     private static DdmHandleHello mInstance = new DdmHandleHello();
 
+    private static final String[] NATIVE_FEATURES = new String[] { "opengl-tracing" };
 
     /* singleton, do not instantiate */
     private DdmHandleHello() {}
@@ -149,21 +150,27 @@ public class DdmHandleHello extends ChunkHandler {
     private Chunk handleFEAT(Chunk request) {
         // TODO: query the VM to ensure that support for these features
         // is actually compiled in
-        final String[] features = Debug.getVmFeatureList();
+        final String[] vmFeatures = Debug.getVmFeatureList();
 
         if (false)
             Log.v("ddm-heap", "Got feature list request");
 
-        int size = 4 + 4 * features.length;
-        for (int i = features.length-1; i >= 0; i--)
-            size += features[i].length() * 2;
+        int size = 4 + 4 * (vmFeatures.length + NATIVE_FEATURES.length);
+        for (int i = vmFeatures.length-1; i >= 0; i--)
+            size += vmFeatures[i].length() * 2;
+        for (int i = NATIVE_FEATURES.length-1; i>= 0; i--)
+            size += NATIVE_FEATURES[i].length() * 2;
 
         ByteBuffer out = ByteBuffer.allocate(size);
         out.order(ChunkHandler.CHUNK_ORDER);
-        out.putInt(features.length);
-        for (int i = features.length-1; i >= 0; i--) {
-            out.putInt(features[i].length());
-            putString(out, features[i]);
+        out.putInt(vmFeatures.length + NATIVE_FEATURES.length);
+        for (int i = vmFeatures.length-1; i >= 0; i--) {
+            out.putInt(vmFeatures[i].length());
+            putString(out, vmFeatures[i]);
+        }
+        for (int i = NATIVE_FEATURES.length-1; i >= 0; i--) {
+            out.putInt(NATIVE_FEATURES[i].length());
+            putString(out, NATIVE_FEATURES[i]);
         }
 
         return new Chunk(CHUNK_FEAT, out);

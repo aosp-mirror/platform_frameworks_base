@@ -557,9 +557,9 @@ void nativeUtilsClassInit(JNIEnv *env, jclass clazz)
 }
 
 extern void setGLDebugLevel(int level);
-void nativeEnableTracing(JNIEnv *env, jclass clazz)
+void setTracingLevel(JNIEnv *env, jclass clazz, jint level)
 {
-    setGLDebugLevel(1);
+    setGLDebugLevel(level);
 }
 
 static int checkFormat(SkBitmap::Config config, int format, int type)
@@ -1032,7 +1032,7 @@ static JNINativeMethod gUtilsMethods[] = {
     { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
     { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
     { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
-    { "native_enableTracing", "()V",                    (void*)nativeEnableTracing },
+    { "setTracingLevel", "(I)V",                        (void*)setTracingLevel },
 };
 
 static JNINativeMethod gEtc1Methods[] = {

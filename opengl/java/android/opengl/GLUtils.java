@@ -270,12 +270,10 @@ public final class GLUtils {
     }
 
     /**
-     * Enable tracing of OpenGL functions for this application.
+     * Set OpenGL Tracing level for this application.
      * @hide
      */
-    public static void enableTracing() {
-        native_enableTracing();
-    }
+    native public static void setTracingLevel(int level);
 
     native private static void nativeClassInit();
 
@@ -285,5 +283,4 @@ public final class GLUtils {
             Bitmap bitmap, int type, int border);
     native private static int native_texSubImage2D(int target, int level, int xoffset, int yoffset,
             Bitmap bitmap, int format, int type);
-    native private static void native_enableTracing();
 }
