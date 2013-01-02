@@ -85,7 +85,11 @@ void usage(void)
         "   Add specified files to Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
         " %s c[runch] [-v] -S resource-sources ... -C output-folder ...\n"
-        "   Do PNG preprocessing and store the results in output folder.\n\n", gProgName);
+        "   Do PNG preprocessing on one or several resource folders\n"
+        "   and store the results in the output folder.\n\n", gProgName);
+    fprintf(stderr,
+        " %s s[ingleCrunch] [-v] -i input-file -o outputfile\n"
+        "   Do PNG preprocessing on a single file.\n\n", gProgName);
     fprintf(stderr,
         " %s v[ersion]\n"
         "   Print program version.\n\n", gProgName);
@@ -203,13 +207,14 @@ int handleCommand(Bundle* bundle)
     //    printf("  %d: '%s'\n", i, bundle->getFileSpecEntry(i));
 
     switch (bundle->getCommand()) {
-    case kCommandVersion:   return doVersion(bundle);
-    case kCommandList:      return doList(bundle);
-    case kCommandDump:      return doDump(bundle);
-    case kCommandAdd:       return doAdd(bundle);
-    case kCommandRemove:    return doRemove(bundle);
-    case kCommandPackage:   return doPackage(bundle);
-    case kCommandCrunch:    return doCrunch(bundle);
+    case kCommandVersion:      return doVersion(bundle);
+    case kCommandList:         return doList(bundle);
+    case kCommandDump:         return doDump(bundle);
+    case kCommandAdd:          return doAdd(bundle);
+    case kCommandRemove:       return doRemove(bundle);
+    case kCommandPackage:      return doPackage(bundle);
+    case kCommandCrunch:       return doCrunch(bundle);
+    case kCommandSingleCrunch: return doSingleCrunch(bundle);
     default:
         fprintf(stderr, "%s: requested command not yet supported\n", gProgName);
         return 1;
@@ -249,6 +254,8 @@ int main(int argc, char* const argv[])
         bundle.setCommand(kCommandPackage);
     else if (argv[1][0] == 'c')
         bundle.setCommand(kCommandCrunch);
+    else if (argv[1][0] == 's')
+        bundle.setCommand(kCommandSingleCrunch);
     else {
         fprintf(stderr, "ERROR: Unknown command '%s'\n", argv[1]);
         wantUsage = true;
@@ -426,6 +433,28 @@ int main(int argc, char* const argv[])
                 }
                 convertPath(argv[0]);
                 bundle.setCrunchedOutputDir(argv[0]);
+                break;
+            case 'i':
+                argc--;
+                argv++;
+                if (!argc) {
+                    fprintf(stderr, "ERROR: No argument supplied for '-i' option\n");
+                    wantUsage = true;
+                    goto bail;
+                }
+                convertPath(argv[0]);
+                bundle.setSingleCrunchInputFile(argv[0]);
+                break;
+            case 'o':
+                argc--;
+                argv++;
+                if (!argc) {
+                    fprintf(stderr, "ERROR: No argument supplied for '-o' option\n");
+                    wantUsage = true;
+                    goto bail;
+                }
+                convertPath(argv[0]);
+                bundle.setSingleCrunchOutputFile(argv[0]);
                 break;
             case '0':
                 argc--;

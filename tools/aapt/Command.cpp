@@ -7,6 +7,7 @@
 #include "Bundle.h"
 #include "ResourceFilter.h"
 #include "ResourceTable.h"
+#include "Images.h"
 #include "XMLNode.h"
 
 #include <utils/Log.h>
@@ -1837,6 +1838,21 @@ int doCrunch(Bundle* bundle)
     updatePreProcessedCache(bundle);
 
     return NO_ERROR;
+}
+
+/*
+ * Do PNG Crunching on a single flag
+ *  -i points to a single png file
+ *  -o points to a single png output file
+ */
+int doSingleCrunch(Bundle* bundle)
+{
+    fprintf(stdout, "Crunching single PNG file: %s\n", bundle->getSingleCrunchInputFile());
+    fprintf(stdout, "\tOutput file: %s\n", bundle->getSingleCrunchOutputFile());
+
+    String8 input(bundle->getSingleCrunchInputFile());
+    String8 output(bundle->getSingleCrunchOutputFile());
+    return preProcessImageToCache(bundle, input, output);
 }
 
 char CONSOLE_DATA[2925] = {
