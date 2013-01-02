@@ -5324,58 +5324,62 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // store the new display information
-                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-                while(stackIterator.hasNext()) {
-                    RemoteControlStackEntry rcse = stackIterator.next();
-                    if(rcse.mMediaIntent.equals(mediaIntent)) {
-                        // already had a remote control client?
-                        if (rcse.mRcClientDeathHandler != null) {
-                            // stop monitoring the old client's death
-                            rcse.unlinkToRcClientDeath();
-                        }
-                        // save the new remote control client
-                        rcse.mRcClient = rcClient;
-                        rcse.mCallingPackageName = callingPackageName;
-                        rcse.mCallingUid = Binder.getCallingUid();
-                        if (rcClient == null) {
-                            // here rcse.mRcClientDeathHandler is null;
-                            rcse.resetPlaybackInfo();
+                try {
+                    for (int index = mRCStack.size()-1; index >= 0; index--) {
+                        final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                        if(rcse.mMediaIntent.equals(mediaIntent)) {
+                            // already had a remote control client?
+                            if (rcse.mRcClientDeathHandler != null) {
+                                // stop monitoring the old client's death
+                                rcse.unlinkToRcClientDeath();
+                            }
+                            // save the new remote control client
+                            rcse.mRcClient = rcClient;
+                            rcse.mCallingPackageName = callingPackageName;
+                            rcse.mCallingUid = Binder.getCallingUid();
+                            if (rcClient == null) {
+                                // here rcse.mRcClientDeathHandler is null;
+                                rcse.resetPlaybackInfo();
+                                break;
+                            }
+                            rccId = rcse.mRccId;
+
+                            // there is a new (non-null) client:
+                            // 1/ give the new client the current display (if any)
+                            if (mRcDisplay != null) {
+                                try {
+                                    rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
+                                } catch (RemoteException e) {
+                                    Log.e(TAG, "Error connecting RCD to RCC in RCC registration",e);
+                                }
+                            }
+                            // 2/ monitor the new client's death
+                            IBinder b = rcse.mRcClient.asBinder();
+                            RcClientDeathHandler rcdh =
+                                    new RcClientDeathHandler(b, rcse.mMediaIntent);
+                            try {
+                                b.linkToDeath(rcdh, 0);
+                            } catch (RemoteException e) {
+                                // remote control client is DOA, disqualify it
+                                Log.w(TAG, "registerRemoteControlClient() has a dead client " + b);
+                                rcse.mRcClient = null;
+                            }
+                            rcse.mRcClientDeathHandler = rcdh;
                             break;
                         }
-                        rccId = rcse.mRccId;
-
-                        // there is a new (non-null) client:
-                        // 1/ give the new client the current display (if any)
-                        if (mRcDisplay != null) {
-                            try {
-                                rcse.mRcClient.plugRemoteControlDisplay(mRcDisplay);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Error connecting remote control display to client: "+e);
-                                e.printStackTrace();
-                            }
-                        }
-                        // 2/ monitor the new client's death
-                        IBinder b = rcse.mRcClient.asBinder();
-                        RcClientDeathHandler rcdh =
-                                new RcClientDeathHandler(b, rcse.mMediaIntent);
-                        try {
-                            b.linkToDeath(rcdh, 0);
-                        } catch (RemoteException e) {
-                            // remote control client is DOA, disqualify it
-                            Log.w(TAG, "registerRemoteControlClient() has a dead client " + b);
-                            rcse.mRcClient = null;
-                        }
-                        rcse.mRcClientDeathHandler = rcdh;
-                        break;
-                    }
+                    }//for
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    // not expected to happen, indicates improper concurrent modification
+                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
                 }
+
                 // if the eventReceiver is at the top of the stack
                 // then check for potential refresh of the remote controls
                 if (isCurrentRcController(mediaIntent)) {
                     checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
-            }
-        }
+            }//synchronized(mRCStack)
+        }//synchronized(mAudioFocusLock)
         return rccId;
     }
 
@@ -5387,18 +5391,30 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             IRemoteControlClient rcClient) {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
-                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-                while(stackIterator.hasNext()) {
-                    RemoteControlStackEntry rcse = stackIterator.next();
-                    if ((rcse.mMediaIntent.equals(mediaIntent))
-                            && rcClient.equals(rcse.mRcClient)) {
-                        // we found the IRemoteControlClient to unregister
-                        // stop monitoring its death
-                        rcse.unlinkToRcClientDeath();
-                        // reset the client-related fields
-                        rcse.mRcClient = null;
-                        rcse.mCallingPackageName = null;
+                boolean topRccChange = false;
+                try {
+                    for (int index = mRCStack.size()-1; index >= 0; index--) {
+                        final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                        if ((rcse.mMediaIntent.equals(mediaIntent))
+                                && rcClient.equals(rcse.mRcClient)) {
+                            // we found the IRemoteControlClient to unregister
+                            // stop monitoring its death
+                            rcse.unlinkToRcClientDeath();
+                            // reset the client-related fields
+                            rcse.mRcClient = null;
+                            rcse.mCallingPackageName = null;
+                            topRccChange = (index == mRCStack.size()-1);
+                            // there can only be one matching RCC in the RC stack, we're done
+                            break;
+                        }
                     }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    // not expected to happen, indicates improper concurrent modification
+                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+                }
+                if (topRccChange) {
+                    // no more RCC for the RCD, check for potential refresh of the remote controls
+                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
                 }
             }
         }
