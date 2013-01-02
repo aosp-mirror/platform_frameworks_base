@@ -5503,8 +5503,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 // new display, start monitoring its death
                 rcDisplay_startDeathMonitor_syncRcStack();
 
-                // let all the remote control clients there is a new display
-                // no need to unplug the previous because we only support one display
+                // let all the remote control clients know there is a new display, so the remote
+                //   control stack traversal order doesn't matter.
+                // No need to unplug the previous because we only support one display
                 // and the clients don't track the death of the display
                 Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
                 while(stackIterator.hasNext()) {
@@ -5543,7 +5544,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             rcDisplay_stopDeathMonitor_syncRcStack();
             mRcDisplay = null;
 
-            // disconnect this remote control display from all the clients
+            // disconnect this remote control display from all the clients, so the remote
+            //   control stack traversal order doesn't matter
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
@@ -5643,6 +5645,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // handler for MSG_RCC_NEW_VOLUME_OBS
     private void onRegisterVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
         synchronized(mRCStack) {
+            // The stack traversal order doesn't matter because there is only one stack entry
+            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
+            //  ID has been found.
+            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
+            //  at the top of the stack
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
@@ -5738,6 +5745,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
         IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
+            // The stack traversal order doesn't matter because there is only one stack entry
+            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
+            //  ID has been found.
+            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
+            //  at the top of the stack
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
@@ -5786,6 +5798,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
         IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
+            // The stack traversal order doesn't matter because there is only one stack entry
+            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
+            //  ID has been found.
+            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
+            //  at the top of the stack
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
@@ -5819,6 +5836,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // is there a registered RemoteControlClient that is handling remote playback
         boolean hasRemotePlayback = false;
         synchronized (mRCStack) {
+            // iteration stops when PLAYBACK_TYPE_REMOTE is found, so remote control stack
+            //   traversal order doesn't matter
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
