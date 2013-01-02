@@ -5579,60 +5579,66 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         if(DEBUG_RC) Log.d(TAG, "onNewPlaybackInfoForRcc(id=" + rccId +
                 ", what=" + key + ",val=" + value + ")");
         synchronized(mRCStack) {
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if (rcse.mRccId == rccId) {
-                    switch (key) {
-                        case RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE:
-                            rcse.mPlaybackType = value;
-                            postReevaluateRemote();
-                            break;
-                        case RemoteControlClient.PLAYBACKINFO_VOLUME:
-                            rcse.mPlaybackVolume = value;
-                            synchronized (mMainRemote) {
-                                if (rccId == mMainRemote.mRccId) {
-                                    mMainRemote.mVolume = value;
-                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+            // iterating from top of stack as playback information changes are more likely
+            //   on entries at the top of the remote control stack
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                    if (rcse.mRccId == rccId) {
+                        switch (key) {
+                            case RemoteControlClient.PLAYBACKINFO_PLAYBACK_TYPE:
+                                rcse.mPlaybackType = value;
+                                postReevaluateRemote();
+                                break;
+                            case RemoteControlClient.PLAYBACKINFO_VOLUME:
+                                rcse.mPlaybackVolume = value;
+                                synchronized (mMainRemote) {
+                                    if (rccId == mMainRemote.mRccId) {
+                                        mMainRemote.mVolume = value;
+                                        mVolumePanel.postHasNewRemotePlaybackInfo();
+                                    }
                                 }
-                            }
-                            break;
-                        case RemoteControlClient.PLAYBACKINFO_VOLUME_MAX:
-                            rcse.mPlaybackVolumeMax = value;
-                            synchronized (mMainRemote) {
-                                if (rccId == mMainRemote.mRccId) {
-                                    mMainRemote.mVolumeMax = value;
-                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+                                break;
+                            case RemoteControlClient.PLAYBACKINFO_VOLUME_MAX:
+                                rcse.mPlaybackVolumeMax = value;
+                                synchronized (mMainRemote) {
+                                    if (rccId == mMainRemote.mRccId) {
+                                        mMainRemote.mVolumeMax = value;
+                                        mVolumePanel.postHasNewRemotePlaybackInfo();
+                                    }
                                 }
-                            }
-                            break;
-                        case RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING:
-                            rcse.mPlaybackVolumeHandling = value;
-                            synchronized (mMainRemote) {
-                                if (rccId == mMainRemote.mRccId) {
-                                    mMainRemote.mVolumeHandling = value;
-                                    mVolumePanel.postHasNewRemotePlaybackInfo();
+                                break;
+                            case RemoteControlClient.PLAYBACKINFO_VOLUME_HANDLING:
+                                rcse.mPlaybackVolumeHandling = value;
+                                synchronized (mMainRemote) {
+                                    if (rccId == mMainRemote.mRccId) {
+                                        mMainRemote.mVolumeHandling = value;
+                                        mVolumePanel.postHasNewRemotePlaybackInfo();
+                                    }
                                 }
-                            }
-                            break;
-                        case RemoteControlClient.PLAYBACKINFO_USES_STREAM:
-                            rcse.mPlaybackStream = value;
-                            break;
-                        case RemoteControlClient.PLAYBACKINFO_PLAYSTATE:
-                            rcse.mPlaybackState = value;
-                            synchronized (mMainRemote) {
-                                if (rccId == mMainRemote.mRccId) {
-                                    mMainRemoteIsActive = isPlaystateActive(value);
-                                    postReevaluateRemote();
+                                break;
+                            case RemoteControlClient.PLAYBACKINFO_USES_STREAM:
+                                rcse.mPlaybackStream = value;
+                                break;
+                            case RemoteControlClient.PLAYBACKINFO_PLAYSTATE:
+                                rcse.mPlaybackState = value;
+                                synchronized (mMainRemote) {
+                                    if (rccId == mMainRemote.mRccId) {
+                                        mMainRemoteIsActive = isPlaystateActive(value);
+                                        postReevaluateRemote();
+                                    }
                                 }
-                            }
-                            break;
-                        default:
-                            Log.e(TAG, "unhandled key " + key + " for RCC " + rccId);
-                            break;
+                                break;
+                            default:
+                                Log.e(TAG, "unhandled key " + key + " for RCC " + rccId);
+                                break;
+                        }
+                        return;
                     }
-                    return;
-                }
+                }//for
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
             }
         }
     }
@@ -5669,23 +5675,28 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     private boolean checkUpdateRemoteStateIfActive(int streamType) {
         synchronized(mRCStack) {
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if ((rcse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE)
-                        && isPlaystateActive(rcse.mPlaybackState)
-                        && (rcse.mPlaybackStream == streamType)) {
-                    if (DEBUG_RC) Log.d(TAG, "remote playback active on stream " + streamType
-                            + ", vol =" + rcse.mPlaybackVolume);
-                    synchronized (mMainRemote) {
-                        mMainRemote.mRccId = rcse.mRccId;
-                        mMainRemote.mVolume = rcse.mPlaybackVolume;
-                        mMainRemote.mVolumeMax = rcse.mPlaybackVolumeMax;
-                        mMainRemote.mVolumeHandling = rcse.mPlaybackVolumeHandling;
-                        mMainRemoteIsActive = true;
+            // iterating from top of stack as active playback is more likely on entries at the top
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                    if ((rcse.mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE)
+                            && isPlaystateActive(rcse.mPlaybackState)
+                            && (rcse.mPlaybackStream == streamType)) {
+                        if (DEBUG_RC) Log.d(TAG, "remote playback active on stream " + streamType
+                                + ", vol =" + rcse.mPlaybackVolume);
+                        synchronized (mMainRemote) {
+                            mMainRemote.mRccId = rcse.mRccId;
+                            mMainRemote.mVolume = rcse.mPlaybackVolume;
+                            mMainRemote.mVolumeMax = rcse.mPlaybackVolumeMax;
+                            mMainRemote.mVolumeHandling = rcse.mPlaybackVolumeHandling;
+                            mMainRemoteIsActive = true;
+                        }
+                        return true;
                     }
-                    return true;
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
             }
         }
         synchronized (mMainRemote) {
