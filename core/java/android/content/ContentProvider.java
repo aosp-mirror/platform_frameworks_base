@@ -154,8 +154,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param abstractInterface The ContentProvider interface that is to be
      *              coerced.
-     * @return If the IContentProvider is non-null and local, returns its actual
-     * ContentProvider instance.  Otherwise returns null.
+     * @return If the IContentProvider is non-{@code null} and local, returns its actual
+     * ContentProvider instance.  Otherwise returns {@code null}.
      * @hide
      */
     public static ContentProvider coerceToLocalContentProvider(
@@ -398,7 +398,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     /**
      * Retrieves the Context this provider is running in.  Only available once
-     * {@link #onCreate} has been called -- this will return null in the
+     * {@link #onCreate} has been called -- this will return {@code null} in the
      * constructor.
      */
     public final Context getContext() {
@@ -570,15 +570,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *      that the implementation should parse and add to a WHERE or HAVING clause, specifying
      *      that _id value.
      * @param projection The list of columns to put into the cursor. If
-     *      null all columns are included.
+     *      {@code null} all columns are included.
      * @param selection A selection criteria to apply when filtering rows.
-     *      If null then all rows are included.
+     *      If {@code null} then all rows are included.
      * @param selectionArgs You may include ?s in selection, which will be replaced by
      *      the values from selectionArgs, in order that they appear in the selection.
      *      The values will be bound as Strings.
      * @param sortOrder How the rows in the cursor should be sorted.
-     *      If null then the provider is free to define the sort order.
-     * @return a Cursor or null.
+     *      If {@code null} then the provider is free to define the sort order.
+     * @return a Cursor or {@code null}.
      */
     public abstract Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder);
@@ -633,18 +633,18 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *      that the implementation should parse and add to a WHERE or HAVING clause, specifying
      *      that _id value.
      * @param projection The list of columns to put into the cursor. If
-     *      null all columns are included.
+     *      {@code null} all columns are included.
      * @param selection A selection criteria to apply when filtering rows.
-     *      If null then all rows are included.
+     *      If {@code null} then all rows are included.
      * @param selectionArgs You may include ?s in selection, which will be replaced by
      *      the values from selectionArgs, in order that they appear in the selection.
      *      The values will be bound as Strings.
      * @param sortOrder How the rows in the cursor should be sorted.
-     *      If null then the provider is free to define the sort order.
-     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
+     *      If {@code null} then the provider is free to define the sort order.
+     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
-     * @return a Cursor or null.
+     * @return a Cursor or {@code null}.
      */
     public Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder,
@@ -668,7 +668,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * to retrieve the MIME type for a URI when dispatching intents.
      *
      * @param uri the URI to query.
-     * @return a MIME type string, or null if there is no type.
+     * @return a MIME type string, or {@code null} if there is no type.
      */
     public abstract String getType(Uri uri);
 
@@ -679,8 +679,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
-     * @param uri The content:// URI of the insertion request.
+     * @param uri The content:// URI of the insertion request. This must not be {@code null}.
      * @param values A set of column_name/value pairs to add to the database.
+     *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
     public abstract Uri insert(Uri uri, ContentValues values);
@@ -697,6 +698,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param uri The content:// URI of the insertion request.
      * @param values An array of sets of column_name/value pairs to add to the database.
+     *    This must not be {@code null}.
      * @return The number of values that were inserted.
      */
     public int bulkInsert(Uri uri, ContentValues[] values) {
@@ -741,8 +743,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * @param uri The URI to query. This can potentially have a record ID if this
      * is an update request for a specific record.
-     * @param values A Bundle mapping from column names to new column values (NULL is a
-     *               valid value).
+     * @param values A set of column_name/value pairs to update in the database.
+     *     This must not be {@code null}.
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
@@ -875,7 +877,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     /**
      * Called by a client to determine the types of data streams that this
      * content provider supports for the given URI.  The default implementation
-     * returns null, meaning no types.  If your content provider stores data
+     * returns {@code null}, meaning no types.  If your content provider stores data
      * of a particular type, return that MIME type if it matches the given
      * mimeTypeFilter.  If it can perform type conversions, return an array
      * of all supported MIME types that match mimeTypeFilter.
@@ -883,7 +885,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param uri The data in the content provider being queried.
      * @param mimeTypeFilter The type of data the client desires.  May be
      * a pattern, such as *\/* to retrieve all possible data types.
-     * @return Returns null if there are no possible data streams for the
+     * @return Returns {@code null} if there are no possible data streams for the
      * given mimeTypeFilter.  Otherwise returns an array of all available
      * concrete MIME types.
      *
@@ -1091,10 +1093,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * interfaces that are cheaper and/or unnatural for a table-like
      * model.
      *
-     * @param method method name to call.  Opaque to framework, but should not be null.
-     * @param arg provider-defined String argument.  May be null.
-     * @param extras provider-defined Bundle argument.  May be null.
-     * @return provider-defined return value.  May be null.  Null is also
+     * @param method method name to call.  Opaque to framework, but should not be {@code null}.
+     * @param arg provider-defined String argument.  May be {@code null}.
+     * @param extras provider-defined Bundle argument.  May be {@code null}.
+     * @return provider-defined return value.  May be {@code null}, which is also
      *   the default for providers which don't implement any call methods.
      */
     public Bundle call(String method, String arg, Bundle extras) {
