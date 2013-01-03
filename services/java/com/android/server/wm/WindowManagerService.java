@@ -2468,16 +2468,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && w.mHasSurface) {
-                    final Pair<WindowStateAnimator, Region> pair =
-                            new Pair<WindowStateAnimator, Region>(w.mWinAnimator, region);
-                    mH.sendMessage(mH.obtainMessage(H.SET_TRANSPARENT_REGION, pair));
+                    w.mWinAnimator.setTransparentRegionHintLocked(region);
                 }
             }
         } finally {
@@ -2959,18 +2956,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void finishDrawingWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
-        synchronized (mWindowMap) {
-            WindowState win = windowForClientLocked(session, client, false);
-            if (win != null && win.mWinAnimator.finishDrawingLocked()) {
-                if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
-                    getDefaultDisplayContentLocked().pendingLayoutChanges |=
-                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+        try {
+            synchronized (mWindowMap) {
+                WindowState win = windowForClientLocked(session, client, false);
+                if (win != null && win.mWinAnimator.finishDrawingLocked()) {
+                    if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                        getDefaultDisplayContentLocked().pendingLayoutChanges |=
+                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                    }
+                    win.mDisplayContent.layoutNeeded = true;
+                    requestTraversalLocked();
                 }
-                win.mDisplayContent.layoutNeeded = true;
-                performLayoutAndPlaceSurfacesLocked();
             }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        Binder.restoreCallingIdentity(origId);
     }
 
     @Override
@@ -6610,12 +6610,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
 
-        public static final int ANIMATOR_WHAT_OFFSET = 100000;
-        public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
-
-        public H() {
-        }
-
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7014,15 +7008,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_STRICT_MODE_VIOLATION: {
                     showStrictModeViolation(msg.arg1, msg.arg2);
-                    break;
-                }
-
-                case SET_TRANSPARENT_REGION: {
-                    @SuppressWarnings("unchecked")
-                    Pair<WindowStateAnimator, Region> pair =
-                                (Pair<WindowStateAnimator, Region>) msg.obj;
-                    final WindowStateAnimator winAnimator = pair.first;
-                    winAnimator.setTransparentRegionHint(pair.second);
                     break;
                 }
 
