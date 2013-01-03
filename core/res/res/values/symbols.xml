@@ -172,8 +172,6 @@
   <java-symbol type="id" name="text" />
   <java-symbol type="id" name="time" />
   <java-symbol type="id" name="time_current" />
-  <java-symbol type="id" name="timeDisplayBackground" />
-  <java-symbol type="id" name="timeDisplayForeground" />
   <java-symbol type="id" name="titleDivider" />
   <java-symbol type="id" name="titleDividerTop" />
   <java-symbol type="id" name="timePicker" />
@@ -1272,27 +1270,20 @@
   <java-symbol type="drawable" name="kg_widget_bg_padded" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="alarm_status" />
-  <java-symbol type="id" name="backspace" />
   <java-symbol type="id" name="button0" />
   <java-symbol type="id" name="button4" />
   <java-symbol type="id" name="button5" />
   <java-symbol type="id" name="button6" />
   <java-symbol type="id" name="button7" />
-  <java-symbol type="id" name="carrier" />
   <java-symbol type="id" name="date" />
   <java-symbol type="id" name="eight" />
-  <java-symbol type="id" name="emergencyCallButton" />
   <java-symbol type="id" name="face_unlock_area_view" />
   <java-symbol type="id" name="face_unlock_cancel_button" />
   <java-symbol type="id" name="five" />
-  <java-symbol type="id" name="forgotPatternButton" />
   <java-symbol type="id" name="four" />
-  <java-symbol type="id" name="headerText" />
   <java-symbol type="id" name="icon_menu_presenter" />
-  <java-symbol type="id" name="instructions" />
   <java-symbol type="id" name="keyboard" />
   <java-symbol type="id" name="list_menu_presenter" />
-  <java-symbol type="id" name="lockPattern" />
   <java-symbol type="id" name="lock_screen" />
   <java-symbol type="id" name="login" />
   <java-symbol type="id" name="nine" />
@@ -1305,24 +1296,14 @@
   <java-symbol type="id" name="password" />
   <java-symbol type="id" name="passwordEntry" />
   <java-symbol type="id" name="pinEntry" />
-  <java-symbol type="id" name="pinDel" />
-  <java-symbol type="id" name="pinDisplay" />
-  <java-symbol type="id" name="owner_info" />
-  <java-symbol type="id" name="pukDel" />
-  <java-symbol type="id" name="pukDisplay" />
   <java-symbol type="id" name="right_icon" />
   <java-symbol type="id" name="seven" />
   <java-symbol type="id" name="six" />
   <java-symbol type="id" name="status" />
-  <java-symbol type="id" name="status1" />
   <java-symbol type="id" name="switch_ime_button" />
   <java-symbol type="id" name="three" />
   <java-symbol type="id" name="title_container" />
-  <java-symbol type="id" name="topHeader" />
-  <java-symbol type="id" name="transport" />
-  <java-symbol type="id" name="transport_bg_protect" />
   <java-symbol type="id" name="two" />
-  <java-symbol type="id" name="unlock_widget" />
   <java-symbol type="id" name="zero" />
   <java-symbol type="id" name="keyguard_message_area" />
   <java-symbol type="id" name="keyguard_click_area" />
@@ -1374,17 +1355,6 @@
   <java-symbol type="integer" name="kg_carousel_angle" />
   <java-symbol type="layout" name="global_actions_item" />
   <java-symbol type="layout" name="global_actions_silent_mode" />
-  <java-symbol type="layout" name="keyguard_screen_glogin_unlock" />
-  <java-symbol type="layout" name="keyguard_screen_password_landscape" />
-  <java-symbol type="layout" name="keyguard_screen_password_portrait" />
-  <java-symbol type="layout" name="keyguard_screen_sim_pin_landscape" />
-  <java-symbol type="layout" name="keyguard_screen_sim_pin_portrait" />
-  <java-symbol type="layout" name="keyguard_screen_sim_puk_landscape" />
-  <java-symbol type="layout" name="keyguard_screen_sim_puk_portrait" />
-  <java-symbol type="layout" name="keyguard_screen_tab_unlock" />
-  <java-symbol type="layout" name="keyguard_screen_tab_unlock_land" />
-  <java-symbol type="layout" name="keyguard_screen_unlock_landscape" />
-  <java-symbol type="layout" name="keyguard_screen_unlock_portrait" />
   <java-symbol type="layout" name="keyguard_selector_view" />
   <java-symbol type="layout" name="keyguard_pattern_view" />
   <java-symbol type="layout" name="keyguard_password_view" />
