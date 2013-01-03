@@ -1061,10 +1061,7 @@ public final class Bundle implements Parcelable, Cloneable {
      */
     public String getString(String key) {
         unparcel();
-        Object o = mMap.get(key);
-        if (o == null) {
-            return null;
-        }
+        final Object o = mMap.get(key);
         try {
             return (String) o;
         } catch (ClassCastException e) {
@@ -1079,20 +1076,12 @@ public final class Bundle implements Parcelable, Cloneable {
      *
      * @param key a String, or null
      * @param defaultValue Value to return if key does not exist
-     * @return a String value, or null
+     * @return the String value associated with the given key, or defaultValue
+     *     if no valid String object is currently mapped to that key.
      */
     public String getString(String key, String defaultValue) {
-        unparcel();
-        Object o = mMap.get(key);
-        if (o == null) {
-            return defaultValue;
-        }
-        try {
-            return (String) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "String", e);
-            return defaultValue;
-        }
+        final String s = getString(key);
+        return (s == null) ? defaultValue : s;
     }
 
     /**
@@ -1105,10 +1094,7 @@ public final class Bundle implements Parcelable, Cloneable {
      */
     public CharSequence getCharSequence(String key) {
         unparcel();
-        Object o = mMap.get(key);
-        if (o == null) {
-            return null;
-        }
+        final Object o = mMap.get(key);
         try {
             return (CharSequence) o;
         } catch (ClassCastException e) {
@@ -1123,20 +1109,12 @@ public final class Bundle implements Parcelable, Cloneable {
      *
      * @param key a String, or null
      * @param defaultValue Value to return if key does not exist
-     * @return a CharSequence value, or null
+     * @return the CharSequence value associated with the given key, or defaultValue
+     *     if no valid CharSequence object is currently mapped to that key.
      */
     public CharSequence getCharSequence(String key, CharSequence defaultValue) {
-        unparcel();
-        Object o = mMap.get(key);
-        if (o == null) {
-            return defaultValue;
-        }
-        try {
-            return (CharSequence) o;
-        } catch (ClassCastException e) {
-            typeWarning(key, o, "CharSequence", e);
-            return defaultValue;
-        }
+        final CharSequence cs = getCharSequence(key);
+        return (cs == null) ? defaultValue : cs;
     }
 
     /**
