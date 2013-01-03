@@ -157,6 +157,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 26;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 27;
     private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 28;
+    private static final int MSG_PROMOTE_RCC = 29;
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
     // persisted
@@ -3527,6 +3528,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 case MSG_PERSIST_SAFE_VOLUME_STATE:
                     onPersistSafeVolumeState(msg.arg1);
                     break;
+
+                case MSG_PROMOTE_RCC:
+                    onPromoteRcc(msg.arg1);
+                    break;
             }
         }
     }
@@ -5246,6 +5251,50 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /**
+     * Helper function:
+     * Post a message to asynchronously move the media button event receiver associated with the
+     * given remote control client ID to the top of the remote control stack
+     * @param rccId
+     */
+    private void postPromoteRcc(int rccId) {
+        sendMsg(mAudioHandler, MSG_PROMOTE_RCC, SENDMSG_REPLACE,
+                rccId /*arg1*/, 0, null, 0/*delay*/);
+    }
+
+    private void onPromoteRcc(int rccId) {
+        if (DEBUG_RC) { Log.d(TAG, "Promoting RCC " + rccId); }
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                // ignore if given RCC ID is already at top of remote control stack
+                if (!mRCStack.isEmpty() && (mRCStack.peek().mRccId == rccId)) {
+                    return;
+                }
+                int indexToPromote = -1;
+                try {
+                    for (int index = mRCStack.size()-1; index >= 0; index--) {
+                        final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                        if (rcse.mRccId == rccId) {
+                            indexToPromote = index;
+                            break;
+                        }
+                    }
+                    if (indexToPromote >= 0) {
+                        if (DEBUG_RC) { Log.d(TAG, "  moving RCC from index " + indexToPromote
+                                + " to " + (mRCStack.size()-1)); }
+                        final RemoteControlStackEntry rcse = mRCStack.remove(indexToPromote);
+                        mRCStack.push(rcse);
+                        // the RC stack changed, reevaluate the display
+                        checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    // not expected to happen, indicates improper concurrent modification
+                    Log.e(TAG, "Wrong index accessing RC stack, lock error? ", e);
+                }
+            }//synchronized(mRCStack)
+        }//synchronized(mAudioFocusLock)
+    }
+
+    /**
      * see AudioManager.registerMediaButtonIntent(PendingIntent pi, ComponentName c)
      * precondition: mediaIntent != null, target != null
      */
@@ -5389,6 +5438,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     public void unregisterRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient) {
+        if (DEBUG_RC) Log.i(TAG, "Unregister remote control client rcClient="+rcClient);
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 boolean topRccChange = false;
@@ -5627,6 +5677,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                         mMainRemoteIsActive = isPlaystateActive(value);
                                         postReevaluateRemote();
                                     }
+                                }
+                                // an RCC moving to a "playing" state should become the media button
+                                //   event receiver so it can be controlled, without requiring the
+                                //   app to re-register its receiver
+                                if (isPlaystateActive(value)) {
+                                    postPromoteRcc(rccId);
                                 }
                                 break;
                             default:
