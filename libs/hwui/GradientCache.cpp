@@ -49,7 +49,6 @@ static inline T min(T a, T b) {
 
 hash_t GradientCacheEntry::hash() const {
     uint32_t hash = JenkinsHashMix(0, count);
-    hash = JenkinsHashMix(hash, tileMode);
     for (uint32_t i = 0; i < count; i++) {
         hash = JenkinsHashMix(hash, android::hash_type(colors[i]));
         hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
@@ -59,9 +58,6 @@ hash_t GradientCacheEntry::hash() const {
 
 int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCacheEntry& rhs) {
     int deltaInt = int(lhs.count) - int(rhs.count);
-    if (deltaInt != 0) return deltaInt;
-
-    deltaInt = lhs.tileMode - rhs.tileMode;
     if (deltaInt != 0) return deltaInt;
 
     deltaInt = memcmp(lhs.colors, rhs.colors, lhs.count * sizeof(uint32_t));
@@ -127,9 +123,7 @@ void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
     if (texture) {
         const uint32_t size = texture->width * texture->height * GRADIENT_BYTES_PER_PIXEL;
         mSize -= size;
-    }
 
-    if (texture) {
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
@@ -140,7 +134,6 @@ void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* GradientCache::get(uint32_t* colors, float* positions, int count) {
-
     GradientCacheEntry gradient(colors, positions, count);
     Texture* texture = mCache.get(gradient);
 
@@ -189,7 +182,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
 
     // Asume the cache is always big enough
     const uint32_t size = texture->width * texture->height * GRADIENT_BYTES_PER_PIXEL;
-    while (mSize + size > mMaxSize) {
+    while (getSize() + size > mMaxSize) {
         mCache.removeOldest();
     }
 

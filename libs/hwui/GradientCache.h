@@ -76,10 +76,8 @@ struct GradientCacheEntry {
     uint32_t* colors;
     float* positions;
     uint32_t count;
-    SkShader::TileMode tileMode;
 
 private:
-
     void copy(uint32_t* colors, float* positions, uint32_t count) {
         this->count = count;
         this->colors = new uint32_t[count];
