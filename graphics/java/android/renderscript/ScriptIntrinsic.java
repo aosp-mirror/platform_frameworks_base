@@ -16,11 +16,6 @@
 
 package android.renderscript;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.Log;
-
-
 /**
  * Base class for all Intrinsic scripts. An intrinsic a script
  * which implements a pre-defined function. Intrinsics are
