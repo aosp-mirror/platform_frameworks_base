@@ -366,6 +366,13 @@ protected:
 
 private:
     /**
+     * Discards the content of the framebuffer if supported by the driver.
+     * This method should be called at the beginning of a frame to optimize
+     * rendering on some tiler architectures.
+     */
+    void discardFramebuffer(float left, float top, float right, float bottom);
+
+    /**
      * Ensures the state of the renderer is the same as the state of
      * the GL context.
      */
