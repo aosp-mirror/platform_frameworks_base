@@ -19394,6 +19394,7 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Element.DataKind PIXEL_LA;
     enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGB;
     enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGBA;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_YUV;
     enum_constant public static final android.renderscript.Element.DataKind USER;
   }
 

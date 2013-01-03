@@ -47,6 +47,7 @@ public class Type extends BaseObj {
     int mDimZ;
     boolean mDimMipmaps;
     boolean mDimFaces;
+    int mDimYuv;
     int mElementCount;
     Element mElement;
 
