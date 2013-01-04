@@ -700,7 +700,7 @@ mNotificationManager.notify(id, builder.build());
         element for the {@link android.app.Activity}
         <dl>
             <dt>
-<code><a href="guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
             </dt>
             <dd>
                 The activity's fully-qualified class name.
