@@ -12,7 +12,7 @@ next.link=creating.html
   <div id="tb"> 
     <h2>This lesson teaches you to</h2>
     <ol>
-      <li><a href="#Setup">Set Up Your Project With the Support Library</a></li>
+      <li><a href="#Setup">Set Up Your Project with the Support Library</a></li>
       <li><a href="#Apis">Import the Support Library APIs</a></li>
     </ol>
     <h2>You should also read</h2>
@@ -23,7 +23,7 @@ next.link=creating.html
 </div>
 
 <p>The Android <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> provides a JAR
-file with an API library that allow you to use some of the more recent Android APIs in your app
+file with an API library that allows you to use some of the more recent Android APIs in your app
 while running on earlier versions of Android. For instance, the Support Library provides a version
 of the {@link android.app.Fragment} APIs that you can use on Android 1.6 (API level 4) and
 higher.</p>
@@ -32,7 +32,7 @@ higher.</p>
 to build a dynamic app UI.</p>
 
 
-<h2 id="Setup">Set Up Your Project With the Support Library</h2>
+<h2 id="Setup">Set Up Your Project with the Support Library</h2>
 
 <div class="figure" style="width:527px">
 <img src="{@docRoot}images/training/basics/sdk-manager.png" alt="" />
@@ -43,7 +43,7 @@ Android Support package selected.</p>
 <p>To set up your project:</p>
 
 <ol>
-  <li>Downlad the Android Support package using the SDK Manager</li>
+  <li>Download the Android Support package using the SDK Manager.</li>
 
   <li>Create a <code>libs</code> directory at the top level of your Android project.</li>
   <li>Locate the JAR file for the library you want to use and copy it into the <code>libs/</code>
