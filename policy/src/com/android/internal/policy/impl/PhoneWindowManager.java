@@ -1952,9 +1952,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (down && repeatCount == 0 && !keyguardOn) {
-                showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
+            try {
+                mStatusBarService.toggleRecentApps();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException when showing recent apps", e);
             }
+        }
             return -1;
+        }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
             if (down) {
                 if (repeatCount == 0) {
