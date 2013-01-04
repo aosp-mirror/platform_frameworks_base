@@ -404,16 +404,14 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets whether the WebView should save form data. The default is true,
-     * unless in private browsing mode, when the value is always false.
+     * Sets whether the WebView should save form data. The default is true.
      */
     public void setSaveFormData(boolean save) {
         throw new MustOverrideException();
     }
 
     /**
-     * Gets whether the WebView saves form data. Always false in private
-     * browsing mode.
+     * Gets whether the WebView saves form data.
      *
      * @return whether the WebView saves form data
      * @see #setSaveFormData
