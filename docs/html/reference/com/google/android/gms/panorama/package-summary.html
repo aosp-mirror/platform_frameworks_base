@@ -361,7 +361,7 @@ onkeyup="return search_changed(event, false, '/')" />
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
-      <span class="en">Google Play services</span></a>
+      <span class="en">Google Play Services</span></a>
     </div>
     <ul>
       <li><a href="/google/play-services/setup.html">
@@ -369,7 +369,7 @@ onkeyup="return search_changed(event, false, '/')" />
       </li>
 
       <li><a href="/google/play-services/auth.html">
-          <span class="en">Authentication</span></a>
+          <span class="en">Authorization</span></a>
       </li>
 
       <li><a href="/google/play-services/plus.html">
@@ -391,32 +391,47 @@ onkeyup="return search_changed(event, false, '/')" />
     </ul>
   </li>
 
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-          <li><a href="/google/play/billing/billing_overview.html">
-              <span class="en">In-app Billing Overview</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_integrate.html">
-              <span class="en">Implementing In-app Billing</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_subscriptions.html">
-              <span class="en">Subscriptions</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_overview.html">
+              <span class="en">Overview</span></a>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+              <span class="en">Version 3 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/v2/api.html">
+              <span class="en">Version 2 API</span></a></div>
+              <ul>
+              <li><a href="/google/play/billing/v2/billing_integrate.html">
+              <span class="en">Implementing the API</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a></li>
+              <li><a href="/google/play/billing/v2/billing_reference.html">
+              <span class="en">Reference</span></a></li>
+              </ul>
+      </li>
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_testing.html">
+      </li>
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_admin.html">
+      </li>
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
-          </li>
-          <li><a href="/google/play/billing/billing_reference.html">
-              <span class="en">Reference</span></a>
-          </li>
+      </li>
+      <li><a href="/google/play/billing/versions.html">
+              <span class="en">Version Notes</span></a>
+      </li>
     </ul>
   </li>
 
@@ -432,11 +447,9 @@ onkeyup="return search_changed(event, false, '/')" />
       <li><a href="/google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
       </li>
-
       <li><a href="/google/play/expansion-files.html">
           <span class="en">APK Expansion Files</span></a>
       </li>
-
       <li class="nav-section">
         <div class="nav-section-header"><a href="/google/play/licensing/index.html">
           <span class="en">Application Licensing</span></a>
@@ -457,38 +470,50 @@ onkeyup="return search_changed(event, false, '/')" />
         </ul>
       </li>
     </ul>
+  </li>
+
+  <li class="nav-section">
+      <div class="nav-section-header"><a href="/google/gcm/index.html">
+        <span class="en">Google Cloud Messaging</span></a>
+      </div>
+      <ul>
+        <li><a href="/google/gcm/gs.html">
+            <span class="en">Getting Started</span></a>
+        </li>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Architectural Overview</span></a>
+        </li>
+        <li><a href="/google/gcm/demo.html">
+            <span class="en">Demo App Tutorial</span></a>
+        </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
+        <li><a href="/google/gcm/c2dm.html">
+            <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
+        </li>
+      </ul>
+  </li>
 
 
-    <li class="nav-section">
-        <div class="nav-section-header"><a href="/google/gcm/index.html">
-          <span class="en">Google Cloud Messaging</span></a>
-        </div>
-        <ul>
-          <li><a href="/google/gcm/gs.html">
-              <span class="en">Getting Started</span></a>
-          </li>
-          <li><a href="/google/gcm/gcm.html">
-              <span class="en">Architectural Overview</span></a>
-          </li>
-          <li><a href="/google/gcm/demo.html">
-              <span class="en">Demo App Tutorial</span></a>
-          </li>
-          <li><a href="/google/gcm/adv.html">
-              <span class="en">Advanced Topics</span></a>
-          </li>
-          <li><a href="/google/gcm/c2dm.html">
-              <span class="en">Migration</span></a>
-          </li>
-          <li id="gcm-tree-list" class="nav-section">
-            <div class="nav-section-header">
-              <a href="/reference/gcm-packages.html">
-                <span class="en">Reference</span>
-              </a>
-            <div>
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/backup/index.html">
+      Android Backup Service</a>
+    </div>
+    <ul>
+      <li><a href="/google/backup/signup.html">
+          Register</a>
       </li>
+    </ul>
+  </li>
 
-        </ul>
-      </li>
 </ul>
 
 <script type="text/javascript">
@@ -595,11 +620,7 @@ onkeyup="return search_changed(event, false, '/')" />
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
-  <div id="build_info">
-    
-    Android &nbsp;r &mdash; 03 Dec 2012 12:16
-
-  </div>
+  
 
 
   <div id="footerlinks">
