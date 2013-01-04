@@ -123,7 +123,7 @@ If you are connected to only a single device, you do not need to set the ANDROID
 <p>Before using the {@code uiautomator} testing framework, complete these pre-flight tasks:
 </p>
 <h3 id="loading">Load the application to a device</h3>
-<p>If you are reading this document, chances are that the Android application that you want to test has not been published yet. If you have a copy of the APK file, you can install the APK onto a test device by using the {@code adb} tool. To learn how to install an APK file using the {@code adb} tool, see the <a href="@docRoot}/tools/help/adb.html#move">{@code adb}</a> documentation. </p>
+<p>If you are reading this document, chances are that the Android application that you want to test has not been published yet. If you have a copy of the APK file, you can install the APK onto a test device by using the {@code adb} tool. To learn how to install an APK file using the {@code adb} tool, see the <a href="{@docRoot}tools/help/adb.html#move">{@code adb}</a> documentation. </p>
 
 <h3 id="identifyUI">Identify the application’s UI components</h3>
 <p>Before writing your {@code uiautomator} tests, first identify the UI components in the application that you want to test. Typically, good candidates for testing are UI components that are visible and that users can interact with. The UI components should also have visible text labels, <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">{@code android:contentDescription}</a> values, or both. 
@@ -173,7 +173,7 @@ If you are connected to only a single device, you do not need to set the ANDROID
 <dl>
 <DT><a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a></DT>
 <dd><p>Represents the device state.  In your tests, you can call methods on the <a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a> instance to check for the state of various properties, such as current orientation or display size. Your tests also can use the <a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a> instance to perform device level actions, such as forcing the device into a specific rotation, pressing the d-pad hardware button, or pressing the Home and Menu buttons.</p>
-<p>To get an instance of <a href="{@docRoot}tools/help/UiDevice.html">{@code UiDevice}</a> and simulate a Home button press:
+<p>To get an instance of <a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a> and simulate a Home button press:
 <pre>
 getUiDevice().pressHome();
 </pre></p></dd>
@@ -213,7 +213,7 @@ UiObject okButton = new UiObject(new UiSelector().text("OK")
 </dd>
 
 <dt><a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a></dt>
-<dd>Represents a collection of items, for example songs in a music album or a list of emails in an inbox. Similar to a <a href="{@docRoot}tools/help/uiautomator/UiObject.html">{@code UiObject}</a>, you construct a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> instance by specifying a <a href="{@docRoot}tools/help/UiSelector.html">{@code UiSelector}</a>. The <a href="{@docRoot}tools/help/uiautomator/UiSelector.html">{@code UiSelector}</a> for a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> should search for a UI element that is a container or wrapper of other child UI elements (such as  a layout view that contains child UI elements).  For example, the following code snippet  shows how to construct a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> to represent a video album that is displayed within a {@link android.widget.FrameLayout}:
+<dd>Represents a collection of items, for example songs in a music album or a list of emails in an inbox. Similar to a <a href="{@docRoot}tools/help/uiautomator/UiObject.html">{@code UiObject}</a>, you construct a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> instance by specifying a <a href="{@docRoot}tools/help/uiautomator/UiSelector.html">{@code UiSelector}</a>. The <a href="{@docRoot}tools/help/uiautomator/UiSelector.html">{@code UiSelector}</a> for a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> should search for a UI element that is a container or wrapper of other child UI elements (such as  a layout view that contains child UI elements).  For example, the following code snippet  shows how to construct a <a href="{@docRoot}tools/help/uiautomator/UiCollection.html">{@code UiCollection}</a> to represent a video album that is displayed within a {@link android.widget.FrameLayout}:
 <pre>
 UiCollection videos = new UiCollection(new UiSelector()
    .className("android.widget.FrameLayout"));
