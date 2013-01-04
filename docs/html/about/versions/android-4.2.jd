@@ -240,7 +240,7 @@ android.media.MediaRouter#getSelectedRoute MediaRouter.getSelectedRoute()} as me
 secondary screens, you can apply
 a different theme by specifying the {@link
 android.R.attr#presentationTheme android:presentationTheme} attribute in the <a
-href=”{@docRoot}guide/topics/resources/style-resource.html”>{@code &lt;style>}</a> that you’ve
+href="{@docRoot}guide/topics/resources/style-resource.html">{@code &lt;style>}</a> that you’ve
 applied to your application or activity.</p>
 
 <p>Keep in mind that screens connected to the user’s device often have a larger screen size and
