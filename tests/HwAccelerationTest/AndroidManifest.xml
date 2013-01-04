@@ -33,6 +33,15 @@
         <meta-data android:name="android.graphics.renderThread" android:value="true" />
 
         <activity
+                android:name="Alpha8BitmapActivity"
+                android:label="_Alpha8Bitmap">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="MipMapActivity"
                 android:label="_MipMap">
             <intent-filter>

@@ -596,6 +596,11 @@ private:
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
             bool ignoreScale = false, bool dirty = true);
 
+    void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
+            GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
+            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
+            bool ignoreTransform, bool dirty = true);
+
     /**
      * Draws text underline and strike-through if needed.
      *
@@ -700,7 +705,6 @@ private:
     void setupDrawAA();
     void setupDrawVertexShape();
     void setupDrawPoint(float pointSize);
-    void setupDrawColor(int color);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);

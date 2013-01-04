@@ -1340,30 +1340,20 @@ void OpenGLRenderer::setupDrawPoint(float pointSize) {
     mDescription.pointSize = pointSize;
 }
 
-void OpenGLRenderer::setupDrawColor(int color) {
-    setupDrawColor(color, (color >> 24) & 0xFF);
-}
-
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
-    // Second divide of a by 255 is an optimization, allowing us to simply multiply
-    // the rgb values by a instead of also dividing by 255
-    const float a = mColorA / 255.0f;
-    mColorR = a * ((color >> 16) & 0xFF);
-    mColorG = a * ((color >>  8) & 0xFF);
-    mColorB = a * ((color      ) & 0xFF);
+    mColorR = mColorA * ((color >> 16) & 0xFF) / 255.0f;
+    mColorG = mColorA * ((color >>  8) & 0xFF) / 255.0f;
+    mColorB = mColorA * ((color      ) & 0xFF) / 255.0f;
     mColorSet = true;
     mSetShaderColor = mDescription.setColor(mColorR, mColorG, mColorB, mColorA);
 }
 
 void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
     mColorA = alpha / 255.0f;
-    // Double-divide of a by 255 is an optimization, allowing us to simply multiply
-    // the rgb values by a instead of also dividing by 255
-    const float a = mColorA / 255.0f;
-    mColorR = a * ((color >> 16) & 0xFF);
-    mColorG = a * ((color >>  8) & 0xFF);
-    mColorB = a * ((color      ) & 0xFF);
+    mColorR = mColorA * ((color >> 16) & 0xFF) / 255.0f;
+    mColorG = mColorA * ((color >>  8) & 0xFF) / 255.0f;
+    mColorB = mColorA * ((color      ) & 0xFF) / 255.0f;
     mColorSet = true;
     mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
 }
@@ -1625,43 +1615,27 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+    int color = paint != NULL ? paint->getColor() : 0;
+
     float x = left;
     float y = top;
 
-    GLenum filter = GL_LINEAR;
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+
     bool ignoreTransform = false;
     if (mSnapshot->transform->isPureTranslate()) {
         x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
         y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
         ignoreTransform = true;
-        filter = GL_NEAREST;
+
+        texture->setFilter(GL_NEAREST, true);
     } else {
-        filter = FILTER(paint);
+        texture->setFilter(FILTER(paint), true);
     }
 
-    setupDraw();
-    setupDrawWithTexture(true);
-    if (paint) {
-        setupDrawAlpha8Color(paint->getColor(), alpha);
-    }
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelView(x, y, x + texture->width, y + texture->height, ignoreTransform);
-
-    setupDrawTexture(texture->id);
-    texture->setWrap(GL_CLAMP_TO_EDGE);
-    texture->setFilter(filter);
-
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms();
-    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-    finishDrawTexture();
+    drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
+            paint != NULL, color, alpha, mode, (GLvoid*) NULL,
+            (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
 }
 
 status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
@@ -1704,7 +1678,11 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint*
     // to the vertex shader. The save/restore is a bit overkill.
     save(SkCanvas::kMatrix_SaveFlag);
     concatMatrix(matrix);
-    drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
+    if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
+        drawAlphaBitmap(texture, 0.0f, 0.0f, paint);
+    } else {
+        drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
+    }
     restore();
 
     return DrawGlInfo::kStatusDrew;
@@ -1722,7 +1700,11 @@ status_t OpenGLRenderer::drawBitmapData(SkBitmap* bitmap, float left, float top,
     Texture* texture = mCaches.textureCache.getTransient(bitmap);
     const AutoTexture autoCleanup(texture);
 
-    drawTextureRect(left, top, right, bottom, texture, paint);
+    if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
+        drawAlphaBitmap(texture, left, top, paint);
+    } else {
+        drawTextureRect(left, top, right, bottom, texture, paint);
+    }
 
     return DrawGlInfo::kStatusDrew;
 }
@@ -1836,26 +1818,59 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
-    if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
-        const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
-        const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
+    float scaleX = (dstRight - dstLeft) / (srcRight - srcLeft);
+    float scaleY = (dstBottom - dstTop) / (srcBottom - srcTop);
 
-        GLenum filter = GL_NEAREST;
-        // Enable linear filtering if the source rectangle is scaled
-        if (srcRight - srcLeft != dstRight - dstLeft || srcBottom - srcTop != dstBottom - dstTop) {
-            filter = FILTER(paint);
-        }
+    bool scaled = scaleX != 1.0f || scaleY != 1.0f;
+    // Apply a scale transform on the canvas only when a shader is in use
+    // Skia handles the ratio between the dst and src rects as a scale factor
+    // when a shader is set
+    bool useScaleTransform = mShader && scaled;
+    bool ignoreTransform = false;
 
-        texture->setFilter(filter, true);
-        drawTextureMesh(x, y, x + (dstRight - dstLeft), y + (dstBottom - dstTop),
-                texture->id, alpha / 255.0f, mode, texture->blend,
-                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
-                GL_TRIANGLE_STRIP, gMeshCount, false, true);
+    if (CC_LIKELY(mSnapshot->transform->isPureTranslate() && !useScaleTransform)) {
+        float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
+        float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
+
+        dstRight = x + (dstRight - dstLeft);
+        dstBottom = y + (dstBottom - dstTop);
+
+        dstLeft = x;
+        dstTop = y;
+
+        texture->setFilter(scaled ? FILTER(paint) : GL_NEAREST, true);
+        ignoreTransform = true;
     } else {
         texture->setFilter(FILTER(paint), true);
-        drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
-                mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
-                GL_TRIANGLE_STRIP, gMeshCount);
+    }
+
+    if (CC_UNLIKELY(useScaleTransform)) {
+        save(SkCanvas::kMatrix_SaveFlag);
+        translate(dstLeft, dstTop);
+        scale(scaleX, scaleY);
+
+        dstLeft = 0.0f;
+        dstTop = 0.0f;
+
+        dstRight = srcRight - srcLeft;
+        dstBottom = srcBottom - srcTop;
+    }
+
+    if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
+        int color = paint ? paint->getColor() : 0;
+        drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
+                texture->id, paint != NULL, color, alpha, mode,
+                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
+    } else {
+        drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom,
+                texture->id, alpha / 255.0f, mode, texture->blend,
+                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                GL_TRIANGLE_STRIP, gMeshCount, false, ignoreTransform);
+    }
+
+    if (CC_UNLIKELY(useScaleTransform)) {
+        restore();
     }
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
@@ -3094,18 +3109,43 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     setupDrawColorFilter();
     setupDrawBlending(blend, mode, swapSrcDst);
     setupDrawProgram();
-    if (!dirty) {
-        setupDrawDirtyRegionsDisabled();
-    }
+    if (!dirty) setupDrawDirtyRegionsDisabled();
     if (!ignoreScale) {
         setupDrawModelView(left, top, right, bottom, ignoreTransform);
     } else {
         setupDrawModelViewTranslate(left, top, right, bottom, ignoreTransform);
     }
+    setupDrawTexture(texture);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawTexture(texture);
     setupDrawMesh(vertices, texCoords, vbo);
+
+    glDrawArrays(drawMode, 0, elementsCount);
+
+    finishDrawTexture();
+}
+
+void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
+        GLuint texture, bool hasColor, int color, int alpha, SkXfermode::Mode mode,
+        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
+        bool ignoreTransform, bool dirty) {
+
+    setupDraw();
+    setupDrawWithTexture(true);
+    if (hasColor) {
+        setupDrawAlpha8Color(color, alpha);
+    }
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    if (!dirty) setupDrawDirtyRegionsDisabled();
+    setupDrawModelView(left, top, right, bottom, ignoreTransform);
+    setupDrawTexture(texture);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms();
+    setupDrawMesh(vertices, texCoords);
 
     glDrawArrays(drawMode, 0, elementsCount);
 
