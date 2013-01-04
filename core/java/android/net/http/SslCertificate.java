@@ -334,9 +334,11 @@ public class SslCertificate {
 
     /**
      * A distinguished name helper class: a 3-tuple of:
-     * - common name (CN),
-     * - organization (O),
-     * - organizational unit (OU)
+     * <ul>
+     *   <li>the most specific common name (CN)</li>
+     *   <li>the most specific organization (O)</li>
+     *   <li>the most specific organizational unit (OU)</li>
+     * <ul>
      */
     public class DName {
         /**
@@ -360,8 +362,15 @@ public class SslCertificate {
         private String mUName;
 
         /**
-         * Creates a new distinguished name
-         * @param dName The distinguished name
+         * Creates a new {@code DName} from a string. The attributes
+         * are assumed to come in most significant to least
+         * significant order which is true of human readable values
+         * returned by methods such as {@code X500Principal.getName()}.
+         * Be aware that the underlying sources of distinguished names
+         * such as instances of {@code X509Certificate} are encoded in
+         * least significant to most significant order, so make sure
+         * the value passed here has the expected ordering of
+         * attributes.
          */
         public DName(String dName) {
             if (dName != null) {
@@ -374,18 +383,24 @@ public class SslCertificate {
 
                     for (int i = 0; i < oid.size(); i++) {
                         if (oid.elementAt(i).equals(X509Name.CN)) {
-                            mCName = (String) val.elementAt(i);
+                            if (mCName == null) {
+                                mCName = (String) val.elementAt(i);
+                            }
                             continue;
                         }
 
                         if (oid.elementAt(i).equals(X509Name.O)) {
-                            mOName = (String) val.elementAt(i);
-                            continue;
+                            if (mOName == null) {
+                                mOName = (String) val.elementAt(i);
+                                continue;
+                            }
                         }
 
                         if (oid.elementAt(i).equals(X509Name.OU)) {
-                            mUName = (String) val.elementAt(i);
-                            continue;
+                            if (mUName == null) {
+                                mUName = (String) val.elementAt(i);
+                                continue;
+                            }
                         }
                     }
                 } catch (IllegalArgumentException ex) {
@@ -402,21 +417,21 @@ public class SslCertificate {
         }
 
         /**
-         * @return The Common-name (CN) component of this name
+         * @return The most specific Common-name (CN) component of this name
          */
         public String getCName() {
             return mCName != null ? mCName : "";
         }
 
         /**
-         * @return The Organization (O) component of this name
+         * @return The most specific Organization (O) component of this name
          */
         public String getOName() {
             return mOName != null ? mOName : "";
         }
 
         /**
-         * @return The Organizational Unit (OU) component of this name
+         * @return The most specific Organizational Unit (OU) component of this name
          */
         public String getUName() {
             return mUName != null ? mUName : "";
