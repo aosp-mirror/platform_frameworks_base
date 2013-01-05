@@ -218,7 +218,7 @@ public final class BridgeTypedArray extends TypedArray {
             return defValue;
         }
 
-        if (s == null) {
+        if (s == null || s.length() == 0) {
             return defValue;
         }
 
