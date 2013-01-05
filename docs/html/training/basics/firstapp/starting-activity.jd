@@ -249,16 +249,29 @@ you won't need it for this app so you can remove it.</li>
   Keep this one the way it is.</li>
 </ul>
 
-<p>The class should look like this:</p>
+<p>Because the {@link android.app.ActionBar} APIs are available only on {@link
+android.os.Build.VERSION_CODES#HONEYCOMB} (API level 11) and higher, you must add a condition
+around the {@link android.app.Activity#getActionBar()} method to check the current platform version.
+Additionally, you must add the {@code &#64;SuppressLint("NewApi")} tag to the
+{@link android.app.Activity#onCreate onCreate()} method to avoid <a
+href="{@docRoot}tools/help/lint.html">lint</a> errors.</p>
+
+<p>The {@code DisplayMessageActivity} class should now look like this:</p>
 
 <pre>
 public class DisplayMessageActivity extends Activity {
+
+    &#64;SuppressLint("NewApi")
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Make sure we're running on Honeycomb or higher to use ActionBar APIs
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     &#64;Override

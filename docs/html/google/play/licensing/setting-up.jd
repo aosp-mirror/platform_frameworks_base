@@ -290,7 +290,7 @@ sources as your working set. If you are using a source-code management
 system, add and track the sources that are in the working location rather
 than those in default location in the SDK. </p>
 
-<p>Moving the library sources is important is because, when you later update the
+<p>Moving the library sources is important because when you later update the
 Licensing package, the SDK installs the new files to the same location as
 the older files. Moving your working library files to a safe location ensures
 that your work won't be inadvertently overwritten should you download a new

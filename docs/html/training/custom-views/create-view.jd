@@ -68,8 +68,8 @@ This constructor allows the layout editor to create and edit an instance of your
 
 <pre class="prettyprint">
 class PieChart extends View {
-    public PieChart(Context ctx, AttributeSet attrs) {
-        super(ctx, attrs);
+    public PieChart(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 }
 </pre>
@@ -104,7 +104,7 @@ enable this behavior in your custom view, you must:
 </p>
 
 <pre>
-&lt;resources>;
+&lt;resources>
    &lt;declare-styleable name="PieChart">
        &lt;attr name="showText" format="boolean" />
        &lt;attr name="labelPosition" format="enum">
@@ -189,8 +189,8 @@ enable this behavior in your custom view, you must:
             reads its attributes:</p>
 
 <pre>
-public PieChart(Context ctx, AttributeSet attrs) {
-   super(ctx, attrs);
+public PieChart(Context context, AttributeSet attrs) {
+   super(context, attrs);
    TypedArray a = context.getTheme().obtainStyledAttributes(
         attrs,
         R.styleable.PieChart,

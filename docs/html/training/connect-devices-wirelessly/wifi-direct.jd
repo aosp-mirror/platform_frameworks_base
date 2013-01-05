@@ -263,7 +263,7 @@ public void onReceive(Context context, Intent intent) {
         // asynchronous call and the calling activity is notified with a
         // callback on PeerListListener.onPeersAvailable()
         if (mManager != null) {
-            mManager.requestPeers(mChannel, peerListener);
+            mManager.requestPeers(mChannel, peerListListener);
         }
         Log.d(WiFiDirectActivity.TAG, "P2P peers changed");
     }...
