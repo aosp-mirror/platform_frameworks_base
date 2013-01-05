@@ -64,6 +64,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawTextOnPath",
     "DrawPosText",
     "DrawText",
+    "DrawRects",
     "ResetShader",
     "SetupShader",
     "ResetColorFilter",
@@ -631,6 +632,13 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float length = getFloat();
                 ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
                         text.text(), text.length(), count, paint);
+            }
+            break;
+            case DrawRects: {
+                int32_t count = 0;
+                float* rects = getFloats(count);
+                SkPaint* paint = getPaint(renderer);
+                ALOGD("%s%s %d, %p", (char*) indent, OP_NAMES[op], count / 4, paint);
             }
             break;
             case ResetShader: {
@@ -1277,6 +1285,14 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                         x, y, positions, paint, length);
             }
             break;
+            case DrawRects: {
+                int32_t count = 0;
+                float* rects = getFloats(count);
+                SkPaint* paint = getPaint(renderer);
+                DISPLAY_LIST_LOGD("%s%s %d, %p", (char*) indent, OP_NAMES[op], count, paint);
+                drawGlStatus |= renderer.drawRects(rects, count / 4, paint);
+            }
+            break;
             case ResetShader: {
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.resetShader();
@@ -1811,6 +1827,15 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
     }
     addFloat(length);
     addSkip(location);
+    return DrawGlInfo::kStatusDone;
+}
+
+status_t DisplayListRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
+    if (count <= 0) return DrawGlInfo::kStatusDone;
+
+    addOp(DisplayList::DrawRects);
+    addFloats(rects, count * 4);
+    addPaint(paint);
     return DrawGlInfo::kStatusDone;
 }
 
