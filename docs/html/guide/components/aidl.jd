@@ -208,7 +208,7 @@ YourInterface.Stub}) and declares all the methods from the {@code .aidl} file.</
 defines a few helper methods, most notably {@code asInterface()}, which takes an {@link
 android.os.IBinder} (usually the one passed to a client's {@link
 android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback method) and
-returns an instance of the stub interface. See the section <a href="#calling">Calling an IPC
+returns an instance of the stub interface. See the section <a href="#Calling">Calling an IPC
 Method</a> for more details on how to make this cast.</p>
 
 <p>To implement the interface generated from the {@code .aidl}, extend the generated {@link
