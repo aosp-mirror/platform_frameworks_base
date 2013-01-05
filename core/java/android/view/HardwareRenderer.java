@@ -1464,12 +1464,12 @@ public abstract class HardwareRenderer {
      */
     static class Gl20Renderer extends GlRenderer {
         // TODO: Convert dimensions to dp instead of px
-        private static final int PROFILE_DRAW_MARGIN = 1;
-        private static final int PROFILE_DRAW_WIDTH = 3;
-        private static final int[] PROFILE_DRAW_COLORS = { 0xff3e66cc, 0xffdc3912, 0xffe69800 };
+        private static final int PROFILE_DRAW_MARGIN = 0;
+        private static final int PROFILE_DRAW_WIDTH = 4;
+        private static final int[] PROFILE_DRAW_COLORS = { 0xcf3e66cc, 0xcfdc3912, 0xcfe69800 };
+        private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xcf5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
-        private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xff5faa4d;
         private static final int PROFILE_DRAW_PX_PER_MS = 10;
 
         private GLES20Canvas mGlCanvas;
@@ -1625,10 +1625,11 @@ public abstract class HardwareRenderer {
 
                     count++;
                 }
+                x += PROFILE_DRAW_MARGIN;
 
                 drawGraph(count);
                 drawCurrentFrame(current);
-                drawThreshold(x + PROFILE_DRAW_MARGIN);
+                drawThreshold(x);
             }
         }
 
