@@ -28,9 +28,9 @@ next.link=wifi-direct.html
 <h2>Try it out</h2>
 
 <div class="download-box">
-  <a href="{@docRoot}shareables/training/nsdchat.zip" class="button">Download
+  <a href="{@docRoot}shareables/training/NsdChat.zip" class="button">Download
     the sample app</a>
-  <p class="filename">nsdchat.zip</p>
+  <p class="filename">NsdChat.zip</p>
 </div>
 </p>
 
