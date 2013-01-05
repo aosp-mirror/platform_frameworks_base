@@ -93,7 +93,7 @@ href="{@docRoot}guide/topics/manifest/uses-permission-element.html"><code>&lt;us
 element as a child of <code>&lt;manifest&gt;</code>, as follows: </p>
 
 <p style="margin-left:2em;"><code>&lt;uses-permission
-android:name="com.android.vending.CHECK_LICENSE"&gt;</code></p>
+android:name="com.android.vending.CHECK_LICENSE" /&gt;</code></p>
 
 <p>For example, here's how the LVL sample application declares the permission:
 </p>
