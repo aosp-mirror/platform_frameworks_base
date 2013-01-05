@@ -1013,6 +1013,17 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDrawPath(int renderer, int path, int paint);
     private static native void nDrawRects(int renderer, int region, int paint);
 
+    void drawRects(float[] rects, int count, Paint paint) {
+        int modifiers = setupModifiers(paint, MODIFIER_COLOR_FILTER | MODIFIER_SHADER);
+        try {
+            nDrawRects(mRenderer, rects, count, paint.mNativePaint);
+        } finally {
+            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        }
+    }
+
+    private static native void nDrawRects(int renderer, float[] rects, int count, int paint);
+
     @Override
     public void drawPicture(Picture picture) {
         if (picture.createdFromStream) {

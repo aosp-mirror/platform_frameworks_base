@@ -1254,7 +1254,8 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     return !clip.intersects(transformed);
 }
 
-bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint) {
+bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom,
+        SkPaint* paint) {
     if (paint->getStyle() != SkPaint::kFill_Style) {
         float outset = paint->getStrokeWidth() * 0.5f;
         return quickReject(left - outset, top - outset, right + outset, bottom + outset);
@@ -3028,6 +3029,76 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
             drawLines(&points[0], pointsCount, &paintCopy);
         }
     }
+}
+
+status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) {
+        return DrawGlInfo::kStatusDone;
+    }
+
+    float left = FLT_MAX;
+    float top = FLT_MAX;
+    float right = FLT_MIN;
+    float bottom = FLT_MIN;
+
+    int vertexCount = 0;
+    Vertex mesh[count * 6];
+    Vertex* vertex = mesh;
+
+    for (int i = 0; i < count; i++) {
+        int index = i * 4;
+        float l = rects[index + 0];
+        float t = rects[index + 1];
+        float r = rects[index + 2];
+        float b = rects[index + 3];
+
+        if (!quickRejectNoScissor(left, top, right, bottom)) {
+            Vertex::set(vertex++, l, b);
+            Vertex::set(vertex++, l, t);
+            Vertex::set(vertex++, r, t);
+            Vertex::set(vertex++, l, b);
+            Vertex::set(vertex++, r, t);
+            Vertex::set(vertex++, r, b);
+
+            vertexCount += 6;
+
+            left = fminf(left, l);
+            top = fminf(top, t);
+            right = fmaxf(right, r);
+            bottom = fmaxf(bottom, b);
+        }
+    }
+
+    if (count == 0) return DrawGlInfo::kStatusDone;
+
+    int color = paint->getColor();
+    // If a shader is set, preserve only the alpha
+    if (mShader) {
+        color |= 0x00ffffff;
+    }
+    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
+
+    setupDraw();
+    setupDrawNoTexture();
+    setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
+    setupDrawShader();
+    setupDrawColorFilter();
+    setupDrawBlending(mode);
+    setupDrawProgram();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f);
+    setupDrawColorUniforms();
+    setupDrawShaderUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawVertices((GLvoid*) &mesh[0].position[0]);
+
+    if (hasLayer()) {
+        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+    }
+
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+    return DrawGlInfo::kStatusDrew;
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,

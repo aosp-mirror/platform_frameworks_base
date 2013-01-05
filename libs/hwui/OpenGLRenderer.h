@@ -201,6 +201,7 @@ public:
             const float* positions, SkPaint* paint);
     virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, SkPaint* paint, float length = -1.0f);
+    virtual status_t drawRects(const float* rects, int count, SkPaint* paint);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
@@ -215,6 +216,10 @@ public:
     virtual void setupPaintFilter(int clearBits, int setBits);
 
     SkPaint* filterPaint(SkPaint* paint);
+
+    ANDROID_API bool isCurrentTransformSimple() {
+        return mSnapshot->transform->isSimple();
+    }
 
     /**
      * Sets the alpha on the current snapshot. This alpha value will be modulated

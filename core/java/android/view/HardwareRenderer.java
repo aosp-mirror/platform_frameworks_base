@@ -88,10 +88,25 @@ public abstract class HardwareRenderer {
      * Possible values:
      * "true", to enable profiling
      * "false", to disable profiling
-     * 
+     *
      * @hide
      */
     public static final String PROFILE_PROPERTY = "debug.hwui.profile";
+
+    /**
+     * System property used to enable or disable hardware rendering profiling
+     * visualization. The default value of this property is assumed to be false.
+     *
+     * This property is only taken into account when {@link #PROFILE_PROPERTY} is
+     * turned on.
+     *
+     * Possible values:
+     * "true", to enable on screen profiling
+     * "false", to disable on screen profiling
+     *
+     * @hide
+     */
+    public static final String PROFILE_VISUALIZER_PROPERTY = "debug.hwui.profile_visualizer";
 
     /**
      * System property used to specify the number of frames to be used
@@ -342,7 +357,7 @@ public abstract class HardwareRenderer {
      * Notifies EGL that the frame is about to be rendered.
      * @param size
      */
-    private static void beginFrame(int[] size) {
+    static void beginFrame(int[] size) {
         nBeginFrame(size);
     }
 
@@ -648,10 +663,14 @@ public abstract class HardwareRenderer {
         boolean mUpdateDirtyRegions;
 
         boolean mProfileEnabled;
+        boolean mProfileVisualizerEnabled;
         float[] mProfileData;
         ReentrantLock mProfileLock;
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
-        
+
+        float[][] mProfileRects;
+        Paint mProfilePaint;
+
         boolean mDebugDirtyRegions;
         boolean mShowOverdraw;
 
@@ -698,6 +717,18 @@ public abstract class HardwareRenderer {
                     mProfileData = null;
                     mProfileLock = null;
                 }
+
+                mProfileRects = null;
+                mProfilePaint = null;
+            }
+
+            value = SystemProperties.getBoolean(PROFILE_VISUALIZER_PROPERTY, false);
+            if (value != mProfileVisualizerEnabled) {
+                changed = true;
+                mProfileVisualizerEnabled = value;
+
+                mProfileRects = null;
+                mProfilePaint = null;
             }
 
             value = SystemProperties.getBoolean(DEBUG_DIRTY_REGIONS_PROPERTY, false);
@@ -1175,23 +1206,7 @@ public abstract class HardwareRenderer {
                         mProfileLock.lock();
                     }
 
-                    // We had to change the current surface and/or context, redraw everything
-                    if (surfaceState == SURFACE_STATE_UPDATED) {
-                        dirty = null;
-                        beginFrame(null);
-                    } else {
-                        int[] size = mSurfaceSize;
-                        beginFrame(size);
-
-                        if (size[1] != mHeight || size[0] != mWidth) {
-                            mWidth = size[0];
-                            mHeight = size[1];
-
-                            canvas.setViewport(mWidth, mHeight);
-
-                            dirty = null;
-                        }
-                    }
+                    dirty = beginFrame(canvas, dirty, surfaceState);
 
                     int saveCount = 0;
                     int status = DisplayList.STATUS_DONE;
@@ -1201,63 +1216,19 @@ public abstract class HardwareRenderer {
                                 == View.PFLAG_INVALIDATED;
                         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
 
-                        long getDisplayListStartTime = 0;
-                        if (mProfileEnabled) {
-                            mProfileCurrentFrame += PROFILE_FRAME_DATA_COUNT;
-                            if (mProfileCurrentFrame >= mProfileData.length) {
-                                mProfileCurrentFrame = 0;
-                            }
-
-                            getDisplayListStartTime = System.nanoTime();
-                        }
-
+                        long buildDisplayListStartTime = startBuildDisplayListProfiling();
                         canvas.clearLayerUpdates();
 
-                        DisplayList displayList;
-                        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
-                        try {
-                            displayList = view.getDisplayList();
-                        } finally {
-                            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-                        }
+                        DisplayList displayList = buildDisplayList(view);
+                        status = prepareFrame(dirty);
 
-                        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "prepareFrame");
-                        try {
-                            status = onPreDraw(dirty);
-                        } finally {
-                            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-                        }
                         saveCount = canvas.save();
                         callbacks.onHardwarePreDraw(canvas);
 
-                        if (mProfileEnabled) {
-                            long now = System.nanoTime();
-                            float total = (now - getDisplayListStartTime) * 0.000001f;
-                            //noinspection PointlessArithmeticExpression
-                            mProfileData[mProfileCurrentFrame] = total;
-                        }
+                        endBuildDisplayListProfiling(buildDisplayListStartTime);
 
                         if (displayList != null) {
-                            long drawDisplayListStartTime = 0;
-                            if (mProfileEnabled) {
-                                drawDisplayListStartTime = System.nanoTime();
-                            }
-
-                            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
-                            try {
-                                status |= canvas.drawDisplayList(displayList, mRedrawClip,
-                                        DisplayList.FLAG_CLIP_CHILDREN);
-                            } finally {
-                                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-                            }
-
-                            if (mProfileEnabled) {
-                                long now = System.nanoTime();
-                                float total = (now - drawDisplayListStartTime) * 0.000001f;
-                                mProfileData[mProfileCurrentFrame + 1] = total;
-                            }
-
-                            handleFunctorStatus(attachInfo, status);
+                            status = drawDisplayList(attachInfo, canvas, displayList, status);
                         } else {
                             // Shouldn't reach here
                             view.draw(canvas);
@@ -1269,48 +1240,151 @@ public abstract class HardwareRenderer {
 
                         mFrameCount++;
 
-                        if (mDebugDirtyRegions) {
-                            if (mDebugPaint == null) {
-                                mDebugPaint = new Paint();
-                                mDebugPaint.setColor(0x7fff0000);
-                            }
-
-                            if (dirty != null && (mFrameCount & 1) == 0) {
-                                canvas.drawRect(dirty, mDebugPaint);
-                            }
-                        }
+                        debugDirtyRegions(dirty, canvas);
+                        drawProfileData();
                     }
 
                     onPostDraw();
 
-                    attachInfo.mIgnoreDirtyState = false;
-                    
-                    if ((status & DisplayList.STATUS_DREW) == DisplayList.STATUS_DREW) {
-                        long eglSwapBuffersStartTime = 0;
-                        if (mProfileEnabled) {
-                            eglSwapBuffersStartTime = System.nanoTime();
-                        }
-    
-                        sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
-    
-                        if (mProfileEnabled) {
-                            long now = System.nanoTime();
-                            float total = (now - eglSwapBuffersStartTime) * 0.000001f;
-                            mProfileData[mProfileCurrentFrame + 2] = total;
-                        }
-    
-                        checkEglErrors();
-                    }
+                    swapBuffers(status);
 
                     if (mProfileEnabled) {
                         mProfileLock.unlock();
                     }
 
+                    attachInfo.mIgnoreDirtyState = false;
                     return dirty == null;
                 }
             }
 
             return false;
+        }
+
+        abstract void drawProfileData();
+
+        private Rect beginFrame(HardwareCanvas canvas, Rect dirty, int surfaceState) {
+            // We had to change the current surface and/or context, redraw everything
+            if (surfaceState == SURFACE_STATE_UPDATED) {
+                dirty = null;
+                beginFrame(null);
+            } else {
+                int[] size = mSurfaceSize;
+                beginFrame(size);
+
+                if (size[1] != mHeight || size[0] != mWidth) {
+                    mWidth = size[0];
+                    mHeight = size[1];
+
+                    canvas.setViewport(mWidth, mHeight);
+
+                    dirty = null;
+                }
+            }
+
+            if (mProfileEnabled && mProfileVisualizerEnabled) dirty = null;
+
+            return dirty;
+        }
+
+        private long startBuildDisplayListProfiling() {
+            if (mProfileEnabled) {
+                mProfileCurrentFrame += PROFILE_FRAME_DATA_COUNT;
+                if (mProfileCurrentFrame >= mProfileData.length) {
+                    mProfileCurrentFrame = 0;
+                }
+
+                return System.nanoTime();
+            }
+            return 0;
+        }
+
+        private void endBuildDisplayListProfiling(long getDisplayListStartTime) {
+            if (mProfileEnabled) {
+                long now = System.nanoTime();
+                float total = (now - getDisplayListStartTime) * 0.000001f;
+                //noinspection PointlessArithmeticExpression
+                mProfileData[mProfileCurrentFrame] = total;
+            }
+        }
+
+        private static DisplayList buildDisplayList(View view) {
+            DisplayList displayList;
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
+            try {
+                displayList = view.getDisplayList();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+            return displayList;
+        }
+
+        private int prepareFrame(Rect dirty) {
+            int status;
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "prepareFrame");
+            try {
+                status = onPreDraw(dirty);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+            return status;
+        }
+
+        private int drawDisplayList(View.AttachInfo attachInfo, HardwareCanvas canvas,
+                DisplayList displayList, int status) {
+
+            long drawDisplayListStartTime = 0;
+            if (mProfileEnabled) {
+                drawDisplayListStartTime = System.nanoTime();
+            }
+
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawDisplayList");
+            try {
+                status |= canvas.drawDisplayList(displayList, mRedrawClip,
+                        DisplayList.FLAG_CLIP_CHILDREN);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+
+            if (mProfileEnabled) {
+                long now = System.nanoTime();
+                float total = (now - drawDisplayListStartTime) * 0.000001f;
+                mProfileData[mProfileCurrentFrame + 1] = total;
+            }
+
+            handleFunctorStatus(attachInfo, status);
+            return status;
+        }
+
+        private void swapBuffers(int status) {
+            if ((status & DisplayList.STATUS_DREW) == DisplayList.STATUS_DREW) {
+                long eglSwapBuffersStartTime = 0;
+                if (mProfileEnabled) {
+                    eglSwapBuffersStartTime = System.nanoTime();
+                }
+
+                sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+
+                if (mProfileEnabled) {
+                    long now = System.nanoTime();
+                    float total = (now - eglSwapBuffersStartTime) * 0.000001f;
+                    mProfileData[mProfileCurrentFrame + 2] = total;
+                }
+
+                checkEglErrors();
+            }
+        }
+
+        private void debugDirtyRegions(Rect dirty, HardwareCanvas canvas) {
+            if (mDebugDirtyRegions) {
+                if (mDebugPaint == null) {
+                    mDebugPaint = new Paint();
+                    mDebugPaint.setColor(0x7fff0000);
+                }
+
+                if (dirty != null && (mFrameCount & 1) == 0) {
+                    canvas.drawRect(dirty, mDebugPaint);
+                }
+            }
         }
 
         private void handleFunctorStatus(View.AttachInfo attachInfo, int status) {
@@ -1389,6 +1463,15 @@ public abstract class HardwareRenderer {
      * Hardware renderer using OpenGL ES 2.0.
      */
     static class Gl20Renderer extends GlRenderer {
+        // TODO: Convert dimensions to dp instead of px
+        private static final int PROFILE_DRAW_MARGIN = 1;
+        private static final int PROFILE_DRAW_WIDTH = 3;
+        private static final int[] PROFILE_DRAW_COLORS = { 0xff3e66cc, 0xffdc3912, 0xffe69800 };
+        private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
+        private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
+        private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xff5faa4d;
+        private static final int PROFILE_DRAW_PX_PER_MS = 10;
+
         private GLES20Canvas mGlCanvas;
 
         private static EGLSurface sPbuffer;
@@ -1491,6 +1574,94 @@ public abstract class HardwareRenderer {
         @Override
         void onPostDraw() {
             mGlCanvas.onPostDraw();
+        }
+
+        @Override
+        void drawProfileData() {
+            if (mProfileEnabled && mProfileVisualizerEnabled) {
+                initProfileDrawData();
+
+                int x = 0;
+                int count = 0;
+                int current = 0;
+
+                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                    if (mProfileData[i] < 0.0f) break;
+
+                    int index = count * 4;
+                    if (i == mProfileCurrentFrame) current = index;
+
+                    x += PROFILE_DRAW_MARGIN;
+                    int x2 = x + PROFILE_DRAW_WIDTH;
+
+                    int y2 = mHeight;
+                    int y1 = (int) (y2 - mProfileData[i] * PROFILE_DRAW_PX_PER_MS);
+
+                    float[] r = mProfileRects[0];
+                    r[index] = x;
+                    r[index + 1] = y1;
+                    r[index + 2] = x2;
+                    r[index + 3] = y2;
+
+                    y2 = y1;
+                    y1 = (int) (y2 - mProfileData[i + 1] * PROFILE_DRAW_PX_PER_MS);
+
+                    r = mProfileRects[1];
+                    r[index] = x;
+                    r[index + 1] = y1;
+                    r[index + 2] = x2;
+                    r[index + 3] = y2;
+
+                    y2 = y1;
+                    y1 = (int) (y2 - mProfileData[i + 2] * PROFILE_DRAW_PX_PER_MS);
+
+                    r = mProfileRects[2];
+                    r[index] = x;
+                    r[index + 1] = y1;
+                    r[index + 2] = x2;
+                    r[index + 3] = y2;
+
+                    x += PROFILE_DRAW_WIDTH;
+
+                    count++;
+                }
+
+                drawGraph(count);
+                drawCurrentFrame(current);
+                drawThreshold(x + PROFILE_DRAW_MARGIN);
+            }
+        }
+
+        private void drawGraph(int count) {
+            for (int i = 0; i < mProfileRects.length; i++) {
+                mProfilePaint.setColor(PROFILE_DRAW_COLORS[i]);
+                mGlCanvas.drawRects(mProfileRects[i], count, mProfilePaint);
+            }
+        }
+
+        private void drawCurrentFrame(int index) {
+            mProfilePaint.setColor(PROFILE_DRAW_CURRENT_FRAME_COLOR);
+            mGlCanvas.drawRect(mProfileRects[2][index], mProfileRects[2][index + 1],
+                    mProfileRects[2][index + 2], mProfileRects[0][index + 3], mProfilePaint);
+        }
+
+        private void drawThreshold(int x) {
+            mProfilePaint.setColor(PROFILE_DRAW_THRESHOLD_COLOR);
+            mProfilePaint.setStrokeWidth(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH);
+            int y = mHeight - 16 * 10;
+            mGlCanvas.drawLine(0.0f, y, x, y, mProfilePaint);
+            mProfilePaint.setStrokeWidth(1.0f);
+        }
+
+        private void initProfileDrawData() {
+            if (mProfileRects == null) {
+                mProfileRects = new float[PROFILE_FRAME_DATA_COUNT][];
+                for (int i = 0; i < mProfileRects.length; i++) {
+                    int count = mProfileData.length / PROFILE_FRAME_DATA_COUNT;
+                    mProfileRects[i] = new float[count * 4];
+                }
+                mProfilePaint = new Paint();
+            }
         }
 
         @Override
