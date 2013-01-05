@@ -288,7 +288,7 @@ String selection = FeedReaderContract.FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LI
 // Specify arguments in placeholder order.
 String[] selelectionArgs = { String.valueOf(rowId) };
 // Issue SQL statement.
-db.delete(table_name, mySelection, selectionArgs);
+db.delete(table_name, selection, selectionArgs);
 </pre>
 
 

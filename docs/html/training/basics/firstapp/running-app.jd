@@ -52,7 +52,27 @@ project:</p>
   <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
 the fundamental characteristics of the app and defines each of
 its components. You'll learn about various declarations in this file as you read more training
-classes.</dd>
+classes.
+  <p>One of the most important elements your manifest should include is the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a>
+element. This declares your app's compatibility with different Android versions using the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+and <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code android:targetSdkVersion}</a>
+attributes. For your first app, it should look like this:</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ... >
+    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
+    ...
+&lt;/manifest>
+</pre>
+<p>You should always set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code android:targetSdkVersion}</a>
+as high as possible and test your app on the corresponding platform version. For more information,
+read <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
+Platform Versions</a>.</p>
+
+  </dd>
   <dt><code>src/</code></dt>
   <dd>Directory for your app's main source files. By default, it includes an {@link
 android.app.Activity} class that runs when your app is launched using the app icon.</dd>
