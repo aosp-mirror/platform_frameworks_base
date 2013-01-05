@@ -19,6 +19,8 @@ package android.net;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.EnumMap;
 
 /**
@@ -312,7 +314,9 @@ public class NetworkInfo implements Parcelable {
         }
     }
 
-    void setRoaming(boolean isRoaming) {
+    /** {@hide} */
+    @VisibleForTesting
+    public void setRoaming(boolean isRoaming) {
         synchronized (this) {
             mIsRoaming = isRoaming;
         }
