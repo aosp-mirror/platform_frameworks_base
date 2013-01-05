@@ -449,14 +449,38 @@ static void android_view_GLES20Canvas_drawArc(JNIEnv* env, jobject clazz,
     renderer->drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
 }
 
-static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject clazz,
+static void android_view_GLES20Canvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, SkRegion* region, SkPaint* paint) {
-    SkRegion::Iterator it(*region);
-    while (!it.done()) {
-        const SkIRect& r = it.rect();
-        renderer->drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, paint);
-        it.next();
+    if (paint->getStyle() != SkPaint::kFill_Style ||
+            (paint->isAntiAlias() && !renderer->isCurrentTransformSimple())) {
+        SkRegion::Iterator it(*region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            renderer->drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, paint);
+            it.next();
+        }
+    } else {
+        int count = 0;
+        Vector<float> rects;
+        SkRegion::Iterator it(*region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            rects.push(r.fLeft);
+            rects.push(r.fTop);
+            rects.push(r.fRight);
+            rects.push(r.fBottom);
+            count++;
+            it.next();
+        }
+        renderer->drawRects(rects.array(), count, paint);
     }
+}
+
+static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jfloatArray rects, jint count, SkPaint* paint) {
+    jfloat* storage = env->GetFloatArrayElements(rects, NULL);
+    renderer->drawRects(storage, count, paint);
+    env->ReleaseFloatArrayElements(rects, storage, 0);
 }
 
 static void android_view_GLES20Canvas_drawPoints(JNIEnv* env, jobject clazz,
@@ -958,7 +982,8 @@ static JNINativeMethod gMethods[] = {
 
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
-    { "nDrawRects",         "(III)V",          (void*) android_view_GLES20Canvas_drawRects },
+    { "nDrawRects",         "(III)V",          (void*) android_view_GLES20Canvas_drawRegionAsRects },
+    { "nDrawRects",         "(I[FII)V",        (void*) android_view_GLES20Canvas_drawRects },
     { "nDrawRoundRect",     "(IFFFFFFI)V",     (void*) android_view_GLES20Canvas_drawRoundRect },
     { "nDrawCircle",        "(IFFFI)V",        (void*) android_view_GLES20Canvas_drawCircle },
     { "nDrawOval",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawOval },
