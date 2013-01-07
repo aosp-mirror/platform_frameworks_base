@@ -289,7 +289,7 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * Like {@link #getActivity(Context, int, Intent, int)}, but allows an
-     * array of Intents to be supplied.  The first Intent in the array is
+     * array of Intents to be supplied.  The last Intent in the array is
      * taken as the primary key for the PendingIntent, like the single Intent
      * given to {@link #getActivity(Context, int, Intent, int)}.  Upon sending
      * the resulting PendingIntent, all of the Intents are started in the same
@@ -335,7 +335,7 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * Like {@link #getActivity(Context, int, Intent, int)}, but allows an
-     * array of Intents to be supplied.  The first Intent in the array is
+     * array of Intents to be supplied.  The last Intent in the array is
      * taken as the primary key for the PendingIntent, like the single Intent
      * given to {@link #getActivity(Context, int, Intent, int)}.  Upon sending
      * the resulting PendingIntent, all of the Intents are started in the same
