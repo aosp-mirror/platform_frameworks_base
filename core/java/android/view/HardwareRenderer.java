@@ -716,9 +716,7 @@ public abstract class HardwareRenderer {
 
                 if (mProfileEnabled) {
                     Log.d(LOG_TAG, "Profiling hardware renderer");
-                }
 
-                if (mProfileEnabled) {
                     int maxProfileFrames = SystemProperties.getInt(PROFILE_MAXFRAMES_PROPERTY,
                             PROFILE_MAX_FRAMES);
                     mProfileData = new float[maxProfileFrames * PROFILE_FRAME_DATA_COUNT];
@@ -732,8 +730,7 @@ public abstract class HardwareRenderer {
                     mProfileLock = null;
                 }
 
-                mProfileRects = null;
-                mProfilePaint = null;
+                mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
             }
 
             value = SystemProperties.getBoolean(DEBUG_DIRTY_REGIONS_PROPERTY, false);
