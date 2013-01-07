@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import com.google.android.gles_jni.EGLImpl;
 
@@ -1241,7 +1242,7 @@ public abstract class HardwareRenderer {
                         mFrameCount++;
 
                         debugDirtyRegions(dirty, canvas);
-                        drawProfileData();
+                        drawProfileData(attachInfo);
                     }
 
                     onPostDraw();
@@ -1260,7 +1261,7 @@ public abstract class HardwareRenderer {
             return false;
         }
 
-        abstract void drawProfileData();
+        abstract void drawProfileData(View.AttachInfo attachInfo);
 
         private Rect beginFrame(HardwareCanvas canvas, Rect dirty, int surfaceState) {
             // We had to change the current surface and/or context, redraw everything
@@ -1465,14 +1466,16 @@ public abstract class HardwareRenderer {
     static class Gl20Renderer extends GlRenderer {
         // TODO: Convert dimensions to dp instead of px
         private static final int PROFILE_DRAW_MARGIN = 0;
-        private static final int PROFILE_DRAW_WIDTH = 4;
+        private static final int PROFILE_DRAW_WIDTH = 3;
         private static final int[] PROFILE_DRAW_COLORS = { 0xcf3e66cc, 0xcfdc3912, 0xcfe69800 };
         private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xcf5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
-        private static final int PROFILE_DRAW_PX_PER_MS = 10;
+        private static final int PROFILE_DRAW_PX_PER_MS = 7;
 
         private GLES20Canvas mGlCanvas;
+
+        private DisplayMetrics mDisplayMetrics;
 
         private static EGLSurface sPbuffer;
         private static final Object[] sPbufferLock = new Object[0];
@@ -1577,9 +1580,13 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void drawProfileData() {
+        void drawProfileData(View.AttachInfo attachInfo) {
             if (mProfileEnabled && mProfileVisualizerEnabled) {
-                initProfileDrawData();
+                initProfileDrawData(attachInfo);
+
+                final int pxPerMs = (int) (PROFILE_DRAW_PX_PER_MS * mDisplayMetrics.density + 0.5f);
+                final int margin = (int) (PROFILE_DRAW_MARGIN * mDisplayMetrics.density + 0.5f);
+                final int width = (int) (PROFILE_DRAW_WIDTH * mDisplayMetrics.density + 0.5f);
 
                 int x = 0;
                 int count = 0;
@@ -1591,11 +1598,11 @@ public abstract class HardwareRenderer {
                     int index = count * 4;
                     if (i == mProfileCurrentFrame) current = index;
 
-                    x += PROFILE_DRAW_MARGIN;
-                    int x2 = x + PROFILE_DRAW_WIDTH;
+                    x += margin;
+                    int x2 = x + width;
 
                     int y2 = mHeight;
-                    int y1 = (int) (y2 - mProfileData[i] * PROFILE_DRAW_PX_PER_MS);
+                    int y1 = (int) (y2 - mProfileData[i] * pxPerMs);
 
                     float[] r = mProfileRects[0];
                     r[index] = x;
@@ -1604,7 +1611,7 @@ public abstract class HardwareRenderer {
                     r[index + 3] = y2;
 
                     y2 = y1;
-                    y1 = (int) (y2 - mProfileData[i + 1] * PROFILE_DRAW_PX_PER_MS);
+                    y1 = (int) (y2 - mProfileData[i + 1] * pxPerMs);
 
                     r = mProfileRects[1];
                     r[index] = x;
@@ -1613,7 +1620,7 @@ public abstract class HardwareRenderer {
                     r[index + 3] = y2;
 
                     y2 = y1;
-                    y1 = (int) (y2 - mProfileData[i + 2] * PROFILE_DRAW_PX_PER_MS);
+                    y1 = (int) (y2 - mProfileData[i + 2] * pxPerMs);
 
                     r = mProfileRects[2];
                     r[index] = x;
@@ -1621,15 +1628,15 @@ public abstract class HardwareRenderer {
                     r[index + 2] = x2;
                     r[index + 3] = y2;
 
-                    x += PROFILE_DRAW_WIDTH;
+                    x += width;
 
                     count++;
                 }
-                x += PROFILE_DRAW_MARGIN;
+                x += margin;
 
                 drawGraph(count);
                 drawCurrentFrame(current);
-                drawThreshold(x);
+                drawThreshold(x, pxPerMs);
             }
         }
 
@@ -1646,15 +1653,16 @@ public abstract class HardwareRenderer {
                     mProfileRects[2][index + 2], mProfileRects[0][index + 3], mProfilePaint);
         }
 
-        private void drawThreshold(int x) {
+        private void drawThreshold(int x, int pxPerMs) {
             mProfilePaint.setColor(PROFILE_DRAW_THRESHOLD_COLOR);
-            mProfilePaint.setStrokeWidth(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH);
-            int y = mHeight - 16 * 10;
+            mProfilePaint.setStrokeWidth((int)
+                    (PROFILE_DRAW_THRESHOLD_STROKE_WIDTH * mDisplayMetrics.density + 0.5f));
+            int y = mHeight - 16 * pxPerMs;
             mGlCanvas.drawLine(0.0f, y, x, y, mProfilePaint);
             mProfilePaint.setStrokeWidth(1.0f);
         }
 
-        private void initProfileDrawData() {
+        private void initProfileDrawData(View.AttachInfo attachInfo) {
             if (mProfileRects == null) {
                 mProfileRects = new float[PROFILE_FRAME_DATA_COUNT][];
                 for (int i = 0; i < mProfileRects.length; i++) {
@@ -1663,6 +1671,11 @@ public abstract class HardwareRenderer {
                 }
                 mProfilePaint = new Paint();
             }
+
+            if (mDisplayMetrics == null) {
+                mDisplayMetrics = new DisplayMetrics();
+            }
+            attachInfo.mDisplay.getMetrics(mDisplayMetrics);
         }
 
         @Override
