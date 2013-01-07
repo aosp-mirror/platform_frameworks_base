@@ -1465,14 +1465,13 @@ public abstract class HardwareRenderer {
      * Hardware renderer using OpenGL ES 2.0.
      */
     static class Gl20Renderer extends GlRenderer {
-        // TODO: Convert dimensions to dp instead of px
         private static final int PROFILE_DRAW_MARGIN = 0;
         private static final int PROFILE_DRAW_WIDTH = 3;
         private static final int[] PROFILE_DRAW_COLORS = { 0xcf3e66cc, 0xcfdc3912, 0xcfe69800 };
         private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xcf5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
         private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
-        private static final int PROFILE_DRAW_PX_PER_MS = 7;
+        private static final int PROFILE_DRAW_DP_PER_MS = 7;
 
         private GLES20Canvas mGlCanvas;
 
@@ -1585,7 +1584,7 @@ public abstract class HardwareRenderer {
             if (mProfileEnabled && mProfileVisualizerEnabled) {
                 initProfileDrawData(attachInfo);
 
-                final int pxPerMs = (int) (PROFILE_DRAW_PX_PER_MS * mDisplayMetrics.density + 0.5f);
+                final int pxPerMs = (int) (PROFILE_DRAW_DP_PER_MS * mDisplayMetrics.density + 0.5f);
                 final int margin = (int) (PROFILE_DRAW_MARGIN * mDisplayMetrics.density + 0.5f);
                 final int width = (int) (PROFILE_DRAW_WIDTH * mDisplayMetrics.density + 0.5f);
 
