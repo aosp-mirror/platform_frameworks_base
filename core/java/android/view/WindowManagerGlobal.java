@@ -160,6 +160,29 @@ public final class WindowManagerGlobal {
         }
     }
 
+    public String[] getViewRootNames() {
+        synchronized (mLock) {
+            if (mRoots == null) return new String[0];
+            String[] mViewRoots = new String[mRoots.length];
+            int i = 0;
+            for (ViewRootImpl root : mRoots) {
+                mViewRoots[i++] = getWindowName(root);
+            }
+            return mViewRoots;
+        }
+    }
+
+    public View getRootView(String name) {
+        synchronized (mLock) {
+            if (mRoots == null) return null;
+            for (ViewRootImpl root : mRoots) {
+                if (name.equals(getWindowName(root))) return root.getView();
+            }
+        }
+
+        return null;
+    }
+
     public void addView(View view, ViewGroup.LayoutParams params,
             Display display, Window parentWindow) {
         if (view == null) {
