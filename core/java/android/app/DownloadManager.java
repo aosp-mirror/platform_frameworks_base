@@ -499,7 +499,7 @@ public class DownloadManager {
                             " already exists and is not a directory");
                 }
             } else {
-                if (!file.mkdir()) {
+                if (!file.mkdirs()) {
                     throw new IllegalStateException("Unable to create directory: "+
                             file.getAbsolutePath());
                 }
