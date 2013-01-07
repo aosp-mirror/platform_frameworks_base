@@ -88,26 +88,22 @@ public abstract class HardwareRenderer {
      *
      * Possible values:
      * "true", to enable profiling
+     * "visual", to enable profiling and visualize the results on screen
      * "false", to disable profiling
+     *
+     * @see #PROFILE_PROPERTY_VISUALIZE
      *
      * @hide
      */
     public static final String PROFILE_PROPERTY = "debug.hwui.profile";
 
     /**
-     * System property used to enable or disable hardware rendering profiling
-     * visualization. The default value of this property is assumed to be false.
-     *
-     * This property is only taken into account when {@link #PROFILE_PROPERTY} is
-     * turned on.
-     *
-     * Possible values:
-     * "true", to enable on screen profiling
-     * "false", to disable on screen profiling
+     * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
+     * value, profiling data will be visualized on screen.
      *
      * @hide
      */
-    public static final String PROFILE_VISUALIZER_PROPERTY = "debug.hwui.profile_visualizer";
+    public static final String PROFILE_PROPERTY_VISUALIZE = "visual";
 
     /**
      * System property used to specify the number of frames to be used
@@ -694,9 +690,26 @@ public abstract class HardwareRenderer {
 
         @Override
         boolean loadSystemProperties(Surface surface) {
+            boolean value;
             boolean changed = false;
 
-            boolean value = SystemProperties.getBoolean(PROFILE_PROPERTY, false);
+            String profiling = SystemProperties.get(PROFILE_PROPERTY);
+            value = PROFILE_PROPERTY_VISUALIZE.equalsIgnoreCase(profiling);
+
+            if (value != mProfileVisualizerEnabled) {
+                changed = true;
+                mProfileVisualizerEnabled = value;
+
+                mProfileRects = null;
+                mProfilePaint = null;
+            }
+
+            // If on-screen profiling is not enabled, we need to check whether
+            // console profiling only is enabled
+            if (!value) {
+                value = Boolean.parseBoolean(profiling);
+            }
+
             if (value != mProfileEnabled) {
                 changed = true;
                 mProfileEnabled = value;
@@ -718,15 +731,6 @@ public abstract class HardwareRenderer {
                     mProfileData = null;
                     mProfileLock = null;
                 }
-
-                mProfileRects = null;
-                mProfilePaint = null;
-            }
-
-            value = SystemProperties.getBoolean(PROFILE_VISUALIZER_PROPERTY, false);
-            if (value != mProfileVisualizerEnabled) {
-                changed = true;
-                mProfileVisualizerEnabled = value;
 
                 mProfileRects = null;
                 mProfilePaint = null;
