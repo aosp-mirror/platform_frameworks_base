@@ -98,6 +98,7 @@ public abstract class WindowOrientationListener {
             if (LOG) {
                 Log.d(TAG, "WindowOrientationListener enabled");
             }
+            mSensorEventListener.reset();
             mSensorManager.registerListener(mSensorEventListener, mSensor, mRate);
             mEnabled = true;
         }
