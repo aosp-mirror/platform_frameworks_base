@@ -314,7 +314,7 @@ to navigate backward:</p>
 &#64;Override
 public boolean {@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown}(int keyCode, KeyEvent event) {
     // Check if the key event was the Back button and if there's history
-    if ((keyCode == KeyEvent.KEYCODE_BACK) &amp;&amp; myWebView.{@link android.webkit.WebView#canGoBack() canGoBack}() {
+    if ((keyCode == KeyEvent.KEYCODE_BACK) &amp;&amp; myWebView.{@link android.webkit.WebView#canGoBack() canGoBack}()) {
         myWebView.{@link android.webkit.WebView#goBack() goBack}();
         return true;
     }
