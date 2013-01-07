@@ -22,15 +22,19 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = PhoneStatusBar.DEBUG;
+    private static final boolean DEBUG_GESTURES = true;
 
     PhoneStatusBar mBar;
     int mScrimColor;
@@ -175,7 +179,17 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return mBar.interceptTouchEvent(event) || super.onTouchEvent(event);
+        boolean barConsumedEvent = mBar.interceptTouchEvent(event);
+
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
+                        barConsumedEvent ? 1 : 0);
+            }
+        }
+
+        return barConsumedEvent || super.onTouchEvent(event);
     }
 
     @Override
