@@ -65,6 +65,8 @@ class PackageSettingBase extends GrantedPermissions {
     boolean permissionsFixed;
     boolean haveGids;
 
+    PackageKeySetData keySetData = new PackageKeySetData();
+
     private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
 
     // Whether this package is currently stopped, thus can not be
@@ -120,6 +122,9 @@ class PackageSettingBase extends GrantedPermissions {
         origPackage = base.origPackage;
 
         installerPackageName = base.installerPackageName;
+
+        keySetData = new PackageKeySetData(base.keySetData);
+
     }
 
     void init(File codePath, File resourcePath, String nativeLibraryPathString,
@@ -170,6 +175,7 @@ class PackageSettingBase extends GrantedPermissions {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
         }
         installStatus = base.installStatus;
+        keySetData = base.keySetData;
     }
 
     private PackageUserState modifyUserState(int userId) {
