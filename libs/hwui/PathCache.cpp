@@ -93,9 +93,6 @@ PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     PathCacheEntry entry(path, paint);
     PathTexture* texture = mCache.get(entry);
 
-    float left, top, offset;
-    uint32_t width, height;
-
     if (!texture) {
         texture = addTexture(entry, path, paint);
     } else if (path->getGenerationID() != texture->generation) {

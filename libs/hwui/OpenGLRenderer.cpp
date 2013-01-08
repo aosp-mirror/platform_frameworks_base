@@ -1716,7 +1716,6 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
         return DrawGlInfo::kStatusDone;
     }
 
-    // TODO: We should compute the bounding box when recording the display list
     float left = FLT_MAX;
     float top = FLT_MAX;
     float right = FLT_MIN;
@@ -1754,7 +1753,6 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
             TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
             TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
 
-            // TODO: This could be optimized to avoid unnecessary ops
             left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
             top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
             right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
@@ -2453,7 +2451,8 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
     }
 
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
-    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 || p->getStrokeCap() != SkPaint::kButt_Cap || useCenter) {
+    if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != 0 ||
+            p->getStrokeCap() != SkPaint::kButt_Cap || useCenter) {
         mCaches.activeTexture(0);
         const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
@@ -2577,16 +2576,15 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
-            paint->getTextSize());
+    fontRenderer.setFont(paint, *mSnapshot->transform);
 
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
     if (CC_UNLIKELY(mHasShadow)) {
-        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer, alpha, mode,
-                0.0f, 0.0f);
+        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
+                alpha, mode, 0.0f, 0.0f);
     }
 
     // Pick the appropriate texture filtering
@@ -2655,6 +2653,14 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return DrawGlInfo::kStatusDone;
     }
 
+#if DEBUG_GLYPHS
+    ALOGD("OpenGLRenderer drawText() with FontID=%d",
+            SkTypeface::UniqueID(paint->getTypeface()));
+#endif
+
+    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
+    fontRenderer.setFont(paint, *mSnapshot->transform);
+
     const float oldX = x;
     const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();
@@ -2662,15 +2668,6 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
     }
-
-#if DEBUG_GLYPHS
-    ALOGD("OpenGLRenderer drawText() with FontID=%d",
-            SkTypeface::UniqueID(paint->getTypeface()));
-#endif
-
-    FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
-            paint->getTextSize());
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2744,8 +2741,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
-    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
-            paint->getTextSize());
+    fontRenderer.setFont(paint, *mSnapshot->transform);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2789,7 +2785,6 @@ status_t OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
     mCaches.activeTexture(0);
 
-    // TODO: Perform early clip test before we rasterize the path
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return DrawGlInfo::kStatusDone;
     const AutoTexture autoCleanup(texture);

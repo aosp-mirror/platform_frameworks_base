@@ -102,9 +102,6 @@ public:
      */
     void dump();
 
-private:
-    void deleteLayer(Layer* layer);
-
     struct LayerEntry {
         LayerEntry():
             mLayer(NULL), mWidth(0), mHeight(0) {
@@ -119,15 +116,14 @@ private:
             mLayer(layer), mWidth(layer->getWidth()), mHeight(layer->getHeight()) {
         }
 
-        bool operator<(const LayerEntry& rhs) const {
-            if (mWidth == rhs.mWidth) {
-                return mHeight < rhs.mHeight;
-            }
-            return mWidth < rhs.mWidth;
+        static int compare(const LayerEntry& lhs, const LayerEntry& rhs);
+
+        bool operator==(const LayerEntry& other) const {
+            return compare(*this, other) == 0;
         }
 
-        bool operator==(const LayerEntry& rhs) const {
-            return mWidth == rhs.mWidth && mHeight == rhs.mHeight;
+        bool operator!=(const LayerEntry& other) const {
+            return compare(*this, other) != 0;
         }
 
         Layer* mLayer;
@@ -135,11 +131,23 @@ private:
         uint32_t mHeight;
     }; // struct LayerEntry
 
+private:
+    void deleteLayer(Layer* layer);
+
     SortedList<LayerEntry> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
 }; // class LayerCache
+
+inline int strictly_order_type(const LayerCache::LayerEntry& lhs,
+        const LayerCache::LayerEntry& rhs) {
+    return LayerCache::LayerEntry::compare(lhs, rhs) < 0;
+}
+
+inline int compare_type(const LayerCache::LayerEntry& lhs, const LayerCache::LayerEntry& rhs) {
+    return LayerCache::LayerEntry::compare(lhs, rhs);
+}
 
 }; // namespace uirenderer
 }; // namespace android

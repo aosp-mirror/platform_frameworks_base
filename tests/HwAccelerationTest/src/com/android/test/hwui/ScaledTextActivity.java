@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.os.Bundle;
 import android.view.View;
 
@@ -43,15 +44,27 @@ public class ScaledTextActivity extends Activity {
     }
 
     public static class ScaledTextView extends View {
+        private static final String TEXT = "Hello libhwui! ";
+
         private final Paint mPaint;
+        private final Paint mShadowPaint;
+        private final Path mPath;
+
         private float mScale = 1.0f;
 
         public ScaledTextView(Context c) {
             super(c);
 
+            mPath = makePath();
+
             mPaint = new Paint();
             mPaint.setAntiAlias(true);
             mPaint.setTextSize(20.0f);
+
+            mShadowPaint = new Paint();
+            mShadowPaint.setAntiAlias(true);
+            mShadowPaint.setShadowLayer(3.0f, 0.0f, 3.0f, 0xff000000);
+            mShadowPaint.setTextSize(20.0f);
         }
 
         public float getTextScale() {
@@ -63,17 +76,47 @@ public class ScaledTextActivity extends Activity {
             invalidate();
         }
 
+        private static Path makePath() {
+            Path path = new Path();
+            buildPath(path);
+            return path;
+        }
+
+        private static void buildPath(Path path) {
+            path.moveTo(0.0f, 0.0f);
+            path.cubicTo(0.0f, 0.0f, 100.0f, 150.0f, 100.0f, 200.0f);
+            path.cubicTo(100.0f, 200.0f, 50.0f, 300.0f, -80.0f, 200.0f);
+            path.cubicTo(-80.0f, 200.0f, 100.0f, 200.0f, 200.0f, 0.0f);
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             canvas.drawARGB(255, 255, 255, 255);
 
-            canvas.drawText("Hello libhwui!", 30.0f, 30.0f, mPaint);
+            canvas.drawText(TEXT, 30.0f, 30.0f, mPaint);
+
             canvas.translate(0.0f, 50.0f);
+
             canvas.save();
             canvas.scale(mScale, mScale);
-            canvas.drawText("Hello libhwui!", 30.0f, 30.0f, mPaint);
+            canvas.drawText(TEXT, 30.0f, 30.0f, mPaint);
             canvas.restore();
+
+            canvas.translate(0.0f, 250.0f);
+            canvas.save();
+            canvas.scale(3.0f, 3.0f);
+            canvas.drawText(TEXT, 30.0f, 30.0f, mShadowPaint);
+            canvas.translate(100.0f, 0.0f);
+//            canvas.drawTextOnPath(TEXT + TEXT + TEXT, mPath, 0.0f, 0.0f, mPaint);
+            canvas.restore();
+
+            float width = mPaint.measureText(TEXT);
+
+            canvas.translate(500.0f, 0.0f);
+            canvas.rotate(45.0f, width * 3.0f / 2.0f, 0.0f);
+            canvas.scale(3.0f, 3.0f);
+            canvas.drawText(TEXT, 30.0f, 30.0f, mPaint);
         }
     }
 }

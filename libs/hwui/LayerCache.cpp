@@ -67,6 +67,14 @@ void LayerCache::setMaxSize(uint32_t maxSize) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
+int LayerCache::LayerEntry::compare(const LayerCache::LayerEntry& lhs,
+        const LayerCache::LayerEntry& rhs) {
+    int deltaInt = int(lhs.mWidth) - int(rhs.mWidth);
+    if (deltaInt != 0) return deltaInt;
+
+    return int(lhs.mHeight) - int(rhs.mHeight);
+}
+
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
         LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
