@@ -118,8 +118,8 @@ Play&trade; Store app."
 <p>You may use the Google Play Store icon, but you may not modify it.</p>
 
 <p>As mentioned above, when referring to the Google Play Store app in copy, use the full name:
-"Google Play Store." However, when labelling the Google Play Store icon directly, it's OK to use
-"Play Store" without "Google" (which is how the icon is labelled on a device).</p>
+"Google Play Store." However, when labeling the Google Play Store icon directly, it's OK to use
+"Play Store" alone to accurately reflect the icon label as it appears on a device.</p>
 
         
 <h4>Google Play badge</h4>
@@ -128,16 +128,14 @@ Play&trade; Store app."
     <img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="">
     <p style="text-align:center">
        <a href="{@docRoot}images/brand/en_app_rgb_wo_45.png">129x45</a> |
-       <a href="{@docRoot}images/brand/en_app_rgb_wo_60.png">172x60</a><br>
-       <a href="{@docRoot}downloads/brand/en_app_rgb_wo.ai">Illustrator (.ai)</a></p>
+       <a href="{@docRoot}images/brand/en_app_rgb_wo_60.png">172x60</a></p>
   </div>
       
   <div style="float:right;clear:right;width:172px;margin-left:30px">
     <img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png" alt="">
     <p style="text-align:center">
        <a href="{@docRoot}images/brand/en_generic_rgb_wo_45.png">129x45</a> |
-       <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a><br>
-       <a href="{@docRoot}downloads/brand/en_generic_rgb_wo.ai">Illustrator (.ai)</a></p>
+       <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a></p>
   </div>
          
   <p>The "Get it on Google Play" and "Android App on Google Play" logos are badges that you
@@ -160,14 +158,19 @@ Play&trade; Store app."
       </ul>
     </li>
   </ul>
-
-  <p>For your convenience, you can use the 
-    <a href="{@docRoot}distribute/googleplay/promote/badges.html">Googe Play badge generator</a>
-    to create badges that link to your apps on Google Play.</p>
+  
+  <p>To quickly create a badge that links to your apps on Google Play,
+  use the <a
+  href="{@docRoot}distribute/googleplay/promote/badges.html">Googe Play badge generator</a>
+  (provides the badge in over 40 languages).</p>
+  
+  <p>To create your own size, download an Adobe&reg; Illustrator&reg; (.ai) file for the
+  <a href="{@docRoot}distribute/googleplay/promote/badge-files.html">Google Play
+  badge in over 40 languages</a>.</p>
     
   <p>For details on all the ways that you can link to your product details page in Google Play, 
     see <a href="{@docRoot}distribute/googleplay/promote/linking.html">Linking to your products</a></p>
 
 
-<p>If you are not sure you meet these criteria, <a href=
+<p>If you are not sure you meet these brand guidelines, <a href=
             "http://services.google.com/permissions/application">please contact us</a>. </p>
