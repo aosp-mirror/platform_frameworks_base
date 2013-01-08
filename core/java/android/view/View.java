@@ -4376,8 +4376,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags & PFLAG_FOCUSED) == 0) {
             mPrivateFlags |= PFLAG_FOCUSED;
 
+            View oldFocus = (mAttachInfo != null) ? getRootView().findFocus() : null;
+
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
+            }
+
+            if (mAttachInfo != null) {
+                mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, this);
             }
 
             onFocusChanged(true, direction, previouslyFocusedRect);
@@ -4486,7 +4492,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             refreshDrawableState();
 
-            ensureInputFocusOnFirstFocusable();
+            if (!rootViewRequestFocus()) {
+                notifyGlobalFocusCleared(this);
+            }
 
             if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 notifyAccessibilityStateChanged();
@@ -4494,11 +4502,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    void ensureInputFocusOnFirstFocusable() {
+    void notifyGlobalFocusCleared(View oldFocus) {
+        if (oldFocus != null && mAttachInfo != null) {
+            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, null);
+        }
+    }
+
+    boolean rootViewRequestFocus() {
         View root = getRootView();
         if (root != null) {
-            root.requestFocus();
+            return root.requestFocus();
         }
+        return false;
     }
 
     /**

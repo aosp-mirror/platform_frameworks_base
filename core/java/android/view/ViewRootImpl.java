@@ -169,9 +169,6 @@ public final class ViewRootImpl implements ViewParent,
     int mSeq;
 
     View mView;
-    View mFocusedView;
-    View mRealFocusedView;  // this is not set to null in touch mode
-    View mOldFocusedView;
 
     View mAccessibilityFocusedHost;
     AccessibilityNodeInfo mAccessibilityFocusedVirtualView;
@@ -269,7 +266,7 @@ public final class ViewRootImpl implements ViewParent,
 
     boolean mScrollMayChange;
     int mSoftInputMode;
-    View mLastScrolledFocus;
+    WeakReference<View> mLastScrolledFocus;
     int mScrollY;
     int mCurScrollY;
     Scroller mScroller;
@@ -1526,7 +1523,9 @@ public final class ViewRootImpl implements ViewParent,
                 } else if (!mSurface.isValid()) {
                     // If the surface has been removed, then reset the scroll
                     // positions.
-                    mLastScrolledFocus = null;
+                    if (mLastScrolledFocus != null) {
+                        mLastScrolledFocus.clear();
+                    }
                     mScrollY = mCurScrollY = 0;
                     if (mScroller != null) {
                         mScroller.abortAnimation();
@@ -1802,13 +1801,11 @@ public final class ViewRootImpl implements ViewParent,
             if (mView != null) {
                 if (!mView.hasFocus()) {
                     mView.requestFocus(View.FOCUS_FORWARD);
-                    mFocusedView = mRealFocusedView = mView.findFocus();
                     if (DEBUG_INPUT_RESIZE) Log.v(TAG, "First: requested focused view="
-                            + mFocusedView);
+                            + mView.findFocus());
                 } else {
-                    mRealFocusedView = mView.findFocus();
                     if (DEBUG_INPUT_RESIZE) Log.v(TAG, "First: existing focused view="
-                            + mRealFocusedView);
+                            + mView.findFocus());
                 }
             }
             if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_ANIMATING) != 0) {
@@ -2514,17 +2511,12 @@ public final class ViewRootImpl implements ViewParent,
             // requestChildRectangleOnScreen() call (in which case 'rectangle'
             // is non-null and we just want to scroll to whatever that
             // rectangle is).
-            View focus = mRealFocusedView;
-
-            // When in touch mode, focus points to the previously focused view,
-            // which may have been removed from the view hierarchy. The following
-            // line checks whether the view is still in our hierarchy.
-            if (focus == null || focus.mAttachInfo != mAttachInfo) {
-                mRealFocusedView = null;
+            View focus = mView.findFocus();
+            if (focus == null) {
                 return false;
             }
-
-            if (focus != mLastScrolledFocus) {
+            View lastScrolledFocus = (mLastScrolledFocus != null) ? mLastScrolledFocus.get() : null;
+            if (lastScrolledFocus != null && focus != lastScrolledFocus) {
                 // If the focus has changed, then ignore any requests to scroll
                 // to a rectangle; first we want to make sure the entire focus
                 // view is visible.
@@ -2533,8 +2525,7 @@ public final class ViewRootImpl implements ViewParent,
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Eval scroll: focus=" + focus
                     + " rectangle=" + rectangle + " ci=" + ci
                     + " vi=" + vi);
-            if (focus == mLastScrolledFocus && !mScrollMayChange
-                    && rectangle == null) {
+            if (focus == lastScrolledFocus && !mScrollMayChange && rectangle == null) {
                 // Optimization: if the focus hasn't changed since last
                 // time, and no layout has happened, then just leave things
                 // as they are.
@@ -2544,7 +2535,7 @@ public final class ViewRootImpl implements ViewParent,
                 // We need to determine if the currently focused view is
                 // within the visible part of the window and, if not, apply
                 // a pan so it can be seen.
-                mLastScrolledFocus = focus;
+                mLastScrolledFocus = new WeakReference<View>(focus);
                 mScrollMayChange = false;
                 if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Need to scroll?");
                 // Try to find the rectangle from the focus view.
@@ -2671,33 +2662,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void requestChildFocus(View child, View focused) {
-        checkThread();
-
         if (DEBUG_INPUT_RESIZE) {
             Log.v(TAG, "Request child focus: focus now " + focused);
         }
-
-        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mOldFocusedView, focused);
+        checkThread();
         scheduleTraversals();
-
-        mFocusedView = mRealFocusedView = focused;
     }
 
     public void clearChildFocus(View child) {
-        checkThread();
-
         if (DEBUG_INPUT_RESIZE) {
             Log.v(TAG, "Clearing child focus");
         }
-
-        mOldFocusedView = mFocusedView;
-
-        // Invoke the listener only if there is no view to take focus
-        if (focusSearch(null, View.FOCUS_FORWARD) == null) {
-            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mOldFocusedView, null);
-        }
-
-        mFocusedView = mRealFocusedView = null;
+        checkThread();
+        scheduleTraversals();
     }
 
     @Override
@@ -2714,14 +2691,13 @@ public final class ViewRootImpl implements ViewParent,
                 // the one case where will transfer focus away from the current one
                 // is if the current view is a view group that prefers to give focus
                 // to its children first AND the view is a descendant of it.
-                mFocusedView = mView.findFocus();
-                boolean descendantsHaveDibsOnFocus =
-                        (mFocusedView instanceof ViewGroup) &&
-                            (((ViewGroup) mFocusedView).getDescendantFocusability() ==
-                                    ViewGroup.FOCUS_AFTER_DESCENDANTS);
-                if (descendantsHaveDibsOnFocus && isViewDescendantOf(v, mFocusedView)) {
-                    // If a view gets the focus, the listener will be invoked from requestChildFocus()
-                    v.requestFocus();
+                View focused = mView.findFocus();
+                if (focused instanceof ViewGroup) {
+                    ViewGroup group = (ViewGroup) focused;
+                    if (group.getDescendantFocusability() == ViewGroup.FOCUS_AFTER_DESCENDANTS
+                            && isViewDescendantOf(v, focused)) {
+                        v.requestFocus();
+                    }
                 }
             }
         }
@@ -3199,7 +3175,6 @@ public final class ViewRootImpl implements ViewParent,
                 // set yet.
                 final View focused = mView.findFocus();
                 if (focused != null && !focused.isFocusableInTouchMode()) {
-
                     final ViewGroup ancestorToTakeFocus =
                             findAncestorToTakeFocusInTouchMode(focused);
                     if (ancestorToTakeFocus != null) {
@@ -3208,10 +3183,7 @@ public final class ViewRootImpl implements ViewParent,
                         return ancestorToTakeFocus.requestFocus();
                     } else {
                         // nothing appropriate to have focus in touch mode, clear it out
-                        mView.unFocus();
-                        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
-                        mFocusedView = null;
-                        mOldFocusedView = null;
+                        focused.unFocus();
                         return true;
                     }
                 }
@@ -3246,12 +3218,11 @@ public final class ViewRootImpl implements ViewParent,
     private boolean leaveTouchMode() {
         if (mView != null) {
             if (mView.hasFocus()) {
-                // i learned the hard way to not trust mFocusedView :)
-                mFocusedView = mView.findFocus();
-                if (!(mFocusedView instanceof ViewGroup)) {
+                View focusedView = mView.findFocus();
+                if (!(focusedView instanceof ViewGroup)) {
                     // some view has focus, let it keep it
                     return false;
-                } else if (((ViewGroup)mFocusedView).getDescendantFocusability() !=
+                } else if (((ViewGroup) focusedView).getDescendantFocusability() !=
                         ViewGroup.FOCUS_AFTER_DESCENDANTS) {
                     // some view group has focus, and doesn't prefer its children
                     // over itself for focus, so let them keep it.
