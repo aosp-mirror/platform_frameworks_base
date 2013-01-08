@@ -551,7 +551,10 @@ public class ImageView extends View {
         applied to the drawable, be sure to call setImageMatrix().
     */
     public Matrix getImageMatrix() {
-        return mMatrix;
+        if (mDrawMatrix == null) {
+            return Matrix.IDENTITY_MATRIX;
+        }
+        return mDrawMatrix;
     }
 
     public void setImageMatrix(Matrix matrix) {
