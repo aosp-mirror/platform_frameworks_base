@@ -237,16 +237,16 @@ page.title=Wi-Fi Direct
  */
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
-    private WifiP2pManager manager;
-    private Channel channel;
-    private MyWiFiActivity activity;
+    private WifiP2pManager mManager;
+    private Channel mChannel;
+    private MyWiFiActivity mActivity;
 
     public WiFiDirectBroadcastReceiver(WifiP2pManager manager, Channel channel,
             MyWifiActivity activity) {
         super();
-        this.manager = manager;
-        this.channel = channel;
-        this.activity = activity;
+        this.mManager = manager;
+        this.mChannel = channel;
+        this.mActivity = activity;
     }
 
     &#064;Override
@@ -333,7 +333,7 @@ protected void onCreate(Bundle savedInstanceState){
     ...
     mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
     mChannel = mManager.initialize(this, getMainLooper(), null);
-    mReceiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+    mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
     ...
 }
 </pre>
@@ -397,7 +397,7 @@ protected void onPause() {
   that the discovery process succeeded and does not provide any information about the actual peers
   that it discovered, if any:</p>
   <pre>
-manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+mManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
     &#064;Override
     public void onSuccess() {
         ...
@@ -425,8 +425,8 @@ if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
     // request available peers from the wifi p2p manager. This is an
     // asynchronous call and the calling activity is notified with a
     // callback on PeerListListener.onPeersAvailable()
-    if (manager != null) {
-        manager.requestPeers(channel, myPeerListListener);
+    if (mManager != null) {
+        mManager.requestPeers(mChannel, myPeerListListener);
     }
 }
 </pre>
@@ -453,7 +453,7 @@ if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 WifiP2pDevice device;
 WifiP2pConfig config = new WifiP2pConfig();
 config.deviceAddress = device.deviceAddress;
-manager.connect(channel, config, new ActionListener() {
+mManager.connect(mChannel, config, new ActionListener() {
 
     &#064;Override
     public void onSuccess() {

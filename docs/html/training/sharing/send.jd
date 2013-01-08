@@ -32,7 +32,7 @@ Intent Filters</a></li>
 <p>When you construct an intent, you must specify the action you want the intent to "trigger." 
 Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as 
 you can probably guess, indicates that the intent is sending data from one activity to another, 
-even across process boundaries. To send data to another activity, all you need to do is speicify 
+even across process boundaries. To send data to another activity, all you need to do is specify 
 the data and its type, the system will identify compatible receiving activities and display them 
 to the user (if there are multiple options) or immediately start the activity (if there is only 
 one option). Similarly, you can advertise the data types that your activities support receiving 
