@@ -81,11 +81,28 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
             KeyguardMultiUserAvatar uv = createAndAddUser(user);
             if (user.id == activeUser.id) {
                 mActiveUserAvatar = uv;
-                mActiveUserAvatar.setActive(true, false, null);
-            } else {
-                uv.setActive(false, false, null);
             }
+            uv.setActive(false, false, null);
         }
+        mActiveUserAvatar.lockPressed(true);
+    }
+
+    public void finalizeActiveUserView(boolean animate) {
+        if (animate) {
+            getHandler().postDelayed(new Runnable() {
+                    @Override
+                        public void run() {
+                        finalizeActiveUserNow(true);
+                    }
+                }, 500);
+        } else {
+            finalizeActiveUserNow(animate);
+        }
+    }
+
+    void finalizeActiveUserNow(boolean animate) {
+        mActiveUserAvatar.lockPressed(false);
+        mActiveUserAvatar.setActive(true, animate, null);
     }
 
     Comparator<UserInfo> mOrderAddedComparator = new Comparator<UserInfo>() {
@@ -132,25 +149,21 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
                 // Reset the previously active user to appear inactive
                 mCallback.hideSecurityView(FADE_OUT_ANIMATION_DURATION);
                 setAllClickable(false);
+                avatar.lockPressed(true);
                 mActiveUserAvatar.setActive(false, true, new Runnable() {
                     @Override
                     public void run() {
                         mActiveUserAvatar = avatar;
-                        mActiveUserAvatar.setActive(true, true, new Runnable() {
-                            @Override
-                            public void run() {
-                                if (this.getClass().getName().contains("internal")) {
-                                    try {
-                                        ActivityManagerNative.getDefault()
-                                                .switchUser(avatar.getUserInfo().id);
-                                    } catch (RemoteException re) {
-                                        Log.e(TAG, "Couldn't switch user " + re);
-                                    }
-                                } else {
-                                    setAllClickable(true);
-                                }
+                        if (this.getClass().getName().contains("internal")) {
+                            try {
+                                ActivityManagerNative.getDefault()
+                                        .switchUser(avatar.getUserInfo().id);
+                            } catch (RemoteException re) {
+                                Log.e(TAG, "Couldn't switch user " + re);
                             }
-                        });
+                        } else {
+                            setAllClickable(true);
+                        }
                     }
                 });
             }

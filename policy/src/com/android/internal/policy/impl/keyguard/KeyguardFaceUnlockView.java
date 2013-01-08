@@ -197,7 +197,7 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
         }
 
         @Override
-        public void onUserSwitched(int userId) {
+        public void onUserSwitching(int userId) {
             if (DEBUG) Log.d(TAG, "onUserSwitched(" + userId + ")");
             if (mBiometricUnlock != null) {
                 mBiometricUnlock.stop();

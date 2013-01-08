@@ -85,9 +85,14 @@ class KeyguardUpdateMonitorCallback {
     void onDevicePolicyManagerStateChanged() { }
 
     /**
-     * Called when the user changes.
+     * Called when the user change begins.
      */
-    void onUserSwitched(int userId) { }
+    void onUserSwitching(int userId) { }
+
+    /**
+     * Called when the user change is complete.
+     */
+    void onUserSwitchComplete(int userId) { }
 
     /**
      * Called when the SIM state changes.
