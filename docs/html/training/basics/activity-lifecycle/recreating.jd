@@ -39,7 +39,7 @@ resources so the system must shut down background processes to recover memory.</
 <p>When your activity is destroyed because the user presses <em>Back</em> or the activity finishes
 itself, the system's concept of that {@link android.app.Activity} instance is gone forever because
 the behavior indicates the activity is no longer needed. However, if the system destroys
-the activity due to system constraints (rather than normal app behavior), then althought the actual
+the activity due to system constraints (rather than normal app behavior), then although the actual
 {@link android.app.Activity} instance is gone, the system remembers that it existed such that if
 the user navigates back to it, the system creates a new instance of the activity using a set of
 saved data that describes the state of the activity when it was destroyed. The saved data that the
@@ -126,7 +126,7 @@ can save the state of the view hierarchy.</p>
 state from the {@link android.os.Bundle} that the system
 passes your activity. Both the {@link android.app.Activity#onCreate onCreate()} and {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} callback methods receive
-the same {@link android.os.Bundle} that containes the instance state information.</p>
+the same {@link android.os.Bundle} that contains the instance state information.</p>
 
 <p>Because the {@link android.app.Activity#onCreate onCreate()} method is called whether the
 system is creating a new instance of your activity or recreating a previous one, you must check
