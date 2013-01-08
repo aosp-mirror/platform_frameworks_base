@@ -153,8 +153,13 @@ notifications of a particular kind are pending.</p>
 <p>To create an app that feels streamlined, pleasant, and respectful, it is important to design your notifications carefully. Notifications embody your app's voice, and contribute to your app's personality. Unwanted or unimportant notifications can annoy the user, so use them judiciously.</p>
 
 <h4>When to display a notification</h4>
-<p>To create an application that people love, it's important to recognize that the user's attention and focus is a resource that must be protected. While Android's notification system has been designed to minimize the impact of notifications on the users attention, it is nonetheless still important to be aware of the fact that notifications are potentially interrupting the users task flow. As you plan your notifications, ask yourself if they are important enough to warrant an interruption. If you are unsure, allow the user to opt into a notification using your apps notification settings or adjust the notifications priority flag.</p>
-<p>Time sensitive events are great opportunities for valuable notifications with high priority, especially if these synchronous events involve other people. For instance, an incoming chat is a real time and synchronous form of communication: there is another user actively waiting on you to respond. Calendar events are another good example of when to use a notification and grab the user's attention, because the event is imminent, and calendar events often involve other people.</p>
+<p>To create an application that people love, it's important to recognize that the user's attention and
+focus is a resource that must be protected. While Android's notification system has been designed
+to minimize the impact of notifications on the users attention, it is nonetheless still important
+to be aware of the fact that notifications are potentially interrupting the users task flow. As you
+plan your notifications, ask yourself if they are important enough to warrant an interruption. If
+you are unsure, allow the user to opt into a notification using your apps notification settings or
+adjust the notifications priority flag.</p>
 <p>While well behaved apps generally only speak when spoken to, there are some limited cases where an
 app actually should interrupt the user with an unprompted notification.</p>
 <p>Notifications should be used primarily for <strong>time sensitive events</strong>, and especially if these

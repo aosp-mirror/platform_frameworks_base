@@ -128,7 +128,9 @@ public void onDestroy() {
 }
 </pre>
 
-<p>For a complete implementation of a service connection that binds to the {@code IInAppBillingService}, see the <a href="{@docRoot}/training/in-app-billing/preparing-iab-app.html#Connect">Selling In-app Products</a> training class.</p>
+<p>For a complete implementation of a service connection that binds to the {@code IInAppBillingService},
+see the <a href="{@docRoot}training/in-app-billing/preparing-iab-app.html">Selling In-app
+Products</a> training class and associated sample.</p>
 
 <h2 id="billing-requests">Making In-app Billing Requests</h2>
 <p>Once your application is connected to Google Play, you can initiate purchase requests for in-app products. Google Play provides a checkout interface for users to enter their payment method, so your application does not need to handle payment transactions directly. When an item is purchased, Google Play recognizes that the user has ownership of that item and prevents the user from purchasing another item with the same product ID until it is consumed. You can control how the item is consumed in your application, and notify Google Play to make the item available for purchase again. You can also query Google Play to quickly retrieve the list of purchases that were made by the user. This is useful, for example, when you want to restore the user's purchases when your user launches your app.
