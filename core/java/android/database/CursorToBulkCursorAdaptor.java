@@ -132,6 +132,11 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
     }
 
+    /**
+     * Returns an object that contains sufficient metadata to reconstruct
+     * the cursor remotely.  May throw if an error occurs when executing the query
+     * and obtaining the row count.
+     */
     public BulkCursorDescriptor getBulkCursorDescriptor() {
         synchronized (mLock) {
             throwIfCursorIsClosed();

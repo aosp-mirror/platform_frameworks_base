@@ -381,6 +381,7 @@ public abstract class ContentResolver {
             return null;
         }
         IContentProvider stableProvider = null;
+        Cursor qCursor = null;
         try {
             long startTime = SystemClock.uptimeMillis();
 
@@ -390,7 +391,6 @@ public abstract class ContentResolver {
                 remoteCancellationSignal = unstableProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            Cursor qCursor;
             try {
                 qCursor = unstableProvider.query(uri, projection,
                         selection, selectionArgs, sortOrder, remoteCancellationSignal);
@@ -409,20 +409,26 @@ public abstract class ContentResolver {
             if (qCursor == null) {
                 return null;
             }
-            // force query execution
+
+            // Force query execution.  Might fail and throw a runtime exception here.
             qCursor.getCount();
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
-            // Wrap the cursor object into CursorWrapperInner object
+
+            // Wrap the cursor object into CursorWrapperInner object.
             CursorWrapperInner wrapper = new CursorWrapperInner(qCursor,
                     stableProvider != null ? stableProvider : acquireProvider(uri));
             stableProvider = null;
+            qCursor = null;
             return wrapper;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
         } finally {
+            if (qCursor != null) {
+                qCursor.close();
+            }
             if (unstableProvider != null) {
                 releaseUnstableProvider(unstableProvider);
             }

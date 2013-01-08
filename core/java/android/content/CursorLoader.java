@@ -65,9 +65,14 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
             Cursor cursor = getContext().getContentResolver().query(mUri, mProjection, mSelection,
                     mSelectionArgs, mSortOrder, mCancellationSignal);
             if (cursor != null) {
-                // Ensure the cursor window is filled
-                cursor.getCount();
-                registerContentObserver(cursor, mObserver);
+                try {
+                    // Ensure the cursor window is filled.
+                    cursor.getCount();
+                    registerContentObserver(cursor, mObserver);
+                } catch (RuntimeException ex) {
+                    cursor.close();
+                    throw ex;
+                }
             }
             return cursor;
         } finally {
