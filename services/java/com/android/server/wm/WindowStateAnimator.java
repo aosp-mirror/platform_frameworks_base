@@ -1317,7 +1317,7 @@ class WindowStateAnimator {
         }
     }
 
-    void setTransparentRegionHint(final Region region) {
+    void setTransparentRegionHintLocked(final Region region) {
         if (mSurface == null) {
             Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
             return;
