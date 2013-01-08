@@ -111,20 +111,21 @@ ServiceConnection mServiceConn = new ServiceConnection() {
 <pre>
 &#64;Override
 public void onCreate(Bundle savedInstanceState) {    
-   super.onCreate(savedInstanceState);
-   setContentView(R.layout.activity_main);        
-   bindService(new 
-      Intent("com.android.vending.billing.InAppBillingService.BIND"),
-          mServiceConn, Context.BIND_AUTO_CREATE);
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);        
+    bindService(new 
+        Intent("com.android.vending.billing.InAppBillingService.BIND"),
+                mServiceConn, Context.BIND_AUTO_CREATE);
 </pre>
 <p>You can now use the mService reference to communicate with the Google Play service.</p>
 <p class="note"><strong>Important:</strong> Remember to unbind from the In-app Billing service when you are done with your {@link android.app.Activity}. If you don’t unbind, the open service connection could cause your device’s performance to degrade. This example shows how to perform the unbind operation on a service connection to In-app Billing called {@code mServiceConn} by overriding the activity’s {@link android.app.Activity#onDestroy onDestroy} method.</p>
 <pre>
 &#64;Override
 public void onDestroy() {
-   if (mServiceConn != null) {
-      unbindService(mServiceConn);
-   }	
+    super.onDestroy();
+    if (mServiceConn != null) {
+        unbindService(mServiceConn);
+    }	
 }
 </pre>
 

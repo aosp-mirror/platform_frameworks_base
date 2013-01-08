@@ -265,7 +265,7 @@ signal that your activity instance is being completely removed from the system m
 with the activity and your activity should perform most cleanup during {@link
 android.app.Activity#onPause} and {@link android.app.Activity#onStop}. However, if your
 activity includes background threads that you created during {@link
-android.app.Activity#onCreate onCreate()} or other other long-running resources that could
+android.app.Activity#onCreate onCreate()} or other long-running resources that could
 potentially leak memory if not properly closed, you should kill them during  {@link
 android.app.Activity#onDestroy}.</p>
 
