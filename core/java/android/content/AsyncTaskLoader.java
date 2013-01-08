@@ -78,7 +78,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
                     // So we treat this case as an unhandled exception.
                     throw ex;
                 }
-                if (DEBUG) Slog.v(TAG, this + "  <<< doInBackground (was canceled)");
+                if (DEBUG) Slog.v(TAG, this + "  <<< doInBackground (was canceled)", ex);
                 return null;
             }
         }
