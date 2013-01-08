@@ -91,6 +91,7 @@ public class Location implements Parcelable {
     private boolean mHasAccuracy = false;
     private float mAccuracy = 0.0f;
     private Bundle mExtras = null;
+    private boolean mIsFromMockProvider = false;
 
     // Cache the inputs and outputs of computeDistanceAndBearing
     // so calls to distanceTo() and bearingTo() can share work
@@ -140,6 +141,7 @@ public class Location implements Parcelable {
         mHasAccuracy = l.mHasAccuracy;
         mAccuracy = l.mAccuracy;
         mExtras = (l.mExtras == null) ? null : new Bundle(l.mExtras);
+        mIsFromMockProvider = l.mIsFromMockProvider;
     }
 
     /**
@@ -160,6 +162,7 @@ public class Location implements Parcelable {
         mHasAccuracy = false;
         mAccuracy = 0;
         mExtras = null;
+        mIsFromMockProvider = false;
     }
 
     /**
@@ -840,6 +843,7 @@ public class Location implements Parcelable {
         if (mHasAltitude) s.append(" alt=").append(mAltitude);
         if (mHasSpeed) s.append(" vel=").append(mSpeed);
         if (mHasBearing) s.append(" bear=").append(mBearing);
+        if (mIsFromMockProvider) s.append(" mock");
 
         if (mExtras != null) {
             s.append(" {").append(mExtras).append('}');
@@ -871,6 +875,7 @@ public class Location implements Parcelable {
             l.mHasAccuracy = in.readInt() != 0;
             l.mAccuracy = in.readFloat();
             l.mExtras = in.readBundle();
+            l.mIsFromMockProvider = in.readInt() != 0;
             return l;
         }
 
@@ -901,6 +906,7 @@ public class Location implements Parcelable {
         parcel.writeInt(mHasAccuracy ? 1 : 0);
         parcel.writeFloat(mAccuracy);
         parcel.writeBundle(mExtras);
+        parcel.writeInt(mIsFromMockProvider? 1 : 0);
     }
 
     /**
@@ -933,5 +939,24 @@ public class Location implements Parcelable {
             mExtras = new Bundle();
         }
         mExtras.putParcelable(key, value);
+    }
+
+    /**
+     * Returns true if the Location came from a mock provider.
+     *
+     * @return true if this Location came from a mock provider, false otherwise
+     */
+    public boolean isFromMockProvider() {
+        return mIsFromMockProvider;
+    }
+
+    /**
+     * Flag this Location as having come from a mock provider or not.
+     *
+     * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
+     * @hide
+     */
+    public void setIsFromMockProvider(boolean isFromMockProvider) {
+        mIsFromMockProvider = isFromMockProvider;
     }
 }

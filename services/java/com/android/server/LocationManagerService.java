@@ -1784,17 +1784,33 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
+    private boolean isMockProvider(String provider) {
+        synchronized (mLock) {
+            return mMockProviders.containsKey(provider);
+        }
+    }
+
     private void handleLocationChanged(Location location, boolean passive) {
-        String provider = location.getProvider();
+        // create a working copy of the incoming Location so that the service can modify it without
+        // disturbing the caller's copy
+        Location myLocation = new Location(location);
+        String provider = myLocation.getProvider();
+
+        // set "isFromMockProvider" bit if location came from a mock provider. we do not clear this
+        // bit if location did not come from a mock provider because passive/fused providers can
+        // forward locations from mock providers, and should not grant them legitimacy in doing so.
+        if (!myLocation.isFromMockProvider() && isMockProvider(provider)) {
+            myLocation.setIsFromMockProvider(true);
+        }
 
         if (!passive) {
             // notify passive provider of the new location
-            mPassiveProvider.updateLocation(location);
+            mPassiveProvider.updateLocation(myLocation);
         }
 
         synchronized (mLock) {
             if (isAllowedBySettingsLocked(provider, mCurrentUserId)) {
-                handleLocationChangedLocked(location, passive);
+                handleLocationChangedLocked(myLocation, passive);
             }
         }
     }
