@@ -25,6 +25,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptC;
 import android.renderscript.ScriptGroup;
+import android.renderscript.ScriptIntrinsic3DLUT;
 import android.renderscript.ScriptIntrinsicColorMatrix;
 import android.renderscript.Type;
 import android.util.Log;
@@ -32,8 +33,11 @@ import android.util.Log;
 public class ColorCube extends TestBase {
     private Allocation mCube;
     private ScriptC_colorcube mScript;
+    private ScriptIntrinsic3DLUT mIntrinsic;
+    private boolean mUseIntrinsic;
 
-    public ColorCube() {
+    public ColorCube(boolean useIntrinsic) {
+        mUseIntrinsic = useIntrinsic;
     }
 
     private void initCube() {
@@ -66,16 +70,19 @@ public class ColorCube extends TestBase {
 
     public void createTest(android.content.res.Resources res) {
         mScript = new ScriptC_colorcube(mRS, res, R.raw.colorcube);
+        mIntrinsic = ScriptIntrinsic3DLUT.create(mRS, Element.U8_4(mRS));
 
         initCube();
         mScript.invoke_setCube(mCube);
-
-
-        //mScript.invoke_setMatrix(m);
+        mIntrinsic.setLUT(mCube);
     }
 
     public void runTest() {
-        mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        if (mUseIntrinsic) {
+            mIntrinsic.forEach(mInPixelsAllocation, mOutPixelsAllocation);
+        } else {
+            mScript.forEach_root(mInPixelsAllocation, mOutPixelsAllocation);
+        }
     }
 
 }

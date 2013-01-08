@@ -292,7 +292,10 @@ public class ImageProcessingActivity extends Activity
             mTest = new WhiteBalance();
             break;
         case 36:
-            mTest = new ColorCube();
+            mTest = new ColorCube(false);
+            break;
+        case 37:
+            mTest = new ColorCube(true);
             break;
         }
 
@@ -305,7 +308,7 @@ public class ImageProcessingActivity extends Activity
     }
 
     void setupTests() {
-        mTestNames = new String[37];
+        mTestNames = new String[38];
         mTestNames[0] = "Levels Vec3 Relaxed";
         mTestNames[1] = "Levels Vec4 Relaxed";
         mTestNames[2] = "Levels Vec3 Full";
@@ -343,6 +346,7 @@ public class ImageProcessingActivity extends Activity
         mTestNames[34] = "Exposure";
         mTestNames[35] = "White Balance";
         mTestNames[36] = "Color Cube";
+        mTestNames[37] = "Color Cube (3D LUT intrinsic)";
 
         mTestSpinner.setAdapter(new ArrayAdapter<String>(
             this, R.layout.spinner_layout, mTestNames));
