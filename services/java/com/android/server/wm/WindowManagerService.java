@@ -250,11 +250,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final int MAX_ANIMATION_DURATION = 10*1000;
 
-    /** Amount of time (in milliseconds) to animate the dim surface from one
-     * value to another, when no window animation is driving it.
-     */
-    static final int DEFAULT_DIM_DURATION = 200;
-
     /** Amount of time (in milliseconds) to animate the fade-in-out transition for
      * compatible windows.
      */
@@ -8211,18 +8206,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mDimming = true;
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             if (!mAnimator.isDimmingLocked(winAnimator)) {
-                final int width, height;
-                if (attrs.type == TYPE_BOOT_PROGRESS) {
-                    final DisplayInfo displayInfo = w.mDisplayContent.getDisplayInfo();
-                    width = displayInfo.logicalWidth;
-                    height = displayInfo.logicalHeight;
-                } else {
-                    width = innerDw;
-                    height = innerDh;
-                }
                 if (localLOGV) Slog.v(TAG, "Win " + w + " start dimming.");
-                startDimmingLocked(
-                        winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount, width, height);
+                startDimmingLocked(winAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount);
             }
         }
     }
@@ -8918,14 +8903,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void startDimmingLocked(final WindowStateAnimator winAnimator, final float target,
-                      final int width, final int height) {
-        mAnimator.setDimParamsLocked(winAnimator.mWin.getDisplayId(),
-                new DimAnimator.Parameters(winAnimator, width, height, target));
+    void startDimmingLocked(final WindowStateAnimator winAnimator, final float target) {
+        mAnimator.setDimWinAnimatorLocked(winAnimator.mWin.getDisplayId(), winAnimator);
     }
 
     void stopDimmingLocked(int displayId) {
-        mAnimator.setDimParamsLocked(displayId, null);
+        mAnimator.setDimWinAnimatorLocked(displayId, null);
     }
 
     private boolean needsLayout() {

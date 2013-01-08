@@ -1184,9 +1184,7 @@ class WindowStateAnimator {
                 mAnimator.setPendingLayoutChanges(displayId,
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
-                    final DisplayInfo displayInfo = mWin.mDisplayContent.getDisplayInfo();
-                    mService.startDimmingLocked(this, w.mExiting ? 0 : w.mAttrs.dimAmount,
-                            displayInfo.appWidth, displayInfo.appHeight);
+                    mService.startDimmingLocked(this, w.mExiting ? 0 : w.mAttrs.dimAmount);
                 }
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
