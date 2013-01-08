@@ -33,6 +33,24 @@
         <meta-data android:name="android.graphics.renderThread" android:value="true" />
 
         <activity
+                android:name="ScaledTextActivity"
+                android:label="_ScaledText">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="ScaledPathsActivity"
+                android:label="_ScaledPaths">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="Alpha8BitmapActivity"
                 android:label="_Alpha8Bitmap">
             <intent-filter>
