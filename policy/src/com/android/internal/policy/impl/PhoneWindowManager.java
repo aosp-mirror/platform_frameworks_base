@@ -1711,31 +1711,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean PRINT_ANIM = false;
     
     /** {@inheritDoc} */
+    @Override
     public int selectAnimationLw(WindowState win, int transit) {
         if (PRINT_ANIM) Log.i(TAG, "selectAnimation in " + win
               + ": transit=" + transit);
         if (win == mStatusBar) {
-            if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+            if (transit == TRANSIT_EXIT
+                    || transit == TRANSIT_HIDE) {
                 return R.anim.dock_top_exit;
-            } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+            } else if (transit == TRANSIT_ENTER
+                    || transit == TRANSIT_SHOW) {
                 return R.anim.dock_top_enter;
             }
         } else if (win == mNavigationBar) {
             // This can be on either the bottom or the right.
             if (mNavigationBarOnBottom) {
-                if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+                if (transit == TRANSIT_EXIT
+                        || transit == TRANSIT_HIDE) {
                     return R.anim.dock_bottom_exit;
-                } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+                } else if (transit == TRANSIT_ENTER
+                        || transit == TRANSIT_SHOW) {
                     return R.anim.dock_bottom_enter;
                 }
             } else {
-                if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+                if (transit == TRANSIT_EXIT
+                        || transit == TRANSIT_HIDE) {
                     return R.anim.dock_right_exit;
-                } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+                } else if (transit == TRANSIT_ENTER
+                        || transit == TRANSIT_SHOW) {
                     return R.anim.dock_right_enter;
                 }
             }
-        } if (transit == TRANSIT_PREVIEW_DONE) {
+        }
+
+        if (transit == TRANSIT_PREVIEW_DONE) {
             if (win.hasAppShownWindows()) {
                 if (PRINT_ANIM) Log.i(TAG, "**** STARTING EXIT");
                 return com.android.internal.R.anim.app_starting_exit;
@@ -4566,71 +4575,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
         }
         return true;
-    }
-
-    /**
-     * Returns the human readable name of a window transition.
-     *
-     * @param transition The window transition.
-     * @return The transition symbolic name.
-     */
-    public static String windowTransitionToString(int transition) {
-        switch (transition) {
-            case WindowManagerPolicy.TRANSIT_UNSET: {
-                return "TRANSIT_UNSET";
-            }
-            case WindowManagerPolicy.TRANSIT_NONE: {
-                return "TRANSIT_NONE";
-            }
-            case WindowManagerPolicy.TRANSIT_ENTER: {
-                return "TRANSIT_ENTER";
-            }
-            case WindowManagerPolicy.TRANSIT_EXIT: {
-                return "TRANSIT_EXIT";
-            }
-            case WindowManagerPolicy.TRANSIT_SHOW: {
-                return "TRANSIT_SHOW";
-            }
-            case WindowManagerPolicy.TRANSIT_EXIT_MASK: {
-                return "TRANSIT_EXIT_MASK";
-            }
-            case WindowManagerPolicy.TRANSIT_PREVIEW_DONE: {
-                return "TRANSIT_PREVIEW_DONE";
-            }
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN: {
-                return "TRANSIT_ACTIVITY_OPEN";
-            }
-            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE: {
-                return "TRANSIT_ACTIVITY_CLOSE";
-            }
-            case WindowManagerPolicy.TRANSIT_TASK_OPEN: {
-                return "TRANSIT_TASK_OPEN";
-            }
-            case WindowManagerPolicy.TRANSIT_TASK_CLOSE: {
-                return "TRANSIT_TASK_CLOSE";
-            }
-            case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT: {
-                return "TRANSIT_TASK_TO_FRONT";
-            }
-            case WindowManagerPolicy.TRANSIT_TASK_TO_BACK: {
-                return "TRANSIT_TASK_TO_BACK";
-            }
-            case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE: {
-                return "TRANSIT_WALLPAPER_CLOSE";
-            }
-            case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN: {
-                return "TRANSIT_WALLPAPER_OPEN";
-            }
-            case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN: {
-                return "TRANSIT_WALLPAPER_INTRA_OPEN";
-            }
-            case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE: {
-                return "TRANSIT_WALLPAPER_INTRA_CLOSE";
-            }
-            default: {
-                return "<UNKNOWN>";
-            }
-        }
     }
 
     @Override
