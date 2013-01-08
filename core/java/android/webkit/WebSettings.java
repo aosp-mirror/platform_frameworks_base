@@ -594,18 +594,25 @@ public abstract class WebSettings {
     }
 
     /**
-     * Tells the WebView to use a wide viewport. The default is false.
+     * Sets whether the WebView should enable support for the &quot;viewport&quot;
+     * HTML meta tag or should use a wide viewport.
+     * When the value of the setting is false, the layout width is always set to the
+     * width of the WebView control in device-independent (CSS) pixels.
+     * When the value is true and the page contains the viewport meta tag, the value
+     * of the width specified in the tag is used. If the page does not contain the tag or
+     * does not provide a width, then a wide viewport will be used.
      *
-     * @param use whether to use a wide viewport
+     * @param use whether to enable support for the viewport meta tag
      */
     public synchronized void setUseWideViewPort(boolean use) {
         throw new MustOverrideException();
     }
 
     /**
-     * Gets whether the WebView is using a wide viewport.
+     * Gets whether the WebView supports the &quot;viewport&quot;
+     * HTML meta tag or will use a wide viewport.
      *
-     * @return true if the WebView is using a wide viewport
+     * @return true if the WebView supports the viewport meta tag
      * @see #setUseWideViewPort
      */
     public synchronized boolean getUseWideViewPort() {
