@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 
 public class DimLayer {
     private static final String TAG = "DimLayer";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /** Reference to the owner of this object. */
     final DisplayContent mDisplayContent;
