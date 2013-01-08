@@ -32,7 +32,7 @@ import java.util.HashMap;
  *
  * <p>Each FileObserver instance monitors a single file or directory.
  * If a directory is monitored, events will be triggered for all files and
- * subdirectories (recursively) inside the monitored directory.</p>
+ * subdirectories inside the monitored directory.</p>
  *
  * <p>An event mask is used to specify which changes or actions to report.
  * Event type constants are used to describe the possible changes in the

@@ -108,7 +108,7 @@ MyProject/
 
 <p>By default, the <code>layout/main.xml</code> file is used for portrait orientation.</p>
 
-<p>If you want a provide a special layout for landscape, including while on large screens, then
+<p>If you want to provide a special layout for landscape, including while on large screens, then
 you need to use both the <code>large</code> and <code>land</code> qualifier:</p>
 
 <pre class="classic no-pretty-print">
