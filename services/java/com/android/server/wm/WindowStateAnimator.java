@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.util.Slog;
@@ -1337,31 +1338,35 @@ class WindowStateAnimator {
         }
     }
 
-    void setWallpaperOffset(int left, int top) {
-        mSurfaceX = left;
-        mSurfaceY = top;
-        if (mAnimating) {
-            // If this window (or its app token) is animating, then the position
-            // of the surface will be re-computed on the next animation frame.
-            // We can't poke it directly here because it depends on whatever
-            // transformation is being applied by the animation.
-            return;
-        }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                ">>> OPEN TRANSACTION setWallpaperOffset");
-        Surface.openTransaction();
-        try {
-            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
-                    "POS " + left + ", " + top, null);
-            mSurface.setPosition(mWin.mFrame.left + left, mWin.mFrame.top + top);
-            updateSurfaceWindowCrop(false);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error positioning surface of " + mWin
-                    + " pos=(" + left + "," + top + ")", e);
-        } finally {
-            Surface.closeTransaction();
+    void setWallpaperOffset(RectF shownFrame) {
+        final int left = (int) shownFrame.left;
+        final int top = (int) shownFrame.top;
+        if (mSurfaceX != left || mSurfaceY != top) {
+            mSurfaceX = left;
+            mSurfaceY = top;
+            if (mAnimating) {
+                // If this window (or its app token) is animating, then the position
+                // of the surface will be re-computed on the next animation frame.
+                // We can't poke it directly here because it depends on whatever
+                // transformation is being applied by the animation.
+                return;
+            }
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    "<<< CLOSE TRANSACTION setWallpaperOffset");
+                    ">>> OPEN TRANSACTION setWallpaperOffset");
+            Surface.openTransaction();
+            try {
+                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+                        "POS " + left + ", " + top, null);
+                mSurface.setPosition(mWin.mFrame.left + left, mWin.mFrame.top + top);
+                updateSurfaceWindowCrop(false);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error positioning surface of " + mWin
+                        + " pos=(" + left + "," + top + ")", e);
+            } finally {
+                Surface.closeTransaction();
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION setWallpaperOffset");
+            }
         }
     }
 

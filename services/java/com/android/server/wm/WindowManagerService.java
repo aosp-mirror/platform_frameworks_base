@@ -324,6 +324,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Mapping from an IWindow IBinder to the server's Window object.
      * This is also used as the lock for all of our state.
+     * NOTE: Never call into methods that lock ActivityManagerService while holding this object.
      */
     final HashMap<IBinder, WindowState> mWindowMap = new HashMap<IBinder, WindowState>();
 
@@ -1113,7 +1114,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** TODO(cmautner): Is this the same as {@link WindowState#canReceiveKeys()} */
     static boolean canBeImeTarget(WindowState w) {
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
@@ -1969,12 +1969,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.computeShownFrameLocked();
                     // No need to lay out the windows - we can just set the wallpaper position
                     // directly.
-                    // TODO(cmautner): Don't move this from here, just lock the WindowAnimator.
-                    if (winAnimator.mSurfaceX != wallpaper.mShownFrame.left
-                            || winAnimator.mSurfaceY != wallpaper.mShownFrame.top) {
-                        winAnimator.setWallpaperOffset((int) wallpaper.mShownFrame.left,
-                                (int) wallpaper.mShownFrame.top);
-                    }
+                    winAnimator.setWallpaperOffset(wallpaper.mShownFrame);
                     // We only want to be synchronous with one wallpaper.
                     sync = false;
                 }
@@ -2478,11 +2473,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO(cmautner): Move to WindowStateAnimator.
-    void setTransparentRegionHint(final WindowStateAnimator winAnimator, final Region region) {
-        mH.sendMessage(mH.obtainMessage(H.SET_TRANSPARENT_REGION,
-                new Pair<WindowStateAnimator, Region>(winAnimator, region)));
-    }
 
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
         long origId = Binder.clearCallingIdentity();
@@ -2490,7 +2480,9 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && w.mHasSurface) {
-                    setTransparentRegionHint(w.mWinAnimator, region);
+                    final Pair<WindowStateAnimator, Region> pair =
+                            new Pair<WindowStateAnimator, Region>(w.mWinAnimator, region);
+                    mH.sendMessage(mH.obtainMessage(H.SET_TRANSPARENT_REGION, pair));
                 }
             }
         } finally {
@@ -2652,7 +2644,6 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         synchronized(mWindowMap) {
-            // TODO(cmautner): synchronize on mAnimator or win.mWinAnimator.
             WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return 0;
@@ -7031,8 +7022,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                // Animation messages. Move to Window{State}Animator
                 case SET_TRANSPARENT_REGION: {
+                    @SuppressWarnings("unchecked")
                     Pair<WindowStateAnimator, Region> pair =
                                 (Pair<WindowStateAnimator, Region>) msg.obj;
                     final WindowStateAnimator winAnimator = pair.first;
@@ -7147,13 +7138,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void getInitialDisplaySize(int displayId, Point size) {
-        // TODO(cmautner): Access to DisplayContent should be locked on mWindowMap. Doing that
-        //  could lead to deadlock since this is called from ActivityManager.
-        final DisplayContent displayContent = getDisplayContentLocked(displayId);
-        if (displayContent != null) {
-            synchronized(displayContent.mDisplaySizeLock) {
-                size.x = displayContent.mInitialDisplayWidth;
-                size.y = displayContent.mInitialDisplayHeight;
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                synchronized(displayContent.mDisplaySizeLock) {
+                    size.x = displayContent.mInitialDisplayWidth;
+                    size.y = displayContent.mInitialDisplayHeight;
+                }
             }
         }
     }
@@ -8951,8 +8942,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean doRequest = false;
 
         final int bulkUpdateParams = mAnimator.mBulkUpdateParams;
-        // TODO(cmautner): As the number of bits grows, use masks of bit groups to
-        //  eliminate unnecessary tests.
         if ((bulkUpdateParams & LayoutFields.SET_UPDATE_ROTATION) != 0) {
             mInnerFields.mUpdateRotation = true;
             doRequest = true;
