@@ -921,7 +921,7 @@ mNotifyManager.notify(0, mBuilder.build());
 </p>
 <pre>
  // Sets an activity indicator for an operation of indeterminate length
-mBuilder.setProgress(0, 0, false);
+mBuilder.setProgress(0, 0, true);
 // Issues the notification
 mNotifyManager.notify(0, mBuilder.build());
 </pre>
