@@ -197,7 +197,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             isResumed = state.resumed;
         }
         if (isResumed) {
-            requestNfcServiceCallback(true);
+            requestNfcServiceCallback();
         }
     }
 
@@ -211,7 +211,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             isResumed = state.resumed;
         }
         if (isResumed) {
-            requestNfcServiceCallback(true);
+            requestNfcServiceCallback();
         }
     }
 
@@ -223,7 +223,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             isResumed = state.resumed;
         }
         if (isResumed) {
-            requestNfcServiceCallback(true);
+            requestNfcServiceCallback();
         }
     }
 
@@ -236,7 +236,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             isResumed = state.resumed;
         }
         if (isResumed) {
-            requestNfcServiceCallback(true);
+            requestNfcServiceCallback();
         }
     }
 
@@ -249,18 +249,17 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             isResumed = state.resumed;
         }
         if (isResumed) {
-            requestNfcServiceCallback(true);
+            requestNfcServiceCallback();
         }
     }
 
     /**
      * Request or unrequest NFC service callbacks for NDEF push.
      * Makes IPC call - do not hold lock.
-     * TODO: Do not do IPC on every onPause/onResume
      */
-    void requestNfcServiceCallback(boolean request) {
+    void requestNfcServiceCallback() {
         try {
-            NfcAdapter.sService.setNdefPushCallback(request ? this : null);
+            NfcAdapter.sService.setNdefPushCallback(this);
         } catch (RemoteException e) {
             mAdapter.attemptDeadServiceRecovery(e);
         }
@@ -355,7 +354,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             if (state == null) return;
             state.resumed = true;
         }
-        requestNfcServiceCallback(true);
+        requestNfcServiceCallback();
     }
 
     /** Callback from Activity life-cycle, on main thread */
@@ -367,7 +366,6 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             if (state == null) return;
             state.resumed = false;
         }
-        requestNfcServiceCallback(false);
     }
 
     /** Callback from Activity life-cycle, on main thread */
