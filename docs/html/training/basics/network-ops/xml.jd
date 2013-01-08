@@ -551,5 +551,5 @@ private InputStream downloadUrl(String urlString) throws IOException {
     conn.setDoInput(true);
     // Starts the query
     conn.connect();
-    InputStream stream = conn.getInputStream();      
+    return conn.getInputStream();
 }</pre>

@@ -153,4 +153,4 @@ important when your application isn’t visible and therefore can’t be control
 UI.</p>
 
 <p>A better approach is to register and unregister the media button event receiver when your
-application gains and losses the audio focus. This is covered in detail in the next lesson.</p>
+application gains and loses the audio focus. This is covered in detail in the next lesson.</p>
