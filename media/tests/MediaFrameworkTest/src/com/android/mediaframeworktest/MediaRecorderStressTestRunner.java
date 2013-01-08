@@ -33,18 +33,16 @@ public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
     // the test must be supported by the corresponding camera.
     public static int mCameraId = 0;
     public static int mProfileQuality = CamcorderProfile.QUALITY_HIGH;
-    public static CamcorderProfile profile =
-                        CamcorderProfile.get(mCameraId, mProfileQuality);
-
-    public static int mIterations = 100;
+    public static CamcorderProfile profile = CamcorderProfile.get(mCameraId, mProfileQuality);
+    public static int mIterations = 15;
     public static int mVideoEncoder = profile.videoCodec;
-    public static int mAudioEncdoer = profile.audioCodec;
+    public static int mAudioEncoder = profile.audioCodec;
     public static int mFrameRate = profile.videoFrameRate;
     public static int mVideoWidth = profile.videoFrameWidth;
     public static int mVideoHeight = profile.videoFrameHeight;
     public static int mBitRate = profile.videoBitRate;
     public static boolean mRemoveVideo = true;
-    public static int mDuration = 10 * 1000; // 10 seconds
+    public static int mDuration = 60 * 1000; // 60 seconds
     public static int mTimeLapseDuration = 180 * 1000; // 3 minutes
     public static double mCaptureRate = 0.5; // 2 sec timelapse interval
 
@@ -64,41 +62,41 @@ public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         String iterations = (String) icicle.get("iterations");
-        String video_encoder = (String) icicle.get("video_encoder");
-        String audio_encoder = (String) icicle.get("audio_encoder");
-        String frame_rate = (String) icicle.get("frame_rate");
-        String video_width = (String) icicle.get("video_width");
-        String video_height = (String) icicle.get("video_height");
-        String bit_rate = (String) icicle.get("bit_rate");
-        String record_duration = (String) icicle.get("record_duration");
-        String remove_videos = (String) icicle.get("remove_videos");
+        String videoEncoder = (String) icicle.get("video_encoder");
+        String audioEncoder = (String) icicle.get("audio_encoder");
+        String frameRate = (String) icicle.get("frame_rate");
+        String videoWidth = (String) icicle.get("video_width");
+        String videoHeight = (String) icicle.get("video_height");
+        String bitRate = (String) icicle.get("bit_rate");
+        String recordDuration = (String) icicle.get("record_duration");
+        String removeVideos = (String) icicle.get("remove_videos");
 
         if (iterations != null ) {
             mIterations = Integer.parseInt(iterations);
         }
-        if ( video_encoder != null) {
-            mVideoEncoder = Integer.parseInt(video_encoder);
+        if (videoEncoder != null) {
+            mVideoEncoder = Integer.parseInt(videoEncoder);
         }
-        if ( audio_encoder != null) {
-            mAudioEncdoer = Integer.parseInt(audio_encoder);
+        if (audioEncoder != null) {
+            mAudioEncoder = Integer.parseInt(audioEncoder);
         }
-        if (frame_rate != null) {
-            mFrameRate = Integer.parseInt(frame_rate);
+        if (frameRate != null) {
+            mFrameRate = Integer.parseInt(frameRate);
         }
-        if (video_width != null) {
-            mVideoWidth = Integer.parseInt(video_width);
+        if (videoWidth != null) {
+            mVideoWidth = Integer.parseInt(videoWidth);
         }
-        if (video_height != null) {
-            mVideoHeight = Integer.parseInt(video_height);
+        if (videoHeight != null) {
+            mVideoHeight = Integer.parseInt(videoHeight);
         }
-        if (bit_rate != null) {
-            mBitRate = Integer.parseInt(bit_rate);
+        if (bitRate != null) {
+            mBitRate = Integer.parseInt(bitRate);
         }
-        if (record_duration != null) {
-            mDuration = Integer.parseInt(record_duration);
+        if (recordDuration != null) {
+            mDuration = Integer.parseInt(recordDuration);
         }
-        if (remove_videos != null) {
-            if (remove_videos.compareTo("true") == 0) {
+        if (removeVideos != null) {
+            if (removeVideos.compareTo("true") == 0) {
                 mRemoveVideo = true;
             } else {
                 mRemoveVideo = false;
