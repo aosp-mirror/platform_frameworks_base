@@ -69,6 +69,7 @@ class KeyguardMultiUserAvatar extends FrameLayout {
     private boolean mInit = true;
     private KeyguardMultiUserSelectorView mUserSelector;
     private KeyguardCircleFramedDrawable mFramed;
+    private boolean mPressLock;
 
     public static KeyguardMultiUserAvatar fromXml(int resId, Context context,
             KeyguardMultiUserSelectorView userSelector, UserInfo info) {
@@ -212,11 +213,20 @@ class KeyguardMultiUserAvatar extends FrameLayout {
 
     @Override
     public void setPressed(boolean pressed) {
-        if (!pressed || isClickable()) {
+        if (mPressLock && !pressed) {
+            return;
+        }
+
+        if (mPressLock || !pressed || isClickable()) {
             super.setPressed(pressed);
             mFramed.setPressed(pressed);
             mUserImage.invalidate();
         }
+    }
+
+    public void lockPressed(boolean pressed) {
+        mPressLock = pressed;
+        setPressed(pressed);
     }
 
     public UserInfo getUserInfo() {

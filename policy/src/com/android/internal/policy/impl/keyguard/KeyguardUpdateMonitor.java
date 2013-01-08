@@ -79,10 +79,11 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
     private static final int MSG_DPM_STATE_CHANGED = 309;
-    private static final int MSG_USER_SWITCHED = 310;
+    private static final int MSG_USER_SWITCHING = 310;
     private static final int MSG_USER_REMOVED = 311;
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
     protected static final int MSG_BOOT_COMPLETED = 313;
+    private static final int MSG_USER_SWITCH_COMPLETE = 314;
 
 
     private static KeyguardUpdateMonitor sInstance;
@@ -147,8 +148,11 @@ public class KeyguardUpdateMonitor {
                 case MSG_DPM_STATE_CHANGED:
                     handleDevicePolicyManagerStateChanged();
                     break;
-                case MSG_USER_SWITCHED:
-                    handleUserSwitched(msg.arg1, (IRemoteCallback)msg.obj);
+                case MSG_USER_SWITCHING:
+                    handleUserSwitching(msg.arg1, (IRemoteCallback)msg.obj);
+                    break;
+                case MSG_USER_SWITCH_COMPLETE:
+                    handleUserSwitchComplete(msg.arg1);
                     break;
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
@@ -359,11 +363,13 @@ public class KeyguardUpdateMonitor {
                     new IUserSwitchObserver.Stub() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
-                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED,
+                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
                                     newUserId, 0, reply));
                         }
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
+                                    newUserId));
                         }
                     });
         } catch (RemoteException e) {
@@ -418,19 +424,31 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Handle {@link #MSG_USER_SWITCHED}
+     * Handle {@link #MSG_USER_SWITCHING}
      */
-    protected void handleUserSwitched(int userId, IRemoteCallback reply) {
+    protected void handleUserSwitching(int userId, IRemoteCallback reply) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onUserSwitched(userId);
+                cb.onUserSwitching(userId);
             }
         }
         setAlternateUnlockEnabled(false);
         try {
             reply.sendResult(null);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Handle {@link #MSG_USER_SWITCH_COMPLETE}
+     */
+    protected void handleUserSwitchComplete(int userId) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onUserSwitchComplete(userId);
+            }
         }
     }
 
@@ -456,7 +474,7 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Handle {@link #MSG_USER_SWITCHED}
+     * Handle {@link #MSG_USER_REMOVED}
      */
     protected void handleUserRemoved(int userId) {
         for (int i = 0; i < mCallbacks.size(); i++) {

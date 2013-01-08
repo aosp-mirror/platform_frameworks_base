@@ -53,6 +53,7 @@ public class KeyguardViewManager {
     private final static boolean DEBUG = KeyguardViewMediator.DEBUG;
     private static String TAG = "KeyguardViewManager";
     public static boolean USE_UPPER_CASE = true;
+    public final static String IS_SWITCHING_USER = "is_switching_user";
 
     // Timeout used for keypresses
     static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
@@ -237,6 +238,8 @@ public class KeyguardViewManager {
         mKeyguardView = (KeyguardHostView) view.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mViewMediatorCallback);
+        mKeyguardView.initializeSwitchingUserState(options != null &&
+                options.getBoolean(IS_SWITCHING_USER));
 
         // HACK
         // The keyguard view will have set up window flags in onFinishInflate before we set
