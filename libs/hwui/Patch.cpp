@@ -37,7 +37,7 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQua
     // 2 triangles per patch, 3 vertices per triangle
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
     mVertices = new TextureVertex[maxVertices];
-    mUploaded = false;
+    mAllocatedVerticesCount = 0;
 
     verticesCount = 0;
     hasEmptyQuads = emptyQuads > 0;
@@ -68,38 +68,37 @@ void Patch::copy(const int32_t* xDivs, const int32_t* yDivs) {
     memcpy(mYDivs, yDivs, mYCount * sizeof(int32_t));
 }
 
-void Patch::copy(const int32_t* yDivs) {
-    memcpy(mYDivs, yDivs, mYCount * sizeof(int32_t));
-}
-
 void Patch::updateColorKey(const uint32_t colorKey) {
     mColorKey = colorKey;
 }
 
-bool Patch::matches(const int32_t* xDivs, const int32_t* yDivs, const uint32_t colorKey) {
+bool Patch::matches(const int32_t* xDivs, const int32_t* yDivs,
+        const uint32_t colorKey, const int8_t emptyQuads) {
+
+    bool matches = true;
+
+    if (mEmptyQuads != emptyQuads) {
+        mEmptyQuads = emptyQuads;
+        hasEmptyQuads = emptyQuads > 0;
+        matches = false;
+    }
+
     if (mColorKey != colorKey) {
         updateColorKey(colorKey);
-        copy(xDivs, yDivs);
-        return false;
+        matches = false;
     }
 
-    for (uint32_t i = 0; i < mXCount; i++) {
-        if (mXDivs[i] != xDivs[i]) {
-            // The Y divs may or may not match, copy everything
-            copy(xDivs, yDivs);
-            return false;
-        }
+    if (memcmp(mXDivs, xDivs, mXCount * sizeof(int32_t))) {
+        memcpy(mXDivs, xDivs, mXCount * sizeof(int32_t));
+        matches = false;
     }
 
-    for (uint32_t i = 0; i < mYCount; i++) {
-        if (mYDivs[i] != yDivs[i]) {
-            // We know all the X divs match, copy only Y divs
-            copy(yDivs);
-            return false;
-        }
+    if (memcmp(mYDivs, yDivs, mYCount * sizeof(int32_t))) {
+        memcpy(mYDivs, yDivs, mYCount * sizeof(int32_t));
+        matches = false;
     }
 
-    return true;
+    return matches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,10 +202,10 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     if (verticesCount > 0) {
         Caches& caches = Caches::getInstance();
         caches.bindMeshBuffer(meshBuffer);
-        if (!mUploaded) {
+        if (mAllocatedVerticesCount < verticesCount) {
             glBufferData(GL_ARRAY_BUFFER, sizeof(TextureVertex) * verticesCount,
                     mVertices, GL_DYNAMIC_DRAW);
-            mUploaded = true;
+            mAllocatedVerticesCount = verticesCount;
         } else {
             glBufferSubData(GL_ARRAY_BUFFER, 0,
                     sizeof(TextureVertex) * verticesCount, mVertices);
