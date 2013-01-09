@@ -13793,6 +13793,10 @@ package android.nfc {
     field public static final java.lang.String EXTRA_ID = "android.nfc.extra.ID";
     field public static final java.lang.String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
+    field public static final int STATE_OFF = 1; // 0x1
+    field public static final int STATE_ON = 3; // 0x3
+    field public static final int STATE_TURNING_OFF = 4; // 0x4
+    field public static final int STATE_TURNING_ON = 2; // 0x2
   }
 
   public static abstract interface NfcAdapter.CreateBeamUrisCallback {

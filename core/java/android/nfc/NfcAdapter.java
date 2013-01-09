@@ -190,13 +190,9 @@ public final class NfcAdapter {
      */
     public static final String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
 
-    /** @hide */
     public static final int STATE_OFF = 1;
-    /** @hide */
     public static final int STATE_TURNING_ON = 2;
-    /** @hide */
     public static final int STATE_ON = 3;
-    /** @hide */
     public static final int STATE_TURNING_OFF = 4;
 
     /** @hide */
