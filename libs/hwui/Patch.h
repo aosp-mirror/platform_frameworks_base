@@ -45,7 +45,7 @@ namespace uirenderer {
  * indices to render the vertices.
  */
 struct Patch {
-    Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads = 0);
+    Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads);
     ~Patch();
 
     void updateVertices(const float bitmapWidth, const float bitmapHeight,
@@ -53,7 +53,8 @@ struct Patch {
 
     void updateColorKey(const uint32_t colorKey);
     void copy(const int32_t* xDivs, const int32_t* yDivs);
-    bool matches(const int32_t* xDivs, const int32_t* yDivs, const uint32_t colorKey);
+    bool matches(const int32_t* xDivs, const int32_t* yDivs,
+            const uint32_t colorKey, const int8_t emptyQuads);
 
     GLuint meshBuffer;
     uint32_t verticesCount;
@@ -62,7 +63,7 @@ struct Patch {
 
 private:
     TextureVertex* mVertices;
-    bool mUploaded;
+    uint32_t mAllocatedVerticesCount;
 
     int32_t* mXDivs;
     int32_t* mYDivs;
@@ -71,8 +72,6 @@ private:
     uint32_t mXCount;
     uint32_t mYCount;
     int8_t mEmptyQuads;
-
-    void copy(const int32_t* yDivs);
 
     void generateRow(TextureVertex*& vertex, float y1, float y2,
             float v1, float v2, float stretchX, float rescaleX,
