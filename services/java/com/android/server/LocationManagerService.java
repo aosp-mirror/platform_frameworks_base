@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -53,6 +54,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -60,6 +62,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -124,6 +127,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final LocationRequest DEFAULT_LOCATION_REQUEST = new LocationRequest();
 
     private final Context mContext;
+    private final AppOpsManager mAppOps;
 
     // used internally for synchronization
     private final Object mLock = new Object();
@@ -187,6 +191,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public LocationManagerService(Context context) {
         super();
         mContext = context;
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
         if (D) Log.d(TAG, "Constructed");
 
@@ -524,6 +529,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public boolean callLocationChangedLocked(Location location) {
+            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_LOCATION, mUid, mPackageName)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return true;
+            }
             if (mListener != null) {
                 try {
                     synchronized (this) {
@@ -1162,7 +1171,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private Receiver checkListenerOrIntent(ILocationListener listener, PendingIntent intent,
             int pid, int uid, String packageName) {
         if (intent == null && listener == null) {
-            throw new IllegalArgumentException("need eiter listener or intent");
+            throw new IllegalArgumentException("need either listener or intent");
         } else if (intent != null && listener != null) {
             throw new IllegalArgumentException("cannot register both listener and intent");
         } else if (intent != null) {
@@ -1185,11 +1194,14 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
-        Receiver recevier = checkListenerOrIntent(listener, intent, pid, uid, packageName);
-
         // providers may use public location API's, need to clear identity
         long identity = Binder.clearCallingIdentity();
         try {
+            // We don't check for MODE_IGNORED here; we will do that when we go to deliver
+            // a location.
+            mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName);
+            Receiver recevier = checkListenerOrIntent(listener, intent, pid, uid, packageName);
+
             synchronized (mLock) {
                 requestLocationUpdatesLocked(sanitizedRequest, recevier, pid, uid, packageName);
             }
@@ -1296,8 +1308,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                 request.getProvider());
         // no need to sanitize this request, as only the provider name is used
 
-        long identity = Binder.clearCallingIdentity();
+        final int uid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
         try {
+            if (mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return null;
+            }
+            
             if (mBlacklist.isBlacklisted(packageName)) {
                 if (D) Log.d(TAG, "not returning last loc for blacklisted app: " +
                         packageName);
@@ -1381,12 +1399,23 @@ public class LocationManagerService extends ILocationManager.Stub {
 
 
     @Override
-    public boolean addGpsStatusListener(IGpsStatusListener listener) {
+    public boolean addGpsStatusListener(IGpsStatusListener listener, String packageName) {
         if (mGpsStatusProvider == null) {
             return false;
         }
         checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
                 LocationManager.GPS_PROVIDER);
+
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         try {
             mGpsStatusProvider.addGpsStatusListener(listener);

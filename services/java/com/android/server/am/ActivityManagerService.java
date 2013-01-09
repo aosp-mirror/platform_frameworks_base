@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
+import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
@@ -619,9 +620,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     final BatteryStatsService mBatteryStatsService;
     
     /**
-     * information about component usage
+     * Information about component usage
      */
     final UsageStatsService mUsageStatsService;
+    
+    /**
+     * Information about and control over application operations
+     */
+    final AppOpsService mAppOpsService;
 
     /**
      * Current configuration information.  HistoryRecord objects are given
@@ -1450,7 +1456,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
-        
+        m.mAppOpsService.publish(context);
+
         synchronized (thr) {
             thr.mReady = true;
             thr.notifyAll();
@@ -1613,9 +1620,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
-        
+
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
+        mAppOpsService = new AppOpsService();
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         // User 0 is the first and only user that runs at boot.
@@ -7174,7 +7182,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        
+
+        mAppOpsService.shutdown();
         mUsageStatsService.shutdown();
         mBatteryStatsService.shutdown();
         

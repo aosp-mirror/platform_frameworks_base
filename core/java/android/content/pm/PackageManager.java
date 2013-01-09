@@ -1280,6 +1280,22 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
+     * @hide Return the uid associated with the given package name for the
+     * given user.
+     *
+     * <p>Throws {@link NameNotFoundException} if a package with the given
+     * name can not be found on the system.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *                    desired package.
+     * @param userHandle The user handle identifier to look up the package under.
+     *
+     * @return Returns an integer uid who owns the given package name.
+     */
+    public abstract int getPackageUid(String packageName, int userHandle)
+            throws NameNotFoundException;
+
+    /**
      * Retrieve all of the information we know about a particular permission.
      *
      * <p>Throws {@link NameNotFoundException} if a permission with the given

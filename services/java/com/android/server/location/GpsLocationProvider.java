@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -56,6 +57,8 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 import android.util.NtpTrustedTime;
+
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.ProviderProperties;
@@ -305,6 +308,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final PendingIntent mWakeupIntent;
     private final PendingIntent mTimeoutIntent;
 
+    private final IAppOpsService mAppOpsService;
     private final IBatteryStats mBatteryStats;
 
     // only modified on handler thread
@@ -433,6 +437,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // App ops service to keep track of who is accessing the GPS
+        mAppOpsService = IAppOpsService.Stub.asInterface(ServiceManager.getService(
+                Context.APP_OPS_SERVICE));
 
         // Battery statistics service to be notified when GPS turns on or off
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
@@ -863,6 +871,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
             if (newUid) {
                 try {
+                    mAppOpsService.startOperation(AppOpsManager.OP_GPS, uid1, null);
                     mBatteryStats.noteStartGps(uid1);
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException", e);
@@ -882,6 +891,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (oldUid) {
                 try {
                     mBatteryStats.noteStopGps(uid1);
+                    mAppOpsService.finishOperation(AppOpsManager.OP_GPS, uid1, null);
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException", e);
                 }

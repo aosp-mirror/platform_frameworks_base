@@ -142,6 +142,21 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public int getPackageUid(String packageName, int userHandle)
+            throws NameNotFoundException {
+        try {
+            int uid = mPM.getPackageUid(packageName, userHandle);
+            if (uid >= 0) {
+                return uid;
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+
+        throw new NameNotFoundException(packageName);
+    }
+
+    @Override
     public PermissionInfo getPermissionInfo(String name, int flags)
             throws NameNotFoundException {
         try {

@@ -261,7 +261,6 @@ class ServerThread extends Thread {
             ServiceManager.addService(Context.USER_SERVICE,
                     UserManagerService.getInstance());
 
-
             mContentResolver = context.getContentResolver();
 
             // The AccountManager must come before the ContentService

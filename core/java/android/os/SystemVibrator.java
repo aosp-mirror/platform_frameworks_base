@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.content.Context;
 import android.util.Log;
 
 /**
@@ -26,10 +27,18 @@ import android.util.Log;
 public class SystemVibrator extends Vibrator {
     private static final String TAG = "Vibrator";
 
+    private final String mPackageName;
     private final IVibratorService mService;
     private final Binder mToken = new Binder();
 
     public SystemVibrator() {
+        mPackageName = null;
+        mService = IVibratorService.Stub.asInterface(
+                ServiceManager.getService("vibrator"));
+    }
+
+    public SystemVibrator(Context context) {
+        mPackageName = context.getPackageName();
         mService = IVibratorService.Stub.asInterface(
                 ServiceManager.getService("vibrator"));
     }
@@ -54,7 +63,7 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         try {
-            mService.vibrate(milliseconds, mToken);
+            mService.vibrate(mPackageName, milliseconds, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
@@ -71,7 +80,7 @@ public class SystemVibrator extends Vibrator {
         // anyway
         if (repeat < pattern.length) {
             try {
-                mService.vibratePattern(pattern, repeat, mToken);
+                mService.vibratePattern(mPackageName, pattern, repeat, mToken);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to vibrate.", e);
             }

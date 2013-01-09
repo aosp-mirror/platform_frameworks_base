@@ -144,6 +144,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
+    public void noteVibratorOn(int uid, long durationMillis) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVibratorOnLocked(uid, durationMillis);
+        }
+    }
+
+    public void noteVibratorOff(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVibratorOffLocked(uid);
+        }
+    }
+
     public void noteStartGps(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {

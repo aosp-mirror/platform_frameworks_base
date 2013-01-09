@@ -16,6 +16,8 @@
 
 package android.os;
 
+import java.io.PrintWriter;
+
 /**
  * Representation of a user on the device.
  */
@@ -149,6 +151,50 @@ public final class UserHandle implements Parcelable {
     public static final int getSharedAppGid(int id) {
         return Process.FIRST_SHARED_APPLICATION_GID + (id % PER_USER_RANGE)
                 - Process.FIRST_APPLICATION_UID;
+    }
+
+    /**
+     * Generate a text representation of the uid, breaking out its individual
+     * components -- user, app, isolated, etc.
+     * @hide
+     */
+    public static void formatUid(StringBuilder sb, int uid) {
+        if (uid < Process.FIRST_APPLICATION_UID) {
+            sb.append(uid);
+        } else {
+            sb.append('u');
+            sb.append(getUserId(uid));
+            final int appId = getAppId(uid);
+            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
+                sb.append('i');
+                sb.append(appId - Process.FIRST_ISOLATED_UID);
+            } else {
+                sb.append('a');
+                sb.append(appId);
+            }
+        }
+    }
+
+    /**
+     * Generate a text representation of the uid, breaking out its individual
+     * components -- user, app, isolated, etc.
+     * @hide
+     */
+    public static void formatUid(PrintWriter pw, int uid) {
+        if (uid < Process.FIRST_APPLICATION_UID) {
+            pw.print(uid);
+        } else {
+            pw.print('u');
+            pw.print(getUserId(uid));
+            final int appId = getAppId(uid);
+            if (appId >= Process.FIRST_ISOLATED_UID && appId <= Process.LAST_ISOLATED_UID) {
+                pw.print('i');
+                pw.print(appId - Process.FIRST_ISOLATED_UID);
+            } else {
+                pw.print('a');
+                pw.print(appId);
+            }
+        }
     }
 
     /**
