@@ -6459,7 +6459,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mDeferScroll = -1;
             bringPointIntoView(Math.min(curs, mText.length()));
         }
-        if (changed && mEditor != null) mEditor.invalidateTextDisplayList();
     }
 
     private boolean isShowingHint() {
