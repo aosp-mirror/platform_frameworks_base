@@ -837,6 +837,16 @@ public class PhoneStatusBar extends BaseStatusBar {
         mWindowManager.addView(mIntruderAlertView, lp);
     }
 
+    public void refreshAllStatusBarIcons() {
+        final int count = mStatusIcons.getChildCount();
+        for (int n = 0; n < count; n++) {
+            View child = mStatusIcons.getChildAt(n);
+            if (child instanceof StatusBarIconView) {
+                ((StatusBarIconView) child).updateDrawable();
+            }
+        }
+    }
+
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
@@ -984,6 +994,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationButton.setImageDrawable(null);
             mNotificationButton.setImageResource(R.drawable.ic_notifications);
         }
+
+        refreshAllStatusBarIcons();
     }
 
     private void updateShowSearchHoldoff() {
