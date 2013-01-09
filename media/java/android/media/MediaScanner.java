@@ -958,7 +958,9 @@ public class MediaScanner
                 // If the rowId of the inserted file is needed, it gets inserted immediately,
                 // bypassing the bulk inserter.
                 if (inserter == null || needToSetSettings) {
-                    inserter.flushAll();
+                    if (inserter != null) {
+                        inserter.flushAll();
+                    }
                     result = mMediaProvider.insert(tableUri, values);
                 } else if (entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
                     inserter.insertwithPriority(tableUri, values);
