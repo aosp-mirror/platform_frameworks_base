@@ -1051,6 +1051,7 @@ public class ActionBarView extends AbsActionBarView {
                     (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
             if (showTitle) {
                 x += positionChild(mTitleLayout, x, y, contentHeight, isLayoutRtl);
+                homeSlop = mTitleLayout.getWidth();
             }
 
             switch (mNavigationMode) {
