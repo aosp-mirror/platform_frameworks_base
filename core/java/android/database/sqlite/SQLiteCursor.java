@@ -138,17 +138,26 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private void fillWindow(int requiredPos) {
         clearOrCreateWindow(getDatabase().getPath());
 
-        if (mCount == NO_COUNT) {
-            int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos, 0);
-            mCount = mQuery.fillWindow(mWindow, startPos, requiredPos, true);
-            mCursorWindowCapacity = mWindow.getNumRows();
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "received count(*) from native_fill_window: " + mCount);
+        try {
+            if (mCount == NO_COUNT) {
+                int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos, 0);
+                mCount = mQuery.fillWindow(mWindow, startPos, requiredPos, true);
+                mCursorWindowCapacity = mWindow.getNumRows();
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "received count(*) from native_fill_window: " + mCount);
+                }
+            } else {
+                int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos,
+                        mCursorWindowCapacity);
+                mQuery.fillWindow(mWindow, startPos, requiredPos, false);
             }
-        } else {
-            int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos,
-                    mCursorWindowCapacity);
-            mQuery.fillWindow(mWindow, startPos, requiredPos, false);
+        } catch (RuntimeException ex) {
+            // Close the cursor window if the query failed and therefore will
+            // not produce any results.  This helps to avoid accidentally leaking
+            // the cursor window if the client does not correctly handle exceptions
+            // and fails to close the cursor.
+            closeWindow();
+            throw ex;
         }
     }
 

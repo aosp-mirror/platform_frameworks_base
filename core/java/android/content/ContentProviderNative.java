@@ -113,13 +113,21 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder,
                             cancellationSignal);
                     if (cursor != null) {
-                        CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
-                                cursor, observer, getProviderName());
-                        BulkCursorDescriptor d = adaptor.getBulkCursorDescriptor();
+                        try {
+                            CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
+                                    cursor, observer, getProviderName());
+                            BulkCursorDescriptor d = adaptor.getBulkCursorDescriptor();
+                            cursor = null;
 
-                        reply.writeNoException();
-                        reply.writeInt(1);
-                        d.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                            reply.writeNoException();
+                            reply.writeInt(1);
+                            d.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                        } finally {
+                            // Close cursor if an exception was thrown while constructing the adaptor.
+                            if (cursor != null) {
+                                cursor.close();
+                            }
+                        }
                     } else {
                         reply.writeNoException();
                         reply.writeInt(0);
