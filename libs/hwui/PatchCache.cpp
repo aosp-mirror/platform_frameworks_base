@@ -97,7 +97,7 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
         }
 
         mCache.add(description, mesh);
-    } else if (!mesh->matches(xDivs, yDivs, colorKey)) {
+    } else if (!mesh->matches(xDivs, yDivs, colorKey, transparentQuads)) {
         PATCH_LOGD("Patch mesh does not match, refreshing vertices");
         mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f, pixelWidth, pixelHeight);
     }
