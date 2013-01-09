@@ -140,10 +140,7 @@ public class TextToSpeech {
      * Listener that will be called when the TTS service has
      * completed synthesizing an utterance. This is only called if the utterance
      * has an utterance ID (see {@link TextToSpeech.Engine#KEY_PARAM_UTTERANCE_ID}).
-     *
-     * @deprecated Use {@link UtteranceProgressListener} instead.
      */
-    @Deprecated
     public interface OnUtteranceCompletedListener {
         /**
          * Called when an utterance has been synthesized.
@@ -239,28 +236,19 @@ public class TextToSpeech {
         /**
          * Indicates erroneous data when checking the installation status of the resources used by
          * the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
-         *
-         * @deprecated Use CHECK_VOICE_DATA_FAIL instead.
          */
-        @Deprecated
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
 
         /**
          * Indicates missing resources when checking the installation status of the resources used
          * by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
-         *
-         * @deprecated Use CHECK_VOICE_DATA_FAIL instead.
          */
-        @Deprecated
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
 
         /**
          * Indicates missing storage volume when checking the installation status of the resources
          * used by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
-         *
-         * @deprecated Use CHECK_VOICE_DATA_FAIL instead.
          */
-        @Deprecated
         public static final int CHECK_VOICE_DATA_MISSING_VOLUME = -3;
 
         /**
@@ -296,8 +284,9 @@ public class TextToSpeech {
                 "android.speech.tts.engine.INSTALL_TTS_DATA";
 
         /**
-         * Broadcast Action: broadcast to signal the change in the list of available
-         * languages or/and their features.
+         * Broadcast Action: broadcast to signal the completion of the installation of
+         * the data files used by the synthesis engine. Success or failure is indicated in the
+         * {@link #EXTRA_TTS_DATA_INSTALLED} extra.
          */
         @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
         public static final String ACTION_TTS_DATA_INSTALLED =
@@ -310,16 +299,20 @@ public class TextToSpeech {
          * return one of the following codes:
          * {@link #CHECK_VOICE_DATA_PASS},
          * {@link #CHECK_VOICE_DATA_FAIL},
+         * {@link #CHECK_VOICE_DATA_BAD_DATA},
+         * {@link #CHECK_VOICE_DATA_MISSING_DATA}, or
+         * {@link #CHECK_VOICE_DATA_MISSING_VOLUME}.
          * <p> Moreover, the data received in the activity result will contain the following
          * fields:
          * <ul>
-         *   <li>{@link #EXTRA_AVAILABLE_VOICES} which contains an ArrayList<String> of all the
-         *   available voices. The format of each voice is: lang-COUNTRY-variant where COUNTRY and
-         *   variant are optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").</li>
-         *   <li>{@link #EXTRA_UNAVAILABLE_VOICES} which contains an ArrayList<String> of all the
-         *   unavailable voices (ones that user can install). The format of each voice is:
-         *   lang-COUNTRY-variant where COUNTRY and variant are optional (ie, "eng" or
-         *   "eng-USA" or "eng-USA-FEMALE").</li>
+         *   <li>{@link #EXTRA_VOICE_DATA_ROOT_DIRECTORY} which
+         *       indicates the path to the location of the resource files,</li>
+         *   <li>{@link #EXTRA_VOICE_DATA_FILES} which contains
+         *       the list of all the resource files,</li>
+         *   <li>and {@link #EXTRA_VOICE_DATA_FILES_INFO} which
+         *       contains, for each resource file, the description of the language covered by
+         *       the file in the xxx-YYY format, where xxx is the 3-letter ISO language code,
+         *       and YYY is the 3-letter ISO country code.</li>
          * </ul>
          */
         @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -327,33 +320,37 @@ public class TextToSpeech {
                 "android.speech.tts.engine.CHECK_TTS_DATA";
 
         /**
-         * Activity intent for getting some sample text to use for demonstrating TTS. Specific
-         * locale have to be requested by passing following extra parameters:
-         * <ul>
-         *   <li>language</li>
-         *   <li>country</li>
-         *   <li>variant</li>
-         * </ul>
+         * Activity intent for getting some sample text to use for demonstrating TTS.
          *
-         * Upon completion, the activity result may contain the following fields:
-         * <ul>
-         *   <li>{@link #EXTRA_SAMPLE_TEXT} which contains an String with sample text.</li>
-         * </ul>
+         * @hide This intent was used by engines written against the old API.
+         * Not sure if it should be exposed.
          */
         @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_GET_SAMPLE_TEXT =
                 "android.speech.tts.engine.GET_SAMPLE_TEXT";
 
-        /**
-         * Extra information received with the {@link #ACTION_GET_SAMPLE_TEXT} intent result where
-         * the TextToSpeech engine returns an String with sample text for requested voice
-         */
-        public static final String EXTRA_SAMPLE_TEXT = "sampleText";
-
-
         // extras for a TTS engine's check data activity
         /**
-         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent result where
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
+         * the TextToSpeech engine specifies the path to its resources.
+         */
+        public static final String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+
+        /**
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
+         * the TextToSpeech engine specifies the file names of its resources under the
+         * resource path.
+         */
+        public static final String EXTRA_VOICE_DATA_FILES = "dataFiles";
+
+        /**
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
+         * the TextToSpeech engine specifies the locale associated with each resource file.
+         */
+        public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
+        /**
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
@@ -361,7 +358,7 @@ public class TextToSpeech {
         public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
 
         /**
-         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent result where
+         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
@@ -369,63 +366,22 @@ public class TextToSpeech {
         public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
 
         /**
-         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent result where
-         * the TextToSpeech engine specifies the path to its resources.
-         *
-         * It may be used by language packages to find out where to put their data.
-         *
-         * @deprecated TTS engine implementation detail, this information has no use for
-         * text-to-speech API client.
-         */
-        @Deprecated
-        public static final String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
-
-        /**
-         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent result where
-         * the TextToSpeech engine specifies the file names of its resources under the
-         * resource path.
-         *
-         * @deprecated TTS engine implementation detail, this information has no use for
-         * text-to-speech API client.
-         */
-        @Deprecated
-        public static final String EXTRA_VOICE_DATA_FILES = "dataFiles";
-
-        /**
-         * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent result where
-         * the TextToSpeech engine specifies the locale associated with each resource file.
-         *
-         * @deprecated TTS engine implementation detail, this information has no use for
-         * text-to-speech API client.
-         */
-        @Deprecated
-        public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
-
-        /**
          * Extra information sent with the {@link #ACTION_CHECK_TTS_DATA} intent where the
          * caller indicates to the TextToSpeech engine which specific sets of voice data to
          * check for by sending an ArrayList<String> of the voices that are of interest.
          * The format of each voice is: lang-COUNTRY-variant where COUNTRY and variant are
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
-         *
-         * @deprecated Redundant functionality, checking for existence of specific sets of voice
-         * data can be done on client side.
          */
-        @Deprecated
         public static final String EXTRA_CHECK_VOICE_DATA_FOR = "checkVoiceDataFor";
 
         // extras for a TTS engine's data installation
         /**
-         * Extra information received with the {@link #ACTION_TTS_DATA_INSTALLED} intent result.
+         * Extra information received with the {@link #ACTION_TTS_DATA_INSTALLED} intent.
          * It indicates whether the data files for the synthesis engine were successfully
          * installed. The installation was initiated with the  {@link #ACTION_INSTALL_TTS_DATA}
          * intent. The possible values for this extra are
          * {@link TextToSpeech#SUCCESS} and {@link TextToSpeech#ERROR}.
-         *
-         * @deprecated No longer in use. If client ise interested in information about what
-         * changed, is should send ACTION_CHECK_TTS_DATA intent to discover available voices.
          */
-        @Deprecated
         public static final String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
 
         // keys for the parameters passed with speak commands. Hidden keys are used internally
@@ -518,10 +474,6 @@ public class TextToSpeech {
          * for a description of how feature keys work. If set and supported by the engine
          * as per {@link TextToSpeech#getFeatures(Locale)}, the engine must synthesize
          * text on-device (without making network requests).
-         *
-         * @see TextToSpeech#speak(String, int, java.util.HashMap)
-         * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
-         * @see TextToSpeech#getFeatures(java.util.Locale)
          */
         public static final String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
     }
