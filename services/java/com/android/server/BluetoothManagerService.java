@@ -60,6 +60,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int TIMEOUT_SAVE_MS = 500; //Maximum msec to wait for a save
     //Maximum msec to wait for service restart
     private static final int SERVICE_RESTART_TIME_MS = 200;
+    //Maximum msec to wait for restart due to error
+    private static final int ERROR_RESTART_TIME_MS = 3000;
     //Maximum msec to delay MESSAGE_USER_SWITCHED
     private static final int USER_SWITCHED_TIME_MS = 200;
 
@@ -79,6 +81,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_SAVE_NAME_AND_ADDRESS=201;
     private static final int MESSAGE_USER_SWITCHED = 300;
     private static final int MAX_SAVE_RETRIES=3;
+    private static final int MAX_ERROR_RESTART_RETRIES=6;
+
     // Bluetooth persisted setting is off
     private static final int BLUETOOTH_OFF=0;
     // Bluetooth persisted setting is on
@@ -118,6 +122,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private int mState;
     private HandlerThread mThread;
     private final BluetoothHandler mHandler;
+    private int mErrorRecoveryRetryCounter;
 
     private void registerForAirplaneMode(IntentFilter filter) {
         final ContentResolver resolver = mContext.getContentResolver();
@@ -203,6 +208,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mEnableExternal = false;
         mAddress = null;
         mName = null;
+        mErrorRecoveryRetryCounter = 0;
         mContentResolver = context.getContentResolver();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
         mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
@@ -847,6 +853,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     if (DBG) Log.d(TAG, "MESSAGE_BLUETOOTH_STATE_CHANGE: prevState = " + prevState + ", newState=" + newState);
                     mState = newState;
                     bluetoothStateChangeHandler(prevState, newState);
+                    // handle error state transition case from TURNING_ON to OFF
+                    // unbind and rebind bluetooth service and enable bluetooth
+                    if ((prevState == BluetoothAdapter.STATE_TURNING_ON) &&
+                        (newState == BluetoothAdapter.STATE_OFF) &&
+                        (mBluetooth != null) && mEnable) {
+                        recoverBluetoothServiceFromError();
+                    }
+                    if (newState == BluetoothAdapter.STATE_ON) {
+                        // bluetooth is working, reset the counter
+                        if (mErrorRecoveryRetryCounter != 0) {
+                            Log.w(TAG, "bluetooth is recovered from error");
+                            mErrorRecoveryRetryCounter = 0;
+                        }
+                    }
                     break;
                 }
                 case MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED:
@@ -1180,5 +1200,49 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
         }
         return false;
+    }
+
+    private void recoverBluetoothServiceFromError() {
+        Log.e(TAG,"recoverBluetoothServiceFromError");
+        synchronized (mConnection) {
+            if (mBluetooth != null) {
+                //Unregister callback object
+                try {
+                    mBluetooth.unregisterCallback(mBluetoothCallback);
+                } catch (RemoteException re) {
+                    Log.e(TAG, "Unable to unregister",re);
+                }
+            }
+        }
+
+        SystemClock.sleep(500);
+
+        // disable
+        handleDisable();
+
+        waitForOnOff(false, true);
+
+        sendBluetoothServiceDownCallback();
+        synchronized (mConnection) {
+            if (mBluetooth != null) {
+                mBluetooth = null;
+                //Unbind
+                mContext.unbindService(mConnection);
+            }
+        }
+
+        mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+        mState = BluetoothAdapter.STATE_OFF;
+
+        mEnable = false;
+
+        if (mErrorRecoveryRetryCounter++ < MAX_ERROR_RESTART_RETRIES) {
+            // Send a Bluetooth Restart message to reenable bluetooth
+            Message restartMsg = mHandler.obtainMessage(
+                             MESSAGE_RESTART_BLUETOOTH_SERVICE);
+            mHandler.sendMessageDelayed(restartMsg, ERROR_RESTART_TIME_MS);
+        } else {
+            // todo: notify user to power down and power up phone to make bluetooth work.
+        }
     }
 }
