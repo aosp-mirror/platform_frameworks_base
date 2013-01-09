@@ -95,7 +95,7 @@ Intent sendIntent = new Intent();
 sendIntent.setAction(Intent.ACTION_SEND);
 sendIntent.putExtra(Intent.EXTRA_TEXT, &quot;This is my text to send.&quot;);
 sendIntent.setType(&quot;text/plain&quot;);
-startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)</strong>);
+startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.string.send_to))</strong>);
 </pre>
 
 <p>The resulting dialog is shown in figure 1.</p>
