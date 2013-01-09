@@ -222,10 +222,10 @@ public class WifiP2pServiceResponse implements Parcelable {
                  */
                 // The length equals to 3 plus the number of octets in the vendor
                 // specific content field. And this is little endian.
-                int length = ((dis.readByte() & 0xff) +
-                        ((dis.readByte() & 0xff) << 8)) - 3;
+                int length = (dis.readUnsignedByte() +
+                        (dis.readUnsignedByte() << 8)) - 3;
                 int type = dis.readUnsignedByte();
-                byte transId = dis.readByte();
+                int transId = dis.readUnsignedByte();
                 int status = dis.readUnsignedByte();
                 if (length < 0) {
                     return null;
