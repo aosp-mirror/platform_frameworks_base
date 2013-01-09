@@ -2289,6 +2289,18 @@ public abstract class Context {
     public static final String USER_SERVICE = "user";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.app.AppOpsManager} for tracking application operations
+     * on the device.
+     *
+     * @see #getSystemService
+     * @see android.app.AppOpsManager
+     *
+     * @hide
+     */
+    public static final String APP_OPS_SERVICE = "appops";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

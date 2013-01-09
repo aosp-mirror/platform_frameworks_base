@@ -37,6 +37,8 @@ interface IBatteryStats {
     void noteStartWakelockFromSource(in WorkSource ws, int pid, String name, int type);
     void noteStopWakelockFromSource(in WorkSource ws, int pid, String name, int type);
 
+    void noteVibratorOn(int uid, long durationMillis);
+    void noteVibratorOff(int uid);
     void noteStartGps(int uid);
     void noteStopGps(int uid);
     void noteScreenOn();
