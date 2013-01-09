@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_FONT_RENDERER_H
 #define ANDROID_HWUI_FONT_RENDERER_H
 
+#include <utils/LruCache.h>
 #include <utils/Vector.h>
 
 #include <SkPaint.h>
@@ -27,6 +28,7 @@
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
+#include "Matrix.h"
 #include "Properties.h"
 
 namespace android {
@@ -47,13 +49,10 @@ public:
         mGammaTable = gammaTable;
     }
 
-    void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
+    void setFont(SkPaint* paint, const mat4& matrix);
 
-    void precache(SkPaint* paint, const char* text, int numGlyphs);
+    void precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix);
 
-    // bounds is an out parameter
-    bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, int x, int y, Rect* bounds);
     // bounds is an out parameter
     bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds);
@@ -153,7 +152,7 @@ private:
     Vector<CacheTexture*> mCacheTextures;
 
     Font* mCurrentFont;
-    Vector<Font*> mActiveFonts;
+    LruCache<Font::FontDescription, Font*> mActiveFonts;
 
     CacheTexture* mCurrentCacheTexture;
 

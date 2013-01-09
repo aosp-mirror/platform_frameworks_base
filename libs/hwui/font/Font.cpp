@@ -18,7 +18,8 @@
 
 #include <cutils/compiler.h>
 
-#include <SkGlyph.h>
+#include <utils/JenkinsHash.h>
+
 #include <SkUtils.h>
 
 #include "Debug.h"
@@ -34,14 +35,22 @@ namespace uirenderer {
 // Font
 ///////////////////////////////////////////////////////////////////////////////
 
-Font::Font(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle, uint32_t scaleX,
-        SkPaint::Style style, uint32_t strokeWidth) :
-        mState(state), mFontId(fontId), mFontSize(fontSize),
-        mFlags(flags), mItalicStyle(italicStyle), mScaleX(scaleX),
-        mStyle(style), mStrokeWidth(mStrokeWidth) {
+Font::Font(FontRenderer* state, const Font::FontDescription& desc) :
+        mState(state), mDescription(desc) {
 }
 
+Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix) {
+    mFontId = SkTypeface::UniqueID(paint->getTypeface());
+    mFontSize = paint->getTextSize();
+    mFlags = 0;
+    if (paint->isFakeBoldText()) {
+        mFlags |= Font::kFakeBold;
+    }
+    mItalicStyle = paint->getTextSkewX();
+    mScaleX = paint->getTextScaleX();
+    mStyle = paint->getStyle();
+    mStrokeWidth = paint->getStrokeWidth();
+}
 
 Font::~Font() {
     mState->removeFont(this);
@@ -49,6 +58,43 @@ Font::~Font() {
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
         delete mCachedGlyphs.valueAt(i);
     }
+}
+
+hash_t Font::FontDescription::hash() const {
+    uint32_t hash = JenkinsHashMix(0, mFontId);
+    hash = JenkinsHashMix(hash, android::hash_type(mFontSize));
+    hash = JenkinsHashMix(hash, android::hash_type(mFlags));
+    hash = JenkinsHashMix(hash, android::hash_type(mItalicStyle));
+    hash = JenkinsHashMix(hash, android::hash_type(mScaleX));
+    hash = JenkinsHashMix(hash, android::hash_type(mStyle));
+    hash = JenkinsHashMix(hash, android::hash_type(mStrokeWidth));
+    return JenkinsHashWhiten(hash);
+}
+
+int Font::FontDescription::compare(const Font::FontDescription& lhs,
+        const Font::FontDescription& rhs) {
+    int deltaInt = int(lhs.mFontId) - int(rhs.mFontId);
+    if (deltaInt != 0) return deltaInt;
+
+    if (lhs.mFontSize < rhs.mFontSize) return -1;
+    if (lhs.mFontSize > rhs.mFontSize) return +1;
+
+    if (lhs.mItalicStyle < rhs.mItalicStyle) return -1;
+    if (lhs.mItalicStyle > rhs.mItalicStyle) return +1;
+
+    deltaInt = int(lhs.mFlags) - int(rhs.mFlags);
+    if (deltaInt != 0) return deltaInt;
+
+    if (lhs.mScaleX < rhs.mScaleX) return -1;
+    if (lhs.mScaleX > rhs.mScaleX) return +1;
+
+    deltaInt = int(lhs.mStyle) - int(rhs.mStyle);
+    if (deltaInt != 0) return deltaInt;
+
+    if (lhs.mStrokeWidth < rhs.mStrokeWidth) return -1;
+    if (lhs.mStrokeWidth > rhs.mStrokeWidth) return +1;
+
+    return 0;
 }
 
 void Font::invalidateTextureCache(CacheTexture* cacheTexture) {
@@ -84,16 +130,16 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
 
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
-    int nPenX = x + glyph->mBitmapLeft;
-    int nPenY = y + glyph->mBitmapTop + glyph->mBitmapHeight;
+    float nPenX = x + glyph->mBitmapLeft;
+    float nPenY = y + (glyph->mBitmapTop + glyph->mBitmapHeight);
+
+    float width = (float) glyph->mBitmapWidth;
+    float height = (float) glyph->mBitmapHeight;
 
     float u1 = glyph->mBitmapMinU;
     float u2 = glyph->mBitmapMaxU;
     float v1 = glyph->mBitmapMinV;
     float v2 = glyph->mBitmapMaxV;
-
-    int width = (int) glyph->mBitmapWidth;
-    int height = (int) glyph->mBitmapHeight;
 
     mState->appendMeshQuad(nPenX, nPenY, u1, v2,
             nPenX + width, nPenY, u2, v2,
@@ -137,7 +183,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
     vOffset += glyph->mBitmapTop + height;
 
     SkPoint destination[4];
-    measure.getPosTan(x + hOffset +  glyph->mBitmapLeft + halfWidth, position, tangent);
+    measure.getPosTan(x + hOffset + glyph->mBitmapLeft + halfWidth, position, tangent);
 
     // Move along the tangent and offset by the normal
     destination[0].set(-tangent->fX * halfWidth - tangent->fY * vOffset,
@@ -177,22 +223,11 @@ CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit, bool pre
 
     // Is the glyph still in texture cache?
     if (!cachedGlyph->mIsValid) {
-        const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit);
+        const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit, NULL);
         updateGlyphCache(paint, skiaGlyph, cachedGlyph, precaching);
     }
 
     return cachedGlyph;
-}
-
-void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-        int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
-    if (bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
-        render(paint, text, start, len, numGlyphs, x, y, BITMAP, bitmap,
-                bitmapW, bitmapH, NULL, NULL);
-    } else {
-        render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
-                0, 0, NULL, NULL);
-    }
 }
 
 void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
@@ -299,71 +334,40 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     text += start;
     int glyphsCount = 0;
 
-    if (CC_LIKELY(positions == NULL)) {
-        SkFixed prevRsbDelta = 0;
+    const SkPaint::Align align = paint->getTextAlign();
 
-        float penX = x + 0.5f;
-        int penY = y;
+    while (glyphsCount < numGlyphs) {
+        glyph_t glyph = GET_GLYPH(text);
 
-        while (glyphsCount < numGlyphs) {
-            glyph_t glyph = GET_GLYPH(text);
-
-            // Reached the end of the string
-            if (IS_END_OF_STRING(glyph)) {
-                break;
-            }
-
-            CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-            penX += SkFixedToFloat(AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta));
-            prevRsbDelta = cachedGlyph->mRsbDelta;
-
-            // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
-            if (cachedGlyph->mIsValid) {
-                (*this.*render)(cachedGlyph, (int) floorf(penX), penY,
-                        bitmap, bitmapW, bitmapH, bounds, positions);
-            }
-
-            penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
-
-            glyphsCount++;
+        // Reached the end of the string
+        if (IS_END_OF_STRING(glyph)) {
+            break;
         }
-    } else {
-        const SkPaint::Align align = paint->getTextAlign();
 
-        // This is for renderPosText()
-        while (glyphsCount < numGlyphs) {
-            glyph_t glyph = GET_GLYPH(text);
+        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
 
-            // Reached the end of the string
-            if (IS_END_OF_STRING(glyph)) {
-                break;
+        // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
+        if (cachedGlyph->mIsValid) {
+            int penX = x + positions[(glyphsCount << 1)];
+            int penY = y + positions[(glyphsCount << 1) + 1];
+
+            switch (align) {
+                case SkPaint::kRight_Align:
+                    penX -= SkFixedToFloat(cachedGlyph->mAdvanceX);
+                    penY -= SkFixedToFloat(cachedGlyph->mAdvanceY);
+                    break;
+                case SkPaint::kCenter_Align:
+                    penX -= SkFixedToFloat(cachedGlyph->mAdvanceX >> 1);
+                    penY -= SkFixedToFloat(cachedGlyph->mAdvanceY >> 1);
+                default:
+                    break;
             }
 
-            CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-
-            // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
-            if (cachedGlyph->mIsValid) {
-                int penX = x + positions[(glyphsCount << 1)];
-                int penY = y + positions[(glyphsCount << 1) + 1];
-
-                switch (align) {
-                    case SkPaint::kRight_Align:
-                        penX -= SkFixedToFloat(cachedGlyph->mAdvanceX);
-                        penY -= SkFixedToFloat(cachedGlyph->mAdvanceY);
-                        break;
-                    case SkPaint::kCenter_Align:
-                        penX -= SkFixedToFloat(cachedGlyph->mAdvanceX >> 1);
-                        penY -= SkFixedToFloat(cachedGlyph->mAdvanceY >> 1);
-                    default:
-                        break;
-                }
-
-                (*this.*render)(cachedGlyph, penX, penY,
-                        bitmap, bitmapW, bitmapH, bounds, positions);
-            }
-
-            glyphsCount++;
+            (*this.*render)(cachedGlyph, penX, penY,
+                    bitmap, bitmapW, bitmapH, bounds, positions);
         }
+
+        glyphsCount++;
     }
 }
 
@@ -380,7 +384,7 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     uint32_t startY = 0;
 
     // Get the bitmap for the glyph
-    paint->findImage(skiaGlyph);
+    paint->findImage(skiaGlyph, NULL);
     mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY, precaching);
 
     if (!glyph->mIsValid) {
@@ -410,7 +414,7 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph);
+    const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph, NULL);
     newGlyph->mGlyphIndex = skiaGlyph.fID;
     newGlyph->mIsValid = false;
 
@@ -419,24 +423,16 @@ CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph, bool precaching
     return newGlyph;
 }
 
-Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle, uint32_t scaleX,
-        SkPaint::Style style, uint32_t strokeWidth) {
-    Vector<Font*> &activeFonts = state->mActiveFonts;
+Font* Font::create(FontRenderer* state, const SkPaint* paint, const mat4& matrix) {
+    FontDescription description(paint, matrix);
+    Font* font = state->mActiveFonts.get(description);
 
-    for (uint32_t i = 0; i < activeFonts.size(); i++) {
-        Font* font = activeFonts[i];
-        if (font->mFontId == fontId && font->mFontSize == fontSize &&
-                font->mFlags == flags && font->mItalicStyle == italicStyle &&
-                font->mScaleX == scaleX && font->mStyle == style &&
-                (style == SkPaint::kFill_Style || font->mStrokeWidth == strokeWidth)) {
-            return font;
-        }
+    if (font) {
+        return font;
     }
 
-    Font* newFont = new Font(state, fontId, fontSize, flags, italicStyle,
-            scaleX, style, strokeWidth);
-    activeFonts.push(newFont);
+    Font* newFont = new Font(state, description);
+    state->mActiveFonts.put(description, newFont);
     return newFont;
 }
 

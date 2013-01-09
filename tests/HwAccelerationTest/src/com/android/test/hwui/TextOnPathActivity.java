@@ -41,26 +41,26 @@ public class TextOnPathActivity extends Activity {
         setContentView(view);
     }
 
-    private Path makePath() {
+    private static Path makePath() {
         Path path = new Path();
         buildPath(path);
         return path;
     }
 
-    private void buildPath(Path path) {
+    private static void buildPath(Path path) {
         path.moveTo(0.0f, 0.0f);
         path.cubicTo(0.0f, 0.0f, 100.0f, 150.0f, 100.0f, 200.0f);
         path.cubicTo(100.0f, 200.0f, 50.0f, 300.0f, -80.0f, 200.0f);
         path.cubicTo(-80.0f, 200.0f, 100.0f, 200.0f, 200.0f, 0.0f);
     }
 
-    private Path makeStraightPath() {
+    private static Path makeStraightPath() {
         Path path = new Path();
         buildStraightPath(path);
         return path;
     }
 
-    private void buildStraightPath(Path path) {
+    private static void buildStraightPath(Path path) {
         path.moveTo(0.0f, 0.0f);
         path.lineTo(400.0f, 0.0f);
     }

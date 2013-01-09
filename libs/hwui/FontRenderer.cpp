@@ -37,7 +37,9 @@ namespace uirenderer {
 
 static bool sLogFontRendererCreate = true;
 
-FontRenderer::FontRenderer() {
+FontRenderer::FontRenderer() :
+        mActiveFonts(LruCache<Font::FontDescription, Font*>::kUnlimitedCapacity) {
+
     if (sLogFontRendererCreate) {
         INIT_LOGD("Creating FontRenderer");
     }
@@ -108,10 +110,11 @@ FontRenderer::~FontRenderer() {
         delete[] mTextMesh;
     }
 
-    Vector<Font*> fontsToDereference = mActiveFonts;
-    for (uint32_t i = 0; i < fontsToDereference.size(); i++) {
-        delete fontsToDereference[i];
+    LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
+    while (it.next()) {
+        delete it.value();
     }
+    mActiveFonts.clear();
 }
 
 void FontRenderer::flushAllAndInvalidate() {
@@ -119,8 +122,9 @@ void FontRenderer::flushAllAndInvalidate() {
         issueDrawCommand();
     }
 
-    for (uint32_t i = 0; i < mActiveFonts.size(); i++) {
-        mActiveFonts[i]->invalidateTextureCache();
+    LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
+    while (it.next()) {
+        it.value()->invalidateTextureCache();
     }
 
     for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
@@ -147,8 +151,9 @@ void FontRenderer::flushLargeCaches() {
         CacheTexture* cacheTexture = mCacheTextures[i];
         if (cacheTexture->getTexture()) {
             cacheTexture->init();
-            for (uint32_t j = 0; j < mActiveFonts.size(); j++) {
-                mActiveFonts[j]->invalidateTextureCache(cacheTexture);
+            LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
+            while (it.next()) {
+                it.value()->invalidateTextureCache(cacheTexture);
             }
             cacheTexture->releaseTexture();
         }
@@ -481,22 +486,8 @@ void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
     }
 }
 
-void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
-    int flags = 0;
-    if (paint->isFakeBoldText()) {
-        flags |= Font::kFakeBold;
-    }
-
-    const float skewX = paint->getTextSkewX();
-    uint32_t italicStyle = *(uint32_t*) &skewX;
-    const float scaleXFloat = paint->getTextScaleX();
-    uint32_t scaleX = *(uint32_t*) &scaleXFloat;
-    SkPaint::Style style = paint->getStyle();
-    const float strokeWidthFloat = paint->getStrokeWidth();
-    uint32_t strokeWidth = *(uint32_t*) &strokeWidthFloat;
-    mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle,
-            scaleX, style, strokeWidth);
-
+void FontRenderer::setFont(SkPaint* paint, const mat4& matrix) {
+    mCurrentFont = Font::create(this, paint, matrix);
 }
 
 FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
@@ -562,37 +553,9 @@ void FontRenderer::finishRender() {
     }
 }
 
-void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs) {
-    int flags = 0;
-    if (paint->isFakeBoldText()) {
-        flags |= Font::kFakeBold;
-    }
-    const float skewX = paint->getTextSkewX();
-    uint32_t italicStyle = *(uint32_t*) &skewX;
-    const float scaleXFloat = paint->getTextScaleX();
-    uint32_t scaleX = *(uint32_t*) &scaleXFloat;
-    SkPaint::Style style = paint->getStyle();
-    const float strokeWidthFloat = paint->getStrokeWidth();
-    uint32_t strokeWidth = *(uint32_t*) &strokeWidthFloat;
-    float fontSize = paint->getTextSize();
-    Font* font = Font::create(this, SkTypeface::UniqueID(paint->getTypeface()),
-            fontSize, flags, italicStyle, scaleX, style, strokeWidth);
-
+void FontRenderer::precache(SkPaint* paint, const char* text, int numGlyphs, const mat4& matrix) {
+    Font* font = Font::create(this, paint, matrix);
     font->precache(paint, text, numGlyphs);
-}
-
-bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, Rect* bounds) {
-    if (!mCurrentFont) {
-        ALOGE("No font set");
-        return false;
-    }
-
-    initRender(clip, bounds);
-    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y);
-    finishRender();
-
-    return mDrawn;
 }
 
 bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
@@ -626,12 +589,7 @@ bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char
 }
 
 void FontRenderer::removeFont(const Font* font) {
-    for (uint32_t ct = 0; ct < mActiveFonts.size(); ct++) {
-        if (mActiveFonts[ct] == font) {
-            mActiveFonts.removeAt(ct);
-            break;
-        }
-    }
+    mActiveFonts.remove(font->getDescription());
 
     if (mCurrentFont == font) {
         mCurrentFont = NULL;
