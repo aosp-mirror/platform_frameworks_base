@@ -174,21 +174,19 @@ public final class NfcAdapter {
      * Broadcast Action: The state of the local NFC adapter has been
      * changed.
      * <p>For example, NFC has been turned on or off.
-     * <p>Always contains the extra field {@link #EXTRA_STATE}
-     * @hide
+     * <p>Always contains the extra field {@link #EXTRA_ADAPTER_STATE}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ADAPTER_STATE_CHANGED =
             "android.nfc.action.ADAPTER_STATE_CHANGED";
 
     /**
-     * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
+     * Used as an int extra field in {@link #ACTION_ADAPTER_STATE_CHANGED}
      * intents to request the current power state. Possible values are:
      * {@link #STATE_OFF},
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
-     * @hide
      */
     public static final String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
 
