@@ -61,7 +61,7 @@ var APP_LANGS = ['it','pt-br','pt-pt','nl','ko','ja','fr','es','es-419','en','de
 
 // variables for creating 'try it out' demo button
 var imagePath = "https://developer.android.com/images/brand/"
-var linkStart = "<a href=\"http://play.google.com/store/";
+var linkStart = "<a href=\"https://play.google.com/store/";
 var imageStart = "\">\n"
         + "  <img alt=\"";
   // leaves opening for the alt text value
@@ -70,7 +70,7 @@ var imageSrc = "\"\n       src=\"" + imagePath;
 var imageEnd = ".png\" />\n</a>";
 
 // variables for creating code snippet
-var linkStartCode = "&lt;a href=\"http://play.google.com/store/";
+var linkStartCode = "&lt;a href=\"https://play.google.com/store/";
 var imageStartCode = "\"&gt;\n"
         + "  &lt;img alt=\"";
   // leaves opening for the alt text value
