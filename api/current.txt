@@ -13785,9 +13785,11 @@ package android.nfc {
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
     method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
     method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
+    field public static final java.lang.String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final java.lang.String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field public static final java.lang.String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
     field public static final java.lang.String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
+    field public static final java.lang.String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
     field public static final java.lang.String EXTRA_ID = "android.nfc.extra.ID";
     field public static final java.lang.String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
