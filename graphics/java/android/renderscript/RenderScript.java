@@ -240,10 +240,10 @@ public class RenderScript {
         rsnElementGetSubElements(mContext, id, IDs, names, arraySizes);
     }
 
-    native int rsnTypeCreate(int con, int eid, int x, int y, int z, boolean mips, boolean faces);
-    synchronized int nTypeCreate(int eid, int x, int y, int z, boolean mips, boolean faces) {
+    native int rsnTypeCreate(int con, int eid, int x, int y, int z, boolean mips, boolean faces, int yuv);
+    synchronized int nTypeCreate(int eid, int x, int y, int z, boolean mips, boolean faces, int yuv) {
         validate();
-        return rsnTypeCreate(mContext, eid, x, y, z, mips, faces);
+        return rsnTypeCreate(mContext, eid, x, y, z, mips, faces, yuv);
     }
     native void rsnTypeGetNativeData(int con, int id, int[] typeData);
     synchronized void nTypeGetNativeData(int id, int[] typeData) {

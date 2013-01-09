@@ -427,12 +427,12 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id,
 
 static int
 nTypeCreate(JNIEnv *_env, jobject _this, RsContext con, RsElement eid,
-            jint dimx, jint dimy, jint dimz, jboolean mips, jboolean faces)
+            jint dimx, jint dimy, jint dimz, jboolean mips, jboolean faces, jint yuv)
 {
-    LOG_API("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i)",
-            con, eid, dimx, dimy, dimz, mips, faces);
+    LOG_API("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i), yuv(%i)",
+            con, eid, dimx, dimy, dimz, mips, faces, yuv);
 
-    jint id = (jint)rsTypeCreate(con, (RsElement)eid, dimx, dimy, dimz, mips, faces);
+    jint id = (jint)rsTypeCreate(con, (RsElement)eid, dimx, dimy, dimz, mips, faces, yuv);
     return (jint)id;
 }
 
@@ -1454,7 +1454,7 @@ static JNINativeMethod methods[] = {
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
 {"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;[I)V",          (void*)nElementGetSubElements },
 
-{"rsnTypeCreate",                    "(IIIIIZZ)I",                            (void*)nTypeCreate },
+{"rsnTypeCreate",                    "(IIIIIZZI)I",                           (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(IIIII)I",                               (void*)nAllocationCreateTyped },

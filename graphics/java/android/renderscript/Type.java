@@ -18,6 +18,8 @@ package android.renderscript;
 
 
 import java.lang.reflect.Field;
+
+import android.graphics.ImageFormat;
 import android.util.Log;
 
 /**
@@ -208,6 +210,7 @@ public class Type extends BaseObj {
         int mDimZ;
         boolean mDimMipmaps;
         boolean mDimFaces;
+        int mYuv;
 
         Element mElement;
 
@@ -263,6 +266,25 @@ public class Type extends BaseObj {
             return this;
         }
 
+        /**
+         * @hide
+         *
+         * only NV21, YV12.  Enums from ImageFormat
+         */
+        public Builder setYuvFormat(int yuvFormat) {
+            switch (yuvFormat) {
+            case android.graphics.ImageFormat.NV21:
+            case android.graphics.ImageFormat.YV12:
+                break;
+
+            default:
+                throw new RSIllegalArgumentException("Only NV21 and YV12 are supported..");
+            }
+
+            mYuv = yuvFormat;
+            return this;
+        }
+
 
         /**
          * Validate structure and create a new type.
@@ -289,8 +311,14 @@ public class Type extends BaseObj {
                 }
             }
 
+            if (mYuv != 0) {
+                if ((mDimZ != 0) || mDimFaces || mDimMipmaps) {
+                    throw new RSInvalidStateException("YUV only supports basic 2D.");
+                }
+            }
+
             int id = mRS.nTypeCreate(mElement.getID(mRS),
-                                     mDimX, mDimY, mDimZ, mDimMipmaps, mDimFaces);
+                                     mDimX, mDimY, mDimZ, mDimMipmaps, mDimFaces, mYuv);
             Type t = new Type(id, mRS);
             t.mElement = mElement;
             t.mDimX = mDimX;
@@ -298,6 +326,7 @@ public class Type extends BaseObj {
             t.mDimZ = mDimZ;
             t.mDimMipmaps = mDimMipmaps;
             t.mDimFaces = mDimFaces;
+            t.mDimYuv = mYuv;
 
             t.calcElementCount();
             return t;
