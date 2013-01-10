@@ -2844,7 +2844,7 @@ public class Activity extends ContextThemeWrapper
      * item has been selected.
      * <p>
      * It is not safe to hold onto the context menu after this method returns.
-     * {@inheritDoc}
+     *
      */
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
     }
