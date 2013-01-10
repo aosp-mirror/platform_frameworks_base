@@ -13,7 +13,7 @@ click <em>Build my badge</em>, then paste the HTML into your web content.</p>
 wraps your screenshots in real device artwork.</p>
 
 <p>For guidelines when using the Google Play badge and other brand assets,
-see the <a href="{@docRoot}distribute/googleplay/promote/brand.html">Brand
+see the <a href="{@docRoot}distribute/googleplay/promote/brand.html#brand-google_play">Brand
 Guidelines</a>.</p>
 
 <style type="text/css">
@@ -56,8 +56,11 @@ div.button-row input {
 
 <script type="text/javascript">
 
+// locales for which we have the 'app' badge
+var APP_LANGS = ['it','pt-br','pt-pt','nl','ko','ja','fr','es','es-419','en','de'];
+
 // variables for creating 'try it out' demo button
-var imagePath = "http://developer.android.com/images/brand/"
+var imagePath = "/images/brand/"
 var linkStart = "<a href=\"http://play.google.com/store/";
 var imageStart = "\">\n"
         + "  <img alt=\"";
@@ -77,8 +80,9 @@ var imageEndCode = ".png\" />\n&lt;/a>";
 
 /** Generate the HTML snippet and demo based on form values */
 function buildButton(form) {
-  var selectedValue = $('form input[type=radio]:checked').val();
-  var altText = selectedValue.indexOf("get_it") != -1 ? "Get it on Google Play" : "Android app on Google Play";
+  var lang = $('#locale option:selected').val();
+  var selectedValue = lang + $('form input[type=radio]:checked').val();
+  var altText = selectedValue.indexOf("generic") != -1 ? "Get it on Google Play" : "Android app on Google Play";
 
   if (form["package"].value != "com.example.android") {
     $("#preview").show();
@@ -144,6 +148,33 @@ function clearLabel(id, example) {
   return false;
 }
 
+/** Switch the badge urls for selected language */
+function changeBadgeLang() {
+  var lang = $('#locale option:selected').val();
+  
+  // check if we have the 'app' badge for this lang and show notice if not
+  $("div.button-row.error").remove();  // remove any existing instance of error message
+  if ($.inArray(lang,APP_LANGS) == -1) {
+    $("div.button-row.app").hide();
+    $("div.button-row.app").after('<div class="button-row error"><p class="note" style="margin:1em 0 -1em">'
+        + 'Sorry, we currently don\'t have the '
+        + '<em>Android app on Google Play</em> badge translated for '
+        + $("select#locale option[value="+lang+"]").attr("title")
+        + '.<br>Please check back later or instead use the <em>Get it on Google Play</em> badge below.'
+        + '</p></div>');
+  } else {
+    $("div.button-row.app").show(); // show the 'app' badge row
+  }
+  
+  $('.button-row img').each(function() {
+    var id = $(this).parent().attr('for');
+    var imgName = lang + $('input#'+id).attr('value') + '.png';
+    var lastSlash = $(this).attr('src').lastIndexOf('/');
+    var imgPath = $(this).attr('src').substring(0, lastSlash+1);
+    $(this).attr('src', imgPath + imgName);
+  });
+}
+
 /** When the doc is ready, find the inputs and color the input grey if the value is the example
     text. This is necessary to handle back-navigation, which can auto-fill the form with previous
     values (and text should not be grey) */
@@ -163,7 +194,106 @@ $(document).ready(function() {
 </script>
 
 <form class="button-form">
-  <label class="block" for="package">Package name:</label>
+  <label class="block" for="locale">Language:</label>
+  <select id="locale" style="display:block;float:left;margin:0"
+          onchange="changeBadgeLang()">
+    <option title="Afrikaans"
+            value="af">Afrikaans</option>
+    <option title="Arabic"
+            value="ar">العربية</option>
+    <option title="Belarusian"
+            value="be">Беларуская</option>
+    <option title="Bulgarian"
+            value="bg">Български</option>
+    <option title="Catalan"
+            value="ca">Català</option>
+    <option title="Chinese (China)"
+            value="zh-cn">中文 (中国)</option>
+    <option title="Chinese (Hong Kong)"
+            value="zh-hk">中文（香港）</option>
+    <option title="Chinese (Taiwan)"
+            value="zh-tw">中文 (台灣)</option>
+    <option title="Croatian"
+            value="hr">Hrvatski</option>
+    <option title="Czech"
+            value="cs">Česky</option>
+    <option title="Danish"
+            value="da">Dansk</option>
+    <option title="Dutch"
+            value="nl">Nederlands</option>
+    <option title="Estonian"
+            value="et">Eesti</option>
+    <option title="Farsi - Persian"
+            value="fa">فارسی</option>
+    <option title="Filipino"
+            value="fil">Tagalog</option>
+    <option title="Finnish"
+            value="fi">Suomi</option>
+    <option title="French"
+            value="fr">Français</option>
+    <option title="German"
+            value="de">Deutsch</option>
+    <option title="Greek"
+            value="el">Ελληνικά</option>
+    <option title="English"
+            value="en" selected="true">English</option>
+    <option title="Hebrew"
+            value="iw-he">עברית</option>
+    <option title="Hungarian"
+            value="hu">Magyar</option>
+    <option title="Indonesian"
+            value="id-in">Bahasa Indonesia</option>
+    <option title="Italian"
+            value="it">Italiano</option>
+    <option title="Japanese"
+            value="ja">日本語</option>
+    <option title="Korean"
+            value="ko">한국어</option>
+    <option title="Latvian"
+            value="lv">Latviešu</option>
+    <option title="Lithuanian"
+            value="lt">Lietuviškai</option>
+    <option title="Malay"
+            value="ms">Bahasa Melayu</option>
+    <option title="Norwegian"
+            value="no">Norsk (bokmål)‎</option>
+    <option title="Polish"
+            value="pl">Polski</option>
+    <option title="Portuguese (Brazil)"
+            value="pt-br">Português (Brasil)</option>
+    <option title="Portuguese (Portugal)"
+            value="pt-pt">Português (Portugal)</option>
+    <option title="Romanian"
+            value="ro">Română</option>
+    <option title="Russian"
+            value="ru">Русский</option>
+    <option title="Serbian"
+            value="sr">Српски / srpski</option>
+    <option title="Slovak"
+            value="sk">Slovenčina</option>
+    <option title="Slovenian"
+            value="sl">Slovenščina</option>
+    <option title="Spanish (Spain)"
+            value="es">Español (España)</option>
+    <option title="Spanish (Latin America)"
+            value="es-419">Español (Latinoamérica)</option>
+    <option title="Swedish"
+            value="sv">Svenska</option>
+    <option title="Swahili"
+            value="sw">Kiswahili</option>
+    <option title="Thai"
+            value="th">ไทย</option>
+    <option title="Turkish"
+            value="tr">Türkçe</option>
+    <option title="Ukrainian"
+            value="uk">Українська</option>
+    <option title="Vietnamese"
+            value="vi">Tiếng Việt</option>
+    <option title="Zulu"
+            value="zu">isiZulu</option>
+  </select>
+  <p style="clear:both;margin:0">&nbsp;</p>
+  <label class="block" for="package" style="clear:left">Package name:</label>
   <input class="text" type="text" id="package" name="package"
          value="com.example.android"
          default="com.example.android"
@@ -185,27 +315,27 @@ $(document).ready(function() {
          <br/><br/>
 
 
-<div class="button-row">
-  <input type="radio" name="buttonStyle" value="en_app_rgb_wo_45" id="ws" checked="checked" />
+<div class="button-row app">
+  <input type="radio" name="buttonStyle" value="_app_rgb_wo_45" id="ws" />
     <label for="ws"><img src="{@docRoot}images/brand/en_app_rgb_wo_45.png"
 alt="Android app on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="en_app_rgb_wo_60" id="wm" />
+  <input type="radio" name="buttonStyle" value="_app_rgb_wo_60" id="wm" />
     <label for="wm"><img src="{@docRoot}images/brand/en_app_rgb_wo_60.png"
 alt="Android app on Google Play (large)" /></label>
 </div>
 
 <div class="button-row">
-  <input type="radio" name="buttonStyle" value="en_generic_rgb_wo_45" id="ns" />
+  <input type="radio" name="buttonStyle" value="_generic_rgb_wo_45" id="ns" checked="checked" />
     <label for="ns"><img src="{@docRoot}images/brand/en_generic_rgb_wo_45.png"
 alt="Get it on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="en_generic_rgb_wo_60" id="nm" />
+  <input type="radio" name="buttonStyle" value="_generic_rgb_wo_60" id="nm" />
     <label for="nm"><img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png"
 alt="Get it on Google Play (large)" /></label>
 </div>
 
-  <input onclick="return buildButton(this.parentNode);"
+  <input class="button" onclick="return buildButton(this.parentNode);"
     type="button" value="Build my badge" style="padding:10px" />
   <br/>
 </form>
