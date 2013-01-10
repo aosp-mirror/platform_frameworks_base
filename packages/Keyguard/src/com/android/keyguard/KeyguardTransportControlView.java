@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -43,8 +43,6 @@ import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.android.internal.R;
 
 import java.lang.ref.WeakReference;
 /**
@@ -356,26 +354,26 @@ public class KeyguardTransportControlView extends FrameLayout implements OnClick
         final int imageDescId;
         switch (state) {
             case RemoteControlClient.PLAYSTATE_ERROR:
-                imageResId = com.android.internal.R.drawable.stat_sys_warning;
+                imageResId = R.drawable.stat_sys_warning;
                 // TODO use more specific image description string for warning, but here the "play"
                 //      message is still valid because this button triggers a play command.
-                imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
+                imageDescId = R.string.keyguard_transport_play_description;
                 break;
 
             case RemoteControlClient.PLAYSTATE_PLAYING:
-                imageResId = com.android.internal.R.drawable.ic_media_pause;
-                imageDescId = com.android.internal.R.string.lockscreen_transport_pause_description;
+                imageResId = R.drawable.ic_media_pause;
+                imageDescId = R.string.keyguard_transport_pause_description;
                 break;
 
             case RemoteControlClient.PLAYSTATE_BUFFERING:
-                imageResId = com.android.internal.R.drawable.ic_media_stop;
-                imageDescId = com.android.internal.R.string.lockscreen_transport_stop_description;
+                imageResId = R.drawable.ic_media_stop;
+                imageDescId = R.string.keyguard_transport_stop_description;
                 break;
 
             case RemoteControlClient.PLAYSTATE_PAUSED:
             default:
-                imageResId = com.android.internal.R.drawable.ic_media_play;
-                imageDescId = com.android.internal.R.string.lockscreen_transport_play_description;
+                imageResId = R.drawable.ic_media_play;
+                imageDescId = R.string.keyguard_transport_play_description;
                 break;
         }
         mBtnPlay.setImageResource(imageResId);

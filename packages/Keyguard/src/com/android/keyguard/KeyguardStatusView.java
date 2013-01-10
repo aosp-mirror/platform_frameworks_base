@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.text.SimpleDateFormat;
@@ -40,7 +39,7 @@ public class KeyguardStatusView extends GridLayout {
     private static final String TAG = "KeyguardStatusView";
 
     public static final int LOCK_ICON = 0; // R.drawable.ic_lock_idle_lock;
-    public static final int ALARM_ICON = com.android.internal.R.drawable.ic_lock_idle_alarm;
+    public static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
     public static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
     public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
 
@@ -84,8 +83,7 @@ public class KeyguardStatusView extends GridLayout {
         super.onFinishInflate();
         Resources res = getContext().getResources();
         final Locale locale = Locale.getDefault();
-        final String datePattern =
-                res.getString(com.android.internal.R.string.system_ui_date_pattern);
+        final String datePattern = res.getString(R.string.system_ui_date_pattern);
         final String bestFormat = ICU.getBestDateTimePattern(datePattern, locale.toString());
         mDateFormat = new SimpleDateFormat(bestFormat, locale);
         mDateView = (TextView) findViewById(R.id.date);

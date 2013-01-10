@@ -17,15 +17,15 @@
 */
 -->
 <!-- This is the SIM PIN view that allows the user to enter a SIM PIN to unlock the device. -->
-<com.android.internal.policy.impl.keyguard.KeyguardSimPinView
+<com.android.keyguard.KeyguardSimPinView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     android:id="@+id/keyguard_sim_pin_view"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_maxWidth="@dimen/keyguard_security_width"
-    android:layout_maxHeight="@dimen/keyguard_security_height"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:gravity="center_horizontal">
 
     <ImageView
@@ -39,7 +39,7 @@
         />
     <LinearLayout
        android:id="@+id/keyguard_bouncer_frame"
-       android:background="@*android:drawable/kg_bouncer_bg_white"
+       android:background="@drawable/kg_bouncer_bg_white"
        android:layout_width="match_parent"
        android:layout_height="0dp"
        android:orientation="vertical"
@@ -58,7 +58,7 @@
                android:layout_height="match_parent"
                android:layout_weight="1"
                android:gravity="center"
-               android:layout_marginStart="@*android:dimen/keyguard_lockscreen_pin_margin_left"
+               android:layout_marginStart="@dimen/keyguard_lockscreen_pin_margin_left"
                android:singleLine="true"
                android:cursorVisible="false"
                android:background="@null"
@@ -69,7 +69,7 @@
                android:layout_width="wrap_content"
                android:layout_height="match_parent"
                android:gravity="center_vertical"
-               android:src="@*android:drawable/ic_input_delete"
+               android:src="@drawable/ic_input_delete"
                android:clickable="true"
                android:paddingTop="8dip"
                android:paddingBottom="8dip"
@@ -90,7 +90,7 @@
            android:layout_weight="1"
            android:orientation="horizontal"
            >
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key1"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -99,7 +99,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="1"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key2"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -108,7 +108,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="2"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key3"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -124,7 +124,7 @@
            android:layout_weight="1"
            android:orientation="horizontal"
            >
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key4"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -133,7 +133,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="4"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key5"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -142,7 +142,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="5"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key6"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -158,7 +158,7 @@
            android:orientation="horizontal"
            android:layout_weight="1"
            >
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key7"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -167,7 +167,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="7"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key8"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -176,7 +176,7 @@
                androidprv:textView="@+id/pinEntry"
                androidprv:digit="8"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key9"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -197,7 +197,7 @@
                android:layout_height="match_parent"
                android:layout_weight="1"
                />
-           <view class="com.android.internal.policy.impl.keyguard.NumPadKey"
+           <view class="com.android.keyguard.NumPadKey"
                android:id="@+id/key0"
                style="@style/Widget.Button.NumPadKey"
                android:layout_width="0px"
@@ -227,4 +227,4 @@
                    android:layout_gravity="bottom|center_horizontal"
                    android:gravity="center_horizontal" />
 
-</com.android.internal.policy.impl.keyguard.KeyguardSimPinView>
+</com.android.keyguard.KeyguardSimPinView>

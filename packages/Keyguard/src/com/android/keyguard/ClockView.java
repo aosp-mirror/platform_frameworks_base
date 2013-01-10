@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,7 +34,6 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
-import com.android.internal.R;
 
 /**
  * Displays the time

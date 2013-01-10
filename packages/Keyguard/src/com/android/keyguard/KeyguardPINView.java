@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.text.Editable;
@@ -24,8 +24,6 @@ import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.R;
 
 /**
  * Displays a PIN pad for unlocking.

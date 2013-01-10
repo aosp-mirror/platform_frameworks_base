@@ -18,29 +18,30 @@
 -->
 
 <!-- This is a view that shows general status information in Keyguard. -->
-<com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame
+<com.android.keyguard.KeyguardWidgetFrame
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     android:id="@+id/keyguard_status_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_maxWidth="@dimen/keyguard_security_width"
-    android:layout_maxHeight="@dimen/keyguard_security_height"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:gravity="center_horizontal">
 
-    <com.android.internal.policy.impl.keyguard.KeyguardStatusView
+    <com.android.keyguard.KeyguardStatusView
         android:id="@+id/keyguard_status_view_face_palm"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|top"
-        android:contentDescription="@android:string/keyguard_accessibility_status">
+        android:contentDescription="@string/keyguard_accessibility_status">
 
         <LinearLayout android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center_horizontal|top"
                       android:orientation="vertical"
                       android:focusable="true">
-            <com.android.internal.policy.impl.keyguard.ClockView
+            <com.android.keyguard.ClockView
                 android:id="@+id/clock_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -58,10 +59,10 @@
                           android:drawablePadding="2dip"
                           />
 
-            </com.android.internal.policy.impl.keyguard.ClockView>
+            </com.android.keyguard.ClockView>
 
             <include layout="@layout/keyguard_status_area" />
         </LinearLayout>
 
-    </com.android.internal.policy.impl.keyguard.KeyguardStatusView>
-</com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>
+    </com.android.keyguard.KeyguardStatusView>
+</com.android.keyguard.KeyguardWidgetFrame>

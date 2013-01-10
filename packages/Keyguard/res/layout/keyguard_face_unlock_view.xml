@@ -18,14 +18,15 @@
 -->
 
 <!-- This is the screen that allows the user to unlock by showing their face.  -->
-<com.android.internal.policy.impl.keyguard.KeyguardFaceUnlockView
+<com.android.keyguard.KeyguardFaceUnlockView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     android:id="@+id/keyguard_face_unlock_view"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_maxWidth="@dimen/keyguard_security_width"
-    android:layout_maxHeight="@dimen/keyguard_security_height"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:contentDescription="@string/keyguard_accessibility_face_unlock">
 
     <include layout="@layout/keyguard_message_area"
@@ -35,7 +36,7 @@
 
     <FrameLayout
        android:id="@+id/keyguard_bouncer_frame"
-       android:background="@*android:drawable/kg_bouncer_bg_white"
+       android:background="@drawable/kg_bouncer_bg_white"
        android:layout_width="match_parent"
        android:layout_height="0dp"
        android:layout_weight="1"
@@ -45,14 +46,14 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent"
            android:layout_gravity="center_horizontal"
-           android:background="@*android:drawable/intro_bg"
+           android:background="@drawable/intro_bg"
            android:gravity="center">
 
            <View
                android:id="@+id/spotlightMask"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
-               android:background="@*android:color/facelock_spotlight_mask"
+               android:background="@color/facelock_spotlight_mask"
            />
 
            <ImageButton
@@ -63,7 +64,7 @@
                android:layout_alignParentTop="true"
                android:layout_alignParentEnd="true"
                android:background="#00000000"
-               android:src="@*android:drawable/ic_facial_backup"
+               android:src="@drawable/ic_facial_backup"
            />
        </com.android.internal.widget.FaceUnlockView>
     </FrameLayout>
@@ -75,4 +76,4 @@
         android:orientation="vertical"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal" />
-</com.android.internal.policy.impl.keyguard.KeyguardFaceUnlockView>
+</com.android.keyguard.KeyguardFaceUnlockView>

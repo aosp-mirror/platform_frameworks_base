@@ -16,13 +16,14 @@
 ** limitations under the License.
 */
 -->
-<com.android.internal.policy.impl.keyguard.KeyguardAccountView
+<com.android.keyguard.KeyguardAccountView
     xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     android:id="@+id/keyguard_account_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_maxWidth="@dimen/keyguard_security_width"
-    android:layout_maxHeight="@dimen/keyguard_security_height"
+    androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:orientation="vertical">
 
     <include layout="@layout/keyguard_message_area"
@@ -84,4 +85,4 @@
         android:gravity="center_horizontal" />
     -->
 
-</com.android.internal.policy.impl.keyguard.KeyguardAccountView>
+</com.android.keyguard.KeyguardAccountView>

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
+
+import com.android.internal.policy.IKeyguardResult;
+import com.android.internal.widget.LockPatternUtils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -28,6 +31,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
@@ -39,9 +43,6 @@ import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard.  Calls back
@@ -119,7 +120,7 @@ public class KeyguardViewManager {
     private boolean shouldEnableScreenRotation() {
         Resources res = mContext.getResources();
         return SystemProperties.getBoolean("lockscreen.rot_override",false)
-                || res.getBoolean(com.android.internal.R.bool.config_enableLockScreenRotation);
+                || res.getBoolean(R.bool.config_enableLockScreenRotation);
     }
 
     class ViewManagerHost extends FrameLayout {
@@ -194,12 +195,11 @@ public class KeyguardViewManager {
             }
 
             final int stretch = ViewGroup.LayoutParams.MATCH_PARENT;
-            final int type = isActivity ? WindowManager.LayoutParams.TYPE_APPLICATION
-                    : WindowManager.LayoutParams.TYPE_KEYGUARD;
+            final int type = WindowManager.LayoutParams.TYPE_KEYGUARD;
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-            lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
+            lp.windowAnimations = R.style.Animation_LockScreen;
             if (ActivityManager.isHighEndGfx()) {
                 lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
                 lp.privateFlags |=
@@ -331,8 +331,7 @@ public class KeyguardViewManager {
         }
     }
 
-    public synchronized void onScreenTurnedOn(
-            final KeyguardViewManager.ShowListener showListener) {
+    public synchronized void onScreenTurnedOn(final IKeyguardResult result) {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
         if (mKeyguardView != null) {
@@ -340,26 +339,41 @@ public class KeyguardViewManager {
 
             // Caller should wait for this window to be shown before turning
             // on the screen.
-            if (showListener != null) {
+            if (result != null) {
                 if (mKeyguardHost.getVisibility() == View.VISIBLE) {
                     // Keyguard may be in the process of being shown, but not yet
                     // updated with the window manager...  give it a chance to do so.
                     mKeyguardHost.post(new Runnable() {
                         @Override
                         public void run() {
+                            IBinder token = null;
                             if (mKeyguardHost.getVisibility() == View.VISIBLE) {
-                                showListener.onShown(mKeyguardHost.getWindowToken());
-                            } else {
-                                showListener.onShown(null);
+                                token = mKeyguardHost.getWindowToken();
+                            }
+                            try {
+                                result.onShown(token);
+                            } catch (RemoteException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
                             }
                         }
                     });
                 } else {
-                    showListener.onShown(null);
+                    try {
+                        result.onShown(null);
+                    } catch (RemoteException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
-        } else if (showListener != null) {
-            showListener.onShown(null);
+        } else if (result != null) {
+            try {
+                result.onShown(null);
+            } catch (RemoteException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 

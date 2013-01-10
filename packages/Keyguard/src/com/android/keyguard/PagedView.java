@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -52,8 +52,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
-
-import com.android.internal.R;
 
 import java.util.ArrayList;
 

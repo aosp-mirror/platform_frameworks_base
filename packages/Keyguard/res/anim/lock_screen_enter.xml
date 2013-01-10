@@ -18,7 +18,7 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@interpolator/accelerate_cubic">
+        android:interpolator="@android:interpolator/accelerate_cubic">
     <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_activityDefaultDur" />
+        android:duration="@integer/config_activityDefaultDur" />
 </set>

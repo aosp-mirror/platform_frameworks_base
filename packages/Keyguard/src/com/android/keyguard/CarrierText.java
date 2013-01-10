@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.internal.R;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
@@ -124,7 +123,7 @@ public class CarrierText extends TextView {
 
             case NetworkLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        mContext.getText(R.string.lockscreen_network_locked_message), plmn);
+                        mContext.getText(R.string.keyguard_network_locked_message), plmn);
                 break;
 
             case SimMissing:
@@ -133,30 +132,30 @@ public class CarrierText extends TextView {
                 // has some connectivity. Otherwise, it should be null or empty and just show
                 // "No SIM card"
                 carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_missing_sim_message_short),
+                        getContext().getText(R.string.keyguard_missing_sim_message_short),
                         plmn);
                 break;
 
             case SimPermDisabled:
                 carrierText = getContext().getText(
-                        R.string.lockscreen_permanent_disabled_sim_message_short);
+                        R.string.keyguard_permanent_disabled_sim_message_short);
                 break;
 
             case SimMissingLocked:
                 carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_missing_sim_message_short),
+                        getContext().getText(R.string.keyguard_missing_sim_message_short),
                         plmn);
                 break;
 
             case SimLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_sim_locked_message),
+                        getContext().getText(R.string.keyguard_sim_locked_message),
                         plmn);
                 break;
 
             case SimPukLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_sim_puk_locked_message),
+                        getContext().getText(R.string.keyguard_sim_puk_locked_message),
                         plmn);
                 break;
         }
@@ -232,19 +231,19 @@ public class CarrierText extends TextView {
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
             case NetworkLocked:
-                carrierHelpTextId = R.string.lockscreen_instructions_when_pattern_disabled;
+                carrierHelpTextId = R.string.keyguard_instructions_when_pattern_disabled;
                 break;
 
             case SimMissing:
-                carrierHelpTextId = R.string.lockscreen_missing_sim_instructions_long;
+                carrierHelpTextId = R.string.keyguard_missing_sim_instructions_long;
                 break;
 
             case SimPermDisabled:
-                carrierHelpTextId = R.string.lockscreen_permanent_disabled_sim_instructions;
+                carrierHelpTextId = R.string.keyguard_permanent_disabled_sim_instructions;
                 break;
 
             case SimMissingLocked:
-                carrierHelpTextId = R.string.lockscreen_missing_sim_instructions;
+                carrierHelpTextId = R.string.keyguard_missing_sim_instructions;
                 break;
 
             case Normal:

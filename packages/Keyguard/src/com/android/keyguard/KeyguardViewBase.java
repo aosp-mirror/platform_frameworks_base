@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.app.Activity;
 import android.content.Context;
@@ -260,5 +260,4 @@ public abstract class KeyguardViewBase extends FrameLayout {
             KeyguardViewMediator.ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
     }
-
 }

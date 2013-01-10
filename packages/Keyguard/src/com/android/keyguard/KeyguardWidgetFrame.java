@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -36,8 +36,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-
-import com.android.internal.R;
 
 public class KeyguardWidgetFrame extends FrameLayout {
     private final static PorterDuffXfermode sAddBlendMode =
@@ -114,9 +112,9 @@ public class KeyguardWidgetFrame extends FrameLayout {
         // This will be overriden on phones based on the current security mode, however on tablets
         // we need to specify a height.
         mSmallWidgetHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.kg_small_widget_height);
+                res.getDimensionPixelSize(R.dimen.kg_small_widget_height);
         mBackgroundDrawable = res.getDrawable(R.drawable.kg_widget_bg_padded);
-        mGradientColor = res.getColor(com.android.internal.R.color.kg_widget_pager_gradient);
+        mGradientColor = res.getColor(R.color.kg_widget_pager_gradient);
         mGradientPaint.setXfermode(sAddBlendMode);
     }
 

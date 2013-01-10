@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -33,8 +33,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
-import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
+import com.android.keyguard.KeyguardActivityLauncher.CameraWidgetInfo;
 
 public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnClickListener {
     private static final String TAG = CameraWidgetFrame.class.getSimpleName();
@@ -204,7 +203,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
     private static View inflateGenericWidgetView(Context context) {
         if (DEBUG) Log.d(TAG, "inflateGenericWidgetView");
         ImageView iv = new ImageView(context);
-        iv.setImageResource(com.android.internal.R.drawable.ic_lockscreen_camera);
+        iv.setImageResource(R.drawable.ic_lockscreen_camera);
         iv.setScaleType(ScaleType.CENTER);
         iv.setBackgroundColor(Color.argb(127, 0, 0, 0));
         return iv;
@@ -423,7 +422,7 @@ public class CameraWidgetFrame extends KeyguardWidgetFrame implements View.OnCli
         if (!(lp instanceof WindowManager.LayoutParams))
             return;
         WindowManager.LayoutParams wlp = (WindowManager.LayoutParams) lp;
-        int newWindowAnimations = isEnabled ? com.android.internal.R.style.Animation_LockScreen : 0;
+        int newWindowAnimations = isEnabled ? R.style.Animation_LockScreen : 0;
         if (newWindowAnimations != wlp.windowAnimations) {
             if (DEBUG) Log.d(TAG, "setting windowAnimations to: " + newWindowAnimations
                     + " at " + SystemClock.uptimeMillis());

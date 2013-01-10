@@ -18,14 +18,14 @@
 -->
 
 <!-- This is the selector widget that allows the user to select an action. -->
-<com.android.internal.policy.impl.keyguard.KeyguardSelectorView
-    xmlns:prvandroid="http://schemas.android.com/apk/prv/res/android"
+<com.android.keyguard.KeyguardSelectorView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     android:id="@+id/keyguard_selector_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_maxWidth="420dp"
-    android:layout_maxHeight="@dimen/keyguard_security_height"
+    androidprv:layout_maxWidth="420dp"
+    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:orientation="vertical"
@@ -49,7 +49,7 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:background="@*android:drawable/kg_bouncer_bg_white"/>
+            android:background="@drawable/kg_bouncer_bg_white"/>
 
         <include layout="@layout/keyguard_glow_pad_container" />
 
@@ -60,5 +60,5 @@
             android:layout_gravity="bottom|center_horizontal" />
     </FrameLayout>
 
-</com.android.internal.policy.impl.keyguard.KeyguardSelectorView>
+</com.android.keyguard.KeyguardSelectorView>
 

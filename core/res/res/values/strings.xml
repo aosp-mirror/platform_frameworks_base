@@ -3429,6 +3429,11 @@
     <!-- Description of an application permission that lets an application route media output. -->
     <string name="permdesc_route_media_output">Allows an application to route media output to other external devices.</string>
 
+    <!-- Title of an application permission that lets an application access keyguard secure storage. -->
+    <string name="permlab_access_keyguard_secure_storage">Access keyguard secure storage</string>
+    <!-- Description of an application permission that lets an application access keyguard secure storage. -->
+    <string name="permdesc_access_keyguard_secure_storage">Allows an application to access keguard secure storage.</string>
+
     <!-- Shown in the tutorial for tap twice for zoom control. -->
     <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
 

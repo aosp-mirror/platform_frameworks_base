@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -35,8 +37,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.android.internal.policy.impl.keyguard.KeyguardHostView.OnDismissAction;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 import java.util.List;
 

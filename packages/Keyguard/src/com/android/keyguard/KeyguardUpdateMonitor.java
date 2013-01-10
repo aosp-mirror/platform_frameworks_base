@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.app.ActivityManagerNative;
 import android.app.IUserSwitchObserver;
@@ -37,7 +37,6 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -45,7 +44,6 @@ import com.android.internal.telephony.TelephonyIntents;
 
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import com.android.internal.R;
 import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
@@ -466,7 +464,7 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * We need to store this state in the KeyguardUpdateMonitor since this class will not be 
+     * We need to store this state in the KeyguardUpdateMonitor since this class will not be
      * destroyed.
      */
     public boolean hasBootCompleted() {
@@ -675,7 +673,7 @@ public class KeyguardUpdateMonitor {
      * @return The default plmn (no service)
      */
     private CharSequence getDefaultPlmn() {
-        return mContext.getResources().getText(R.string.lockscreen_carrier_default);
+        return mContext.getResources().getText(R.string.keyguard_carrier_default);
     }
 
     /**

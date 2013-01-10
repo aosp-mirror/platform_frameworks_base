@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
+import com.android.internal.policy.IKeyguardResult;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
 import android.app.Activity;
@@ -219,7 +220,7 @@ public class KeyguardViewMediator {
      * how we'll ultimately let them know whether it was successful.  We use this
      * var being non-null as an indicator that there is an in progress request.
      */
-    private WindowManagerPolicy.OnKeyguardExitResult mExitSecureCallback;
+    private IKeyguardResult mExitSecureCallback;
 
     // the properties of the keyguard
 
@@ -347,7 +348,7 @@ public class KeyguardViewMediator {
                     // flicker while turning back on the screen and disabling the keyguard again).
                     if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
                             + "keyguard is showing");
-                    doKeyguardLocked();
+                    doKeyguardLocked(null);
                 }
             }
         };
@@ -377,7 +378,7 @@ public class KeyguardViewMediator {
                                 if (DEBUG) Log.d(TAG, "ICC_ABSENT isn't showing,"
                                         + " we need to show the keyguard since the "
                                         + "device isn't provisioned yet.");
-                                doKeyguardLocked();
+                                doKeyguardLocked(null);
                             } else {
                                 resetStateLocked(null);
                             }
@@ -390,7 +391,7 @@ public class KeyguardViewMediator {
                         if (!isShowing()) {
                             if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
                                     + "showing; need to show keyguard so user can enter sim pin");
-                            doKeyguardLocked();
+                            doKeyguardLocked(null);
                         } else {
                             resetStateLocked(null);
                         }
@@ -401,7 +402,7 @@ public class KeyguardViewMediator {
                         if (!isShowing()) {
                             if (DEBUG) Log.d(TAG, "PERM_DISABLED and "
                                   + "keygaurd isn't showing.");
-                            doKeyguardLocked();
+                            doKeyguardLocked(null);
                         } else {
                             if (DEBUG) Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
                                   + "show permanently disabled message in lockscreen.");
@@ -558,7 +559,7 @@ public class KeyguardViewMediator {
                 mUpdateMonitor.setAlternateUnlockEnabled(true);
             }
 
-            doKeyguardLocked();
+            doKeyguardLocked(null);
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
@@ -586,7 +587,11 @@ public class KeyguardViewMediator {
 
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
-                mExitSecureCallback.onKeyguardExitResult(false);
+                try {
+                    mExitSecureCallback.onKeyguardExitResult(false);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 mExitSecureCallback = null;
                 if (!mExternallyEnabled) {
                     hideLocked();
@@ -600,7 +605,7 @@ public class KeyguardViewMediator {
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
                 // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
-                doKeyguardLocked();
+                doKeyguardLocked(null);
             }
         }
     }
@@ -638,7 +643,7 @@ public class KeyguardViewMediator {
         if (timeout <= 0) {
             // Lock now
             mSuppressNextLockSound = true;
-            doKeyguardLocked();
+            doKeyguardLocked(null);
         } else {
             // Lock in the future
             long when = SystemClock.elapsedRealtime() + timeout;
@@ -659,13 +664,13 @@ public class KeyguardViewMediator {
     /**
      * Let's us know the screen was turned on.
      */
-    public void onScreenTurnedOn(KeyguardViewManager.ShowListener showListener) {
+    public void onScreenTurnedOn(IKeyguardResult result) {
         synchronized (this) {
             mScreenOn = true;
             cancelDoKeyguardLaterLocked();
             if (DEBUG) Log.d(TAG, "onScreenTurnedOn, seq = " + mDelayedShowingSequence);
-            if (showListener != null) {
-                notifyScreenOnLocked(showListener);
+            if (result != null) {
+                notifyScreenOnLocked(result);
             }
         }
         maybeSendUserPresentBroadcast();
@@ -736,7 +741,11 @@ public class KeyguardViewMediator {
 
                 if (mExitSecureCallback != null) {
                     if (DEBUG) Log.d(TAG, "onKeyguardExitResult(false), resetting");
-                    mExitSecureCallback.onKeyguardExitResult(false);
+                    try {
+                        mExitSecureCallback.onKeyguardExitResult(false);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                     mExitSecureCallback = null;
                     resetStateLocked(null);
                 } else {
@@ -764,24 +773,36 @@ public class KeyguardViewMediator {
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
-    public void verifyUnlock(WindowManagerPolicy.OnKeyguardExitResult callback) {
+    public void verifyUnlock(IKeyguardResult result) {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "verifyUnlock");
             if (!mUpdateMonitor.isDeviceProvisioned()) {
                 // don't allow this api when the device isn't provisioned
                 if (DEBUG) Log.d(TAG, "ignoring because device isn't provisioned");
-                callback.onKeyguardExitResult(false);
+                try {
+                    result.onKeyguardExitResult(false);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             } else if (mExternallyEnabled) {
                 // this only applies when the user has externally disabled the
                 // keyguard.  this is unexpected and means the user is not
                 // using the api properly.
                 Log.w(TAG, "verifyUnlock called when not externally disabled");
-                callback.onKeyguardExitResult(false);
+                try {
+                    result.onKeyguardExitResult(false);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             } else if (mExitSecureCallback != null) {
                 // already in progress with someone else
-                callback.onKeyguardExitResult(false);
+                try {
+                    result.onKeyguardExitResult(false);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             } else {
-                mExitSecureCallback = callback;
+                mExitSecureCallback = result;
                 verifyUnlockLocked();
             }
         }
@@ -842,10 +863,6 @@ public class KeyguardViewMediator {
      */
     public boolean isInputRestricted() {
         return mShowing || mNeedToReshowWhenReenabled || !mUpdateMonitor.isDeviceProvisioned();
-    }
-
-    private void doKeyguardLocked() {
-        doKeyguardLocked(null);
     }
 
     /**
@@ -945,9 +962,9 @@ public class KeyguardViewMediator {
      * @see #onScreenTurnedOn()
      * @see #handleNotifyScreenOn
      */
-    private void notifyScreenOnLocked(KeyguardViewManager.ShowListener showListener) {
+    private void notifyScreenOnLocked(IKeyguardResult result) {
         if (DEBUG) Log.d(TAG, "notifyScreenOnLocked");
-        Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_ON, showListener);
+        Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_ON, result);
         mHandler.sendMessage(msg);
     }
 
@@ -1020,7 +1037,7 @@ public class KeyguardViewMediator {
                     if (mDelayedShowingSequence == sequence) {
                         // Don't play lockscreen SFX if the screen went off due to timeout.
                         mSuppressNextLockSound = true;
-                        doKeyguardLocked();
+                        doKeyguardLocked(null);
                     }
                 }
             }
@@ -1080,7 +1097,12 @@ public class KeyguardViewMediator {
             }
 
             if (mExitSecureCallback != null) {
-                mExitSecureCallback.onKeyguardExitResult(authenticated);
+                try {
+                    mExitSecureCallback.onKeyguardExitResult(authenticated);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
                 mExitSecureCallback = null;
 
                 if (authenticated) {
@@ -1120,7 +1142,7 @@ public class KeyguardViewMediator {
                     handleNotifyScreenOff();
                     return;
                 case NOTIFY_SCREEN_ON:
-                    handleNotifyScreenOn((KeyguardViewManager.ShowListener)msg.obj);
+                    handleNotifyScreenOn((IKeyguardResult) msg.obj);
                     return;
                 case WAKE_WHEN_READY:
                     handleWakeWhenReady(msg.arg1);
@@ -1164,10 +1186,11 @@ public class KeyguardViewMediator {
     }
 
     private void sendUserPresentBroadcast() {
-        if (!(mContext instanceof Activity)) {
-            final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
-            mContext.sendBroadcastAsUser(mUserPresentIntent, currentUser);
-        }
+        // TODO
+//        if (!(mContext instanceof Activity)) {
+//            final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
+//            mContext.sendBroadcastAsUser(mUserPresentIntent, currentUser);
+//        }
     }
 
     /**
@@ -1176,7 +1199,7 @@ public class KeyguardViewMediator {
      */
     private void handleKeyguardDoneDrawing() {
         synchronized(this) {
-            if (false) Log.d(TAG, "handleKeyguardDoneDrawing");
+            if (DEBUG) Log.d(TAG, "handleKeyguardDoneDrawing");
             if (mWaitingUntilKeyguardVisible) {
                 if (DEBUG) Log.d(TAG, "handleKeyguardDoneDrawing: notifying mWaitingUntilKeyguardVisible");
                 mWaitingUntilKeyguardVisible = false;
@@ -1232,8 +1255,12 @@ public class KeyguardViewMediator {
      */
     private void handleShow(Bundle options) {
         synchronized (KeyguardViewMediator.this) {
-            if (DEBUG) Log.d(TAG, "handleShow");
-            if (!mSystemReady) return;
+            if (!mSystemReady) {
+                if (DEBUG) Log.d(TAG, "ignoring handleShow because system is not ready.");
+                return;
+            } else {
+                if (DEBUG) Log.d(TAG, "handleShow");
+            }
 
             mKeyguardViewManager.show(options);
             mShowing = true;
@@ -1406,10 +1433,10 @@ public class KeyguardViewMediator {
      * Handle message sent by {@link #notifyScreenOnLocked()}
      * @see #NOTIFY_SCREEN_ON
      */
-    private void handleNotifyScreenOn(KeyguardViewManager.ShowListener showListener) {
+    private void handleNotifyScreenOn(IKeyguardResult result) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
-            mKeyguardViewManager.onScreenTurnedOn(showListener);
+            mKeyguardViewManager.onScreenTurnedOn(result);
         }
     }
 

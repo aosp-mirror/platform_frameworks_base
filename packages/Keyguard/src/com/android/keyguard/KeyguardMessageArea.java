@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -35,9 +35,6 @@ import android.widget.TextView;
 import libcore.util.MutableInt;
 
 import java.lang.ref.WeakReference;
-
-import com.android.internal.R;
-
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
@@ -242,13 +239,12 @@ class KeyguardMessageArea extends TextView {
             if (mCharging) {
                 // Charging, charged or waiting to charge.
                 string = getContext().getString(mBatteryCharged
-                        ? com.android.internal.R.string.lockscreen_charged
-                        : com.android.internal.R.string.lockscreen_plugged_in, mBatteryLevel);
+                        ? R.string.keyguard_charged
+                        : R.string.keyguard_plugged_in, mBatteryLevel);
                 icon.value = CHARGING_ICON;
             } else if (mBatteryIsLow) {
                 // Battery is low
-                string = getContext().getString(
-                        com.android.internal.R.string.lockscreen_low_battery);
+                string = getContext().getString(R.string.keyguard_low_battery);
                 icon.value = BATTERY_LOW_ICON;
             }
         }

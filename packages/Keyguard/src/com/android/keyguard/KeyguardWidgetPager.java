@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -350,7 +350,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         View content = (widget == frame) ?  frame.getContent() : widget;
         if (content != null) {
             String contentDescription = mContext.getString(
-                com.android.internal.R.string.keyguard_accessibility_widget,
+                R.string.keyguard_accessibility_widget,
                 content.getContentDescription());
             frame.setContentDescription(contentDescription);
         }
@@ -846,7 +846,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             setCurrentPage(mCurrentPage + 1);
             mAddWidgetView = null;
         } else if (mAddWidgetView == null && !enabled) {
-            View addWidget = findViewById(com.android.internal.R.id.keyguard_add_widget);
+            View addWidget = findViewById(R.id.keyguard_add_widget);
             if (addWidget != null) {
                 mAddWidgetView = addWidget;
                 removeView(addWidget);
@@ -856,7 +856,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     boolean isAddPage(int pageIndex) {
         View v = getChildAt(pageIndex);
-        return v != null && v.getId() == com.android.internal.R.id.keyguard_add_widget;
+        return v != null && v.getId() == R.id.keyguard_add_widget;
     }
 
     boolean isCameraPage(int pageIndex) {

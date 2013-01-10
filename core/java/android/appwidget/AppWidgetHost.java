@@ -198,7 +198,6 @@ public class AppWidgetHost {
      * @return a appWidgetId
      */
     public int allocateAppWidgetId() {
-
         try {
             if (mPackageName == null) {
                 mPackageName = mContext.getPackageName();

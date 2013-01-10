@@ -28,7 +28,7 @@
     android:layout_alignParentBottom="true"
     android:clickable="true">
 
-    <com.android.internal.policy.impl.keyguard.CarrierText
+    <com.android.keyguard.CarrierText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -46,12 +46,12 @@
         android:gravity="center"
         android:weightSum="2">
 
-        <com.android.internal.policy.impl.keyguard.EmergencyButton
+        <com.android.keyguard.EmergencyButton
             android:id="@+id/emergency_call_button"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
+            android:drawableLeft="@drawable/lockscreen_emergency_button"
             android:text="@string/kg_emergency_call_label"
             style="?android:attr/buttonBarButtonStyle"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -63,7 +63,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
+            android:drawableLeft="@drawable/lockscreen_forgot_password_button"
             style="?android:attr/buttonBarButtonStyle"
             android:textSize="@dimen/kg_status_line_font_size"
             android:textColor="?android:attr/textColorSecondary"

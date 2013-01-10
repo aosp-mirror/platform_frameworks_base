@@ -15,7 +15,7 @@
 -->
 
 <!-- This is a view to control music playback in keyguard. -->
-<com.android.internal.policy.impl.keyguard.KeyguardTransportControlView
+<com.android.keyguard.KeyguardTransportControlView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -26,8 +26,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:foreground="@*android:drawable/ic_lockscreen_player_background"
-        android:contentDescription="@*android:string/keygaurd_accessibility_media_controls">
+        android:foreground="@drawable/ic_lockscreen_player_background"
+        android:contentDescription="@string/keygaurd_accessibility_media_controls">
         <!-- Use ImageView for its cropping features; otherwise could be android:background -->
         <ImageView
             android:id="@+id/albumart"
@@ -70,11 +70,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:src="@*android:drawable/ic_media_previous"
+                    android:src="@drawable/ic_media_previous"
                     android:clickable="true"
                     android:background="?android:attr/selectableItemBackground"
                     android:padding="10dip"
-                    android:contentDescription="@*android:string/lockscreen_transport_prev_description"/>
+                    android:contentDescription="@string/keyguard_accessibility_transport_prev_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -86,10 +86,10 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:clickable="true"
-                    android:src="@*android:drawable/ic_media_play"
+                    android:src="@drawable/ic_media_play"
                     android:background="?android:attr/selectableItemBackground"
                     android:padding="10dip"
-                    android:contentDescription="@*android:string/lockscreen_transport_play_description"/>
+                    android:contentDescription="@string/keyguard_accessibility_transport_play_description"/>
             </FrameLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -101,12 +101,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:clickable="true"
-                    android:src="@*android:drawable/ic_media_next"
+                    android:src="@drawable/ic_media_next"
                     android:background="?android:attr/selectableItemBackground"
                     android:padding="10dip"
-                    android:contentDescription="@*android:string/lockscreen_transport_next_description"/>
+                    android:contentDescription="@string/keyguard_accessibility_transport_next_description"/>
             </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 
-</com.android.internal.policy.impl.keyguard.KeyguardTransportControlView>
+</com.android.keyguard.KeyguardTransportControlView>

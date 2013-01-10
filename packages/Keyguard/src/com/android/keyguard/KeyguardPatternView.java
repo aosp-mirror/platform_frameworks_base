@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -37,7 +37,6 @@ import android.widget.LinearLayout;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
-import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.List;

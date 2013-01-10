@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import com.android.internal.telephony.ITelephony;
 
@@ -32,8 +32,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.R;
 
 /**
  * Displays a PIN pad for unlocking.

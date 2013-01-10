@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.app.ActivityManagerNative;
 import android.content.Context;
@@ -26,8 +26,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -154,15 +152,11 @@ public class KeyguardMultiUserSelectorView extends FrameLayout implements View.O
                     @Override
                     public void run() {
                         mActiveUserAvatar = avatar;
-                        if (this.getClass().getName().contains("internal")) {
-                            try {
-                                ActivityManagerNative.getDefault()
-                                        .switchUser(avatar.getUserInfo().id);
-                            } catch (RemoteException re) {
-                                Log.e(TAG, "Couldn't switch user " + re);
-                            }
-                        } else {
-                            setAllClickable(true);
+                        try {
+                            ActivityManagerNative.getDefault()
+                                    .switchUser(avatar.getUserInfo().id);
+                        } catch (RemoteException re) {
+                            Log.e(TAG, "Couldn't switch user " + re);
                         }
                     }
                 });

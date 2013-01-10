@@ -1,11 +1,9 @@
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-
-import com.android.internal.R;
 
 public class KeyguardSecurityContainer extends FrameLayout {
     public KeyguardSecurityContainer(Context context, AttributeSet attrs) {

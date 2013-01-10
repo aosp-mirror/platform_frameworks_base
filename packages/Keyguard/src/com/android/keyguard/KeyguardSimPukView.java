@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.policy.impl.keyguard;
 
+package com.android.keyguard;
+
+import com.android.internal.telephony.ITelephony;
+
+import android.content.Context;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.Editable;
@@ -29,10 +32,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView.OnEditorActionListener;
-
-import com.android.internal.telephony.ITelephony;
-
-import com.android.internal.R;
 
 /**
  * Displays a PIN pad for entering a PUK (Pin Unlock Kode) provided by a carrier.
@@ -72,8 +71,7 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
             } else if (state == CONFIRM_PIN) {
                 if (confirmPin()) {
                     state = DONE;
-                    msg =
-                        com.android.internal.R.string.lockscreen_sim_unlock_progress_dialog_message;
+                    msg = R.string.keyguard_sim_unlock_progress_dialog_message;
                     updateSim();
                 } else {
                     state = ENTER_PIN; // try again?

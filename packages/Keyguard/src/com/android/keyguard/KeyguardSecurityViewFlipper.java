@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
-
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -31,6 +28,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
+
+import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so

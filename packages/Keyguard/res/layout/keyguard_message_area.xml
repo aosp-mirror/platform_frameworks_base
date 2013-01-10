@@ -18,7 +18,7 @@
 -->
 
 <!-- This contains emergency call button and carrier as shared by pin/pattern/password screens -->
-<com.android.internal.policy.impl.keyguard.KeyguardMessageArea
+<com.android.keyguard.KeyguardMessageArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

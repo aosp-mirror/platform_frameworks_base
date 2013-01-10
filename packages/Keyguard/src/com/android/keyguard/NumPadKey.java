@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,7 +26,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
 public class NumPadKey extends Button {

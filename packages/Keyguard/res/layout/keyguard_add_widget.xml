@@ -18,7 +18,7 @@
 -->
 
 <!-- This is a view that shows general status information in Keyguard. -->
-<com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame
+<com.android.keyguard.KeyguardWidgetFrame
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_add_widget"
     android:layout_width="match_parent"
@@ -39,4 +39,4 @@
             android:src="@drawable/keyguard_add_widget_button"
             android:contentDescription="@string/keyguard_accessibility_add_widget"/>
     </FrameLayout>
-</com.android.internal.policy.impl.keyguard.KeyguardWidgetFrame>
+</com.android.keyguard.KeyguardWidgetFrame>

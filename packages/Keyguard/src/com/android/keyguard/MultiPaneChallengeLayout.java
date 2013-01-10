@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
-
-import com.android.internal.R;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -72,7 +70,7 @@ public class MultiPaneChallengeLayout extends ViewGroup implements ChallengeLayo
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.MultiPaneChallengeLayout, defStyleAttr, 0);
-        mOrientation = a.getInt(R.styleable.MultiPaneChallengeLayout_orientation,
+        mOrientation = a.getInt(R.styleable.MultiPaneChallengeLayout_android_orientation,
                 HORIZONTAL);
         a.recycle();
 

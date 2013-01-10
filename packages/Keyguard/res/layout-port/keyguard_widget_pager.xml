@@ -18,8 +18,8 @@
 -->
 
 <!-- This is the selector widget that allows the user to select an action. -->
-<com.android.internal.policy.impl.keyguard.KeyguardWidgetPager
-    xmlns:androidprv="http://schemas.android.com/apk/res/android"
+<com.android.keyguard.KeyguardWidgetPager
+    xmlns:androidprv="http://schemas.android.com/apk/res/com.android.keyguard"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/app_widget_container"
     android:paddingLeft="25dp"
@@ -28,4 +28,4 @@
     android:paddingBottom="@dimen/kg_widget_pager_bottom_padding"
     android:clipToPadding="false"
     androidprv:pageSpacing="10dp">
-</com.android.internal.policy.impl.keyguard.KeyguardWidgetPager>
+</com.android.keyguard.KeyguardWidgetPager>

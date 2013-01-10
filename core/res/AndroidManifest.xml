@@ -2187,6 +2187,13 @@
         android:description="@string/permdesc_accessNotifications"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
+        @hide -->
+    <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_access_keyguard_secure_storage"
+        android:description="@string/permdesc_access_keyguard_secure_storage" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

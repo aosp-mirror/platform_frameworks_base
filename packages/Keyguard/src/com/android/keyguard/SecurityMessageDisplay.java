@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 public interface SecurityMessageDisplay {
     public void setMessage(CharSequence msg, boolean important);

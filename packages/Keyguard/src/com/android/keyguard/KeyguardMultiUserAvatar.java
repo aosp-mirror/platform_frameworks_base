@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,8 +34,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.android.internal.R;
 
 class KeyguardMultiUserAvatar extends FrameLayout {
     private static final String TAG = KeyguardMultiUserAvatar.class.getSimpleName();
@@ -70,6 +69,7 @@ class KeyguardMultiUserAvatar extends FrameLayout {
     private KeyguardMultiUserSelectorView mUserSelector;
     private KeyguardCircleFramedDrawable mFramed;
     private boolean mPressLock;
+    private UserManager mUserManager;
 
     public static KeyguardMultiUserAvatar fromXml(int resId, Context context,
             KeyguardMultiUserSelectorView userSelector, UserInfo info) {
@@ -104,6 +104,7 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mActiveScale = ACTIVE_SCALE;
         mActiveAlpha = ACTIVE_ALPHA;
         mInactiveAlpha = INACTIVE_ALPHA;
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         mTouched = false;
 
@@ -111,9 +112,6 @@ class KeyguardMultiUserAvatar extends FrameLayout {
     }
 
     protected String rewriteIconPath(String path) {
-        if (!this.getClass().getName().contains("internal")) {
-            return path.replace("system", "data");
-        }
         return path;
     }
 
@@ -124,16 +122,12 @@ class KeyguardMultiUserAvatar extends FrameLayout {
         mUserImage = (ImageView) findViewById(R.id.keyguard_user_avatar);
         mUserName = (TextView) findViewById(R.id.keyguard_user_name);
 
-        Bitmap icon = null; 
-        try {
-            icon = BitmapFactory.decodeFile(rewriteIconPath(user.iconPath));
-        } catch (Exception e) {
-            if (DEBUG) Log.d(TAG, "failed to open profile icon " + user.iconPath, e);
-        }
+        Bitmap icon = mUserManager.getUserIcon(user.id);
 
         if (icon == null) {
+            if (DEBUG) Log.w(TAG, "Couldn't get user icon for user id " + user.id);
             icon = BitmapFactory.decodeResource(mContext.getResources(),
-                    com.android.internal.R.drawable.ic_contact_picture);
+                    R.drawable.ic_contact_picture);
         }
 
         mFramed = new KeyguardCircleFramedDrawable(icon, (int) mIconSize, mFrameColor, mStroke,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import com.android.internal.policy.IFaceLockCallback;
 import com.android.internal.policy.IFaceLockInterface;

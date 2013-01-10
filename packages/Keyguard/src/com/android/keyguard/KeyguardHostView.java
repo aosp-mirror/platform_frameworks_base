@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
+
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -52,10 +55,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
-
-import com.android.internal.R;
-import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
 import java.util.List;
@@ -512,7 +511,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         final AlertDialog dialog = new AlertDialog.Builder(mContext)
             .setTitle(title)
             .setMessage(message)
-            .setNeutralButton(com.android.internal.R.string.ok, null)
+            .setNeutralButton(R.string.ok, null)
             .create();
         if (!(mContext instanceof Activity)) {
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
@@ -863,8 +862,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         KeyguardSecurityView newView = getSecurityView(securityMode);
 
         // Enter full screen mode if we're in SIM or Account screen
-        boolean fullScreenEnabled = getResources().getBoolean(
-                com.android.internal.R.bool.kg_sim_puk_account_full_screen);
+        boolean fullScreenEnabled = getResources().getBoolean(R.bool.kg_sim_puk_account_full_screen);
         boolean isSimOrAccount = securityMode == SecurityMode.SimPin
                 || securityMode == SecurityMode.SimPuk
                 || securityMode == SecurityMode.Account;
@@ -1551,17 +1549,10 @@ public class KeyguardHostView extends KeyguardViewBase {
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
     private boolean shouldEnableMenuKey() {
         final Resources res = getResources();
-        final boolean configDisabled = res.getBoolean(
-                com.android.internal.R.bool.config_disableMenuKeyInLockScreen);
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
         return !configDisabled || isTestHarness || fileOverride;
-    }
-
-
-
-    public void goToUserSwitcher() {
-        mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_multi_user_selector));
     }
 
     public void goToWidget(int appWidgetId) {

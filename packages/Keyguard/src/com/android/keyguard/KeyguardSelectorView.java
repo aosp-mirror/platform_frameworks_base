@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.policy.impl.keyguard;
+package com.android.keyguard;
 
 import android.animation.ObjectAnimator;
 import android.app.SearchManager;
@@ -34,7 +34,6 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
-import com.android.internal.R;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
@@ -58,7 +57,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         public void onTrigger(View v, int target) {
             final int resId = mGlowPadView.getResourceIdForTarget(target);
             switch (resId) {
-                case com.android.internal.R.drawable.ic_action_assist_generic:
+                case R.drawable.ic_action_assist_generic:
                     Intent assistIntent =
                             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                             .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
@@ -70,13 +69,13 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                     mCallback.userActivity(0);
                     break;
 
-                case com.android.internal.R.drawable.ic_lockscreen_camera:
+                case R.drawable.ic_lockscreen_camera:
                     mActivityLauncher.launchCamera(null, null);
                     mCallback.userActivity(0);
                     break;
 
-                case com.android.internal.R.drawable.ic_lockscreen_unlock_phantom:
-                case com.android.internal.R.drawable.ic_lockscreen_unlock:
+                case R.drawable.ic_lockscreen_unlock_phantom:
+                case R.drawable.ic_lockscreen_unlock:
                     mCallback.userActivity(0);
                     mCallback.dismiss(false);
                 break;
@@ -179,9 +178,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
         boolean disabledBySimState = monitor.isSimLocked();
         boolean cameraTargetPresent =
-            isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_camera);
+            isTargetPresent(R.drawable.ic_lockscreen_camera);
         boolean searchTargetPresent =
-            isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic);
+            isTargetPresent(R.drawable.ic_action_assist_generic);
 
         if (cameraDisabledByAdmin) {
             Log.v(TAG, "Camera disabled by Device Policy");
@@ -214,21 +213,17 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 // DON'T USE IT!
                 ComponentName component = intent.getComponent();
                 boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                        ASSIST_ICON_METADATA_NAME + "_google",
-                        com.android.internal.R.drawable.ic_action_assist_generic);
+                        ASSIST_ICON_METADATA_NAME + "_google", R.drawable.ic_action_assist_generic);
 
                 if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                            ASSIST_ICON_METADATA_NAME,
-                            com.android.internal.R.drawable.ic_action_assist_generic)) {
+                            ASSIST_ICON_METADATA_NAME, R.drawable.ic_action_assist_generic)) {
                         Slog.w(TAG, "Couldn't grab icon from package " + component);
                 }
             }
         }
 
-        mGlowPadView.setEnableTarget(com.android.internal.R.drawable
-                .ic_lockscreen_camera, !mCameraDisabled);
-        mGlowPadView.setEnableTarget(com.android.internal.R.drawable
-                .ic_action_assist_generic, !mSearchDisabled);
+        mGlowPadView.setEnableTarget(R.drawable.ic_lockscreen_camera, !mCameraDisabled);
+        mGlowPadView.setEnableTarget(R.drawable.ic_action_assist_generic, !mSearchDisabled);
     }
 
     void doTransition(View view, float to) {
