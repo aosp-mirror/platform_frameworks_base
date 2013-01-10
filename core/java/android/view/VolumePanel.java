@@ -336,6 +336,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         listenToRingerMode();
     }
 
+    public void setLayoutDirection(int layoutDirection) {
+        mPanel.setLayoutDirection(layoutDirection);
+        updateStates();
+    }
+
     private void listenToRingerMode() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
@@ -459,6 +464,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private void updateSlider(StreamControl sc) {
         sc.seekbarView.setProgress(getStreamVolume(sc.streamType));
         final boolean muted = isMuted(sc.streamType);
+        // Force reloading the image resource
+        sc.icon.setImageDrawable(null);
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
         if (sc.streamType == AudioManager.STREAM_RING &&
                 mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
