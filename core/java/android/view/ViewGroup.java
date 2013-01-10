@@ -3697,7 +3697,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearChildFocus = true;
         }
 
-        view.clearAccessibilityFocus();
+        if (view.isAccessibilityFocused()) {
+            view.clearAccessibilityFocus();
+        }
 
         cancelTouchTarget(view);
         cancelHoverTarget(view);
@@ -3719,11 +3721,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (clearChildFocus) {
             clearChildFocus(view);
-            ensureInputFocusOnFirstFocusable();
-        }
-
-        if (view.isAccessibilityFocused()) {
-            view.clearAccessibilityFocus();
+            if (!rootViewRequestFocus()) {
+                notifyGlobalFocusCleared(this);
+            }
         }
 
         onViewRemoved(view);
@@ -3765,7 +3765,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private void removeViewsInternal(int start, int count) {
         final View focused = mFocused;
         final boolean detach = mAttachInfo != null;
-        View clearChildFocus = null;
+        boolean clearChildFocus = false;
 
         final View[] children = mChildren;
         final int end = start + count;
@@ -3779,10 +3779,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (view == focused) {
                 view.unFocus();
-                clearChildFocus = view;
+                clearChildFocus = true;
             }
 
-            view.clearAccessibilityFocus();
+            if (view.isAccessibilityFocused()) {
+                view.clearAccessibilityFocus();
+            }
 
             cancelTouchTarget(view);
             cancelHoverTarget(view);
@@ -3805,9 +3807,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         removeFromArray(start, count);
 
-        if (clearChildFocus != null) {
-            clearChildFocus(clearChildFocus);
-            ensureInputFocusOnFirstFocusable();
+        if (clearChildFocus) {
+            clearChildFocus(focused);
+            if (!rootViewRequestFocus()) {
+                notifyGlobalFocusCleared(focused);
+            }
         }
     }
 
@@ -3849,7 +3853,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         final View focused = mFocused;
         final boolean detach = mAttachInfo != null;
-        View clearChildFocus = null;
+        boolean clearChildFocus = false;
 
         needGlobalAttributesUpdate(false);
 
@@ -3862,10 +3866,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (view == focused) {
                 view.unFocus();
-                clearChildFocus = view;
+                clearChildFocus = true;
             }
 
-            view.clearAccessibilityFocus();
+            if (view.isAccessibilityFocused()) {
+                view.clearAccessibilityFocus();
+            }
 
             cancelTouchTarget(view);
             cancelHoverTarget(view);
@@ -3887,9 +3893,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             children[i] = null;
         }
 
-        if (clearChildFocus != null) {
-            clearChildFocus(clearChildFocus);
-            ensureInputFocusOnFirstFocusable();
+        if (clearChildFocus) {
+            clearChildFocus(focused);
+            if (!rootViewRequestFocus()) {
+                notifyGlobalFocusCleared(focused);
+            }
         }
     }
 
