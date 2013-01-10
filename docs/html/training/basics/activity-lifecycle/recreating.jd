@@ -126,7 +126,7 @@ can save the state of the view hierarchy.</p>
 state from the {@link android.os.Bundle} that the system
 passes your activity. Both the {@link android.app.Activity#onCreate onCreate()} and {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} callback methods receive
-the same {@link android.os.Bundle} that containes the instance state information.</p>
+the same {@link android.os.Bundle} that contains the instance state information.</p>
 
 <p>Because the {@link android.app.Activity#onCreate onCreate()} method is called whether the
 system is creating a new instance of your activity or recreating a previous one, you must check

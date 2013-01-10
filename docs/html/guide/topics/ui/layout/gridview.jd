@@ -170,7 +170,7 @@ image is resized and cropped to fit in these dimensions, as appropriate.</li>
 be cropped toward the center (if necessary).</li>
   <li>{@link android.widget.ImageView#setPadding(int,int,int,int)} defines the padding for all
 sides. (Note that, if the images have different aspect-ratios, then less
-padding will cause for more cropping of the image if it does not match
+padding will cause more cropping of the image if it does not match
 the dimensions given to the ImageView.)</li>
 </ul>
 

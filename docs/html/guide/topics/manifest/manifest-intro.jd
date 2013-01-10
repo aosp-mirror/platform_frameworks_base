@@ -115,6 +115,7 @@ other mention of the element name.
         <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
             <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
             <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
         <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
 
         <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>

@@ -17,12 +17,12 @@ next.link=create-view.html
 
         <h2>You should also read</h2>
         <ul>
-            <li><a href="{@docRoot}/guide/topics/ui/custom-components.html">Custom Components</a>
+            <li><a href="{@docRoot}guide/topics/ui/custom-components.html">Custom Components</a>
             </li>
-            <li><a href="{@docRoot}/guide/topics/ui/ui-events.html">Input Events</a></li>
-            <li><a href="{@docRoot}/guide/topics/graphics/prop-animation.html">Property
+            <li><a href="{@docRoot}guide/topics/ui/ui-events.html">Input Events</a></li>
+            <li><a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property
                 Animation</a></li>
-            <li><a href="{@docRoot}/guide/topics/graphics/hardware-accel.html">Hardware
+            <li><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware
                 Acceleration</a></li>
             <li><a href="{@docRoot}guide/topics/ui/accessibility/index.html">
                 Accessibility</a> developer guide</li>
