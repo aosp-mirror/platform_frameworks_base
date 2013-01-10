@@ -412,6 +412,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
     boolean mHideLockScreen;
+    boolean mForcingShowNavBar;
+    int mForcingShowNavBarLayer;
 
     // States of keyguard dismiss.
     private static final int DISMISS_KEYGUARD_NONE = 0; // Keyguard not being dismissed.
@@ -2936,6 +2938,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
         mForceStatusBarFromKeyguard = false;
+        mForcingShowNavBar = false;
+        mForcingShowNavBarLayer = -1;
         
         mHideLockScreen = false;
         mAllowLockscreenWhenOn = false;
@@ -2950,6 +2954,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 WindowManager.LayoutParams attrs) {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
+        if (mTopFullscreenOpaqueWindowState == null && (win.getAttrs().privateFlags
+                &WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR) != 0) {
+            if (mForcingShowNavBarLayer < 0) {
+                mForcingShowNavBar = true;
+                mForcingShowNavBarLayer = win.getSurfaceLayer();
+            }
+        }
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
@@ -4478,9 +4489,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // will quickly lose focus once it correctly gets hidden.
             return 0;
         }
-        final int visibility = mFocusedWindow.getSystemUiVisibility()
+        int tmpVisibility = mFocusedWindow.getSystemUiVisibility()
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
+        if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
+            tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
+        }
+        final int visibility = tmpVisibility;
         int diff = visibility ^ mLastSystemUiFlags;
         final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
         if (diff == 0 && mLastFocusNeedsMenu == needsMenu
@@ -4666,6 +4681,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mTopFullscreenOpaqueWindowState != null) {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
                     pw.println(mTopFullscreenOpaqueWindowState);
+        }
+        if (mForcingShowNavBar) {
+            pw.print(prefix); pw.print("mForcingShowNavBar=");
+                    pw.println(mForcingShowNavBar); pw.print( "mForcingShowNavBarLayer=");
+                    pw.println(mForcingShowNavBarLayer);
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
                 pw.print(" mHideLockScreen="); pw.println(mHideLockScreen);
