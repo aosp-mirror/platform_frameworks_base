@@ -25,6 +25,7 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
+import com.android.server.IntentResolver;
 import com.android.server.pm.PackageManagerService.DumpState;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -45,7 +46,6 @@ import android.content.pm.UserInfo;
 import android.content.pm.PackageUserState;
 import android.content.pm.VerifierDeviceIdentity;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
@@ -2335,11 +2335,9 @@ final class Settings {
         for (PackageSetting ps : mPackages.values()) {
             // Only system apps are initially installed.
             ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
-            boolean restrictHomeDir = (ps.pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.K);
             // Need to create a data directory for all apps under this user.
             installer.createUserData(ps.name,
-                    UserHandle.getUid(userHandle, ps.appId), userHandle,
-                    restrictHomeDir);
+                    UserHandle.getUid(userHandle, ps.appId), userHandle);
         }
         readDefaultPreferredAppsLPw(userHandle);
         writePackageRestrictionsLPr(userHandle);

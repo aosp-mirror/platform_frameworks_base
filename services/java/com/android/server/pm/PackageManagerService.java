@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
+import static libcore.io.OsConstants.S_ISLNK;
 import static libcore.io.OsConstants.S_IRWXU;
 import static libcore.io.OsConstants.S_IRGRP;
 import static libcore.io.OsConstants.S_IXGRP;
@@ -110,6 +111,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Environment.UserEnvironment;
+import android.provider.Settings.Secure;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -146,11 +148,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
+import libcore.io.OsConstants;
 import libcore.io.StructStat;
 
 /**
@@ -3578,17 +3582,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private int createDataDirsLI(String packageName, int uid, int targetSdkVersion) {
+    private int createDataDirsLI(String packageName, int uid) {
         int[] users = sUserManager.getUserIds();
-        boolean restrictHomeDir = (targetSdkVersion >= Build.VERSION_CODES.K);
-        int res = mInstaller.install(packageName, uid, uid, restrictHomeDir);
+        int res = mInstaller.install(packageName, uid, uid);
         if (res < 0) {
             return res;
         }
         for (int user : users) {
             if (user != 0) {
                 res = mInstaller.createUserData(packageName,
-                        UserHandle.getUid(user, uid), user, restrictHomeDir);
+                        UserHandle.getUid(user, uid), user);
                 if (res < 0) {
                     return res;
                 }
@@ -3982,8 +3985,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             recovered = true;
 
                             // And now re-install the app.
-                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
-                                    pkg.applicationInfo.targetSdkVersion);
+                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
                             if (ret == -1) {
                                 // Ack should not happen!
                                 msg = prefix + pkg.packageName
@@ -4028,9 +4030,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
-                // invoke installer to do the actual installation
-                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
-                        pkg.applicationInfo.targetSdkVersion);
+                //invoke installer to do the actual installation
+                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid);
                 if (ret < 0) {
                     // Error from installer
                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
