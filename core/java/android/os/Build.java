@@ -431,17 +431,6 @@ public class Build {
          * </ul>
          */
         public static final int JELLY_BEAN_MR1 = 17;
-
-        /**
-         * Android X.X: "K".  Just "K"
-         *
-         * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
-         * <ul>
-         * <li>Application home directory permissions are now {@code 0700}.</li>
-         * </ul>
-         */
-        public static final int K = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
