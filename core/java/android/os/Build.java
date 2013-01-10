@@ -431,6 +431,11 @@ public class Build {
          * </ul>
          */
         public static final int JELLY_BEAN_MR1 = 17;
+
+        /**
+         * Android X.X: "K".  Just "K"
+         */
+        public static final int K = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
