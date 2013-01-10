@@ -782,9 +782,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!isSystemIme(imi)) {
             return false;
         }
-        if (imi.isAuxiliaryIme()) {
-            return false;
-        }
         if (imi.getIsDefaultResourceId() != 0) {
             try {
                 Resources res = context.createPackageContext(
@@ -806,9 +803,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static boolean isSystemImeThatHasEnglishSubtype(InputMethodInfo imi) {
         if (!isSystemIme(imi)) {
-            return false;
-        }
-        if (imi.isAuxiliaryIme()) {
             return false;
         }
         return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage());
@@ -2862,9 +2856,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         List<Pair<String, ArrayList<String>>> enabledInputMethodsList = mSettings
                 .getEnabledInputMethodsAndSubtypeListLocked();
 
-        if (DEBUG) {
-            Slog.d(TAG, (enabled ? "Enable " : "Disable ") + id);
-        }
         if (enabled) {
             for (Pair<String, ArrayList<String>> pair: enabledInputMethodsList) {
                 if (pair.first.equals(id)) {
