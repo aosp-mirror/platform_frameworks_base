@@ -62,10 +62,10 @@ void root(const uchar4 *in, uchar4 *out, uint32_t x, uint32_t y) {
     uint4 yz01 = ((v001 * weight1.x) + (v101 * weight2.x)) >> (int4)8;
     uint4 yz11 = ((v011 * weight1.x) + (v111 * weight2.x)) >> (int4)8;
 
-    uint4 z0 = (yz00 * weight1.y) + (yz10 * weight2.y) >> (int4)16;
-    uint4 z1 = (yz01 * weight1.y) + (yz11 * weight2.y) >> (int4)16;
+    uint4 z0 = ((yz00 * weight1.y) + (yz10 * weight2.y)) >> (int4)16;
+    uint4 z1 = ((yz01 * weight1.y) + (yz11 * weight2.y)) >> (int4)16;
 
-    uint4 v = (z0 * weight1.z) + (z1 * weight2.z) >> (int4)16;
+    uint4 v = ((z0 * weight1.z) + (z1 * weight2.z)) >> (int4)16;
     uint4 v2 = (v + 0x7f) >> (int4)8;
 
     *out = convert_uchar4(v2);
