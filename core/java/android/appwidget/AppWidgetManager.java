@@ -239,7 +239,7 @@ public class AppWidgetManager {
     public static final String EXTRA_CUSTOM_SORT = "customSort";
 
     /**
-     * A sentiel value that the AppWidget manager will never return as a appWidgetId.
+     * A sentinel value that the AppWidget manager will never return as a appWidgetId.
      */
     public static final int INVALID_APPWIDGET_ID = 0;
 
