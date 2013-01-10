@@ -88,18 +88,14 @@ public class TestBase  {
         return false;
     }
 
-    public final void createBaseTest(ImageProcessingActivity2 ipact, Bitmap b, Bitmap b2) {
+    public final void createBaseTest(ImageProcessingActivity2 ipact, Bitmap b, Bitmap b2, Bitmap outb) {
         act = ipact;
         mRS = RenderScript.create(act);
-        mInPixelsAllocation = Allocation.createFromBitmap(mRS, b,
-                                                          Allocation.MipmapControl.MIPMAP_NONE,
-                                                          Allocation.USAGE_SCRIPT);
-        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2,
-                                                          Allocation.MipmapControl.MIPMAP_NONE,
-                                                          Allocation.USAGE_SCRIPT);
-        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, b,
-                                                           Allocation.MipmapControl.MIPMAP_NONE,
-                                                           Allocation.USAGE_SCRIPT);
+
+        mInPixelsAllocation = Allocation.createFromBitmap(mRS, b);
+        mInPixelsAllocation2 = Allocation.createFromBitmap(mRS, b2);
+        mOutPixelsAllocation = Allocation.createFromBitmap(mRS, outb);
+
         createTest(act.getResources());
     }
 
