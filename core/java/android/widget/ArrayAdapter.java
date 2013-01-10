@@ -97,11 +97,11 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * Constructor
      *
      * @param context The current context.
-     * @param textViewResourceId The resource ID for a layout file containing a TextView to use when
+     * @param resource The resource ID for a layout file containing a TextView to use when
      *                 instantiating views.
      */
-    public ArrayAdapter(Context context, int textViewResourceId) {
-        init(context, textViewResourceId, 0, new ArrayList<T>());
+    public ArrayAdapter(Context context, int resource) {
+        init(context, resource, 0, new ArrayList<T>());
     }
 
     /**
@@ -120,12 +120,12 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * Constructor
      *
      * @param context The current context.
-     * @param textViewResourceId The resource ID for a layout file containing a TextView to use when
+     * @param resource The resource ID for a layout file containing a TextView to use when
      *                 instantiating views.
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int textViewResourceId, T[] objects) {
-        init(context, textViewResourceId, 0, Arrays.asList(objects));
+    public ArrayAdapter(Context context, int resource, T[] objects) {
+        init(context, resource, 0, Arrays.asList(objects));
     }
 
     /**
@@ -145,12 +145,12 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * Constructor
      *
      * @param context The current context.
-     * @param textViewResourceId The resource ID for a layout file containing a TextView to use when
+     * @param resource The resource ID for a layout file containing a TextView to use when
      *                 instantiating views.
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int textViewResourceId, List<T> objects) {
-        init(context, textViewResourceId, 0, objects);
+    public ArrayAdapter(Context context, int resource, List<T> objects) {
+        init(context, resource, 0, objects);
     }
 
     /**
