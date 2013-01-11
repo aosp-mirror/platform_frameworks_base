@@ -139,7 +139,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         public void startObserving() {
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.BUGREPORT_IN_POWER_MENU), false, this);
+                    Settings.Global.getUriFor(Settings.Global.BUGREPORT_IN_POWER_MENU), false, this);
         }
     }
 
@@ -544,7 +544,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         final ContentResolver cr = mContext.getContentResolver();
         boolean enabled = false;
         try {
-            enabled = (Settings.Secure.getInt(cr, Settings.Secure.BUGREPORT_IN_POWER_MENU) != 0);
+            enabled = (Settings.Global.getInt(cr, Settings.Global.BUGREPORT_IN_POWER_MENU) != 0);
         } catch (SettingNotFoundException e) {
         }
 
