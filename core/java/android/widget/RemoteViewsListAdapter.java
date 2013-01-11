@@ -30,10 +30,13 @@ public class RemoteViewsListAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<RemoteViews> mRemoteViewsList;
     private ArrayList<Integer> mViewTypes = new ArrayList<Integer>();
+    private int mViewTypeCount;
 
-    public RemoteViewsListAdapter(Context context, ArrayList<RemoteViews> remoteViews) {
+    public RemoteViewsListAdapter(Context context, ArrayList<RemoteViews> remoteViews,
+            int viewTypeCount) {
         mContext = context;
         mRemoteViewsList = remoteViews;
+        mViewTypeCount = viewTypeCount;
         init();
     }
 
@@ -51,6 +54,11 @@ public class RemoteViewsListAdapter extends BaseAdapter {
             if (!mViewTypes.contains(rv.getLayoutId())) {
                 mViewTypes.add(rv.getLayoutId());
             }
+        }
+
+        if (mViewTypes.size() > mViewTypeCount || mViewTypeCount < 1) {
+            throw new RuntimeException("Invalid view type count -- view type count must be >= 1" +
+                    "and must be as large as the total number of distinct view types");
         }
     }
 
@@ -77,6 +85,7 @@ public class RemoteViewsListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (position < getCount()) {
             RemoteViews rv = mRemoteViewsList.get(position);
+            rv.setIsWidgetCollectionChild(true);
             View v;
             if (convertView != null && rv != null &&
                     convertView.getId() == rv.getLayoutId()) {
@@ -102,7 +111,7 @@ public class RemoteViewsListAdapter extends BaseAdapter {
     }
 
     public int getViewTypeCount() {
-        return mViewTypes.size();
+        return mViewTypeCount;
     }
 
     @Override
