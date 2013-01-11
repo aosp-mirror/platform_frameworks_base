@@ -956,16 +956,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
         
         public void scheduleTimeTickEvent() {
-            Calendar calendar = Calendar.getInstance();
             final long currentTime = System.currentTimeMillis();
-            calendar.setTimeInMillis(currentTime);
-            calendar.add(Calendar.MINUTE, 1);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+            final long nextTime = 60000 * ((currentTime / 60000) + 1);
 
             // Schedule this event for the amount of time that it would take to get to
             // the top of the next minute.
-            final long tickEventDelay = calendar.getTimeInMillis() - currentTime;
+            final long tickEventDelay = nextTime - currentTime;
 
             set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay,
                     mTimeTickSender);
