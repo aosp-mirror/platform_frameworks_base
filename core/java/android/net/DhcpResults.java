@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -211,11 +212,13 @@ public class DhcpResults implements Parcelable {
     }
 
     public boolean addDns(String addrString) {
-        try {
-            linkProperties.addDns(NetworkUtils.numericToInetAddress(addrString));
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "addDns failed with addrString " + addrString);
-            return true;
+        if (TextUtils.isEmpty(addrString) == false) {
+            try {
+                linkProperties.addDns(NetworkUtils.numericToInetAddress(addrString));
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "addDns failed with addrString " + addrString);
+                return true;
+            }
         }
         return false;
     }

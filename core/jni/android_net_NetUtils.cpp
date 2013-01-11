@@ -28,23 +28,21 @@ int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
 int ifc_reset_connections(const char *ifname, int reset_mask);
 
-int dhcp_do_request(const char *ifname,
+int dhcp_do_request(const char * const ifname,
                     const char *ipaddr,
                     const char *gateway,
                     uint32_t *prefixLength,
-                    const char *dns1,
-                    const char *dns2,
+                    const char *dns[],
                     const char *server,
                     uint32_t *lease,
                     const char *vendorInfo,
                     const char *domains);
 
-int dhcp_do_request_renew(const char *ifname,
+int dhcp_do_request_renew(const char * const ifname,
                     const char *ipaddr,
                     const char *gateway,
                     uint32_t *prefixLength,
-                    const char *dns1,
-                    const char *dns2,
+                    const char *dns[],
                     const char *server,
                     uint32_t *lease,
                     const char *vendorInfo,
@@ -120,6 +118,9 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     char gateway[PROPERTY_VALUE_MAX];
     char    dns1[PROPERTY_VALUE_MAX];
     char    dns2[PROPERTY_VALUE_MAX];
+    char    dns3[PROPERTY_VALUE_MAX];
+    char    dns4[PROPERTY_VALUE_MAX];
+    const char *dns[5] = {dns1, dns2, dns3, dns4, NULL};
     char  server[PROPERTY_VALUE_MAX];
     uint32_t lease;
     char vendorInfo[PROPERTY_VALUE_MAX];
@@ -130,10 +131,10 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
 
     if (renew) {
         result = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease, vendorInfo, domains);
+                dns, server, &lease, vendorInfo, domains);
     } else {
         result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease, vendorInfo, domains);
+                dns, server, &lease, vendorInfo, domains);
     }
     env->ReleaseStringUTFChars(ifname, nameStr);
     if (result == 0) {
@@ -168,6 +169,15 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
 
         result = env->CallBooleanMethod(dhcpResults,
                 dhcpResultsFieldIds.addDns, env->NewStringUTF(dns2));
+
+        if (result == 0) {
+            result = env->CallBooleanMethod(dhcpResults,
+                    dhcpResultsFieldIds.addDns, env->NewStringUTF(dns3));
+            if (result == 0) {
+                result = env->CallBooleanMethod(dhcpResults,
+                        dhcpResultsFieldIds.addDns, env->NewStringUTF(dns4));
+            }
+        }
     }
 
     if (result == 0) {
