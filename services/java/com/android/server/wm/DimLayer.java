@@ -84,6 +84,17 @@ public class DimLayer {
         return mTargetAlpha;
     }
 
+    void setLayer(int layer) {
+        if (mLayer != layer) {
+            mLayer = layer;
+            mDimSurface.setLayer(layer);
+        }
+    }
+
+    int getLayer() {
+        return mLayer;
+    }
+
     private void setAlpha(float alpha) {
         if (mAlpha != alpha) {
             if (DEBUG) Slog.v(TAG, "setAlpha alpha=" + alpha);
