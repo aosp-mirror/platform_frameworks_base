@@ -27,6 +27,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Gravity;
@@ -38,10 +39,12 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.TextClock;
 
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwitchListener,
         OnLongClickListener, ChallengeLayout.OnBouncerStateChangedListener {
@@ -50,6 +53,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private static float CAMERA_DISTANCE = 10000;
     protected static float OVERSCROLL_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
+
+    private static final int FLAG_HAS_LOCAL_HOUR = 0x1;
+    private static final int FLAG_HAS_LOCAL_MINUTE = 0x2;
 
     protected KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
@@ -131,16 +137,21 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
     @Override
     public void onPageSwitched(View newPage, int newPageIndex) {
-        boolean showingStatusWidget = false;
+        boolean showingClock = false;
         if (newPage instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) newPage;
             if (vg.getChildAt(0) instanceof KeyguardStatusView) {
-                showingStatusWidget = true;
+                showingClock = true;
             }
         }
 
+        if (newPage != null &&
+                findClockInHierarchy(newPage) == (FLAG_HAS_LOCAL_HOUR | FLAG_HAS_LOCAL_MINUTE)) {
+            showingClock = true;
+        }
+
         // Disable the status bar clock if we're showing the default status widget
-        if (showingStatusWidget) {
+        if (showingClock) {
             setSystemUiVisibility(getSystemUiVisibility() | View.STATUS_BAR_DISABLE_CLOCK);
         } else {
             setSystemUiVisibility(getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_CLOCK);
@@ -856,5 +867,54 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     @Override
     protected boolean shouldSetTopAlignedPivotForWidget(int childIndex) {
         return !isCameraPage(childIndex) && super.shouldSetTopAlignedPivotForWidget(childIndex);
+    }
+
+    /**
+     * Search given {@link View} hierarchy for {@link TextClock} instances that
+     * show various time components. Returns combination of
+     * {@link #FLAG_HAS_LOCAL_HOUR} and {@link #FLAG_HAS_LOCAL_MINUTE}.
+     */
+    private static int findClockInHierarchy(View view) {
+        if (view instanceof TextClock) {
+            return getClockFlags((TextClock) view);
+        } else if (view instanceof ViewGroup) {
+            int flags = 0;
+            final ViewGroup group = (ViewGroup) view;
+            final int size = group.getChildCount();
+            for (int i = 0; i < size; i++) {
+                flags |= findClockInHierarchy(group.getChildAt(i));
+            }
+            return flags;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Return combination of {@link #FLAG_HAS_LOCAL_HOUR} and
+     * {@link #FLAG_HAS_LOCAL_MINUTE} describing the time represented described
+     * by the given {@link TextClock}.
+     */
+    private static int getClockFlags(TextClock clock) {
+        int flags = 0;
+
+        final String timeZone = clock.getTimeZone();
+        if (timeZone != null && !TimeZone.getDefault().equals(TimeZone.getTimeZone(timeZone))) {
+            // Ignore clocks showing another timezone
+            return 0;
+        }
+
+        final CharSequence format = clock.getFormat();
+        final char hour = clock.is24HourModeEnabled() ? DateFormat.HOUR_OF_DAY
+                : DateFormat.HOUR;
+
+        if (DateFormat.hasDesignator(format, hour)) {
+            flags |= FLAG_HAS_LOCAL_HOUR;
+        }
+        if (DateFormat.hasDesignator(format, DateFormat.MINUTE)) {
+            flags |= FLAG_HAS_LOCAL_MINUTE;
+        }
+
+        return flags;
     }
 }
