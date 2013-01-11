@@ -25,7 +25,6 @@ import android.net.NetworkUtils;
 import android.net.NetworkInfo.DetailedState;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
-import android.net.wifi.WifiConfiguration.EnterpriseField;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
@@ -1122,31 +1121,17 @@ class WifiConfigStore {
                 break setVariables;
             }
 
-            for (WifiConfiguration.EnterpriseField field
-                    : config.enterpriseFields) {
-                String varName = field.varName();
-                String value = field.value();
-                if (value != null) {
-                    if (field == config.engine) {
-                        /*
-                         * If the field is declared as an integer, it must not
-                         * be null
-                         */
-                        if (value.length() == 0) {
-                            value = "0";
-                        }
-                    } else if (field != config.eap) {
-                        value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
-                    }
+            HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
+            for (String key : enterpriseFields.keySet()) {
+                    String value = enterpriseFields.get(key);
                     if (!mWifiNative.setNetworkVariable(
                                 netId,
-                                varName,
+                                key,
                                 value)) {
-                        loge(config.SSID + ": failed to set " + varName +
+                        loge(config.SSID + ": failed to set " + key +
                                 ": " + value);
                         break setVariables;
                     }
-                }
             }
             updateFailed = false;
         }
@@ -1445,78 +1430,26 @@ class WifiConfigStore {
             }
         }
 
-        for (WifiConfiguration.EnterpriseField field :
-                config.enterpriseFields) {
-            value = mWifiNative.getNetworkVariable(netId,
-                    field.varName());
+        HashMap<String, String> entepriseFields = config.enterpriseConfig.getFields();
+        for (String key : entepriseFields.keySet()) {
+            value = mWifiNative.getNetworkVariable(netId, key);
             if (!TextUtils.isEmpty(value)) {
-                if (field != config.eap && field != config.engine) {
-                    value = removeDoubleQuotes(value);
-                }
-                field.setValue(value);
+                entepriseFields.put(key, removeDoubleQuotes(value));
             }
         }
 
-        migrateOldEapTlsIfNecessary(config, netId);
-    }
-
-    /**
-     * Migration code for old EAP-TLS configurations. This should only be used
-     * when restoring an old wpa_supplicant.conf or upgrading from a previous
-     * platform version.
-     *
-     * @param config the configuration to be migrated
-     * @param netId the wpa_supplicant's net ID
-     * @param value the old private_key value
-     */
-    private void migrateOldEapTlsIfNecessary(WifiConfiguration config, int netId) {
-        String value = mWifiNative.getNetworkVariable(netId,
-                WifiConfiguration.OLD_PRIVATE_KEY_NAME);
-        /*
-         * If the old configuration value is not present, then there is nothing
-         * to do.
-         */
-        if (TextUtils.isEmpty(value)) {
-            return;
-        } else {
-            // Also ignore it if it's empty quotes.
-            value = removeDoubleQuotes(value);
-            if (TextUtils.isEmpty(value)) {
-                return;
-            }
+        if (config.enterpriseConfig.migrateOldEapTlsNative(mWifiNative, netId)) {
+            saveConfig();
         }
-
-        config.engine.setValue(WifiConfiguration.ENGINE_ENABLE);
-        config.engine_id.setValue(convertToQuotedString(WifiConfiguration.KEYSTORE_ENGINE_ID));
-
-        /*
-         * The old key started with the keystore:// URI prefix, but we don't
-         * need that anymore. Trim it off if it exists.
-         */
-        final String keyName;
-        if (value.startsWith(WifiConfiguration.KEYSTORE_URI)) {
-            keyName = new String(value.substring(WifiConfiguration.KEYSTORE_URI.length()));
-        } else {
-            keyName = value;
-        }
-        config.key_id.setValue(convertToQuotedString(keyName));
-
-        // Now tell the wpa_supplicant the new configuration values.
-        final EnterpriseField needsUpdate[] = { config.engine, config.engine_id, config.key_id };
-        for (EnterpriseField field : needsUpdate) {
-            mWifiNative.setNetworkVariable(netId, field.varName(), field.value());
-        }
-
-        // Remove old private_key string so we don't run this again.
-        mWifiNative.setNetworkVariable(netId, WifiConfiguration.OLD_PRIVATE_KEY_NAME,
-                convertToQuotedString(""));
-
-        saveConfig();
     }
 
     private String removeDoubleQuotes(String string) {
-        if (string.length() <= 2) return "";
-        return string.substring(1, string.length() - 1);
+        int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"')
+                && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
     }
 
     private String convertToQuotedString(String string) {
