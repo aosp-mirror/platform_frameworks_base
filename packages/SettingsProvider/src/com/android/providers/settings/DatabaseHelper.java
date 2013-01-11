@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 95;
+    private static final int DATABASE_VERSION = 96;
 
     private Context mContext;
     private int mUserHandle;
@@ -1488,7 +1488,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Redo this step, since somehow it didn't work the first time for some users
             if (mUserHandle == UserHandle.USER_OWNER) {
                 db.beginTransaction();
-                SQLiteStatement stmt = null;
                 try {
                     // Migrate now-global settings
                     String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
@@ -1499,7 +1498,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
-                    if (stmt != null) stmt.close();
                 }
             }
             upgradeVersion = 94;
@@ -1522,6 +1520,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 95;
+        }
+
+        if (upgradeVersion == 95) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    String[] settingsToMove = { Settings.Global.BUGREPORT_IN_POWER_MENU };
+                    moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 96;
         }
 
         // *** Remember to update DATABASE_VERSION above!

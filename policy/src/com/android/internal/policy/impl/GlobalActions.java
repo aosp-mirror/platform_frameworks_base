@@ -260,8 +260,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mItems.add(mAirplaneModeOn);
 
         // next: bug report, if enabled
-        if (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.BUGREPORT_IN_POWER_MENU, 0) != 0) {
+        if (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0) {
             mItems.add(
                 new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
                         R.string.global_action_bug_report) {
