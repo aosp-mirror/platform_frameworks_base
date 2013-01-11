@@ -5991,6 +5991,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     }
                 }
             }
+            mVolumePanel.setLayoutDirection(config.getLayoutDirection());
         } catch (Exception e) {
             Log.e(TAG, "Error retrieving device orientation: " + e);
         }
