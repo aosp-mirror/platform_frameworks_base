@@ -487,13 +487,15 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class SetRemoteViewsAdapterList extends Action {
-        public SetRemoteViewsAdapterList(int id, ArrayList<RemoteViews> list) {
+        public SetRemoteViewsAdapterList(int id, ArrayList<RemoteViews> list, int viewTypeCount) {
             this.viewId = id;
             this.list = list;
+            this.viewTypeCount = viewTypeCount;
         }
 
         public SetRemoteViewsAdapterList(Parcel parcel) {
             viewId = parcel.readInt();
+            viewTypeCount = parcel.readInt();
             int count = parcel.readInt();
             list = new ArrayList<RemoteViews>();
 
@@ -506,6 +508,7 @@ public class RemoteViews implements Parcelable, Filter {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
+            dest.writeInt(viewTypeCount);
 
             if (list == null || list.size() == 0) {
                 dest.writeInt(0);
@@ -540,18 +543,18 @@ public class RemoteViews implements Parcelable, Filter {
             if (target instanceof AbsListView) {
                 AbsListView v = (AbsListView) target;
                 Adapter a = v.getAdapter();
-                if (a instanceof RemoteViewsListAdapter) {
+                if (a instanceof RemoteViewsListAdapter && viewTypeCount <= a.getViewTypeCount()) {
                     ((RemoteViewsListAdapter) a).setViewsList(list);
                 } else {
-                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list));
+                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list, viewTypeCount));
                 }
             } else if (target instanceof AdapterViewAnimator) {
                 AdapterViewAnimator v = (AdapterViewAnimator) target;
                 Adapter a = v.getAdapter();
-                if (a instanceof RemoteViewsListAdapter) {
+                if (a instanceof RemoteViewsListAdapter && viewTypeCount <= a.getViewTypeCount()) {
                     ((RemoteViewsListAdapter) a).setViewsList(list);
                 } else {
-                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list));
+                    v.setAdapter(new RemoteViewsListAdapter(v.getContext(), list, viewTypeCount));
                 }
             }
         }
@@ -560,6 +563,7 @@ public class RemoteViews implements Parcelable, Filter {
             return "SetRemoteViewsAdapterList";
         }
 
+        int viewTypeCount;
         ArrayList<RemoteViews> list;
         public final static int TAG = 15;
     }
@@ -2099,9 +2103,13 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param viewId The id of the {@link AdapterView}
      * @param list The list of RemoteViews which will populate the view specified by viewId.
+     * @param viewTypeCount The maximum number of unique layout id's used to construct the list of
+     *      RemoteViews. This count cannot change during the life-cycle of a given widget, so this
+     *      parameter should account for the maximum possible number of types that may appear in the
+     *      See {@link Adapter#getViewTypeCount()}.
      */
-    public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list) {
-        addAction(new SetRemoteViewsAdapterList(viewId, list));
+    public void setRemoteAdapter(int viewId, ArrayList<RemoteViews> list, int viewTypeCount) {
+        addAction(new SetRemoteViewsAdapterList(viewId, list, viewTypeCount));
     }
 
     /**
