@@ -43,6 +43,7 @@ import javax.microedition.khronos.opengles.GL;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static javax.microedition.khronos.egl.EGL10.*;
@@ -88,10 +89,12 @@ public abstract class HardwareRenderer {
      *
      * Possible values:
      * "true", to enable profiling
-     * "visual", to enable profiling and visualize the results on screen
+     * "visual_bars", to enable profiling and visualize the results on screen
+     * "visual_lines", to enable profiling and visualize the results on screen
      * "false", to disable profiling
      *
-     * @see #PROFILE_PROPERTY_VISUALIZE
+     * @see #PROFILE_PROPERTY_VISUALIZE_BARS
+     * @see #PROFILE_PROPERTY_VISUALIZE_LINES
      *
      * @hide
      */
@@ -99,11 +102,19 @@ public abstract class HardwareRenderer {
 
     /**
      * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
-     * value, profiling data will be visualized on screen.
+     * value, profiling data will be visualized on screen as a bar chart.
      *
      * @hide
      */
-    public static final String PROFILE_PROPERTY_VISUALIZE = "visual";
+    public static final String PROFILE_PROPERTY_VISUALIZE_BARS = "visual_bars";
+
+    /**
+     * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
+     * value, profiling data will be visualized on screen as a line chart.
+     *
+     * @hide
+     */
+    public static final String PROFILE_PROPERTY_VISUALIZE_LINES = "visual_lines";
 
     /**
      * System property used to specify the number of frames to be used
@@ -619,6 +630,100 @@ public abstract class HardwareRenderer {
         mRequested = requested;
     }
 
+    /**
+     * Describes a series of frames that should be drawn on screen as a graph.
+     * Each frame is composed of 1 or more elements.
+     */
+    abstract class GraphDataProvider {
+        /**
+         * Draws the graph as bars. Frame elements are stacked on top of
+         * each other.
+         */
+        public static final int GRAPH_TYPE_BARS = 0;
+        /**
+         * Draws the graph as lines. The number of series drawn corresponds
+         * to the number of elements.
+         */
+        public static final int GRAPH_TYPE_LINES = 1;
+
+        /**
+         * Returns the type of graph to render.
+         *
+         * @return {@link #GRAPH_TYPE_BARS} or {@link #GRAPH_TYPE_LINES}
+         */
+        abstract int getGraphType();
+
+        /**
+         * This method is invoked before the graph is drawn. This method
+         * can be used to compute sizes, etc.
+         *
+         * @param metrics The display metrics
+         */
+        abstract void prepare(DisplayMetrics metrics);
+
+        /**
+         * @return The size in pixels of a vertical unit.
+         */
+        abstract int getVerticalUnitSize();
+
+        /**
+         * @return The size in pixels of a horizontal unit.
+         */
+        abstract int getHorizontalUnitSize();
+
+        /**
+         * @return The size in pixels of the margin between horizontal units.
+         */
+        abstract int getHorizontaUnitMargin();
+
+        /**
+         * An optional threshold value.
+         *
+         * @return A value >= 0 to draw the threshold, a negative value
+         *         to ignore it.
+         */
+        abstract float getThreshold();
+
+        /**
+         * The data to draw in the graph. The number of elements in the
+         * array must be at least {@link #getFrameCount()} * {@link #getElementCount()}.
+         * If a value is negative the following values will be ignored.
+         */
+        abstract float[] getData();
+
+        /**
+         * Returns the number of frames to render in the graph.
+         */
+        abstract int getFrameCount();
+
+        /**
+         * Returns the number of elements in each frame. This directly affects
+         * the number of series drawn in the graph.
+         */
+        abstract int getElementCount();
+
+        /**
+         * Returns the current frame, if any. If the returned value is negative
+         * the current frame is ignored.
+         */
+        abstract int getCurrentFrame();
+
+        /**
+         * Prepares the paint to draw the specified element (or series.)
+         */
+        abstract void setupGraphPaint(Paint paint, int elementIndex);
+
+        /**
+         * Prepares the paint to draw the threshold.
+         */
+        abstract void setupThresholdPaint(Paint paint);
+
+        /**
+         * Prepares the paint to draw the current frame indicator.
+         */
+        abstract void setupCurrentFramePaint(Paint paint);
+    }
+
     @SuppressWarnings({"deprecation"})
     static abstract class GlRenderer extends HardwareRenderer {
         static final int SURFACE_STATE_ERROR = 0;
@@ -626,6 +731,14 @@ public abstract class HardwareRenderer {
         static final int SURFACE_STATE_UPDATED = 2;
 
         static final int FUNCTOR_PROCESS_DELAY = 4;
+
+        private static final int PROFILE_DRAW_MARGIN = 0;
+        private static final int PROFILE_DRAW_WIDTH = 3;
+        private static final int[] PROFILE_DRAW_COLORS = { 0xcf3e66cc, 0xcfdc3912, 0xcfe69800 };
+        private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xcf5faa4d;
+        private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
+        private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
+        private static final int PROFILE_DRAW_DP_PER_MS = 7;
 
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
@@ -660,12 +773,13 @@ public abstract class HardwareRenderer {
         boolean mUpdateDirtyRegions;
 
         boolean mProfileEnabled;
-        boolean mProfileVisualizerEnabled;
+        int mProfileVisualizerType = -1;
         float[] mProfileData;
         ReentrantLock mProfileLock;
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
 
-        float[][] mProfileRects;
+        GraphDataProvider mDebugDataProvider;
+        float[][] mProfileShapes;
         Paint mProfilePaint;
 
         boolean mDebugDirtyRegions;
@@ -688,20 +802,32 @@ public abstract class HardwareRenderer {
             loadSystemProperties(null);
         }
 
+        private static final String[] VISUALIZERS = {
+                PROFILE_PROPERTY_VISUALIZE_BARS,
+                PROFILE_PROPERTY_VISUALIZE_LINES
+        };
+
         @Override
         boolean loadSystemProperties(Surface surface) {
             boolean value;
             boolean changed = false;
 
             String profiling = SystemProperties.get(PROFILE_PROPERTY);
-            value = PROFILE_PROPERTY_VISUALIZE.equalsIgnoreCase(profiling);
+            int graphType = Arrays.binarySearch(VISUALIZERS, profiling);
+            value = graphType >= 0;
 
-            if (value != mProfileVisualizerEnabled) {
+            if (graphType != mProfileVisualizerType) {
                 changed = true;
-                mProfileVisualizerEnabled = value;
+                mProfileVisualizerType = graphType;
 
-                mProfileRects = null;
+                mProfileShapes = null;
                 mProfilePaint = null;
+
+                if (value) {
+                    mDebugDataProvider = new DrawPerformanceDataProvider(graphType);
+                } else {
+                    mDebugDataProvider = null;
+                }
             }
 
             // If on-screen profiling is not enabled, we need to check whether
@@ -728,6 +854,7 @@ public abstract class HardwareRenderer {
                 } else {
                     mProfileData = null;
                     mProfileLock = null;
+                    mProfileVisualizerType = -1;
                 }
 
                 mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
@@ -1283,7 +1410,7 @@ public abstract class HardwareRenderer {
                 }
             }
 
-            if (mProfileEnabled && mProfileVisualizerEnabled) dirty = null;
+            if (mDebugDataProvider != null) dirty = null;
 
             return dirty;
         }
@@ -1459,20 +1586,102 @@ public abstract class HardwareRenderer {
             }
             return SURFACE_STATE_SUCCESS;
         }
+
+        private static int dpToPx(int dp, float density) {
+            return (int) (dp * density + 0.5f);
+        }
+
+        class DrawPerformanceDataProvider extends GraphDataProvider {
+            private final int mGraphType;
+
+            private int mVerticalUnit;
+            private int mHorizontalUnit;
+            private int mHorizontalMargin;
+            private int mThresholdStroke;
+
+            DrawPerformanceDataProvider(int graphType) {
+                mGraphType = graphType;
+            }
+
+            @Override
+            void prepare(DisplayMetrics metrics) {
+                final float density = metrics.density;
+
+                mVerticalUnit = dpToPx(PROFILE_DRAW_DP_PER_MS, density);
+                mHorizontalUnit = dpToPx(PROFILE_DRAW_WIDTH, density);
+                mHorizontalMargin = dpToPx(PROFILE_DRAW_MARGIN, density);
+                mThresholdStroke = dpToPx(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH, density);
+            }
+
+            @Override
+            int getGraphType() {
+                return mGraphType;
+            }
+
+            @Override
+            int getVerticalUnitSize() {
+                return mVerticalUnit;
+            }
+
+            @Override
+            int getHorizontalUnitSize() {
+                return mHorizontalUnit;
+            }
+
+            @Override
+            int getHorizontaUnitMargin() {
+                return mHorizontalMargin;
+            }
+
+            @Override
+            float[] getData() {
+                return mProfileData;
+            }
+
+            @Override
+            float getThreshold() {
+                return 16;
+            }
+
+            @Override
+            int getFrameCount() {
+                return mProfileData.length / PROFILE_FRAME_DATA_COUNT;
+            }
+
+            @Override
+            int getElementCount() {
+                return PROFILE_FRAME_DATA_COUNT;
+            }
+
+            @Override
+            int getCurrentFrame() {
+                return mProfileCurrentFrame / PROFILE_FRAME_DATA_COUNT;
+            }
+
+            @Override
+            void setupGraphPaint(Paint paint, int elementIndex) {
+                paint.setColor(PROFILE_DRAW_COLORS[elementIndex]);
+                if (mGraphType == GRAPH_TYPE_LINES) paint.setStrokeWidth(mThresholdStroke);
+            }
+
+            @Override
+            void setupThresholdPaint(Paint paint) {
+                paint.setColor(PROFILE_DRAW_THRESHOLD_COLOR);
+                paint.setStrokeWidth(mThresholdStroke);
+            }
+
+            @Override
+            void setupCurrentFramePaint(Paint paint) {
+                paint.setColor(PROFILE_DRAW_CURRENT_FRAME_COLOR);
+                if (mGraphType == GRAPH_TYPE_LINES) paint.setStrokeWidth(mThresholdStroke);
+            }
+        }
     }
 
     /**
      * Hardware renderer using OpenGL ES 2.0.
      */
     static class Gl20Renderer extends GlRenderer {
-        private static final int PROFILE_DRAW_MARGIN = 0;
-        private static final int PROFILE_DRAW_WIDTH = 3;
-        private static final int[] PROFILE_DRAW_COLORS = { 0xcf3e66cc, 0xcfdc3912, 0xcfe69800 };
-        private static final int PROFILE_DRAW_CURRENT_FRAME_COLOR = 0xcf5faa4d;
-        private static final int PROFILE_DRAW_THRESHOLD_COLOR = 0xff5faa4d;
-        private static final int PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
-        private static final int PROFILE_DRAW_DP_PER_MS = 7;
-
         private GLES20Canvas mGlCanvas;
 
         private DisplayMetrics mDisplayMetrics;
@@ -1581,101 +1790,149 @@ public abstract class HardwareRenderer {
 
         @Override
         void drawProfileData(View.AttachInfo attachInfo) {
-            if (mProfileEnabled && mProfileVisualizerEnabled) {
-                initProfileDrawData(attachInfo);
+            if (mDebugDataProvider != null) {
+                final GraphDataProvider provider = mDebugDataProvider;
+                initProfileDrawData(attachInfo, provider);
 
-                final int pxPerMs = (int) (PROFILE_DRAW_DP_PER_MS * mDisplayMetrics.density + 0.5f);
-                final int margin = (int) (PROFILE_DRAW_MARGIN * mDisplayMetrics.density + 0.5f);
-                final int width = (int) (PROFILE_DRAW_WIDTH * mDisplayMetrics.density + 0.5f);
+                final int height = provider.getVerticalUnitSize();
+                final int margin = provider.getHorizontaUnitMargin();
+                final int width = provider.getHorizontalUnitSize();
 
                 int x = 0;
                 int count = 0;
                 int current = 0;
 
-                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
-                    if (mProfileData[i] < 0.0f) break;
+                final float[] data = provider.getData();
+                final int elementCount = provider.getElementCount();
+                final int graphType = provider.getGraphType();
+
+                int totalCount = provider.getFrameCount() * elementCount;
+                if (graphType == GraphDataProvider.GRAPH_TYPE_LINES) {
+                    totalCount -= elementCount;
+                }
+
+                for (int i = 0; i < totalCount; i += elementCount) {
+                    if (data[i] < 0.0f) break;
 
                     int index = count * 4;
-                    if (i == mProfileCurrentFrame) current = index;
+                    if (i == provider.getCurrentFrame() * elementCount) current = index;
 
                     x += margin;
                     int x2 = x + width;
 
                     int y2 = mHeight;
-                    int y1 = (int) (y2 - mProfileData[i] * pxPerMs);
+                    int y1 = (int) (y2 - data[i] * height);
 
-                    float[] r = mProfileRects[0];
-                    r[index] = x;
-                    r[index + 1] = y1;
-                    r[index + 2] = x2;
-                    r[index + 3] = y2;
+                    switch (graphType) {
+                        case GraphDataProvider.GRAPH_TYPE_BARS: {
+                            for (int j = 0; j < elementCount; j++) {
+                                //noinspection MismatchedReadAndWriteOfArray
+                                final float[] r = mProfileShapes[j];
+                                r[index] = x;
+                                r[index + 1] = y1;
+                                r[index + 2] = x2;
+                                r[index + 3] = y2;
 
-                    y2 = y1;
-                    y1 = (int) (y2 - mProfileData[i + 1] * pxPerMs);
+                                y2 = y1;
+                                if (j < elementCount - 1) {
+                                    y1 = (int) (y2 - data[i + j + 1] * height);
+                                }
+                            }
+                        } break;
+                        case GraphDataProvider.GRAPH_TYPE_LINES: {
+                            for (int j = 0; j < elementCount; j++) {
+                                //noinspection MismatchedReadAndWriteOfArray
+                                final float[] r = mProfileShapes[j];
+                                r[index] = (x + x2) * 0.5f;
+                                r[index + 1] = index == 0 ? y1 : r[index - 1];
+                                r[index + 2] = r[index] + width;
+                                r[index + 3] = y1;
 
-                    r = mProfileRects[1];
-                    r[index] = x;
-                    r[index + 1] = y1;
-                    r[index + 2] = x2;
-                    r[index + 3] = y2;
+                                y2 = y1;
+                                if (j < elementCount - 1) {
+                                    y1 = (int) (y2 - data[i + j + 1] * height);
+                                }
+                            }
+                        } break;
+                    }
 
-                    y2 = y1;
-                    y1 = (int) (y2 - mProfileData[i + 2] * pxPerMs);
-
-                    r = mProfileRects[2];
-                    r[index] = x;
-                    r[index + 1] = y1;
-                    r[index + 2] = x2;
-                    r[index + 3] = y2;
 
                     x += width;
-
                     count++;
                 }
+
                 x += margin;
 
-                drawGraph(count);
-                drawCurrentFrame(current);
-                drawThreshold(x, pxPerMs);
+                drawGraph(graphType, count);
+                drawCurrentFrame(graphType, current);
+                drawThreshold(x, height);
             }
         }
 
-        private void drawGraph(int count) {
-            for (int i = 0; i < mProfileRects.length; i++) {
-                mProfilePaint.setColor(PROFILE_DRAW_COLORS[i]);
-                mGlCanvas.drawRects(mProfileRects[i], count, mProfilePaint);
-            }
-        }
-
-        private void drawCurrentFrame(int index) {
-            mProfilePaint.setColor(PROFILE_DRAW_CURRENT_FRAME_COLOR);
-            mGlCanvas.drawRect(mProfileRects[2][index], mProfileRects[2][index + 1],
-                    mProfileRects[2][index + 2], mProfileRects[0][index + 3], mProfilePaint);
-        }
-
-        private void drawThreshold(int x, int pxPerMs) {
-            mProfilePaint.setColor(PROFILE_DRAW_THRESHOLD_COLOR);
-            mProfilePaint.setStrokeWidth((int)
-                    (PROFILE_DRAW_THRESHOLD_STROKE_WIDTH * mDisplayMetrics.density + 0.5f));
-            int y = mHeight - 16 * pxPerMs;
-            mGlCanvas.drawLine(0.0f, y, x, y, mProfilePaint);
-            mProfilePaint.setStrokeWidth(1.0f);
-        }
-
-        private void initProfileDrawData(View.AttachInfo attachInfo) {
-            if (mProfileRects == null) {
-                mProfileRects = new float[PROFILE_FRAME_DATA_COUNT][];
-                for (int i = 0; i < mProfileRects.length; i++) {
-                    int count = mProfileData.length / PROFILE_FRAME_DATA_COUNT;
-                    mProfileRects[i] = new float[count * 4];
+        private void drawGraph(int graphType, int count) {
+            for (int i = 0; i < mProfileShapes.length; i++) {
+                mDebugDataProvider.setupGraphPaint(mProfilePaint, i);
+                switch (graphType) {
+                    case GraphDataProvider.GRAPH_TYPE_BARS:
+                        mGlCanvas.drawRects(mProfileShapes[i], count, mProfilePaint);
+                        break;
+                    case GraphDataProvider.GRAPH_TYPE_LINES:
+                        mGlCanvas.drawLines(mProfileShapes[i], 0, count * 4, mProfilePaint);
+                        break;
                 }
+            }
+        }
+
+        private void drawCurrentFrame(int graphType, int index) {
+            if (index >= 0) {
+                mDebugDataProvider.setupCurrentFramePaint(mProfilePaint);
+                switch (graphType) {
+                    case GraphDataProvider.GRAPH_TYPE_BARS:
+                        mGlCanvas.drawRect(mProfileShapes[2][index], mProfileShapes[2][index + 1],
+                                mProfileShapes[2][index + 2], mProfileShapes[0][index + 3],
+                                mProfilePaint);
+                        break;
+                    case GraphDataProvider.GRAPH_TYPE_LINES:
+                        mGlCanvas.drawLine(mProfileShapes[2][index], mProfileShapes[2][index + 1],
+                                mProfileShapes[2][index], mHeight, mProfilePaint);
+                        break;
+                }
+            }
+        }
+
+        private void drawThreshold(int x, int height) {
+            float threshold = mDebugDataProvider.getThreshold();
+            if (threshold > 0.0f) {
+                mDebugDataProvider.setupThresholdPaint(mProfilePaint);
+                int y = (int) (mHeight - threshold * height);
+                mGlCanvas.drawLine(0.0f, y, x, y, mProfilePaint);
+            }
+        }
+
+        private void initProfileDrawData(View.AttachInfo attachInfo, GraphDataProvider provider) {
+            if (mProfileShapes == null) {
+                final int elementCount = provider.getElementCount();
+                final int frameCount = provider.getFrameCount();
+
+                mProfileShapes = new float[elementCount][];
+                for (int i = 0; i < elementCount; i++) {
+                    mProfileShapes[i] = new float[frameCount * 4];
+                }
+
                 mProfilePaint = new Paint();
+            }
+
+            mProfilePaint.reset();
+            if (provider.getGraphType() == GraphDataProvider.GRAPH_TYPE_LINES) {
+                mProfilePaint.setAntiAlias(true);
             }
 
             if (mDisplayMetrics == null) {
                 mDisplayMetrics = new DisplayMetrics();
             }
+
             attachInfo.mDisplay.getMetrics(mDisplayMetrics);
+            provider.prepare(mDisplayMetrics);
         }
 
         @Override
