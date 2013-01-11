@@ -5708,17 +5708,19 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void onRegisterVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
         synchronized(mRCStack) {
             // The stack traversal order doesn't matter because there is only one stack entry
-            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
-            //  ID has been found.
-            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
-            //  at the top of the stack
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if (rcse.mRccId == rccId) {
-                    rcse.mRemoteVolumeObs = rvo;
-                    break;
+            //  with this RCC ID, but the matching ID is more likely at the top of the stack, so
+            //  start iterating from the top.
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                    if (rcse.mRccId == rccId) {
+                        rcse.mRemoteVolumeObs = rvo;
+                        break;
+                    }
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
             }
         }
     }
@@ -5813,18 +5815,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
             // The stack traversal order doesn't matter because there is only one stack entry
-            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
-            //  ID has been found.
-            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
-            //  at the top of the stack
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-                if (rcse.mRccId == rccId) {
-                    rvo = rcse.mRemoteVolumeObs;
-                    break;
+            //  with this RCC ID, but the matching ID is more likely at the top of the stack, so
+            //  start iterating from the top.
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
+                    //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
+                    if (rcse.mRccId == rccId) {
+                        rvo = rcse.mRemoteVolumeObs;
+                        break;
+                    }
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
             }
         }
         if (rvo != null) {
@@ -5866,18 +5870,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         IRemoteVolumeObserver rvo = null;
         synchronized (mRCStack) {
             // The stack traversal order doesn't matter because there is only one stack entry
-            //  with this RCC ID, and we can stop iterating over the stack entries once the matching
-            //  ID has been found.
-            // FIXME optimize by traversing stack from top to bottom, the matching ID is more likely
-            //  at the top of the stack
-            Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
-            while(stackIterator.hasNext()) {
-                RemoteControlStackEntry rcse = stackIterator.next();
-                if (rcse.mRccId == rccId) {
+            //  with this RCC ID, but the matching ID is more likely at the top of the stack, so
+            //  start iterating from the top.
+            try {
+                for (int index = mRCStack.size()-1; index >= 0; index--) {
+                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
                     //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-                    rvo = rcse.mRemoteVolumeObs;
-                    break;
+                    if (rcse.mRccId == rccId) {
+                        rvo = rcse.mRemoteVolumeObs;
+                        break;
+                    }
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // not expected to happen, indicates improper concurrent modification
+                Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
             }
         }
         if (rvo != null) {
