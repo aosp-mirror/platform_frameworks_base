@@ -452,6 +452,16 @@ public class DateFormat {
      * @hide
      */
     public static boolean hasSeconds(CharSequence inFormat) {
+        return hasDesignator(inFormat, SECONDS);
+    }
+
+    /**
+     * Test if a format string contains the given designator. Always returns
+     * {@code false} if the input format is {@code null}.
+     *
+     * @hide
+     */
+    public static boolean hasDesignator(CharSequence inFormat, char designator) {
         if (inFormat == null) return false;
 
         final int length = inFormat.length();
@@ -465,7 +475,7 @@ public class DateFormat {
 
             if (c == QUOTE) {
                 count = skipQuotedText(inFormat, i, length);
-            } else if (c == SECONDS) {
+            } else if (c == designator) {
                 return true;
             }
         }

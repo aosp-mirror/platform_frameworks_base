@@ -386,6 +386,16 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Returns the current format string. Always valid after constructor has
+     * finished, and will never be {@code null}.
+     *
+     * @hide
+     */
+    public CharSequence getFormat() {
+        return mFormat;
+    }
+
+    /**
      * Selects either one of {@link #getFormat12Hour()} or {@link #getFormat24Hour()}
      * depending on whether the user has selected 24-hour format.
      * 
