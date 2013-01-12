@@ -2087,6 +2087,10 @@ public final class Parcel {
                                         + "Parcelable.Creator object called "
                                         + " CREATOR on class " + name);
                 }
+                catch (NullPointerException e) {
+                    throw new BadParcelableException("Parcelable protocol requires "
+                            + "the CREATOR object to be static on class " + name);
+                }
                 if (creator == null) {
                     throw new BadParcelableException("Parcelable protocol requires a "
                                         + "Parcelable.Creator object called "
