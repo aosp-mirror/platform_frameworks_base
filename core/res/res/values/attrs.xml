@@ -3501,7 +3501,7 @@
         <attr name="calendarViewShown" format="boolean" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" format="string" />
-        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />

@@ -684,7 +684,7 @@ procedures:</p>
     <p>The Downloader Library includes some APIs in the {@code Helper} class to
 help with this process:</p>
   <ul>
-    <li>{@code getExtendedAPKFileName(Context, c, boolean mainFile, int
+    <li>{@code getExpansionAPKFileName(Context, c, boolean mainFile, int
 versionCode)}</li>
     <li>{@code doesFileExist(Context c, String fileName, long fileSize)}</li>
   </ul>
