@@ -573,10 +573,13 @@ public class WindowAnimator {
 
                 final DimLayer dimAnimator = displayAnimator.mDimAnimator;
                 final WindowStateAnimator winAnimator = displayAnimator.mDimWinAnimator;
+                final int dimLayer;
                 final float dimAmount;
                 if (winAnimator == null) {
+                    dimLayer = dimAnimator.getLayer();
                     dimAmount = 0;
                 } else {
+                    dimLayer = winAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM;
                     dimAmount = winAnimator.mWin.mAttrs.dimAmount;
                 }
                 final float targetAlpha = dimAnimator.getTargetAlpha();
@@ -590,9 +593,10 @@ public class WindowAnimator {
                         if (targetAlpha > dimAmount) {
                             duration = getDimBehindFadeDuration(duration);
                         }
-                        dimAnimator.show(winAnimator.mAnimLayer -
-                                WindowManagerService.LAYER_OFFSET_DIM, dimAmount, duration);
+                        dimAnimator.show(dimLayer, dimAmount, duration);
                     }
+                } else if (dimAnimator.getLayer() != dimLayer) {
+                    dimAnimator.setLayer(dimLayer);
                 }
                 if (dimAnimator.isAnimating()) {
                     if (!mService.okToDisplay()) {
