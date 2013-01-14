@@ -24,14 +24,25 @@ import junit.framework.TestSuite;
 
 /**
  * Run the ImageProcessing benchmark test
- * adb shell am instrument -w com.android.rs.image/.ImageProcessingTestRunner
+ * adb shell am instrument -e iteration <n> -w com.android.rs.image/.ImageProcessingTestRunner
  *
  */
 public class ImageProcessingTestRunner extends InstrumentationTestRunner {
+    public int mIteration = 5;
+
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(ImageProcessingTest.class);
         return suite;
+    }
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        String strIteration = (String) icicle.get("iteration");
+        if (strIteration != null) {
+            mIteration = Integer.parseInt(strIteration);
+        }
     }
 }
