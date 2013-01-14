@@ -21,9 +21,9 @@ two Google Play badges.</p>
        <a href="{@docRoot}downloads/brand/en_generic_rgb_wo.ai">English (English)</a><br/>
 
        <a href="{@docRoot}downloads/brand/af_generic_rgb_wo.ai">Afrikaans (Afrikaans)</a><br/>
-
+<!--
        <a href="{@docRoot}downloads/brand/ar_generic_rgb_wo.ai">العربية (Arabic)</a><br/>
-
+-->
        <a href="{@docRoot}downloads/brand/be_generic_rgb_wo.ai">Беларуская (Belarusian)</a><br/>
        
        <a href="{@docRoot}downloads/brand/bg_generic_rgb_wo.ai">български (Bulgarian)</a><br/>
@@ -61,9 +61,9 @@ two Google Play badges.</p>
        <a href="{@docRoot}downloads/brand/de_generic_rgb_wo.ai">Deutsch (German)</a><br/>
 
        <a href="{@docRoot}downloads/brand/el_generic_rgb_wo.ai">Ελληνικά (Greek)</a><br/>
-
+<!--
        <a href="{@docRoot}downloads/brand/iw-he_generic_rgb_wo.ai">עברית (Hebrew)</a><br/>
-
+-->
        <a href="{@docRoot}downloads/brand/hu_generic_rgb_wo.ai">Magyar (Hungarian)</a><br/>
 
        <a href="{@docRoot}downloads/brand/id-in_generic_rgb_wo.ai">Bahasa Indonesia (Indonesian)</a><br/>
