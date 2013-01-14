@@ -177,7 +177,7 @@ ID to reference the array.</dd>
 
     </dd>
   <dt id="string-array-item-element"><code>&lt;item&gt;</code></dt>
-    <dd>A string, which can include styling tags. The value can be a referenced to another
+    <dd>A string, which can include styling tags. The value can be a reference to another
 string resource. Must be a child of a {@code &lt;string-array&gt;} element. Beware that you
 must escape apostrophes and
 quotation marks. See <a href="#FormattingAndStyling">Formatting and Styling</a>, below, for

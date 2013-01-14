@@ -149,7 +149,7 @@ querySkus.putStringArrayList(“ITEM_ID_LIST”, skuList);
 <p>To retrieve this information from Google Play, call the {@code getSkuDetails} method on the In-app Billing Version 3 API, and pass the method the In-app Billing API version (“3”), the package name of your calling app, the purchase type (“inapp”), and the {@link android.os.Bundle} that you created.</p>
 <pre>
 Bundle skuDetails = mService.getSkuDetails(3, 
-   getPackageName(), “inapp”, querySkus);
+   getPackageName(), "inapp", querySkus);
 </pre>
 <p>If the request is successful, the returned {@link android.os.Bundle}has a response code of {@code BILLING_RESPONSE_RESULT_OK} (0).</p>
 <p class="note"><strong>Warning:</strong> Do not call the {@code getSkuDetails} method on the main thread. Calling this method triggers a network request which could block your main thread.  Instead, create a separate thread and call the {@code getSkuDetails} method from inside that thread.</p>
@@ -169,8 +169,8 @@ if (response == 0) {
       JSONObject object = new JSONObject(thisResponse);
       String sku = object.getString("productId");
       String price = object.getString("price");
-      if (sku.equals(“premiumUpgrade”)) mPremiumUpgradePrice = price;
-      else if (sku.equals(“gas”)) mGasPrice = price;
+      if (sku.equals("premiumUpgrade")) mPremiumUpgradePrice = price;
+      else if (sku.equals("gas")) mGasPrice = price;
    }
 }
 </pre>
@@ -186,7 +186,7 @@ Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
 If the request is successful, the returned {@link android.os.Bundle} has a response code of {@code BILLING_RESPONSE_RESULT_OK} (0) and a {@link android.app.PendingIntent} that you can use to start the purchase flow. To see all the possible response codes from Google Play, see <a href="{@docRoot}google/play/billing/billing_reference.html#billing-codes">In-app Billing Reference</a>. Next, extract a {@link android.app.PendingIntent} from the response {@link android.os.Bundle} with key {@code BUY_INTENT}.
 </p>
 <pre>
-PendingIntent pendingIntent = buyIntentBundle.getParcelable(“BUY_INTENT”);
+PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
 </pre>
 <p>
 To complete the purchase transaction, call the {@link android.app.Activity#startIntentSenderForResult startIntentSenderForResult} method and use the {@link android.app.PendingIntent} that you created. In this example, you are using an arbitrary value of 1001 for the request code.</p>
@@ -206,7 +206,7 @@ startIntentSenderForResult(pendingIntent.getIntentSender(),
    "purchaseTime":1345678900000,
    "purchaseState":0,
    "developerPayload":"bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
-   “purchaseToken”:“rojeslcdyyiapnqcynkjyyjh”
+   "purchaseToken":"rojeslcdyyiapnqcynkjyyjh"
  }'
 </pre>
 </p>
@@ -217,8 +217,8 @@ startIntentSenderForResult(pendingIntent.getIntentSender(),
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {	
    if (requestCode == 1001) {    	
       int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-      String purchaseData = data.getStringExtra(“INAPP_PURCHASE_DATA”);
-      String dataSignature = data.getStringExtra(“INAPP_DATA_SIGNATURE”);
+      String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+      String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
         
       if (resultCode == RESULT_OK) {
          try {
@@ -240,7 +240,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 <h3 id="QueryPurchases">Querying for Purchased Items</h3>
 <p>To retrieve information about purchases made by a user from your app, call the {@code getPurchases} method on the In-app Billing Version 3 service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, and the purchase type (“inapp”).</p>
 <pre>
-Bundle ownedItems = mService.getPurchases(3, getPackageName(), “inapp”, null);
+Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
 </pre>
 <p>The Google Play service returns only the purchases made by the user account that is currently logged in to the device. If the request is successful, the returned {@link android.os.Bundle} has a response code of 0. The response {@link android.os.Bundle} also contains a list of the product IDs, a list of the order details for each purchase, and the signatures for each purchase.</p>
 <p>To improve performance, the In-app Billing service returns only up to 700 products that are owned by the user when {@code getPurchase} is first called. If the user owns a large number of products, Google Play includes a String token mapped to the key {@code INAPP_CONTINUATION_TOKEN} in the response {@link android.os.Bundle} to indicate that more products can be retrieved. Your application can then make a subsequent {@code getPurchases} call, and pass in this token as an argument. Google Play continues to return a continuation token in the response {@link android.os.Bundle} until all products that are owned by the user has been sent to your app.</p>
