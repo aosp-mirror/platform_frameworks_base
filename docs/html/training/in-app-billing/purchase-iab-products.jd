@@ -65,7 +65,7 @@ IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
       else if (purchase.getSku().equals(SKU_GAS)) {
          // consume the gas and update the UI
       }
-      else (purchase.getSku().equals(SKU_PREMIUM)) {
+      else if (purchase.getSku().equals(SKU_PREMIUM)) {
          // give user access to premium content and update the UI
       }
    }

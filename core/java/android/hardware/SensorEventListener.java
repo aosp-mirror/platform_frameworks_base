@@ -30,7 +30,7 @@ public interface SensorEventListener {
      * 
      * <p><b>NOTE:</b> The application doesn't own the
      * {@link android.hardware.SensorEvent event}
-     * object passed as a parameter and therefore cannot hold on o it.
+     * object passed as a parameter and therefore cannot hold on to it.
      * The object may be part of an internal pool and may be reused by
      * the framework.
      *

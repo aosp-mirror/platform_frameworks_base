@@ -141,11 +141,11 @@ If you are connected to only a single device, you do not need to set the ANDROID
 </ul>
 </p>
 
-<p>For more information about implementing and testing accessibility, see <a href="{@docRoot}/guide/topics/ui/accessibility/apps.html">Making Applications Accessible</a>.</p>
+<p>For more information about implementing and testing accessibility, see <a href="{@docRoot}guide/topics/ui/accessibility/apps.html">Making Applications Accessible</a>.</p>
 
 <p class="note"><strong>Note: </strong>To identify the non-accessible components in the UI, click on the <strong>Toggle NAF Nodes</strong> option in the {@code uiautomatorviewer} tool.</p>
 
-<p>Generally, Android application developers get accessibility support for free, courtesy of the {@link android.view.View} and {@link android.view.ViewGroup} classes. However, some applications use custom view components to provide a richer user experience. Such custom components won't get the accessibility support that is provided by the standard Android UI components. If this applies to your application, ensure that the application developer exposes the custom drawn UI components to Android accessibility services, by implementing the {@link android.view.accessibility.AccessibilityNodeProvider} class. For more information about making custom view components accessible, see <a href="{@docRoot}/guide/topics/ui/accessibility/apps.html#custom-views">Making Applications Accessible</a>.</p>
+<p>Generally, Android application developers get accessibility support for free, courtesy of the {@link android.view.View} and {@link android.view.ViewGroup} classes. However, some applications use custom view components to provide a richer user experience. Such custom components won't get the accessibility support that is provided by the standard Android UI components. If this applies to your application, ensure that the application developer exposes the custom drawn UI components to Android accessibility services, by implementing the {@link android.view.accessibility.AccessibilityNodeProvider} class. For more information about making custom view components accessible, see <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views">Making Applications Accessible</a>.</p>
 
 <h3 id="configure">Configure your development environment</h3>
 <p>If you're developing in Eclipse, the Android SDK provides additional tools that help you write test cases using {@code uiautomator} and buiild your JAR file. In order to set up Eclipse to assist you, you need to create a project that includes the {@code uiautomator} client library, along with the Android SDK library. To configure Eclipse:</p>
