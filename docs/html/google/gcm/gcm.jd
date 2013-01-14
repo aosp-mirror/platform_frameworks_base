@@ -208,9 +208,9 @@ ID in a database. </li>
 <p>The registration ID lasts until the Android application explicitly unregisters
 itself, or until Google refreshes the registration ID for your Android application.</p>
 
-<p class="note"><strong>Note:</strong> When users uninstall an application, it is not automatically unregistered on GCM. It is only  unregistered when the GCM server tries to send a message to the device and the device answers that the application is uninstalled or it does not have a broadcast receiver configured to receive <code>com.google.android.c2dm.intent.RECEIVE</code> intents. At that point, you server should mark the device as unregistered (the server will receive a <code><a href="#unreg_device">NotRegistered</a></code> error).
+<p class="note"><strong>Note:</strong> When users uninstall an application, it is not automatically unregistered on GCM. It is only  unregistered when the GCM server tries to send a message to the device and the device answers that the application is uninstalled or it does not have a broadcast receiver configured to receive <code>com.google.android.c2dm.intent.RECEIVE</code> intents. At that point, your server should mark the device as unregistered (the server will receive a <code><a href="#unreg_device">NotRegistered</a></code> error).
   <p>
-Note that it might take a few minutes for the registration ID to be completed removed from the GCM server. So if the 3rd party server sends a message during this time, it will get a valid message ID, even though the message will not be delivered to the device.</p>
+Note that it might take a few minutes for the registration ID to be completely removed from the GCM server. So if the 3rd party server sends a message during this time, it will get a valid message ID, even though the message will not be delivered to the device.</p>
 </p>
 
 <h4 id="push-process">Sending a Message</h4>
@@ -593,7 +593,7 @@ have an  application server that meets the following criteria:</p>
 <ul>
   <li>Able to communicate with your client.</li>
   <li>Able to  fire off HTTPS requests to the GCM server.</li>
-  <li>Able to handle requests and resend then as needed, using <a href="http://en.wikipedia.org/wiki/Exponential_backoff">exponential back-off.</a></li>
+  <li>Able to handle requests and resend them as needed, using <a href="http://en.wikipedia.org/wiki/Exponential_backoff">exponential back-off.</a></li>
   <li>Able to store the API key and client registration IDs. The
 API key is included in the header of POST requests that send
 messages.</li>

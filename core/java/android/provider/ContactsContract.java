@@ -4695,7 +4695,8 @@ public final class ContactsContract {
          * The content:// style URI for this table. Append the phone number you want to lookup
          * to this URI and query it to perform a lookup. For example:
          * <pre>
-         * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_URI, Uri.encode(phoneNumber));
+         * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+         *         Uri.encode(phoneNumber));
          * </pre>
          */
         public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(AUTHORITY_URI,

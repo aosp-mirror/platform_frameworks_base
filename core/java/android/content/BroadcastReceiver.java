@@ -117,7 +117,7 @@ import android.util.Slog;
  *
  * <ul>
  * <li><p>The Intent namespace is global.  Make sure that Intent action names and
- * other strings are written in a namespace you own, or else you may inadvertantly
+ * other strings are written in a namespace you own, or else you may inadvertently
  * conflict with other applications.
  * <li><p>When you use {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)},
  * <em>any</em> application may send broadcasts to that registered receiver.  You can
