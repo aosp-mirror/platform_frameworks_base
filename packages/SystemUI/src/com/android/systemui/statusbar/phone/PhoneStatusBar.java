@@ -838,9 +838,14 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void refreshAllStatusBarIcons() {
-        final int count = mStatusIcons.getChildCount();
+        refreshAllIconsForLayout(mStatusIcons);
+        refreshAllIconsForLayout(mNotificationIcons);
+    }
+
+    private void refreshAllIconsForLayout(LinearLayout ll) {
+        final int count = ll.getChildCount();
         for (int n = 0; n < count; n++) {
-            View child = mStatusIcons.getChildAt(n);
+            View child = ll.getChildAt(n);
             if (child instanceof StatusBarIconView) {
                 ((StatusBarIconView) child).updateDrawable();
             }
