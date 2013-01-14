@@ -691,7 +691,7 @@ restored, by default).</p>
 android.app.Activity#onSaveInstanceState onSaveInstanceState()} helps save the state of the UI, if
 you override the method in order to save additional state information, you should always call the
 superclass implementation of {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
-before doing any work. Likewise, you should also call the supercall implementation of {@link
+before doing any work. Likewise, you should also call the superclass implementation of {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} if you override it, so the
 default implementation can restore view states.</p>
 

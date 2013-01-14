@@ -42,7 +42,7 @@ import java.lang.ref.WeakReference;
 
 /**
  * <p>A popup window that can be used to display an arbitrary view. The popup
- * windows is a floating container that appears on top of the current
+ * window is a floating container that appears on top of the current
  * activity.</p>
  * 
  * @see android.widget.AutoCompleteTextView
