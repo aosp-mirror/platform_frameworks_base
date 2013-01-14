@@ -101,19 +101,20 @@ private LruCache&lt;String, Bitmap&gt; mMemoryCache;
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     ...
-    // Get memory class of this device, exceeding this amount will throw an
-    // OutOfMemory exception.
-    final int memClass = ((ActivityManager) context.getSystemService(
-            Context.ACTIVITY_SERVICE)).getMemoryClass();
+    // Get max available VM memory, exceeding this amount will throw an
+    // OutOfMemory exception. Stored in kilobytes as LruCache takes an
+    // int in its constructor.
+    final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 
     // Use 1/8th of the available memory for this memory cache.
-    final int cacheSize = 1024 * 1024 * memClass / 8;
+    final int cacheSize = maxMemory / 8;
 
     mMemoryCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) {
         &#64;Override
         protected int sizeOf(String key, Bitmap bitmap) {
-            // The cache size will be measured in bytes rather than number of items.
-            return bitmap.getByteCount();
+            // The cache size will be measured in kilobytes rather than
+            // number of items.
+            return bitmap.getByteCount() / 1024;
         }
     };
     ...
