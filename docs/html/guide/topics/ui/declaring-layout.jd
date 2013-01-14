@@ -395,7 +395,7 @@ subclasses {@link android.widget.AdapterView} to populate the layout with views 
 subclass of the {@link android.widget.AdapterView} class uses an {@link android.widget.Adapter} to
 bind data to its layout. The {@link android.widget.Adapter} behaves as a middle-man between the data
 source and the {@link android.widget.AdapterView} layout&mdash;the {@link android.widget.Adapter}
-retreives the data (from a source such as an array or a database query) and converts each entry
+retrieves the data (from a source such as an array or a database query) and converts each entry
 into a view that can be added into the {@link android.widget.AdapterView} layout.</p>
 
 <p>Common layouts backed by an adapter include:</p>
