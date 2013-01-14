@@ -202,7 +202,7 @@ accuracy.</p>
 android.location.LocationManager#requestLocationUpdates requestLocationUpdates()}:</p>
 
 <pre>
-LocationProvider locationProvider = LocationManager.NETWORK_PROVIDER;
+String locationProvider = LocationManager.NETWORK_PROVIDER;
 // Or, use GPS location data:
 // LocationProvider locationProvider = LocationManager.GPS_PROVIDER;
 
@@ -217,7 +217,7 @@ long for users wait. Until a more accurate location is provided to your location
 should utilize a cached location by calling {@link
 android.location.LocationManager#getLastKnownLocation}:</p>
 <pre>
-LocationProvider locationProvider = LocationManager.NETWORK_PROVIDER;
+String locationProvider = LocationManager.NETWORK_PROVIDER;
 // Or use LocationManager.GPS_PROVIDER
 
 Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);

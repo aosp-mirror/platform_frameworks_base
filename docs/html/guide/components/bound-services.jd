@@ -578,7 +578,7 @@ private ServiceConnection mConnection = new ServiceConnection() {
 </pre>
 
 <p>With this {@link android.content.ServiceConnection}, the client can bind to a service by passing
-this it to {@link android.content.Context#bindService bindService()}. For example:</p>
+it to {@link android.content.Context#bindService bindService()}. For example:</p>
 
 <pre>
 Intent intent = new Intent(this, LocalService.class);
@@ -667,7 +667,7 @@ Below, figure 1 illustrates the logic for this kind of lifecycle.</p>
 and also allows binding.</p>
 
 
-<p>For more information about the lifecycle of an started service, see the <a
+<p>For more information about the lifecycle of a started service, see the <a
 href="{@docRoot}guide/components/services.html#Lifecycle">Services</a> document.</p>
 
 
