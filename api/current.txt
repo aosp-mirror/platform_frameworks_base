@@ -28963,7 +28963,9 @@ package android.widget {
     ctor public QuickContactBadge(android.content.Context, android.util.AttributeSet);
     ctor public QuickContactBadge(android.content.Context, android.util.AttributeSet, int);
     method public void assignContactFromEmail(java.lang.String, boolean);
+    method public void assignContactFromEmail(java.lang.String, boolean, android.os.Bundle);
     method public void assignContactFromPhone(java.lang.String, boolean);
+    method public void assignContactFromPhone(java.lang.String, boolean, android.os.Bundle);
     method public void assignContactUri(android.net.Uri);
     method public void onClick(android.view.View);
     method public void setExcludeMimes(java.lang.String[]);
