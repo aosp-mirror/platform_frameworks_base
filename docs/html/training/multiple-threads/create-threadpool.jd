@@ -46,7 +46,7 @@ trainingnavtop=true
     <code>synchronized</code> block. This approach will prevent one thread from reading the variable
     while another is writing to it. Typically, this situation arises with static variables, but it
     also occurs in any object that is only instantiated once. To learn more about this, read the
-    <a href="{@docRoot}http://developer.android.com/guide/components/processes-and-threads.html">
+    <a href="{@docRoot}guide/components/processes-and-threads.html">
     Processes and Threads</a> API guide.
     
 </p>

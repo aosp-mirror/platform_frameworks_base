@@ -90,7 +90,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
 
     /**
      * Special theme constant for {@link #AlertDialog(Context, int)}: use
-     * the device's default alert theme with a dark background.
+     * the device's default alert theme with a light background.
      */
     public static final int THEME_DEVICE_DEFAULT_LIGHT = 5;
     

@@ -82,7 +82,7 @@ private class ReverseGeocodingTask extends AsyncTask&lt;Location, Void, Void&gt;
             // Update UI field with the exception.
             Message.obtain(mHandler, UPDATE_ADDRESS, e.toString()).sendToTarget();
         }
-        if (addresses != null &amps;&amps; addresses.size() &gt; 0) {
+        if (addresses != null &amp;&amp; addresses.size() &gt; 0) {
             Address address = addresses.get(0);
             // Format the first line of address (if available), city, and country name.
             String addressText = String.format("&#037;s, &#037;s, &#037;s",

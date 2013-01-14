@@ -100,7 +100,7 @@ public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuIn
 </ol>
 
 <h2>Step 3</h2>
-  <p>Now that the we've registered our ListView for a context menu and defined our context menu item, we need
+  <p>Now that we've registered our ListView for a context menu and defined our context menu item, we need
   to handle the callback when it is selected. For this, we need to identify the list ID of the
   selected item, then delete it. So fill in the
   <code>onContextItemSelected()</code> method like this:</p>
