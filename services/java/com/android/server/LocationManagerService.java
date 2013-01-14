@@ -1010,7 +1010,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
                         LocationRequest locationRequest = record.mRequest;
                         if (locationRequest.getInterval() <= thresholdInterval) {
-                            worksource.add(record.mReceiver.mUid);
+                            worksource.add(record.mReceiver.mUid, record.mReceiver.mPackageName);
                         }
                     }
                 }

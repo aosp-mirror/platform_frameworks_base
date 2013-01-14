@@ -189,27 +189,23 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (ops == null) {
             // This is the first time we have seen this package name under this uid,
             // so let's make sure it is valid.
-            // XXX for now we always allow null through until we can fix everything
-            // to provide the name.
-            if (packageName != null) {
-                final long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                int pkgUid = -1;
                 try {
-                    int pkgUid = -1;
-                    try {
-                        pkgUid = mContext.getPackageManager().getPackageUid(packageName,
-                                UserHandle.getUserId(uid));
-                    } catch (NameNotFoundException e) {
-                    }
-                    if (pkgUid != uid) {
-                        // Oops!  The package name is not valid for the uid they are calling
-                        // under.  Abort.
-                        Slog.w(TAG, "Bad call: specified package " + packageName
-                                + " under uid " + uid + " but it is really " + pkgUid);
-                        return null;
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
+                    pkgUid = mContext.getPackageManager().getPackageUid(packageName,
+                            UserHandle.getUserId(uid));
+                } catch (NameNotFoundException e) {
                 }
+                if (pkgUid != uid) {
+                    // Oops!  The package name is not valid for the uid they are calling
+                    // under.  Abort.
+                    Slog.w(TAG, "Bad call: specified package " + packageName
+                            + " under uid " + uid + " but it is really " + pkgUid);
+                    return null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
             ops = new Ops(packageName);
             pkgOps.put(packageName, ops);

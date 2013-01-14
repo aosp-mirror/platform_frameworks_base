@@ -312,7 +312,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final IBatteryStats mBatteryStats;
 
     // only modified on handler thread
-    private int[] mClientUids = new int[0];
+    private WorkSource mClientSource = new WorkSource();
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
@@ -805,11 +805,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         if (request.reportLocation) {
             // update client uids
-            int[] uids = new int[source.size()];
-            for (int i=0; i < source.size(); i++) {
-                uids[i] = source.get(i);
-            }
-            updateClientUids(uids);
+            updateClientUids(source);
 
             mFixInterval = (int) request.interval;
 
@@ -831,7 +827,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 startNavigating();
             }
         } else {
-            updateClientUids(new int[0]);
+            updateClientUids(new WorkSource());
 
             stopNavigating();
             mAlarmManager.cancel(mWakeupIntent);
@@ -859,47 +855,45 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
-    private void updateClientUids(int[] uids) {
-        // Find uid's that were not previously tracked
-        for (int uid1 : uids) {
-            boolean newUid = true;
-            for (int uid2 : mClientUids) {
-                if (uid1 == uid2) {
-                    newUid = false;
-                    break;
-                }
-            }
-            if (newUid) {
+    private void updateClientUids(WorkSource source) {
+        // Update work source.
+        WorkSource[] changes = mClientSource.setReturningDiffs(source);
+        WorkSource newWork = changes[0];
+        WorkSource goneWork = changes[1];
+
+        // Update sources that were not previously tracked.
+        if (newWork != null) {
+            int lastuid = -1;
+            for (int i=0; i<newWork.size(); i++) {
                 try {
-                    mAppOpsService.startOperation(AppOpsManager.OP_GPS, uid1, null);
-                    mBatteryStats.noteStartGps(uid1);
+                    int uid = newWork.get(i);
+                    mAppOpsService.startOperation(AppOpsManager.OP_GPS, uid, newWork.getName(i));
+                    if (uid != lastuid) {
+                        lastuid = uid;
+                        mBatteryStats.noteStartGps(uid);
+                    }
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException", e);
                 }
             }
         }
 
-        // Find uid'd that were tracked but have now disappeared
-        for (int uid1 : mClientUids) {
-            boolean oldUid = true;
-            for (int uid2 : uids) {
-                if (uid1 == uid2) {
-                    oldUid = false;
-                    break;
-                }
-            }
-            if (oldUid) {
+        // Update sources that are no longer tracked.
+        if (goneWork != null) {
+            int lastuid = -1;
+            for (int i=0; i<goneWork.size(); i++) {
                 try {
-                    mBatteryStats.noteStopGps(uid1);
-                    mAppOpsService.finishOperation(AppOpsManager.OP_GPS, uid1, null);
+                    int uid = goneWork.get(i);
+                    mAppOpsService.finishOperation(AppOpsManager.OP_GPS, uid, goneWork.getName(i));
+                    if (uid != lastuid) {
+                        lastuid = uid;
+                        mBatteryStats.noteStopGps(uid);
+                    }
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException", e);
                 }
             }
         }
-
-        // save current uids
-        mClientUids = uids;
     }
 
     @Override
