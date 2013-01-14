@@ -139,9 +139,9 @@ public final class DeviceAdminInfo implements Parcelable {
     public static final int USES_POLICY_DISABLE_CAMERA = 8;
 
     /**
-     * A type of policy that this device admin can use: disables use of keyguard widgets.
+     * A type of policy that this device admin can use: disables use of keyguard features.
      *
-     * <p>To control this policy, the device admin must have a "disable-keyguard-widgets"
+     * <p>To control this policy, the device admin must have a "disable-keyguard-features"
      * tag in the "uses-policies" section of its meta-data.
      */
     public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
