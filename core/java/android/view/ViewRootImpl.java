@@ -229,6 +229,13 @@ public final class ViewRootImpl implements ViewParent,
     int mLastSystemUiVisibility;
     int mClientWindowLayoutFlags;
 
+    /** @hide */
+    public static final int EVENT_NOT_HANDLED = 0;
+    /** @hide */
+    public static final int EVENT_HANDLED = 1;
+    /** @hide */
+    public static final int EVENT_IN_PROGRESS = 2;
+
     // Pool of queued input events.
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
     private QueuedInputEvent mQueuedInputEventPool;
@@ -3240,19 +3247,19 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    private void deliverInputEvent(QueuedInputEvent q) {
+    private int deliverInputEvent(QueuedInputEvent q) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
         try {
             if (q.mEvent instanceof KeyEvent) {
-                deliverKeyEvent(q);
+                return deliverKeyEvent(q);
             } else {
                 final int source = q.mEvent.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                    deliverPointerEvent(q);
+                    return deliverPointerEvent(q);
                 } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                    deliverTrackballEvent(q);
+                    return deliverTrackballEvent(q);
                 } else {
-                    deliverGenericMotionEvent(q);
+                    return deliverGenericMotionEvent(q);
                 }
             }
         } finally {
@@ -3260,7 +3267,25 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void deliverPointerEvent(QueuedInputEvent q) {
+    private int deliverInputEventPostIme(QueuedInputEvent q) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEventPostIme");
+        try {
+            if (q.mEvent instanceof KeyEvent) {
+                return deliverKeyEventPostIme(q);
+            } else {
+                final int source = q.mEvent.getSource();
+                if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    return deliverTrackballEventPostIme(q);
+                } else {
+                    return deliverGenericMotionEventPostIme(q);
+                }
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+    }
+
+    private int deliverPointerEvent(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent)q.mEvent;
         final boolean isTouchEvent = event.isTouchEvent();
         if (mInputEventConsistencyVerifier != null) {
@@ -3273,8 +3298,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishInputEvent(q, false);
-            return;
+            return EVENT_NOT_HANDLED;
         }
 
         // Translate the pointer event for compatibility, if needed.
@@ -3307,16 +3331,10 @@ public final class ViewRootImpl implements ViewParent,
         if (MEASURE_LATENCY) {
             lt.sample("B Dispatched PointerEvents ", System.nanoTime() - event.getEventTimeNano());
         }
-        if (handled) {
-            finishInputEvent(q, true);
-            return;
-        }
-
-        // Pointer event was unhandled.
-        finishInputEvent(q, false);
+        return handled ? EVENT_HANDLED : EVENT_NOT_HANDLED;
     }
 
-    private void deliverTrackballEvent(QueuedInputEvent q) {
+    private int deliverTrackballEvent(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
@@ -3335,24 +3353,25 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_IMF)
                         Log.v(TAG, "Sending trackball event to IME: seq="
                                 + seq + " event=" + event);
-                    imm.dispatchTrackballEvent(mView.getContext(), seq, event,
+                    int result = imm.dispatchTrackballEvent(mView.getContext(), seq, event,
                             mInputMethodCallback);
-                    return;
+                    if (result != EVENT_NOT_HANDLED) {
+                        return result;
+                    }
                 }
             }
         }
 
         // Not dispatching to IME, continue with post IME actions.
-        deliverTrackballEventPostIme(q);
+        return deliverTrackballEventPostIme(q);
     }
 
-    private void deliverTrackballEventPostIme(QueuedInputEvent q) {
+    private int deliverTrackballEventPostIme(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent) q.mEvent;
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishInputEvent(q, false);
-            return;
+            return EVENT_NOT_HANDLED;
         }
 
         // Deliver the trackball event to the view.
@@ -3362,10 +3381,8 @@ public final class ViewRootImpl implements ViewParent,
             // event into a key event, touch mode will not exit, so we exit
             // touch mode here.
             ensureTouchMode(false);
-
-            finishInputEvent(q, true);
             mLastTrackballTime = Integer.MIN_VALUE;
-            return;
+            return EVENT_HANDLED;
         }
 
         // Translate the trackball event into DPAD keys and try to deliver those.
@@ -3473,10 +3490,10 @@ public final class ViewRootImpl implements ViewParent,
 
         // Unfortunately we can't tell whether the application consumed the keys, so
         // we always consider the trackball event handled.
-        finishInputEvent(q, true);
+        return EVENT_HANDLED;
     }
 
-    private void deliverGenericMotionEvent(QueuedInputEvent q) {
+    private int deliverGenericMotionEvent(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
@@ -3494,18 +3511,20 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_IMF)
                         Log.v(TAG, "Sending generic motion event to IME: seq="
                                 + seq + " event=" + event);
-                    imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
+                    int result = imm.dispatchGenericMotionEvent(mView.getContext(), seq, event,
                             mInputMethodCallback);
-                    return;
+                    if (result != EVENT_NOT_HANDLED) {
+                        return result;
+                    }
                 }
             }
         }
 
         // Not dispatching to IME, continue with post IME actions.
-        deliverGenericMotionEventPostIme(q);
+        return deliverGenericMotionEventPostIme(q);
     }
 
-    private void deliverGenericMotionEventPostIme(QueuedInputEvent q) {
+    private int deliverGenericMotionEventPostIme(QueuedInputEvent q) {
         final MotionEvent event = (MotionEvent) q.mEvent;
         final int source = event.getSource();
         final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
@@ -3519,8 +3538,7 @@ public final class ViewRootImpl implements ViewParent,
               //Convert TouchPad motion into a TrackBall event
               mSimulatedTrackball.updateTrackballDirection(this, event);
             }
-            finishInputEvent(q, false);
-            return;
+            return EVENT_NOT_HANDLED;
         }
 
         // Deliver the event to the view.
@@ -3531,22 +3549,21 @@ public final class ViewRootImpl implements ViewParent,
               //Convert TouchPad motion into a TrackBall event
               mSimulatedTrackball.updateTrackballDirection(this, event);
             }
-            finishInputEvent(q, true);
-            return;
+            return EVENT_HANDLED;
         }
 
         if (isJoystick) {
             // Translate the joystick event into DPAD keys and try to deliver
             // those.
             updateJoystickDirection(event, true);
-            finishInputEvent(q, true);
-        } else if (isTouchPad) {
+            return EVENT_HANDLED;
+        }
+        if (isTouchPad) {
             //Convert TouchPad motion into a TrackBall event
             mSimulatedTrackball.updateTrackballDirection(this, event);
-            finishInputEvent(q, true);
-        } else {
-            finishInputEvent(q, false);
+            return EVENT_HANDLED;
         }
+        return EVENT_NOT_HANDLED;
     }
 
     private void updateJoystickDirection(MotionEvent event, boolean synthesizeNewKeys) {
@@ -3690,7 +3707,7 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    private void deliverKeyEvent(QueuedInputEvent q) {
+    private int deliverKeyEvent(QueuedInputEvent q) {
         final KeyEvent event = (KeyEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
@@ -3701,8 +3718,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // Perform predispatching before the IME.
             if (mView.dispatchKeyEventPreIme(event)) {
-                finishInputEvent(q, true);
-                return;
+                return EVENT_HANDLED;
             }
 
             // Dispatch to the IME before propagating down the view hierarchy.
@@ -3713,81 +3729,30 @@ public final class ViewRootImpl implements ViewParent,
                     final int seq = event.getSequenceNumber();
                     if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
                             + seq + " event=" + event);
-                    imm.dispatchKeyEvent(mView.getContext(), seq, event, mInputMethodCallback);
-                    return;
+                    int result = imm.dispatchKeyEvent(mView.getContext(), seq, event,
+                            mInputMethodCallback);
+                    if (result != EVENT_NOT_HANDLED) {
+                        return result;
+                    }
                 }
             }
         }
 
         // Not dispatching to IME, continue with post IME actions.
-        deliverKeyEventPostIme(q);
+        return deliverKeyEventPostIme(q);
     }
 
-    void handleImeFinishedEvent(int seq, boolean handled) {
-        final QueuedInputEvent q = mCurrentInputEvent;
-        if (q != null && q.mEvent.getSequenceNumber() == seq) {
-            if (DEBUG_IMF) {
-                Log.v(TAG, "IME finished event: seq=" + seq
-                        + " handled=" + handled + " event=" + q);
-            }
-            if (handled) {
-                finishInputEvent(q, true);
-            } else {
-                if (q.mEvent instanceof KeyEvent) {
-                    KeyEvent event = (KeyEvent)q.mEvent;
-                    if (event.getAction() != KeyEvent.ACTION_UP) {
-                        // If the window doesn't currently have input focus, then drop
-                        // this event.  This could be an event that came back from the
-                        // IME dispatch but the window has lost focus in the meantime.
-                        if (!mAttachInfo.mHasWindowFocus) {
-                            Slog.w(TAG, "Dropping event due to no window focus: " + event);
-                            finishInputEvent(q, true);
-                            return;
-                        }
-                    }
-                    deliverKeyEventPostIme(q);
-                } else {
-                    MotionEvent event = (MotionEvent)q.mEvent;
-                    if (event.getAction() != MotionEvent.ACTION_CANCEL
-                            && event.getAction() != MotionEvent.ACTION_UP) {
-                        // If the window doesn't currently have input focus, then drop
-                        // this event.  This could be an event that came back from the
-                        // IME dispatch but the window has lost focus in the meantime.
-                        if (!mAttachInfo.mHasWindowFocus) {
-                            Slog.w(TAG, "Dropping event due to no window focus: " + event);
-                            finishInputEvent(q, true);
-                            return;
-                        }
-                    }
-                    final int source = q.mEvent.getSource();
-                    if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                        deliverTrackballEventPostIme(q);
-                    } else {
-                        deliverGenericMotionEventPostIme(q);
-                    }
-                }
-            }
-        } else {
-            if (DEBUG_IMF) {
-                Log.v(TAG, "IME finished event: seq=" + seq
-                        + " handled=" + handled + ", event not found!");
-            }
-        }
-    }
-
-    private void deliverKeyEventPostIme(QueuedInputEvent q) {
+    private int deliverKeyEventPostIme(QueuedInputEvent q) {
         final KeyEvent event = (KeyEvent)q.mEvent;
 
         // If the view went away, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishInputEvent(q, false);
-            return;
+            return EVENT_NOT_HANDLED;
         }
 
         // If the key's purpose is to exit touch mode then we consume it and consider it handled.
         if (checkForLeavingTouchModeAndConsume(event)) {
-            finishInputEvent(q, true);
-            return;
+            return EVENT_HANDLED;
         }
 
         // Make sure the fallback event policy sees all keys that will be delivered to the
@@ -3796,8 +3761,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // Deliver the key to the view hierarchy.
         if (mView.dispatchKeyEvent(event)) {
-            finishInputEvent(q, true);
-            return;
+            return EVENT_HANDLED;
         }
 
         // If the Control modifier is held, try to interpret the key as a shortcut.
@@ -3806,15 +3770,13 @@ public final class ViewRootImpl implements ViewParent,
                 && event.getRepeatCount() == 0
                 && !KeyEvent.isModifierKey(event.getKeyCode())) {
             if (mView.dispatchKeyShortcutEvent(event)) {
-                finishInputEvent(q, true);
-                return;
+                return EVENT_HANDLED;
             }
         }
 
         // Apply the fallback event policy.
         if (mFallbackEventHandler.dispatchKeyEvent(event)) {
-            finishInputEvent(q, true);
-            return;
+            return EVENT_HANDLED;
         }
 
         // Handle automatic focus changes.
@@ -3867,22 +3829,20 @@ public final class ViewRootImpl implements ViewParent,
                         if (v.requestFocus(direction, mTempRect)) {
                             playSoundEffect(SoundEffectConstants
                                     .getContantForFocusDirection(direction));
-                            finishInputEvent(q, true);
-                            return;
+                            return EVENT_HANDLED;
                         }
                     }
 
                     // Give the focused view a last chance to handle the dpad key.
                     if (mView.dispatchUnhandledMove(focused, direction)) {
-                        finishInputEvent(q, true);
-                        return;
+                        return EVENT_HANDLED;
                     }
                 }
             }
         }
 
         // Key was unhandled.
-        finishInputEvent(q, false);
+        return EVENT_NOT_HANDLED;
     }
 
     /* drag/drop */
@@ -4403,7 +4363,11 @@ public final class ViewRootImpl implements ViewParent,
             mFirstPendingInputEvent = q.mNext;
             q.mNext = null;
             mCurrentInputEvent = q;
-            deliverInputEvent(q);
+
+            final int result = deliverInputEvent(q);
+            if (result != EVENT_IN_PROGRESS) {
+                finishCurrentInputEvent(result == EVENT_HANDLED);
+            }
         }
 
         // We are done processing all input events that we can process right now
@@ -4414,10 +4378,42 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void finishInputEvent(QueuedInputEvent q, boolean handled) {
-        if (q != mCurrentInputEvent) {
-            throw new IllegalStateException("finished input event out of order");
+    void handleImeFinishedEvent(int seq, boolean handled) {
+        final QueuedInputEvent q = mCurrentInputEvent;
+        if (q != null && q.mEvent.getSequenceNumber() == seq) {
+            if (DEBUG_IMF) {
+                Log.v(TAG, "IME finished event: seq=" + seq
+                        + " handled=" + handled + " event=" + q);
+            }
+
+            if (!handled) {
+                // If the window doesn't currently have input focus, then drop
+                // this event.  This could be an event that came back from the
+                // IME dispatch but the window has lost focus in the meantime.
+                if (!mAttachInfo.mHasWindowFocus && !isTerminalInputEvent(q.mEvent)) {
+                    Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
+                } else {
+                    final int result = deliverInputEventPostIme(q);
+                    if (result == EVENT_HANDLED) {
+                        handled = true;
+                    }
+                }
+            }
+            finishCurrentInputEvent(handled);
+
+            // Immediately start processing the next input event.
+            doProcessInputEvents();
+        } else {
+            if (DEBUG_IMF) {
+                Log.v(TAG, "IME finished event: seq=" + seq
+                        + " handled=" + handled + ", event not found!");
+            }
         }
+    }
+
+    private void finishCurrentInputEvent(boolean handled) {
+        final QueuedInputEvent q = mCurrentInputEvent;
+        mCurrentInputEvent = null;
 
         if (q.mReceiver != null) {
             q.mReceiver.finishInputEvent(q.mEvent, handled);
@@ -4426,10 +4422,18 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         recycleQueuedInputEvent(q);
+    }
 
-        mCurrentInputEvent = null;
-        if (mFirstPendingInputEvent != null) {
-            scheduleProcessInputEvents();
+    private static boolean isTerminalInputEvent(InputEvent event) {
+        if (event instanceof KeyEvent) {
+            final KeyEvent keyEvent = (KeyEvent)event;
+            return keyEvent.getAction() == KeyEvent.ACTION_UP;
+        } else {
+            final MotionEvent motionEvent = (MotionEvent)event;
+            final int action = motionEvent.getAction();
+            return action == MotionEvent.ACTION_UP
+                    || action == MotionEvent.ACTION_CANCEL
+                    || action == MotionEvent.ACTION_HOVER_EXIT;
         }
     }
 
