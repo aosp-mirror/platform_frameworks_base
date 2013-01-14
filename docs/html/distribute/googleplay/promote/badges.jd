@@ -199,8 +199,10 @@ $(document).ready(function() {
           onchange="changeBadgeLang()">
     <option title="Afrikaans"
             value="af">Afrikaans</option>
+<!--
     <option title="Arabic"
             value="ar">العربية</option>
+-->
     <option title="Belarusian"
             value="be">Беларуская</option>
     <option title="Bulgarian"
@@ -237,8 +239,10 @@ $(document).ready(function() {
             value="el">Ελληνικά</option>
     <option title="English"
             value="en" selected="true">English</option>
+<!--
     <option title="Hebrew"
             value="iw-he">עברית</option>
+-->
     <option title="Hungarian"
             value="hu">Magyar</option>
     <option title="Indonesian"
