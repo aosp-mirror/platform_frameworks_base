@@ -9,6 +9,15 @@ page.landing.image=
 
   <div>
     <h3>Blog Articles</h3>
+
+      <a
+href="http://android-developers.blogspot.com/2013/01/evolution-of-renderscript-performance.html">
+        <h4>Evolution of Renderscript Performance</h4>
+      <p>It’s been a year since the last blog post on Renderscript, and with the release
+      of Android 4.2, it’s a good time to talk about the performance work that we’ve done
+      since then. One of the major goals of this past year was to improve the performance
+      of common image-processing operations with Renderscript.</p> </a>
+
       <a
 href="http://android-developers.blogspot.com/2012/01/levels-in-renderscript.html">
         <h4>Levels in Renderscript</h4>
