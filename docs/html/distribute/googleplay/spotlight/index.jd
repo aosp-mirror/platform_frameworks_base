@@ -7,7 +7,34 @@ header.hide=0
 
 <p>Android developers, their apps, and their successes with Android and Google Play. </p>
 
-
+<div style="background: #F0F0F0;
+            border-top: 1px solid #DDD;
+            padding: 0px 0 24px 0;
+            overflow: auto;
+            clear:both;
+            margin-bottom:40px;
+            margin-top:30px;"">
+   <div style="padding:0 0 0 29px;">
+        <h4>Developer Story: Smule</h4>
+          <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 17px 20px 9px 0;" src=
+            "//lh6.ggpht.com/z5wl9PuHl9JfO54uefjRTUX70SuLY-1DRpPxQ5mg7XEDfnYhBDssh1RrPZjN1tbwzhg=w124">
+          <div style="width:700px;">
+          <p style="margin-top:26px;
+                    margin-bottom:12px;">
+          The creators of <a href="//play.google.com/store/apps/details?id=com.smule.autorap">AutoRap</a>, <a href="//play.google.com/store/apps/details?id=com.smule.magicpiano">Magic Piano</a>, and <a href="//play.google.com/store/apps/details?id=com.smule.songify">Songify</a> talk about their experiences launching on Android, the explosive global growth they’ve seen on Google Play, and some of the techniques they use to market and monetize their products effectively across the world.</p>
+           </div>
+           <iframe style="float:left;
+             margin-right:24px;
+             margin-top:14px;" width="700" height="394" src=
+             "http://www.youtube.com/embed/RRelFvc6Czo?HD=1;rel=0;origin=developer.android.com;" frameborder="0" allowfullscreen>
+           </iframe>
+   </div> 
+</div>
 
 <div style="background: #F0F0F0;
             border-top: 1px solid #DDD;
