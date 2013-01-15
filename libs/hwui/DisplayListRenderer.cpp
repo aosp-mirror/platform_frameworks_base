@@ -44,6 +44,8 @@ const char* DisplayList::OP_NAMES[] = {
     "SetMatrix",
     "ConcatMatrix",
     "ClipRect",
+    "ClipPath",
+    "ClipRegion",
     "DrawDisplayList",
     "DrawLayer",
     "DrawBitmap",
@@ -166,6 +168,10 @@ void DisplayList::clearResources() {
         delete mPaints.itemAt(i);
     }
 
+    for (size_t i = 0; i < mRegions.size(); i++) {
+        delete mRegions.itemAt(i);
+    }
+
     for (size_t i = 0; i < mPaths.size(); i++) {
         SkPath* path = mPaths.itemAt(i);
         caches.pathCache.remove(path);
@@ -182,6 +188,7 @@ void DisplayList::clearResources() {
     mShaders.clear();
     mSourcePaths.clear();
     mPaints.clear();
+    mRegions.clear();
     mPaths.clear();
     mMatrices.clear();
     mLayers.clear();
@@ -259,20 +266,10 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 
     caches.resourceCache.unlock();
 
-    const Vector<SkPaint*>& paints = recorder.getPaints();
-    for (size_t i = 0; i < paints.size(); i++) {
-        mPaints.add(paints.itemAt(i));
-    }
-
-    const Vector<SkPath*>& paths = recorder.getPaths();
-    for (size_t i = 0; i < paths.size(); i++) {
-        mPaths.add(paths.itemAt(i));
-    }
-
-    const Vector<SkMatrix*>& matrices = recorder.getMatrices();
-    for (size_t i = 0; i < matrices.size(); i++) {
-        mMatrices.add(matrices.itemAt(i));
-    }
+    mPaints.appendVector(recorder.getPaints());
+    mRegions.appendVector(recorder.getRegions());
+    mPaths.appendVector(recorder.getPaths());
+    mMatrices.appendVector(recorder.getMatrices());
 }
 
 void DisplayList::init() {
@@ -427,6 +424,18 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 int regionOp = getInt();
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d", (char*) indent, OP_NAMES[op],
                         f1, f2, f3, f4, regionOp);
+            }
+            break;
+            case ClipPath: {
+                SkPath* path = getPath();
+                int regionOp = getInt();
+                ALOGD("%s%s %d", (char*) indent, OP_NAMES[op], regionOp);
+            }
+            break;
+            case ClipRegion: {
+                SkRegion* region = getRegion();
+                int regionOp = getInt();
+                ALOGD("%s%s %d", (char*) indent, OP_NAMES[op], regionOp);
             }
             break;
             case DrawDisplayList: {
@@ -1031,6 +1040,20 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flag
                 renderer.clipRect(f1, f2, f3, f4, (SkRegion::Op) regionOp);
             }
             break;
+            case ClipPath: {
+                SkPath* path = getPath();
+                int32_t regionOp = getInt();
+                DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, OP_NAMES[op], regionOp);
+                renderer.clipPath(path, (SkRegion::Op) regionOp);
+            }
+            break;
+            case ClipRegion: {
+                SkRegion* region = getRegion();
+                int32_t regionOp = getInt();
+                DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, OP_NAMES[op], regionOp);
+                renderer.clipRegion(region, (SkRegion::Op) regionOp);
+            }
+            break;
             case DrawDisplayList: {
                 DisplayList* displayList = getDisplayList();
                 int32_t flags = getInt();
@@ -1415,6 +1438,9 @@ void DisplayListRenderer::reset() {
     mPaints.clear();
     mPaintMap.clear();
 
+    mRegions.clear();
+    mRegionMap.clear();
+
     mPaths.clear();
     mPathMap.clear();
 
@@ -1569,6 +1595,20 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     addBounds(left, top, right, bottom);
     addInt(op);
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
+}
+
+bool DisplayListRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+    addOp(DisplayList::ClipPath);
+    addPath(path);
+    addInt(op);
+    return OpenGLRenderer::clipPath(path, op);
+}
+
+bool DisplayListRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+    addOp(DisplayList::ClipRegion);
+    addRegion(region);
+    addInt(op);
+    return OpenGLRenderer::clipRegion(region, op);
 }
 
 status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,

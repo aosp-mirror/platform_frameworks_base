@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package android.view;
 
@@ -172,6 +171,17 @@ public abstract class HardwareRenderer {
      * @hide
      */
     public static final String DEBUG_SHOW_OVERDRAW_PROPERTY = "debug.hwui.show_overdraw";
+
+    /**
+     * Turn on to allow region clipping (see
+     * {@link android.graphics.Canvas#clipPath(android.graphics.Path)} and
+     * {@link android.graphics.Canvas#clipRegion(android.graphics.Region)}.
+     *
+     * When this option is turned on a stencil buffer is always required.
+     * If this option is off a stencil buffer is only created when the overdraw
+     * debugging mode is turned on.
+     */
+    private static final boolean REGION_CLIPPING_ENABLED = false;
 
     /**
      * A process can set this flag to false to prevent the use of hardware
@@ -876,10 +886,12 @@ public abstract class HardwareRenderer {
                 changed = true;
                 mShowOverdraw = value;
 
-                if (surface != null && isEnabled()) {
-                    if (validate()) {
-                        sEglConfig = loadEglConfig();
-                        invalidate(surface);
+                if (!REGION_CLIPPING_ENABLED) {
+                    if (surface != null && isEnabled()) {
+                        if (validate()) {
+                            sEglConfig = loadEglConfig();
+                            invalidate(surface);
+                        }
                     }
                 }
             }
@@ -1752,6 +1764,11 @@ public abstract class HardwareRenderer {
 
         @Override
         int[] getConfig(boolean dirtyRegions) {
+            //noinspection PointlessBooleanExpression
+            final int stencilSize = mShowOverdraw || REGION_CLIPPING_ENABLED ?
+                    GLES20Canvas.getStencilSize() : 0;
+            final int swapBehavior = dirtyRegions ? EGL14.EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+
             return new int[] {
                     EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
                     EGL_RED_SIZE, 8,
@@ -1760,14 +1777,12 @@ public abstract class HardwareRenderer {
                     EGL_ALPHA_SIZE, 8,
                     EGL_DEPTH_SIZE, 0,
                     EGL_CONFIG_CAVEAT, EGL_NONE,
-                    // TODO: Find a better way to choose the stencil size
-                    EGL_STENCIL_SIZE, mShowOverdraw ? GLES20Canvas.getStencilSize() : 0,
-                    EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
-                            (dirtyRegions ? EGL14.EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
+                    EGL_STENCIL_SIZE, stencilSize,
+                    EGL_SURFACE_TYPE, EGL_WINDOW_BIT | swapBehavior,
                     EGL_NONE
             };
         }
-        
+
         @Override
         void initCaches() {
             GLES20Canvas.initCaches();

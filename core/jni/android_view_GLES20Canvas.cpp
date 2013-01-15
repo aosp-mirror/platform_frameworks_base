@@ -275,6 +275,16 @@ static bool android_view_GLES20Canvas_clipRect(JNIEnv* env, jobject clazz,
     return renderer->clipRect(float(left), float(top), float(right), float(bottom), op);
 }
 
+static bool android_view_GLES20Canvas_clipPath(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, SkPath* path, SkRegion::Op op) {
+    return renderer->clipPath(path, op);
+}
+
+static bool android_view_GLES20Canvas_clipRegion(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, SkRegion* region, SkRegion::Op op) {
+    return renderer->clipRegion(region, op);
+}
+
 static bool android_view_GLES20Canvas_getClipBounds(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jobject rect) {
     const android::uirenderer::Rect& bounds(renderer->getClipBounds());
@@ -961,6 +971,8 @@ static JNINativeMethod gMethods[] = {
     { "nQuickReject",       "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_quickReject },
     { "nClipRect",          "(IFFFFI)Z",       (void*) android_view_GLES20Canvas_clipRectF },
     { "nClipRect",          "(IIIIII)Z",       (void*) android_view_GLES20Canvas_clipRect },
+    { "nClipPath",          "(III)Z",          (void*) android_view_GLES20Canvas_clipPath },
+    { "nClipRegion",        "(III)Z",          (void*) android_view_GLES20Canvas_clipRegion },
 
     { "nTranslate",         "(IFF)V",          (void*) android_view_GLES20Canvas_translate },
     { "nRotate",            "(IF)V",           (void*) android_view_GLES20Canvas_rotate },

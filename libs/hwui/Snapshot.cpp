@@ -130,6 +130,7 @@ bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
     switch (op) {
         case SkRegion::kIntersect_Op: {
             if (CC_UNLIKELY(clipRegion)) {
+                ensureClipRegion();
                 clipped = clipRegionOp(r.left, r.top, r.right, r.bottom, SkRegion::kIntersect_Op);
             } else {
                 clipped = clipRect->intersect(r);
@@ -142,6 +143,7 @@ bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
         }
         case SkRegion::kUnion_Op: {
             if (CC_UNLIKELY(clipRegion)) {
+                ensureClipRegion();
                 clipped = clipRegionOp(r.left, r.top, r.right, r.bottom, SkRegion::kUnion_Op);
             } else {
                 clipped = clipRect->unionWith(r);
