@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
@@ -30,7 +29,11 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+
+import libcore.icu.ICU;
 
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardViewMediator.DEBUG;
@@ -41,7 +44,7 @@ public class KeyguardStatusView extends GridLayout {
     public static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
     public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
 
-    private CharSequence mDateFormatString;
+    private SimpleDateFormat mDateFormat;
     private LockPatternUtils mLockPatternUtils;
 
     private TextView mDateView;
@@ -80,8 +83,11 @@ public class KeyguardStatusView extends GridLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         Resources res = getContext().getResources();
-        mDateFormatString =
-                res.getText(com.android.internal.R.string.abbrev_wday_month_day_no_year);
+        final Locale locale = Locale.getDefault();
+        final String datePattern =
+                res.getString(com.android.internal.R.string.system_ui_date_pattern);
+        final String bestFormat = ICU.getBestDateTimePattern(datePattern, locale.toString());
+        mDateFormat = new SimpleDateFormat(bestFormat, locale);
         mDateView = (TextView) findViewById(R.id.date);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mClockView = (ClockView) findViewById(R.id.clock_view);
@@ -121,7 +127,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     void refreshDate() {
-        maybeSetUpperCaseText(mDateView, DateFormat.format(mDateFormatString, new Date()));
+        maybeSetUpperCaseText(mDateView, mDateFormat.format(new Date()));
     }
 
     @Override
