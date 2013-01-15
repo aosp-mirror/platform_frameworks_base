@@ -477,6 +477,10 @@
     <skip />
     <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
     <skip />
+    <!-- no translation found for permlab_updateAppOpsStats (8829097373851521505) -->
+    <skip />
+    <!-- no translation found for permdesc_updateAppOpsStats (50784596594403483) -->
+    <skip />
     <string name="permlab_backup" msgid="470013022865453920">"controllar las copias da segirezza e la restauraziun dal sistem"</string>
     <!-- no translation found for permdesc_backup (6912230525140589891) -->
     <skip />
