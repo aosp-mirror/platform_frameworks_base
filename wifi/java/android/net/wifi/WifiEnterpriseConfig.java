@@ -100,7 +100,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         return 0;
     }
 
-    /** @Override */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mFields.size());
         for (Map.Entry<String, String> entry : mFields.entrySet()) {
@@ -109,7 +109,6 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
     }
 
-    /** @Override */
     public static final Creator<WifiEnterpriseConfig> CREATOR =
             new Creator<WifiEnterpriseConfig>() {
                 public WifiEnterpriseConfig createFromParcel(Parcel in) {
