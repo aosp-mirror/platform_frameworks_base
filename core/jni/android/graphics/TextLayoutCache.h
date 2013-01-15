@@ -35,11 +35,9 @@
 #include <SkLanguage.h>
 
 #include <unicode/ubidi.h>
-#include <unicode/ushape.h>
 #include <unicode/unistr.h>
 
-#include "HarfbuzzSkia.h"
-#include "harfbuzz-shaper.h"
+#include <hb.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -189,14 +187,9 @@ public:
 
 private:
     /**
-     * Harfbuzz shaper item
+     * Harfbuzz buffer for shaping
      */
-    HB_ShaperItem mShaperItem;
-
-    /**
-     * Harfbuzz font
-     */
-    HB_FontRec mFontRec;
+    hb_buffer_t* mBuffer;
 
     /**
      * Skia Paint used for shaping
@@ -211,30 +204,15 @@ private:
     /**
      * Cache of Harfbuzz faces
      */
-    KeyedVector<SkFontID, HB_Face> mCachedHBFaces;
-
-    /**
-     * Cache of glyph array size
-     */
-    size_t mShaperItemGlyphArraySize;
-
-    /**
-     * Buffer for containing the ICU normalized form of a run
-     */
-    UnicodeString mNormalizedString;
-
-    /**
-     * Buffer for normalizing a piece of a run with ICU
-     */
-    UnicodeString mBuffer;
+    KeyedVector<SkFontID, hb_face_t*> mCachedHBFaces;
 
     void init();
     void unrefTypefaces();
 
     SkTypeface* typefaceForScript(const SkPaint* paint, SkTypeface* typeface,
-        HB_Script script);
+        hb_script_t script);
 
-    size_t shapeFontRun(const SkPaint* paint, bool isRTL);
+    size_t shapeFontRun(const SkPaint* paint);
 
     void computeValues(const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags,
@@ -242,17 +220,14 @@ private:
             Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
     void computeRunValues(const SkPaint* paint, const UChar* chars,
-            size_t count, bool isRTL,
+            size_t start, size_t count, size_t contextCount, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs, Vector<jfloat>* const outPos);
 
-    SkTypeface* getCachedTypeface(SkTypeface** typeface, HB_Script script, SkTypeface::Style style);
-    HB_Face getCachedHBFace(SkTypeface* typeface);
+    SkTypeface* setCachedTypeface(SkTypeface** typeface, hb_script_t script, SkTypeface::Style style);
+    hb_face_t* referenceCachedHBFace(SkTypeface* typeface);
 
-    bool doShaping(size_t size);
-    void createShaperItemGlyphArrays(size_t size);
-    void deleteShaperItemGlyphArrays();
-    bool isComplexScript(HB_Script script);
+    bool isComplexScript(hb_script_t script);
 
 }; // TextLayoutShaper
 
