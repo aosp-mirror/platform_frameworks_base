@@ -204,7 +204,7 @@ android.location.LocationManager#requestLocationUpdates requestLocationUpdates()
 <pre>
 String locationProvider = LocationManager.NETWORK_PROVIDER;
 // Or, use GPS location data:
-// LocationProvider locationProvider = LocationManager.GPS_PROVIDER;
+// String locationProvider = LocationManager.GPS_PROVIDER;
 
 locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
 </pre>
