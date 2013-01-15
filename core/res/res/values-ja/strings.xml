@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"現在の電池消費量の低レベルデータを読み取ることをアプリに許可します。このアプリが、使用しているアプリの詳細情報を確認できるようになります。"</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"電池統計情報の変更"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"電池に関して収集した統計情報の変更をアプリに許可します。通常のアプリでは使用しません。"</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"アプリの操作状況に関する統計情報の変更"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"アプリの操作状況に関して収集された統計情報の変更をアプリに許可します。通常のアプリでは使用しません。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"システムのバックアップと復元を制御する"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"システムのバックアップと復元メカニズムの制御をアプリに許可します。通常のアプリでは使用しません。"</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"フルバックアップや復元の操作の確認"</string>

@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Antaa sovelluksen lukea nykyisiä alhaisen tason akunkäyttötietoja. Sovellus saattaa saada tietoonsa, mitä sovelluksia käytät."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"muokkaa akkutilastoja"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Antaa sovelluksen muokata kerättyjä akkutilastoja. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"sovellusten käyttötilastojen muokkaus"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Antaa sovelluksen muokata kerättyjä sovellusten käyttötilastoja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_backup" msgid="470013022865453920">"hallitse järjestelmän varmuuskopiointia ja palauttamista"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Antaa sovelluksen hallita järjestelmän varmuuskopiointi- ja palautusmekanismia. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"vahvista täysi varmuuskopiointi tai palauta toiminto"</string>

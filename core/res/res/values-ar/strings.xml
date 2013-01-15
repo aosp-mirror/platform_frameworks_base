@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"للسماح لتطبيق بقراءة البيانات الحالية التي تستهلك مستوى منخفضًا من البطارية. قد يتيح التطبيق معرفة معلومات تفصيلية عن التطبيقات التي تستخدمها."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"تعديل إحصاءات البطارية"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"للسماح للتطبيق بتعديل إحصاءات البطارية المجمّعة. ليس للاستخدام بواسطة التطبيقات العادية."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"تعديل إحصاءات تشغيل التطبيق"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"للسماح للتطبيق بتعديل إحصاءات تشغيل التطبيق المجمّعة. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_backup" msgid="470013022865453920">"التحكم في النسخة الاحتياطية للنظام واستعادتها"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"للسماح للتطبيق بالتحكم في النسخة الاحتياطية للنظام وآلية الاستعادة. ليس للاستخدام بواسطة التطبيقات العادية."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"تأكيد إجراء عملية نسخ احتياطي أو استرداد كاملة"</string>

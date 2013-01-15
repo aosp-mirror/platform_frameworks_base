@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ivumela uhlelo lokusebenza ukufunda idatha yokusebenza yebhethri leleveli ephansi yamanje. Ingavumela uhlelo lokusebenza ukuthola ulwazi lemininingwane mayelana nokuthi iziphi izinhlelo zokusebenza ozisebenzisayo."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"guqula izibalo zebhetri"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ivumela uhlelo lokusebenza ukuthi luguqule izibalo zebhethri eziqoqiwe. Akwenzelwe ukuthi kusetshenziswe izinhlelo zokusebenza ezijwayelekile."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"shintsha izinombolo zokusebenza zohlelo lokusebenza"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Ivumela uhlelo lokusebenza ukuthi lishintshe izinombolo zokusebenza kohlelo lokusebenza lokuqoqiwe. Akufanele kusetshenziswe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_backup" msgid="470013022865453920">"lawula ukusekela ngokulondoloza uhlelo bese ubuyisela esimweni"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Ivumela insiza ukuthi ilawule isipele sesistimu kanye nohlelo lokubuyiselwa kabusha. Ayenzelwe ukusetshenziswa izinsiza ezijwayelekile."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"qinisekisa isipele sonke noma buyisela futhi ukusebenza"</string>

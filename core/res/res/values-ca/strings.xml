@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Permet que l\'aplicació llegeixi l\'ús de dades actual quan hi ha poca bateria. Pot permetre que l\'aplicació recopili informació detallada sobre les aplicacions que fas servir."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"modifica les estadístiques de la bateria"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Permet que l\'aplicació modifiqui les estadístiques d\'ús de la bateria recopilades. No ho poden fer servir les aplicacions normals."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"modifica les estadístiques d\'ús de l\'aplicació"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Permet que l\'aplicació modifiqui les estadístiques d\'ús de l\'aplicació recopilades. No indicat per a les aplicacions normals."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controlar la còpia de seguretat i restauració del sistema"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Permet que l\'aplicació controli el mecanisme de còpia de seguretat i restauració del sistema. No indicat per a les aplicacions normals."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"confirmar una operació de còpia de seguretat completa o de restauració"</string>
