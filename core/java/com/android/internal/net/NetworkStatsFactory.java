@@ -31,6 +31,7 @@ import com.android.internal.util.ProcFileReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.ProtocolException;
 
 import libcore.io.IoUtils;
 
@@ -41,7 +42,8 @@ import libcore.io.IoUtils;
 public class NetworkStatsFactory {
     private static final String TAG = "NetworkStatsFactory";
 
-    // TODO: consider moving parsing to native code
+    private static final boolean USE_NATIVE_PARSING = true;
+    private static final boolean SANITY_CHECK_NATIVE = false;
 
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
@@ -69,7 +71,7 @@ public class NetworkStatsFactory {
      *
      * @throws IllegalStateException when problem parsing stats.
      */
-    public NetworkStats readNetworkStatsSummaryDev() throws IllegalStateException {
+    public NetworkStats readNetworkStatsSummaryDev() throws IOException {
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
@@ -105,11 +107,9 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new ProtocolException("problem parsing stats", e);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new ProtocolException("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -124,7 +124,7 @@ public class NetworkStatsFactory {
      *
      * @throws IllegalStateException when problem parsing stats.
      */
-    public NetworkStats readNetworkStatsSummaryXt() throws IllegalStateException {
+    public NetworkStats readNetworkStatsSummaryXt() throws IOException {
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         // return null when kernel doesn't support
@@ -154,11 +154,9 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new ProtocolException("problem parsing stats", e);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing stats: " + e);
+            throw new ProtocolException("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -166,17 +164,33 @@ public class NetworkStatsFactory {
         return stats;
     }
 
-    public NetworkStats readNetworkStatsDetail() {
+    public NetworkStats readNetworkStatsDetail() throws IOException {
         return readNetworkStatsDetail(UID_ALL);
     }
 
+    public NetworkStats readNetworkStatsDetail(int limitUid) throws IOException {
+        if (USE_NATIVE_PARSING) {
+            final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+            if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid) != 0) {
+                throw new IOException("Failed to parse network stats");
+            }
+            if (SANITY_CHECK_NATIVE) {
+                final NetworkStats javaStats = javaReadNetworkStatsDetail(mStatsXtUid, limitUid);
+                assertEquals(javaStats, stats);
+            }
+            return stats;
+        } else {
+            return javaReadNetworkStatsDetail(mStatsXtUid, limitUid);
+        }
+    }
+
     /**
-     * Parse and return {@link NetworkStats} with UID-level details. Values
-     * monotonically increase since device boot.
-     *
-     * @throws IllegalStateException when problem parsing stats.
+     * Parse and return {@link NetworkStats} with UID-level details. Values are
+     * expected to monotonically increase since device boot.
      */
-    public NetworkStats readNetworkStatsDetail(int limitUid) throws IllegalStateException {
+    @VisibleForTesting
+    public static NetworkStats javaReadNetworkStatsDetail(File detailPath, int limitUid)
+            throws IOException {
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
@@ -188,13 +202,13 @@ public class NetworkStatsFactory {
         ProcFileReader reader = null;
         try {
             // open and consume header line
-            reader = new ProcFileReader(new FileInputStream(mStatsXtUid));
+            reader = new ProcFileReader(new FileInputStream(detailPath));
             reader.finishLine();
 
             while (reader.hasMoreData()) {
                 idx = reader.nextInt();
                 if (idx != lastIdx + 1) {
-                    throw new IllegalStateException(
+                    throw new ProtocolException(
                             "inconsistent idx=" + idx + " after lastIdx=" + lastIdx);
                 }
                 lastIdx = idx;
@@ -215,11 +229,9 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException e) {
-            throw new IllegalStateException("problem parsing idx " + idx, e);
+            throw new ProtocolException("problem parsing idx " + idx, e);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("problem parsing idx " + idx, e);
-        } catch (IOException e) {
-            throw new IllegalStateException("problem parsing idx " + idx, e);
+            throw new ProtocolException("problem parsing idx " + idx, e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -227,4 +239,30 @@ public class NetworkStatsFactory {
 
         return stats;
     }
+
+    public void assertEquals(NetworkStats expected, NetworkStats actual) {
+        if (expected.size() != actual.size()) {
+            throw new AssertionError(
+                    "Expected size " + expected.size() + ", actual size " + actual.size());
+        }
+
+        NetworkStats.Entry expectedRow = null;
+        NetworkStats.Entry actualRow = null;
+        for (int i = 0; i < expected.size(); i++) {
+            expectedRow = expected.getValues(i, expectedRow);
+            actualRow = actual.getValues(i, actualRow);
+            if (!expectedRow.equals(actualRow)) {
+                throw new AssertionError(
+                        "Expected row " + i + ": " + expectedRow + ", actual row " + actualRow);
+            }
+        }
+    }
+
+    /**
+     * Parse statistics from file into given {@link NetworkStats} object. Values
+     * are expected to monotonically increase since device boot.
+     */
+    @VisibleForTesting
+    public static native int nativeReadNetworkStatsDetail(
+            NetworkStats stats, String path, int limitUid);
 }
