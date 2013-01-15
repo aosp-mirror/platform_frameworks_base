@@ -858,6 +858,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void updateClientUids(WorkSource source) {
         // Update work source.
         WorkSource[] changes = mClientSource.setReturningDiffs(source);
+        if (changes == null) {
+            return;
+        }
         WorkSource newWork = changes[0];
         WorkSource goneWork = changes[1];
 
