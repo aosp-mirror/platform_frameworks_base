@@ -4880,6 +4880,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
+    @Override
     public void setInputFilter(IInputFilter filter) {
         if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
             throw new SecurityException("Requires FILTER_EVENTS permission");
@@ -5127,6 +5128,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setInTouchMode(boolean mode) {
         synchronized(mWindowMap) {
             mInTouchMode = mode;
@@ -5181,6 +5183,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setStrictModeVisualIndicatorPreference(String value) {
         SystemProperties.set(StrictMode.VISUAL_PROPERTY, value);
     }
@@ -5355,6 +5358,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param rotation The desired rotation to freeze to, or -1 to use the
      * current rotation.
      */
+    @Override
     public void freezeRotation(int rotation) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
@@ -5376,6 +5380,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Thaw rotation changes.  (Disable "rotation lock".)
      * Persists across reboots.
      */
+    @Override
     public void thawRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "thawRotation()")) {
@@ -5395,6 +5400,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * such that the current rotation might need to be updated, such as when the
      * device is docked or rotated into a new posture.
      */
+    @Override
     public void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout) {
         updateRotationUnchecked(alwaysSendConfiguration, forceRelayout);
     }
@@ -5405,7 +5411,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * This can be used to prevent rotation changes from occurring while the user is
      * performing certain operations, such as drag and drop.
      *
-     * This call nests and must be matched by an equal number of calls to {@link #resumeRotation}.
+     * This call nests and must be matched by an equal number of calls to
+     * {@link #resumeRotationLocked}.
      */
     void pauseRotationLocked() {
         mDeferredRotationPauseCount += 1;
@@ -5639,6 +5646,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @return A {@link Gravity} value for placing the options menu window
      */
+    @Override
     public int getPreferredOptionsPanelGravity() {
         synchronized (mWindowMap) {
             final int rotation = getRotation();
@@ -5658,19 +5666,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     case Surface.ROTATION_270:
                         return Gravity.START | Gravity.BOTTOM;
                 }
-            } else {
-                // On devices with a natural orientation of landscape
-                switch (rotation) {
-                    default:
-                    case Surface.ROTATION_0:
-                        return Gravity.RIGHT | Gravity.BOTTOM;
-                    case Surface.ROTATION_90:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-                    case Surface.ROTATION_180:
-                        return Gravity.START | Gravity.BOTTOM;
-                    case Surface.ROTATION_270:
-                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-                }
+            }
+
+            // On devices with a natural orientation of landscape
+            switch (rotation) {
+                default:
+                case Surface.ROTATION_0:
+                    return Gravity.RIGHT | Gravity.BOTTOM;
+                case Surface.ROTATION_90:
+                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                case Surface.ROTATION_180:
+                    return Gravity.START | Gravity.BOTTOM;
+                case Surface.ROTATION_270:
+                    return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
             }
         }
     }
@@ -5685,6 +5693,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see com.android.server.wm.ViewServer
      * @see com.android.server.wm.ViewServer#VIEW_SERVER_DEFAULT_PORT
      */
+    @Override
     public boolean startViewServer(int port) {
         if (isSystemSecure()) {
             return false;
@@ -5731,6 +5740,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @see com.android.server.wm.ViewServer
      */
+    @Override
     public boolean stopViewServer() {
         if (isSystemSecure()) {
             return false;
@@ -5753,6 +5763,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @see com.android.server.wm.ViewServer
      */
+    @Override
     public boolean isViewServerRunning() {
         if (isSystemSecure()) {
             return false;
@@ -6401,10 +6412,11 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
     // Input Events and Focus Management
     // -------------------------------------------------------------
-    
+
     final InputMonitor mInputMonitor = new InputMonitor(this);
     private boolean mEventDispatchingEnabled;
 
+    @Override
     public void pauseKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "pauseKeyDispatching()")) {
@@ -6419,6 +6431,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void resumeKeyDispatching(IBinder _token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "resumeKeyDispatching()")) {
@@ -6433,6 +6446,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setEventDispatching(boolean enabled) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setEventDispatching()")) {
@@ -6448,6 +6462,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public IBinder getFocusedWindowToken() {
         if (!checkCallingPermission(android.Manifest.permission.RETRIEVE_WINDOW_INFO,
                 "getFocusedWindowToken()")) {
@@ -7272,6 +7287,7 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
+    @Override
     public boolean hasSystemNavBar() {
         return mPolicy.hasSystemNavBar();
     }
@@ -7495,7 +7511,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // applications.  Don't do any window layout until we have it.
             return;
         }
-        
+
         if (!mDisplayReady) {
             // Not yet initialized, nothing to do.
             return;
@@ -7504,7 +7520,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmLayout");
         mInLayout = true;
         boolean recoveringMemory = false;
-        
+
         try {
             if (mForceRemoves != null) {
                 recoveringMemory = true;
@@ -7717,7 +7733,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 attachedBehindDream = behindDream;
             }
         }
-        
+
         // Window frames may have changed.  Tell the input dispatcher about it.
         mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
@@ -7741,7 +7757,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // XXX should probably keep timeout from
                 // when we first froze the display.
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, 
+                mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
                         WINDOW_FREEZE_TIMEOUT_DURATION);
             }
         }
@@ -9304,12 +9320,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessageDelayed(H.FORCE_GC, 2000);
 
         mScreenFrozenLock.release();
-        
+
         if (updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             configChanged |= updateRotationUncheckedLocked(false);
         }
-        
+
         if (configChanged) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
@@ -9414,7 +9430,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
- 
+
     @Override
     public void reevaluateStatusBarVisibility() {
         synchronized (mWindowMap) {
@@ -9475,7 +9491,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void lockNow(Bundle options) {
         mPolicy.lockNow(options);
     }
-    
+
     @Override
     public boolean isSafeModeEnabled() {
         return mSafeMode;
