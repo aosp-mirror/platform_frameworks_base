@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Lubab rakendusel lugeda madala akutaseme kasutusandmeid. Võib lubada rakendusel hankida üksikasjalikku teavet selle kohta, mis rakendusi te kasutate."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"aku statistika muutmine"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Võimaldab rakendusel muuta aku kohta kogutud statistikat. Mitte kasutada tavarakenduste puhul."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"rakenduse tööstatistika muutmine"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Võimaldab rakendusel muuta kogutud rakenduse tööstatistikat. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_backup" msgid="470013022865453920">"juhi süsteemi varundust ja taastet"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Võimaldab rakendusel juhtida süsteemi varundus- ja taastemehhanismi. Mitte kasutada tavarakenduste puhul."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"täieliku varukoopia kinnitamine või toimingu taastamine"</string>

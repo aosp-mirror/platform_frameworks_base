@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Zezwala aplikacji na odczytywanie bieżących danych niskiego poziomu o wykorzystaniu baterii. Możliwe jest wtedy zbieranie przez aplikację szczegółowych danych o używanych aplikacjach."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"zmienianie statystyk dotyczących baterii"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Zezwala aplikacji na modyfikowanie zebranych statystyk dotyczących baterii. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"modyfikowanie statystyk działania aplikacji"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Zezwala aplikacji na modyfikowanie zebranych statystyk działania aplikacji. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrolowanie tworzenia i przywracania kopii zapasowych systemu"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Pozwala aplikacji na sterowanie mechanizmem tworzenia kopii zapasowych systemu i ich przywracania. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Potwierdzenie operacji utworzenia pełnej kopii zapasowej lub przywracania"</string>
@@ -1040,7 +1042,7 @@
     <string name="loading" msgid="7933681260296021180">"Wczytywanie…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Wł"</string>
     <string name="capital_off" msgid="6815870386972805832">"Wył"</string>
-    <string name="whichApplication" msgid="4533185947064773386">"Zakończ czynność przez..."</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Wykonaj czynność przez..."</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Domyślne dla tej czynności"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Wyczyść wartości domyślne w: Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Wybierz czynność"</string>
