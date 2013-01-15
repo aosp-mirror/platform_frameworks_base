@@ -37,13 +37,13 @@ namespace android {
 static inline float
 HBFixedToFloat (hb_position_t v)
 {
-    return scalblnf (v, -8);
+    return scalbnf (v, -8);
 }
 
 static inline hb_position_t
 HBFloatToFixed (float v)
 {
-    return scalblnf (v, +8);
+    return scalbnf (v, +8);
 }
 
 static inline hb_position_t SkScalarToHBFixed(SkScalar value) {
