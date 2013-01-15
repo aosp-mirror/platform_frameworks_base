@@ -16,10 +16,12 @@
 
 package com.android.internal.app;
 
+import android.app.AppOpsManager;
+
 interface IAppOpsService {
+    List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
+    int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
     int startOperation(int code, int uid, String packageName);
     void finishOperation(int code, int uid, String packageName);
-    int noteTimedOperation(int code, int uid, String packageName, int duration);
-    void earlyFinishOperation(int code, int uid, String packageName);
 }

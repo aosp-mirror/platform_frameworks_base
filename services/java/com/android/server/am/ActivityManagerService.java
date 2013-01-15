@@ -1623,7 +1623,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
-        mAppOpsService = new AppOpsService();
+        mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         // User 0 is the first and only user that runs at boot.
@@ -7105,7 +7105,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             sCallerIdentity.set(new Identity(
                     Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(uri, "r");
+                pfd = cph.provider.openFile(null, uri, "r");
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {

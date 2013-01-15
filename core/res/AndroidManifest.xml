@@ -1606,6 +1606,13 @@
         android:description="@string/permdesc_updateBatteryStats"
         android:protectionLevel="signature|system" />
 
+    <!-- @hide Allows an application to collect battery statistics -->
+    <permission android:name="android.permission.GET_APP_OPS_STATS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:label="@string/permlab_getAppOpsStats"
+        android:description="@string/permdesc_getAppOpsStats"
+        android:protectionLevel="signature|system|development" />
+
     <!-- Allows an application to update application operation statistics. Not for
          use by third party apps. @hide -->
     <permission android:name="android.permission.UPDATE_APP_OPS_STATS"

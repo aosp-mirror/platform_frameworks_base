@@ -37,11 +37,13 @@ public class MediaInserter {
     private final HashMap<Uri, List<ContentValues>> mPriorityRowMap =
             new HashMap<Uri, List<ContentValues>>();
 
-    private IContentProvider mProvider;
-    private int mBufferSizePerUri;
+    private final IContentProvider mProvider;
+    private final String mPackageName;
+    private final int mBufferSizePerUri;
 
-    public MediaInserter(IContentProvider provider, int bufferSizePerUri) {
+    public MediaInserter(IContentProvider provider, String packageName, int bufferSizePerUri) {
         mProvider = provider;
+        mPackageName = packageName;
         mBufferSizePerUri = bufferSizePerUri;
     }
 
@@ -88,7 +90,7 @@ public class MediaInserter {
         if (!list.isEmpty()) {
             ContentValues[] valuesArray = new ContentValues[list.size()];
             valuesArray = list.toArray(valuesArray);
-            mProvider.bulkInsert(tableUri, valuesArray);
+            mProvider.bulkInsert(mPackageName, tableUri, valuesArray);
             list.clear();
         }
     }

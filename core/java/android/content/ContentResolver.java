@@ -207,6 +207,7 @@ public abstract class ContentResolver {
 
     public ContentResolver(Context context) {
         mContext = context;
+        mPackageName = context.getPackageName();
     }
 
     /** @hide */
@@ -392,7 +393,7 @@ public abstract class ContentResolver {
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
             try {
-                qCursor = unstableProvider.query(uri, projection,
+                qCursor = unstableProvider.query(mPackageName, uri, projection,
                         selection, selectionArgs, sortOrder, remoteCancellationSignal);
             } catch (DeadObjectException e) {
                 // The remote process has died...  but we only hold an unstable
@@ -403,7 +404,7 @@ public abstract class ContentResolver {
                 if (stableProvider == null) {
                     return null;
                 }
-                qCursor = stableProvider.query(uri, projection,
+                qCursor = stableProvider.query(mPackageName, uri, projection,
                         selection, selectionArgs, sortOrder, remoteCancellationSignal);
             }
             if (qCursor == null) {
@@ -651,7 +652,7 @@ public abstract class ContentResolver {
 
                 try {
                     try {
-                        fd = unstableProvider.openAssetFile(uri, mode);
+                        fd = unstableProvider.openAssetFile(mPackageName, uri, mode);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -665,7 +666,7 @@ public abstract class ContentResolver {
                         if (stableProvider == null) {
                             throw new FileNotFoundException("No content provider: " + uri);
                         }
-                        fd = stableProvider.openAssetFile(uri, mode);
+                        fd = stableProvider.openAssetFile(mPackageName, uri, mode);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -743,7 +744,7 @@ public abstract class ContentResolver {
 
         try {
             try {
-                fd = unstableProvider.openTypedAssetFile(uri, mimeType, opts);
+                fd = unstableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -757,7 +758,7 @@ public abstract class ContentResolver {
                 if (stableProvider == null) {
                     throw new FileNotFoundException("No content provider: " + uri);
                 }
-                fd = stableProvider.openTypedAssetFile(uri, mimeType, opts);
+                fd = stableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -892,7 +893,7 @@ public abstract class ContentResolver {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            Uri createdRow = provider.insert(url, values);
+            Uri createdRow = provider.insert(mPackageName, url, values);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
             return createdRow;
@@ -953,7 +954,7 @@ public abstract class ContentResolver {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsCreated = provider.bulkInsert(url, values);
+            int rowsCreated = provider.bulkInsert(mPackageName, url, values);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
             return rowsCreated;
@@ -984,7 +985,7 @@ public abstract class ContentResolver {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsDeleted = provider.delete(url, where, selectionArgs);
+            int rowsDeleted = provider.delete(mPackageName, url, where, selectionArgs);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "delete", where);
             return rowsDeleted;
@@ -1018,7 +1019,7 @@ public abstract class ContentResolver {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsUpdated = provider.update(uri, values, where, selectionArgs);
+            int rowsUpdated = provider.update(mPackageName, uri, values, where, selectionArgs);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, uri, "update", where);
             return rowsUpdated;
@@ -1057,7 +1058,7 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
         try {
-            return provider.call(method, arg, extras);
+            return provider.call(mPackageName, method, arg, extras);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -1955,7 +1956,13 @@ public abstract class ContentResolver {
         return sContentService;
     }
 
+    /** @hide */
+    public String getPackageName() {
+        return mPackageName;
+    }
+
     private static IContentService sContentService;
     private final Context mContext;
+    final String mPackageName;
     private static final String TAG = "ContentResolver";
 }

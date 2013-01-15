@@ -45,6 +45,7 @@ import java.util.ArrayList;
 public class ContentProviderClient {
     private final IContentProvider mContentProvider;
     private final ContentResolver mContentResolver;
+    private final String mPackageName;
     private final boolean mStable;
     private boolean mReleased;
 
@@ -55,6 +56,7 @@ public class ContentProviderClient {
             IContentProvider contentProvider, boolean stable) {
         mContentProvider = contentProvider;
         mContentResolver = contentResolver;
+        mPackageName = contentResolver.mPackageName;
         mStable = stable;
     }
 
@@ -81,8 +83,8 @@ public class ContentProviderClient {
             cancellationSignal.setRemote(remoteCancellationSignal);
         }
         try {
-            return mContentProvider.query(url, projection, selection,  selectionArgs, sortOrder,
-                    remoteCancellationSignal);
+            return mContentProvider.query(mPackageName, url, projection, selection,  selectionArgs,
+                    sortOrder, remoteCancellationSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -119,7 +121,7 @@ public class ContentProviderClient {
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException {
         try {
-            return mContentProvider.insert(url, initialValues);
+            return mContentProvider.insert(mPackageName, url, initialValues);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -131,7 +133,7 @@ public class ContentProviderClient {
     /** See {@link ContentProvider#bulkInsert ContentProvider.bulkInsert} */
     public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
         try {
-            return mContentProvider.bulkInsert(url, initialValues);
+            return mContentProvider.bulkInsert(mPackageName, url, initialValues);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -144,7 +146,7 @@ public class ContentProviderClient {
     public int delete(Uri url, String selection, String[] selectionArgs)
             throws RemoteException {
         try {
-            return mContentProvider.delete(url, selection, selectionArgs);
+            return mContentProvider.delete(mPackageName, url, selection, selectionArgs);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -157,7 +159,7 @@ public class ContentProviderClient {
     public int update(Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException {
         try {
-            return mContentProvider.update(url, values, selection, selectionArgs);
+            return mContentProvider.update(mPackageName, url, values, selection, selectionArgs);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -176,7 +178,7 @@ public class ContentProviderClient {
     public ParcelFileDescriptor openFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
         try {
-            return mContentProvider.openFile(url, mode);
+            return mContentProvider.openFile(mPackageName, url, mode);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -195,7 +197,7 @@ public class ContentProviderClient {
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
         try {
-            return mContentProvider.openAssetFile(url, mode);
+            return mContentProvider.openAssetFile(mPackageName, url, mode);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -209,7 +211,7 @@ public class ContentProviderClient {
             String mimeType, Bundle opts)
             throws RemoteException, FileNotFoundException {
         try {
-            return mContentProvider.openTypedAssetFile(uri, mimeType, opts);
+            return mContentProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -222,7 +224,7 @@ public class ContentProviderClient {
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException {
         try {
-            return mContentProvider.applyBatch(operations);
+            return mContentProvider.applyBatch(mPackageName, operations);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -235,7 +237,7 @@ public class ContentProviderClient {
     public Bundle call(String method, String arg, Bundle extras)
             throws RemoteException {
         try {
-            return mContentProvider.call(method, arg, extras);
+            return mContentProvider.call(mPackageName, method, arg, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

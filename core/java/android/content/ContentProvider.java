@@ -18,6 +18,7 @@ package android.content;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.app.AppOpsManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -172,6 +173,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @hide
      */
     class Transport extends ContentProviderNative {
+        AppOpsManager mAppOpsManager = null;
+        int mReadOp = -1;
+        int mWriteOp = -1;
+
         ContentProvider getContentProvider() {
             return ContentProvider.this;
         }
@@ -182,10 +187,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public Cursor query(Uri uri, String[] projection,
+        public Cursor query(String callingPkg, Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder,
                 ICancellationSignal cancellationSignal) {
-            enforceReadPermission(uri);
+            // XXX need content provider to help return correct result.
+            enforceReadPermission(callingPkg, uri);
             return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
                     CancellationSignal.fromTransport(cancellationSignal));
         }
@@ -196,63 +202,75 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public Uri insert(Uri uri, ContentValues initialValues) {
-            enforceWritePermission(uri);
+        public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
+            // XXX need content provider to help return correct result.
+            enforceWritePermission(callingPkg, uri);
             return ContentProvider.this.insert(uri, initialValues);
         }
 
         @Override
-        public int bulkInsert(Uri uri, ContentValues[] initialValues) {
-            enforceWritePermission(uri);
+        public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
+            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                return 0;
+            }
             return ContentProvider.this.bulkInsert(uri, initialValues);
         }
 
         @Override
-        public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+        public ContentProviderResult[] applyBatch(String callingPkg,
+                ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             for (ContentProviderOperation operation : operations) {
                 if (operation.isReadOperation()) {
-                    enforceReadPermission(operation.getUri());
+                    if (enforceReadPermission(callingPkg, operation.getUri())
+                            != AppOpsManager.MODE_ALLOWED) {
+                        throw new OperationApplicationException("App op not allowed", 0);
+                    }
                 }
 
                 if (operation.isWriteOperation()) {
-                    enforceWritePermission(operation.getUri());
+                    if (enforceWritePermission(callingPkg, operation.getUri())
+                            != AppOpsManager.MODE_ALLOWED) {
+                        throw new OperationApplicationException("App op not allowed", 0);
+                    }
                 }
             }
             return ContentProvider.this.applyBatch(operations);
         }
 
         @Override
-        public int delete(Uri uri, String selection, String[] selectionArgs) {
-            enforceWritePermission(uri);
+        public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
+            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                return 0;
+            }
             return ContentProvider.this.delete(uri, selection, selectionArgs);
         }
 
         @Override
-        public int update(Uri uri, ContentValues values, String selection,
+        public int update(String callingPkg, Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
-            enforceWritePermission(uri);
+            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                return 0;
+            }
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
         }
 
         @Override
-        public ParcelFileDescriptor openFile(Uri uri, String mode)
+        public ParcelFileDescriptor openFile(String callingPkg, Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
-            else enforceReadPermission(uri);
+            enforceFilePermission(callingPkg, uri, mode);
             return ContentProvider.this.openFile(uri, mode);
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(Uri uri, String mode)
+        public AssetFileDescriptor openAssetFile(String callingPkg, Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
-            else enforceReadPermission(uri);
+            enforceFilePermission(callingPkg, uri, mode);
             return ContentProvider.this.openAssetFile(uri, mode);
         }
 
         @Override
-        public Bundle call(String method, String arg, Bundle extras) {
+        public Bundle call(String callingPkg, String method, String arg, Bundle extras) {
             return ContentProvider.this.call(method, arg, extras);
         }
 
@@ -262,9 +280,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeType, Bundle opts)
-                throws FileNotFoundException {
-            enforceReadPermission(uri);
+        public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
+                Bundle opts) throws FileNotFoundException {
+            enforceFilePermission(callingPkg, uri, "r");
             return ContentProvider.this.openTypedAssetFile(uri, mimeType, opts);
         }
 
@@ -273,7 +291,28 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return CancellationSignal.createTransport();
         }
 
-        private void enforceReadPermission(Uri uri) throws SecurityException {
+        private void enforceFilePermission(String callingPkg, Uri uri, String mode)
+                throws FileNotFoundException, SecurityException {
+            if (mode != null && mode.startsWith("rw")) {
+                if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                    throw new FileNotFoundException("App op not allowed");
+                }
+            } else {
+                if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                    throw new FileNotFoundException("App op not allowed");
+                }
+            }
+        }
+
+        private int enforceReadPermission(String callingPkg, Uri uri) throws SecurityException {
+            enforceReadPermissionInner(uri);
+            if (mAppOpsManager != null) {
+                return mAppOpsManager.noteOp(mReadOp, Binder.getCallingUid(), callingPkg);
+            }
+            return AppOpsManager.MODE_ALLOWED;
+        }
+
+        private void enforceReadPermissionInner(Uri uri) throws SecurityException {
             final Context context = getContext();
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -334,7 +373,15 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                     + ", uid=" + uid + failReason);
         }
 
-        private void enforceWritePermission(Uri uri) throws SecurityException {
+        private int enforceWritePermission(String callingPkg, Uri uri) throws SecurityException {
+            enforceWritePermissionInner(uri);
+            if (mAppOpsManager != null) {
+                return mAppOpsManager.noteOp(mWriteOp, Binder.getCallingUid(), callingPkg);
+            }
+            return AppOpsManager.MODE_ALLOWED;
+        }
+
+        private void enforceWritePermissionInner(Uri uri) throws SecurityException {
             final Context context = getContext();
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -469,6 +516,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      */
     public final PathPermission[] getPathPermissions() {
         return mPathPermissions;
+    }
+
+    /** @hide */
+    public final void setAppOps(int readOp, int writeOp) {
+        mTransport.mAppOpsManager = (AppOpsManager)mContext.getSystemService(
+                Context.APP_OPS_SERVICE);
+        mTransport.mReadOp = readOp;
+        mTransport.mWriteOp = writeOp;
     }
 
     /**

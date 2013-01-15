@@ -623,7 +623,9 @@ class ContextImpl extends Context {
         if (mPackageInfo != null) {
             return mPackageInfo.getPackageName();
         }
-        throw new RuntimeException("Not supported in system context");
+        // No mPackageInfo means this is a Context for the system itself,
+        // and this here is its name.
+        return "android";
     }
 
     @Override

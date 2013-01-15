@@ -529,8 +529,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public boolean callLocationChangedLocked(Location location) {
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_LOCATION, mUid, mPackageName)
-                    != AppOpsManager.MODE_ALLOWED) {
+            if (!reportLocationAccessNoThrow(mUid, mPackageName, mAllowedResolutionLevel)) {
                 return true;
             }
             if (mListener != null) {
@@ -801,6 +800,36 @@ public class LocationManagerService extends ILocationManager.Stub {
                             "\" location provider.");
             }
         }
+    }
+
+    boolean reportLocationAccessNoThrow(int uid, String packageName, int allowedResolutionLevel) {
+        int op;
+        if (allowedResolutionLevel != RESOLUTION_LEVEL_NONE) {
+            if (allowedResolutionLevel == RESOLUTION_LEVEL_COARSE) {
+                op = AppOpsManager.OP_COARSE_LOCATION;
+            } else {
+                op = AppOpsManager.OP_FINE_LOCATION;
+            }
+            if (mAppOps.noteOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean checkLocationAccess(int uid, String packageName, int allowedResolutionLevel) {
+        int op;
+        if (allowedResolutionLevel != RESOLUTION_LEVEL_NONE) {
+            if (allowedResolutionLevel == RESOLUTION_LEVEL_COARSE) {
+                op = AppOpsManager.OP_COARSE_LOCATION;
+            } else {
+                op = AppOpsManager.OP_FINE_LOCATION;
+            }
+            if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1199,7 +1228,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         try {
             // We don't check for MODE_IGNORED here; we will do that when we go to deliver
             // a location.
-            mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName);
+            checkLocationAccess(uid, packageName, allowedResolutionLevel);
             Receiver recevier = checkListenerOrIntent(listener, intent, pid, uid, packageName);
 
             synchronized (mLock) {
@@ -1311,8 +1340,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         final int uid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
         try {
-            if (mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName)
-                    != AppOpsManager.MODE_ALLOWED) {
+            if (!reportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
                 return null;
             }
             
@@ -1403,14 +1431,14 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGpsStatusProvider == null) {
             return false;
         }
-        checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (mAppOps.noteOp(AppOpsManager.OP_LOCATION, uid, packageName)
-                    != AppOpsManager.MODE_ALLOWED) {
+            if (checkLocationAccess(uid, packageName, allowedResolutionLevel)) {
                 return false;
             }
         } finally {
