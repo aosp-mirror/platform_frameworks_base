@@ -63,8 +63,6 @@ import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkPolicyManager;
-import android.net.ThrottleManager;
-import android.net.IThrottleManager;
 import android.net.Uri;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
@@ -472,12 +470,6 @@ class ContextImpl extends Context {
         registerService(TELEPHONY_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new TelephonyManager(ctx.getOuterContext());
-                }});
-
-        registerService(THROTTLE_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    IBinder b = ServiceManager.getService(THROTTLE_SERVICE);
-                    return new ThrottleManager(IThrottleManager.Stub.asInterface(b));
                 }});
 
         registerService(UI_MODE_SERVICE, new ServiceFetcher() {

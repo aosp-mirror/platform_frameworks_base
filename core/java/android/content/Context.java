@@ -1993,17 +1993,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.ThrottleManager} for handling management of
-     * throttling.
-     *
-     * @hide
-     * @see #getSystemService
-     * @see android.net.ThrottleManager
-     */
-    public static final String THROTTLE_SERVICE = "throttle";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.IUpdateLock} for managing runtime sequences that
      * must not be interrupted by headless OTA application or similar.
      *
