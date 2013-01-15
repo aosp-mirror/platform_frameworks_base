@@ -164,6 +164,8 @@ public:
     ANDROID_API bool quickReject(float left, float top, float right, float bottom);
     bool quickRejectNoScissor(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual bool clipPath(SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
     virtual Rect* getClipRect();
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
@@ -498,7 +500,8 @@ private:
 
     /**
      * Draws a colored rectangle with the specified color. The specified coordinates
-     * are transformed by the current snapshot's transform matrix.
+     * are transformed by the current snapshot's transform matrix unless specified
+     * otherwise.
      *
      * @param left The left coordinate of the rectangle
      * @param top The top coordinate of the rectangle
@@ -510,6 +513,20 @@ private:
      */
     void drawColorRect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
+
+    /**
+     * Draws a series of colored rectangles with the specified color. The specified
+     * coordinates are transformed by the current snapshot's transform matrix unless
+     * specified otherwise.
+     *
+     * @param rects A list of rectangles, 4 floats (left, top, right, bottom)
+     *              per rectangle
+     * @param color The rectangles' ARGB color, defined as a packed 32 bits word
+     * @param mode The Skia xfermode to use
+     * @param ignoreTransform True if the current transform should be ignored
+     */
+    status_t drawColorRects(const float* rects, int count, int color,
+            SkXfermode::Mode mode, bool ignoreTransform = false);
 
     /**
      * Draws the shape represented by the specified path texture.

@@ -86,6 +86,8 @@ public:
         SetMatrix,
         ConcatMatrix,
         ClipRect,
+        ClipPath,
+        ClipRegion,
         // Drawing operations
         DrawDisplayList,
         DrawLayer,
@@ -458,6 +460,10 @@ private:
         return (SkPath*) getInt();
     }
 
+    SkRegion* getRegion() {
+        return (SkRegion*) getInt();
+    }
+
     SkPaint* getPaint(OpenGLRenderer& renderer) {
         return renderer.filterPaint((SkPaint*) getInt());
     }
@@ -497,6 +503,7 @@ private:
     Vector<SkPaint*> mPaints;
     Vector<SkPath*> mPaths;
     SortedVector<SkPath*> mSourcePaths;
+    Vector<SkRegion*> mRegions;
     Vector<SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
     Vector<Layer*> mLayers;
@@ -578,6 +585,8 @@ public:
     virtual void concatMatrix(SkMatrix* matrix);
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual bool clipPath(SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
 
     virtual status_t drawDisplayList(DisplayList* displayList, Rect& dirty, int32_t flags,
             uint32_t level = 0);
@@ -656,6 +665,10 @@ public:
 
     const SortedVector<SkPath*>& getSourcePaths() const {
         return mSourcePaths;
+    }
+
+    const Vector<SkRegion*>& getRegions() const {
+        return mRegions;
     }
 
     const Vector<Layer*>& getLayers() const {
@@ -803,6 +816,26 @@ private:
         return paintCopy;
     }
 
+    inline SkRegion* addRegion(SkRegion* region) {
+        if (!region) {
+            addInt((int) NULL);
+            return region;
+        }
+
+        SkRegion* regionCopy = mRegionMap.valueFor(region);
+        // TODO: Add generation ID to SkRegion
+        if (regionCopy == NULL) {
+            regionCopy = new SkRegion(*region);
+            // replaceValueFor() performs an add if the entry doesn't exist
+            mRegionMap.replaceValueFor(region, regionCopy);
+            mRegions.add(regionCopy);
+        }
+
+        addInt((int) regionCopy);
+
+        return regionCopy;
+    }
+
     inline void addDisplayList(DisplayList* displayList) {
         // TODO: To be safe, the display list should be ref-counted in the
         //       resources cache, but we rely on the caller (UI toolkit) to
@@ -876,6 +909,9 @@ private:
     DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
 
     SortedVector<SkPath*> mSourcePaths;
+
+    Vector<SkRegion*> mRegions;
+    DefaultKeyedVector<SkRegion*, SkRegion*> mRegionMap;
 
     Vector<SkiaShader*> mShaders;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;

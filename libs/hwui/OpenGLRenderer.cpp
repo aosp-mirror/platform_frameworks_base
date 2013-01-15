@@ -1288,8 +1288,36 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
     bool clipped = mSnapshot->clip(left, top, right, bottom, op);
     if (clipped) {
         dirtyClip();
+#if DEBUG_CLIP_REGIONS
+        if (!isDeferred() && mSnapshot->clipRegion && !mSnapshot->clipRegion->isRect()) {
+            int count = 0;
+            Vector<float> rects;
+            SkRegion::Iterator it(*mSnapshot->clipRegion);
+            while (!it.done()) {
+                const SkIRect& r = it.rect();
+                rects.push(r.fLeft);
+                rects.push(r.fTop);
+                rects.push(r.fRight);
+                rects.push(r.fBottom);
+                count++;
+                it.next();
+            }
+
+            drawColorRects(rects.array(), count, 0x7f00ff00, SkXfermode::kSrcOver_Mode, true);
+        }
+#endif
     }
     return !mSnapshot->clipRect->isEmpty();
+}
+
+bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+    const SkRect& bounds = path->getBounds();
+    return clipRect(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, op);
+}
+
+bool OpenGLRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
+    const SkIRect& bounds = region->getBounds();
+    return clipRect(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, op);
 }
 
 Rect* OpenGLRenderer::getClipRect() {
@@ -3046,6 +3074,19 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
         return DrawGlInfo::kStatusDone;
     }
 
+    int color = paint->getColor();
+    // If a shader is set, preserve only the alpha
+    if (mShader) {
+        color |= 0x00ffffff;
+    }
+    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
+
+    return drawColorRects(rects, count, color, mode);
+}
+
+status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
+        SkXfermode::Mode mode, bool ignoreTransform) {
+
     float left = FLT_MAX;
     float top = FLT_MAX;
     float right = FLT_MIN;
@@ -3081,13 +3122,6 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 
     if (count == 0) return DrawGlInfo::kStatusDone;
 
-    int color = paint->getColor();
-    // If a shader is set, preserve only the alpha
-    if (mShader) {
-        color |= 0x00ffffff;
-    }
-    SkXfermode::Mode mode = getXfermode(paint->getXfermode());
-
     setupDraw();
     setupDrawNoTexture();
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
@@ -3096,7 +3130,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
     setupDrawBlending(mode);
     setupDrawProgram();
     setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f);
+    setupDrawModelView(0.0f, 0.0f, 1.0f, 1.0f, ignoreTransform, true);
     setupDrawColorUniforms();
     setupDrawShaderUniforms();
     setupDrawColorFilterUniforms();
