@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Umožňuje aplikaci číst aktuální podrobné údaje o využití baterie. Aplikace to může využít k získání podrobných informací o tom, které aplikace používáte."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"změna statistických údajů o baterii"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Umožňuje aplikaci upravit shromážděné statistiky o baterii. Toto oprávnění není určeno pro běžné aplikace."</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"upravit statistiky operací aplikace"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Umožňuje aplikaci upravit shromážděné statistiky operací aplikace. Toto oprávnění není určeno pro běžné aplikace."</string>
     <string name="permlab_backup" msgid="470013022865453920">"ovládání zálohování a obnovy systému"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Umožňuje aplikaci řídit mechanismy zálohování a obnovení systému. Toto oprávnění není určeno pro běžné aplikace."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"potvrzení operace úplné zálohy nebo úplného obnovení"</string>
@@ -325,8 +327,8 @@
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Umožňuje aplikaci využívat jiné aplikace nebo části uživatelského rozhraní. Aplikace tak může zasahovat do používání rozhraní jakékoli aplikace a měnit rozhraní zobrazené v jiných aplikacích."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"změna globální rychlosti animace"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Umožňuje aplikaci kdykoliv globálně změnit rychlost animací (rychlejší či pomalejší animace)."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"správa klíčů aplikací"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Umožňuje aplikaci vytvořit a spravovat vlastní klíče a současně obejít pořadí vykreslování. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"správa aplikačních tokenů"</string>
+    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Umožňuje aplikaci vytvořit a spravovat vlastní tokeny a současně obejít pořadí vykreslování. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_freezeScreen" msgid="4708181184441880175">"zmrazit obrazovku"</string>
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Povoluje aplikaci dočasně zmrazit obrazovku pro přechod do režimu celé obrazovky."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"používání kláves a tlačítek"</string>
@@ -534,7 +536,7 @@
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"přidání nebo odebrání účtů"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Umožňuje aplikaci provádět operace, jako je přidávání nebo odebírání účtů nebo mazání jejich hesel."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"používání účtů v zařízení"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Umožňuje aplikaci požadovat ověřovací klíče."</string>
+    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Umožňuje aplikaci požadovat ověřovací tokeny."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"zobrazení síťových připojení"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Umožňuje aplikaci zobrazit informace o síťových připojeních, například o tom, které sítě jsou k dispozici a které jsou připojené."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"úplný přístup k síti"</string>

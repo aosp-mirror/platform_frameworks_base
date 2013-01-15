@@ -315,7 +315,9 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Inaruhusu programu kusoma data ya sasa ya matumizi ya kiwango cha chini cha betri. Huenda ikaruhusu kupata maelezo ya kina kuhusu programu unazozitumia."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"rekebisha takwimu za betri"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Inaruhusu programu kurekebisha takwimu za betri zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"Dhibiti chelezo la mfumo na rejesha"</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"rekebisha takwimu za oparesheni ya programu"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Inaruhusu programu kurekebisha takwimu za matumizi ya programu zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
+    <string name="permlab_backup" msgid="470013022865453920">"Dhibiti kuhifadhi nakala na kurejesha kwa mfumo"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"Inaruhusu programu kudhibiti utaratibu wa kucheleza na kurejesha wa mfumo. Si kwa matumizi na programu za kawaida."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"thibitisha chelezo kamilifu au rejesha upya uendeshaji"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Inaruhusu programu kuzindua UI ya kuthibitisha chelezo kamili. Si ya kutumiwa na programu yoyote."</string>
