@@ -810,8 +810,6 @@
   <java-symbol type="string" name="time_picker_separator" />
   <java-symbol type="string" name="time_wday" />
   <java-symbol type="string" name="time_wday_date" />
-  <java-symbol type="string" name="twelve_hour_time_format" />
-  <java-symbol type="string" name="twenty_four_hour_time_format" />
   <java-symbol type="string" name="upload_file" />
   <java-symbol type="string" name="user_switched" />
   <java-symbol type="string" name="volume_alarm" />
