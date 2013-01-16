@@ -303,7 +303,7 @@ resource ID.</dd>
 
     </dd>
   <dt id="plurals-item-element"><code>&lt;item&gt;</code></dt>
-    <dd>A plural or singular string. The value can be a referenced to another
+    <dd>A plural or singular string. The value can be a reference to another
 string resource. Must be a child of a {@code &lt;plurals&gt;} element. Beware that you must
 escape apostrophes and quotation marks. See <a href="#FormattingAndStyling">Formatting and
 Styling</a>, below, for information about to properly style and format your strings.
