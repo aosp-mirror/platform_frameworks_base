@@ -479,6 +479,7 @@ public class TextToSpeech {
     }
 
     private final Context mContext;
+    private Connection mConnectingServiceConnection;
     private Connection mServiceConnection;
     private OnInitListener mInitListener;
     // Written from an unspecified application thread, read from
@@ -554,21 +555,24 @@ public class TextToSpeech {
         initTts();
     }
 
-    private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method) {
-        return runAction(action, errorResult, method, false);
+    private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method,
+            boolean onlyEstablishedConnection) {
+        return runAction(action, errorResult, method, false, onlyEstablishedConnection);
     }
 
     private <R> R runAction(Action<R> action, R errorResult, String method) {
-        return runAction(action, errorResult, method, true);
+        return runAction(action, errorResult, method, true, true);
     }
 
-    private <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
+    private <R> R runAction(Action<R> action, R errorResult, String method,
+            boolean reconnect, boolean onlyEstablishedConnection) {
         synchronized (mStartLock) {
             if (mServiceConnection == null) {
                 Log.w(TAG, method + " failed: not bound to TTS engine");
                 return errorResult;
             }
-            return mServiceConnection.runAction(action, errorResult, method, reconnect);
+            return mServiceConnection.runAction(action, errorResult, method, reconnect,
+                    onlyEstablishedConnection);
         }
     }
 
@@ -631,6 +635,7 @@ public class TextToSpeech {
             return false;
         } else {
             Log.i(TAG, "Sucessfully bound to " + engine);
+            mConnectingServiceConnection = connection;
             return true;
         }
     }
@@ -654,6 +659,16 @@ public class TextToSpeech {
      * so the TextToSpeech engine can be cleanly stopped.
      */
     public void shutdown() {
+        // Special case, we are asked to shutdown connection that did finalize its connection.
+        synchronized (mStartLock) {
+            if (mConnectingServiceConnection != null) {
+                mContext.unbindService(mConnectingServiceConnection);
+                mConnectingServiceConnection = null;
+                return;
+            }
+        }
+
+        // Post connection case
         runActionNoReconnect(new Action<Void>() {
             @Override
             public Void run(ITextToSpeechService service) throws RemoteException {
@@ -671,7 +686,7 @@ public class TextToSpeech {
                 mCurrentEngine = null;
                 return null;
             }
-        }, null, "shutdown");
+        }, null, "shutdown", false);
     }
 
     /**
@@ -1310,7 +1325,9 @@ public class TextToSpeech {
     private class Connection implements ServiceConnection {
         private ITextToSpeechService mService;
 
-        private OnServiceConnectedAsyncTask mOnServiceConnectedAsyncTask;
+        private SetupConnectionAsyncTask mOnSetupConnectionAsyncTask;
+
+        private boolean mEstablished;
 
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
             @Override
@@ -1338,13 +1355,11 @@ public class TextToSpeech {
             }
         };
 
-        private class OnServiceConnectedAsyncTask extends AsyncTask<Void, Void, Integer> {
+        private class SetupConnectionAsyncTask extends AsyncTask<Void, Void, Integer> {
             private final ComponentName mName;
-            private final ITextToSpeechService mConnectedService;
 
-            public OnServiceConnectedAsyncTask(ComponentName name, IBinder service) {
+            public SetupConnectionAsyncTask(ComponentName name) {
                 mName = name;
-                mConnectedService = ITextToSpeechService.Stub.asInterface(service);
             }
 
             @Override
@@ -1355,8 +1370,8 @@ public class TextToSpeech {
                     }
 
                     try {
-                        mConnectedService.setCallback(getCallerIdentity(), mCallback);
-                        String[] defaultLanguage = mConnectedService.getClientDefaultLanguage();
+                        mService.setCallback(getCallerIdentity(), mCallback);
+                        String[] defaultLanguage = mService.getClientDefaultLanguage();
 
                         mParams.putString(Engine.KEY_PARAM_LANGUAGE, defaultLanguage[0]);
                         mParams.putString(Engine.KEY_PARAM_COUNTRY, defaultLanguage[1]);
@@ -1374,13 +1389,10 @@ public class TextToSpeech {
             @Override
             protected void onPostExecute(Integer result) {
                 synchronized(mStartLock) {
-                    if (mOnServiceConnectedAsyncTask == this) {
-                        mOnServiceConnectedAsyncTask = null;
+                    if (mOnSetupConnectionAsyncTask == this) {
+                        mOnSetupConnectionAsyncTask = null;
                     }
-
-                    mServiceConnection = Connection.this;
-                    mService = mConnectedService;
-
+                    mEstablished = true;
                     dispatchOnInit(result);
                 }
             }
@@ -1389,14 +1401,20 @@ public class TextToSpeech {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized(mStartLock) {
+                mConnectingServiceConnection = null;
+
                 Log.i(TAG, "Connected to " + name);
 
-                if (mOnServiceConnectedAsyncTask != null) {
-                    mOnServiceConnectedAsyncTask.cancel(false);
+                if (mOnSetupConnectionAsyncTask != null) {
+                    mOnSetupConnectionAsyncTask.cancel(false);
                 }
 
-                mOnServiceConnectedAsyncTask = new OnServiceConnectedAsyncTask(name, service);
-                mOnServiceConnectedAsyncTask.execute();
+                mService = ITextToSpeechService.Stub.asInterface(service);
+                mServiceConnection = Connection.this;
+
+                mEstablished = false;
+                mOnSetupConnectionAsyncTask = new SetupConnectionAsyncTask(name);
+                mOnSetupConnectionAsyncTask.execute();
             }
         }
 
@@ -1407,14 +1425,14 @@ public class TextToSpeech {
         /**
          * Clear connection related fields and cancel mOnServiceConnectedAsyncTask if set.
          *
-         * @return true if we cancel mOnServiceConnectedAsyncTask in progress.
+         * @return true if we cancel mOnSetupConnectionAsyncTask in progress.
          */
         private boolean clearServiceConnection() {
             synchronized(mStartLock) {
                 boolean result = false;
-                if (mOnServiceConnectedAsyncTask != null) {
-                    result = mOnServiceConnectedAsyncTask.cancel(false);
-                    mOnServiceConnectedAsyncTask = null;
+                if (mOnSetupConnectionAsyncTask != null) {
+                    result = mOnSetupConnectionAsyncTask.cancel(false);
+                    mOnSetupConnectionAsyncTask = null;
                 }
 
                 mService = null;
@@ -1445,11 +1463,20 @@ public class TextToSpeech {
             clearServiceConnection();
         }
 
-        public <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
+        public boolean isEstablished() {
+            return mService != null && mEstablished;
+        }
+
+        public <R> R runAction(Action<R> action, R errorResult, String method,
+                boolean reconnect, boolean onlyEstablishedConnection) {
             synchronized (mStartLock) {
                 try {
                     if (mService == null) {
                         Log.w(TAG, method + " failed: not connected to TTS engine");
+                        return errorResult;
+                    }
+                    if (onlyEstablishedConnection && isEstablished()) {
+                        Log.w(TAG, method + " failed: TTS engine connection not fully setuped");
                         return errorResult;
                     }
                     return action.run(mService);
