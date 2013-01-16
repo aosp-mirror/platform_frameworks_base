@@ -193,7 +193,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
      @param extras A bundle of extras to populate the contact edit page with if the contact
      is not found and the user chooses to add the email address to an existing contact or
      create a new contact. Uses the same string constants as those found in
-     {@link #ContactsContract.Intents.Insert}
+     {@link android.provider.ContactsContract.Intents.Insert}
     */
 
     public void assignContactFromEmail(String emailAddress, boolean lazyLookup, Bundle extras) {
@@ -234,7 +234,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
      * @param extras A bundle of extras to populate the contact edit page with if the contact
      * is not found and the user chooses to add the phone number to an existing contact or
      * create a new contact. Uses the same string constants as those found in
-     * {@link #ContactsContract.Intents.Insert}
+     * {@link android.provider.ContactsContract.Intents.Insert}
      */
     public void assignContactFromPhone(String phoneNumber, boolean lazyLookup, Bundle extras) {
         mContactPhone = phoneNumber;
