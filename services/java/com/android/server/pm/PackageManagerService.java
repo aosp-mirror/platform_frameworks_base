@@ -482,8 +482,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     " DefaultContainerService");
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-            if (mContext.bindService(service, mDefContainerConn,
-                    Context.BIND_AUTO_CREATE, UserHandle.USER_OWNER)) {
+            if (mContext.bindServiceAsUser(service, mDefContainerConn,
+                    Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 mBound = true;
                 return true;
@@ -8409,8 +8409,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             users = new int[] { userId };
         }
         final ClearStorageConnection conn = new ClearStorageConnection();
-        if (mContext.bindService(
-                containerIntent, conn, Context.BIND_AUTO_CREATE, UserHandle.USER_OWNER)) {
+        if (mContext.bindServiceAsUser(
+                containerIntent, conn, Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
             try {
                 for (int curUser : users) {
                     long timeout = SystemClock.uptimeMillis() + 5000;

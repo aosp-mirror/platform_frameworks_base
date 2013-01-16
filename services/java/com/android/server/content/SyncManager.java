@@ -1061,10 +1061,10 @@ public class SyncManager {
                     mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0,
                     null, new UserHandle(userId)));
             mBound = true;
-            final boolean bindResult = mContext.bindService(intent, this,
+            final boolean bindResult = mContext.bindServiceAsUser(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                     | Context.BIND_ALLOW_OOM_MANAGEMENT,
-                    mSyncOperation.userId);
+                    new UserHandle(mSyncOperation.userId));
             if (!bindResult) {
                 mBound = false;
             }

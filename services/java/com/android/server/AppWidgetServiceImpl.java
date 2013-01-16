@@ -718,7 +718,8 @@ class AppWidgetServiceImpl {
             final long token = Binder.clearCallingIdentity();
             try {
                 conn = new ServiceConnectionProxy(key, connection);
-                mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
+                mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE,
+                        new UserHandle(userId));
                 mBoundRemoteViewsServices.put(key, conn);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -806,7 +807,8 @@ class AppWidgetServiceImpl {
         // RemoteViewsService.
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
+            mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE,
+                    new UserHandle(userId));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1104,7 +1106,8 @@ class AppWidgetServiceImpl {
                         // Bind to the service and call onDataSetChanged()
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
+                            mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE,
+                                    new UserHandle(userId));
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
