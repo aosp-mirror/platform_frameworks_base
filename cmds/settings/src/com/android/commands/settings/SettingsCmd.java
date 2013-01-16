@@ -180,7 +180,7 @@ public final class SettingsCmd {
         try {
             Bundle arg = new Bundle();
             arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-            Bundle b = provider.call(callGetCommand, key, arg);
+            Bundle b = provider.call(null, callGetCommand, key, arg);
             if (b != null) {
                 result = b.getPairValue();
             }
@@ -205,7 +205,7 @@ public final class SettingsCmd {
             Bundle arg = new Bundle();
             arg.putString(Settings.NameValueTable.VALUE, value);
             arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-            provider.call(callPutCommand, key, arg);
+            provider.call(null, callPutCommand, key, arg);
         } catch (RemoteException e) {
             System.err.println("Can't set key " + key + " in " + table + " for user " + userHandle);
         }

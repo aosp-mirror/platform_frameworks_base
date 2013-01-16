@@ -358,7 +358,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.insert(mUri, mContentValues);
+            provider.insert(null, mUri, mContentValues);
         }
     }
 
@@ -372,7 +372,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.delete(mUri, mWhere, null);
+            provider.delete(null, mUri, mWhere, null);
         }
     }
 
@@ -389,7 +389,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(mUri, mProjection, mWhere, null, mSortOrder, null);
+            Cursor cursor = provider.query(null, mUri, mProjection, mWhere, null, mSortOrder, null);
             if (cursor == null) {
                 System.out.println("No result found.");
                 return;
@@ -451,7 +451,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.update(mUri, mContentValues, mWhere, null);
+            provider.update(null, mUri, mContentValues, mWhere, null);
         }
     }
 

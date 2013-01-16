@@ -34,30 +34,33 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    public Cursor query(Uri url, String[] projection, String selection,
+    public Cursor query(String callingPkg, Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder, ICancellationSignal cancellationSignal)
                     throws RemoteException;
     public String getType(Uri url) throws RemoteException;
-    public Uri insert(Uri url, ContentValues initialValues)
+    public Uri insert(String callingPkg, Uri url, ContentValues initialValues)
             throws RemoteException;
-    public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException;
-    public int delete(Uri url, String selection, String[] selectionArgs)
+    public int bulkInsert(String callingPkg, Uri url, ContentValues[] initialValues)
             throws RemoteException;
-    public int update(Uri url, ContentValues values, String selection,
+    public int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
+            throws RemoteException;
+    public int update(String callingPkg, Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException;
-    public ParcelFileDescriptor openFile(Uri url, String mode)
+    public ParcelFileDescriptor openFile(String callingPkg, Uri url, String mode)
             throws RemoteException, FileNotFoundException;
-    public AssetFileDescriptor openAssetFile(Uri url, String mode)
+    public AssetFileDescriptor openAssetFile(String callingPkg, Uri url, String mode)
             throws RemoteException, FileNotFoundException;
-    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
-            throws RemoteException, OperationApplicationException;
-    public Bundle call(String method, String arg, Bundle extras) throws RemoteException;
+    public ContentProviderResult[] applyBatch(String callingPkg,
+            ArrayList<ContentProviderOperation> operations)
+                    throws RemoteException, OperationApplicationException;
+    public Bundle call(String callingPkg, String method, String arg, Bundle extras)
+            throws RemoteException;
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
-    public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
-            throws RemoteException, FileNotFoundException;
+    public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
+            Bundle opts) throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";

@@ -40,26 +40,30 @@ import java.util.ArrayList;
  */
 public final class BridgeContentProvider implements IContentProvider {
     @Override
-    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> arg0)
+    public ContentProviderResult[] applyBatch(String callingPackage,
+            ArrayList<ContentProviderOperation> arg0)
             throws RemoteException, OperationApplicationException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public int bulkInsert(Uri arg0, ContentValues[] arg1) throws RemoteException {
+    public int bulkInsert(String callingPackage, Uri arg0, ContentValues[] arg1)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public Bundle call(String arg0, String arg1, Bundle arg2) throws RemoteException {
+    public Bundle call(String callingPackage, String arg0, String arg1, Bundle arg2)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) throws RemoteException {
+    public int delete(String callingPackage, Uri arg0, String arg1, String[] arg2)
+            throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -71,35 +75,35 @@ public final class BridgeContentProvider implements IContentProvider {
     }
 
     @Override
-    public Uri insert(Uri arg0, ContentValues arg1) throws RemoteException {
+    public Uri insert(String callingPackage, Uri arg0, ContentValues arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public AssetFileDescriptor openAssetFile(Uri arg0, String arg1) throws RemoteException,
-            FileNotFoundException {
+    public AssetFileDescriptor openAssetFile(String callingPackage, Uri arg0, String arg1)
+            throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ParcelFileDescriptor openFile(Uri arg0, String arg1) throws RemoteException,
-            FileNotFoundException {
+    public ParcelFileDescriptor openFile(String callingPackage, Uri arg0, String arg1)
+            throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Cursor query(Uri arg0, String[] arg1, String arg2, String[] arg3, String arg4,
-            ICancellationSignal arg5) throws RemoteException {
+    public Cursor query(String callingPackage, Uri arg0, String[] arg1, String arg2, String[] arg3,
+            String arg4, ICancellationSignal arg5) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3)
-            throws RemoteException {
+    public int update(String callingPackage, Uri arg0, ContentValues arg1, String arg2,
+            String[] arg3) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -117,8 +121,8 @@ public final class BridgeContentProvider implements IContentProvider {
     }
 
     @Override
-    public AssetFileDescriptor openTypedAssetFile(Uri arg0, String arg1, Bundle arg2)
-            throws RemoteException, FileNotFoundException {
+    public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri arg0, String arg1,
+            Bundle arg2) throws RemoteException, FileNotFoundException {
         // TODO Auto-generated method stub
         return null;
     }

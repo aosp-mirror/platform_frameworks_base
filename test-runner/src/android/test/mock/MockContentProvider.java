@@ -53,18 +53,20 @@ public class MockContentProvider extends ContentProvider {
      */
     private class InversionIContentProvider implements IContentProvider {
         @Override
-        public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+        public ContentProviderResult[] applyBatch(String callingPackage,
+                ArrayList<ContentProviderOperation> operations)
                 throws RemoteException, OperationApplicationException {
             return MockContentProvider.this.applyBatch(operations);
         }
 
         @Override
-        public int bulkInsert(Uri url, ContentValues[] initialValues) throws RemoteException {
+        public int bulkInsert(String callingPackage, Uri url, ContentValues[] initialValues)
+                throws RemoteException {
             return MockContentProvider.this.bulkInsert(url, initialValues);
         }
 
         @Override
-        public int delete(Uri url, String selection, String[] selectionArgs)
+        public int delete(String callingPackage, Uri url, String selection, String[] selectionArgs)
                 throws RemoteException {
             return MockContentProvider.this.delete(url, selection, selectionArgs);
         }
@@ -75,37 +77,39 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public Uri insert(Uri url, ContentValues initialValues) throws RemoteException {
+        public Uri insert(String callingPackage, Uri url, ContentValues initialValues)
+                throws RemoteException {
             return MockContentProvider.this.insert(url, initialValues);
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(Uri url, String mode) throws RemoteException,
-                FileNotFoundException {
+        public AssetFileDescriptor openAssetFile(String callingPackage, Uri url, String mode)
+                throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openAssetFile(url, mode);
         }
 
         @Override
-        public ParcelFileDescriptor openFile(Uri url, String mode) throws RemoteException,
-                FileNotFoundException {
+        public ParcelFileDescriptor openFile(String callingPackage, Uri url, String mode)
+                throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openFile(url, mode);
         }
 
         @Override
-        public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
+        public Cursor query(String callingPackage, Uri url, String[] projection, String selection,
+                String[] selectionArgs,
                 String sortOrder, ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.query(url, projection, selection,
                     selectionArgs, sortOrder);
         }
 
         @Override
-        public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
-                throws RemoteException {
+        public int update(String callingPackage, Uri url, ContentValues values, String selection,
+                String[] selectionArgs) throws RemoteException {
             return MockContentProvider.this.update(url, values, selection, selectionArgs);
         }
 
         @Override
-        public Bundle call(String method, String request, Bundle args)
+        public Bundle call(String callingPackage, String method, String request, Bundle args)
                 throws RemoteException {
             return MockContentProvider.this.call(method, request, args);
         }
@@ -121,7 +125,8 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
+        public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri url,
+                String mimeType, Bundle opts)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
         }
