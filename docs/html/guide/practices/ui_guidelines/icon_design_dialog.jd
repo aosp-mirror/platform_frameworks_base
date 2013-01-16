@@ -51,36 +51,46 @@ for suggestions on how to work with multiple sets of icons.</p>
 <p class="table-caption"><strong>Table 1.</strong> Summary of finished dialog
 icon dimensions for each of the three generalized screen densities.</p>
 
-  <table>
-    <tbody>
-    <tr>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>Low density screen <em>(ldpi)</em></nobr>
-      </th>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>Medium density screen <em>(mdpi)</em></nobr>
-      </th>
-      <th style="background-color:#f3f3f3;font-weight:normal">
-        <nobr>High density screen <em>(hdpi)</em><nobr>
-      </th>
-    </tr>
-
-    <tr>
-      <td>
-        24 x 24 px
-      </td>
-      <td>
-        32 x 32 px
-      </td>
-      <td>
-        48 x 48 px
-      </td>
-    </tr>
-
-    </tbody>
-  </table>
-
-
+<table>
+  <tbody>
+  <tr>
+    <th></th>
+    <th>
+      <code>ldpi</code> (120 dpi)<br>
+      <small style="font-weight: normal">(Low density screen)</small>
+    </th>
+    <th>
+      <code>mdpi</code> (160 dpi)<br>
+      <small style="font-weight: normal">(Medium density screen)</small>
+    </th>
+    <th>
+      <code>hdpi</code> (240 dpi)<br>
+      <small style="font-weight: normal">(High density screen)</small>
+    </th>
+    <th>
+      <code>xhdpi</code> (320 dpi)<br>
+      <small style="font-weight: normal">(Extra-high density screen)</small>
+    </th>
+  </tr>
+  <tr>
+    <th style="background-color:#f3f3f3;font-weight:normal">
+      Dialog Icon Size
+    </th>
+    <td>
+      24 x 24 px
+    </td>
+    <td>
+      32 x 32 px
+    </td>
+    <td>
+      48 x 48 px
+    </td>
+    <td>
+      64 x 64 px
+    </td>
+  </tr>
+  </tbody>
+</table>
 
 <p><strong>Final art must be exported as a transparent PNG file. Do not include
 a background color</strong>.</p>

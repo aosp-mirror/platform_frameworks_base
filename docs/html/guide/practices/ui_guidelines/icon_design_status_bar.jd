@@ -155,7 +155,7 @@ finished icon dimensions for each generalized screen density.</p>
     </th>
   </tr>
   <tr>
-    <th style="background-color:#f3f3f3;font-weight:normal">
+    <th>
       Status Bar Icon Size<br><small>(Android 3.0 and Later)</small>
     </th>
     <td>
