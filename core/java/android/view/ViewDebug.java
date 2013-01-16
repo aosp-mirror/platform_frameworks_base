@@ -406,7 +406,7 @@ public class ViewDebug {
         view = view.getRootView();
 
         if (REMOTE_COMMAND_DUMP.equalsIgnoreCase(command)) {
-            dump(view, clientStream);
+            dump(view, false, true, clientStream);
         } else if (REMOTE_COMMAND_CAPTURE_LAYERS.equalsIgnoreCase(command)) {
             captureLayers(view, new DataOutputStream(clientStream));
         } else {
@@ -425,7 +425,8 @@ public class ViewDebug {
         }
     }
 
-    private static View findView(View root, String parameter) {
+    /** @hide */
+    public static View findView(View root, String parameter) {
         // Look by type/hashcode
         if (parameter.indexOf('@') != -1) {
             final String[] ids = parameter.split("@");
@@ -488,7 +489,8 @@ public class ViewDebug {
         }
     }
 
-    private static void profileViewAndChildren(final View view, BufferedWriter out)
+    /** @hide */
+    public static void profileViewAndChildren(final View view, BufferedWriter out)
             throws IOException {
         profileViewAndChildren(view, out, true);
     }
@@ -623,7 +625,8 @@ public class ViewDebug {
         return duration[0];
     }
 
-    private static void captureLayers(View root, final DataOutputStream clientStream)
+    /** @hide */
+    public static void captureLayers(View root, final DataOutputStream clientStream)
             throws IOException {
 
         try {
@@ -695,10 +698,21 @@ public class ViewDebug {
         view.getViewRootImpl().outputDisplayList(view);
     }
 
+    /** @hide */
+    public static void outputDisplayList(View root, View target) {
+        root.getViewRootImpl().outputDisplayList(target);
+    }
+
     private static void capture(View root, final OutputStream clientStream, String parameter)
             throws IOException {
 
         final View captureView = findView(root, parameter);
+        capture(root, clientStream, captureView);
+    }
+
+    /** @hide */
+    public static void capture(View root, final OutputStream clientStream, View captureView)
+            throws IOException {
         Bitmap b = performViewCapture(captureView, false);
 
         if (b == null) {
@@ -752,14 +766,20 @@ public class ViewDebug {
         return null;
     }
 
-    private static void dump(View root, OutputStream clientStream) throws IOException {
+    /**
+     * Dumps the view hierarchy starting from the given view.
+     * @hide
+     */
+    public static void dump(View root, boolean skipChildren, boolean includeProperties,
+            OutputStream clientStream) throws IOException {
         BufferedWriter out = null;
         try {
             out = new BufferedWriter(new OutputStreamWriter(clientStream, "utf-8"), 32 * 1024);
             View view = root.getRootView();
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
-                dumpViewHierarchyWithProperties(group.getContext(), group, out, 0);
+                dumpViewHierarchy(group.getContext(), group, out, 0,
+                        skipChildren, includeProperties);
             }
             out.write("DONE.");
             out.newLine();
@@ -804,9 +824,13 @@ public class ViewDebug {
         return view.getClass().getName().equals(className) && view.hashCode() == hashCode;
     }
 
-    private static void dumpViewHierarchyWithProperties(Context context, ViewGroup group,
-            BufferedWriter out, int level) {
-        if (!dumpViewWithProperties(context, group, out, level)) {
+    private static void dumpViewHierarchy(Context context, ViewGroup group,
+            BufferedWriter out, int level, boolean skipChildren, boolean includeProperties) {
+        if (!dumpView(context, group, out, level, includeProperties)) {
+            return;
+        }
+
+        if (skipChildren) {
             return;
         }
 
@@ -814,9 +838,10 @@ public class ViewDebug {
         for (int i = 0; i < count; i++) {
             final View view = group.getChildAt(i);
             if (view instanceof ViewGroup) {
-                dumpViewHierarchyWithProperties(context, (ViewGroup) view, out, level + 1);
+                dumpViewHierarchy(context, (ViewGroup) view, out, level + 1, skipChildren,
+                        includeProperties);
             } else {
-                dumpViewWithProperties(context, view, out, level + 1);
+                dumpView(context, view, out, level + 1, includeProperties);
             }
         }
         if (group instanceof HierarchyHandler) {
@@ -824,8 +849,8 @@ public class ViewDebug {
         }
     }
 
-    private static boolean dumpViewWithProperties(Context context, View view,
-            BufferedWriter out, int level) {
+    private static boolean dumpView(Context context, View view,
+            BufferedWriter out, int level, boolean includeProperties) {
 
         try {
             for (int i = 0; i < level; i++) {
@@ -835,7 +860,9 @@ public class ViewDebug {
             out.write('@');
             out.write(Integer.toHexString(view.hashCode()));
             out.write(' ');
-            dumpViewProperties(context, view, out);
+            if (includeProperties) {
+                dumpViewProperties(context, view, out);
+            }
             out.newLine();
         } catch (IOException e) {
             Log.w("View", "Error while dumping hierarchy tree");
