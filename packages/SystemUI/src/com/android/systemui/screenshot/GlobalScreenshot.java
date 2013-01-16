@@ -217,11 +217,19 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             resolver.update(uri, values, null, null);
 
             params[0].imageUri = uri;
+            params[0].image = null;
             params[0].result = 0;
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is not
             // mounted
+            params[0].imageUri = null;
+            params[0].image = null;
             params[0].result = 1;
+        }
+
+        // Recycle the bitmap data
+        if (image != null) {
+            image.recycle();
         }
 
         return params[0];
@@ -458,6 +466,10 @@ class GlobalScreenshot {
                 // Save the screenshot once we have a bit of time now
                 saveScreenshotInWorkerThread(finisher);
                 mWindowManager.removeView(mScreenshotLayout);
+
+                // Clear any references to the bitmap
+                mScreenBitmap = null;
+                mScreenshotView.setImageBitmap(null);
             }
         });
         mScreenshotLayout.post(new Runnable() {
