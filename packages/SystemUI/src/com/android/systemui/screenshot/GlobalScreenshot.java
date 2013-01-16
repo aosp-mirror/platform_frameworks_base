@@ -81,7 +81,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         SaveImageInBackgroundData> {
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
-    private static final String SCREENSHOT_FILE_PATH_TEMPLATE = "%s/%s/%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
     private int mNotificationId;
@@ -108,11 +107,14 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // Prepare all the output metadata
         mImageTime = System.currentTimeMillis();
         String imageDate = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(mImageTime));
-        String imageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES).getAbsolutePath();
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-        mImageFilePath = String.format(SCREENSHOT_FILE_PATH_TEMPLATE, imageDir,
-                SCREENSHOTS_DIR_NAME, mImageFileName);
+
+        // Create screenshot directory if it doesn't exist
+        final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), SCREENSHOTS_DIR_NAME);
+        screenshotDir.mkdirs();
+
+        mImageFilePath = new File(screenshotDir, mImageFileName).getAbsolutePath();
 
         // Create the large notification icon
         mImageWidth = data.image.getWidth();
