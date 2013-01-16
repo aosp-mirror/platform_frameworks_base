@@ -3349,8 +3349,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 @Override
                 public void onServiceDisconnected(ComponentName name) {}
             };
-            if (mContext.bindService(
-                    intent, conn, Context.BIND_AUTO_CREATE, UserHandle.USER_CURRENT)) {
+            if (mContext.bindServiceAsUser(
+                    intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
                 mScreenshotConnection = conn;
                 mHandler.postDelayed(mScreenshotTimeout, 10000);
             }

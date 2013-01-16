@@ -1592,7 +1592,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
          */
         public boolean bind() {
             if (!mIsAutomation && mService == null) {
-                return mContext.bindService(mIntent, this, Context.BIND_AUTO_CREATE, mUserId);
+                return mContext.bindServiceAsUser(mIntent, this, Context.BIND_AUTO_CREATE,
+                        new UserHandle(mUserId));
             }
             return false;
         }

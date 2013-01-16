@@ -885,7 +885,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     Intent.createChooser(new Intent(Intent.ACTION_SET_WALLPAPER),
                             mContext.getText(com.android.internal.R.string.chooser_wallpaper)),
                     0, null, new UserHandle(serviceUserId)));
-            if (!mContext.bindService(intent, newConn, Context.BIND_AUTO_CREATE, serviceUserId)) {
+            if (!mContext.bindServiceAsUser(intent, newConn, Context.BIND_AUTO_CREATE,
+                    new UserHandle(serviceUserId))) {
                 String msg = "Unable to bind service: "
                         + componentName;
                 if (fromUser) {

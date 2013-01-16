@@ -1405,12 +1405,13 @@ class ContextImpl extends Context {
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
         warnIfCallingFromSystemProcess();
-        return bindService(service, conn, flags, UserHandle.getUserId(Process.myUid()));
+        return bindServiceAsUser(service, conn, flags, Process.myUserHandle());
     }
 
     /** @hide */
     @Override
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            UserHandle user) {
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -1432,7 +1433,7 @@ class ContextImpl extends Context {
             int res = ActivityManagerNative.getDefault().bindService(
                 mMainThread.getApplicationThread(), getActivityToken(),
                 service, service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, userHandle);
+                sd, flags, user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);

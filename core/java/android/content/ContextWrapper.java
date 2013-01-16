@@ -475,8 +475,9 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
-        return mBase.bindService(service, conn, flags, userHandle);
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, user);
     }
 
     @Override

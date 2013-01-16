@@ -888,7 +888,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "--- bind failed: service = " + service + ", conn = " + conn);
             return false;
         }
-        return mContext.bindService(service, conn, flags, mSettings.getCurrentUserId());
+        return mContext.bindServiceAsUser(service, conn, flags,
+                new UserHandle(mSettings.getCurrentUserId()));
     }
 
     @Override

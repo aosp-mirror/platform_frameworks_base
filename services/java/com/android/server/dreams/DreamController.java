@@ -116,8 +116,8 @@ final class DreamController {
         intent.setComponent(name);
         intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {
-            if (!mContext.bindService(intent, mCurrentDream,
-                    Context.BIND_AUTO_CREATE, userId)) {
+            if (!mContext.bindServiceAsUser(intent, mCurrentDream,
+                    Context.BIND_AUTO_CREATE, new UserHandle(userId))) {
                 Slog.e(TAG, "Unable to bind dream service: " + intent);
                 stopDream();
                 return;
