@@ -51,7 +51,7 @@ public class DdmRegister {
         DdmHandleNativeHeap.register();
         DdmHandleProfiling.register();
         DdmHandleExit.register();
-        DdmHandleGlTracing.register();
+        DdmHandleViewDebug.register();
 
         DdmServer.registrationComplete();
     }
