@@ -32,17 +32,7 @@
 namespace android {
 
 static const char* QTAGUID_IFACE_STATS = "/proc/net/xt_qtaguid/iface_stat_fmt";
-
-enum Tx_Rx {
-    TX,
-    RX
-};
-
-enum Tcp_Udp {
-    TCP,
-    UDP,
-    TCP_AND_UDP
-};
+static const char* QTAGUID_UID_STATS = "/proc/net/xt_qtaguid/stats";
 
 // NOTE: keep these in sync with TrafficStats.java
 static const uint64_t UNKNOWN = -1;
@@ -82,27 +72,6 @@ static uint64_t getStatsType(struct Stats* stats, StatsType type) {
         default:
             return UNKNOWN;
     }
-}
-
-// Returns an ASCII decimal number read from the specified file, -1 on error.
-static jlong readNumber(char const* filename) {
-    char buf[80];
-    int fd = open(filename, O_RDONLY);
-    if (fd < 0) {
-        if (errno != ENOENT) ALOGE("Can't open %s: %s", filename, strerror(errno));
-        return -1;
-    }
-
-    int len = read(fd, buf, sizeof(buf) - 1);
-    if (len < 0) {
-        ALOGE("Can't read %s: %s", filename, strerror(errno));
-        close(fd);
-        return -1;
-    }
-
-    close(fd);
-    buf[len] = '\0';
-    return atoll(buf);
 }
 
 static int parseIfaceStats(const char* iface, struct Stats* stats) {
@@ -149,6 +118,36 @@ static int parseIfaceStats(const char* iface, struct Stats* stats) {
     return 0;
 }
 
+static int parseUidStats(const uint32_t uid, struct Stats* stats) {
+    FILE *fp = fopen(QTAGUID_UID_STATS, "r");
+    if (fp == NULL) {
+        return -1;
+    }
+
+    char buffer[256];
+    char iface[32];
+    uint32_t idx, cur_uid, set;
+    uint64_t tag, rxBytes, rxPackets, txBytes, txPackets;
+
+    while (fgets(buffer, 256, fp) != NULL) {
+        if (sscanf(buffer, "%d %31s 0x%llx %u %u %llu %llu %llu %llu", &idx,
+                iface, &tag, &cur_uid, &set, &rxBytes, &rxPackets, &txBytes,
+                &txPackets) == 9) {
+            if (uid == cur_uid && tag == 0L) {
+                stats->rxBytes += rxBytes;
+                stats->rxPackets += rxPackets;
+                stats->txBytes += txBytes;
+                stats->txPackets += txPackets;
+            }
+        }
+    }
+
+    if (fclose(fp) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
 static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type) {
     struct Stats stats;
     memset(&stats, 0, sizeof(Stats));
@@ -174,160 +173,20 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
     }
 }
 
-
-// Per-UID stats require reading from a constructed filename.
-
-static jlong getUidBytes(JNIEnv* env, jobject clazz, jint uid,
-                         enum Tx_Rx tx_or_rx, enum Tcp_Udp tcp_or_udp) {
-    char tcp_filename[80], udp_filename[80];
-    jlong tcp_bytes = -1, udp_bytes = -1, total_bytes = -1;
-
-    switch (tx_or_rx) {
-        case TX:
-            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_snd", uid);
-            sprintf(udp_filename, "/proc/uid_stat/%d/udp_snd", uid);
-            break;
-        case RX:
-            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_rcv", uid);
-            sprintf(udp_filename, "/proc/uid_stat/%d/udp_rcv", uid);
-            break;
-        default:
-            return -1;
+static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
+    struct Stats stats;
+    memset(&stats, 0, sizeof(Stats));
+    if (parseUidStats(uid, &stats) == 0) {
+        return getStatsType(&stats, (StatsType) type);
+    } else {
+        return UNKNOWN;
     }
-
-    switch (tcp_or_udp) {
-        case TCP:
-            tcp_bytes = readNumber(tcp_filename);
-            total_bytes = (tcp_bytes >= 0) ? tcp_bytes : -1;
-            break;
-        case UDP:
-            udp_bytes = readNumber(udp_filename);
-            total_bytes = (udp_bytes >= 0) ? udp_bytes : -1;
-            break;
-        case TCP_AND_UDP:
-            tcp_bytes = readNumber(tcp_filename);
-            total_bytes += (tcp_bytes >= 0 ? tcp_bytes : 0);
-
-            udp_bytes = readNumber(udp_filename);
-            total_bytes += (udp_bytes >= 0 ? udp_bytes : 0);
-            break;
-        default:
-            return -1;
-    }
-
-    return total_bytes;
-}
-
-static jlong getUidPkts(JNIEnv* env, jobject clazz, jint uid,
-                         enum Tx_Rx tx_or_rx, enum Tcp_Udp tcp_or_udp) {
-    char tcp_filename[80], udp_filename[80];
-    jlong tcp_pkts = -1, udp_pkts = -1, total_pkts = -1;
-
-    switch (tx_or_rx) {
-        case TX:
-            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_snd_pkt", uid);
-            sprintf(udp_filename, "/proc/uid_stat/%d/udp_snd_pkt", uid);
-            break;
-        case RX:
-            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_rcv_pkt", uid);
-            sprintf(udp_filename, "/proc/uid_stat/%d/udp_rcv_pkt", uid);
-            break;
-        default:
-            return -1;
-    }
-
-    switch (tcp_or_udp) {
-        case TCP:
-            tcp_pkts = readNumber(tcp_filename);
-            total_pkts = (tcp_pkts >= 0) ? tcp_pkts : -1;
-            break;
-        case UDP:
-            udp_pkts = readNumber(udp_filename);
-            total_pkts = (udp_pkts >= 0) ? udp_pkts : -1;
-            break;
-        case TCP_AND_UDP:
-            tcp_pkts = readNumber(tcp_filename);
-            total_pkts += (tcp_pkts >= 0 ? tcp_pkts : 0);
-
-            udp_pkts = readNumber(udp_filename);
-            total_pkts += (udp_pkts >= 0 ? udp_pkts : 0);
-            break;
-        default:
-            return -1;
-    }
-
-    return total_pkts;
-}
-
-static jlong getUidRxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, RX, TCP_AND_UDP);
-}
-
-static jlong getUidTxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, TX, TCP_AND_UDP);
-}
-
-/* TCP Segments + UDP Packets */
-static jlong getUidTxPackets(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, TX, TCP_AND_UDP);
-}
-
-/* TCP Segments + UDP Packets */
-static jlong getUidRxPackets(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, RX, TCP_AND_UDP);
-}
-
-static jlong getUidTcpTxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, TX, TCP);
-}
-
-static jlong getUidTcpRxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, RX, TCP);
-}
-
-static jlong getUidUdpTxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, TX, UDP);
-}
-
-static jlong getUidUdpRxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidBytes(env, clazz, uid, RX, UDP);
-}
-
-static jlong getUidTcpTxSegments(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, TX, TCP);
-}
-
-static jlong getUidTcpRxSegments(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, RX, TCP);
-}
-
-static jlong getUidUdpTxPackets(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, TX, UDP);
-}
-
-static jlong getUidUdpRxPackets(JNIEnv* env, jobject clazz, jint uid) {
-    return getUidPkts(env, clazz, uid, RX, UDP);
 }
 
 static JNINativeMethod gMethods[] = {
     {"nativeGetTotalStat", "(I)J", (void*) getTotalStat},
     {"nativeGetIfaceStat", "(Ljava/lang/String;I)J", (void*) getIfaceStat},
-
-    /* Per-UID Stats */
-    {"getUidTxBytes", "(I)J", (void*) getUidTxBytes},
-    {"getUidRxBytes", "(I)J", (void*) getUidRxBytes},
-    {"getUidTxPackets", "(I)J", (void*) getUidTxPackets},
-    {"getUidRxPackets", "(I)J", (void*) getUidRxPackets},
-
-    {"getUidTcpTxBytes", "(I)J", (void*) getUidTcpTxBytes},
-    {"getUidTcpRxBytes", "(I)J", (void*) getUidTcpRxBytes},
-    {"getUidUdpTxBytes", "(I)J", (void*) getUidUdpTxBytes},
-    {"getUidUdpRxBytes", "(I)J", (void*) getUidUdpRxBytes},
-
-    {"getUidTcpTxSegments", "(I)J", (void*) getUidTcpTxSegments},
-    {"getUidTcpRxSegments", "(I)J", (void*) getUidTcpRxSegments},
-    {"getUidUdpTxPackets", "(I)J", (void*) getUidUdpTxPackets},
-    {"getUidUdpRxPackets", "(I)J", (void*) getUidUdpRxPackets},
+    {"nativeGetUidStat", "(II)J", (void*) getUidStat},
 };
 
 int register_android_net_TrafficStats(JNIEnv* env) {
