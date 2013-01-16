@@ -444,7 +444,7 @@ public abstract class BatteryStats implements Parcelable {
         public byte batteryHealth;
         public byte batteryPlugType;
         
-        public char batteryTemperature;
+        public short batteryTemperature;
         public char batteryVoltage;
         
         // Constants from SCREEN_BRIGHTNESS_*
@@ -521,7 +521,7 @@ public abstract class BatteryStats implements Parcelable {
             batteryHealth = (byte)((bat>>20)&0xf);
             batteryPlugType = (byte)((bat>>24)&0xf);
             bat = src.readInt();
-            batteryTemperature = (char)(bat&0xffff);
+            batteryTemperature = (short)(bat&0xffff);
             batteryVoltage = (char)((bat>>16)&0xffff);
             states = src.readInt();
         }
@@ -590,7 +590,7 @@ public abstract class BatteryStats implements Parcelable {
                 if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryToken=0x"
                         + Integer.toHexString(batteryLevelInt)
                         + " batteryLevel=" + batteryLevel
-                        + " batteryTemp=" + (int)batteryTemperature
+                        + " batteryTemp=" + batteryTemperature
                         + " batteryVolt=" + (int)batteryVoltage);
             }
             if (stateIntChanged) {
@@ -605,8 +605,8 @@ public abstract class BatteryStats implements Parcelable {
         }
         
         private int buildBatteryLevelInt() {
-            return ((((int)batteryLevel)<<24)&0xff000000)
-                    | ((((int)batteryTemperature)<<14)&0x00ffc000)
+            return ((((int)batteryLevel)<<25)&0xfe000000)
+                    | ((((int)batteryTemperature)<<14)&0x01ffc000)
                     | (((int)batteryVoltage)&0x00003fff);
         }
         
@@ -642,13 +642,13 @@ public abstract class BatteryStats implements Parcelable {
             
             if ((firstToken&DELTA_BATTERY_LEVEL_FLAG) != 0) {
                 int batteryLevelInt = src.readInt();
-                batteryLevel = (byte)((batteryLevelInt>>24)&0xff);
-                batteryTemperature = (char)((batteryLevelInt>>14)&0x3ff);
+                batteryLevel = (byte)((batteryLevelInt>>25)&0x7f);
+                batteryTemperature = (short)((batteryLevelInt<<7)>>21);
                 batteryVoltage = (char)(batteryLevelInt&0x3fff);
                 if (DEBUG) Slog.i(TAG, "READ DELTA: batteryToken=0x"
                         + Integer.toHexString(batteryLevelInt)
                         + " batteryLevel=" + batteryLevel
-                        + " batteryTemp=" + (int)batteryTemperature
+                        + " batteryTemp=" + batteryTemperature
                         + " batteryVolt=" + (int)batteryVoltage);
             }
             
