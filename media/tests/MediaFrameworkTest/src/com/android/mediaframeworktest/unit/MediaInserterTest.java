@@ -38,6 +38,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
     private MediaInserter mMediaInserter;
     private static final int TEST_BUFFER_SIZE = 10;
     private IContentProvider mMockProvider;
+    private String mPackageName;
 
     private int mFilesCounter;
     private int mAudioCounter;
@@ -83,7 +84,9 @@ public class MediaInserterTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mMockProvider = EasyMock.createMock(IContentProvider.class);
-        mMediaInserter = new MediaInserter(mMockProvider, TEST_BUFFER_SIZE);
+        mMediaInserter = new MediaInserter(mMockProvider,
+		mPackageName, TEST_BUFFER_SIZE);
+	mPackageName = getInstrumentation().getContext().getPackageName();
         mFilesCounter = 0;
         mAudioCounter = 0;
         mVideoCounter = 0;
@@ -144,7 +147,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testInsertContentsEqualToBufferSize() throws Exception {
-        EasyMock.expect(mMockProvider.bulkInsert(
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
                 (Uri) EasyMock.anyObject(), (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(4);
         EasyMock.replay(mMockProvider);
@@ -159,7 +162,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testInsertContentsMoreThanBufferSize() throws Exception {
-        EasyMock.expect(mMockProvider.bulkInsert(
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
                 (Uri) EasyMock.anyObject(), (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(4);
         EasyMock.replay(mMockProvider);
@@ -183,7 +186,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testFlushAllWithSomeContents() throws Exception {
-        EasyMock.expect(mMockProvider.bulkInsert(
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
                 (Uri) EasyMock.anyObject(), (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(4);
         EasyMock.replay(mMockProvider);
@@ -199,7 +202,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testInsertContentsAfterFlushAll() throws Exception {
-        EasyMock.expect(mMockProvider.bulkInsert(
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
                 (Uri) EasyMock.anyObject(), (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(8);
         EasyMock.replay(mMockProvider);
@@ -220,16 +223,20 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testInsertContentsWithDifferentSizePerContentType() throws Exception {
-        EasyMock.expect(mMockProvider.bulkInsert(MediaUriMatcher.expectMediaUri(sFilesUri),
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
+		MediaUriMatcher.expectMediaUri(sFilesUri),
                 (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(1);
-        EasyMock.expect(mMockProvider.bulkInsert(MediaUriMatcher.expectMediaUri(sAudioUri),
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
+		MediaUriMatcher.expectMediaUri(sAudioUri),
                 (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(2);
-        EasyMock.expect(mMockProvider.bulkInsert(MediaUriMatcher.expectMediaUri(sVideoUri),
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
+		MediaUriMatcher.expectMediaUri(sVideoUri),
                 (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(3);
-        EasyMock.expect(mMockProvider.bulkInsert(MediaUriMatcher.expectMediaUri(sImagesUri),
+        EasyMock.expect(mMockProvider.bulkInsert(mPackageName,
+		MediaUriMatcher.expectMediaUri(sImagesUri),
                 (ContentValues[]) EasyMock.anyObject())).andReturn(1);
         EasyMock.expectLastCall().times(4);
         EasyMock.replay(mMockProvider);
