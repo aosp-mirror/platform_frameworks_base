@@ -428,7 +428,6 @@ public class AudioService extends IAudioService.Stub {
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
     final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_AUX_DIGITAL |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ALL_USB;
 
     // TODO merge orientation and rotation
