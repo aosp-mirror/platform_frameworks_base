@@ -575,7 +575,7 @@ ID to reference the array.</dd>
       </dl>
     </dd>
   <dt id="integer-array-item-element"><code>&lt;item&gt;</code></dt>
-    <dd>An integer. The value can be a referenced to another
+    <dd>An integer. The value can be a reference to another
 integer resource. Must be a child of a {@code &lt;integer-array&gt;} element.
       <p>No attributes.</p>
     </dd>
