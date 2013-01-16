@@ -306,23 +306,6 @@ interface INetworkManagementService
     boolean isBandwidthControlEnabled();
 
     /**
-     * Configures bandwidth throttling on an interface.
-     */
-    void setInterfaceThrottle(String iface, int rxKbps, int txKbps);
-
-    /**
-     * Returns the currently configured RX throttle values
-     * for the specified interface
-     */
-    int getInterfaceRxThrottle(String iface);
-
-    /**
-     * Returns the currently configured TX throttle values
-     * for the specified interface
-     */
-    int getInterfaceTxThrottle(String iface);
-
-    /**
      * Sets idletimer for an interface.
      *
      * This either initializes a new idletimer or increases its
