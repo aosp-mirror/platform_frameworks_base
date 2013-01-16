@@ -28,11 +28,12 @@
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
 
-#include <SkPaint.h>
-#include <SkTemplates.h>
-#include <SkUtils.h>
 #include <SkAutoKern.h>
 #include <SkLanguage.h>
+#include <SkPaint.h>
+#include <SkTemplates.h>
+#include <SkTypeface.h>
+#include <SkUtils.h>
 
 #include <unicode/ubidi.h>
 #include <unicode/unistr.h>
