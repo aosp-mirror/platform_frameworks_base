@@ -83,15 +83,16 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
-    private int mNotificationId;
-    private NotificationManager mNotificationManager;
-    private Notification.Builder mNotificationBuilder;
-    private String mImageFileName;
-    private String mImageFilePath;
-    private long mImageTime;
-    private BigPictureStyle mNotificationStyle;
-    private int mImageWidth;
-    private int mImageHeight;
+    private final int mNotificationId;
+    private final NotificationManager mNotificationManager;
+    private final Notification.Builder mNotificationBuilder;
+    private final File mScreenshotDir;
+    private final String mImageFileName;
+    private final String mImageFilePath;
+    private final long mImageTime;
+    private final BigPictureStyle mNotificationStyle;
+    private final int mImageWidth;
+    private final int mImageHeight;
 
     // WORKAROUND: We want the same notification across screenshots that we update so that we don't
     // spam a user's notification drawer.  However, we only show the ticker for the saving state
@@ -109,12 +110,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         String imageDate = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(mImageTime));
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
 
-        // Create screenshot directory if it doesn't exist
-        final File screenshotDir = new File(Environment.getExternalStoragePublicDirectory(
+        mScreenshotDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), SCREENSHOTS_DIR_NAME);
-        screenshotDir.mkdirs();
-
-        mImageFilePath = new File(screenshotDir, mImageFileName).getAbsolutePath();
+        mImageFilePath = new File(mScreenshotDir, mImageFileName).getAbsolutePath();
 
         // Create the large notification icon
         mImageWidth = data.image.getWidth();
@@ -177,6 +175,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         Resources r = context.getResources();
 
         try {
+            // Create screenshot directory if it doesn't exist
+            mScreenshotDir.mkdirs();
+
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
             ContentResolver resolver = context.getContentResolver();
