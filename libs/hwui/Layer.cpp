@@ -41,6 +41,7 @@ Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight) {
     renderer = NULL;
     displayList = NULL;
     fbo = 0;
+    stencil = 0;
     debugDrawUpdate = false;
     Caches::getInstance().resourceCache.incrementRefcount(this);
 }
@@ -53,9 +54,22 @@ Layer::~Layer() {
     deleteTexture();
 }
 
-void Layer::removeFbo() {
+void Layer::removeFbo(bool flush) {
+    if (stencil) {
+        // TODO: recycle & cache instead of simply deleting
+        GLuint previousFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
+        if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        if (fbo != previousFbo) glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+
+        glDeleteRenderbuffers(1, &stencil);
+        stencil = 0;
+    }
+
     if (fbo) {
-        LayerRenderer::flushLayer(this);
+        if (flush) LayerRenderer::flushLayer(this);
+        // If put fails the cache will delete the FBO
         Caches::getInstance().fboCache.put(fbo);
         fbo = 0;
     }
@@ -74,8 +88,6 @@ void Layer::setColorFilter(SkiaColorFilter* filter) {
         Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
     }
 }
-
-
 
 }; // namespace uirenderer
 }; // namespace android

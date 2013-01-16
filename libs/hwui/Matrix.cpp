@@ -30,6 +30,16 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+static const float EPSILON = 0.0000001f;
+
+///////////////////////////////////////////////////////////////////////////////
+// Matrix
+///////////////////////////////////////////////////////////////////////////////
+
 void Matrix4::loadIdentity() {
     data[kScaleX]       = 1.0f;
     data[kSkewY]        = 0.0f;
@@ -51,44 +61,91 @@ void Matrix4::loadIdentity() {
     data[kTranslateZ]   = 0.0f;
     data[kPerspective2] = 1.0f;
 
-    mIsIdentity = true;
-    mSimpleMatrix = true;
+    mType = kTypeIdentity | kTypeRectToRect;
+}
+
+static bool isZero(float f) {
+    return fabs(f) <= EPSILON;
+}
+
+uint32_t Matrix4::getType() const {
+    if (mType & kTypeUnknown) {
+        mType = kTypeIdentity;
+
+        if (data[kPerspective0] != 0.0f || data[kPerspective1] != 0.0f ||
+                data[kPerspective2] != 1.0f) {
+            mType |= kTypePerspective;
+        }
+
+        if (data[kTranslateX] != 0.0f || data[kTranslateY] != 0.0f) {
+            mType |= kTypeTranslate;
+        }
+
+        float m00 = data[kScaleX];
+        float m01 = data[kSkewX];
+        float m10 = data[kSkewY];
+        float m11 = data[kScaleY];
+
+        if (m01 != 0.0f || m10 != 0.0f) {
+            mType |= kTypeAffine;
+        }
+
+        if (m00 != 1.0f || m11 != 1.0f) {
+            mType |= kTypeScale;
+        }
+
+        // The following section determines whether the matrix will preserve
+        // rectangles. For instance, a rectangle transformed by a pure
+        // translation matrix will result in a rectangle. A rectangle
+        // transformed by a 45 degrees rotation matrix is not a rectangle.
+        // If the matrix has a perspective component then we already know
+        // it doesn't preserve rectangles.
+        if (!(mType & kTypePerspective)) {
+            if ((isZero(m00) && isZero(m11) && !isZero(m01) && !isZero(m10)) ||
+                    (isZero(m01) && isZero(m10) && !isZero(m00) && !isZero(m11))) {
+                mType |= kTypeRectToRect;
+            }
+        }
+    }
+    return mType;
+}
+
+uint32_t Matrix4::getGeometryType() const {
+    return getType() & sGeometryMask;
+}
+
+bool Matrix4::rectToRect() const {
+    return getType() & kTypeRectToRect;
 }
 
 bool Matrix4::changesBounds() const {
-    return !(data[0] == 1.0f && data[1] == 0.0f && data[2] == 0.0f && data[4] == 0.0f &&
-             data[5] == 1.0f && data[6] == 0.0f && data[8] == 0.0f && data[9] == 0.0f &&
-             data[10] == 1.0f);
+    return getType() & (kTypeScale | kTypeAffine | kTypePerspective);
 }
 
 bool Matrix4::isPureTranslate() const {
-    return mSimpleMatrix && data[kScaleX] == 1.0f && data[kScaleY] == 1.0f;
+    return getGeometryType() == kTypeTranslate;
 }
 
 bool Matrix4::isSimple() const {
-    return mSimpleMatrix;
+    return getGeometryType() <= (kTypeScale | kTypeTranslate);
 }
 
 bool Matrix4::isIdentity() const {
-    return mIsIdentity;
+    return getGeometryType() == kTypeIdentity;
 }
 
 bool Matrix4::isPerspective() const {
-    return data[kPerspective0] != 0.0f || data[kPerspective1] != 0.0f ||
-            data[kPerspective2] != 1.0f;
+    return getType() & kTypePerspective;
 }
 
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
-    // TODO: Do something smarter here
-    mSimpleMatrix = false;
-    mIsIdentity = false;
+    mType = kTypeUnknown;
 }
 
 void Matrix4::load(const Matrix4& v) {
     memcpy(data, v.data, sizeof(data));
-    mSimpleMatrix = v.mSimpleMatrix;
-    mIsIdentity = v.mIsIdentity;
+    mType = v.getType();
 }
 
 void Matrix4::load(const SkMatrix& v) {
@@ -108,8 +165,14 @@ void Matrix4::load(const SkMatrix& v) {
 
     data[kScaleZ] = 1.0f;
 
-    mSimpleMatrix = (v.getType() <= (SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask));
-    mIsIdentity = v.isIdentity();
+    // NOTE: The flags are compatible between SkMatrix and this class.
+    //       However, SkMatrix::getType() does not return the flag
+    //       kRectStaysRect. The return value is masked with 0xF
+    //       so we need the extra rectStaysRect() check
+    mType = v.getType();
+    if (v.rectStaysRect()) {
+        mType |= kTypeRectToRect;
+    }
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {
@@ -158,8 +221,7 @@ void Matrix4::loadInverse(const Matrix4& v) {
     data[kPerspective2] = (v.data[kScaleX] * v.data[kScaleY] -
             v.data[kSkewX] * v.data[kSkewY]) * scale;
 
-    mSimpleMatrix = v.mSimpleMatrix;
-    mIsIdentity = v.mIsIdentity;
+    mType = kTypeUnknown;
 }
 
 void Matrix4::copyTo(float* v) const {
@@ -178,7 +240,7 @@ void Matrix4::multiply(float v) {
     for (int i = 0; i < 16; i++) {
         data[i] *= v;
     }
-    mIsIdentity = false;
+    mType = kTypeUnknown;
 }
 
 void Matrix4::loadTranslate(float x, float y, float z) {
@@ -188,7 +250,7 @@ void Matrix4::loadTranslate(float x, float y, float z) {
     data[kTranslateY] = y;
     data[kTranslateZ] = z;
 
-    mIsIdentity = false;
+    mType = kTypeTranslate | kTypeRectToRect;
 }
 
 void Matrix4::loadScale(float sx, float sy, float sz) {
@@ -198,7 +260,7 @@ void Matrix4::loadScale(float sx, float sy, float sz) {
     data[kScaleY] = sy;
     data[kScaleZ] = sz;
 
-    mIsIdentity = false;
+    mType = kTypeScale | kTypeRectToRect;
 }
 
 void Matrix4::loadSkew(float sx, float sy) {
@@ -216,8 +278,23 @@ void Matrix4::loadSkew(float sx, float sy) {
     data[kPerspective1] = 0.0f;
     data[kPerspective2] = 1.0f;
 
-    mSimpleMatrix = false;
-    mIsIdentity = false;
+    mType = kTypeUnknown;
+}
+
+void Matrix4::loadRotate(float angle) {
+    angle *= float(M_PI / 180.0f);
+    float c = cosf(angle);
+    float s = sinf(angle);
+
+    loadIdentity();
+
+    data[kScaleX]     = c;
+    data[kSkewX]      = -s;
+
+    data[kSkewY]      = s;
+    data[kScaleY]     = c;
+
+    mType = kTypeUnknown;
 }
 
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
@@ -257,8 +334,7 @@ void Matrix4::loadRotate(float angle, float x, float y, float z) {
     data[6]       =    yz * nc + xs;
     data[kScaleZ] = z * z * nc +  c;
 
-    mSimpleMatrix = false;
-    mIsIdentity = false;
+    mType = kTypeUnknown;
 }
 
 void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
@@ -282,8 +358,7 @@ void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
         set(i, 3, w);
     }
 
-    mSimpleMatrix = u.mSimpleMatrix && v.mSimpleMatrix;
-    mIsIdentity = false;
+    mType = kTypeUnknown;
 }
 
 void Matrix4::loadOrtho(float left, float right, float bottom, float top, float near, float far) {
@@ -296,13 +371,13 @@ void Matrix4::loadOrtho(float left, float right, float bottom, float top, float 
     data[kTranslateY] = -(top + bottom) / (top - bottom);
     data[kTranslateZ] = -(far + near) / (far - near);
 
-    mIsIdentity = false;
+    mType = kTypeTranslate | kTypeScale | kTypeRectToRect;
 }
 
 #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
 
 void Matrix4::mapPoint(float& x, float& y) const {
-    if (mSimpleMatrix) {
+    if (isSimple()) {
         MUL_ADD_STORE(x, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(y, data[kScaleY], data[kTranslateY]);
         return;
@@ -318,7 +393,7 @@ void Matrix4::mapPoint(float& x, float& y) const {
 }
 
 void Matrix4::mapRect(Rect& r) const {
-    if (mSimpleMatrix) {
+    if (isSimple()) {
         MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.right, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.top, data[kScaleY], data[kTranslateY]);
@@ -376,7 +451,7 @@ void Matrix4::mapRect(Rect& r) const {
 }
 
 void Matrix4::dump() const {
-    ALOGD("Matrix4[simple=%d", mSimpleMatrix);
+    ALOGD("Matrix4[simple=%d, type=0x%x", isSimple(), getType());
     ALOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
     ALOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[9], data[kTranslateY]);
     ALOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);

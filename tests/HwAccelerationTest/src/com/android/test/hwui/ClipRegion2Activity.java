@@ -16,18 +16,16 @@
 
 package com.android.test.hwui;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Path;
+import android.graphics.Region;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class ClipRegionActivity extends Activity {
+public class ClipRegion2Activity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,12 +37,6 @@ public class ClipRegionActivity extends Activity {
         group.addView(text);
 
         setContentView(group);
-
-        ObjectAnimator animator = ObjectAnimator.ofFloat(group, "clipPosition", 0.0f, 1.0f);
-        animator.setDuration(3000);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-        animator.start();
     }
 
     private static CharSequence buildText() {
@@ -56,7 +48,7 @@ public class ClipRegionActivity extends Activity {
     }
 
     public static class RegionView extends FrameLayout {
-        private final Path mClipPath = new Path();
+        private final Region mRegion = new Region();
         private float mClipPosition = 0.0f;
 
         public RegionView(Context c) {
@@ -77,11 +69,13 @@ public class ClipRegionActivity extends Activity {
 
             canvas.save();
 
-            mClipPath.reset();
-            mClipPath.addCircle(mClipPosition * getWidth(), getHeight() / 2.0f,
-                    getWidth() / 4.0f, Path.Direction.CW);
+            mRegion.setEmpty();
+            mRegion.op(0, 0, getWidth(), getHeight(),
+                    Region.Op.REPLACE);
+            mRegion.op(getWidth() / 4, getHeight() / 4, 3 * getWidth() / 4, 3 * getHeight() / 4,
+                    Region.Op.DIFFERENCE);
 
-            canvas.clipPath(mClipPath);
+            canvas.clipRegion(mRegion);
             super.dispatchDraw(canvas);
 
             canvas.restore();

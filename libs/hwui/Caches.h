@@ -270,9 +270,7 @@ public:
     GammaFontRenderer* fontRenderer;
 
     Dither dither;
-#if STENCIL_BUFFER_SIZE
     Stencil stencil;
-#endif
 
     // Debug methods
     PFNGLINSERTEVENTMARKEREXTPROC eventMark;

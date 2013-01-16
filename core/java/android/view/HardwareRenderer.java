@@ -173,17 +173,6 @@ public abstract class HardwareRenderer {
     public static final String DEBUG_SHOW_OVERDRAW_PROPERTY = "debug.hwui.show_overdraw";
 
     /**
-     * Turn on to allow region clipping (see
-     * {@link android.graphics.Canvas#clipPath(android.graphics.Path)} and
-     * {@link android.graphics.Canvas#clipRegion(android.graphics.Region)}.
-     *
-     * When this option is turned on a stencil buffer is always required.
-     * If this option is off a stencil buffer is only created when the overdraw
-     * debugging mode is turned on.
-     */
-    private static final boolean REGION_CLIPPING_ENABLED = false;
-
-    /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.
      * 
@@ -885,15 +874,6 @@ public abstract class HardwareRenderer {
             if (value != mShowOverdraw) {
                 changed = true;
                 mShowOverdraw = value;
-
-                if (!REGION_CLIPPING_ENABLED) {
-                    if (surface != null && isEnabled()) {
-                        if (validate()) {
-                            sEglConfig = loadEglConfig();
-                            invalidate(surface);
-                        }
-                    }
-                }
             }
 
             if (nLoadProperties()) {
@@ -1764,9 +1744,8 @@ public abstract class HardwareRenderer {
 
         @Override
         int[] getConfig(boolean dirtyRegions) {
-            //noinspection PointlessBooleanExpression
-            final int stencilSize = mShowOverdraw || REGION_CLIPPING_ENABLED ?
-                    GLES20Canvas.getStencilSize() : 0;
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            final int stencilSize = GLES20Canvas.getStencilSize();
             final int swapBehavior = dirtyRegions ? EGL14.EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
 
             return new int[] {

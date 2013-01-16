@@ -287,6 +287,19 @@ protected:
     void resumeAfterLayer();
 
     /**
+     * This method is called whenever a stencil buffer is required. Subclasses
+     * should override this method and call attachStencilBufferToLayer() on the
+     * appropriate layer(s).
+     */
+    virtual void ensureStencilBuffer();
+
+    /**
+     * Obtains a stencil render buffer (allocating it if necessary) and
+     * attaches it to the specified layer.
+     */
+    void attachStencilBufferToLayer(Layer* layer);
+
+    /**
      * Compose the layer defined in the current snapshot with the layer
      * defined by the previous snapshot.
      *
@@ -423,6 +436,12 @@ private:
     void setScissorFromClip();
 
     /**
+     * Sets the clipping region using the stencil buffer. The clip region
+     * is defined by the current snapshot's clipRegion member.
+     */
+    void setStencilFromClip();
+
+    /**
      * Performs a quick reject but does not affect the scissor. Returns
      * the transformed rect to test and the current clip.
      */
@@ -524,9 +543,10 @@ private:
      * @param color The rectangles' ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
+     * @param dirty True if calling this method should dirty the current layer
      */
     status_t drawColorRects(const float* rects, int count, int color,
-            SkXfermode::Mode mode, bool ignoreTransform = false);
+            SkXfermode::Mode mode, bool ignoreTransform = false, bool dirty = true);
 
     /**
      * Draws the shape represented by the specified path texture.
@@ -773,6 +793,19 @@ private:
      * is used for debugging only.
      */
     void drawRegionRects(const Region& region);
+
+    /**
+     * Renders the specified region as a series of rectangles. The region
+     * must be in screen-space coordinates.
+     */
+    void drawRegionRects(const SkRegion& region, int color, SkXfermode::Mode mode,
+            bool dirty = false);
+
+    /**
+     * Draws the current clip region if any. Only when DEBUG_CLIP_REGIONS
+     * is turned on.
+     */
+    void debugClip();
 
     void debugOverdraw(bool enable, bool clear);
     void renderOverdraw();
