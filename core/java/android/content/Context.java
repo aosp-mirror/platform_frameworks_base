@@ -1677,7 +1677,7 @@ public abstract class Context {
      * argument for use by system server and other multi-user aware code.
      * @hide
      */
-    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userHandle) {
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

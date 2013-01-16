@@ -128,10 +128,10 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         if (!mBoundToService) {
             Log.d(TAG, "Binding to Face Unlock service for user="
                     + mLockPatternUtils.getCurrentUser());
-            mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
+            mContext.bindServiceAsUser(new Intent(IFaceLockInterface.class.getName()),
                     mConnection,
                     Context.BIND_AUTO_CREATE,
-                    mLockPatternUtils.getCurrentUser());
+                    new UserHandle(mLockPatternUtils.getCurrentUser()));
             mBoundToService = true;
         } else {
             Log.w(TAG, "Attempt to bind to Face Unlock when already bound");
