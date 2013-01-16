@@ -146,7 +146,6 @@ class ServerThread extends Thread {
         TwilightService twilight = null;
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
-        ThrottleService throttle = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
@@ -511,15 +510,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Throttle Service");
-                throttle = new ThrottleService(context);
-                ServiceManager.addService(
-                        Context.THROTTLE_SERVICE, throttle);
-            } catch (Throwable e) {
-                reportWtf("starting ThrottleService", e);
-            }
-
-            try {
                 Slog.i(TAG, "UpdateLock Service");
                 ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
                         new UpdateLockService(context));
@@ -839,7 +829,6 @@ class ServerThread extends Thread {
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
         final UsbService usbF = usb;
-        final ThrottleService throttleF = throttle;
         final TwilightService twilightF = twilight;
         final UiModeManagerService uiModeF = uiMode;
         final AppWidgetService appWidgetF = appWidget;
@@ -950,11 +939,6 @@ class ServerThread extends Thread {
                     if (countryDetectorF != null) countryDetectorF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Country Detector Service ready", e);
-                }
-                try {
-                    if (throttleF != null) throttleF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Throttle Service ready", e);
                 }
                 try {
                     if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();

@@ -1345,49 +1345,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        try {
-            mConnector.execute("interface", "setthrottle", iface, rxKbps, txKbps);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    private int getInterfaceThrottle(String iface, boolean rx) {
-        final NativeDaemonEvent event;
-        try {
-            event = mConnector.execute("interface", "getthrottle", iface, rx ? "rx" : "tx");
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-
-        if (rx) {
-            event.checkCode(InterfaceRxThrottleResult);
-        } else {
-            event.checkCode(InterfaceTxThrottleResult);
-        }
-
-        try {
-            return Integer.parseInt(event.getMessage());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("unexpected response:" + event);
-        }
-    }
-
-    @Override
-    public int getInterfaceRxThrottle(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        return getInterfaceThrottle(iface, true);
-    }
-
-    @Override
-    public int getInterfaceTxThrottle(String iface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        return getInterfaceThrottle(iface, false);
-    }
-
-    @Override
     public void setDefaultInterfaceForDns(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
