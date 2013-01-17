@@ -106,7 +106,7 @@ public class SamplingProfilerIntegration {
         }
 
         ThreadGroup group = Thread.currentThread().getThreadGroup();
-        SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
+        SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupThreadSet(group);
         samplingProfiler = new SamplingProfiler(samplingProfilerDepth, threadSet);
         samplingProfiler.start(samplingProfilerMilliseconds);
         startMillis = System.currentTimeMillis();
