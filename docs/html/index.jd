@@ -22,7 +22,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <script type="text/javascript">
                             var params = { allowScriptAccess: "always" };
                             var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("http://www.youtube.com/v/RRelFvc6Czo?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                            swfobject.embedSWF("//www.youtube.com/v/RRelFvc6Czo?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
                               "ytapiplayer", "600", "338", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
