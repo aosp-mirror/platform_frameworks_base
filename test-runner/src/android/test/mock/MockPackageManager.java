@@ -146,6 +146,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public List<PackageInfo> getPackagesHoldingPermissions(String[] permissions,
+            int flags) {
+        throw new UnsupportedOperationException();
+    }
+
     /** @hide */
     @Override
     public List<PackageInfo> getInstalledPackages(int flags, int userId) {

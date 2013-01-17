@@ -233,6 +233,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + " code " + code + " time=" + op.time + " duration=" + op.duration
                         + " nesting=" + op.nesting);
                 }
+                op.nesting = 0;
             } else {
                 op.nesting--;
             }
