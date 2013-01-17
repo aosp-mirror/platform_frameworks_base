@@ -37,7 +37,7 @@ void Stencil::clear() {
 void Stencil::enableTest() {
     if (mState != kTest) {
         enable();
-        glStencilFunc(GL_EQUAL, 0x1, 0x1);
+        glStencilFunc(GL_EQUAL, 0xff, 0xff);
         // We only want to test, let's keep everything
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -48,7 +48,7 @@ void Stencil::enableTest() {
 void Stencil::enableWrite() {
     if (mState != kWrite) {
         enable();
-        glStencilFunc(GL_ALWAYS, 0x1, 0x1);
+        glStencilFunc(GL_ALWAYS, 0xff, 0xff);
         // The test always passes so the first two values are meaningless
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);

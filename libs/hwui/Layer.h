@@ -49,7 +49,12 @@ struct Layer {
     Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
-    void removeFbo();
+    /**
+     * Calling this method will remove (either by recycling or
+     * destroying) the associated FBO, if present, and any render
+     * buffer (stencil for instance.)
+     */
+    void removeFbo(bool flush = true);
 
     /**
      * Sets this layer's region to a rectangle. Computes the appropriate
@@ -135,6 +140,14 @@ struct Layer {
         return fbo;
     }
 
+    inline void setStencilRenderBuffer(GLuint renderBuffer) {
+        this->stencil = renderBuffer;
+    }
+
+    inline GLuint getStencilRenderBuffer() {
+        return stencil;
+    }
+
     inline GLuint getTexture() {
         return texture.id;
     }
@@ -213,10 +226,6 @@ struct Layer {
         texture.id = 0;
     }
 
-    inline void deleteFbo() {
-        if (fbo) glDeleteFramebuffers(1, &fbo);
-    }
-
     inline void allocateTexture(GLenum format, GLenum storage) {
 #if DEBUG_LAYERS
         ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
@@ -274,6 +283,12 @@ private:
      * this layer is not backed by an FBO, but a simple texture.
      */
     GLuint fbo;
+
+    /**
+     * Name of the render buffer used as the stencil buffer. If the
+     * name is 0, this layer does not have a stencil buffer.
+     */
+    GLuint stencil;
 
     /**
      * Indicates whether this layer has been used already.

@@ -837,6 +837,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         return;
     }
 
+    Layer* layer = current->layer;
+    const Rect& rect = layer->layer;
     const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
 
     if (fboLayer) {
@@ -844,15 +846,15 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 
         // Detach the texture from the FBO
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+
+        layer->removeFbo(false);
+
         // Unbind current FBO and restore previous one
         glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
         debugOverdraw(true, false);
 
         startTiling(previous);
     }
-
-    Layer* layer = current->layer;
-    const Rect& rect = layer->layer;
 
     if (!fboLayer && layer->getAlpha() < 255) {
         drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
@@ -879,17 +881,6 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     } else if (!rect.isEmpty()) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
         composeLayerRect(layer, rect, true);
-    }
-
-    if (fboLayer) {
-        // Note: No need to use glDiscardFramebufferEXT() since we never
-        //       create/compose layers that are not on screen with this
-        //       code path
-        // See LayerRenderer::destroyLayer(Layer*)
-
-        // Put the FBO name back in the cache, if it doesn't fit, it will be destroyed
-        mCaches.fboCache.put(current->fbo);
-        layer->setFbo(0);
     }
 
     dirtyClip();
@@ -1001,10 +992,14 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         const float texY = 1.0f / float(layer->getHeight());
         const float height = rect.getHeight();
 
+        setupDraw();
+
+        // We must get (and therefore bind) the region mesh buffer
+        // after we setup drawing in case we need to mess with the
+        // stencil buffer in setupDraw()
         TextureVertex* mesh = mCaches.getRegionMesh();
         GLsizei numQuads = 0;
 
-        setupDraw();
         setupDrawWithTexture();
         setupDrawColor(alpha, alpha, alpha, alpha);
         setupDrawColorFilter();
@@ -1087,6 +1082,25 @@ void OpenGLRenderer::drawRegionRects(const Region& region) {
                 SkXfermode::kSrcOver_Mode);
     }
 #endif
+}
+
+void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
+        SkXfermode::Mode mode, bool dirty) {
+    int count = 0;
+    Vector<float> rects;
+
+    SkRegion::Iterator it(region);
+    while (!it.done()) {
+        const SkIRect& r = it.rect();
+        rects.push(r.fLeft);
+        rects.push(r.fTop);
+        rects.push(r.fRight);
+        rects.push(r.fBottom);
+        count++;
+        it.next();
+    }
+
+    drawColorRects(rects.array(), count, color, mode, true, dirty);
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
@@ -1219,6 +1233,65 @@ void OpenGLRenderer::setScissorFromClip() {
     }
 }
 
+void OpenGLRenderer::ensureStencilBuffer() {
+    // Thanks to the mismatch between EGL and OpenGL ES FBO we
+    // cannot attach a stencil buffer to fbo0 dynamically. Let's
+    // just hope we have one when hasLayer() returns false.
+    if (hasLayer()) {
+        attachStencilBufferToLayer(mSnapshot->layer);
+    }
+}
+
+void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
+    // The layer's FBO is already bound when we reach this stage
+    if (!layer->getStencilRenderBuffer()) {
+        // TODO: See Layer::removeFbo(). The stencil renderbuffer should be cached
+        GLuint buffer;
+        glGenRenderbuffers(1, &buffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, buffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8,
+                layer->getWidth(), layer->getHeight());
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
+        layer->setStencilRenderBuffer(buffer);
+    }
+}
+
+void OpenGLRenderer::setStencilFromClip() {
+    if (!mCaches.debugOverdraw) {
+        if (!mSnapshot->clipRegion->isEmpty()) {
+            // NOTE: The order here is important, we must set dirtyClip to false
+            //       before any draw call to avoid calling back into this method
+            mDirtyClip = false;
+
+            ensureStencilBuffer();
+
+            mCaches.stencil.enableWrite();
+
+            // Clear the stencil but first make sure we restrict drawing
+            // to the region's bounds
+            bool resetScissor = mCaches.enableScissor();
+            if (resetScissor) {
+                // The scissor was not set so we now need to update it
+                setScissorFromClip();
+            }
+            mCaches.stencil.clear();
+            if (resetScissor) mCaches.disableScissor();
+
+            // NOTE: We could use the region contour path to generate a smaller mesh
+            //       Since we are using the stencil we could use the red book path
+            //       drawing technique. It might increase bandwidth usage though.
+
+            // The last parameter is important: we are not drawing in the color buffer
+            // so we don't want to dirty the current layer, if any
+            drawRegionRects(*mSnapshot->clipRegion, 0xff000000, SkXfermode::kSrc_Mode, false);
+
+            mCaches.stencil.enableTest();
+        } else {
+            mCaches.stencil.disable();
+        }
+    }
+}
+
 const Rect& OpenGLRenderer::getClipBounds() {
     return mSnapshot->getLocalClip();
 }
@@ -1284,40 +1357,60 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
     return rejected;
 }
 
+void OpenGLRenderer::debugClip() {
+#if DEBUG_CLIP_REGIONS
+    if (!isDeferred() && !mSnapshot->clipRegion->isEmpty()) {
+        drawRegionRects(*mSnapshot->clipRegion, 0x7f00ff00, SkXfermode::kSrcOver_Mode);
+    }
+#endif
+}
+
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    bool clipped = mSnapshot->clip(left, top, right, bottom, op);
+    if (CC_LIKELY(mSnapshot->transform->rectToRect())) {
+        bool clipped = mSnapshot->clip(left, top, right, bottom, op);
+        if (clipped) {
+            dirtyClip();
+        }
+        return !mSnapshot->clipRect->isEmpty();
+    }
+
+    SkPath path;
+    path.addRect(left, top, right, bottom);
+
+    return clipPath(&path, op);
+}
+
+bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
+    SkMatrix transform;
+    mSnapshot->transform->copyTo(transform);
+
+    SkPath transformed;
+    path->transform(transform, &transformed);
+
+    SkRegion clip;
+    if (!mSnapshot->clipRegion->isEmpty()) {
+        clip.setRegion(*mSnapshot->clipRegion);
+    } else {
+        Rect* bounds = mSnapshot->clipRect;
+        clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
+    }
+
+    SkRegion region;
+    region.setPath(transformed, clip);
+
+    bool clipped = mSnapshot->clipRegionTransformed(region, op);
     if (clipped) {
         dirtyClip();
-#if DEBUG_CLIP_REGIONS
-        if (!isDeferred() && mSnapshot->clipRegion && !mSnapshot->clipRegion->isRect()) {
-            int count = 0;
-            Vector<float> rects;
-            SkRegion::Iterator it(*mSnapshot->clipRegion);
-            while (!it.done()) {
-                const SkIRect& r = it.rect();
-                rects.push(r.fLeft);
-                rects.push(r.fTop);
-                rects.push(r.fRight);
-                rects.push(r.fBottom);
-                count++;
-                it.next();
-            }
-
-            drawColorRects(rects.array(), count, 0x7f00ff00, SkXfermode::kSrcOver_Mode, true);
-        }
-#endif
     }
     return !mSnapshot->clipRect->isEmpty();
 }
 
-bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
-    const SkRect& bounds = path->getBounds();
-    return clipRect(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, op);
-}
-
 bool OpenGLRenderer::clipRegion(SkRegion* region, SkRegion::Op op) {
-    const SkIRect& bounds = region->getBounds();
-    return clipRect(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, op);
+    bool clipped = mSnapshot->clipRegionTransformed(*region, op);
+    if (clipped) {
+        dirtyClip();
+    }
+    return !mSnapshot->clipRect->isEmpty();
 }
 
 Rect* OpenGLRenderer::getClipRect() {
@@ -1332,8 +1425,11 @@ void OpenGLRenderer::setupDraw(bool clear) {
     // TODO: It would be best if we could do this before quickReject()
     //       changes the scissor test state
     if (clear) clearLayerRegions();
+    // Make sure setScissor & setStencil happen at the beginning of
+    // this method
     if (mDirtyClip) {
         setScissorFromClip();
+        setStencilFromClip();
     }
     mDescription.reset();
     mSetShaderColor = false;
@@ -3085,7 +3181,7 @@ status_t OpenGLRenderer::drawRects(const float* rects, int count, SkPaint* paint
 }
 
 status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color,
-        SkXfermode::Mode mode, bool ignoreTransform) {
+        SkXfermode::Mode mode, bool ignoreTransform, bool dirty) {
 
     float left = FLT_MAX;
     float top = FLT_MAX;
@@ -3103,7 +3199,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         float r = rects[index + 2];
         float b = rects[index + 3];
 
-        if (!quickRejectNoScissor(left, top, right, bottom)) {
+        if (ignoreTransform || !quickRejectNoScissor(left, top, right, bottom)) {
             Vertex::set(vertex++, l, b);
             Vertex::set(vertex++, l, t);
             Vertex::set(vertex++, r, t);
@@ -3136,7 +3232,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawColorFilterUniforms();
     setupDrawVertices((GLvoid*) &mesh[0].position[0]);
 
-    if (hasLayer()) {
+    if (dirty && hasLayer()) {
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
 
