@@ -628,7 +628,7 @@ array.</p>
 
 <p>The “loop_until” seen in previous examples has been expanded to show the load
 of B into reg0.  reg1 is assigned the numeric value 8, and reg2 is loaded from
-the address [A+reg1] (same location that thread 1 is accessing).</p>
+the address [A+reg1] (the same location that thread 1 is accessing).</p>
 
 <p>This will not behave correctly because the load from B could be observed
 after the load from [A+reg1].  We can fix this with a load/load barrier after
@@ -640,7 +640,7 @@ the loop, but on ARM we can also just do this:</p>
 <th>Thread 2</th>
 </tr>
 <tr>
-<td><code>A = 41<br />
+<td><code>[A+8] = 41<br />
 <em>store/store barrier</em><br />
 B = 1    // “A is ready”</code></td>
 <td><code>loop:<br />
