@@ -1121,17 +1121,19 @@ class WifiConfigStore {
                 break setVariables;
             }
 
-            HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
-            for (String key : enterpriseFields.keySet()) {
-                    String value = enterpriseFields.get(key);
-                    if (!mWifiNative.setNetworkVariable(
-                                netId,
-                                key,
-                                value)) {
-                        loge(config.SSID + ": failed to set " + key +
-                                ": " + value);
-                        break setVariables;
-                    }
+            if (config.enterpriseConfig != null) {
+                HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
+                for (String key : enterpriseFields.keySet()) {
+                        String value = enterpriseFields.get(key);
+                        if (!mWifiNative.setNetworkVariable(
+                                    netId,
+                                    key,
+                                    value)) {
+                            loge(config.SSID + ": failed to set " + key +
+                                    ": " + value);
+                            break setVariables;
+                        }
+                }
             }
             updateFailed = false;
         }
@@ -1430,11 +1432,16 @@ class WifiConfigStore {
             }
         }
 
-        HashMap<String, String> entepriseFields = config.enterpriseConfig.getFields();
-        for (String key : entepriseFields.keySet()) {
+        if (config.enterpriseConfig == null) {
+            config.enterpriseConfig = new WifiEnterpriseConfig();
+        }
+        HashMap<String, String> enterpriseFields = config.enterpriseConfig.getFields();
+        for (String key : WifiEnterpriseConfig.getSupplicantKeys()) {
             value = mWifiNative.getNetworkVariable(netId, key);
             if (!TextUtils.isEmpty(value)) {
-                entepriseFields.put(key, removeDoubleQuotes(value));
+                enterpriseFields.put(key, removeDoubleQuotes(value));
+            } else {
+                enterpriseFields.put(key, WifiEnterpriseConfig.EMPTY_VALUE);
             }
         }
 
