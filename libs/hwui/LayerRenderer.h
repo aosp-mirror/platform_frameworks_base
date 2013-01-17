@@ -64,6 +64,7 @@ public:
     static void flushLayer(Layer* layer);
 
 protected:
+    virtual void ensureStencilBuffer();
     virtual bool hasLayer();
     virtual Region* getRegion();
     virtual GLint getTargetFbo();

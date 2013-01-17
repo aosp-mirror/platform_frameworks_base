@@ -94,6 +94,12 @@ public:
     bool clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
 
     /**
+     * Modifies the current clip with the specified region and operation.
+     * The specified region is considered already transformed.
+     */
+    bool clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
+
+    /**
      * Sets the current clip.
      */
     void setClip(float left, float top, float right, float bottom);
@@ -136,7 +142,7 @@ public:
     sp<Snapshot> previous;
 
     /**
-     * Only set when the flag kFlagIsLayer is set.
+     * A pointer to the currently active layer.
      *
      * This snapshot does not own the layer, this pointer must not be freed.
      */
@@ -200,8 +206,6 @@ public:
      *
      * This is a reference to a region owned by this snapshot or another
      * snapshot. This pointer must not be freed. See ::mClipRegionRoot.
-     *
-     * This field is used only if STENCIL_BUFFER_SIZE is > 0.
      */
     SkRegion* clipRegion;
 
@@ -234,9 +238,7 @@ private:
     Rect mClipRectRoot;
     Rect mLocalClip;
 
-#if STENCIL_BUFFER_SIZE
     SkRegion mClipRegionRoot;
-#endif
 
 }; // class Snapshot
 
