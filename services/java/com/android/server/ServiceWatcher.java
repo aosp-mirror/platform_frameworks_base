@@ -177,8 +177,7 @@ public class ServiceWatcher implements ServiceConnection {
         mVersion = version;
         if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ")");
         mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_ALLOW_OOM_MANAGEMENT | Context.BIND_NOT_VISIBLE,
-                new UserHandle(mCurrentUserId));
+                | Context.BIND_NOT_VISIBLE, new UserHandle(mCurrentUserId));
     }
 
     public static boolean isSignatureMatch(Signature[] signatures,
