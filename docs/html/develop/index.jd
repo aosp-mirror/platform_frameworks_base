@@ -51,7 +51,7 @@ href="{@docRoot}google/play-services/maps.html" class="button">Read more</a></p>
               <li class="item carousel-home">
                  <div class="col-8">
                    <img
-src="http://4.bp.blogspot.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
+src="//lh4.ggpht.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
 class="play no-shadow no-transform" />
                  </div>
                 <div class="content-right col-6">
@@ -65,7 +65,7 @@ more</a></p>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img
-src="http://1.bp.blogspot.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/google-play-subscriptions.png" class="play"></div>
+src="//lh4.ggpht.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/google-play-subscriptions.png" class="play"></div>
                    <div class="content-right col-6">
                    <h2>In-app Subscriptions with Trials</h2>
                    <p>You can now set up a <strong>free trial period</strong> for any Google Play in-app subscription, making it easy for users try your subscriber content before automatically converting to a full subscription. Free trials give you a new way to bring users into your products and engage them effectively. </p>
@@ -77,7 +77,7 @@ more</a></p>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img
-src="http://2.bp.blogspot.com/-MgN5DnoO5XU/UHYGYzTcAOI/AAAAAAAABs4/jTS7sKkfBcM/s1600/pubsites.png" class="play"></div>
+src="//lh4.ggpht.com/-MgN5DnoO5XU/UHYGYzTcAOI/AAAAAAAABs4/jTS7sKkfBcM/s1600/pubsites.png" class="play"></div>
                    <div class="content-right col-6">
                    <p class="title-intro">From the blog:</p>
                    <h2>New Google Play Developer Console</h2>
@@ -90,7 +90,7 @@ more</a></p>
                <li class="item carousel-home">
                  <div class="col-8">
                    <img
-src="http://4.bp.blogspot.com/-g05If_eKKRQ/UAcrVLI-OYI/AAAAAAAAAr8/AWvunVb5S-w/s320/nexus7.png"
+src="//lh4.ggpht.com/-g05If_eKKRQ/UAcrVLI-OYI/AAAAAAAAAr8/AWvunVb5S-w/s320/nexus7.png"
 class="play no-shadow no-transform" />
                  </div>
                 <div class="content-right col-6">
@@ -127,7 +127,7 @@ more</a></p>
               <p>You can take advantage of the auth APIs in Google Play services to let your back end know which app is calling and for which user....</p>
               </a></li>
             <li><a href="//android-developers.blogspot.com/2012/12/daydream-interactive-screen-savers.html">
-              <div class="feed-image" style="background:url('//3.bp.blogspot.com/-wVsUOo4xGE0/UNy9mZ1nmMI/AAAAAAAAB4w/f6rhyLn5KbI/s1600/daydream-example.jpg') no-repeat 0 0;background-position:right top;"></div>
+              <div class="feed-image" style="background:url('//lh4.ggpht.com/-wVsUOo4xGE0/UNy9mZ1nmMI/AAAAAAAAB4w/f6rhyLn5KbI/s1600/daydream-example.jpg') no-repeat 0 0;background-position:right top;"></div>
               <h4>Daydream: Interactive Screen Savers</h4>
               <p>Daydream is an interactive screen-saver mode introduced in Android 4.2. Learn how to add Daydreams to your apps...</p>
               </a></li>
