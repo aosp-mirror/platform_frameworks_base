@@ -1512,9 +1512,41 @@ public abstract class PackageManager {
      * @see #GET_SERVICES
      * @see #GET_SIGNATURES
      * @see #GET_UNINSTALLED_PACKAGES
-     *
      */
     public abstract List<PackageInfo> getInstalledPackages(int flags);
+
+    /**
+     * Return a List of all installed packages that are currently
+     * holding any of the given permissions.
+     *
+     * @param flags Additional option flags. Use any combination of
+     * {@link #GET_ACTIVITIES},
+     * {@link #GET_GIDS},
+     * {@link #GET_CONFIGURATIONS},
+     * {@link #GET_INSTRUMENTATION},
+     * {@link #GET_PERMISSIONS},
+     * {@link #GET_PROVIDERS},
+     * {@link #GET_RECEIVERS},
+     * {@link #GET_SERVICES},
+     * {@link #GET_SIGNATURES},
+     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
+     *
+     * @return Returns a List of PackageInfo objects, one for each installed
+     * application that is holding any of the permissions that were provided.
+     *
+     * @see #GET_ACTIVITIES
+     * @see #GET_GIDS
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
+     * @see #GET_RECEIVERS
+     * @see #GET_SERVICES
+     * @see #GET_SIGNATURES
+     * @see #GET_UNINSTALLED_PACKAGES
+     */
+    public abstract List<PackageInfo> getPackagesHoldingPermissions(
+            String[] permissions, int flags);
 
     /**
      * Return a List of all packages that are installed on the device, for a specific user.
@@ -1742,14 +1774,14 @@ public abstract class PackageManager {
     /**
      * Return a List of all application packages that are installed on the
      * device. If flag GET_UNINSTALLED_PACKAGES has been set, a list of all
-     * applications including those deleted with DONT_DELETE_DATA(partially
+     * applications including those deleted with DONT_DELETE_DATA (partially
      * installed apps with data directory) will be returned.
      *
      * @param flags Additional option flags. Use any combination of
      * {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
      * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
      *
-     * @return A List of ApplicationInfo objects, one for each application that
+     * @return Returns a List of ApplicationInfo objects, one for each application that
      *         is installed on the device.  In the unlikely case of there being
      *         no installed applications, an empty list is returned.
      *         If flag GET_UNINSTALLED_PACKAGES is set, a list of all

@@ -444,6 +444,28 @@ final class ApplicationPackageManager extends PackageManager {
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<PackageInfo> getPackagesHoldingPermissions(
+            String[] permissions, int flags) {
+        final int userId = mContext.getUserId();
+        try {
+            final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
+            PackageInfo lastItem = null;
+            ParceledListSlice<PackageInfo> slice;
+
+            do {
+                final String lastKey = lastItem != null ? lastItem.packageName : null;
+                slice = mPM.getPackagesHoldingPermissions(permissions, flags, lastKey, userId);
+                lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
+            } while (!slice.isLastSlice());
+
+            return packageInfos;
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<ApplicationInfo> getInstalledApplications(int flags) {
         final int userId = mContext.getUserId();
         try {
