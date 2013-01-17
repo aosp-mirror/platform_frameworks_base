@@ -40,6 +40,10 @@ public class AppOpsManager {
     public static final int MODE_IGNORED = 1;
     public static final int MODE_ERRORED = 2;
 
+    // when adding one of these:
+    //  - increment _NUM_OP
+    //  - add rows to sOpToSwitch, sOpNames, sOpPerms
+    //  - add descriptive strings to Settings/res/values/arrays.xml
     public static final int OP_NONE = -1;
     public static final int OP_COARSE_LOCATION = 0;
     public static final int OP_FINE_LOCATION = 1;
@@ -66,8 +70,9 @@ public class AppOpsManager {
     public static final int OP_WRITE_ICC_SMS = 22;
     public static final int OP_WRITE_SETTINGS = 23;
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
+    public static final int OP_ACCESS_NOTIFICATIONS = 25;
     /** @hide */
-    public static final int _NUM_OP = 25;
+    public static final int _NUM_OP = 26;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -103,6 +108,7 @@ public class AppOpsManager {
             OP_WRITE_SMS,
             OP_WRITE_SETTINGS,
             OP_SYSTEM_ALERT_WINDOW,
+            OP_ACCESS_NOTIFICATIONS,
     };
 
     /**
@@ -135,6 +141,7 @@ public class AppOpsManager {
             "WRITE_ICC_SMS",
             "WRITE_SETTINGS",
             "SYSTEM_ALERT_WINDOW",
+            "ACCESS_NOTIFICATIONS",
     };
 
     /**
@@ -167,6 +174,7 @@ public class AppOpsManager {
             android.Manifest.permission.WRITE_SMS,
             android.Manifest.permission.WRITE_SETTINGS,
             android.Manifest.permission.SYSTEM_ALERT_WINDOW,
+            android.Manifest.permission.ACCESS_NOTIFICATIONS,
     };
 
     public static int opToSwitch(int op) {

@@ -2175,6 +2175,14 @@
         android:description="@string/permdesc_updateLock"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to read the current set of notifications, including
+         any metadata and intents attached.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_NOTIFICATIONS"
+        android:label="@string/permlab_accessNotifications"
+        android:description="@string/permdesc_accessNotifications"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
