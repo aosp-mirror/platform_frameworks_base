@@ -179,8 +179,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
     static final int LONG_PRESS_HOME_NOTHING = 0;
-    static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
-    static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
+    static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 1;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -782,11 +781,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Eat the longpress so it won't dismiss the recent apps dialog when
             // the user lets go of the home key
             mHomeLongPressed = true;
-        }
-
-        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
-            showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
-        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
             try {
                 IStatusBarService statusbar = getStatusBarService();
                 if (statusbar != null) {
@@ -1842,7 +1836,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHomePressed = false;
                 mHomeLongPressed = false;
                 if (!homeWasLongPressed) {
-                    if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                    if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
                         try {
                             IStatusBarService statusbar = getStatusBarService();
                             if (statusbar != null) {
@@ -1964,8 +1958,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (down && repeatCount == 0 && !keyguardOn) {
-                showOrHideRecentAppsDialog(RECENT_APPS_BEHAVIOR_SHOW_OR_DISMISS);
+            if (!keyguardOn) {
+                try {
+                    IStatusBarService statusbar = getStatusBarService();
+                    if (statusbar != null) {
+                        if (down && repeatCount == 0) {
+                            statusbar.preloadRecentApps();
+                        } else if (!down) {
+                            statusbar.toggleRecentApps();
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "RemoteException when preloading recent apps", e);
+                    // re-acquire status bar service next time it is needed.
+                    mStatusBarService = null;
+                }
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
