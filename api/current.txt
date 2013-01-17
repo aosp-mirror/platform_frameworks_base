@@ -6592,6 +6592,7 @@ package android.content.pm {
     method public abstract int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.lang.String[] getPackagesForUid(int);
+    method public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PermissionInfo getPermissionInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getPreferredActivities(java.util.List<android.content.IntentFilter>, java.util.List<android.content.ComponentName>, java.lang.String);
@@ -21689,6 +21690,7 @@ package android.test.mock {
     method public int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] getPackagesForUid(int);
+    method public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PermissionInfo getPermissionInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getPreferredActivities(java.util.List<android.content.IntentFilter>, java.util.List<android.content.ComponentName>, java.lang.String);

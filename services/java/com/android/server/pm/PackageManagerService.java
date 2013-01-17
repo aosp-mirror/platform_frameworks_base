@@ -2944,6 +2944,74 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
+            String[] permissions, int flags, String lastRead, int userId) {
+        if (!sUserManager.exists(userId)) return null;
+        final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
+        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+
+        // writer
+        synchronized (mPackages) {
+            ArrayList<String> keysList = new ArrayList<String>();
+            if (listUninstalled) {
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    for (String perm : permissions) {
+                        if (ps.grantedPermissions.contains(perm)) {
+                            keysList.add(ps.name);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (PackageParser.Package pkg : mPackages.values()) {
+                    PackageSetting ps = (PackageSetting)pkg.mExtras;
+                    if (ps != null) {
+                        for (String perm : permissions) {
+                            if (ps.grantedPermissions.contains(perm)) {
+                                keysList.add(ps.name);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            String[] keys = new String[keysList.size()];
+            keysList.toArray(keys);
+            Arrays.sort(keys);
+            int i = getContinuationPoint(keys, lastRead);
+            final int N = keys.length;
+
+            while (i < N) {
+                final String packageName = keys[i++];
+
+                PackageInfo pi = null;
+                if (listUninstalled) {
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
+                    }
+                } else {
+                    final PackageParser.Package p = mPackages.get(packageName);
+                    if (p != null) {
+                        pi = generatePackageInfo(p, flags, userId);
+                    }
+                }
+
+                if (pi != null && list.append(pi)) {
+                    break;
+                }
+            }
+
+            if (i == N) {
+                list.setLastSlice(true);
+            }
+        }
+
+        return list;
+    }
+
+    @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags,
             String lastRead, int userId) {
         if (!sUserManager.exists(userId)) return null;
