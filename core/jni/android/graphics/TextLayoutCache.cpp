@@ -810,6 +810,9 @@ bool TextLayoutShaper::isComplexScript(hb_script_t script) {
     case HB_SCRIPT_CYRILLIC:
     case HB_SCRIPT_HANGUL:
     case HB_SCRIPT_INHERITED:
+    case HB_SCRIPT_HAN:
+    case HB_SCRIPT_KATAKANA:
+    case HB_SCRIPT_HIRAGANA:
         return false;
     default:
         return true;
