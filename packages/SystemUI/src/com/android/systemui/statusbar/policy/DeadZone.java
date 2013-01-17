@@ -135,7 +135,7 @@ public class DeadZone extends View {
         mLastPokeTime = event.getEventTime();
         if (DEBUG)
             Slog.v(TAG, "poked! size=" + getSize(mLastPokeTime));
-        postInvalidate();
+        if (mShouldFlash) postInvalidate();
     }
 
     public void setFlash(float f) {
