@@ -75,7 +75,8 @@ public class NavigationBarView extends LinearLayout {
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
     private Drawable mRecentIcon;
-    
+    private Drawable mRecentLandIcon;
+
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
 
@@ -179,6 +180,7 @@ public class NavigationBarView extends LinearLayout {
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
+        mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
     }
 
     @Override
@@ -238,7 +240,7 @@ public class NavigationBarView extends LinearLayout {
                 ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
                 : (mVertical ? mBackLandIcon : mBackIcon));
 
-        ((ImageView)getRecentsButton()).setImageDrawable(mRecentIcon);
+        ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
 
         setDisabledFlags(mDisabledFlags, true);
     }
