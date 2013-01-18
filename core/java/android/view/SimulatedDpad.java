@@ -28,15 +28,15 @@ import android.os.UserHandle;
 import android.util.Log;
 
 /**
- * This class creates trackball events from touchpad events.
+ * This class creates DPAD events from touchpad events.
  * 
  * @see ViewRootImpl
  */
 
 //TODO: Make this class an internal class of ViewRootImpl.java
-class SimulatedTrackball {
+class SimulatedDpad {
 
-    private static final String TAG = "SimulatedTrackball";
+    private static final String TAG = "SimulatedDpad";
 
     // Maximum difference in milliseconds between the down and up of a touch
     // event for it to be considered a tap
@@ -97,7 +97,7 @@ class SimulatedTrackball {
     // How quickly the repeated events die off
     private float mFlickDecay;
 
-    public SimulatedTrackball(Context context) {
+    public SimulatedDpad(Context context) {
         mDistancePerTick = SystemProperties.getInt("persist.vr_dist_tick", 64);
         mDistancePerTickSquared = mDistancePerTick * mDistancePerTick;
         mMaxRepeatDelay = SystemProperties.getInt("persist.vr_repeat_delay", 300);
@@ -140,7 +140,11 @@ class SimulatedTrackball {
         }
     };
 
-    public void updateTrackballDirection(ViewRootImpl viewroot, MotionEvent event) {
+    public void updateTouchPad(ViewRootImpl viewroot, MotionEvent event,
+            boolean synthesizeNewKeys) {
+        if (!synthesizeNewKeys) {
+            mHandler.removeMessages(MSG_FLICK);
+        }
         // Store what time the touchpad event occurred
         final long time = SystemClock.uptimeMillis();
         switch (event.getAction()) {
@@ -159,8 +163,9 @@ class SimulatedTrackball {
                     mEdgeSwipePossible = true;
                 }
                 // Clear any flings
-                mHandler.removeMessages(MSG_FLICK);
-
+                if (synthesizeNewKeys) {
+                    mHandler.removeMessages(MSG_FLICK);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 // Determine whether the move is slop or an intentional move
@@ -226,12 +231,16 @@ class SimulatedTrackball {
                     while (dominantAxis * dominantAxis > mDistancePerTickSquared) {
                         repeatCount++;
                         dominantAxis -= sign * mDistancePerTick;
-                        viewroot.enqueueInputEvent(new KeyEvent(time, time,
-                                KeyEvent.ACTION_DOWN, key, 0, event.getMetaState(),
-                                event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK, event.getSource()));
-                        viewroot.enqueueInputEvent(new KeyEvent(time, time,
-                                KeyEvent.ACTION_UP, key, 0, event.getMetaState(),
-                                event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK, event.getSource()));
+                        if (synthesizeNewKeys) {
+                            viewroot.enqueueInputEvent(new KeyEvent(time, time,
+                                    KeyEvent.ACTION_DOWN, key, 0, event.getMetaState(),
+                                    event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK,
+                                    event.getSource()));
+                            viewroot.enqueueInputEvent(new KeyEvent(time, time,
+                                    KeyEvent.ACTION_UP, key, 0, event.getMetaState(),
+                                    event.getDeviceId(), 0, KeyEvent.FLAG_FALLBACK,
+                                    event.getSource()));
+                        }
                     }
                     // Save new axis values
                     mAccumulatedX = isXAxis ? dominantAxis : 0;
@@ -244,18 +253,16 @@ class SimulatedTrackball {
                 break;
             case MotionEvent.ACTION_UP:
                 if (time - mLastTouchPadStartTimeMs < MAX_TAP_TIME && mAlwaysInTapRegion) {
-                    // Trackball Down
-                    MotionEvent trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
-                            MotionEvent.ACTION_DOWN, 0, 0, 0, 0, event.getMetaState(),
-                            10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
-                    viewroot.enqueueInputEvent(trackballEvent);
-                    // Trackball Release
-                    trackballEvent = MotionEvent.obtain(mLastTouchPadStartTimeMs, time,
-                            MotionEvent.ACTION_UP, 0, 0, 0, 0, event.getMetaState(),
-                            10f, 10f, event.getDeviceId(), 0);
-                    trackballEvent.setSource(InputDevice.SOURCE_TRACKBALL);
-                    viewroot.enqueueInputEvent(trackballEvent);
+                    if (synthesizeNewKeys) {
+                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchPadStartTimeMs, time,
+                                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                event.getMetaState(), event.getDeviceId(), 0,
+                                KeyEvent.FLAG_FALLBACK, event.getSource()));
+                        viewroot.enqueueInputEvent(new KeyEvent(mLastTouchPadStartTimeMs, time,
+                                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0,
+                                event.getMetaState(), event.getDeviceId(), 0,
+                                KeyEvent.FLAG_FALLBACK, event.getSource()));
+                    }
                 } else {
                     float xMoveSquared = mLastMoveX * mLastMoveX;
                     float yMoveSquared = mLastMoveY * mLastMoveY;
@@ -267,10 +274,12 @@ class SimulatedTrackball {
                         mLastSource = event.getSource();
                         mLastMetaState = event.getMetaState();
 
-                        Message message = Message.obtain(mHandler, MSG_FLICK,
-                                mKeySendRateMs, mLastKeySent, viewroot);
-                        message.setAsynchronous(true);
-                        mHandler.sendMessageDelayed(message, mKeySendRateMs);
+                        if (synthesizeNewKeys) {
+                            Message message = Message.obtain(mHandler, MSG_FLICK,
+                                    mKeySendRateMs, mLastKeySent, viewroot);
+                            message.setAsynchronous(true);
+                            mHandler.sendMessageDelayed(message, mKeySendRateMs);
+                        }
                     }
                 }
                 mEdgeSwipePossible = false;
