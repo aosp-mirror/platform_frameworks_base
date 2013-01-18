@@ -19,6 +19,16 @@ trainingnavtop=true
             <a href="#animate">Zoom the View</a>
           </li>
         </ol>
+        <h2>
+          Try it out
+        </h2>
+        <div class="download-box">
+          <a href="{@docRoot}shareables/training/Animations.zip" class=
+          "button">Download the sample app</a>
+          <p class="filename">
+            Animations.zip
+          </p>
+        </div>
       </div>
     </div>
     <p>
