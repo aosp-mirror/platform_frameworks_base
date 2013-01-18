@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -184,7 +185,7 @@ public class ReliabilityTestActivity extends Activity {
     }
 
     private final void validateNotAppThread() {
-        if (ActivityThread.currentActivityThread() != null) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException(
                 "This method can not be called from the main application thread");
         }
