@@ -33,12 +33,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
-        View.OnClickListener {
+/**
+ * @hide
+ */
+public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
+        View.OnClickListener, WebView.FindListener {
     private View mCustomView;
     private EditText mEditText;
     private TextView mMatches;
-    private WebViewClassic mWebView;
+    private WebView mWebView;
     private InputMethodManager mInput;
     private Resources mResources;
     private boolean mMatchesFound;
@@ -46,7 +49,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private int mActiveMatchIndex;
     private ActionMode mActionMode;
 
-    FindActionModeCallback(Context context) {
+    public FindActionModeCallback(Context context) {
         mCustomView = LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.webview_find, null);
         mEditText = (EditText) mCustomView.findViewById(
@@ -61,7 +64,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mResources = context.getResources();
     }
 
-    void finish() {
+    public void finish() {
         mActionMode.finish();
     }
 
@@ -69,7 +72,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
      * Place text in the text field so it can be searched for.  Need to press
      * the find next or find previous button to find all of the matches.
      */
-    void setText(String text) {
+    public void setText(String text) {
         mEditText.setText(text);
         Spannable span = (Spannable) mEditText.getText();
         int length = span.length();
@@ -84,15 +87,23 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     }
 
     /*
-     * Set the WebView to search.  Must be non null, and set before calling
-     * startActionMode.
+     * Set the WebView to search.  Must be non null.
      */
-    void setWebView(WebViewClassic webView) {
+    public void setWebView(WebView webView) {
         if (null == webView) {
             throw new AssertionError("WebView supplied to "
                     + "FindActionModeCallback cannot be null");
         }
         mWebView = webView;
+        mWebView.setFindDialogFindListener(this);
+    }
+
+    @Override
+    public void onFindResultReceived(int activeMatchOrdinal, int numberOfMatches,
+            boolean isDoneCounting) {
+        if (isDoneCounting) {
+            updateMatchCount(activeMatchOrdinal, numberOfMatches, numberOfMatches == 0);
+        }
     }
 
     /*
@@ -121,7 +132,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     /*
      * Highlight all the instances of the string from mEditText in mWebView.
      */
-    void findAll() {
+    public void findAll() {
         if (mWebView == null) {
             throw new AssertionError(
                     "No WebView for FindActionModeCallback::findAll");
@@ -208,7 +219,8 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     public void onDestroyActionMode(ActionMode mode) {
         mActionMode = null;
         mWebView.notifyFindDialogDismissed();
-        mInput.hideSoftInputFromWindow(mWebView.getWebView().getWindowToken(), 0);
+        mWebView.setFindDialogFindListener(null);
+        mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
     }
 
     @Override
@@ -222,7 +234,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             throw new AssertionError(
                     "No WebView for FindActionModeCallback::onActionItemClicked");
         }
-        mInput.hideSoftInputFromWindow(mWebView.getWebView().getWindowToken(), 0);
+        mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
         switch(item.getItemId()) {
             case com.android.internal.R.id.find_prev:
                 findNext(false);

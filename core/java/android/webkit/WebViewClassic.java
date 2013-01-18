@@ -3668,7 +3668,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mCachedOverlappingActionModeHeight = -1;
         mFindCallback = callback;
         setFindIsUp(true);
-        mFindCallback.setWebView(this);
+        mFindCallback.setWebView(getWebView());
         if (showIme) {
             mFindCallback.showSoftInput();
         } else if (text != null) {
@@ -3770,7 +3770,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Called when the find ActionMode ends.
      */
-    void notifyFindDialogDismissed() {
+    @Override
+    public void notifyFindDialogDismissed() {
         mFindCallback = null;
         mCachedOverlappingActionModeHeight = -1;
         if (mWebViewCore == null) {
