@@ -806,7 +806,15 @@ public class Process {
      */
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
-    
+
+    /**
+     * Return the scheduling group of requested process.
+     *
+     * @hide
+     */
+    public static final native int getProcessGroup(int pid)
+            throws IllegalArgumentException, SecurityException;
+
     /**
      * Set the priority of the calling thread, based on Linux priorities.  See
      * {@link #setThreadPriority(int, int)} for more information.
