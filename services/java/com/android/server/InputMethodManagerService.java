@@ -2554,6 +2554,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         public void onCheckedChanged(
                                 CompoundButton buttonView, boolean isChecked) {
                             mWindowManagerService.setHardKeyboardEnabled(isChecked);
+                            // Ensure that the input method dialog is dismissed when changing
+                            // the hardware keyboard state.
+                            hideInputMethodMenu();
                         }
                     });
 
