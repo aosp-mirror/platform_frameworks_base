@@ -1329,7 +1329,8 @@ public class WebView extends AbsoluteLayout
      */
     public void setFindListener(FindListener listener) {
         checkThread();
-        mProvider.setFindListener(listener);
+        setupFindListenerIfNeeded();
+        mFindListener.mUserFindListener = listener;
     }
 
     /**
@@ -1850,10 +1851,59 @@ public class WebView extends AbsoluteLayout
     }
 
     //-------------------------------------------------------------------------
+    // Package-private internal stuff
+    //-------------------------------------------------------------------------
+
+    // Only used by android.webkit.FindActionModeCallback.
+    void setFindDialogFindListener(FindListener listener) {
+        checkThread();
+        setupFindListenerIfNeeded();
+        mFindListener.mFindDialogFindListener = listener;
+    }
+
+    // Only used by android.webkit.FindActionModeCallback.
+    void notifyFindDialogDismissed() {
+        checkThread();
+        mProvider.notifyFindDialogDismissed();
+    }
+
+    //-------------------------------------------------------------------------
     // Private internal stuff
     //-------------------------------------------------------------------------
 
     private WebViewProvider mProvider;
+
+    /**
+     * In addition to the FindListener that the user may set via the WebView.setFindListener
+     * API, FindActionModeCallback will register it's own FindListener. We keep them separate
+     * via this class so that that the two FindListeners can potentially exist at once.
+     */
+    private class FindListenerDistributor implements FindListener {
+        private FindListener mFindDialogFindListener;
+        private FindListener mUserFindListener;
+
+        @Override
+        public void onFindResultReceived(int activeMatchOrdinal, int numberOfMatches,
+                boolean isDoneCounting) {
+            if (mFindDialogFindListener != null) {
+                mFindDialogFindListener.onFindResultReceived(activeMatchOrdinal, numberOfMatches,
+                        isDoneCounting);
+            }
+
+            if (mUserFindListener != null) {
+                mUserFindListener.onFindResultReceived(activeMatchOrdinal, numberOfMatches,
+                        isDoneCounting);
+            }
+        }
+    }
+    private FindListenerDistributor mFindListener;
+
+    private void setupFindListenerIfNeeded() {
+        if (mFindListener == null) {
+            mFindListener = new FindListenerDistributor();
+            mProvider.setFindListener(mFindListener);
+        }
+    }
 
     private void ensureProviderCreated() {
         checkThread();

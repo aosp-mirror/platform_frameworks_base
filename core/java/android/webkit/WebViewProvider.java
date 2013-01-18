@@ -240,7 +240,7 @@ public interface WebViewProvider {
     public View findHierarchyView(String className, int hashCode);
 
     //-------------------------------------------------------------------------
-    // Provider glue methods
+    // Provider internal methods
     //-------------------------------------------------------------------------
 
     /**
@@ -254,6 +254,12 @@ public interface WebViewProvider {
      * returned by getViewDelegate().
      */
     /* package */ ScrollDelegate getScrollDelegate();
+
+    /**
+     * Only used by FindActionModeCallback to inform providers that the find dialog has
+     * been dismissed.
+     */
+    public void notifyFindDialogDismissed();
 
     //-------------------------------------------------------------------------
     // View / ViewGroup delegation methods
