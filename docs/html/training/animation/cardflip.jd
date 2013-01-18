@@ -21,6 +21,16 @@ trainingnavtop=true
             <a href="#animate">Animate the Card Flip</a>
           </li>
         </ol>
+        <h2>
+          Try it out
+        </h2>
+        <div class="download-box">
+          <a href="{@docRoot}shareables/training/Animations.zip" class=
+          "button">Download the sample app</a>
+          <p class="filename">
+            Animations.zip
+          </p>
+        </div>
       </div>
     </div>
     <p> This lesson shows you how to do a card flip
