@@ -418,6 +418,9 @@ public abstract class Context {
     /** Return the name of this application's package. */
     public abstract String getPackageName();
 
+    /** @hide Return the name of the base context this context is derived from. */
+    public abstract String getBasePackageName();
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 

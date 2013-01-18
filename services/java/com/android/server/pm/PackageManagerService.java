@@ -2878,187 +2878,144 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static final int getContinuationPoint(final String[] keys, final String key) {
-        final int index;
-        if (key == null) {
-            index = 0;
-        } else {
-            final int insertPoint = Arrays.binarySearch(keys, key);
-            if (insertPoint < 0) {
-                index = -insertPoint;
-            } else {
-                index = insertPoint + 1;
-            }
-        }
-        return index;
-    }
-
     @Override
-    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, String lastRead,
-            int userId) {
-        final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
+    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
-        final String[] keys;
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "get installed packages");
 
         // writer
         synchronized (mPackages) {
+            ArrayList<PackageInfo> list;
             if (listUninstalled) {
-                keys = mSettings.mPackages.keySet().toArray(new String[mSettings.mPackages.size()]);
-            } else {
-                keys = mPackages.keySet().toArray(new String[mPackages.size()]);
-            }
-
-            Arrays.sort(keys);
-            int i = getContinuationPoint(keys, lastRead);
-            final int N = keys.length;
-
-            while (i < N) {
-                final String packageName = keys[i++];
-
-                PackageInfo pi = null;
-                if (listUninstalled) {
-                    final PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps != null) {
+                list = new ArrayList<PackageInfo>(mSettings.mPackages.size());
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    PackageInfo pi;
+                    if (ps.pkg != null) {
+                        pi = generatePackageInfo(ps.pkg, flags, userId);
+                    } else {
                         pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
                     }
-                } else {
-                    final PackageParser.Package p = mPackages.get(packageName);
-                    if (p != null) {
-                        pi = generatePackageInfo(p, flags, userId);
+                    if (pi != null) {
+                        list.add(pi);
                     }
                 }
-
-                if (pi != null && list.append(pi)) {
-                    break;
+            } else {
+                list = new ArrayList<PackageInfo>(mPackages.size());
+                for (PackageParser.Package p : mPackages.values()) {
+                    PackageInfo pi = generatePackageInfo(p, flags, userId);
+                    if (pi != null) {
+                        list.add(pi);
+                    }
                 }
             }
 
-            if (i == N) {
-                list.setLastSlice(true);
+            return new ParceledListSlice<PackageInfo>(list);
+        }
+    }
+
+    private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
+            String[] permissions, boolean[] tmp, int flags, int userId) {
+        int numMatch = 0;
+        for (int i=0; i<permissions.length; i++) {
+            if (ps.grantedPermissions.contains(permissions[i])) {
+                tmp[i] = true;
+                numMatch++;
+            } else {
+                tmp[i] = false;
             }
         }
-
-        return list;
+        if (numMatch == 0) {
+            return;
+        }
+        PackageInfo pi;
+        if (ps.pkg != null) {
+            pi = generatePackageInfo(ps.pkg, flags, userId);
+        } else {
+            pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
+        }
+        if ((flags&PackageManager.GET_PERMISSIONS) == 0) {
+            if (numMatch == permissions.length) {
+                pi.requestedPermissions = permissions;
+            } else {
+                pi.requestedPermissions = new String[numMatch];
+                numMatch = 0;
+                for (int i=0; i<permissions.length; i++) {
+                    if (tmp[i]) {
+                        pi.requestedPermissions[numMatch] = permissions[i];
+                        numMatch++;
+                    }
+                }
+            }
+        }
+        list.add(pi);
     }
 
     @Override
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
-            String[] permissions, int flags, String lastRead, int userId) {
+            String[] permissions, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
         synchronized (mPackages) {
-            ArrayList<String> keysList = new ArrayList<String>();
+            ArrayList<PackageInfo> list = new ArrayList<PackageInfo>();
+            boolean[] tmpBools = new boolean[permissions.length];
             if (listUninstalled) {
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    for (String perm : permissions) {
-                        if (ps.grantedPermissions.contains(perm)) {
-                            keysList.add(ps.name);
-                            break;
-                        }
-                    }
+                    addPackageHoldingPermissions(list, ps, permissions, tmpBools, flags, userId);
                 }
             } else {
                 for (PackageParser.Package pkg : mPackages.values()) {
                     PackageSetting ps = (PackageSetting)pkg.mExtras;
                     if (ps != null) {
-                        for (String perm : permissions) {
-                            if (ps.grantedPermissions.contains(perm)) {
-                                keysList.add(ps.name);
-                                break;
-                            }
+                        addPackageHoldingPermissions(list, ps, permissions, tmpBools, flags,
+                                userId);
+                    }
+                }
+            }
+
+            return new ParceledListSlice<PackageInfo>(list);
+        }
+    }
+
+    @Override
+    public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
+        if (!sUserManager.exists(userId)) return null;
+        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+
+        // writer
+        synchronized (mPackages) {
+            ArrayList<ApplicationInfo> list;
+            if (listUninstalled) {
+                list = new ArrayList<ApplicationInfo>(mSettings.mPackages.size());
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    ApplicationInfo ai;
+                    if (ps.pkg != null) {
+                        ai = PackageParser.generateApplicationInfo(ps.pkg, flags,
+                                ps.readUserState(userId), userId);
+                    } else {
+                        ai = generateApplicationInfoFromSettingsLPw(ps.name, flags, userId);
+                    }
+                    if (ai != null) {
+                        list.add(ai);
+                    }
+                }
+            } else {
+                list = new ArrayList<ApplicationInfo>(mPackages.size());
+                for (PackageParser.Package p : mPackages.values()) {
+                    if (p.mExtras != null) {
+                        ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
+                                ((PackageSetting)p.mExtras).readUserState(userId), userId);
+                        if (ai != null) {
+                            list.add(ai);
                         }
                     }
                 }
             }
 
-            String[] keys = new String[keysList.size()];
-            keysList.toArray(keys);
-            Arrays.sort(keys);
-            int i = getContinuationPoint(keys, lastRead);
-            final int N = keys.length;
-
-            while (i < N) {
-                final String packageName = keys[i++];
-
-                PackageInfo pi = null;
-                if (listUninstalled) {
-                    final PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps != null) {
-                        pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
-                    }
-                } else {
-                    final PackageParser.Package p = mPackages.get(packageName);
-                    if (p != null) {
-                        pi = generatePackageInfo(p, flags, userId);
-                    }
-                }
-
-                if (pi != null && list.append(pi)) {
-                    break;
-                }
-            }
-
-            if (i == N) {
-                list.setLastSlice(true);
-            }
+            return new ParceledListSlice<ApplicationInfo>(list);
         }
-
-        return list;
-    }
-
-    @Override
-    public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags,
-            String lastRead, int userId) {
-        if (!sUserManager.exists(userId)) return null;
-        final ParceledListSlice<ApplicationInfo> list = new ParceledListSlice<ApplicationInfo>();
-        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
-        final String[] keys;
-
-        // writer
-        synchronized (mPackages) {
-            if (listUninstalled) {
-                keys = mSettings.mPackages.keySet().toArray(new String[mSettings.mPackages.size()]);
-            } else {
-                keys = mPackages.keySet().toArray(new String[mPackages.size()]);
-            }
-
-            Arrays.sort(keys);
-            int i = getContinuationPoint(keys, lastRead);
-            final int N = keys.length;
-
-            while (i < N) {
-                final String packageName = keys[i++];
-
-                ApplicationInfo ai = null;
-                final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (listUninstalled) {
-                    if (ps != null) {
-                        ai = generateApplicationInfoFromSettingsLPw(ps.name, flags, userId);
-                    }
-                } else {
-                    final PackageParser.Package p = mPackages.get(packageName);
-                    if (p != null && ps != null) {
-                        ai = PackageParser.generateApplicationInfo(p, flags,
-                                ps.readUserState(userId), userId);
-                    }
-                }
-
-                if (ai != null && list.append(ai)) {
-                    break;
-                }
-            }
-
-            if (i == N) {
-                list.setLastSlice(true);
-            }
-        }
-
-        return list;
     }
 
     public List<ApplicationInfo> getPersistentApplications(int flags) {

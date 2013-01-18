@@ -16,44 +16,92 @@
 
 package android.content.pm;
 
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Builds up a parcel that is discarded when written to another parcel or
- * written to a list. This is useful for API that sends huge lists across a
- * Binder that may be larger than the IPC limit.
+ * Transfer a large list of Parcelable objects across an IPC.  Splits into
+ * multiple transactions if needed.
  *
  * @hide
  */
 public class ParceledListSlice<T extends Parcelable> implements Parcelable {
+    private static String TAG = "ParceledListSlice";
+    private static boolean DEBUG = false;
+
     /*
      * TODO get this number from somewhere else. For now set it to a quarter of
      * the 1MB limit.
      */
     private static final int MAX_IPC_SIZE = 256 * 1024;
+    private static final int MAX_FIRST_IPC_SIZE = MAX_IPC_SIZE / 2;
 
-    private Parcel mParcel;
+    private final List<T> mList;
 
-    private int mNumItems;
-
-    private boolean mIsLastSlice;
-
-    public ParceledListSlice() {
-        mParcel = Parcel.obtain();
+    public ParceledListSlice(List<T> list) {
+        mList = list;
     }
 
-    private ParceledListSlice(Parcel p, int numItems, boolean lastSlice) {
-        mParcel = p;
-        mNumItems = numItems;
-        mIsLastSlice = lastSlice;
+    private ParceledListSlice(Parcel p, ClassLoader loader) {
+        final int N = p.readInt();
+        mList = new ArrayList<T>(N);
+        if (DEBUG) Log.d(TAG, "Retrieving " + N + " items");
+        if (N <= 0) {
+            return;
+        }
+        Parcelable.Creator<T> creator = p.readParcelableCreator(loader);
+        int i = 0;
+        while (i < N) {
+            if (p.readInt() == 0) {
+                break;
+            }
+            mList.add(p.readCreator(creator, loader));
+            if (DEBUG) Log.d(TAG, "Read inline #" + i + ": " + mList.get(mList.size()-1));
+            i++;
+        }
+        if (i >= N) {
+            return;
+        }
+        final IBinder retriever = p.readStrongBinder();
+        while (i < N) {
+            if (DEBUG) Log.d(TAG, "Reading more @" + i + " of " + N + ": retriever=" + retriever);
+            Parcel data = Parcel.obtain();
+            Parcel reply = Parcel.obtain();
+            data.writeInt(i);
+            try {
+                retriever.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failure retrieving array; only received " + i + " of " + N, e);
+                return;
+            }
+            while (i < N && reply.readInt() != 0) {
+                mList.add(reply.readCreator(creator, loader));
+                if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
+                i++;
+            }
+            reply.recycle();
+            data.recycle();
+        }
+    }
+
+    public List<T> getList() {
+        return mList;
     }
 
     @Override
     public int describeContents() {
-        return 0;
+        int contents = 0;
+        for (int i=0; i<mList.size(); i++) {
+            contents |= mList.get(i).describeContents();
+        }
+        return contents;
     }
 
     /**
@@ -63,104 +111,59 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mNumItems);
-        dest.writeInt(mIsLastSlice ? 1 : 0);
-
-        if (mNumItems > 0) {
-            final int parcelSize = mParcel.dataSize();
-            dest.writeInt(parcelSize);
-            dest.appendFrom(mParcel, 0, parcelSize);
+        final int N = mList.size();
+        final int callFlags = flags;
+        dest.writeInt(N);
+        if (DEBUG) Log.d(TAG, "Writing " + N + " items");
+        if (N > 0) {
+            dest.writeParcelableCreator(mList.get(0));
+            int i = 0;
+            while (i < N && dest.dataSize() < MAX_FIRST_IPC_SIZE) {
+                dest.writeInt(1);
+                mList.get(i).writeToParcel(dest, callFlags);
+                if (DEBUG) Log.d(TAG, "Wrote inline #" + i + ": " + mList.get(i));
+                i++;
+            }
+            if (i < N) {
+                dest.writeInt(0);
+                Binder retriever = new Binder() {
+                    @Override
+                    protected boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                            throws RemoteException {
+                        if (code != FIRST_CALL_TRANSACTION) {
+                            return super.onTransact(code, data, reply, flags);
+                        }
+                        int i = data.readInt();
+                        if (DEBUG) Log.d(TAG, "Writing more @" + i + " of " + N);
+                        while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
+                            reply.writeInt(1);
+                            mList.get(i).writeToParcel(reply, callFlags);
+                            if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
+                            i++;
+                        }
+                        if (i < N) {
+                            if (DEBUG) Log.d(TAG, "Breaking @" + i + " of " + N);
+                            reply.writeInt(0);
+                        }
+                        return true;
+                    }
+                };
+                if (DEBUG) Log.d(TAG, "Breaking @" + i + " of " + N + ": retriever=" + retriever);
+                dest.writeStrongBinder(retriever);
+            }
         }
-
-        mNumItems = 0;
-        mParcel.recycle();
-        mParcel = null;
-    }
-
-    /**
-     * Appends a parcel to this list slice.
-     *
-     * @param item Parcelable item to append to this list slice
-     * @return true when the list slice is full and should not be appended to
-     *         anymore
-     */
-    public boolean append(T item) {
-        if (mParcel == null) {
-            throw new IllegalStateException("ParceledListSlice has already been recycled");
-        }
-
-        item.writeToParcel(mParcel, PARCELABLE_WRITE_RETURN_VALUE);
-        mNumItems++;
-
-        return mParcel.dataSize() > MAX_IPC_SIZE;
-    }
-
-    /**
-     * Populates a list and discards the internal state of the
-     * ParceledListSlice in the process. The instance should
-     * not be used anymore.
-     *
-     * @param list list to insert items from this slice.
-     * @param creator creator that knows how to unparcel the
-     *        target object type.
-     * @return the last item inserted into the list or null if none.
-     */
-    public T populateList(List<T> list, Creator<T> creator) {
-        mParcel.setDataPosition(0);
-
-        T item = null;
-        for (int i = 0; i < mNumItems; i++) {
-            item = creator.createFromParcel(mParcel);
-            list.add(item);
-        }
-
-        mParcel.recycle();
-        mParcel = null;
-
-        return item;
-    }
-
-    /**
-     * Sets whether this is the last list slice in the series.
-     *
-     * @param lastSlice
-     */
-    public void setLastSlice(boolean lastSlice) {
-        mIsLastSlice = lastSlice;
-    }
-
-    /**
-     * Returns whether this is the last slice in a series of slices.
-     *
-     * @return true if this is the last slice in the series.
-     */
-    public boolean isLastSlice() {
-        return mIsLastSlice;
     }
 
     @SuppressWarnings("unchecked")
-    public static final Parcelable.Creator<ParceledListSlice> CREATOR =
-            new Parcelable.Creator<ParceledListSlice>() {
+    public static final Parcelable.ClassLoaderCreator<ParceledListSlice> CREATOR =
+            new Parcelable.ClassLoaderCreator<ParceledListSlice>() {
         public ParceledListSlice createFromParcel(Parcel in) {
-            final int numItems = in.readInt();
-            final boolean lastSlice = in.readInt() == 1;
+            return new ParceledListSlice(in, null);
+        }
 
-            if (numItems > 0) {
-                final int parcelSize = in.readInt();
-
-                // Advance within this Parcel
-                int offset = in.dataPosition();
-                in.setDataPosition(offset + parcelSize);
-
-                Parcel p = Parcel.obtain();
-                p.setDataPosition(0);
-                p.appendFrom(in, offset, parcelSize);
-                p.setDataPosition(0);
-
-                return new ParceledListSlice(p, numItems, lastSlice);
-            } else {
-                return new ParceledListSlice();
-            }
+        @Override
+        public ParceledListSlice createFromParcel(Parcel in, ClassLoader loader) {
+            return new ParceledListSlice(in, loader);
         }
 
         public ParceledListSlice[] newArray(int size) {
