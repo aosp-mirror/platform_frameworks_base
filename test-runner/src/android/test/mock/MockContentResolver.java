@@ -54,12 +54,20 @@ import java.util.Map;
 public class MockContentResolver extends ContentResolver {
     Map<String, ContentProvider> mProviders;
 
-    /*
-     * Creates a local map of providers. This map is used instead of the global map when an
-     * API call tries to acquire a provider.
+    /**
+     * Creates a local map of providers. This map is used instead of the global
+     * map when an API call tries to acquire a provider.
      */
     public MockContentResolver() {
-        super(null);
+        this(null);
+    }
+
+    /**
+     * Creates a local map of providers. This map is used instead of the global
+     * map when an API call tries to acquire a provider.
+     */
+    public MockContentResolver(Context context) {
+        super(context);
         mProviders = Maps.newHashMap();
     }
 

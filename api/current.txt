@@ -21512,6 +21512,7 @@ package android.test.mock {
 
   public class MockContentResolver extends android.content.ContentResolver {
     ctor public MockContentResolver();
+    ctor public MockContentResolver(android.content.Context);
     method public void addProvider(java.lang.String, android.content.ContentProvider);
   }
 
