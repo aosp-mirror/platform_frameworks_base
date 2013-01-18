@@ -268,6 +268,15 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     closedir(d);
 }
 
+jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
+{
+    SchedPolicy sp;
+    if (get_sched_policy(pid, &sp) != 0) {
+        signalExceptionForGroupError(env, errno);
+    }
+    return (int) sp;
+}
+
 static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, jboolean bgOk) {
     // Establishes the calling thread as illegal to put into the background.
     // Typically used only for the system process's main looper.
@@ -991,7 +1000,8 @@ static const JNINativeMethod methods[] = {
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
-    {"setProcessGroup",      "(II)V", (void*)android_os_Process_setProcessGroup},
+    {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
+    {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},

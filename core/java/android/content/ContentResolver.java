@@ -20,6 +20,7 @@ import dalvik.system.CloseGuard;
 
 import android.accounts.Account;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
@@ -206,8 +207,8 @@ public abstract class ContentResolver {
     private final Random mRandom = new Random();  // guarded by itself
 
     public ContentResolver(Context context) {
-        mContext = context;
-        mPackageName = context.getPackageName();
+        mContext = context != null ? context : ActivityThread.currentApplication();
+        mPackageName = mContext.getPackageName();
     }
 
     /** @hide */

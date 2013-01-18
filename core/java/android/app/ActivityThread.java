@@ -187,7 +187,8 @@ public final class ActivityThread {
             = new ArrayList<Application>();
     // set of instantiated backup agents, keyed by package name
     final HashMap<String, BackupAgent> mBackupAgents = new HashMap<String, BackupAgent>();
-    static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
+    /** Reference to singleton {@link ActivityThread} */
+    private static ActivityThread sCurrentActivityThread;
     Instrumentation mInstrumentation;
     String mInstrumentationAppDir = null;
     String mInstrumentationAppLibraryDir = null;
@@ -1564,7 +1565,7 @@ public final class ActivityThread {
     }
 
     public static ActivityThread currentActivityThread() {
-        return sThreadLocal.get();
+        return sCurrentActivityThread;
     }
 
     public static String currentPackageName() {
@@ -4894,7 +4895,7 @@ public final class ActivityThread {
     }
 
     private void attach(boolean system) {
-        sThreadLocal.set(this);
+        sCurrentActivityThread = this;
         mSystemThread = system;
         if (!system) {
             ViewRootImpl.addFirstDrawHandler(new Runnable() {
