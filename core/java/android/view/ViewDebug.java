@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Various debugging/tracing tools related to {@link View} and the view hierarchy.
@@ -1373,5 +1374,69 @@ public class ViewDebug {
         sb.append(capturedViewExportFields(view, klass, ""));
         sb.append(capturedViewExportMethods(view, klass, ""));
         Log.d(tag, sb.toString());
+    }
+
+    /**
+     * Invoke a particular method on given view.
+     * The given method is always invoked on the UI thread. The caller thread will stall until the
+     * method invocation is complete. Returns an object equal to the result of the method
+     * invocation, null if the method is declared to return void
+     * @throws Exception if the method invocation caused any exception
+     * @hide
+     */
+    public static Object invokeViewMethod(final View view, final Method method,
+            final Object[] args) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Object> result = new AtomicReference<Object>();
+        final AtomicReference<Throwable> exception = new AtomicReference<Throwable>();
+
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    result.set(method.invoke(view, args));
+                } catch (InvocationTargetException e) {
+                    exception.set(e.getCause());
+                } catch (Exception e) {
+                    exception.set(e);
+                }
+
+                latch.countDown();
+            }
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (exception.get() != null) {
+            throw new RuntimeException(exception.get());
+        }
+
+        return result.get();
+    }
+
+    /**
+     * @hide
+     */
+    public static void setLayoutParameter(final View view, final String param, final int value)
+            throws NoSuchFieldException, IllegalAccessException {
+        final ViewGroup.LayoutParams p = view.getLayoutParams();
+        final Field f = p.getClass().getField(param);
+        if (f.getType() != int.class) {
+            throw new RuntimeException("Only integer layout parameters can be set. Field "
+                        + param + " is of type " + f.getType().getSimpleName());
+        }
+
+        f.set(p, Integer.valueOf(value));
+
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                view.setLayoutParams(p);
+            }
+        });
     }
 }

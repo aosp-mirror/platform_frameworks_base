@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
@@ -67,20 +68,25 @@ public class DdmHandleViewDebug extends ChunkHandler {
     /** Obtain the Display List corresponding to the view. */
     private static final int VUOP_DUMP_DISPLAYLIST = 2;
 
-    /** Invalidate View. */
-    private static final int VUOP_INVALIDATE_VIEW = 3;
-
-    /** Re-layout given view. */
-    private static final int VUOP_LAYOUT_VIEW = 4;
-
     /** Profile a view. */
-    private static final int VUOP_PROFILE_VIEW = 5;
+    private static final int VUOP_PROFILE_VIEW = 3;
+
+    /** Invoke a method on the view. */
+    private static final int VUOP_INVOKE_VIEW_METHOD = 4;
+
+    /** Set layout parameter. */
+    private static final int VUOP_SET_LAYOUT_PARAMETER = 5;
 
     /** Error code indicating operation specified in chunk is invalid. */
     private static final int ERR_INVALID_OP = -1;
 
     /** Error code indicating that the parameters are invalid. */
     private static final int ERR_INVALID_PARAM = -2;
+
+    /** Error code indicating an exception while performing operation. */
+    private static final int ERR_EXCEPTION = -3;
+
+    private static final String TAG = "DdmViewDebug";
 
     private static final DdmHandleViewDebug sInstance = new DdmHandleViewDebug();
 
@@ -140,12 +146,12 @@ public class DdmHandleViewDebug extends ChunkHandler {
                     return captureView(rootView, targetView);
                 case VUOP_DUMP_DISPLAYLIST:
                     return dumpDisplayLists(rootView, targetView);
-                case VUOP_INVALIDATE_VIEW:
-                    return invalidateView(rootView, targetView);
-                case VUOP_LAYOUT_VIEW:
-                    return layoutView(rootView, targetView);
                 case VUOP_PROFILE_VIEW:
                     return profileView(rootView, targetView);
+                case VUOP_INVOKE_VIEW_METHOD:
+                    return invokeViewMethod(rootView, targetView, in);
+                case VUOP_SET_LAYOUT_PARAMETER:
+                    return setLayoutParameter(rootView, targetView, in);
                 default:
                     return createFailChunk(ERR_INVALID_OP, "Unknown view operation: " + op);
             }
@@ -276,20 +282,115 @@ public class DdmHandleViewDebug extends ChunkHandler {
         return null;
     }
 
-    /** Invalidates provided view. */
-    private Chunk invalidateView(final View rootView, final View targetView) {
-        targetView.postInvalidate();
+    /**
+     * Invokes provided method on the view.
+     * The method name and its arguments are passed in as inputs via the byte buffer.
+     * The buffer contains:<ol>
+     *  <li> len(method name) </li>
+     *  <li> method name </li>
+     *  <li> # of args </li>
+     *  <li> arguments: Each argument comprises of a type specifier followed by the actual argument.
+     *          The type specifier is a single character as used in JNI:
+     *          (Z - boolean, B - byte, C - char, S - short, I - int, J - long,
+     *          F - float, D - double). <p>
+     *          The type specifier is followed by the actual value of argument.
+     *          Booleans are encoded via bytes with 0 indicating false.</li>
+     * </ol>
+     * Methods that take no arguments need only specify the method name.
+     */
+    private Chunk invokeViewMethod(final View rootView, final View targetView, ByteBuffer in) {
+        int l = in.getInt();
+        String methodName = getString(in, l);
+
+        Class<?>[] argTypes;
+        Object[] args;
+        if (!in.hasRemaining()) {
+            argTypes = new Class<?>[0];
+            args = new Object[0];
+        } else {
+            int nArgs = in.getInt();
+
+            argTypes = new Class<?>[nArgs];
+            args = new Object[nArgs];
+
+            for (int i = 0; i < nArgs; i++) {
+                char c = in.getChar();
+                switch (c) {
+                    case 'Z':
+                        argTypes[i] = boolean.class;
+                        args[i] = in.get() == 0 ? false : true;
+                        break;
+                    case 'B':
+                        argTypes[i] = byte.class;
+                        args[i] = in.get();
+                        break;
+                    case 'C':
+                        argTypes[i] = char.class;
+                        args[i] = in.getChar();
+                        break;
+                    case 'S':
+                        argTypes[i] = short.class;
+                        args[i] = in.getShort();
+                        break;
+                    case 'I':
+                        argTypes[i] = int.class;
+                        args[i] = in.getInt();
+                        break;
+                    case 'J':
+                        argTypes[i] = long.class;
+                        args[i] = in.getLong();
+                        break;
+                    case 'F':
+                        argTypes[i] = float.class;
+                        args[i] = in.getFloat();
+                        break;
+                    case 'D':
+                        argTypes[i] = double.class;
+                        args[i] = in.getDouble();
+                        break;
+                    default:
+                        Log.e(TAG, "arg " + i + ", unrecognized type: " + c);
+                        return createFailChunk(ERR_INVALID_PARAM,
+                                "Unsupported parameter type (" + c + ") to invoke view method.");
+                }
+            }
+        }
+
+        Method method = null;
+        try {
+            method = targetView.getClass().getMethod(methodName, argTypes);
+        } catch (NoSuchMethodException e) {
+            Log.e(TAG, "No such method: " + e.getMessage());
+            return createFailChunk(ERR_INVALID_PARAM,
+                    "No such method: " + e.getMessage());
+        }
+
+        try {
+            ViewDebug.invokeViewMethod(targetView, method, args);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while invoking method: " + e.getCause().getMessage());
+            String msg = e.getCause().getMessage();
+            if (msg == null) {
+                msg = e.getCause().toString();
+            }
+            return createFailChunk(ERR_EXCEPTION, msg);
+        }
+
         return null;
     }
 
-    /** Lays out provided view. */
-    private Chunk layoutView(View rootView, final View targetView) {
-        rootView.post(new Runnable() {
-            @Override
-            public void run() {
-                targetView.requestLayout();
-            }
-        });
+    private Chunk setLayoutParameter(final View rootView, final View targetView, ByteBuffer in) {
+        int l = in.getInt();
+        String param = getString(in, l);
+        int value = in.getInt();
+        try {
+            ViewDebug.setLayoutParameter(targetView, param, value);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception setting layout parameter: " + e);
+            return createFailChunk(ERR_EXCEPTION, "Error accessing field "
+                        + param + ":" + e.getMessage());
+        }
+
         return null;
     }
 
