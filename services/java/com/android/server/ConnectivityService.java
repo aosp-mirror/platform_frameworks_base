@@ -194,7 +194,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mNetworkPreference;
     private int mActiveDefaultNetwork = -1;
     // 0 is full bad, 100 is full good
-    private int mDefaultInetCondition = 0;
     private int mDefaultInetConditionPublished = 0;
     private boolean mInetConditionChangeInFlight = false;
     private int mDefaultConnectionSequence = 0;
@@ -1728,6 +1727,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
                 mDefaultInetConditionPublished = 0; // we're not connected anymore
+                if (DBG) {
+                    log("handleDisconnect: net=" + mActiveDefaultNetwork +
+                            ", published condition=" + mDefaultInetConditionPublished);
+                }
                 intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
             }
         }
@@ -1918,6 +1921,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
                 mDefaultInetConditionPublished = 0;
+                if (DBG) {
+                    log("handleConnectionFailure: net=" + mActiveDefaultNetwork +
+                            ", published condition=" + mDefaultInetConditionPublished);
+                }
                 intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
             }
         }
@@ -2062,6 +2069,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mDefaultInetConditionPublished = 0;
             mDefaultConnectionSequence++;
             mInetConditionChangeInFlight = false;
+            if (DBG) {
+                log("handleConnect: net=" + newNetType +
+                        ", published condition=" + mDefaultInetConditionPublished);
+            }
             // Don't do this - if we never sign in stay, grey
             //reportNetworkCondition(mActiveDefaultNetwork, 100);
         }
@@ -2712,7 +2723,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 {
                     int netType = msg.arg1;
                     int sequence = msg.arg2;
-                    handleInetConditionHoldEnd(netType, sequence);
+                    int condition = (Integer)msg.obj;
+                    handleInetConditionHoldEnd(netType, sequence, condition);
                     break;
                 }
                 case EVENT_SET_NETWORK_PREFERENCE:
@@ -2925,14 +2937,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (VDBG) {
             log("handleInetConditionChange: net=" +
                     netType + ", condition=" + condition +
-                    ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
+                    " mActiveDefaultNetwork=" + mActiveDefaultNetwork);
         }
-        mDefaultInetCondition = condition;
         int delay;
         if (mInetConditionChangeInFlight == false) {
             if (VDBG) log("handleInetConditionChange: starting a change hold");
             // setup a new hold to debounce this
-            if (mDefaultInetCondition > 50) {
+            if (condition > 50) {
                 delay = Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY, 500);
             } else {
@@ -2941,18 +2952,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             mInetConditionChangeInFlight = true;
             mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_INET_CONDITION_HOLD_END,
-                    mActiveDefaultNetwork, mDefaultConnectionSequence), delay);
+                    mActiveDefaultNetwork, mDefaultConnectionSequence, new Integer(condition)), delay);
         } else {
             // we've set the new condition, when this hold ends that will get picked up
             if (VDBG) log("handleInetConditionChange: currently in hold - not setting new end evt");
         }
     }
 
-    private void handleInetConditionHoldEnd(int netType, int sequence) {
+    private void handleInetConditionHoldEnd(int netType, int sequence, int condition) {
         if (DBG) {
-            log("handleInetConditionHoldEnd: net=" + netType +
-                    ", condition=" + mDefaultInetCondition +
-                    ", published condition=" + mDefaultInetConditionPublished);
+            log("handleInetConditionHoldEnd: net=" + netType + ", condition=" + condition);
         }
         mInetConditionChangeInFlight = false;
 
@@ -2964,19 +2973,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (DBG) log("handleInetConditionHoldEnd: event hold for obsolete network - ignoring");
             return;
         }
-        // TODO: Figure out why this optimization sometimes causes a
-        //       change in mDefaultInetCondition to be missed and the
-        //       UI to not be updated.
-        //if (mDefaultInetConditionPublished == mDefaultInetCondition) {
-        //    if (DBG) log("no change in condition - aborting");
-        //    return;
-        //}
+
         NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         if (networkInfo.isConnected() == false) {
             if (DBG) log("handleInetConditionHoldEnd: default network not connected - ignoring");
             return;
         }
-        mDefaultInetConditionPublished = mDefaultInetCondition;
+        mDefaultInetConditionPublished = condition;
         sendInetConditionBroadcast(networkInfo);
         return;
     }
