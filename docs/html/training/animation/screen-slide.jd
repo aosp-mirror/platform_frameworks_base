@@ -9,15 +9,26 @@ trainingnavtop=true
          <ol>
             <li><a href="#views">Create the Views</a></li>
             <li><a href="#fragment">Create the Fragment</a></li>
-            <li><a href="#viewpager">Animate the Screen Slide</a></li>
+            <li><a href="#viewpager">Add a ViewPager</a></li>
+            <li><a href="#pagetransformer">Customize the Animation with PageTransformer</a></li>
         </ol>
+        <h2>
+          Try it out
+        </h2>
+        <div class="download-box">
+          <a href="{@docRoot}shareables/training/Animations.zip" class=
+          "button">Download the sample app</a>
+          <p class="filename">
+            Animations.zip
+          </p>
+        </div>
     </div>
   </div>
   <p>
       Screen slides are transitions between one entire screen to another and are common with UIs
       like setup wizards or slideshows. This lesson shows you how to do screen slides with
       a {@link android.support.v4.view.ViewPager} provided by the <a href=
-      "{@docRoot}/tools/extras/support-library.html">support library</a>.
+      "{@docRoot}tools/extras/support-library.html">support library</a>.
       {@link android.support.v4.view.ViewPager}s can animate screen slides
       automatically. Here's what a screen slide looks like that transitions from
       one screen of content to the next:
@@ -89,7 +100,7 @@ public class ScreenSlidePageFragment extends Fragment {
 }
 </pre>
 
-<h2 id="viewpager">Screen Slides with ViewPager</h2>
+<h2 id="viewpager">Add a ViewPager</h2>
 
 <p>{@link android.support.v4.view.ViewPager}s have built-in swipe gestures to transition
   through pages, and they display screen slide animations by default, so you don't need to create any. {@link android.support.v4.view.ViewPager}s use
@@ -112,12 +123,12 @@ fragment class that you created earlier.
 
 <ul>
   <li>Sets the content view to be the layout with the {@link android.support.v4.view.ViewPager}.</li>
-  <li>Create a class that extends the {@link android.support.v13.app.FragmentStatePagerAdapter} abstract class. Implement
+  <li>Creates a class that extends the {@link android.support.v13.app.FragmentStatePagerAdapter} abstract class and implements
   the {@link android.support.v4.app.FragmentStatePagerAdapter#getItem getItem()} method to supply
     instances of <code>ScreenSlidePageFragment</code> as new pages. The pager adapter also requires that you implement the
     {@link android.support.v4.view.PagerAdapter#getCount getCount()} method, which returns the amount of pages the adapter will create (five in the example).
   <li>Hooks up the {@link android.support.v4.view.PagerAdapter} to the {@link android.support.v4.view.ViewPager}</code>.</li>
-  <li>Handle's the device's back button by moving backwards in the virtual stack of fragments.
+  <li>Handles the device's back button by moving backwards in the virtual stack of fragments.
     If the user is already on the first page, go back on the activity back stack.</li>
 </ul>
 
@@ -183,3 +194,178 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
     }
 }
 </pre>
+
+
+<h2 id="pagetransformer">Customize the Animation with PageTransformer</h2>
+
+<p>To display a different animation from the default screen slide animation, implement the
+  {@link android.support.v4.view.ViewPager.PageTransformer} interface and supply it to
+  the view pager. The interface exposes a single method, {@link android.support.v4.view.ViewPager.PageTransformer#transformPage transformPage()}. At each point in the screen's transition, this method is called once for each visible page (generally there's only one visible page) and for adjacent pages just off the screen.
+  For example, if page three is visible and the user drags towards page four,
+  {@link android.support.v4.view.ViewPager.PageTransformer#transformPage transformPage()} is called
+  for pages two, three, and four at each step of the gesture.</p>
+
+  <p>
+  In your implementation of {@link android.support.v4.view.ViewPager.PageTransformer#transformPage transformPage()},
+  you can then create custom slide animations by determining which pages need to be transformed based on the
+  position of the page on the screen, which is obtained from the <code>position</code> parameter
+  of the {@link android.support.v4.view.ViewPager.PageTransformer#transformPage transformPage()} method.</p>
+
+<p>The <code>position</code> parameter indicates where a given page is located relative to the center of the screen. 
+It is a dynamic property that changes as the user scrolls through the pages. When a page fills the screen, its position value is <code>0</code>.
+When a page is drawn just off the right side of the screen, its position value is <code>1</code>. If the user scrolls halfway between pages one and two, page one has a position of -0.5 and page two has a position of 0.5. Based on the position of the pages on the screen, you can create custom slide animations by setting page properties with methods such as {@link android.view.View#setAlpha setAlpha()}, {@link android.view.View#setTranslationX setTranslationX()}, or
+  {@link android.view.View#setScaleY setScaleY()}.</p>
+
+
+<p>When you have an implementation of a {@link android.support.v4.view.ViewPager.PageTransformer PageTransformer},
+call {@link android.support.v4.view.ViewPager#setPageTransformer setPageTransformer()} with
+  your implementation to apply your custom animations. For example, if you have a
+  {@link android.support.v4.view.ViewPager.PageTransformer PageTransformer} named
+  <code>ZoomOutPageTransformer</code>, you can set your custom animations
+  like this:</p>
+<pre>
+ViewPager pager = (ViewPager) findViewById(R.id.pager);
+...
+pager.setPageTransformer(true, new ZoomOutPageTransformer());
+</pre>
+
+
+<p>See the <a href="#zoom-out">Zoom-out page transformer</a> and <a href="#depth-page">Depth page transformer</a>
+sections for examples and videos of a {@link android.support.v4.view.ViewPager.PageTransformer PageTransformer}.</p>
+
+
+<h3 id="zoom-out">Zoom-out page transformer</h3>
+<p>
+ This page transformer shrinks and fades pages when scrolling between
+ adjacent pages. As a page gets closer to the center, it grows back to
+ its normal size and fades in.
+</p>
+
+<div class="framed-galaxynexus-land-span-8">
+  <video class="play-on-hover" autoplay>
+    <source src="anim_page_transformer_zoomout.mp4" type="video/mp4">
+    <source src="anim_page_transformer_zoomout.webm" type="video/webm">
+    <source src="anim_page_transformer_zoomout.ogv" type="video/ogg">
+  </video>
+</div>
+
+<div class="figure-caption">
+  <code>ZoomOutPageTransformer</code> example
+  <div class="video-instructions">&nbsp;</div>
+</div>
+
+
+<pre>
+public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
+    private static float MIN_SCALE = 0.85f;
+    private static float MIN_ALPHA = 0.5f;
+
+    public void transformPage(View view, float position) {
+        int pageWidth = view.getWidth();
+        int pageHeight = view.getHeight();
+
+        if (position &lt; -1) { // [-Infinity,-1)
+            // This page is way off-screen to the left.
+            view.setAlpha(0);
+
+        } else if (position &lt;= 1) { // [-1,1]
+            // Modify the default slide transition to shrink the page as well
+            float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
+            float vertMargin = pageHeight * (1 - scaleFactor) / 2;
+            float horzMargin = pageWidth * (1 - scaleFactor) / 2;
+            if (position &lt; 0) {
+                view.setTranslationX(horzMargin - vertMargin / 2);
+            } else {
+                view.setTranslationX(-horzMargin + vertMargin / 2);
+            }
+
+            // Scale the page down (between MIN_SCALE and 1)
+            view.setScaleX(scaleFactor);
+            view.setScaleY(scaleFactor);
+
+            // Fade the page relative to its size.
+            view.setAlpha(MIN_ALPHA +
+                    (scaleFactor - MIN_SCALE) /
+                    (1 - MIN_SCALE) * (1 - MIN_ALPHA));
+
+        } else { // (1,+Infinity]
+            // This page is way off-screen to the right.
+            view.setAlpha(0);
+        }
+    }
+}
+</pre>
+
+<h3 id="depth-page">Depth page transformer</h3>
+<p>
+This page transformer uses the default slide animation for sliding pages
+to the left, while using a "depth" animation for sliding pages to the
+right. This depth animation fades the page out, and scales it down linearly.
+</p>
+
+<div class="framed-galaxynexus-land-span-8">
+  <video class="play-on-hover" autoplay>
+    <source src="anim_page_transformer_depth.mp4" type="video/mp4">
+    <source src="anim_page_transformer_depth.webm" type="video/webm">
+    <source src="anim_page_transformer_depth.ogv" type="video/ogg">
+  </video>
+</div>
+
+<div class="figure-caption">
+  <code>DepthPageTransformer</code> example
+  <div class="video-instructions">&nbsp;</div>
+</div>
+
+<p class="note"><strong>Note:</strong> During the depth animation, the default animation (a screen slide) still
+takes place, so you must counteract the screen slide with a negative X translation.
+
+For example:
+
+<pre>
+view.setTranslationX(-1 * view.getWidth() * position);
+</pre>
+
+The following example shows how to counteract the default screen slide animation
+in a working page transformer:
+</p>
+
+<pre>
+
+public class DepthPageTransformer implements ViewPager.PageTransformer {
+    private static float MIN_SCALE = 0.75f;
+
+    public void transformPage(View view, float position) {
+        int pageWidth = view.getWidth();
+
+        if (position &lt; -1) { // [-Infinity,-1)
+            // This page is way off-screen to the left.
+            view.setAlpha(0);
+
+        } else if (position &lt;= 0) { // [-1,0]
+            // Use the default slide transition when moving to the left page
+            view.setAlpha(1);
+            view.setTranslationX(0);
+            view.setScaleX(1);
+            view.setScaleY(1);
+
+        } else if (position &lt;= 1) { // (0,1]
+            // Fade the page out.
+            view.setAlpha(1 - position);
+
+            // Counteract the default slide transition
+            view.setTranslationX(pageWidth * -position);
+
+            // Scale the page down (between MIN_SCALE and 1)
+            float scaleFactor = MIN_SCALE
+                    + (1 - MIN_SCALE) * (1 - Math.abs(position));
+            view.setScaleX(scaleFactor);
+            view.setScaleY(scaleFactor);
+
+        } else { // (1,+Infinity]
+            // This page is way off-screen to the right.
+            view.setAlpha(0);
+        }
+    }
+}
+</pre>
+
