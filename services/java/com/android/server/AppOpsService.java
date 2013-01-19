@@ -127,6 +127,30 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
+        ArrayList<AppOpsManager.OpEntry> resOps = null;
+        if (ops == null) {
+            resOps = new ArrayList<AppOpsManager.OpEntry>();
+            for (int j=0; j<pkgOps.size(); j++) {
+                Op curOp = pkgOps.valueAt(j);
+                resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
+                        curOp.duration));
+            }
+        } else {
+            for (int j=0; j<ops.length; j++) {
+                Op curOp = pkgOps.get(ops[j]);
+                if (curOp != null) {
+                    if (resOps == null) {
+                        resOps = new ArrayList<AppOpsManager.OpEntry>();
+                    }
+                    resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
+                            curOp.duration));
+                }
+            }
+        }
+        return resOps;
+    }
+
     @Override
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
@@ -136,26 +160,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i=0; i<mUidOps.size(); i++) {
                 HashMap<String, Ops> packages = mUidOps.valueAt(i);
                 for (Ops pkgOps : packages.values()) {
-                    ArrayList<AppOpsManager.OpEntry> resOps = null;
-                    if (ops == null) {
-                        resOps = new ArrayList<AppOpsManager.OpEntry>();
-                        for (int j=0; j<pkgOps.size(); j++) {
-                            Op curOp = pkgOps.valueAt(j);
-                            resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
-                                    curOp.duration));
-                        }
-                    } else {
-                        for (int j=0; j<ops.length; j++) {
-                            Op curOp = pkgOps.get(ops[j]);
-                            if (curOp != null) {
-                                if (resOps == null) {
-                                    resOps = new ArrayList<AppOpsManager.OpEntry>();
-                                }
-                                resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
-                                        curOp.duration));
-                            }
-                        }
-                    }
+                    ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops);
                     if (resOps != null) {
                         if (res == null) {
                             res = new ArrayList<AppOpsManager.PackageOps>();
@@ -168,6 +173,28 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         return res;
+    }
+
+    @Override
+    public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName,
+            int[] ops) {
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+        synchronized (this) {
+            Ops pkgOps = getOpsLocked(uid, packageName, false);
+            if (pkgOps == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops);
+            if (resOps == null) {
+                return null;
+            }
+            ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
+            AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
+                    pkgOps.packageName, pkgOps.uid, resOps);
+            res.add(resPackage);
+            return res;
+        }
     }
 
     @Override
@@ -252,7 +279,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         return uid;
     }
 
-    private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
+    private Ops getOpsLocked(int uid, String packageName, boolean edit) {
         HashMap<String, Ops> pkgOps = mUidOps.get(uid);
         if (pkgOps == null) {
             if (!edit) {
@@ -288,6 +315,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             ops = new Ops(packageName, uid);
             pkgOps.put(packageName, ops);
+        }
+        return ops;
+    }
+
+    private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
+        Ops ops = getOpsLocked(uid, packageName, edit);
+        if (ops == null) {
+            return null;
         }
         Op op = ops.get(code);
         if (op == null) {
