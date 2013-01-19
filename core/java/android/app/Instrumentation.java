@@ -27,6 +27,7 @@ import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.PerformanceCollector;
 import android.os.Process;
@@ -1637,7 +1638,7 @@ public class Instrumentation {
     }
     
     private final void validateNotAppThread() {
-        if (ActivityThread.currentActivityThread() != null) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException(
                 "This method can not be called from the main application thread");
         }
