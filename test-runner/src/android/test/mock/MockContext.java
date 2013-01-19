@@ -106,6 +106,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public String getBasePackageName() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public ApplicationInfo getApplicationInfo() {
         throw new UnsupportedOperationException();

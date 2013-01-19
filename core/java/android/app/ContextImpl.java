@@ -628,6 +628,12 @@ class ContextImpl extends Context {
         return "android";
     }
 
+    /** @hide */
+    @Override
+    public String getBasePackageName() {
+        return mBasePackageName != null ? mBasePackageName : getPackageName();
+    }
+
     @Override
     public ApplicationInfo getApplicationInfo() {
         if (mPackageInfo != null) {

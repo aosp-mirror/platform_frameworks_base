@@ -135,6 +135,12 @@ public class ContextWrapper extends Context {
         return mBase.getPackageName();
     }
 
+    /** @hide */
+    @Override
+    public String getBasePackageName() {
+        return mBase.getBasePackageName();
+    }
+
     @Override
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();

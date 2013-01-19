@@ -38,7 +38,7 @@ public class SystemVibrator extends Vibrator {
     }
 
     public SystemVibrator(Context context) {
-        mPackageName = context.getPackageName();
+        mPackageName = context.getBasePackageName();
         mService = IVibratorService.Stub.asInterface(
                 ServiceManager.getService("vibrator"));
     }

@@ -228,7 +228,7 @@ public class AppOpsManager {
     }
 
     public int noteOp(int op) {
-        return noteOp(op, Process.myUid(), mContext.getPackageName());
+        return noteOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
     public int startOp(int op, int uid, String packageName) {
@@ -252,7 +252,7 @@ public class AppOpsManager {
     }
 
     public int startOp(int op) {
-        return startOp(op, Process.myUid(), mContext.getPackageName());
+        return startOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
     public void finishOp(int op, int uid, String packageName) {
@@ -263,6 +263,6 @@ public class AppOpsManager {
     }
 
     public void finishOp(int op) {
-        finishOp(op, Process.myUid(), mContext.getPackageName());
+        finishOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 }
