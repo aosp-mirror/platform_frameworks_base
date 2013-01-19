@@ -20,6 +20,7 @@ import android.app.AppOpsManager;
 
 interface IAppOpsService {
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
+    List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
     int startOperation(int code, int uid, String packageName);

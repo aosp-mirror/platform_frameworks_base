@@ -187,6 +187,14 @@ public class AppOpsManager {
         return null;
     }
 
+    public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
+        try {
+            return mService.getOpsForPackage(uid, packageName, ops);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
     public int checkOp(int op, int uid, String packageName) {
         try {
             int mode = mService.checkOperation(op, uid, packageName);
