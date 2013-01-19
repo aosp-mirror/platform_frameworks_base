@@ -264,7 +264,7 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
     if (layer) {
         LAYER_RENDERER_LOGD("Resizing layer fbo = %d to %dx%d", layer->getFbo(), width, height);
 
-        if (Caches::getInstance().layerCache.resize(layer, width, height)) {
+        if (layer->resize(width, height)) {
             layer->layer.set(0.0f, 0.0f, width, height);
             layer->texCoords.set(0.0f, height / float(layer->getHeight()),
                     width / float(layer->getWidth()), 0.0f);

@@ -48,13 +48,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Grow layer" />
+
+        <Button
+            android:onClick="enableClip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Circle clip" />
+
+        <Button
+            android:onClick="disableClip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No clip" />
         
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/list1"
+    <view class="com.android.test.hwui.ViewLayersActivity5$ClipFrameLayout"
+        android:id="@+id/container"
         android:layout_width="0dip"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <ListView
+            android:id="@+id/list1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </view>
 
 </LinearLayout>

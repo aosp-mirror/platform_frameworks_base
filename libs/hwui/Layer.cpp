@@ -54,6 +54,51 @@ Layer::~Layer() {
     deleteTexture();
 }
 
+uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
+    return uint32_t(ceilf(layerWidth / float(LAYER_SIZE)) * LAYER_SIZE);
+}
+
+uint32_t Layer::computeIdealHeight(uint32_t layerHeight) {
+    return uint32_t(ceilf(layerHeight / float(LAYER_SIZE)) * LAYER_SIZE);
+}
+
+bool Layer::resize(const uint32_t width, const uint32_t height) {
+    uint32_t desiredWidth = computeIdealWidth(width);
+    uint32_t desiredHeight = computeIdealWidth(height);
+
+    if (desiredWidth <= getWidth() && desiredHeight <= getHeight()) {
+        return true;
+    }
+
+    uint32_t oldWidth = getWidth();
+    uint32_t oldHeight = getHeight();
+
+    setSize(desiredWidth, desiredHeight);
+
+    if (fbo) {
+        Caches::getInstance().activeTexture(0);
+        bindTexture();
+        allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
+
+        if (glGetError() != GL_NO_ERROR) {
+            setSize(oldWidth, oldHeight);
+            return false;
+        }
+    }
+
+    if (stencil) {
+        bindStencilRenderBuffer();
+        allocateStencilRenderBuffer();
+
+        if (glGetError() != GL_NO_ERROR) {
+            setSize(oldWidth, oldHeight);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void Layer::removeFbo(bool flush) {
     if (stencil) {
         // TODO: recycle & cache instead of simply deleting

@@ -48,6 +48,9 @@ struct Layer {
     Layer(const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
+    static uint32_t computeIdealWidth(uint32_t layerWidth);
+    static uint32_t computeIdealHeight(uint32_t layerHeight);
+
     /**
      * Calling this method will remove (either by recycling or
      * destroying) the associated FBO, if present, and any render
@@ -90,6 +93,17 @@ struct Layer {
     inline uint32_t getHeight() {
         return texture.height;
     }
+
+    /**
+     * Resize the layer and its texture if needed.
+     *
+     * @param width The new width of the layer
+     * @param height The new height of the layer
+     *
+     * @return True if the layer was resized or nothing happened, false if
+     *         a failure occurred during the resizing operation
+     */
+    bool resize(const uint32_t width, const uint32_t height);
 
     void setSize(uint32_t width, uint32_t height) {
         texture.width = width;
@@ -203,6 +217,12 @@ struct Layer {
         }
     }
 
+    inline void bindStencilRenderBuffer() {
+        if (stencil) {
+            glBindRenderbuffer(GL_RENDERBUFFER, stencil);
+        }
+    }
+
     inline void generateTexture() {
         if (!texture.id) {
             glGenTextures(1, &texture.id);
@@ -229,7 +249,16 @@ struct Layer {
 #if DEBUG_LAYERS
         ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
 #endif
-        glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0, format, storage, NULL);
+        if (texture.id) {
+            glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0,
+                    format, storage, NULL);
+        }
+    }
+
+    inline void allocateStencilRenderBuffer() {
+        if (stencil) {
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, getWidth(), getHeight());
+        }
     }
 
     inline mat4& getTexTransform() {
