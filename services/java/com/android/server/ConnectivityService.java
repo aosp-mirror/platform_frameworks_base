@@ -183,7 +183,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * A per Net list of the PID's that requested access to the net
      * used both as a refcount and for per-PID DNS selection
      */
-    private List<Integer> mNetRequestersPids[];
+    private List mNetRequestersPids[];
 
     // priority order of the nettrackers
     // (excluding dynamically set mNetworkPreference)
@@ -199,6 +199,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mDefaultConnectionSequence = 0;
 
     private Object mDnsLock = new Object();
+    private int mNumDnsEntries;
     private boolean mDnsOverridden = false;
 
     private boolean mTestMode;
@@ -506,13 +507,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        mNetRequestersPids =
-                (List<Integer> [])new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
+        mNetRequestersPids = new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
         for (int i : mPriorityList) {
-            mNetRequestersPids[i] = new ArrayList<Integer>();
+            mNetRequestersPids[i] = new ArrayList();
         }
 
         mFeatureUsers = new ArrayList<FeatureUser>();
+
+        mNumDnsEntries = 0;
 
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
                 && SystemProperties.get("ro.build.type").equals("eng");
@@ -1314,7 +1316,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 Integer currentPid = new Integer(pid);
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
                 reassessPidDns(pid, true);
-                flushVmDnsCache();
                 if (mNetRequestersPids[usedNetworkType].size() != 0) {
                     if (VDBG) {
                         log("stopUsingNetworkFeature: net " + networkType + ": " + feature +
@@ -1696,8 +1697,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * in accordance with network preference policies.
          */
         if (!mNetConfigs[prevNetType].isDefault()) {
-            List<Integer> pids = mNetRequestersPids[prevNetType];
-            for (Integer pid : pids) {
+            List pids = mNetRequestersPids[prevNetType];
+            for (int i = 0; i<pids.size(); i++) {
+                Integer pid = (Integer)pids.get(i);
                 // will remove them because the net's no longer connected
                 // need to do this now as only now do we know the pids and
                 // can properly null things that are no longer referenced.
@@ -2259,7 +2261,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                     }
                     if (resetDns) {
-                        flushVmDnsCache();
                         if (VDBG) log("resetting DNS cache for " + iface);
                         try {
                             mNetd.flushInterfaceDnsCache(iface);
@@ -2426,10 +2427,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * on the highest priority active net which this process requested.
      * If there aren't any, clear it out
      */
-    private void reassessPidDns(int pid, boolean doBump)
+    private void reassessPidDns(int myPid, boolean doBump)
     {
-        if (VDBG) log("reassessPidDns for pid " + pid);
-        Integer myPid = new Integer(pid);
+        if (VDBG) log("reassessPidDns for pid " + myPid);
         for(int i : mPriorityList) {
             if (mNetConfigs[i].isDefault()) {
                 continue;
@@ -2439,25 +2439,61 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     !nt.isTeardownRequested()) {
                 LinkProperties p = nt.getLinkProperties();
                 if (p == null) continue;
-                if (mNetRequestersPids[i].contains(myPid)) {
-                    try {
-                        mNetd.setDnsIfaceForPid(p.getInterfaceName(), pid);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "exception reasseses pid dns: " + e);
+                List pids = mNetRequestersPids[i];
+                for (int j=0; j<pids.size(); j++) {
+                    Integer pid = (Integer)pids.get(j);
+                    if (pid.intValue() == myPid) {
+                        Collection<InetAddress> dnses = p.getDnses();
+                        writePidDns(dnses, myPid);
+                        if (doBump) {
+                            bumpDns();
+                        }
+                        return;
                     }
-                    return;
                 }
            }
         }
         // nothing found - delete
-        try {
-            mNetd.clearDnsIfaceForPid(pid);
-        } catch (Exception e) {
-            Slog.e(TAG, "exception clear interface from pid: " + e);
+        for (int i = 1; ; i++) {
+            String prop = "net.dns" + i + "." + myPid;
+            if (SystemProperties.get(prop).length() == 0) {
+                if (doBump) {
+                    bumpDns();
+                }
+                return;
+            }
+            SystemProperties.set(prop, "");
         }
     }
 
-    private void flushVmDnsCache() {
+    // return true if results in a change
+    private boolean writePidDns(Collection <InetAddress> dnses, int pid) {
+        int j = 1;
+        boolean changed = false;
+        for (InetAddress dns : dnses) {
+            String dnsString = dns.getHostAddress();
+            if (changed || !dnsString.equals(SystemProperties.get("net.dns" + j + "." + pid))) {
+                changed = true;
+                SystemProperties.set("net.dns" + j + "." + pid, dns.getHostAddress());
+            }
+            j++;
+        }
+        return changed;
+    }
+
+    private void bumpDns() {
+        /*
+         * Bump the property that tells the name resolver library to reread
+         * the DNS server list from the properties.
+         */
+        String propVal = SystemProperties.get("net.dnschange");
+        int n = 0;
+        if (propVal.length() != 0) {
+            try {
+                n = Integer.parseInt(propVal);
+            } catch (NumberFormatException e) {}
+        }
+        SystemProperties.set("net.dnschange", "" + (n+1));
         /*
          * Tell the VMs to toss their DNS caches
          */
@@ -2476,23 +2512,56 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     // Caller must grab mDnsLock.
-    private void updateDns(String network, String iface,
+    private boolean updateDns(String network, String iface,
             Collection<InetAddress> dnses, String domains) {
+        boolean changed = false;
         int last = 0;
         if (dnses.size() == 0 && mDefaultDns != null) {
-            dnses = new ArrayList();
-            dnses.add(mDefaultDns);
-            if (DBG) {
-                loge("no dns provided for " + network + " - using " + mDefaultDns.getHostAddress());
+            ++last;
+            String value = mDefaultDns.getHostAddress();
+            if (!value.equals(SystemProperties.get("net.dns1"))) {
+                if (DBG) {
+                    loge("no dns provided for " + network + " - using " + value);
+                }
+                changed = true;
+                SystemProperties.set("net.dns1", value);
+            }
+        } else {
+            for (InetAddress dns : dnses) {
+                ++last;
+                String key = "net.dns" + last;
+                String value = dns.getHostAddress();
+                if (!changed && value.equals(SystemProperties.get(key))) {
+                    continue;
+                }
+                if (VDBG) {
+                    log("adding dns " + value + " for " + network);
+                }
+                changed = true;
+                SystemProperties.set(key, value);
             }
         }
-
-        try {
-            mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
-            mNetd.setDefaultInterfaceForDns(iface);
-        } catch (Exception e) {
-            if (DBG) loge("exception setting default dns interface: " + e);
+        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
+            String key = "net.dns" + i;
+            if (VDBG) log("erasing " + key);
+            changed = true;
+            SystemProperties.set(key, "");
         }
+        mNumDnsEntries = last;
+        if (SystemProperties.get("net.dns.search").equals(domains) == false) {
+            SystemProperties.set("net.dns.search", domains);
+            changed = true;
+        }
+
+        if (changed) {
+            try {
+                mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
+                mNetd.setDefaultInterfaceForDns(iface);
+            } catch (Exception e) {
+                if (DBG) loge("exception setting default dns interface: " + e);
+            }
+        }
+        return changed;
     }
 
     private void handleDnsConfigurationChange(int netType) {
@@ -2502,11 +2571,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
+            boolean changed = false;
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
                     if (!mDnsOverridden) {
-                        updateDns(network, p.getInterfaceName(), dnses, p.getDomains());
+                        changed = updateDns(network, p.getInterfaceName(), dnses, p.getDomains());
                     }
                 }
             } else {
@@ -2517,16 +2587,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (DBG) loge("exception setting dns servers: " + e);
                 }
                 // set per-pid dns for attached secondary nets
-                List<Integer> pids = mNetRequestersPids[netType];
-                for (Integer pid : pids) {
-                    try {
-                        mNetd.setDnsIfaceForPid(p.getInterfaceName(), pid);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "exception setting interface for pid: " + e);
-                    }
+                List pids = mNetRequestersPids[netType];
+                for (int y=0; y< pids.size(); y++) {
+                    Integer pid = (Integer)pids.get(y);
+                    changed = writePidDns(dnses, pid.intValue());
                 }
             }
-            flushVmDnsCache();
+            if (changed) bumpDns();
         }
     }
 
@@ -2585,7 +2652,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         pw.increaseIndent();
         for (int net : mPriorityList) {
             String pidString = net + ": ";
-            for (Integer pid : mNetRequestersPids[net]) {
+            for (Object pid : mNetRequestersPids[net]) {
                 pidString = pidString + pid.toString() + ", ";
             }
             pw.println(pidString);
@@ -3287,9 +3354,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String domains = buffer.toString().trim();
 
             // Apply DNS changes.
+            boolean changed = false;
             synchronized (mDnsLock) {
-                updateDns("VPN", "VPN", addresses, domains);
+                changed = updateDns("VPN", "VPN", addresses, domains);
                 mDnsOverridden = true;
+            }
+            if (changed) {
+                bumpDns();
             }
 
             // Temporarily disable the default proxy.
