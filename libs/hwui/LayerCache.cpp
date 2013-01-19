@@ -136,31 +136,6 @@ void LayerCache::dump() {
     }
 }
 
-bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t height) {
-    // TODO: We should be smarter and see if we have a texture of the appropriate
-    //       size already in the cache, and reuse it instead of creating a new one
-
-    LayerEntry entry(width, height);
-    if (entry.mWidth <= layer->getWidth() && entry.mHeight <= layer->getHeight()) {
-        return true;
-    }
-
-    uint32_t oldWidth = layer->getWidth();
-    uint32_t oldHeight = layer->getHeight();
-
-    Caches::getInstance().activeTexture(0);
-    layer->bindTexture();
-    layer->setSize(entry.mWidth, entry.mHeight);
-    layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
-
-    if (glGetError() != GL_NO_ERROR) {
-        layer->setSize(oldWidth, oldHeight);
-        return false;
-    }
-
-    return true;
-}
-
 bool LayerCache::put(Layer* layer) {
     if (!layer->isCacheable()) return false;
 

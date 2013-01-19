@@ -1248,11 +1248,12 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
         // TODO: See Layer::removeFbo(). The stencil renderbuffer should be cached
         GLuint buffer;
         glGenRenderbuffers(1, &buffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, buffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8,
-                layer->getWidth(), layer->getHeight());
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
+
         layer->setStencilRenderBuffer(buffer);
+        layer->bindStencilRenderBuffer();
+        layer->allocateStencilRenderBuffer();
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
     }
 }
 
