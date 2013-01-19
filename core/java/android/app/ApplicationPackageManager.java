@@ -426,17 +426,8 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public List<PackageInfo> getInstalledPackages(int flags, int userId) {
         try {
-            final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
-            PackageInfo lastItem = null;
-            ParceledListSlice<PackageInfo> slice;
-
-            do {
-                final String lastKey = lastItem != null ? lastItem.packageName : null;
-                slice = mPM.getInstalledPackages(flags, lastKey, userId);
-                lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
-            } while (!slice.isLastSlice());
-
-            return packageInfos;
+            ParceledListSlice<PackageInfo> slice = mPM.getInstalledPackages(flags, userId);
+            return slice.getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -448,17 +439,9 @@ final class ApplicationPackageManager extends PackageManager {
             String[] permissions, int flags) {
         final int userId = mContext.getUserId();
         try {
-            final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
-            PackageInfo lastItem = null;
-            ParceledListSlice<PackageInfo> slice;
-
-            do {
-                final String lastKey = lastItem != null ? lastItem.packageName : null;
-                slice = mPM.getPackagesHoldingPermissions(permissions, flags, lastKey, userId);
-                lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
-            } while (!slice.isLastSlice());
-
-            return packageInfos;
+            ParceledListSlice<PackageInfo> slice = mPM.getPackagesHoldingPermissions(
+                    permissions, flags, userId);
+            return slice.getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -469,17 +452,8 @@ final class ApplicationPackageManager extends PackageManager {
     public List<ApplicationInfo> getInstalledApplications(int flags) {
         final int userId = mContext.getUserId();
         try {
-            final List<ApplicationInfo> applicationInfos = new ArrayList<ApplicationInfo>();
-            ApplicationInfo lastItem = null;
-            ParceledListSlice<ApplicationInfo> slice;
-
-            do {
-                final String lastKey = lastItem != null ? lastItem.packageName : null;
-                slice = mPM.getInstalledApplications(flags, lastKey, userId);
-                lastItem = slice.populateList(applicationInfos, ApplicationInfo.CREATOR);
-            } while (!slice.isLastSlice());
-
-            return applicationInfos;
+            ParceledListSlice<ApplicationInfo> slice = mPM.getInstalledApplications(flags, userId);
+            return slice.getList();
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

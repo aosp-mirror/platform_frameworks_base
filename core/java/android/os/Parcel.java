@@ -1254,6 +1254,12 @@ public final class Parcel {
         p.writeToParcel(this, parcelableFlags);
     }
 
+    /** @hide */
+    public final void writeParcelableCreator(Parcelable p) {
+        String name = p.getClass().getName();
+        writeString(name);
+    }
+
     /**
      * Write a generic serializable object in to a Parcel.  It is strongly
      * recommended that this method be avoided, since the serialization
@@ -2046,6 +2052,28 @@ public final class Parcel {
      * was an error trying to instantiate the Parcelable.
      */
     public final <T extends Parcelable> T readParcelable(ClassLoader loader) {
+        Parcelable.Creator<T> creator = readParcelableCreator(loader);
+        if (creator == null) {
+            return null;
+        }
+        if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
+        }
+        return creator.createFromParcel(this);
+    }
+
+    /** @hide */
+    public final <T extends Parcelable> T readCreator(Parcelable.Creator<T> creator,
+            ClassLoader loader) {
+        if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
+        }
+        return creator.createFromParcel(this);
+    }
+
+    /** @hide */
+    public final <T extends Parcelable> Parcelable.Creator<T> readParcelableCreator(
+            ClassLoader loader) {
         String name = readString();
         if (name == null) {
             return null;
@@ -2101,10 +2129,7 @@ public final class Parcel {
             }
         }
 
-        if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
-        }
-        return creator.createFromParcel(this);
+        return creator;
     }
 
     /**

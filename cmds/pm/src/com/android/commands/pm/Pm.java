@@ -321,17 +321,8 @@ public final class Pm {
     @SuppressWarnings("unchecked")
     private List<PackageInfo> getInstalledPackages(IPackageManager pm, int flags, int userId)
             throws RemoteException {
-        final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
-        PackageInfo lastItem = null;
-        ParceledListSlice<PackageInfo> slice;
-
-        do {
-            final String lastKey = lastItem != null ? lastItem.packageName : null;
-            slice = pm.getInstalledPackages(flags, lastKey, userId);
-            lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
-        } while (!slice.isLastSlice());
-
-        return packageInfos;
+        ParceledListSlice<PackageInfo> slice = pm.getInstalledPackages(flags, userId);
+        return slice.getList();
     }
 
     /**
