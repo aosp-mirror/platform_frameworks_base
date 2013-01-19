@@ -74,18 +74,14 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** This represents an empty value of an enterprise field.
      * NULL is used at wpa_supplicant to indicate an empty value
      */
-    private static final String EMPTY_VALUE = "NULL";
+    static final String EMPTY_VALUE = "NULL";
 
     public WifiEnterpriseConfig() {
-        // Set the required defaults
-        mFields.put(EAP_KEY, Eap.strings[Eap.PEAP]);
-        mFields.put(ENGINE_KEY, ENGINE_DISABLE);
+        // Do not set defaults so that the enterprise fields that are not changed
+        // by API are not changed underneath
+        // This is essential because an app may not have all fields like password
+        // available. It allows modification of subset of fields.
 
-        for (String key : new String[] {PHASE2_KEY, IDENTITY_KEY, ANON_IDENTITY_KEY,
-                PASSWORD_KEY, CLIENT_CERT_KEY, ENGINE_ID_KEY, PRIVATE_KEY_ID_KEY,
-                CA_CERT_KEY, SUBJECT_MATCH_KEY}) {
-            mFields.put(key, EMPTY_VALUE);
-        }
     }
 
     /** Copy constructor */
@@ -128,6 +124,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             };
 
     public static final class Eap {
+        /* NONE represents an empty enterprise config */
+        public static final int NONE    = -1;
         public static final int PEAP    = 0;
         public static final int TLS     = 1;
         public static final int TTLS    = 2;
@@ -150,6 +148,13 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** Internal use only @hide */
     public HashMap<String, String> getFields() {
         return mFields;
+    }
+
+    /** Internal use only @hide */
+    public static String[] getSupplicantKeys() {
+        return new String[] { EAP_KEY, PHASE2_KEY, IDENTITY_KEY, ANON_IDENTITY_KEY, PASSWORD_KEY,
+                CLIENT_CERT_KEY, CA_CERT_KEY, SUBJECT_MATCH_KEY, ENGINE_KEY, ENGINE_ID_KEY,
+                PRIVATE_KEY_ID_KEY };
     }
 
     /**
@@ -177,7 +182,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public int getEapMethod() {
         String eapMethod  = mFields.get(EAP_KEY);
-        return getStringIndex(Eap.strings, eapMethod, Eap.PEAP);
+        return getStringIndex(Eap.strings, eapMethod, Eap.NONE);
     }
 
     /**
@@ -211,7 +216,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return a phase 2 method defined at {@link Phase2}
      * */
     public int getPhase2Method() {
-        String phase2Method = mFields.get(PHASE2_KEY);
+        String phase2Method = removeDoubleQuotes(mFields.get(PHASE2_KEY));
+        // Remove auth= prefix
+        if (phase2Method.startsWith(Phase2.PREFIX)) {
+            phase2Method = phase2Method.substring(Phase2.PREFIX.length());
+        }
         return getStringIndex(Phase2.strings, phase2Method, Phase2.NONE);
     }
 
@@ -387,9 +396,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     private int getStringIndex(String arr[], String toBeFound, int defaultIndex) {
         for (int i = 0; i < arr.length; i++) {
-            // toBeFound can be formatted with a prefix. For example, phase2
-            // string has "auth=" as the prefix.
-            if (toBeFound.contains(arr[i])) return i;
+            if (toBeFound.equals(arr[i])) return i;
         }
         return defaultIndex;
     }
