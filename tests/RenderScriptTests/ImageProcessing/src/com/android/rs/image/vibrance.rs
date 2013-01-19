@@ -16,7 +16,6 @@
 
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.image)
-#pragma rs_fp_relaxed
 
 float vibrance = 0.f;
 
@@ -39,7 +38,7 @@ void vibranceKernel(const uchar4 *in, uchar4 *out) {
     int g = in->g;
     int b = in->b;
     float red = (r-max(g, b))/256.f;
-    float sx = (float)(Vib/(1+exp(-red*3)));
+    float sx = (float)(Vib/(1+native_exp(-red*3)));
     S = sx+1;
     MS = 1.0f - S;
     Rt = Rf * MS;
