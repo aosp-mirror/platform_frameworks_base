@@ -2251,6 +2251,11 @@ public final class Settings {
          */
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
+        /** Sprint MWI Quirk: Show message wait indicator notifications
+         * @hide
+         */
+        public static final String ENABLE_MWI_NOTIFICATION = "enable_mwi_notification";
+
         /**
          * Show pointer location on screen?
          * 0 = no
