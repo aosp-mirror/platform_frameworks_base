@@ -43,8 +43,13 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/av/libvideoeditor/vss/mcs/inc \
     $(TOP)/frameworks/av/libvideoeditor/vss/stagefrightshells/inc \
     $(TOP)/frameworks/av/libvideoeditor/lvpp \
-    $(TOP)/frameworks/av/libvideoeditor/osal/inc \
-    $(TOP)/frameworks/native/include/media/openmax
+    $(TOP)/frameworks/av/libvideoeditor/osal/inc
+
+ifneq ($(TI_CUSTOM_DOMX_PATH),)
+LOCAL_C_INCLUDES += $(TI_CUSTOM_DOMX_PATH)/omx_core/inc
+else
+LOCAL_C_INCLUDES += $(TOP)/frameworks/native/include/media/openmax
+endif
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
