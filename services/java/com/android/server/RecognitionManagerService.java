@@ -89,17 +89,15 @@ public class RecognitionManagerService extends Binder {
     private void initForUser(int userHandle) {
         if (DEBUG) Slog.i(TAG, "initForUser user=" + userHandle);
         ComponentName comp = getCurRecognizer(userHandle);
+        ServiceInfo info = null;
         if (comp != null) {
-            // See if the current recognizer is no longer available.
+            // See if the current recognizer is still available.
             try {
-                mIPm.getServiceInfo(comp, 0, userHandle);
+                info = mIPm.getServiceInfo(comp, 0, userHandle);
             } catch (RemoteException e) {
-                comp = findAvailRecognizer(null, userHandle);
-                if (comp != null) {
-                    setCurRecognizer(comp, userHandle);
-                }
             }
-        } else {
+        }
+        if (info == null) {
             comp = findAvailRecognizer(null, userHandle);
             if (comp != null) {
                 setCurRecognizer(comp, userHandle);
