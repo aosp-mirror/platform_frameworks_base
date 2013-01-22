@@ -152,7 +152,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             mActiveMatchIndex = matchIndex;
             updateMatchesString();
         } else {
-            mMatches.setVisibility(View.INVISIBLE);
+            mMatches.setVisibility(View.GONE);
             mNumberOfMatches = 0;
         }
     }
