@@ -50,8 +50,7 @@ uchar4 __attribute__((kernel)) root(uchar4 in, uint32_t x, uint32_t y) {
     const float2 inCoord = {(float)x, (float)y};
     const float2 coord = mad(inCoord, inv_dimensions, neg_center);
     const float sloped_dist_ratio = fast_length(axis_scale * coord)  * sloped_inv_max_dist;
-    // TODO:  add half_exp once implemented
-    const float lumen = opp_shade + shade * half_recip(1.f + sloped_neg_range * exp(sloped_dist_ratio));
+    const float lumen = opp_shade + shade * half_recip(1.f + sloped_neg_range * native_exp(sloped_dist_ratio));
     float4 fout;
     fout.rgb = fin.rgb * lumen;
     fout.w = fin.w;
