@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Membenarkan aplikasi membaca data penggunaan bateri tahap rendah semasa. Boleh membenarkan aplikasi untuk mencari maklumat terperinci tentang apl yang anda gunakan."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ubah suai statistik bateri"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Membenarkan apl mengubah suai statistik bateri yang dikumpul. Bukan untuk penggunaan apl normal."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"dapatkan semula statistik pengendalian apl"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Membenarkan apl mendapatkan semula statistik pengendalian aplikasi yang dikumpul. Bukan untuk kegunaan apl biasa."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"ubah suai apl ops statistik"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Membenarkan apl mengubah suai statistik operasi aplikasi yang dikumpul. Bukan untuk kegunaan apl biasa."</string>
     <string name="permlab_backup" msgid="470013022865453920">"sandaran dan pemulihan sistem kawalan"</string>

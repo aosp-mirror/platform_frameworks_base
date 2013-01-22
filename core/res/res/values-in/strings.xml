@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Mengizinkan aplikasi membaca data penggunaan baterai tingkat rendah. Dapat mengizinkan aplikasi mencari informasi mendetail tentang aplikasi mana yang Anda gunakan."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ubah statistik baterai"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Mengizinkan aplikasi mengubah statistik baterai yang dikumpulkan. Tidak untuk digunakan oleh aplikasi normal."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"mengambil statistik pengoperasian aplikasi"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Mengizinkan aplikasi mengambil statistik pengoperasian aplikasi yang dikumpulkan. Tidak untuk digunakan oleh aplikasi normal."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"memodifikasi statistik pengoperasian aplikasi"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Mengizinkan aplikasi memodifikasi statistik pengoperasian aplikasi yang dikumpulkan. Tidak untuk digunakan oleh aplikasi normal."</string>
     <string name="permlab_backup" msgid="470013022865453920">"mengontrol cadangan dan pemulihan sistem"</string>

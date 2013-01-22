@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ļauj lietojumprogrammai lasīt pašreizējos zema akumulatora enerģijas patēriņa datus. Var atļaut lietojumprogrammai iegūt detalizētu informāciju par to, kuras lietotnes izmantojat."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"akumulatora statistikas pārveidošana"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ļauj lietotnei pārveidot apkopoto statistiku par akumulatoru. Atļauja neattiecas uz parastām lietotnēm."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"Izgūt lietotnes darbību statistiku"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Ļauj lietotnei izgūt apkopoto statistiku par lietojumprogrammas darbību. Atļauja neattiecas uz parastām lietotnēm."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"Pārveidot lietotnes darbības statistiku"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Ļauj lietotnei pārveidot apkopoto statistiku par lietojumprogrammas darbību. Atļauja neattiecas uz parastām lietotnēm."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrolēt sistēmas dublējumu un atjaunošanu"</string>

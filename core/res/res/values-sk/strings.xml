@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Umožňuje aplikácii čítať aktuálne údaje nízkej úrovne o používaní batérie. Pomocou tejto funkcie môže aplikácia zistiť podrobnosti o tom, ktoré aplikácie používate."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"zmena štatistických údajov o batérii"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Umožňuje aplikácii zmeniť zhromaždené štatistické údaje o batérii. Bežné aplikácie toto nastavenie nepoužívajú."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"získať štatistické údaje o fungovaní aplikácií"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Umožňuje aplikácii získať zhromaždené štatistické údaje o fungovaní aplikácií. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"upraviť štatistické údaje o fungovaní aplikácií"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Umožňuje aplikácii zmeniť zhromaždené štatistické údaje o fungovaní aplikácií. Bežné aplikácie toto nastavenie nepoužívajú."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Ovládať zálohovanie a obnovu systému"</string>
