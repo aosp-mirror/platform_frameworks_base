@@ -16,7 +16,7 @@
 
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.image)
-#pragma rs_fp_relaxed
+//#pragma rs_fp_relaxed
 
 static float sr = 0.f;
 static float sg = 0.f;
