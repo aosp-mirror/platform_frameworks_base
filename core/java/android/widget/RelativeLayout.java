@@ -444,21 +444,14 @@ public class RelativeLayout extends ViewGroup {
         // We need to know our size for doing the correct computation of positioning in RTL mode
         if (isLayoutRtl() && (myWidth == -1 || isWrapContentWidth)) {
             int w = getPaddingStart() + getPaddingEnd();
-            final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             for (int i = 0; i < count; i++) {
                 View child = views[i];
                 if (child.getVisibility() != GONE) {
                     LayoutParams params = (LayoutParams) child.getLayoutParams();
-                    // Would be similar to a call to measureChildHorizontal(child, params, -1, myHeight)
-                    // but we cannot change for now the behavior of measureChildHorizontal() for
-                    // taking care or a "-1" for "mywidth" so use here our own version of that code.
-                    int childHeightMeasureSpec;
-                    if (params.width == LayoutParams.MATCH_PARENT) {
-                        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
-                    } else {
-                        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
-                    }
-                    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    int[] rules = params.getRules(View.LAYOUT_DIRECTION_LTR);
+
+                    applyHorizontalSizeRules(params, myWidth, rules);
+                    measureChildHorizontal(child, params, -1, myHeight);
 
                     w += child.getMeasuredWidth();
                     w += params.leftMargin + params.rightMargin;
@@ -476,13 +469,16 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
+        final int layoutDirection = getLayoutDirection();
         for (int i = 0; i < count; i++) {
             View child = views[i];
             if (child.getVisibility() != GONE) {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
+                int[] rules = params.getRules(layoutDirection);
 
-                applyHorizontalSizeRules(params, myWidth);
+                applyHorizontalSizeRules(params, myWidth, rules);
                 measureChildHorizontal(child, params, myWidth, myHeight);
+
                 if (positionChildHorizontal(child, params, myWidth, isWrapContentWidth)) {
                     offsetHorizontalAxis = true;
                 }
@@ -542,8 +538,6 @@ public class RelativeLayout extends ViewGroup {
                 }
             }
         }
-
-        final int layoutDirection = getLayoutDirection();
 
         if (isWrapContentWidth) {
             // Width already has left padding in it since it was calculated by looking at
@@ -862,9 +856,7 @@ public class RelativeLayout extends ViewGroup {
         return rules[ALIGN_PARENT_BOTTOM] != 0;
     }
 
-    private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth) {
-        final int layoutDirection = getLayoutDirection();
-        int[] rules = childParams.getRules(layoutDirection);
+    private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth, int[] rules) {
         RelativeLayout.LayoutParams anchorParams;
 
         // -1 indicated a "soft requirement" in that direction. For example:
