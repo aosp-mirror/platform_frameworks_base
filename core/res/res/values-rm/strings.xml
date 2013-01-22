@@ -477,6 +477,10 @@
     <skip />
     <!-- no translation found for permdesc_updateBatteryStats (6862817857178025002) -->
     <skip />
+    <!-- no translation found for permlab_getAppOpsStats (1508779687436585744) -->
+    <skip />
+    <!-- no translation found for permdesc_getAppOpsStats (6243887041577912877) -->
+    <skip />
     <!-- no translation found for permlab_updateAppOpsStats (8829097373851521505) -->
     <skip />
     <!-- no translation found for permdesc_updateAppOpsStats (50784596594403483) -->

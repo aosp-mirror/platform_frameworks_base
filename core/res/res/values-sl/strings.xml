@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Aplikaciji omogoča branje podatkov o trenutni nizki napolnjenosti akumulatorja. Aplikaciji lahko tudi dovoli dostop do podrobnosti o tem, katere aplikacije uporabljate."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"spreminjanje statističnih podatkov o akumulatorju"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Aplikaciji omogoča spreminjanje zbranih statističnih podatkov o akumulatorju. Ni primerno za uporabo z običajnimi aplikacijami."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"pridobi statistične podatke o delovanju aplikacij"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Aplikaciji dovoli pridobivanje zbranih statističnih podatkov o delovanju aplikacij. Ni za uporabo v navadnih aplikacijah."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"spreminjanje statističnih podatkov o delovanju aplikacije"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Aplikaciji dovoli spreminjanje zbranih statističnih podatkov o delovanju aplikacij. Ni za uporabo v navadnih aplikacijah."</string>
     <string name="permlab_backup" msgid="470013022865453920">"nadzor varnostnega kopiranja sistema in obnovitev"</string>

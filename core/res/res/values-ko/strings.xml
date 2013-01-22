@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"애플리케이션이 현재의 낮은 수준 배터리 사용 데이터를 읽을 수 있도록 합니다. 이 경우 애플리케이션이 내가 사용하는 앱에 대한 세부정보를 파악할 수도 있습니다."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"배터리 통계 수정"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"앱이 수집된 배터리 통계를 수정할 수 있도록 허용합니다. 일반 앱에서는 사용하지 않습니다."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"앱 운영 통계 검색"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"앱이 수집된 애플리케이션 운영 통계를 검색하도록 합니다. 일반 앱에서는 사용하지 않습니다."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"앱 운영 통계 수정"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"앱이 수집된 애플리케이션 운영 통계를 수정하도록 합니다. 일반 앱에서는 사용하지 않습니다."</string>
     <string name="permlab_backup" msgid="470013022865453920">"시스템 백업 및 복원 관리"</string>

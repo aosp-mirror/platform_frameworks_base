@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Binibigyang-daan ang application na basahin ang kasalukuyang data sa paggamit ng mababang antas ng baterya. Maaaring bigyang-daan ang application na malaman ang detalyadong impormasyon tungkol sa kung aling apps ang ginagamit mo."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"baguhin ang mga istatistika ng baterya"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Binibigyang-daan ang app na baguhin ang mga nakolektang istatistika ng baterya. Hindi para sa paggamit ng normal na apps."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"bawiin ang mga istatistika ng pagpapagana ng app"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Binibigyang-daan ang app na bawiin ang mga nakolektang istatistika ng pagpapagana ng application. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"baguhin ang mga istatistika ng pagpapatakbo ng app"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Binibigyang-daan ang app na baguhin ang mga nakolektang istatistika ng pagpapatakbo ng application. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrolin ang system backup at pagbawi"</string>
