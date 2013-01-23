@@ -228,6 +228,10 @@ final class DisplayMagnifier {
         return spec;
     }
 
+    public void destroyLocked() {
+        mMagnifedViewport.destroyWindow();
+    }
+
     /** NOTE: This has to be called within a surface transaction. */
     public void drawMagnifiedRegionBorderIfNeededLocked() {
         mMagnifedViewport.drawWindowIfNeededLocked();
@@ -258,7 +262,7 @@ final class DisplayMagnifier {
         private final int mBorderWidth;
         private final int mHalfBorderWidth;
 
-        private ViewportWindow mWindow;
+        private final ViewportWindow mWindow;
 
         private boolean mFullRedrawNeeded;
 
@@ -459,6 +463,10 @@ final class DisplayMagnifier {
             mWindow.drawIfNeeded();
         }
 
+        public void destroyWindow() {
+            mWindow.releaseSurface();
+        }
+
         private final class ViewportWindow {
             private static final String SURFACE_TITLE = "Magnification Overlay";
 
@@ -639,6 +647,10 @@ final class DisplayMagnifier {
                         mSurface.hide();
                     }
                 }
+            }
+
+            public void releaseSurface() {
+                mSurface.release();
             }
         }
     }
