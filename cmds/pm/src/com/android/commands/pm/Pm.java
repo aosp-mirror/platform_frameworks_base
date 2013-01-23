@@ -135,6 +135,11 @@ public final class Pm {
             return;
         }
 
+        if ("disable-until-used".equals(op)) {
+            runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
+            return;
+        }
+
         if ("grant".equals(op)) {
             runGrantRevokePermission(true);
             return;
@@ -1178,6 +1183,8 @@ public final class Pm {
                 return "disabled";
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
                 return "disabled-user";
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return "disabled-until-used";
         }
         return "unknown";
     }
@@ -1459,6 +1466,7 @@ public final class Pm {
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant PACKAGE PERMISSION");
         System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");

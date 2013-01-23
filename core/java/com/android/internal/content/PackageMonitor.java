@@ -153,8 +153,33 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     public void onPackageUpdateFinished(String packageName, int uid) {
     }
-    
-    public void onPackageChanged(String packageName, int uid, String[] components) {
+
+    /**
+     * Direct reflection of {@link Intent#ACTION_PACKAGE_CHANGED
+     * Intent.ACTION_PACKAGE_CHANGED} being received, informing you of
+     * changes to the enabled/disabled state of components in a package
+     * and/or of the overall package.
+     *
+     * @param packageName The name of the package that is changing.
+     * @param uid The user ID the package runs under.
+     * @param components Any components in the package that are changing.  If
+     * the overall package is changing, this will contain an entry of the
+     * package name itself.
+     * @return Return true to indicate you care about this change, which will
+     * result in {@link #onSomePackagesChanged()} being called later.  If you
+     * return false, no further callbacks will happen about this change.  The
+     * default implementation returns true if this is a change to the entire
+     * package.
+     */
+    public boolean onPackageChanged(String packageName, int uid, String[] components) {
+        if (components != null) {
+            for (String name : components) {
+                if (packageName.equals(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
@@ -189,7 +214,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      */
     public void onPackageAppeared(String packageName, int reason) {
     }
-    
+
+    /**
+     * Called when an existing package is updated or its disabled state changes.
+     */
     public void onPackageModified(String packageName) {
     }
     
@@ -328,9 +356,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             if (pkg != null) {
                 mModifiedPackages = mTempArray;
                 mTempArray[0] = pkg;
-                onPackageChanged(pkg, uid, components);
-                // XXX Don't want this to always cause mSomePackagesChanged,
-                // since it can happen a fair amount.
+                mChangeType = PACKAGE_PERMANENT_CHANGE;
+                if (onPackageChanged(pkg, uid, components)) {
+                    mSomePackagesChanged = true;
+                }
                 onPackageModified(pkg);
             }
         } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
