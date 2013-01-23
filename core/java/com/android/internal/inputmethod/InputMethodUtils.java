@@ -536,7 +536,7 @@ public class InputMethodUtils {
             }
         }
 
-        private String getEnabledInputMethodsStr() {
+        public String getEnabledInputMethodsStr() {
             mEnabledInputMethodsStrCache = Settings.Secure.getStringForUser(
                     mResolver, Settings.Secure.ENABLED_INPUT_METHODS, mCurrentUserId);
             if (DEBUG) {

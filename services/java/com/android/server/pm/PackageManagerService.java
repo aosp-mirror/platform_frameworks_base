@@ -20,6 +20,7 @@ import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -8906,13 +8907,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
               || newState == COMPONENT_ENABLED_STATE_ENABLED
               || newState == COMPONENT_ENABLED_STATE_DISABLED
-              || newState == COMPONENT_ENABLED_STATE_DISABLED_USER)) {
+              || newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+              || newState == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
             throw new IllegalArgumentException("Invalid new component state: "
                     + newState);
         }
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        final int permission = mContext.checkCallingPermission(
+        final int permission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
         enforceCrossUserPermission(uid, userId, false, "set enabled");
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);

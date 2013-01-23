@@ -6627,6 +6627,7 @@ package android.content.pm {
     method public abstract void verifyPendingInstall(int, int);
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
     field public static final int COMPONENT_ENABLED_STATE_DISABLED = 2; // 0x2
+    field public static final int COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4; // 0x4
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3; // 0x3
     field public static final int COMPONENT_ENABLED_STATE_ENABLED = 1; // 0x1
     field public static final int DONT_KILL_APP = 1; // 0x1
@@ -6673,6 +6674,7 @@ package android.content.pm {
     field public static final int GET_ACTIVITIES = 1; // 0x1
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
+    field public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 32768; // 0x8000
     field public static final int GET_GIDS = 256; // 0x100
     field public static final int GET_INSTRUMENTATION = 16; // 0x10
     field public static final int GET_INTENT_FILTERS = 32; // 0x20

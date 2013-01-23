@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -2412,8 +2413,14 @@ final class Settings {
             return false;
         }
         PackageUserState ustate = packageSettings.readUserState(userId);
+        if ((flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0) {
+            if (ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                return true;
+            }
+        }
         if (ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED
                 || ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_USER
+                || ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
                 || (packageSettings.pkg != null && !packageSettings.pkg.applicationInfo.enabled
                     && ustate.enabled == COMPONENT_ENABLED_STATE_DEFAULT)) {
             return false;

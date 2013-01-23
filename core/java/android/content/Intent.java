@@ -1588,7 +1588,7 @@ public class Intent implements Parcelable, Cloneable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST} containing the class name
-     * of the changed components.
+     * of the changed components (or the package name itself).
      * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the
      * default action of restarting the application.
      * </ul>
@@ -2969,7 +2969,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED},
-     * and contains a string array of all of the components that have changed.
+     * and contains a string array of all of the components that have changed.  If
+     * the state of the overall package has changed, then it will contain an entry
+     * with the package name itself.
      */
     public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST =
             "android.intent.extra.changed_component_name_list";
