@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Tillader, at en applikation læser de aktuelle data for batteriforbruget. Kan tillade, at applikationen henter detaljerede oplysninger om, hvilke apps du bruger."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"rediger batteristatistikker"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Tillader, at appen kan ændre indsamlede batteristatistikker. Anvendes ikke af normale apps."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"hent statistikker for handlinger i appen"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Tillader, at appen indhenter statistikker for handlinger i applikationen. Denne handling bruges ikke i almindelige apps."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"lav ændringer i statistik for handlinger i appen"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Tillader, at appen kan ændre indsamlede statistikker for handlinger i applikationen. Dette kan ikke bruges af almindelige apps."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontroller sikkerhedskopiering af system, og gendan"</string>

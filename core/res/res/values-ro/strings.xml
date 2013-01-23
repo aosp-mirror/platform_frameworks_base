@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Permite unei aplicaţii să citească datele actuale privind utilizarea la nivel redus a bateriei. Cu această permisiune, aplicaţia poate afla informaţii detaliate despre aplicaţiile pe care le utilizaţi."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"modifică statistici referitoare la baterie"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Permite aplicaţiei să modifice statisticile colectate despre baterie. Nu se utilizează de aplicaţiile obişnuite."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"preluarea statisticilor privind operațiile aplicației"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Permite aplicației să preia statisticile colectate privind operațiile aplicației. Nu se utilizează de aplicațiile obișnuite."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"modificarea statisticilor privind utilizarea aplicației"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Permite aplicației să modifice statisticile colectate despre utilizarea aplicației. Nu se utilizează de aplicațiile obișnuite."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controlare copiere de rezervă şi restabilire a sistemului"</string>

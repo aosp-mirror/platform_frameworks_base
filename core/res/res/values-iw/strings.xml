@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"מאפשר ליישום לקרוא את נתוני השימוש הנוכחיים של הסוללה ברמה נמוכה. עשוי לאפשר ליישום לגלות מידע מפורט לגבי היישומים שבהם אתה משתמש."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"שינוי הנתונים הסטטיסטיים של הסוללה"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"מאפשר ליישום לשנות נתונים סטטיסטיים שנאספו לגבי הסוללה. לא מיועד לשימוש על ידי יישומים רגילים."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"אחזור נתונים סטטיסטיים של פעולות יישום"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"הרשאה זו מאפשרת ליישום לאחזר נתונים סטטיסטיים שנאספו לגבי פעולות יישום. לא מיועד לשימוש על ידי יישומים רגילים."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"שינוי סטטיסטיקת ההפעלה של היישום"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"מאפשר ליישום לשנות נתונים סטטיסטיים שנאספו לגבי הפעלתו. לא מיועד לשימוש על ידי יישומים רגילים."</string>
     <string name="permlab_backup" msgid="470013022865453920">"שלוט בגיבוי ובשחזור של המערכת"</string>

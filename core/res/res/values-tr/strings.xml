@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Uygulamaya, mevcut pil kullanım verilerini alt düzeyde okuma izni verir. Uygulamanın hangi uygulamaları kullandığınızla ilgili ayrıntılı bilgi edinmesine olanak sağlayabilir."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"pil istatistiklerini değiştir"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Uygulamaya, toplanan pil kullanım istatistiklerini değiştirme izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"uygulama çalışma istatistiklerini al"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Uygulamaya, uygulama çalışma istatistiklerini alma izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"uygulama çalışma istatistiklerini değiştir"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Uygulamaya, uygulama çalışma istatistiklerini değiştirme izni verir. Normal uygulamaların kullanımına yönelik değildir."</string>
     <string name="permlab_backup" msgid="470013022865453920">"sistem yedeğini kontrol et ve geri yükle"</string>

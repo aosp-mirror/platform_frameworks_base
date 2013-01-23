@@ -315,8 +315,10 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"允許應用程式讀取目前的低電量使用資料。應用程式可能藉此找到一些詳細資訊，例如您所使用的應用程式為何。"</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"修改電池使用統計資料"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"允許應用程式修改收集到的電池使用統計資料 (不建議一般應用程式使用)。"</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"修改應用程式作業統計資料"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"允許應用程式修改收集到的應用程式作業統計資料 (不建議一般應用程式使用)。"</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"擷取應用程式作業統計資料"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"允許應用程式擷取收集到的應用程式作業統計資料 (不建議一般應用程式使用)。"</string>
+    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"修改應用程式操作統計資料"</string>
+    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"允許應用程式修改收集到的應用程式操作統計資料 (不建議一般應用程式使用)。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系統備份與還原"</string>
     <string name="permdesc_backup" msgid="6912230525140589891">"允許應用程式控制系統備份與還原機制 (不建議一般應用程式使用)。"</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"確認完整備份或還原作業"</string>

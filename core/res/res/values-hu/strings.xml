@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Lehetővé teszi egy alkalmazás számára, hogy leolvassa az aktuális alacsony szintű akkumulátorhasználatra vonatkozó adatokat. Ezáltal az alkalmazás részletes adatokhoz jut az Ön által használt alkalmazásokról."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"akkumulátorstatisztikák módosítása"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Lehetővé teszi az alkalmazás számára az összegyűjtött akkumulátorhasználati statisztikák módosítását. Normál alkalmazások nem használhatják."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"alkalmazásműveleti statisztikák lekérdezése"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Lehetővé teszi az alkalmazás számára az összegyűjtött alkalmazásműveleti statisztikák lekérdezését. Normál alkalmazások nem használhatják."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"alkalmazásműveleti statisztikák módosítása"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Lehetővé teszi az alkalmazás számára az összegyűjtött alkalmazásműveleti statisztikák módosítását. Normál alkalmazások nem használhatják."</string>
     <string name="permlab_backup" msgid="470013022865453920">"rendszer biztonsági mentésének és helyreállításának vezérlése"</string>

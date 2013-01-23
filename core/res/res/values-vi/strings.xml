@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Cho phép ứng dụng đọc dữ liệu sử dụng pin mức thấp hiện tại. Có thể cho phép ứng dụng biết thông tin chi tiết về ứng dụng bạn sử dụng."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"sửa đổi số liệu thống kê về pin"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Cho phép ứng dụng sửa đổi các số liệu thống kê về pin đã được thu thập. Không dành cho các ứng dụng thông thường."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"truy xuất số liệu thống kê hoạt động của ứng dụng"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Cho phép ứng dụng truy xuất số liệu thống kê hoạt động của ứng dụng đã thu thập. Không dành cho ứng dụng thông thường."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"sửa đổi số liệu thống kê hoạt động của ứng dụng"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Cho phép ứng dụng sửa đổi số liệu thống kê hoạt động của ứng dụng đã thu thập. Không dành cho ứng dụng thông thường."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kiểm soát sao lưu và khôi phục hệ thống"</string>

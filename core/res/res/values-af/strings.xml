@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Laat \'n program toe om die huidige lae-vlak batteryverbruikdata te lees. Kan die program toelaat om gedetailleerde inligting te vind oor watter programme jy gebruik."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"verander batterystatistieke"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Laat die program toe om versamelde battery-statistieke te verander. Nie vir gebruik deur normale programme nie."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"haal programwerking-statistieke op"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Laat die program toe om versamelde programwerking-statistieke te herwin. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"verander programwerking-statistieke"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Laat die program toe om versamelde programwerking-statistieke te verander. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_backup" msgid="470013022865453920">"beheerstelsel-rugsteun en -teruglaai"</string>
