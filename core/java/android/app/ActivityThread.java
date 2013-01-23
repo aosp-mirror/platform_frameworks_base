@@ -533,6 +533,12 @@ public final class ActivityThread {
         String pkg;
         CompatibilityInfo info;
     }
+
+    static final class RequestActivityExtras {
+        IBinder activityToken;
+        IBinder requestToken;
+        int requestType;
+    }
     
     private native void dumpGraphicsInfo(FileDescriptor fd);
 
@@ -1108,6 +1114,16 @@ public final class ActivityThread {
             queueOrSendMessage(H.UNSTABLE_PROVIDER_DIED, provider);
         }
 
+        @Override
+        public void requestActivityExtras(IBinder activityToken, IBinder requestToken,
+                int requestType) {
+            RequestActivityExtras cmd = new RequestActivityExtras();
+            cmd.activityToken = activityToken;
+            cmd.requestToken = requestToken;
+            cmd.requestType = requestType;
+            queueOrSendMessage(H.REQUEST_ACTIVITY_EXTRAS, cmd);
+        }
+
         private void printRow(PrintWriter pw, String format, Object...objs) {
             pw.println(String.format(format, objs));
         }
@@ -1173,6 +1189,7 @@ public final class ActivityThread {
         public static final int TRIM_MEMORY             = 140;
         public static final int DUMP_PROVIDER           = 141;
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
+        public static final int REQUEST_ACTIVITY_EXTRAS = 143;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1219,6 +1236,7 @@ public final class ActivityThread {
                     case TRIM_MEMORY: return "TRIM_MEMORY";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
+                    case REQUEST_ACTIVITY_EXTRAS: return "REQUEST_ACTIVITY_EXTRAS";
                 }
             }
             return Integer.toString(code);
@@ -1429,6 +1447,9 @@ public final class ActivityThread {
                     break;
                 case UNSTABLE_PROVIDER_DIED:
                     handleUnstableProviderDied((IBinder)msg.obj, false);
+                    break;
+                case REQUEST_ACTIVITY_EXTRAS:
+                    handleRequestActivityExtras((RequestActivityExtras)msg.obj);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2322,6 +2343,23 @@ public final class ActivityThread {
         performNewIntents(data.token, data.intents);
     }
 
+    public void handleRequestActivityExtras(RequestActivityExtras cmd) {
+        Bundle data = new Bundle();
+        ActivityClientRecord r = mActivities.get(cmd.activityToken);
+        if (r != null) {
+            r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
+            r.activity.onProvideAssistData(data);
+        }
+        if (data.isEmpty()) {
+            data = null;
+        }
+        IActivityManager mgr = ActivityManagerNative.getDefault();
+        try {
+            mgr.reportTopActivityExtras(cmd.requestToken, data);
+        } catch (RemoteException e) {
+        }
+    }
+    
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
 
     /**

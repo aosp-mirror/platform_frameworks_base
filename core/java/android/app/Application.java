@@ -22,6 +22,7 @@ import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -45,6 +46,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
             new ArrayList<ComponentCallbacks>();
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
+    private ArrayList<OnProvideAssistData> mAssistCallbacks = null;
 
     /** @hide */
     public LoadedApk mLoadedApk;
@@ -57,6 +59,21 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         void onActivityStopped(Activity activity);
         void onActivitySaveInstanceState(Activity activity, Bundle outState);
         void onActivityDestroyed(Activity activity);
+    }
+
+    /**
+     * Callback interface for use with {@link Application#registerOnProvideAssistData}
+     * and {@link Application#unregisterOnProvideAssistData}.
+     */
+    public interface OnProvideAssistData {
+        /**
+         * This is called when the user is requesting an assist, to build a full
+         * {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
+         * application.  You can override this method to place into the bundle anything
+         * you would like to appear in the {@link Intent#EXTRA_ASSIST_CONTEXT} part
+         * of the assist Intent.
+         */
+        public void onProvideAssistData(Activity activity, Bundle data);
     }
 
     public Application() {
@@ -137,7 +154,24 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
             mActivityLifecycleCallbacks.remove(callback);
         }
     }
-    
+
+    public void registerOnProvideAssistData(OnProvideAssistData callback) {
+        synchronized (this) {
+            if (mAssistCallbacks == null) {
+                mAssistCallbacks = new ArrayList<OnProvideAssistData>();
+            }
+            mAssistCallbacks.add(callback);
+        }
+    }
+
+    public void unregisterOnProvideAssistData(OnProvideAssistData callback) {
+        synchronized (this) {
+            if (mAssistCallbacks != null) {
+                mAssistCallbacks.remove(callback);
+            }
+        }
+    }
+
     // ------------------ Internal API ------------------
     
     /**
@@ -231,5 +265,20 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
             }
         }
         return callbacks;
+    }
+
+    /* package */ void dispatchOnProvideAssistData(Activity activity, Bundle data) {
+        Object[] callbacks;
+        synchronized (this) {
+            if (mAssistCallbacks == null) {
+                return;
+            }
+            callbacks = mAssistCallbacks.toArray();
+        }
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((OnProvideAssistData)callbacks[i]).onProvideAssistData(activity, data);
+            }
+        }
     }
 }

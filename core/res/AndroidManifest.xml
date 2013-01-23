@@ -1702,6 +1702,13 @@
         android:description="@string/permdesc_stopAppSwitches"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to retrieve private information about
+         the current top activity, such as any assist context it can provide. -->
+    <permission android:name="android.permission.GET_TOP_ACTIVITY_INFO"
+        android:label="@string/permlab_getTopActivityInfo"
+        android:description="@string/permdesc_getTopActivityInfo"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to retrieve the current state of keys and
          switches.  This is only for use by the system.
          @deprecated The API that used this permission has been removed. -->

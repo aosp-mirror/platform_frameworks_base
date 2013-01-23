@@ -2206,7 +2206,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void launchAssistAction() {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, UserHandle.USER_CURRENT);
+                .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP

@@ -846,8 +846,8 @@ public class SearchManager
      *
      * @hide
      */
-    public Intent getAssistIntent(Context context) {
-        return getAssistIntent(context, UserHandle.myUserId());
+    public Intent getAssistIntent(Context context, boolean inclContext) {
+        return getAssistIntent(context, inclContext, UserHandle.myUserId());
     }
 
     /**
@@ -856,7 +856,7 @@ public class SearchManager
      *
      * @hide
      */
-    public Intent getAssistIntent(Context context, int userHandle) {
+    public Intent getAssistIntent(Context context, boolean inclContext, int userHandle) {
         try {
             if (mService == null) {
                 return null;
@@ -867,6 +867,13 @@ public class SearchManager
             }
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             intent.setComponent(comp);
+            if (inclContext) {
+                IActivityManager am = ActivityManagerNative.getDefault();
+                Bundle extras = am.getTopActivityExtras(0);
+                if (extras != null) {
+                    intent.replaceExtras(extras);
+                }
+            }
             return intent;
         } catch (RemoteException re) {
             Log.e(TAG, "getAssistIntent() failed: " + re);

@@ -182,7 +182,7 @@ class SimulatedDpad {
 
                     Intent intent =
                             ((SearchManager)mContext.getSystemService(Context.SEARCH_SERVICE))
-                            .getAssistIntent(mContext, UserHandle.USER_CURRENT_OR_SELF);
+                            .getAssistIntent(mContext, false, UserHandle.USER_CURRENT_OR_SELF);
                     if (intent != null) {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         try {

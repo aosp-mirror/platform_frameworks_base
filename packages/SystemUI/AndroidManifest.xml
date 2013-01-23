@@ -49,7 +49,8 @@
     <uses-permission android:name="android.permission.SET_SCREEN_COMPATIBILITY" />
     <uses-permission android:name="android.permission.START_ANY_ACTIVITY" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
+    <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
+    
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
