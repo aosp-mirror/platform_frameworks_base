@@ -410,19 +410,19 @@
     <string name="permlab_writeContacts" msgid="5107492086416793544">"úprava kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Umožňuje aplikaci upravit údaje o kontaktech uložených v tabletu včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"číst seznam hovorů"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"čtení seznamu hovorů"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Umožňuje aplikaci číst seznam hovorů v tabletu, včetně dat o příchozích a odchozích hovorech. Toto oprávnění umožňuje aplikaci ukládat údaje ze seznamu hovorů. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Umožňuje aplikaci číst seznam hovorů v telefonu, včetně dat o příchozích a odchozích hovorech. Toto oprávnění umožňuje aplikaci ukládat údaje ze seznamu hovorů. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"zapisovat seznam hovorů"</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"zápis do seznamu hovorů"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikaci upravovat seznam hovorů vašeho tabletu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikaci upravovat seznam hovorů vašeho telefonu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"čtení vaší vlastní vizitky"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Umožňuje aplikaci číst údaje v osobním profilu uložené v zařízení, například jméno nebo kontaktní údaje. Znamená to, že vás aplikace může identifikovat a odeslat údaje z profilu dalším aplikacím."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"úprava vaší vlastní vizitky"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Umožňuje aplikaci změnit nebo přidat údaje osobního profilu uložené v zařízení, například jméno nebo kontaktní údaje. Znamená to, že vás aplikace může identifikovat a odeslat údaje z profilu dalším aplikacím."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"číst váš sociální stream"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"čtení vašeho sociálního streamu"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Umožňuje aplikaci získat přístup k sociálním aktualizacím od vašich přátel a synchronizaci těchto aktualizací. Při sdílení informací buďte opatrní – toto oprávnění umožňuje aplikaci číst komunikaci mezi vámi a vašimi přáteli v sociálních sítích bez ohledu na její důvěrnost. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zapisovat do vašeho sociálního streamu"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"zápis do sociálního streamu"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Umožňuje aplikaci zobrazit sociální aktualizace od vašich přátel. Při sdílení informací buďte opatrní – aplikace s tímto oprávněním může vytvářet zprávy, které zdánlivě pochází od vašich přátel. Poznámka: Toto oprávnění nemusí platit pro všechny sociální sítě."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čtení událostí kalendáře a důvěrné informace"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
@@ -505,8 +505,8 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním smí bez upozornění přepínat sítě, zapínat a vypínat bezdrátový modul telefonu a podobně."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čtení stavu a identity telefonu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránění přechodu tabletu do režimu spánku"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"zabránění přechodu telefonu do režimu spánku"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"bránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"zapnutí či vypnutí tabletu"</string>
@@ -530,12 +530,12 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"role služby AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Umožňuje aplikaci volat funkce AccountAuthenticator."</string>
-    <string name="permlab_getAccounts" msgid="1086795467760122114">"vyhledání účtů v zařízení"</string>
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"vyhledávání účtů v zařízení"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Umožňuje aplikaci získat seznam účtů v tabletu. Mohou sem patřit i účty vytvořené aplikacemi, které jste nainstalovali."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Umožňuje aplikaci získat seznam účtů v telefonu. Mohou sem patřit i účty vytvořené aplikacemi, které jste nainstalovali."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"vytváření účtů a nastavení hesel"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Umožňuje aplikaci používat funkce aplikace AccountManager související s ověřováním účtů – včetně vytváření účtů a získávání a nastavování hesel."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"přidání nebo odebrání účtů"</string>
+    <string name="permlab_manageAccounts" msgid="4983126304757177305">"přidávání nebo odebírání účtů"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Umožňuje aplikaci provádět operace, jako je přidávání nebo odebírání účtů nebo mazání jejich hesel."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"používání účtů v zařízení"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Umožňuje aplikaci požadovat ověřovací tokeny."</string>
