@@ -20,7 +20,8 @@ This is an optimized layout for a screen with the Action Bar enabled.
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:splitMotionEvents="false">
     <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
