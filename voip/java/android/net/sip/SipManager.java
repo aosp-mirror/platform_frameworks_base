@@ -21,10 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Log;
+import android.telephony.Rlog;
 
 import java.text.ParseException;
 
@@ -591,7 +590,7 @@ public class SipManager {
                         : session.getLocalProfile().getUriString());
             } catch (Throwable e) {
                 // SipService died? SIP stack died?
-                Log.w(TAG, "getUri(): " + e);
+                Rlog.e(TAG, "getUri(): ", e);
                 return null;
             }
         }

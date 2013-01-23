@@ -23,31 +23,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
-import android.util.Log;
+import android.telephony.Rlog;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
-import javax.sip.SipException;
 
 /**
  * Timer that can schedule events to occur even when the device is in sleep.
  */
 class SipWakeupTimer extends BroadcastReceiver {
-    private static final String TAG = "_SIP.WkTimer_";
+    private static final String TAG = "SipWakeupTimer";
+    private static final boolean DBG = SipService.DBG && true; // STOPSHIP if true
     private static final String TRIGGER_TIME = "TriggerTime";
-    private static final boolean DEBUG_TIMER = SipService.DEBUG && false;
 
     private Context mContext;
     private AlarmManager mAlarmManager;
@@ -85,7 +74,7 @@ class SipWakeupTimer extends BroadcastReceiver {
 
     private boolean stopped() {
         if (mEventQueue == null) {
-            Log.w(TAG, "Timer stopped");
+            if (DBG) log("Timer stopped");
             return true;
         } else {
             return false;
@@ -112,11 +101,11 @@ class SipWakeupTimer extends BroadcastReceiver {
         }
         TreeSet<MyEvent> newQueue = new TreeSet<MyEvent>(
                 mEventQueue.comparator());
-        newQueue.addAll((Collection<MyEvent>) mEventQueue);
+        newQueue.addAll(mEventQueue);
         mEventQueue.clear();
         mEventQueue = newQueue;
-        if (DEBUG_TIMER) {
-            Log.d(TAG, "queue re-calculated");
+        if (DBG) {
+            log("queue re-calculated");
             printQueue();
         }
     }
@@ -172,8 +161,8 @@ class SipWakeupTimer extends BroadcastReceiver {
         }
 
         long triggerTime = event.mTriggerTime;
-        if (DEBUG_TIMER) {
-            Log.d(TAG, " add event " + event + " scheduled on "
+        if (DBG) {
+            log("set: add event " + event + " scheduled on "
                     + showTime(triggerTime) + " at " + showTime(now)
                     + ", #events=" + mEventQueue.size());
             printQueue();
@@ -187,7 +176,7 @@ class SipWakeupTimer extends BroadcastReceiver {
      */
     public synchronized void cancel(Runnable callback) {
         if (stopped() || mEventQueue.isEmpty()) return;
-        if (DEBUG_TIMER) Log.d(TAG, "cancel:" + callback);
+        if (DBG) log("cancel:" + callback);
 
         MyEvent firstEvent = mEventQueue.first();
         for (Iterator<MyEvent> iter = mEventQueue.iterator();
@@ -195,7 +184,7 @@ class SipWakeupTimer extends BroadcastReceiver {
             MyEvent event = iter.next();
             if (event.mCallback == callback) {
                 iter.remove();
-                if (DEBUG_TIMER) Log.d(TAG, "    cancel found:" + event);
+                if (DBG) log("    cancel found:" + event);
             }
         }
         if (mEventQueue.isEmpty()) {
@@ -209,8 +198,8 @@ class SipWakeupTimer extends BroadcastReceiver {
             recalculatePeriods();
             scheduleNext();
         }
-        if (DEBUG_TIMER) {
-            Log.d(TAG, "after cancel:");
+        if (DBG) {
+            log("cancel: X");
             printQueue();
         }
     }
@@ -242,33 +231,33 @@ class SipWakeupTimer extends BroadcastReceiver {
             long triggerTime = intent.getLongExtra(TRIGGER_TIME, -1L);
             execute(triggerTime);
         } else {
-            Log.d(TAG, "unrecognized intent: " + intent);
+            log("onReceive: unrecognized intent: " + intent);
         }
     }
 
     private void printQueue() {
         int count = 0;
         for (MyEvent event : mEventQueue) {
-            Log.d(TAG, "     " + event + ": scheduled at "
+            log("     " + event + ": scheduled at "
                     + showTime(event.mTriggerTime) + ": last at "
                     + showTime(event.mLastTriggerTime));
             if (++count >= 5) break;
         }
         if (mEventQueue.size() > count) {
-            Log.d(TAG, "     .....");
+            log("     .....");
         } else if (count == 0) {
-            Log.d(TAG, "     <empty>");
+            log("     <empty>");
         }
     }
 
     private void execute(long triggerTime) {
-        if (DEBUG_TIMER) Log.d(TAG, "time's up, triggerTime = "
+        if (DBG) log("time's up, triggerTime = "
                 + showTime(triggerTime) + ": " + mEventQueue.size());
         if (stopped() || mEventQueue.isEmpty()) return;
 
         for (MyEvent event : mEventQueue) {
             if (event.mTriggerTime != triggerTime) continue;
-            if (DEBUG_TIMER) Log.d(TAG, "execute " + event);
+            if (DBG) log("execute " + event);
 
             event.mLastTriggerTime = triggerTime;
             event.mTriggerTime += event.mPeriod;
@@ -276,8 +265,8 @@ class SipWakeupTimer extends BroadcastReceiver {
             // run the callback in the handler thread to prevent deadlock
             mExecutor.execute(event.mCallback);
         }
-        if (DEBUG_TIMER) {
-            Log.d(TAG, "after timeout execution");
+        if (DBG) {
+            log("after timeout execution");
             printQueue();
         }
         scheduleNext();
@@ -327,6 +316,7 @@ class SipWakeupTimer extends BroadcastReceiver {
     // Sort the events by mMaxPeriod so that the first event can be used to
     // align events with larger periods
     private static class MyEventComparator implements Comparator<MyEvent> {
+        @Override
         public int compare(MyEvent e1, MyEvent e2) {
             if (e1 == e2) return 0;
             int diff = e1.mMaxPeriod - e2.mMaxPeriod;
@@ -334,8 +324,13 @@ class SipWakeupTimer extends BroadcastReceiver {
             return diff;
         }
 
+        @Override
         public boolean equals(Object that) {
             return (this == that);
         }
+    }
+
+    private void log(String s) {
+        Rlog.d(TAG, s);
     }
 }
