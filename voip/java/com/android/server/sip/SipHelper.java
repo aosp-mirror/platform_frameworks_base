@@ -24,7 +24,7 @@ import gov.nist.javax.sip.header.extensions.ReferredByHeader;
 import gov.nist.javax.sip.header.extensions.ReplacesHeader;
 
 import android.net.sip.SipProfile;
-import android.util.Log;
+import android.telephony.Rlog;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -46,9 +46,7 @@ import javax.sip.SipFactory;
 import javax.sip.SipProvider;
 import javax.sip.SipStack;
 import javax.sip.Transaction;
-import javax.sip.TransactionAlreadyExistsException;
 import javax.sip.TransactionTerminatedEvent;
-import javax.sip.TransactionUnavailableException;
 import javax.sip.TransactionState;
 import javax.sip.address.Address;
 import javax.sip.address.AddressFactory;
@@ -73,8 +71,8 @@ import javax.sip.message.Response;
  */
 class SipHelper {
     private static final String TAG = SipHelper.class.getSimpleName();
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_PING = false;
+    private static final boolean DBG = false;
+    private static final boolean DBG_PING = false;
 
     private SipStack mSipStack;
     private SipProvider mSipProvider;
@@ -262,7 +260,7 @@ class SipHelper {
         ClientTransaction tid = responseEvent.getClientTransaction();
         ClientTransaction ct = authenticationHelper.handleChallenge(
                 responseEvent.getResponse(), tid, mSipProvider, 5);
-        if (DEBUG) Log.d(TAG, "send request with challenge response: "
+        if (DBG) log("send request with challenge response: "
                 + ct.getRequest());
         ct.sendRequest();
         return ct;
@@ -301,7 +299,7 @@ class SipHelper {
                             "application", "sdp"));
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
-            if (DEBUG) Log.d(TAG, "send INVITE: " + request);
+            if (DBG) log("send INVITE: " + request);
             clientTransaction.sendRequest();
             return clientTransaction;
         } catch (ParseException e) {
@@ -326,7 +324,7 @@ class SipHelper {
 
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
-            if (DEBUG) Log.d(TAG, "send RE-INVITE: " + request);
+            if (DBG) log("send RE-INVITE: " + request);
             dialog.sendRequest(clientTransaction);
             return clientTransaction;
         } catch (ParseException e) {
@@ -360,7 +358,7 @@ class SipHelper {
             ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
             toHeader.setTag(tag);
             response.addHeader(toHeader);
-            if (DEBUG) Log.d(TAG, "send RINGING: " + response);
+            if (DBG) log("send RINGING: " + response);
             transaction.sendResponse(response);
             return transaction;
         } catch (ParseException e) {
@@ -390,7 +388,7 @@ class SipHelper {
             }
 
             if (inviteTransaction.getState() != TransactionState.COMPLETED) {
-                if (DEBUG) Log.d(TAG, "send OK: " + response);
+                if (DBG) log("send OK: " + response);
                 inviteTransaction.sendResponse(response);
             }
 
@@ -412,7 +410,7 @@ class SipHelper {
             }
 
             if (inviteTransaction.getState() != TransactionState.COMPLETED) {
-                if (DEBUG) Log.d(TAG, "send BUSY HERE: " + response);
+                if (DBG) log("send BUSY HERE: " + response);
                 inviteTransaction.sendResponse(response);
             }
         } catch (ParseException e) {
@@ -429,20 +427,20 @@ class SipHelper {
         long cseq = ((CSeqHeader) response.getHeader(CSeqHeader.NAME))
                 .getSeqNumber();
         Request ack = dialog.createAck(cseq);
-        if (DEBUG) Log.d(TAG, "send ACK: " + ack);
+        if (DBG) log("send ACK: " + ack);
         dialog.sendAck(ack);
     }
 
     public void sendBye(Dialog dialog) throws SipException {
         Request byeRequest = dialog.createRequest(Request.BYE);
-        if (DEBUG) Log.d(TAG, "send BYE: " + byeRequest);
+        if (DBG) log("send BYE: " + byeRequest);
         dialog.sendRequest(mSipProvider.getNewClientTransaction(byeRequest));
     }
 
     public void sendCancel(ClientTransaction inviteTransaction)
             throws SipException {
         Request cancelRequest = inviteTransaction.createCancel();
-        if (DEBUG) Log.d(TAG, "send CANCEL: " + cancelRequest);
+        if (DBG) log("send CANCEL: " + cancelRequest);
         mSipProvider.getNewClientTransaction(cancelRequest).sendRequest();
     }
 
@@ -452,9 +450,9 @@ class SipHelper {
             Request request = event.getRequest();
             Response response = mMessageFactory.createResponse(
                     responseCode, request);
-            if (DEBUG && (!Request.OPTIONS.equals(request.getMethod())
-                    || DEBUG_PING)) {
-                Log.d(TAG, "send response: " + response);
+            if (DBG && (!Request.OPTIONS.equals(request.getMethod())
+                    || DBG_PING)) {
+                log("send response: " + response);
             }
             getServerTransaction(event).sendResponse(response);
         } catch (ParseException e) {
@@ -474,7 +472,7 @@ class SipHelper {
                             "message", "sipfrag"));
             request.addHeader(mHeaderFactory.createEventHeader(
                     ReferencesHeader.REFER));
-            if (DEBUG) Log.d(TAG, "send NOTIFY: " + request);
+            if (DBG) log("send NOTIFY: " + request);
             dialog.sendRequest(mSipProvider.getNewClientTransaction(request));
         } catch (ParseException e) {
             throw new SipException("sendReferNotify()", e);
@@ -486,7 +484,7 @@ class SipHelper {
         try {
             Response response = mMessageFactory.createResponse(
                     Response.REQUEST_TERMINATED, inviteRequest);
-            if (DEBUG) Log.d(TAG, "send response: " + response);
+            if (DBG) log("send response: " + response);
             inviteTransaction.sendResponse(response);
         } catch (ParseException e) {
             throw new SipException("sendInviteRequestTerminated()", e);
@@ -531,5 +529,9 @@ class SipHelper {
 
     private static String getCallId(Dialog dialog) {
         return dialog.getCallId().getCallId();
+    }
+
+    private void log(String s) {
+        Rlog.d(TAG, s);
     }
 }

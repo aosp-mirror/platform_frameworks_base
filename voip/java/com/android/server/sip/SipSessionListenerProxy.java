@@ -20,11 +20,11 @@ import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
 import android.net.sip.SipProfile;
 import android.os.DeadObjectException;
-import android.util.Log;
+import android.telephony.Rlog;
 
 /** Class to help safely run a callback in a different thread. */
 class SipSessionListenerProxy extends ISipSessionListener.Stub {
-    private static final String TAG = "SipSession";
+    private static final String TAG = "SipSessionListnerProxy";
 
     private ISipSessionListener mListener;
 
@@ -43,9 +43,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         new Thread(runnable, "SipSessionCallbackThread").start();
     }
 
+    @Override
     public void onCalling(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCalling(session);
@@ -56,10 +58,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRinging(final ISipSession session, final SipProfile caller,
             final String sessionDescription) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRinging(session, caller, sessionDescription);
@@ -70,9 +74,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRingingBack(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRingingBack(session);
@@ -83,10 +89,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onCallEstablished(final ISipSession session,
             final String sessionDescription) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCallEstablished(session, sessionDescription);
@@ -97,9 +105,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onCallEnded(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCallEnded(session);
@@ -110,10 +120,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onCallTransferring(final ISipSession newSession,
             final String sessionDescription) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCallTransferring(newSession, sessionDescription);
@@ -124,9 +136,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onCallBusy(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCallBusy(session);
@@ -137,10 +151,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onCallChangeFailed(final ISipSession session,
             final int errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onCallChangeFailed(session, errorCode, message);
@@ -151,10 +167,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onError(final ISipSession session, final int errorCode,
             final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onError(session, errorCode, message);
@@ -165,9 +183,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRegistering(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRegistering(session);
@@ -178,10 +198,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRegistrationDone(final ISipSession session,
             final int duration) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRegistrationDone(session, duration);
@@ -192,10 +214,12 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRegistrationFailed(final ISipSession session,
             final int errorCode, final String message) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRegistrationFailed(session, errorCode, message);
@@ -206,9 +230,11 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    @Override
     public void onRegistrationTimeout(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {
+            @Override
             public void run() {
                 try {
                     mListener.onRegistrationTimeout(session);
@@ -225,7 +251,15 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
             // This creates race but it's harmless. Just don't log the error
             // when it happens.
         } else if (mListener != null) {
-            Log.w(TAG, message, t);
+            loge(message, t);
         }
+    }
+
+    private void log(String s) {
+        Rlog.d(TAG, s);
+    }
+
+    private void loge(String s, Throwable t) {
+        Rlog.e(TAG, s, t);
     }
 }
