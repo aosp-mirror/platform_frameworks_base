@@ -72,6 +72,13 @@ class SaveImageInBackgroundData {
     Runnable finisher;
     int iconSize;
     int result;
+
+    void clearImage() {
+        context = null;
+        image = null;
+        imageUri = null;
+        iconSize = 0;
+    }
 }
 
 /**
@@ -165,6 +172,10 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     @Override
     protected SaveImageInBackgroundData doInBackground(SaveImageInBackgroundData... params) {
         if (params.length != 1) return null;
+        if (isCancelled()) {
+            params[0].clearImage();
+            return null;
+        }
 
         // By default, AsyncTask sets the worker thread to have background thread priority, so bump
         // it back up so that we save a little quicker.
@@ -225,8 +236,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is not
             // mounted
-            params[0].imageUri = null;
-            params[0].image = null;
+            params[0].clearImage();
             params[0].result = 1;
         }
 
@@ -240,6 +250,12 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
     @Override
     protected void onPostExecute(SaveImageInBackgroundData params) {
+        if (isCancelled()) {
+            params.finisher.run();
+            params.clearImage();
+            return;
+        }
+
         if (params.result > 0) {
             // Show a message that we've failed to save the image to disk
             GlobalScreenshot.notifyScreenshotError(params.context, mNotificationManager);
@@ -308,6 +324,8 @@ class GlobalScreenshot {
     private float mBgPadding;
     private float mBgPaddingScale;
 
+    private AsyncTask<SaveImageInBackgroundData, Void, SaveImageInBackgroundData> mSaveInBgTask;
+
     private MediaActionSound mCameraSound;
 
 
@@ -374,7 +392,10 @@ class GlobalScreenshot {
         data.image = mScreenBitmap;
         data.iconSize = mNotificationIconSize;
         data.finisher = finisher;
-        new SaveImageInBackgroundTask(mContext, data, mNotificationManager,
+        if (mSaveInBgTask != null) {
+            mSaveInBgTask.cancel(false);
+        }
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager,
                 SCREENSHOT_NOTIFICATION_ID).execute(data);
     }
 
@@ -455,6 +476,7 @@ class GlobalScreenshot {
         // Setup the animation with the screenshot just taken
         if (mScreenshotAnimation != null) {
             mScreenshotAnimation.end();
+            mScreenshotAnimation.removeAllListeners();
         }
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
