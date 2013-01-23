@@ -3527,29 +3527,45 @@ public class PackageParser {
         return generateApplicationInfo(p, flags, state, UserHandle.getCallingUserId());
     }
 
+    private static void updateApplicationInfo(ApplicationInfo ai, int flags,
+            PackageUserState state) {
+        // CompatibilityMode is global state.
+        if (!sCompatibilityModeEnabled) {
+            ai.disableCompatibilityMode();
+        }
+        if (state.installed) {
+            ai.flags |= ApplicationInfo.FLAG_INSTALLED;
+        } else {
+            ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+        }
+        if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            ai.enabled = true;
+        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+            ai.enabled = (flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0;
+        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+            ai.enabled = false;
+        }
+        ai.enabledSetting = state.enabled;
+    }
+
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
         if (!checkUseInstalled(flags, state)) {
             return null;
         }
-        if (!copyNeeded(flags, p, state, null, userId)) {
-            // CompatibilityMode is global state. It's safe to modify the instance
-            // of the package.
-            if (!sCompatibilityModeEnabled) {
-                p.applicationInfo.disableCompatibilityMode();
-            }
-            // Make sure we report as installed.  Also safe to do, since the
-            // default state should be installed (we will always copy if we
-            // need to report it is not installed).
-            p.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
-            if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                p.applicationInfo.enabled = true;
-            } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                    || state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-                p.applicationInfo.enabled = false;
-            }
-            p.applicationInfo.enabledSetting = state.enabled;
+        if (!copyNeeded(flags, p, state, null, userId)
+                && ((flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) == 0
+                        || state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
+            // In this case it is safe to directly modify the internal ApplicationInfo state:
+            // - CompatibilityMode is global state, so will be the same for every call.
+            // - We only come in to here if the app should reported as installed; this is the
+            // default state, and we will do a copy otherwise.
+            // - The enable state will always be reported the same for the application across
+            // calls; the only exception is for the UNTIL_USED mode, and in that case we will
+            // be doing a copy.
+            updateApplicationInfo(p.applicationInfo, flags, state);
             return p.applicationInfo;
         }
 
@@ -3565,26 +3581,12 @@ public class PackageParser {
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
         }
-        if (!sCompatibilityModeEnabled) {
-            ai.disableCompatibilityMode();
-        }
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
         }
-        if (state.installed) {
-            ai.flags |= ApplicationInfo.FLAG_INSTALLED;
-        } else {
-            ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
-        }
-        if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-            ai.enabled = true;
-        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                || state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-            ai.enabled = false;
-        }
-        ai.enabledSetting = state.enabled;
+        updateApplicationInfo(ai, flags, state);
         return ai;
     }
 

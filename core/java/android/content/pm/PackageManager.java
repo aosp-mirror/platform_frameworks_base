@@ -175,6 +175,14 @@ public abstract class PackageManager {
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
+     * {@link PackageInfo} flag: include disabled components which are in
+     * that state only because of {@link #COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED}
+     * in the returned info.  Note that if you set this flag, applications
+     * that are in this disabled state will be reported as enabled.
+     */
+    public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 0x00008000;
+
+    /**
      * Resolution and querying flag: if set, only filters that support the
      * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
      * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
@@ -263,6 +271,19 @@ public abstract class PackageManager {
      * {@link #setComponentEnabledSetting(ComponentName, int, int)}.
      */
     public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3;
+
+    /**
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)} only: This
+     * application should be considered, until the point where the user actually
+     * wants to use it.  This means that it will not normally show up to the user
+     * (such as in the launcher), but various parts of the user interface can
+     * use {@link #GET_DISABLED_UNTIL_USED_COMPONENTS} to still see it and allow
+     * the user to select it (as for example an IME, device admin, etc).  Such code,
+     * once the user has selected the app, should at that point also make it enabled.
+     * This option currently <strong>can not</strong> be used with
+     * {@link #setComponentEnabledSetting(ComponentName, int, int)}.
+     */
+    public static final int COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
 
     /**
      * Flag parameter for {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} to

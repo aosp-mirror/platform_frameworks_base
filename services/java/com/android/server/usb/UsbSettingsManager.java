@@ -364,8 +364,9 @@ class UsbSettingsManager {
         }
 
         @Override
-        public void onPackageChanged(String packageName, int uid, String[] components) {
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
             handlePackageUpdate(packageName);
+            return false;
         }
 
         @Override

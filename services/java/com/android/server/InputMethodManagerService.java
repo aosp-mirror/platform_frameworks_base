@@ -382,6 +382,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean mInputBoundToKeyguard;
 
     class SettingsObserver extends ContentObserver {
+        String mLastEnabled = "";
+
         SettingsObserver(Handler handler) {
             super(handler);
             ContentResolver resolver = mContext.getContentResolver();
@@ -395,7 +397,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override public void onChange(boolean selfChange) {
             synchronized (mMethodMap) {
-                updateFromSettingsLocked();
+                boolean enabledChanged = false;
+                String newEnabled = mSettings.getEnabledInputMethodsStr();
+                if (!mLastEnabled.equals(newEnabled)) {
+                    mLastEnabled = newEnabled;
+                    enabledChanged = true;
+                }
+                updateFromSettingsLocked(enabledChanged);
             }
         }
     }
@@ -539,7 +547,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (changed) {
-                    updateFromSettingsLocked();
+                    updateFromSettingsLocked(false);
                 }
             }
         }
@@ -674,7 +682,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mSettingsObserver = new SettingsObserver(mHandler);
-        updateFromSettingsLocked();
+        updateFromSettingsLocked(true);
 
         // IMMS wants to receive Intent.ACTION_LOCALE_CHANGED in order to update the current IME
         // according to the new system locale.
@@ -748,7 +756,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // If the locale is changed, needs to reset the default ime
                 resetDefaultImeLocked(mContext);
             }
-            updateFromSettingsLocked();
+            updateFromSettingsLocked(true);
             mLastSystemLocale = newLocale;
             if (!updateOnlyWhenLocaleChanged) {
                 try {
@@ -1533,7 +1541,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    void updateFromSettingsLocked() {
+    void updateFromSettingsLocked(boolean enabledMayChange) {
+        if (enabledMayChange) {
+            List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
+            for (int i=0; i<enabled.size(); i++) {
+                // We allow the user to select "disabled until used" apps, so if they
+                // are enabling one of those here we now need to make it enabled.
+                InputMethodInfo imm = enabled.get(i);
+                try {
+                    ApplicationInfo ai = mIPackageManager.getApplicationInfo(imm.getPackageName(),
+                            PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                            mSettings.getCurrentUserId());
+                    if (ai.enabledSetting
+                            == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                        mIPackageManager.setApplicationEnabledSetting(imm.getPackageName(),
+                                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                                PackageManager.DONT_KILL_APP, mSettings.getCurrentUserId());
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+        }
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -2383,7 +2411,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
-                PackageManager.GET_META_DATA, mSettings.getCurrentUserId());
+                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                mSettings.getCurrentUserId());
 
         final HashMap<String, List<InputMethodSubtype>> additionalSubtypes =
                 mFileManager.getAllAdditionalInputMethodSubtypes();
@@ -2429,7 +2458,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!map.containsKey(defaultImiId)) {
                 Slog.w(TAG, "Default IME is uninstalled. Choose new default IME.");
                 if (chooseNewDefaultIMELocked()) {
-                    updateFromSettingsLocked();
+                    updateFromSettingsLocked(true);
                 }
             } else {
                 // Double check that the default IME is certainly enabled.
