@@ -801,6 +801,11 @@ public class ActionBarImpl extends ActionBar {
         return mThemedContext;
     }
     
+    @Override
+    public boolean isTitleTruncated() {
+        return mActionView != null && mActionView.isTitleTruncated();
+    }
+
     /**
      * @hide 
      */

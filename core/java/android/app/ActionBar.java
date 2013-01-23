@@ -132,6 +132,12 @@ public abstract class ActionBar {
     public static final int DISPLAY_SHOW_CUSTOM = 0x10;
 
     /**
+     * Allow the title to wrap onto multiple lines if space is available
+     * @hide pending API approval
+     */
+    public static final int DISPLAY_TITLE_MULTIPLE_LINES = 0x20;
+
+    /**
      * Set the action bar into custom navigation mode, supplying a view
      * for custom navigation.
      *
@@ -678,6 +684,15 @@ public abstract class ActionBar {
      * @return A themed Context for creating views
      */
     public Context getThemedContext() { return null; }
+
+    /**
+     * Returns true if the Title field has been truncated during layout for lack
+     * of available space.
+     *
+     * @return true if the Title field has been truncated
+     * @hide pending API approval
+     */
+    public boolean isTitleTruncated() { return false; }
 
     /**
      * Listener interface for ActionBar navigation events.
