@@ -23,7 +23,8 @@ the Action Bar enabled overlaying application content.
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/action_bar_overlay_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:splitMotionEvents="false">
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
