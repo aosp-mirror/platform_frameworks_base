@@ -787,11 +787,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"ユーザーガイドをご覧いただくか、お客様サポートにお問い合わせください。"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIMカードはロックされています。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIMカードのロック解除中..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"正しくないパスワードを<xliff:g id="NUMBER_0">%d</xliff:g>回入力しました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"正しくないPINを<xliff:g id="NUMBER_0">%d</xliff:g>回入力しました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"正しくないパスワードを<xliff:g id="NUMBER_0">%d</xliff:g>回入力しました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"正しくないPINを<xliff:g id="NUMBER_0">%d</xliff:g>回入力しました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にGoogleへのログインが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、タブレットは工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"端末のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、端末は工場出荷状態にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットを工場出荷状態にリセットします。"</string>
@@ -1422,7 +1422,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"パターンが正しくありません"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"パスワードが正しくありません"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PINが正しくありません"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"パターンを入力"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PINを入力"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PINを入力"</string>
@@ -1444,15 +1444,15 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ユーザー名またはパスワードが無効です。"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ユーザー名またはパスワードを忘れた場合は"\n" "<b>"google.com/accounts/recovery"</b>" にアクセスしてください。"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"アカウントをチェックしています…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。"\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、タブレットは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"携帯端末のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、端末は出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットは出荷時設定にリセットされます。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"携帯端末のロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。端末は出荷時設定にリセットされます。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒以内にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。"\n\n"<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7382971871993371648">"安全レベルを超えるまで音量を上げますか？"\n"大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
