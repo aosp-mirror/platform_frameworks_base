@@ -3296,6 +3296,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Log.i(TAG, "Package " + ps.name + " at " + scanFile
                             + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
+                    if (!updatedPkg.codePath.equals(scanFile)) {
+                        Slog.w(PackageManagerService.TAG, "Code path for hidden system pkg : "
+                                + ps.name + " changing from " + updatedPkg.codePathString
+                                + " to " + scanFile);
+                        updatedPkg.codePath = scanFile;
+                        updatedPkg.codePathString = scanFile.toString();                        
+                    }
                     mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
                     return null;
                 } else {
