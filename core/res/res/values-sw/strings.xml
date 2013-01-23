@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Inaruhusu programu kusoma data ya sasa ya matumizi ya kiwango cha chini cha betri. Huenda ikaruhusu kupata maelezo ya kina kuhusu programu unazozitumia."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"rekebisha takwimu za betri"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Inaruhusu programu kurekebisha takwimu za betri zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"epua takwimu za oparesheni ya programu"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Inaruhusu programu kuepua takwimu za matumizi ya programu zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"rekebisha takwimu za oparesheni ya programu"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Inaruhusu programu kurekebisha takwimu za matumizi ya programu zilizokusanywa. Si ya kutumiwa na programu za kawaida."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Dhibiti kuhifadhi nakala na kurejesha kwa mfumo"</string>

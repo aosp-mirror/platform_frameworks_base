@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Aplikacija može očitavati podatke o trenutačnoj potrošnji baterije na niskoj razini. Tako može doznati detaljne informacije o aplikacijama koje upotrebljavate."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"izmjena statistike o bateriji"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Omogućuje aplikaciji promjenu prikupljene statistike o potrošnji baterije. Nije namijenjena uobičajenim aplikacijama."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"dohvaćanje statistike o radu aplikacije"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Aplikaciji omogućuje dohvaćanje prikupljene statistike o radu aplikacije. Nije namijenjena uobičajenim aplikacijama."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"izmjena statistike o radu aplikacije"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Aplikaciji omogućuje promjenu prikupljene statistike o radu aplikacije. Nije namijenjena uobičajenim aplikacijama."</string>
     <string name="permlab_backup" msgid="470013022865453920">"sigurnosna kopija i oporavak nadzornog sustava"</string>

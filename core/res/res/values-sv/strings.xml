@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Tillåter att en app läser de aktuella uppgifterna om låg batterianvändningsnivå. Appen kan tillåtas få reda på detaljerade uppgifter om vilka appar du använder."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ändra batteristatistik"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Tillåter att appen ändrar samlad batteristatistik. Används inte av vanliga appar."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"hämta åtgärdsstatistik för appar"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Tillåter att appen hämtar samlad åtgärdsstatistik för appar. Används inte av vanliga appar."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"ändra appars åtgärdsstatistik"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Tillåter att appen ändrar samlad åtgärdsstatistik för appar. Används inte av vanliga appar."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrollera säkerhetskopiering och återställning av systemet"</string>

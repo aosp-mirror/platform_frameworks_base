@@ -315,6 +315,8 @@
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Permite que o aplicativo leia os dados de uso da bateria de baixo nível atuais. Pode fornecer ao aplicativo informações detalhadas sobre os aplicativos usados por você."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"modificar estatísticas da bateria"</string>
     <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Permite que o aplicativo modifique as estatísticas coletadas da bateria. Não deve ser usado em aplicativos normais."</string>
+    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"recuperar estatísticas de operações de aplicativos"</string>
+    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Permite que o aplicativo recupere as estatísticas de operações de aplicativos. Não deve ser usado em aplicativos normais."</string>
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"modificar estatísticas de operações de aplicativos"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Permite que o aplicativo modifique as estatísticas de operações de aplicativos. Não deve ser usado em aplicativos normais."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controlar backup e restauração do sistema"</string>
