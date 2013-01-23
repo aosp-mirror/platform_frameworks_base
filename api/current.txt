@@ -57,6 +57,7 @@ package android {
     field public static final java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
     field public static final java.lang.String GET_PACKAGE_SIZE = "android.permission.GET_PACKAGE_SIZE";
     field public static final java.lang.String GET_TASKS = "android.permission.GET_TASKS";
+    field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final java.lang.String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
@@ -2738,6 +2739,7 @@ package android.app {
     method public void onPrepareNavigateUpTaskStack(android.app.TaskStackBuilder);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public void onProvideAssistData(android.os.Bundle);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
     method protected void onResume();
@@ -3077,7 +3079,9 @@ package android.app {
     method public void onTerminate();
     method public void onTrimMemory(int);
     method public void registerActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
+    method public void registerOnProvideAssistData(android.app.Application.OnProvideAssistData);
     method public void unregisterActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
+    method public void unregisterOnProvideAssistData(android.app.Application.OnProvideAssistData);
   }
 
   public static abstract interface Application.ActivityLifecycleCallbacks {
@@ -3088,6 +3092,10 @@ package android.app {
     method public abstract void onActivitySaveInstanceState(android.app.Activity, android.os.Bundle);
     method public abstract void onActivityStarted(android.app.Activity);
     method public abstract void onActivityStopped(android.app.Activity);
+  }
+
+  public static abstract interface Application.OnProvideAssistData {
+    method public abstract void onProvideAssistData(android.app.Activity, android.os.Bundle);
   }
 
   public class ApplicationErrorReport implements android.os.Parcelable {
@@ -5901,6 +5909,8 @@ package android.content {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
     field public static final deprecated java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
+    field public static final java.lang.String EXTRA_ASSIST_CONTEXT = "android.intent.extra.ASSIST_CONTEXT";
+    field public static final java.lang.String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
     field public static final java.lang.String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final java.lang.String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
     field public static final java.lang.String EXTRA_CC = "android.intent.extra.CC";

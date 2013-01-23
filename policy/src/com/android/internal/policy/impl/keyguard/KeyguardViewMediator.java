@@ -1428,6 +1428,6 @@ public class KeyguardViewMediator {
 
     private boolean isAssistantAvailable() {
         return mSearchManager != null
-                && mSearchManager.getAssistIntent(mContext, UserHandle.USER_CURRENT) != null;
+                && mSearchManager.getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
     }
 }
