@@ -368,6 +368,10 @@ public interface IActivityManager extends IInterface {
 
     public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException;
 
+    public Bundle getTopActivityExtras(int requestType) throws RemoteException;
+
+    public void reportTopActivityExtras(IBinder token, Bundle extras) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -624,4 +628,6 @@ public interface IActivityManager extends IInterface {
     int INPUT_DISPATCHING_TIMED_OUT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+158;
     int CLEAR_PENDING_BACKUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+159;
     int GET_INTENT_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+160;
+    int GET_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
+    int REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
 }

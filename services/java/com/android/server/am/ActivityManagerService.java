@@ -262,6 +262,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
 
+    // How long to wait in getTopActivityExtras for the activity to respond with the result.
+    static final int PENDING_ACTIVITY_RESULT_TIMEOUT = 2*2000;
+
     static final int MY_PID = Process.myPid();
     
     static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -319,10 +322,31 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Activity we have told the window manager to have key focus.
      */
     ActivityRecord mFocusedActivity = null;
+
     /**
      * List of intents that were used to start the most recent tasks.
      */
     final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
+
+    public class PendingActivityExtras extends Binder implements Runnable {
+        public final ActivityRecord activity;
+        public boolean haveResult = false;
+        public Bundle result = null;
+        public PendingActivityExtras(ActivityRecord _activity) {
+            activity = _activity;
+        }
+        @Override
+        public void run() {
+            Slog.w(TAG, "getTopActivityExtras failed: timeout retrieving from " + activity);
+            synchronized (this) {
+                haveResult = true;
+                notifyAll();
+            }
+        }
+    }
+
+    final ArrayList<PendingActivityExtras> mPendingActivityExtras
+            = new ArrayList<PendingActivityExtras>();
 
     /**
      * Process management.
@@ -7449,6 +7473,63 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return KEY_DISPATCHING_TIMEOUT;
+    }
+
+    public Bundle getTopActivityExtras(int requestType) {
+        enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
+                "getTopActivityExtras()");
+        PendingActivityExtras pae;
+        Bundle extras = new Bundle();
+        synchronized (this) {
+            ActivityRecord activity = mMainStack.mResumedActivity;
+            if (activity == null) {
+                Slog.w(TAG, "getTopActivityExtras failed: no resumed activity");
+                return null;
+            }
+            extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
+            if (activity.app == null || activity.app.thread == null) {
+                Slog.w(TAG, "getTopActivityExtras failed: no process for " + activity);
+                return extras;
+            }
+            if (activity.app.pid == Binder.getCallingPid()) {
+                Slog.w(TAG, "getTopActivityExtras failed: request process same as " + activity);
+                return extras;
+            }
+            pae = new PendingActivityExtras(activity);
+            try {
+                activity.app.thread.requestActivityExtras(activity.appToken, pae, requestType);
+                mPendingActivityExtras.add(pae);
+                mHandler.postDelayed(pae, PENDING_ACTIVITY_RESULT_TIMEOUT);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "getTopActivityExtras failed: crash calling " + activity);
+                return extras;
+            }
+        }
+        synchronized (pae) {
+            while (!pae.haveResult) {
+                try {
+                    pae.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            if (pae.result != null) {
+                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
+            }
+        }
+        synchronized (this) {
+            mPendingActivityExtras.remove(pae);
+            mHandler.removeCallbacks(pae);
+        }
+        return extras;
+    }
+
+    public void reportTopActivityExtras(IBinder token, Bundle extras) {
+        PendingActivityExtras pae = (PendingActivityExtras)token;
+        synchronized (pae) {
+            pae.result = extras;
+            pae.haveResult = true;
+            pae.notifyAll();
+        }
     }
 
     public void registerProcessObserver(IProcessObserver observer) {
