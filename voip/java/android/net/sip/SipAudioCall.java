@@ -25,17 +25,11 @@ import android.net.rtp.RtpStream;
 import android.net.sip.SimpleSessionDescription.Media;
 import android.net.wifi.WifiManager;
 import android.os.Message;
-import android.os.RemoteException;
+import android.telephony.Rlog;
 import android.text.TextUtils;
-import android.util.Log;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Handles an Internet audio call over SIP. You can instantiate this class with {@link SipManager},
@@ -60,7 +54,8 @@ import java.util.Map;
  * </div>
  */
 public class SipAudioCall {
-    private static final String TAG = SipAudioCall.class.getSimpleName();
+    private static final String LOG_TAG = SipAudioCall.class.getSimpleName();
+    private static final boolean DBG = true;
     private static final boolean RELEASE_SOCKET = true;
     private static final boolean DONT_RELEASE_SOCKET = false;
     private static final int SESSION_TIMEOUT = 5; // in seconds
@@ -191,7 +186,6 @@ public class SipAudioCall {
     private boolean mMuted = false;
     private boolean mHold = false;
 
-    private SipProfile mPendingCallRequest;
     private WifiManager mWm;
     private WifiManager.WifiLock mWifiHighPerfLock;
 
@@ -261,7 +255,7 @@ public class SipAudioCall {
                 }
             }
         } catch (Throwable t) {
-            Log.e(TAG, "setListener()", t);
+            loge("setListener()", t);
         }
     }
 
@@ -371,7 +365,7 @@ public class SipAudioCall {
                 mAudioStream = new AudioStream(InetAddress.getByName(
                         getLocalIp()));
             } catch (Throwable t) {
-                Log.i(TAG, "transferToNewSession(): " + t);
+                loge("transferToNewSession():", t);
             }
         }
         if (origin != null) origin.endCall();
@@ -382,26 +376,26 @@ public class SipAudioCall {
         return new SipSession.Listener() {
             @Override
             public void onCalling(SipSession session) {
-                Log.d(TAG, "calling... " + session);
+                if (DBG) log("onCalling: session=" + session);
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
                         listener.onCalling(SipAudioCall.this);
                     } catch (Throwable t) {
-                        Log.i(TAG, "onCalling(): " + t);
+                        loge("onCalling():", t);
                     }
                 }
             }
 
             @Override
             public void onRingingBack(SipSession session) {
-                Log.d(TAG, "sip call ringing back: " + session);
+                if (DBG) log("onRingingBackk: " + session);
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
                         listener.onRingingBack(SipAudioCall.this);
                     } catch (Throwable t) {
-                        Log.i(TAG, "onRingingBack(): " + t);
+                        loge("onRingingBack():", t);
                     }
                 }
             }
@@ -424,7 +418,7 @@ public class SipAudioCall {
                         String answer = createAnswer(sessionDescription).encode();
                         mSipSession.answerCall(answer, SESSION_TIMEOUT);
                     } catch (Throwable e) {
-                        Log.e(TAG, "onRinging()", e);
+                        loge("onRinging():", e);
                         session.endCall();
                     }
                 }
@@ -434,7 +428,7 @@ public class SipAudioCall {
             public void onCallEstablished(SipSession session,
                     String sessionDescription) {
                 mPeerSd = sessionDescription;
-                Log.v(TAG, "onCallEstablished()" + mPeerSd);
+                if (DBG) log("onCallEstablished(): " + mPeerSd);
 
                 // TODO: how to notify the UI that the remote party is changed
                 if ((mTransferringSession != null)
@@ -452,14 +446,14 @@ public class SipAudioCall {
                             listener.onCallEstablished(SipAudioCall.this);
                         }
                     } catch (Throwable t) {
-                        Log.i(TAG, "onCallEstablished(): " + t);
+                        loge("onCallEstablished(): ", t);
                     }
                 }
             }
 
             @Override
             public void onCallEnded(SipSession session) {
-                Log.d(TAG, "sip call ended: " + session + " mSipSession:" + mSipSession);
+                if (DBG) log("onCallEnded: " + session + " mSipSession:" + mSipSession);
                 // reset the trasnferring session if it is the one.
                 if (session == mTransferringSession) {
                     mTransferringSession = null;
@@ -475,7 +469,7 @@ public class SipAudioCall {
                     try {
                         listener.onCallEnded(SipAudioCall.this);
                     } catch (Throwable t) {
-                        Log.i(TAG, "onCallEnded(): " + t);
+                        loge("onCallEnded(): ", t);
                     }
                 }
                 close();
@@ -483,13 +477,13 @@ public class SipAudioCall {
 
             @Override
             public void onCallBusy(SipSession session) {
-                Log.d(TAG, "sip call busy: " + session);
+                if (DBG) log("onCallBusy: " + session);
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
                         listener.onCallBusy(SipAudioCall.this);
                     } catch (Throwable t) {
-                        Log.i(TAG, "onCallBusy(): " + t);
+                        loge("onCallBusy(): ", t);
                     }
                 }
                 close(false);
@@ -498,7 +492,7 @@ public class SipAudioCall {
             @Override
             public void onCallChangeFailed(SipSession session, int errorCode,
                     String message) {
-                Log.d(TAG, "sip call change failed: " + message);
+                if (DBG) log("onCallChangedFailed: " + message);
                 mErrorCode = errorCode;
                 mErrorMessage = message;
                 Listener listener = mListener;
@@ -507,7 +501,7 @@ public class SipAudioCall {
                         listener.onError(SipAudioCall.this, mErrorCode,
                                 message);
                     } catch (Throwable t) {
-                        Log.i(TAG, "onCallBusy(): " + t);
+                        loge("onCallBusy():", t);
                     }
                 }
             }
@@ -542,8 +536,8 @@ public class SipAudioCall {
             @Override
             public void onCallTransferring(SipSession newSession,
                     String sessionDescription) {
-                Log.v(TAG, "onCallTransferring mSipSession:"
-                        + mSipSession + " newSession:" + newSession);
+                if (DBG) log("onCallTransferring: mSipSession="
+                        + mSipSession + " newSession=" + newSession);
                 mTransferringSession = newSession;
                 try {
                     if (sessionDescription == null) {
@@ -554,7 +548,7 @@ public class SipAudioCall {
                         newSession.answerCall(answer, SESSION_TIMEOUT);
                     }
                 } catch (Throwable e) {
-                    Log.e(TAG, "onCallTransferring()", e);
+                    loge("onCallTransferring()", e);
                     newSession.endCall();
                 }
             }
@@ -562,7 +556,7 @@ public class SipAudioCall {
     }
 
     private void onError(int errorCode, String message) {
-        Log.d(TAG, "sip session error: "
+        if (DBG) log("onError: "
                 + SipErrorCode.toString(errorCode) + ": " + message);
         mErrorCode = errorCode;
         mErrorMessage = message;
@@ -571,7 +565,7 @@ public class SipAudioCall {
             try {
                 listener.onError(this, errorCode, message);
             } catch (Throwable t) {
-                Log.i(TAG, "onError(): " + t);
+                loge("onError():", t);
             }
         }
         synchronized (this) {
@@ -600,11 +594,11 @@ public class SipAudioCall {
         synchronized (this) {
             mSipSession = session;
             mPeerSd = sessionDescription;
-            Log.v(TAG, "attachCall()" + mPeerSd);
+            if (DBG) log("attachCall(): " + mPeerSd);
             try {
                 session.setListener(createListener());
             } catch (Throwable e) {
-                Log.e(TAG, "attachCall()", e);
+                loge("attachCall()", e);
                 throwSipException(e);
             }
         }
@@ -627,6 +621,7 @@ public class SipAudioCall {
      */
     public void makeCall(SipProfile peerProfile, SipSession sipSession,
             int timeout) throws SipException {
+        if (DBG) log("makeCall: " + peerProfile + " session=" + sipSession + " timeout=" + timeout);
         if (!SipManager.isVoipSupported(mContext)) {
             throw new SipException("VOIP API is not supported");
         }
@@ -640,6 +635,7 @@ public class SipAudioCall {
                 sipSession.makeCall(peerProfile, createOffer().encode(),
                         timeout);
             } catch (IOException e) {
+                loge("makeCall:", e);
                 throw new SipException("makeCall()", e);
             }
         }
@@ -650,6 +646,7 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to end the call
      */
     public void endCall() throws SipException {
+        if (DBG) log("endCall: mSipSession" + mSipSession);
         synchronized (this) {
             stopCall(RELEASE_SOCKET);
             mInCall = false;
@@ -672,9 +669,11 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to hold the call
      */
     public void holdCall(int timeout) throws SipException {
+        if (DBG) log("holdCall: mSipSession" + mSipSession + " timeout=" + timeout);
         synchronized (this) {
             if (mHold) return;
             if (mSipSession == null) {
+                loge("holdCall:");
                 throw new SipException("Not in a call to hold call");
             }
             mSipSession.changeCall(createHoldOffer().encode(), timeout);
@@ -695,6 +694,7 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to answer the call
      */
     public void answerCall(int timeout) throws SipException {
+        if (DBG) log("answerCall: mSipSession" + mSipSession + " timeout=" + timeout);
         synchronized (this) {
             if (mSipSession == null) {
                 throw new SipException("No call to answer");
@@ -704,6 +704,7 @@ public class SipAudioCall {
                         getLocalIp()));
                 mSipSession.answerCall(createAnswer(mPeerSd).encode(), timeout);
             } catch (IOException e) {
+                loge("answerCall:", e);
                 throw new SipException("answerCall()", e);
             }
         }
@@ -722,6 +723,7 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to unhold the call
      */
     public void continueCall(int timeout) throws SipException {
+        if (DBG) log("continueCall: mSipSession" + mSipSession + " timeout=" + timeout);
         synchronized (this) {
             if (!mHold) return;
             mSipSession.changeCall(createContinueOffer().encode(), timeout);
@@ -740,6 +742,7 @@ public class SipAudioCall {
             media.setRtpPayload(codec.type, codec.rtpmap, codec.fmtp);
         }
         media.setRtpPayload(127, "telephone-event/8000", "0-15");
+        if (DBG) log("createOffer: offer=" + offer);
         return offer;
     }
 
@@ -798,18 +801,22 @@ public class SipAudioCall {
             }
         }
         if (codec == null) {
+            loge("createAnswer: no suitable codes");
             throw new IllegalStateException("Reject SDP: no suitable codecs");
         }
+        if (DBG) log("createAnswer: answer=" + answer);
         return answer;
     }
 
     private SimpleSessionDescription createHoldOffer() {
         SimpleSessionDescription offer = createContinueOffer();
         offer.setAttribute("sendonly", "");
+        if (DBG) log("createHoldOffer: offer=" + offer);
         return offer;
     }
 
     private SimpleSessionDescription createContinueOffer() {
+        if (DBG) log("createContinueOffer");
         SimpleSessionDescription offer =
                 new SimpleSessionDescription(mSessionId, getLocalIp());
         Media media = offer.newMedia(
@@ -825,17 +832,17 @@ public class SipAudioCall {
 
     private void grabWifiHighPerfLock() {
         if (mWifiHighPerfLock == null) {
-            Log.v(TAG, "acquire wifi high perf lock");
+            if (DBG) log("grabWifiHighPerfLock:");
             mWifiHighPerfLock = ((WifiManager)
                     mContext.getSystemService(Context.WIFI_SERVICE))
-                    .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
+                    .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, LOG_TAG);
             mWifiHighPerfLock.acquire();
         }
     }
 
     private void releaseWifiHighPerfLock() {
         if (mWifiHighPerfLock != null) {
-            Log.v(TAG, "release wifi high perf lock");
+            if (DBG) log("releaseWifiHighPerfLock:");
             mWifiHighPerfLock.release();
             mWifiHighPerfLock = null;
         }
@@ -912,7 +919,7 @@ public class SipAudioCall {
             AudioGroup audioGroup = getAudioGroup();
             if ((audioGroup != null) && (mSipSession != null)
                     && (SipSession.State.IN_CALL == getState())) {
-                Log.v(TAG, "send DTMF: " + code);
+                if (DBG) log("sendDtmf: code=" + code + " result=" + result);
                 audioGroup.sendDtmf(code);
             }
             if (result != null) result.sendToTarget();
@@ -971,6 +978,7 @@ public class SipAudioCall {
      */
     public void setAudioGroup(AudioGroup group) {
         synchronized (this) {
+            if (DBG) log("setAudioGroup: group=" + group);
             if ((mAudioStream != null) && (mAudioStream.getGroup() != null)) {
                 mAudioStream.join(group);
             }
@@ -997,8 +1005,8 @@ public class SipAudioCall {
     }
 
     private synchronized void startAudioInternal() throws UnknownHostException {
+        if (DBG) loge("startAudioInternal: mPeerSd=" + mPeerSd);
         if (mPeerSd == null) {
-            Log.v(TAG, "startAudioInternal() mPeerSd = null");
             throw new IllegalStateException("mPeerSd = null");
         }
 
@@ -1082,6 +1090,7 @@ public class SipAudioCall {
     // set audio group mode based on current audio configuration
     private void setAudioGroupMode() {
         AudioGroup audioGroup = getAudioGroup();
+        if (DBG) log("setAudioGroupMode: audioGroup=" + audioGroup);
         if (audioGroup != null) {
             if (mHold) {
                 audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
@@ -1096,7 +1105,7 @@ public class SipAudioCall {
     }
 
     private void stopCall(boolean releaseSocket) {
-        Log.d(TAG, "stop audiocall");
+        if (DBG) log("stopCall: releaseSocket=" + releaseSocket);
         releaseWifiHighPerfLock();
         if (mAudioStream != null) {
             mAudioStream.join(null);
@@ -1120,7 +1129,15 @@ public class SipAudioCall {
         }
     }
 
-    private SipProfile getPeerProfile(SipSession session) {
-        return session.getPeerProfile();
+    private void log(String s) {
+        Rlog.d(LOG_TAG, s);
+    }
+
+    private void loge(String s) {
+        Rlog.e(LOG_TAG, s);
+    }
+
+    private void loge(String s, Throwable t) {
+        Rlog.e(LOG_TAG, s, t);
     }
 }

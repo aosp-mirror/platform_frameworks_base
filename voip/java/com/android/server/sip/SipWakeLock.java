@@ -17,13 +17,13 @@
 package com.android.server.sip;
 
 import android.os.PowerManager;
-import android.util.Log;
+import android.telephony.Rlog;
 
 import java.util.HashSet;
 
 class SipWakeLock {
-    private static final boolean DEBUG = false;
     private static final String TAG = "SipWakeLock";
+    private static final boolean DBG = false;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private PowerManager.WakeLock mTimerWakeLock;
@@ -34,7 +34,7 @@ class SipWakeLock {
     }
 
     synchronized void reset() {
-        if (DEBUG) Log.v(TAG, "reset count=" + mHolders.size());
+        if (DBG) log("reset count=" + mHolders.size());
         mHolders.clear();
         release(null);
     }
@@ -55,7 +55,7 @@ class SipWakeLock {
                     PowerManager.PARTIAL_WAKE_LOCK, "SipWakeLock");
         }
         if (!mWakeLock.isHeld()) mWakeLock.acquire();
-        if (DEBUG) Log.v(TAG, "acquire count=" + mHolders.size());
+        if (DBG) log("acquire count=" + mHolders.size());
     }
 
     synchronized void release(Object holder) {
@@ -64,6 +64,10 @@ class SipWakeLock {
                 && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
-        if (DEBUG) Log.v(TAG, "release count=" + mHolders.size());
+        if (DBG) log("release count=" + mHolders.size());
+    }
+
+    private void log(String s) {
+        Rlog.d(TAG, s);
     }
 }

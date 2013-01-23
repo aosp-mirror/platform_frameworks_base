@@ -17,7 +17,7 @@
 package android.net.sip;
 
 import android.os.RemoteException;
-import android.util.Log;
+import android.telephony.Rlog;
 
 /**
  * Represents a SIP session that is associated with a SIP dialog or a standalone
@@ -242,7 +242,7 @@ public final class SipSession {
             try {
                 realSession.setListener(createListener());
             } catch (RemoteException e) {
-                Log.e(TAG, "SipSession.setListener(): " + e);
+                loge("SipSession.setListener:", e);
             }
         }
     }
@@ -261,7 +261,7 @@ public final class SipSession {
         try {
             return mSession.getLocalIp();
         } catch (RemoteException e) {
-            Log.e(TAG, "getLocalIp(): " + e);
+            loge("getLocalIp:", e);
             return "127.0.0.1";
         }
     }
@@ -275,7 +275,7 @@ public final class SipSession {
         try {
             return mSession.getLocalProfile();
         } catch (RemoteException e) {
-            Log.e(TAG, "getLocalProfile(): " + e);
+            loge("getLocalProfile:", e);
             return null;
         }
     }
@@ -290,7 +290,7 @@ public final class SipSession {
         try {
             return mSession.getPeerProfile();
         } catch (RemoteException e) {
-            Log.e(TAG, "getPeerProfile(): " + e);
+            loge("getPeerProfile:", e);
             return null;
         }
     }
@@ -305,7 +305,7 @@ public final class SipSession {
         try {
             return mSession.getState();
         } catch (RemoteException e) {
-            Log.e(TAG, "getState(): " + e);
+            loge("getState:", e);
             return State.NOT_DEFINED;
         }
     }
@@ -319,7 +319,7 @@ public final class SipSession {
         try {
             return mSession.isInCall();
         } catch (RemoteException e) {
-            Log.e(TAG, "isInCall(): " + e);
+            loge("isInCall:", e);
             return false;
         }
     }
@@ -333,7 +333,7 @@ public final class SipSession {
         try {
             return mSession.getCallId();
         } catch (RemoteException e) {
-            Log.e(TAG, "getCallId(): " + e);
+            loge("getCallId:", e);
             return null;
         }
     }
@@ -364,7 +364,7 @@ public final class SipSession {
         try {
             mSession.register(duration);
         } catch (RemoteException e) {
-            Log.e(TAG, "register(): " + e);
+            loge("register:", e);
         }
     }
 
@@ -381,7 +381,7 @@ public final class SipSession {
         try {
             mSession.unregister();
         } catch (RemoteException e) {
-            Log.e(TAG, "unregister(): " + e);
+            loge("unregister:", e);
         }
     }
 
@@ -402,7 +402,7 @@ public final class SipSession {
         try {
             mSession.makeCall(callee, sessionDescription, timeout);
         } catch (RemoteException e) {
-            Log.e(TAG, "makeCall(): " + e);
+            loge("makeCall:", e);
         }
     }
 
@@ -420,7 +420,7 @@ public final class SipSession {
         try {
             mSession.answerCall(sessionDescription, timeout);
         } catch (RemoteException e) {
-            Log.e(TAG, "answerCall(): " + e);
+            loge("answerCall:", e);
         }
     }
 
@@ -436,7 +436,7 @@ public final class SipSession {
         try {
             mSession.endCall();
         } catch (RemoteException e) {
-            Log.e(TAG, "endCall(): " + e);
+            loge("endCall:", e);
         }
     }
 
@@ -453,7 +453,7 @@ public final class SipSession {
         try {
             mSession.changeCall(sessionDescription, timeout);
         } catch (RemoteException e) {
-            Log.e(TAG, "changeCall(): " + e);
+            loge("changeCall:", e);
         }
     }
 
@@ -463,12 +463,14 @@ public final class SipSession {
 
     private ISipSessionListener createListener() {
         return new ISipSessionListener.Stub() {
+            @Override
             public void onCalling(ISipSession session) {
                 if (mListener != null) {
                     mListener.onCalling(SipSession.this);
                 }
             }
 
+            @Override
             public void onRinging(ISipSession session, SipProfile caller,
                     String sessionDescription) {
                 if (mListener != null) {
@@ -477,12 +479,14 @@ public final class SipSession {
                 }
             }
 
+            @Override
             public void onRingingBack(ISipSession session) {
                 if (mListener != null) {
                     mListener.onRingingBack(SipSession.this);
                 }
             }
 
+            @Override
             public void onCallEstablished(ISipSession session,
                     String sessionDescription) {
                 if (mListener != null) {
@@ -491,18 +495,21 @@ public final class SipSession {
                 }
             }
 
+            @Override
             public void onCallEnded(ISipSession session) {
                 if (mListener != null) {
                     mListener.onCallEnded(SipSession.this);
                 }
             }
 
+            @Override
             public void onCallBusy(ISipSession session) {
                 if (mListener != null) {
                     mListener.onCallBusy(SipSession.this);
                 }
             }
 
+            @Override
             public void onCallTransferring(ISipSession session,
                     String sessionDescription) {
                 if (mListener != null) {
@@ -513,6 +520,7 @@ public final class SipSession {
                 }
             }
 
+            @Override
             public void onCallChangeFailed(ISipSession session, int errorCode,
                     String message) {
                 if (mListener != null) {
@@ -521,24 +529,28 @@ public final class SipSession {
                 }
             }
 
+            @Override
             public void onError(ISipSession session, int errorCode, String message) {
                 if (mListener != null) {
                     mListener.onError(SipSession.this, errorCode, message);
                 }
             }
 
+            @Override
             public void onRegistering(ISipSession session) {
                 if (mListener != null) {
                     mListener.onRegistering(SipSession.this);
                 }
             }
 
+            @Override
             public void onRegistrationDone(ISipSession session, int duration) {
                 if (mListener != null) {
                     mListener.onRegistrationDone(SipSession.this, duration);
                 }
             }
 
+            @Override
             public void onRegistrationFailed(ISipSession session, int errorCode,
                     String message) {
                 if (mListener != null) {
@@ -547,11 +559,16 @@ public final class SipSession {
                 }
             }
 
+            @Override
             public void onRegistrationTimeout(ISipSession session) {
                 if (mListener != null) {
                     mListener.onRegistrationTimeout(SipSession.this);
                 }
             }
         };
+    }
+
+    private void loge(String s, Throwable t) {
+        Rlog.e(TAG, s, t);
     }
 }
