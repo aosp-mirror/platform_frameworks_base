@@ -547,6 +547,11 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
         mUsers.put(0, primary);
         mNextSerialNumber = MIN_USER_ID;
+        
+        Bundle restrictions = new Bundle();
+        initRestrictionsToDefaults(restrictions);
+        mUserRestrictions.append(0, restrictions);
+        
         updateUserIdsLocked();
 
         writeUserListLocked();
@@ -805,6 +810,9 @@ public class UserManagerService extends IUserManager.Stub {
                     userInfo.partial = false;
                     writeUserLocked(userInfo);
                     updateUserIdsLocked();
+                    Bundle restrictions = new Bundle();
+                    initRestrictionsToDefaults(restrictions);
+                    mUserRestrictions.append(userId, restrictions);
                 }
             }
             if (userInfo != null) {
