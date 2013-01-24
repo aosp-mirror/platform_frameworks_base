@@ -704,16 +704,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     @Override
     public void enable() {
+        synchronized (mLock) {
+            if (mEnabled) return;
+            mEnabled = true;
+        }
+
         sendMessage(ENABLE, 1, null);
     }
 
     private void handleEnable() {
         if (DEBUG) Log.d(TAG, "handleEnable");
-
-        synchronized (mLock) {
-            if (mEnabled) return;
-            mEnabled = true;
-        }
 
         boolean enabled = native_init();
 
@@ -740,16 +740,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     @Override
     public void disable() {
+        synchronized (mLock) {
+            if (!mEnabled) return;
+            mEnabled = false;
+        }
+
         sendMessage(ENABLE, 0, null);
     }
 
     private void handleDisable() {
         if (DEBUG) Log.d(TAG, "handleDisable");
-
-        synchronized (mLock) {
-            if (!mEnabled) return;
-            mEnabled = false;
-        }
 
         stopNavigating();
         mAlarmManager.cancel(mWakeupIntent);
