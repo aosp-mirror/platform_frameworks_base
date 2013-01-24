@@ -48,6 +48,7 @@
             android:ellipsize="marquee"
             android:textColor="@color/status_bar_recents_app_label_color"
             android:importantForAccessibility="no"
+            android:textAlignment="viewStart"
         />
         <FrameLayout android:id="@+id/app_thumbnail"
             android:layout_width="wrap_content"
@@ -101,6 +102,7 @@
             android:layout_marginTop="3dip"
             android:singleLine="true"
             android:ellipsize="marquee"
+            android:textAlignment="viewStart"
         />
 
     </RelativeLayout>
