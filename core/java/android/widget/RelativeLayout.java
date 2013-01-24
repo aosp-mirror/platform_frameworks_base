@@ -37,6 +37,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
@@ -220,10 +221,13 @@ public class RelativeLayout extends ViewGroup {
     // Some apps came to rely on them. :(
     private boolean mAllowBrokenMeasureSpecs = false;
 
+    private int mDisplayWidth;
+
     public RelativeLayout(Context context) {
         super(context);
         mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
                 Build.VERSION_CODES.JELLY_BEAN_MR1;
+        getDisplayWidth();
     }
 
     public RelativeLayout(Context context, AttributeSet attrs) {
@@ -231,6 +235,7 @@ public class RelativeLayout extends ViewGroup {
         initFromAttributes(context, attrs);
         mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
                 Build.VERSION_CODES.JELLY_BEAN_MR1;
+        getDisplayWidth();
     }
 
     public RelativeLayout(Context context, AttributeSet attrs, int defStyle) {
@@ -238,6 +243,7 @@ public class RelativeLayout extends ViewGroup {
         initFromAttributes(context, attrs);
         mAllowBrokenMeasureSpecs = context.getApplicationInfo().targetSdkVersion <=
                 Build.VERSION_CODES.JELLY_BEAN_MR1;
+        getDisplayWidth();
     }
 
     private void initFromAttributes(Context context, AttributeSet attrs) {
@@ -245,6 +251,11 @@ public class RelativeLayout extends ViewGroup {
         mIgnoreGravity = a.getResourceId(R.styleable.RelativeLayout_ignoreGravity, View.NO_ID);
         mGravity = a.getInt(R.styleable.RelativeLayout_gravity, mGravity);
         a.recycle();
+    }
+
+    private void getDisplayWidth() {
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        mDisplayWidth = wm.getDefaultDisplay().getWidth();
     }
 
     @Override
@@ -438,38 +449,19 @@ public class RelativeLayout extends ViewGroup {
         final boolean isWrapContentWidth = widthMode != MeasureSpec.EXACTLY;
         final boolean isWrapContentHeight = heightMode != MeasureSpec.EXACTLY;
 
+        // We need to know our size for doing the correct computation of children positioning in RTL
+        // mode but there is no practical way to get it instead of running the code below.
+        // So, instead of running the code twice, we just set the width to the "display width"
+        // before the computation and then, as a last pass, we will update their real position with
+        // an offset equals to "displayWidth - width".
+        final int layoutDirection = getLayoutDirection();
+        if (isLayoutRtl() && myWidth == -1) {
+            myWidth = mDisplayWidth;
+        }
+
         View[] views = mSortedHorizontalChildren;
         int count = views.length;
 
-        // We need to know our size for doing the correct computation of positioning in RTL mode
-        if (isLayoutRtl() && (myWidth == -1 || isWrapContentWidth)) {
-            int w = getPaddingStart() + getPaddingEnd();
-            for (int i = 0; i < count; i++) {
-                View child = views[i];
-                if (child.getVisibility() != GONE) {
-                    LayoutParams params = (LayoutParams) child.getLayoutParams();
-                    int[] rules = params.getRules(View.LAYOUT_DIRECTION_LTR);
-
-                    applyHorizontalSizeRules(params, myWidth, rules);
-                    measureChildHorizontal(child, params, -1, myHeight);
-
-                    w += child.getMeasuredWidth();
-                    w += params.leftMargin + params.rightMargin;
-                }
-            }
-            if (myWidth == -1) {
-                // Easy case: "myWidth" was undefined before so use the width we have just computed
-                myWidth = w;
-            } else {
-                // "myWidth" was defined before, so take the min of it and the computed width if it
-                // is a non null one
-                if (w > 0) {
-                    myWidth = Math.min(myWidth, w);
-                }
-            }
-        }
-
-        final int layoutDirection = getLayoutDirection();
         for (int i = 0; i < count; i++) {
             View child = views[i];
             if (child.getVisibility() != GONE) {
@@ -500,7 +492,11 @@ public class RelativeLayout extends ViewGroup {
                 }
 
                 if (isWrapContentWidth) {
-                    width = Math.max(width, params.mRight);
+                    if (isLayoutRtl()) {
+                        width = Math.max(width, myWidth - params.mLeft);
+                    } else {
+                        width = Math.max(width, params.mRight);
+                    }
                 }
 
                 if (isWrapContentHeight) {
@@ -626,6 +622,19 @@ public class RelativeLayout extends ViewGroup {
                     }
                 }
             }
+        }
+
+        if (isLayoutRtl()) {
+            final int offsetWidth = myWidth - width;
+            for (int i = 0; i < count; i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() != GONE) {
+                    LayoutParams params = (LayoutParams) child.getLayoutParams();
+                    params.mLeft -= offsetWidth;
+                    params.mRight -= offsetWidth;
+                }
+            }
+
         }
 
         setMeasuredDimension(width, height);
