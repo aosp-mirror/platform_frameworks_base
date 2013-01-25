@@ -1475,8 +1475,8 @@ public class TextToSpeech {
                         Log.w(TAG, method + " failed: not connected to TTS engine");
                         return errorResult;
                     }
-                    if (onlyEstablishedConnection && isEstablished()) {
-                        Log.w(TAG, method + " failed: TTS engine connection not fully setuped");
+                    if (onlyEstablishedConnection && !isEstablished()) {
+                        Log.w(TAG, method + " failed: TTS engine connection not fully set up");
                         return errorResult;
                     }
                     return action.run(mService);
