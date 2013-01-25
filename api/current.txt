@@ -5122,6 +5122,7 @@ package android.content {
     method public int bulkInsert(android.net.Uri, android.content.ContentValues[]);
     method public android.os.Bundle call(java.lang.String, java.lang.String, android.os.Bundle);
     method public abstract int delete(android.net.Uri, java.lang.String, java.lang.String[]);
+    method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public final android.content.Context getContext();
     method public final android.content.pm.PathPermission[] getPathPermissions();
     method public final java.lang.String getReadPermission();

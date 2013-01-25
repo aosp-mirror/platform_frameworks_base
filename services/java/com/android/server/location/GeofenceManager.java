@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -68,6 +69,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
 
     private final Context mContext;
     private final LocationManager mLocationManager;
+    private final AppOpsManager mAppOps;
     private final PowerManager.WakeLock mWakeLock;
     private final GeofenceHandler mHandler;
     private final LocationBlacklist mBlacklist;
@@ -107,6 +109,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     public GeofenceManager(Context context, LocationBlacklist blacklist) {
         mContext = context;
         mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mHandler = new GeofenceHandler();
@@ -114,14 +117,14 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            int uid, String packageName) {
+            int allowedResolutionLevel, int uid, String packageName) {
         if (D) {
             Slog.d(TAG, "addFence: request=" + request + ", geofence=" + geofence
                     + ", intent=" + intent + ", uid=" + uid + ", packageName=" + packageName);
         }
 
         GeofenceState state = new GeofenceState(geofence,
-                request.getExpireAt(), packageName, intent);
+                request.getExpireAt(), allowedResolutionLevel, uid, packageName, intent);
         synchronized (mLock) {
             // first make sure it doesn't already exist
             for (int i = mFences.size() - 1; i >= 0; i--) {
@@ -259,6 +262,18 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                                 + state.mPackageName);
                     }
                     continue;
+                }
+
+                int op = LocationManagerService.resolutionLevelToOp(state.mAllowedResolutionLevel);
+                if (op >= 0) {
+                    if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, state.mUid,
+                            state.mPackageName) != AppOpsManager.MODE_ALLOWED) {
+                        if (D) {
+                            Slog.d(TAG, "skipping geofence processing for no op app: "
+                                    + state.mPackageName);
+                        }
+                        continue;
+                    }
                 }
 
                 needUpdates = true;
