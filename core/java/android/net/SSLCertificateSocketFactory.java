@@ -24,6 +24,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPrivateKey;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -88,6 +89,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private TrustManager[] mTrustManagers = null;
     private KeyManager[] mKeyManagers = null;
     private byte[] mNpnProtocols = null;
+    private ECPrivateKey mChannelIdPrivateKey = null;
 
     private final int mHandshakeTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
@@ -319,6 +321,20 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     /**
+     * Sets the {@link ECPrivateKey} to be used for TLS Channel ID by connections made by this
+     * factory.
+     *
+     * @param privateKey private key (enables TLS Channel ID) or {@code null} for no key (disables
+     *        TLS Channel ID). The private key has to be an Elliptic Curve (EC) key based on the
+     *        NIST P-256 curve (aka SECG secp256r1 or ANSI X9.62 prime256v1).
+     *
+     * @hide
+     */
+    public void setChannelIdPrivateKey(ECPrivateKey privateKey) {
+        mChannelIdPrivateKey = privateKey;
+    }
+
+    /**
      * Enables <a href="http://tools.ietf.org/html/rfc5077#section-3.2">session ticket</a>
      * support on the given socket.
      *
@@ -378,6 +394,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
             verifyHostname(s, host);
         }
@@ -397,6 +414,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket();
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
     }
 
@@ -414,6 +432,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 addr, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
     }
 
@@ -429,6 +448,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(addr, port);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
     }
 
@@ -445,6 +465,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 host, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
             verifyHostname(s, host);
         }
@@ -462,6 +483,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
         s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
+        s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
             verifyHostname(s, host);
         }
