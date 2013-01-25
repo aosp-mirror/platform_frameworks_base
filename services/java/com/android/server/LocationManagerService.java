@@ -529,9 +529,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public boolean callLocationChangedLocked(Location location) {
-            if (!reportLocationAccessNoThrow(mUid, mPackageName, mAllowedResolutionLevel)) {
-                return true;
-            }
             if (mListener != null) {
                 try {
                     synchronized (this) {
@@ -802,14 +799,20 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    boolean reportLocationAccessNoThrow(int uid, String packageName, int allowedResolutionLevel) {
-        int op;
+    public static int resolutionLevelToOp(int allowedResolutionLevel) {
         if (allowedResolutionLevel != RESOLUTION_LEVEL_NONE) {
             if (allowedResolutionLevel == RESOLUTION_LEVEL_COARSE) {
-                op = AppOpsManager.OP_COARSE_LOCATION;
+                return AppOpsManager.OP_COARSE_LOCATION;
             } else {
-                op = AppOpsManager.OP_FINE_LOCATION;
+                return AppOpsManager.OP_FINE_LOCATION;
             }
+        }
+        return -1;
+    }
+
+    boolean reportLocationAccessNoThrow(int uid, String packageName, int allowedResolutionLevel) {
+        int op = resolutionLevelToOp(allowedResolutionLevel);
+        if (op >= 0) {
             if (mAppOps.noteOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
@@ -818,13 +821,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     boolean checkLocationAccess(int uid, String packageName, int allowedResolutionLevel) {
-        int op;
-        if (allowedResolutionLevel != RESOLUTION_LEVEL_NONE) {
-            if (allowedResolutionLevel == RESOLUTION_LEVEL_COARSE) {
-                op = AppOpsManager.OP_COARSE_LOCATION;
-            } else {
-                op = AppOpsManager.OP_FINE_LOCATION;
-            }
+        int op = resolutionLevelToOp(allowedResolutionLevel);
+        if (op >= 0) {
             if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
@@ -1019,11 +1017,14 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (records != null) {
             for (UpdateRecord record : records) {
                 if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
-                    LocationRequest locationRequest = record.mRequest;
-                    providerRequest.locationRequests.add(locationRequest);
-                    if (locationRequest.getInterval() < providerRequest.interval) {
-                        providerRequest.reportLocation = true;
-                        providerRequest.interval = locationRequest.getInterval();
+                    if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
+                            record.mReceiver.mAllowedResolutionLevel)) {
+                        LocationRequest locationRequest = record.mRequest;
+                        providerRequest.locationRequests.add(locationRequest);
+                        if (locationRequest.getInterval() < providerRequest.interval) {
+                            providerRequest.reportLocation = true;
+                            providerRequest.interval = locationRequest.getInterval();
+                        }
                     }
                 }
             }
@@ -1144,9 +1145,6 @@ public class LocationManagerService extends ILocationManager.Stub {
      * and consistency requirements.
      *
      * @param request the LocationRequest from which to create a sanitized version
-     * @param shouldBeCoarse whether the sanitized version should be held to coarse resolution
-     * constraints
-     * @param fastestCoarseIntervalMS minimum interval allowed for coarse resolution
      * @return a version of request that meets the given resolution and consistency requirements
      * @hide
      */
@@ -1340,12 +1338,14 @@ public class LocationManagerService extends ILocationManager.Stub {
         final int uid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
         try {
-            if (!reportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
-                return null;
-            }
-            
             if (mBlacklist.isBlacklisted(packageName)) {
                 if (D) Log.d(TAG, "not returning last loc for blacklisted app: " +
+                        packageName);
+                return null;
+            }
+
+            if (!reportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
+                if (D) Log.d(TAG, "not returning last loc for no op app: " +
                         packageName);
                 return null;
             }
@@ -1402,7 +1402,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         long identity = Binder.clearCallingIdentity();
         try {
-            mGeofenceManager.addFence(sanitizedRequest, geofence, intent, uid, packageName);
+            mGeofenceManager.addFence(sanitizedRequest, geofence, intent, allowedResolutionLevel,
+                    uid, packageName);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1699,6 +1700,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             if (mBlacklist.isBlacklisted(receiver.mPackageName)) {
                 if (D) Log.d(TAG, "skipping loc update for blacklisted app: " +
+                        receiver.mPackageName);
+                continue;
+            }
+
+            if (!reportLocationAccessNoThrow(receiver.mUid, receiver.mPackageName,
+                    receiver.mAllowedResolutionLevel)) {
+                if (D) Log.d(TAG, "skipping loc update for no op app: " +
                         receiver.mPackageName);
                 continue;
             }

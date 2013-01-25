@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -127,6 +128,7 @@ public class WifiService extends IWifiManager.Stub {
     private int mMulticastDisabled;
 
     private final IBatteryStats mBatteryStats;
+    private final AppOpsManager mAppOps;
 
     private boolean mEnableTrafficStatsPoll = false;
     private int mTrafficStatsPollToken = 0;
@@ -381,6 +383,7 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName);
         mWifiStateMachine.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
@@ -845,10 +848,15 @@ public class WifiService extends IWifiManager.Stub {
      * a list of {@link ScanResult} objects.
      * @return the list of results
      */
-    public List<ScanResult> getScanResults() {
+    public List<ScanResult> getScanResults(String callingPackage) {
         enforceAccessPermission();
         int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
+        if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
+            return new ArrayList<ScanResult>();
+        }
         try {
             int currentUser = ActivityManager.getCurrentUser();
             if (userId != currentUser) {

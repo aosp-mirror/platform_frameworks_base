@@ -44,19 +44,44 @@ public class AppOpsManager {
     public static final int OP_WRITE_CONTACTS = 5;
     public static final int OP_READ_CALL_LOG = 6;
     public static final int OP_WRITE_CALL_LOG = 7;
+    public static final int OP_READ_CALENDAR = 8;
+    public static final int OP_WRITE_CALENDAR = 9;
+    public static final int OP_WIFI_SCAN = 10;
 
-    public static String opToString(int op) {
-        switch (op) {
-            case OP_COARSE_LOCATION: return "COARSE_LOCATION";
-            case OP_FINE_LOCATION: return "FINE_LOCATION";
-            case OP_GPS: return "GPS";
-            case OP_VIBRATE: return "VIBRATE";
-            case OP_READ_CONTACTS: return "READ_CONTACTS";
-            case OP_WRITE_CONTACTS: return "WRITE_CONTACTS";
-            case OP_READ_CALL_LOG: return "READ_CALL_LOG";
-            case OP_WRITE_CALL_LOG: return "WRITE_CALL_LOG";
-            default: return "Unknown(" + op + ")";
-        }
+    private static String[] sOpNames = new String[] {
+        "COARSE_LOCATION",
+        "FINE_LOCATION",
+        "GPS",
+        "VIBRATE",
+        "READ_CONTACTS",
+        "WRITE_CONTACTS",
+        "READ_CALL_LOG",
+        "WRITE_CALL_LOG",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "WIFI_SCAN",
+    };
+
+    private static String[] sOpPerms = new String[] {
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.VIBRATE,
+        android.Manifest.permission.READ_CONTACTS,
+        android.Manifest.permission.WRITE_CONTACTS,
+        android.Manifest.permission.READ_CALL_LOG,
+        android.Manifest.permission.WRITE_CALL_LOG,
+        android.Manifest.permission.READ_CALENDAR,
+        android.Manifest.permission.WRITE_CALENDAR,
+        android.Manifest.permission.ACCESS_WIFI_STATE,
+    };
+
+    public static String opToName(int op) {
+        return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
+    }
+
+    public static String opToPermission(int op) {
+        return sOpPerms[op];
     }
 
     public static class PackageOps implements Parcelable {
@@ -120,12 +145,16 @@ public class AppOpsManager {
 
     public static class OpEntry implements Parcelable {
         private final int mOp;
+        private final int mMode;
         private final long mTime;
+        private final long mRejectTime;
         private final int mDuration;
 
-        public OpEntry(int op, long time, int duration) {
+        public OpEntry(int op, int mode, long time, long rejectTime, int duration) {
             mOp = op;
+            mMode = mode;
             mTime = time;
+            mRejectTime = rejectTime;
             mDuration = duration;
         }
 
@@ -133,8 +162,16 @@ public class AppOpsManager {
             return mOp;
         }
 
+        public int getMode() {
+            return mMode;
+        }
+
         public long getTime() {
             return mTime;
+        }
+
+        public long getRejectTime() {
+            return mRejectTime;
         }
 
         public boolean isRunning() {
@@ -153,13 +190,17 @@ public class AppOpsManager {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mOp);
+            dest.writeInt(mMode);
             dest.writeLong(mTime);
+            dest.writeLong(mRejectTime);
             dest.writeInt(mDuration);
         }
 
         OpEntry(Parcel source) {
             mOp = source.readInt();
+            mMode = source.readInt();
             mTime = source.readLong();
+            mRejectTime = source.readLong();
             mDuration = source.readInt();
         }
 
@@ -193,6 +234,13 @@ public class AppOpsManager {
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    public void setMode(int code, int uid, String packageName, int mode) {
+        try {
+            mService.setMode(code, uid, packageName, mode);
+        } catch (RemoteException e) {
+        }
     }
 
     public int checkOp(int op, int uid, String packageName) {

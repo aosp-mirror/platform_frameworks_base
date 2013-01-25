@@ -35,6 +35,8 @@ public class GeofenceState {
     public final Geofence mFence;
     private final Location mLocation;
     public final long mExpireAt;
+    public final int mAllowedResolutionLevel;
+    public final int mUid;
     public final String mPackageName;
     public final PendingIntent mIntent;
 
@@ -42,12 +44,14 @@ public class GeofenceState {
     double mDistanceToCenter;  // current distance to center of fence
 
     public GeofenceState(Geofence fence, long expireAt,
-            String packageName, PendingIntent intent) {
+            int allowedResolutionLevel, int uid, String packageName, PendingIntent intent) {
         mState = STATE_UNKNOWN;
         mDistanceToCenter = Double.MAX_VALUE;
 
         mFence = fence;
         mExpireAt = expireAt;
+        mAllowedResolutionLevel = allowedResolutionLevel;
+        mUid = uid;
         mPackageName = packageName;
         mIntent = intent;
 

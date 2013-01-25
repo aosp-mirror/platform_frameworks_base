@@ -190,8 +190,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public Cursor query(String callingPkg, Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder,
                 ICancellationSignal cancellationSignal) {
-            // XXX need content provider to help return correct result.
-            enforceReadPermission(callingPkg, uri);
+            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                // The read is not allowed...  to fake it out, we replace the given
+                // selection statement with a dummy one that will always be false.
+                // This way we will get a cursor back that has the correct structure
+                // but contains no rows.
+                selection = "'A' = 'B'";
+            }
             return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
                     CancellationSignal.fromTransport(cancellationSignal));
         }
@@ -203,8 +208,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
-            // XXX need content provider to help return correct result.
-            enforceWritePermission(callingPkg, uri);
+            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                // If not allowed, we need to return some reasonable URI.  Maybe the
+                // content provider should be responsible for this, but for now we
+                // will just return the base URI with a dummy '0' tagged on to it.
+                // You shouldn't be able to read if you can't write, anyway, so it
+                // shouldn't matter much what is returned.
+                return uri.buildUpon().appendPath("0").build();
+            }
             return ContentProvider.this.insert(uri, initialValues);
         }
 
@@ -1189,12 +1200,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * Print the Provider's state into the given stream.  This gets invoked if
      * you run "adb shell dumpsys activity provider &lt;provider_component_name&gt;".
      *
-     * @param prefix Desired prefix to prepend at each line of output.
      * @param fd The raw file descriptor that the dump is being sent to.
      * @param writer The PrintWriter to which you should dump your state.  This will be
      * closed for you after you return.
      * @param args additional arguments to the dump request.
-     * @hide
      */
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.println("nothing to dump");

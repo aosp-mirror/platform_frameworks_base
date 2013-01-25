@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 public class WorkSource implements Parcelable {
     static final String TAG = "WorkSource";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     int mNum;
     int[] mUids;

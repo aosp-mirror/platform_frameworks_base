@@ -777,7 +777,7 @@ public class WifiManager {
      */
     public List<ScanResult> getScanResults() {
         try {
-            return mService.getScanResults();
+            return mService.getScanResults(mContext.getBasePackageName());
         } catch (RemoteException e) {
             return null;
         }

@@ -38,6 +38,7 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -93,12 +94,15 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     final static class Op {
         public final int op;
+        public int mode;
         public int duration;
         public long time;
+        public long rejectTime;
         public int nesting;
 
         public Op(int _op) {
             op = _op;
+            mode = AppOpsManager.MODE_ALLOWED;
         }
     }
 
@@ -133,8 +137,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             resOps = new ArrayList<AppOpsManager.OpEntry>();
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
-                resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
-                        curOp.duration));
+                resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
+                        curOp.rejectTime, curOp.duration));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
@@ -143,8 +147,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (resOps == null) {
                         resOps = new ArrayList<AppOpsManager.OpEntry>();
                     }
-                    resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.time,
-                            curOp.duration));
+                    resOps.add(new AppOpsManager.OpEntry(curOp.op, curOp.mode, curOp.time,
+                            curOp.rejectTime, curOp.duration));
                 }
             }
         }
@@ -198,6 +202,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
+    public void setMode(int code, int uid, String packageName, int mode) {
+        uid = handleIncomingUid(uid);
+        synchronized (this) {
+            Op op = getOpLocked(code, uid, packageName, true);
+            if (op != null) {
+                if (op.mode != mode) {
+                    op.mode = mode;
+                    scheduleWriteNowLocked();
+                }
+            }
+        }
+    }
+
+    @Override
     public int checkOperation(int code, int uid, String packageName) {
         uid = handleIncomingUid(uid);
         synchronized (this) {
@@ -205,8 +223,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (op == null) {
                 return AppOpsManager.MODE_ALLOWED;
             }
+            return op.mode;
         }
-        return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -215,16 +233,26 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             Op op = getOpLocked(code, uid, packageName, true);
             if (op == null) {
+                if (DEBUG) Log.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
+                        + " package " + packageName);
                 return AppOpsManager.MODE_IGNORED;
             }
             if (op.duration == -1) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName
                         + " code " + code + " time=" + op.time + " duration=" + op.duration);
             }
-            op.time = System.currentTimeMillis();
             op.duration = 0;
+            if (op.mode != AppOpsManager.MODE_ALLOWED) {
+                if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code " + code
+                        + " uid " + uid + " package " + packageName);
+                op.rejectTime = System.currentTimeMillis();
+                return op.mode;
+            }
+            if (DEBUG) Log.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
+                    + " package " + packageName);
+            op.time = System.currentTimeMillis();
+            return AppOpsManager.MODE_ALLOWED;
         }
-        return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -233,15 +261,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             Op op = getOpLocked(code, uid, packageName, true);
             if (op == null) {
+                if (DEBUG) Log.d(TAG, "startOperation: no op for code " + code + " uid " + uid
+                        + " package " + packageName);
                 return AppOpsManager.MODE_IGNORED;
             }
+            if (op.mode != AppOpsManager.MODE_ALLOWED) {
+                if (DEBUG) Log.d(TAG, "startOperation: reject #" + op.mode + " for code " + code
+                        + " uid " + uid + " package " + packageName);
+                op.rejectTime = System.currentTimeMillis();
+                return op.mode;
+            }
+            if (DEBUG) Log.d(TAG, "startOperation: allowing code " + code + " uid " + uid
+                    + " package " + packageName);
             if (op.nesting == 0) {
                 op.time = System.currentTimeMillis();
                 op.duration = -1;
             }
             op.nesting++;
+            return AppOpsManager.MODE_ALLOWED;
         }
-        return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -319,6 +357,21 @@ public class AppOpsService extends IAppOpsService.Stub {
         return ops;
     }
 
+    private void scheduleWriteLocked() {
+        if (!mWriteScheduled) {
+            mWriteScheduled = true;
+            mHandler.postDelayed(mWriteRunner, WRITE_DELAY);
+        }
+    }
+
+    private void scheduleWriteNowLocked() {
+        if (!mWriteScheduled) {
+            mWriteScheduled = true;
+        }
+        mHandler.removeCallbacks(mWriteRunner);
+        mHandler.post(mWriteRunner);
+    }
+
     private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
         Ops ops = getOpsLocked(uid, packageName, edit);
         if (ops == null) {
@@ -332,9 +385,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             op = new Op(code);
             ops.put(code, op);
         }
-        if (edit && !mWriteScheduled) {
-            mWriteScheduled = true;
-            mHandler.postDelayed(mWriteRunner, WRITE_DELAY);
+        if (edit) {
+            scheduleWriteLocked();
         }
         return op;
     }
@@ -441,8 +493,22 @@ public class AppOpsService extends IAppOpsService.Stub {
             String tagName = parser.getName();
             if (tagName.equals("op")) {
                 Op op = new Op(Integer.parseInt(parser.getAttributeValue(null, "n")));
-                op.time = Long.parseLong(parser.getAttributeValue(null, "t"));
-                op.duration = Integer.parseInt(parser.getAttributeValue(null, "d"));
+                String mode = parser.getAttributeValue(null, "m");
+                if (mode != null) {
+                    op.mode = Integer.parseInt(mode);
+                }
+                String time = parser.getAttributeValue(null, "t");
+                if (time != null) {
+                    op.time = Long.parseLong(time);
+                }
+                time = parser.getAttributeValue(null, "r");
+                if (time != null) {
+                    op.rejectTime = Long.parseLong(time);
+                }
+                String dur = parser.getAttributeValue(null, "d");
+                if (dur != null) {
+                    op.duration = Integer.parseInt(dur);
+                }
                 HashMap<String, Ops> pkgOps = mUidOps.get(uid);
                 if (pkgOps == null) {
                     pkgOps = new HashMap<String, Ops>();
@@ -499,8 +565,21 @@ public class AppOpsService extends IAppOpsService.Stub {
                             AppOpsManager.OpEntry op = ops.get(j);
                             out.startTag(null, "op");
                             out.attribute(null, "n", Integer.toString(op.getOp()));
-                            out.attribute(null, "t", Long.toString(op.getTime()));
-                            out.attribute(null, "d", Integer.toString(op.getDuration()));
+                            if (op.getMode() != AppOpsManager.MODE_ALLOWED) {
+                                out.attribute(null, "m", Integer.toString(op.getMode()));
+                            }
+                            long time = op.getTime();
+                            if (time != 0) {
+                                out.attribute(null, "t", Long.toString(time));
+                            }
+                            time = op.getRejectTime();
+                            if (time != 0) {
+                                out.attribute(null, "r", Long.toString(time));
+                            }
+                            int dur = op.getDuration();
+                            if (dur != 0) {
+                                out.attribute(null, "d", Integer.toString(dur));
+                            }
                             out.endTag(null, "op");
                         }
                         out.endTag(null, "uid");
@@ -532,6 +611,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         synchronized (this) {
             pw.println("Current AppOps Service state:");
+            final long now = System.currentTimeMillis();
             for (int i=0; i<mUidOps.size(); i++) {
                 pw.print("  Uid "); UserHandle.formatUid(pw, mUidOps.keyAt(i)); pw.println(":");
                 HashMap<String, Ops> pkgOps = mUidOps.valueAt(i);
@@ -539,10 +619,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    Package "); pw.print(ops.packageName); pw.println(":");
                     for (int j=0; j<ops.size(); j++) {
                         Op op = ops.valueAt(j);
-                        pw.print("      "); pw.print(AppOpsManager.opToString(op.op));
-                        pw.print(": time=");
-                        TimeUtils.formatDuration(System.currentTimeMillis()-op.time, pw);
-                        pw.print(" ago");
+                        pw.print("      "); pw.print(AppOpsManager.opToName(op.op));
+                        pw.print(": mode="); pw.print(op.mode);
+                        if (op.time != 0) {
+                            pw.print("; time="); TimeUtils.formatDuration(now-op.time, pw);
+                            pw.print(" ago");
+                        }
+                        if (op.rejectTime != 0) {
+                            pw.print("; rejectTime="); TimeUtils.formatDuration(now-op.rejectTime, pw);
+                            pw.print(" ago");
+                        }
                         if (op.duration == -1) {
                             pw.println(" (running)");
                         } else {
