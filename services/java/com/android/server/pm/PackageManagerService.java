@@ -1348,7 +1348,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
 
-            if (!ps.grantedPermissions
+            final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+            if (!gp.grantedPermissions
                     .contains(android.Manifest.permission.PACKAGE_VERIFICATION_AGENT)) {
                 continue;
             }
@@ -2918,8 +2919,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
             String[] permissions, boolean[] tmp, int flags, int userId) {
         int numMatch = 0;
+        final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
         for (int i=0; i<permissions.length; i++) {
-            if (ps.grantedPermissions.contains(permissions[i])) {
+            if (gp.grantedPermissions.contains(permissions[i])) {
                 tmp[i] = true;
                 numMatch++;
             } else {

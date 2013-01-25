@@ -45,7 +45,7 @@ interface IWifiManager
 
     void startScan(boolean forceActive);
 
-    List<ScanResult> getScanResults();
+    List<ScanResult> getScanResults(String callingPackage);
 
     void disconnect();
 

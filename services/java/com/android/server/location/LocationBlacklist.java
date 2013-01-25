@@ -67,9 +67,9 @@ public final class LocationBlacklist extends ContentObserver {
 
     private void reloadBlacklistLocked() {
         mWhitelist = getStringArrayLocked(WHITELIST_CONFIG_NAME);
-        Slog.i(TAG, "whitelist: " + Arrays.toString(mWhitelist));
+        if (D) Slog.d(TAG, "whitelist: " + Arrays.toString(mWhitelist));
         mBlacklist = getStringArrayLocked(BLACKLIST_CONFIG_NAME);
-        Slog.i(TAG, "blacklist: " + Arrays.toString(mBlacklist));
+        if (D) Slog.d(TAG, "blacklist: " + Arrays.toString(mBlacklist));
     }
 
     private void reloadBlacklist() {
