@@ -2315,7 +2315,7 @@ public class WifiStateMachine extends StateMachine {
             if (!mWifiNative.setSerialNumber(detail)) {
                 loge("Failed to set serial number " + detail);
             }
-            if (!mWifiNative.setConfigMethods("physical_display virtual_push_button keypad")) {
+            if (!mWifiNative.setConfigMethods("physical_display virtual_push_button")) {
                 loge("Failed to set WPS config methods");
             }
             if (!mWifiNative.setDeviceType(mPrimaryDeviceType)) {
