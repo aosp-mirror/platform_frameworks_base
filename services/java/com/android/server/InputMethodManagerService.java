@@ -511,7 +511,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
 
-                buildInputMethodListLocked(mMethodList, mMethodMap);
+                buildInputMethodListLocked(
+                        mMethodList, mMethodMap, false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
 
@@ -671,9 +672,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Just checking if defaultImiId is empty or not
         final String defaultImiId = mSettings.getSelectedInputMethod();
+        if (DEBUG) {
+            Slog.d(TAG, "Initial default ime = " + defaultImiId);
+        }
         mImeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
 
-        buildInputMethodListLocked(mMethodList, mMethodMap);
+        buildInputMethodListLocked(mMethodList, mMethodMap,
+                !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
         mSettings.enableAllIMEsIfThereIsNoEnabledIME();
 
         if (!mImeSelectedOnBoot) {
@@ -726,7 +731,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void resetAllInternalStateLocked(boolean updateOnlyWhenLocaleChanged) {
+    private void resetAllInternalStateLocked(final boolean updateOnlyWhenLocaleChanged) {
         if (!mSystemReady) {
             // not system ready
             return;
@@ -744,7 +749,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // InputMethodAndSubtypeListManager should be reset when the locale is changed.
             mImListManager = new InputMethodAndSubtypeListManager(mContext, this);
-            buildInputMethodListLocked(mMethodList, mMethodMap);
+            buildInputMethodListLocked(mMethodList, mMethodMap,
+                    updateOnlyWhenLocaleChanged /* resetDefaultEnabledIme */);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
                 if (TextUtils.isEmpty(selectedImiId)) {
@@ -814,7 +820,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mWindowManagerService.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
-                buildInputMethodListLocked(mMethodList, mMethodMap);
+                buildInputMethodListLocked(mMethodList, mMethodMap,
+                        !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
                 if (!mImeSelectedOnBoot) {
                     Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
                     checkCurrentLocaleChangedLocked();
@@ -2147,7 +2154,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mFileManager.addInputMethodSubtypes(imi, subtypes);
                         final long ident = Binder.clearCallingIdentity();
                         try {
-                            buildInputMethodListLocked(mMethodList, mMethodMap);
+                            buildInputMethodListLocked(mMethodList, mMethodMap,
+                                    false /* resetDefaultEnabledIme */);
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
@@ -2397,9 +2405,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void buildInputMethodListLocked(ArrayList<InputMethodInfo> list,
-            HashMap<String, InputMethodInfo> map) {
+            HashMap<String, InputMethodInfo> map, boolean resetDefaultEnabledIme) {
         if (DEBUG) {
-            Slog.d(TAG, "--- re-buildInputMethodList " + ", \n ------ \n" + getStackTrace());
+            Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
+                    + " \n ------ \n" + getStackTrace());
         }
         list.clear();
         map.clear();
@@ -2436,20 +2445,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final String id = p.getId();
                 map.put(id, p);
 
-                // Valid system default IMEs and IMEs that have English subtypes are enabled
-                // by default
-                if (InputMethodUtils.isDefaultEnabledIme(mSystemReady, p, mContext)) {
-                    setInputMethodEnabledLocked(id, true);
-                }
-
                 if (DEBUG) {
-                    Slog.d(TAG, "Found a third-party input method " + p);
+                    Slog.d(TAG, "Found an input method " + p);
                 }
 
             } catch (XmlPullParserException e) {
                 Slog.w(TAG, "Unable to load input method " + compName, e);
             } catch (IOException e) {
                 Slog.w(TAG, "Unable to load input method " + compName, e);
+            }
+        }
+
+        if (resetDefaultEnabledIme) {
+            final ArrayList<InputMethodInfo> defaultEnabledIme =
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, list);
+            for (int i = 0; i < defaultEnabledIme.size(); ++i) {
+                final InputMethodInfo imi =  defaultEnabledIme.get(i);
+                if (DEBUG) {
+                    Slog.d(TAG, "--- enable ime = " + imi);
+                }
+                setInputMethodEnabledLocked(imi.getId(), true);
             }
         }
 

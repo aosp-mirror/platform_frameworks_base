@@ -59,11 +59,53 @@ public class InputMethodUtils {
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    public static boolean isSystemImeThatHasEnglishSubtype(InputMethodInfo imi) {
+    public static boolean isSystemImeThatHasEnglishKeyboardSubtype(InputMethodInfo imi) {
         if (!isSystemIme(imi)) {
             return false;
         }
-        return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage());
+        return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage(), SUBTYPE_MODE_KEYBOARD);
+    }
+
+    private static boolean isSystemAuxilialyImeThatHashAutomaticSubtype(InputMethodInfo imi) {
+        if (!isSystemIme(imi)) {
+            return false;
+        }
+        if (!imi.isAuxiliaryIme()) {
+            return false;
+        }
+        final int subtypeCount = imi.getSubtypeCount();
+        for (int i = 0; i < subtypeCount; ++i) {
+            final InputMethodSubtype s = imi.getSubtypeAt(i);
+            if (s.overridesImplicitlyEnabledSubtype()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
+            Context context, boolean isSystemReady, ArrayList<InputMethodInfo> imis) {
+        final ArrayList<InputMethodInfo> retval = new ArrayList<InputMethodInfo>();
+        boolean auxilialyImeAdded = false;
+        for (int i = 0; i < imis.size(); ++i) {
+            final InputMethodInfo imi = imis.get(i);
+            if (isDefaultEnabledIme(isSystemReady, imi, context)) {
+                retval.add(imi);
+                if (imi.isAuxiliaryIme()) {
+                    auxilialyImeAdded = true;
+                }
+            }
+        }
+        if (auxilialyImeAdded) {
+            return retval;
+        }
+        for (int i = 0; i < imis.size(); ++i) {
+            final InputMethodInfo imi = imis.get(i);
+            if (isSystemAuxilialyImeThatHashAutomaticSubtype(imi)) {
+                retval.add(imi);
+            }
+        }
+        return retval;
     }
 
     // TODO: Rename isSystemDefaultImeThatHasCurrentLanguageSubtype
@@ -77,14 +119,11 @@ public class InputMethodUtils {
         }
         if (imi.getIsDefaultResourceId() != 0) {
             try {
-                Resources res = context.createPackageContext(
-                        imi.getPackageName(), 0).getResources();
-                if (res.getBoolean(imi.getIsDefaultResourceId())
-                        && containsSubtypeOf(imi, context.getResources().getConfiguration().
-                                locale.getLanguage())) {
+                if (imi.isDefault(context) && containsSubtypeOf(
+                        imi, context.getResources().getConfiguration().locale.getLanguage(),
+                        null /* mode */)) {
                     return true;
                 }
-            } catch (PackageManager.NameNotFoundException ex) {
             } catch (Resources.NotFoundException ex) {
             }
         }
@@ -97,15 +136,19 @@ public class InputMethodUtils {
     public static boolean isDefaultEnabledIme(
             boolean isSystemReady, InputMethodInfo imi, Context context) {
         return isValidSystemDefaultIme(isSystemReady, imi, context)
-                || isSystemImeThatHasEnglishSubtype(imi);
+                || isSystemImeThatHasEnglishKeyboardSubtype(imi);
     }
 
-    private static boolean containsSubtypeOf(InputMethodInfo imi, String language) {
+    private static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
         final int N = imi.getSubtypeCount();
         for (int i = 0; i < N; ++i) {
-            if (imi.getSubtypeAt(i).getLocale().startsWith(language)) {
-                return true;
+            if (!imi.getSubtypeAt(i).getLocale().startsWith(language)) {
+                continue;
             }
+            if(!TextUtils.isEmpty(mode) && !imi.getSubtypeAt(i).getMode().equalsIgnoreCase(mode)) {
+                continue;
+            }
+            return true;
         }
         return false;
     }
@@ -141,7 +184,7 @@ public class InputMethodUtils {
             while (i > 0) {
                 i--;
                 final InputMethodInfo imi = enabledImes.get(i);
-                if (InputMethodUtils.isSystemImeThatHasEnglishSubtype(imi)
+                if (InputMethodUtils.isSystemImeThatHasEnglishKeyboardSubtype(imi)
                         && !imi.isAuxiliaryIme()) {
                     return imi;
                 }
