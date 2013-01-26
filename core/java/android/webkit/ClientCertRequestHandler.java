@@ -21,8 +21,8 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import org.apache.harmony.xnet.provider.jsse.NativeCrypto;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLKeyHolder;
 
 /**
  * ClientCertRequestHandler: class responsible for handling client
@@ -56,14 +56,11 @@ public final class ClientCertRequestHandler extends Handler {
             byte[][] chainBytes = NativeCrypto.encodeCertificates(chain);
             mTable.Allow(mHostAndPort, privateKey, chainBytes);
 
-            if (privateKey instanceof OpenSSLRSAPrivateKey) {
-                setSslClientCertFromCtx(((OpenSSLRSAPrivateKey)privateKey).getPkeyContext(),
-                           chainBytes);
-            } else if (privateKey instanceof OpenSSLDSAPrivateKey) {
-                setSslClientCertFromCtx(((OpenSSLDSAPrivateKey)privateKey).getPkeyContext(),
-                           chainBytes);
+            if (privateKey instanceof OpenSSLKeyHolder) {
+                OpenSSLKey pkey = ((OpenSSLKeyHolder) privateKey).getOpenSSLKey();
+                setSslClientCertFromCtx(pkey.getPkeyContext(), chainBytes);
             } else {
-                setSslClientCertFromPKCS8(privateKey.getEncoded(),chainBytes);
+                setSslClientCertFromPKCS8(privateKey.getEncoded(), chainBytes);
             }
         } catch (CertificateEncodingException e) {
             post(new Runnable() {
