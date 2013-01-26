@@ -354,6 +354,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use -1 to disable.
     private int mScreenBrightnessOverrideFromWindowManager = -1;
 
+    // The button brightness setting override from the window manager
+    // to allow the current foreground activity to override the button brightness.
+    // Use -1 to disable.
+    private int mButtonBrightnessOverrideFromWindowManager = -1;
+
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity timeout.
     // Use -1 to disable.
@@ -1360,8 +1365,13 @@ public final class PowerManagerService extends IPowerManager.Stub
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
                         } else {
-                            mButtonsLight.setBrightness(mDisplayPowerRequest.screenBrightness);
-                            nextTimeout = now + BUTTON_ON_DURATION;
+                            int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
+                                    ? mButtonBrightnessOverrideFromWindowManager
+                                    : mDisplayPowerRequest.screenBrightness;
+                            mButtonsLight.setBrightness(brightness);
+                            if (brightness != 0) {
+                                nextTimeout = now + BUTTON_ON_DURATION;
+                            }
                         }
                         mUserActivitySummary |= USER_ACTIVITY_SCREEN_BRIGHT;
                     } else {
@@ -2135,9 +2145,24 @@ public final class PowerManagerService extends IPowerManager.Stub
      * @param brightness The overridden brightness, or -1 to disable the override.
      */
     public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
-        // Do nothing.
-        // Button lights are not currently supported in the new implementation.
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setButtonBrightnessOverrideFromWindowManagerInternal(brightness);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setButtonBrightnessOverrideFromWindowManagerInternal(int brightness) {
+        synchronized (mLock) {
+            if (mButtonBrightnessOverrideFromWindowManager != brightness) {
+                mButtonBrightnessOverrideFromWindowManager = brightness;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
     }
 
     /**
