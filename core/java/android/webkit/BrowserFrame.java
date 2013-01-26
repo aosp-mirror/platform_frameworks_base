@@ -56,8 +56,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.harmony.security.provider.cert.X509CertImpl;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLKeyHolder;
 
 class BrowserFrame extends Handler {
 
@@ -1129,13 +1129,10 @@ class BrowserFrame extends Handler {
         if (table.IsAllowed(hostAndPort)) {
             // previously allowed
             PrivateKey pkey = table.PrivateKey(hostAndPort);
-            if (pkey instanceof OpenSSLRSAPrivateKey) {
+            if (pkey instanceof OpenSSLKeyHolder) {
+                OpenSSLKey sslKey = ((OpenSSLKeyHolder) pkey).getOpenSSLKey();
                 nativeSslClientCert(handle,
-                                    ((OpenSSLRSAPrivateKey)pkey).getPkeyContext(),
-                                    table.CertificateChain(hostAndPort));
-            } else if (pkey instanceof OpenSSLDSAPrivateKey) {
-                nativeSslClientCert(handle,
-                                    ((OpenSSLDSAPrivateKey)pkey).getPkeyContext(),
+                                    sslKey.getPkeyContext(),
                                     table.CertificateChain(hostAndPort));
             } else {
                 nativeSslClientCert(handle,
