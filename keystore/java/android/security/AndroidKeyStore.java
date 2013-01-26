@@ -16,9 +16,8 @@
 
 package android.security;
 
-import org.apache.harmony.xnet.provider.jsse.OpenSSLDSAPrivateKey;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
-import org.apache.harmony.xnet.provider.jsse.OpenSSLRSAPrivateKey;
+import org.apache.harmony.xnet.provider.jsse.OpenSSLKeyHolder;
 
 import android.util.Log;
 
@@ -210,10 +209,8 @@ public class AndroidKeyStore extends KeyStoreSpi {
         byte[] keyBytes = null;
 
         final String pkeyAlias;
-        if (key instanceof OpenSSLRSAPrivateKey) {
-            pkeyAlias = ((OpenSSLRSAPrivateKey) key).getPkeyAlias();
-        } else if (key instanceof OpenSSLDSAPrivateKey) {
-            pkeyAlias = ((OpenSSLDSAPrivateKey) key).getPkeyAlias();
+        if (key instanceof OpenSSLKeyHolder) {
+            pkeyAlias = ((OpenSSLKeyHolder) key).getOpenSSLKey().getAlias();
         } else {
             pkeyAlias = null;
         }
