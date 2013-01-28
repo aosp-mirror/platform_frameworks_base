@@ -123,6 +123,8 @@ final class ActivityRecord {
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
+    int launchCount;        // count of launches since last state
+    long lastLaunchTime;    // time of last lauch of this activity
 
     String stringName;      // for caching of toString().
     
@@ -201,7 +203,12 @@ final class ActivityRecord {
             }
         }
         pw.print(prefix); pw.print("launchFailed="); pw.print(launchFailed);
-                pw.print(" haveState="); pw.print(haveState);
+                pw.print(" launchCount="); pw.print(launchCount);
+                pw.print(" lastLaunchTime=");
+                if (lastLaunchTime == 0) pw.print("0");
+                else TimeUtils.formatDuration(lastLaunchTime, now, pw);
+                pw.println();
+        pw.print(prefix); pw.print(" haveState="); pw.print(haveState);
                 pw.print(" icicle="); pw.println(icicle);
         pw.print(prefix); pw.print("state="); pw.print(state);
                 pw.print(" stopped="); pw.print(stopped);
