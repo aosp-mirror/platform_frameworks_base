@@ -449,6 +449,10 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar il midar tranter applicaziuns"</string>
     <!-- no translation found for permdesc_stopAppSwitches (8262195802582255021) -->
     <skip />
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <!-- no translation found for permlab_runSetActivityWatcher (892239094867182656) -->
     <skip />
     <!-- no translation found for permdesc_runSetActivityWatcher (6003603162578577406) -->

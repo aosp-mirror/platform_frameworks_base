@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Letakkan pengelola aktivitas dalam kondisi mati. Tidak melakukan penonaktifan penuh."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"cegah pergantian aplikasi"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Mencegah pengguna beralih ke apl lain."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"memantau dan mengontrol semua peluncuran apl"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Mengizinkan apl memantau dan mengontrol cara sistem meluncurkan kegiatan. Apl berbahaya dapat meretas sistem sepenuhnya. Izin ini hanya diperlukan untuk pengembangan, tidak pernah diperlukan untuk penggunaan normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kirim siaran paket dihapus"</string>

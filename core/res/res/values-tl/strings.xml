@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Inilalagay ang tagapamahala ng aktibidad sa katayuan ng pag-shutdown. Hindi nagsasagawa ng kumpletong pag-shutdown."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"pigilan ang mga paglipat ng app"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Pinipigilan ang mga user sa paglipat sa isa pang app."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"subaybayan at kontrolin ang lahat ng paglunsad ng app"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Pinapayagan ang app na subaybayan at kontrolin kung paano naglulunsad ng mga aktibidad ang system. Maaaring ganap na ikompromiso ng nakakahamak na apps ang system. Kinakailangan lamang ang pahintulot na ito para sa pagpapabuti, hindi kailanman para sa normal na paggamit."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"magpadala ng package inalis ang broadcast"</string>

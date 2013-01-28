@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Hiermee wordt activiteitenbeheer uitgeschakeld. Er wordt geen volledige uitschakeling uitgevoerd."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen apps voorkomen"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere app."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"alle startende apps bijhouden en beheren"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Hiermee kan de app de manier bijhouden en beheren waarop het systeem activiteiten start. Schadelijke apps kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal gebruik."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"melding verzenden dat pakket is verwijderd"</string>

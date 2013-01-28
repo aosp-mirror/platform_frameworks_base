@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lar applikasjonen sette aktivitetshåndtereren i avslutningstilstand. Slår ikke systemet helt av."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre applikasjonsbytte"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindrer brukeren i å bytte til en annen app."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"avervåke og kontrollere all oppstart av apper"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lar appen overvåke og kontrollere hvordan systemet starter opp aktiviteter. Ondsinnede apper kan utsette hele systemet for sikkerhetsbrudd. Denne tillatelsen er bare nødvendig for utviklere, aldri for vanlig bruk."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kringkaste melding om fjernet pakke"</string>

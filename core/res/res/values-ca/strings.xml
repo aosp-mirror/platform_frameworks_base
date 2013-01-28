@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impedeix que l\'usuari canviï a una altra aplicació."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"supervisa i controla tots els inicis d\'aplicacions"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permet que l\'aplicació supervisi i controli com el sistema inicia activitats. Les aplicacions malicioses poden comprometre totalment el sistema. Aquest permís només és necessari per al desenvolupament, mai per a l\'ús normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar difusió d\'eliminació de paquet"</string>
