@@ -219,10 +219,7 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
-	voip/java/android/net/sip/ISipSession.aidl \
-	voip/java/android/net/sip/ISipSessionListener.aidl \
-	voip/java/android/net/sip/ISipService.aidl
+	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl
 #
 
 
@@ -353,6 +350,8 @@ non_base_dirs := \
 	../../external/apache-http/src/org/apache/http \
 	../opt/telephony/src/java/android/telephony \
 	../opt/telephony/src/java/android/telephony/gsm \
+	../opt/net/voip/src/java/android/net/rtp \
+	../opt/net/voip/src/java/android/net/sip
 
 # These are relative to frameworks/base
 dirs_to_check_apis := \
@@ -405,6 +404,7 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 			framework \
 			mms-common \
 			telephony-common \
+			voip-common \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
