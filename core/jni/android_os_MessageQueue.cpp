@@ -109,55 +109,34 @@ void NativeMessageQueue::wake() {
 
 // ----------------------------------------------------------------------------
 
-static NativeMessageQueue* android_os_MessageQueue_getNativeMessageQueue(JNIEnv* env,
-        jobject messageQueueObj) {
+sp<MessageQueue> android_os_MessageQueue_getMessageQueue(JNIEnv* env, jobject messageQueueObj) {
     jint intPtr = env->GetIntField(messageQueueObj, gMessageQueueClassInfo.mPtr);
     return reinterpret_cast<NativeMessageQueue*>(intPtr);
 }
 
-static void android_os_MessageQueue_setNativeMessageQueue(JNIEnv* env, jobject messageQueueObj,
-        NativeMessageQueue* nativeMessageQueue) {
-    env->SetIntField(messageQueueObj, gMessageQueueClassInfo.mPtr,
-             reinterpret_cast<jint>(nativeMessageQueue));
-}
-
-sp<MessageQueue> android_os_MessageQueue_getMessageQueue(JNIEnv* env, jobject messageQueueObj) {
-    NativeMessageQueue* nativeMessageQueue =
-            android_os_MessageQueue_getNativeMessageQueue(env, messageQueueObj);
-    return nativeMessageQueue;
-}
-
-static void android_os_MessageQueue_nativeInit(JNIEnv* env, jobject obj) {
+static jint android_os_MessageQueue_nativeInit(JNIEnv* env, jclass clazz) {
     NativeMessageQueue* nativeMessageQueue = new NativeMessageQueue();
     if (!nativeMessageQueue) {
         jniThrowRuntimeException(env, "Unable to allocate native queue");
-        return;
+        return 0;
     }
 
     nativeMessageQueue->incStrong(env);
-    android_os_MessageQueue_setNativeMessageQueue(env, obj, nativeMessageQueue);
+    return reinterpret_cast<jint>(nativeMessageQueue);
 }
 
-static void android_os_MessageQueue_nativeDestroy(JNIEnv* env, jobject obj) {
-    NativeMessageQueue* nativeMessageQueue =
-            android_os_MessageQueue_getNativeMessageQueue(env, obj);
-    if (nativeMessageQueue) {
-        android_os_MessageQueue_setNativeMessageQueue(env, obj, NULL);
-        nativeMessageQueue->decStrong(env);
-    }
+static void android_os_MessageQueue_nativeDestroy(JNIEnv* env, jclass clazz, jint ptr) {
+    NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+    nativeMessageQueue->decStrong(env);
 }
 
-static void throwQueueNotInitialized(JNIEnv* env) {
-    jniThrowException(env, "java/lang/IllegalStateException", "Message queue not initialized");
-}
-
-static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,
+static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jclass clazz,
         jint ptr, jint timeoutMillis) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
     nativeMessageQueue->pollOnce(env, timeoutMillis);
 }
 
-static void android_os_MessageQueue_nativeWake(JNIEnv* env, jobject obj, jint ptr) {
+static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jint ptr) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
     return nativeMessageQueue->wake();
 }
@@ -166,8 +145,8 @@ static void android_os_MessageQueue_nativeWake(JNIEnv* env, jobject obj, jint pt
 
 static JNINativeMethod gMessageQueueMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "()V", (void*)android_os_MessageQueue_nativeInit },
-    { "nativeDestroy", "()V", (void*)android_os_MessageQueue_nativeDestroy },
+    { "nativeInit", "()I", (void*)android_os_MessageQueue_nativeInit },
+    { "nativeDestroy", "(I)V", (void*)android_os_MessageQueue_nativeDestroy },
     { "nativePollOnce", "(II)V", (void*)android_os_MessageQueue_nativePollOnce },
     { "nativeWake", "(I)V", (void*)android_os_MessageQueue_nativeWake }
 };

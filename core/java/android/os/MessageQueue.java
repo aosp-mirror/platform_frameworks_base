@@ -48,10 +48,10 @@ public class MessageQueue {
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
     private int mNextBarrierToken;
 
-    private native void nativeInit();
-    private native void nativeDestroy();
-    private native void nativePollOnce(int ptr, int timeoutMillis);
-    private native void nativeWake(int ptr);
+    private native static int nativeInit();
+    private native static void nativeDestroy(int ptr);
+    private native static void nativePollOnce(int ptr, int timeoutMillis);
+    private native static void nativeWake(int ptr);
 
     /**
      * Callback interface for discovering when a thread is going to block
@@ -102,15 +102,22 @@ public class MessageQueue {
 
     MessageQueue(boolean quitAllowed) {
         mQuitAllowed = quitAllowed;
-        nativeInit();
+        mPtr = nativeInit();
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            nativeDestroy();
+            dispose();
         } finally {
             super.finalize();
+        }
+    }
+
+    private void dispose() {
+        if (mPtr != 0) {
+            nativeDestroy(mPtr);
+            mPtr = 0;
         }
     }
 
@@ -126,6 +133,7 @@ public class MessageQueue {
 
             synchronized (this) {
                 if (mQuiting) {
+                    dispose();
                     return null;
                 }
 
