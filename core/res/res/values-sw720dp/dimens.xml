@@ -73,7 +73,7 @@
 
     <!-- Keyguard dimensions -->
     <!-- Size of the clock font in keyguard's status view -->
-    <dimen name="kg_status_clock_font_size">188dp</dimen>
+    <dimen name="kg_status_clock_font_size">170dp</dimen>
 
     <!-- Size of the date font in keyguard's status view  -->
     <dimen name="kg_status_date_font_size">34dp</dimen>
