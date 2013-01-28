@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Изключва диспечера на дейностите. Не извършва пълно изключване."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"предотвратяване на превключването между приложения"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Не позволява на потребителя да превключва към друго приложение."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"наблюдение и контрол на стартирането на всички приложения"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Разрешава на приложението да наблюдава и контролира как системата стартира дейности. Злонамерените приложения могат изцяло да компрометират системата. Това разрешение е нужно само за програмиране, никога за нормална употреба."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"изпращане на излъчване при премахнат пакет"</string>

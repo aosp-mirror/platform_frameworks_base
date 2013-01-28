@@ -299,6 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"مدیر فعالیت را در حالت خاموشی قرار می‌دهد. خاموشی را به صورت کامل انجام نمی‌دهد."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ممانعت از جابجایی برنامه"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"اجازه نمی‎دهد کاربر به برنامه دیگری برود."</string>
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"دریافت اطلاعات برنامه فعلی"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"به دارنده اجازه می‌دهد اطلاعات خصوصی مربوط به برنامه فعلی را در پیش زمینه صفحه بازیابی کند."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"نظارت و کنترل راه‌اندازی همه برنامه"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"به برنامه اجازه می‎دهد تا نحوه راه‌اندازی فعالیت‌های سیستم را کنترل کند. برنامه‎های مخرب می‎توانند کاملا با سیستم سازگار شوند. این مجوز فقط برای توسعه نیاز است و برای استفاده عادی نیست."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ارسال پخش بسته حذف شده"</string>

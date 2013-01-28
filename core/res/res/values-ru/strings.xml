@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Завершает работу диспетчера активности. Не выполняет полное завершение работы."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запретить переключение приложений"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запрещает пользователям переключаться между приложениями."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"отслеживание и управление запуском всех приложений"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Приложение сможет отслеживать запуск системных процессов и управлять им. Вредоносные программы смогут получить полный контроль над системой. Это разрешение необходимо только для разработки и не нужно в обычном режиме."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"отправлять рассылку об удалении пакета"</string>

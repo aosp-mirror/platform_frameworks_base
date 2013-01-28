@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Puts the activity manager into a shut-down state. Does not perform a complete shut down."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"prevent app switches"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Prevents the user from switching to another app."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitor and control all app launching"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Allows the app to monitor and control how the system launches activities. Malicious apps may completely compromise the system. This permission is only needed for development, never for normal use."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send package removed broadcast"</string>

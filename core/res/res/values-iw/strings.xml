@@ -299,6 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"מעביר את מנהל הפעילויות למצב כיבוי. לא מבצע כיבוי מלא."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"מניעת מעבר ליישום אחר על ידי המשתמש."</string>
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"קבל פרטים על היישום הנוכחי"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"מאפשר לבעלים לאחזר מידע פרטי לגבי היישום הנוכחי שבקדמת המסך."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ניהול מעקב ושליטה על כל הפעלות היישומים"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"מאפשר ליישום לנהל מעקב אחר האופן שבו המערכת מפעילה פעילויות, ולשלוט בו. יישומים זדוניים עלולים לסכן את המערכת כולה. הרשאה זו אינה נחוצה לשימוש רגיל, אלא לפיתוח בלבד."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"שלח שידור שהוסר מחבילה"</string>

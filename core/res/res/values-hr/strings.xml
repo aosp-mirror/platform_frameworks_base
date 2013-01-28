@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Postavlja upravitelja za aktivnost u stanje mirovanja. Ne isključuje ga u potpunosti."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"sprečavanje promjene aplikacije"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Sprječava korisnika u prebacivanju na drugu aplikaciju."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"praćenje i nadzor svih pokretanja aplikacija"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Omogućuje aplikaciji nadzor i upravljanje načinom na koji sustav pokreće aktivnosti. Zlonamjerne aplikacije mogu posve ugroziti sustav. Ta je dozvola potrebna samo za razvoj, nikada za uobičajenu upotrebu."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"slanje paketno uklonjenog prijenosa"</string>
