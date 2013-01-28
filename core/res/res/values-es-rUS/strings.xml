@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Pone al administrador de la actividad en estado de cierre. No realiza un cierre completo."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir conmutadores de aplicación"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Evita que el usuario cambie a otra aplicación."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"supervisar y controlar la ejecución de todas las aplicaciones"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite que la aplicación supervise y controle la manera en la que el sistema inicia actividades. Las aplicaciones maliciosas pueden comprometer el sistema por completo. Este permiso es necesario solo para el desarrollo, nunca para el uso habitual."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar emisión de paquete eliminado"</string>

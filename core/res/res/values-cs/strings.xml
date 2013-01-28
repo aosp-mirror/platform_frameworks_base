@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Uvede správce činností do vypnutého stavu. Nedojde však k úplnému vypnutí."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Zabrání uživateli přepnout na jinou aplikaci."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou systém zcela ovládnout. Toto oprávnění je požadováno pouze pro účely vývoje, nikdy pro běžné použití."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odeslání vysílání o odstranění balíčku"</string>

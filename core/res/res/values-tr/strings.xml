@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Eylem yöneticisini kapalı duruma getirir. Tam kapatma işlemi gerçekleştirmez."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"uygulama değişimlerini engelle"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Kullanıcının başka bir uygulamaya geçiş yapmasını engeller."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"tüm uygulama başlatma işlemlerini izle ve denetle"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Uygulamaya, sistemin etkinlikleri nasıl başlattığını izleme ve denetleme izni verir. Kötü amaçlı uygulamalar sistemi tamamen tehlikeye atabilir. Bu izin normal kullanım için değildir, sadece geliştirme süreçlerinde kullanılır."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"paket ile kaldırılan yayını gönder"</string>
