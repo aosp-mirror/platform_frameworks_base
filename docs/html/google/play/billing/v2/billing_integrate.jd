@@ -170,15 +170,14 @@ your project</a>.</p>
 following:</p>
 
 <ol>
-  <li><strong>Add your Google Play public key to the sample application code.</strong>
+  <li><strong>Add your app's public key to the sample application code.</strong>
     <p>This enables the application to verify the signature of the transaction information that is
     returned from Google Play. To add your public key to the sample application code, do the
     following:</p>
     <ol>
-      <li>Log in to your Google Play <a href="http://play.google.com/apps/publish">publisher
-      account</a>.</li>
-      <li>On the upper left part of the page, under your name, click <strong>Edit
-      Profile</strong>.</li>
+      <li>Log in to your Google Play <a href="http://play.google.com/apps/publish">Developer
+      console</a>.</li>
+      <li>On the upper left part of the page, All Applications, click the application name.</strong>.</li>
       <li>On the Edit Profile page, scroll down to the <strong>Licensing &amp; In-app
       Billing</strong> panel.</li>
       <li>Copy your public key.</li>
@@ -1044,14 +1043,14 @@ obfuscate your code.</p>
 
 <p>You will need to use your Google Play public key to perform the signature verification. The
 following procedure shows you how to retrieve Base64-encoded public key from the Google Play
-publisher site.</p>
+Developer Console.</p>
 
 <ol>
   <li>Log in to your <a href="http://play.google.com/apps/publish">publisher account</a>.</li>
-  <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
-  <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure
-  2).</li>
-  <li>Copy your public key.</li>
+  <li>On the upper left part of the page, click <strong>All applications</strong> and then click
+  the app name in the listing.</li>
+  <li>Click <em>Services &amp; APIs</em> and find "Your License Key for this Application" on the page. </li>
+  <li>Copy the app's public key.</li>
 </ol>
 
 <p class="caution"><strong>Important</strong>: To keep your public key safe from malicious users and
@@ -1060,11 +1059,13 @@ runtime from pieces or use bit manipulation (for example, XOR with some other st
 actual key. The key itself is not secret information, but you do not want to make it easy for a
 hacker or malicious user to replace the public key with another key.</p>
 
-<img src="{@docRoot}images/billing_public_key.png" height="510" id="figure2" />
-<p class="img-caption">
-  <strong>Figure 2.</strong> The Licensing and In-app Billing panel of your account's Edit Profile
-  page lets you see your public key.
-</p>
+<div style="width:640px;">
+<img src="{@docRoot}images/licensing_public_key.png" class="frame">
+<p class="img-caption"><strong>Figure
+2.</strong> An app's license key is available from the Services &amp; APIs page in
+the Developer Console.</p>
+</div>
+
 
 <h2 id="billing-implement">Modifying Your Application Code</h2>
 

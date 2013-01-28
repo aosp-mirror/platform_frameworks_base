@@ -492,7 +492,7 @@ compatibility for apps that depend on the (former) developer key. </p>
 <div style="margin:1em;">
 <img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_app_key.png" xheight="510" id="figure4" />
 <p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 4.</strong> You can find the license key for each app in the <strong>Services & APIs</strong> panel.
+  <strong>Figure 4.</strong> You can find the license key for each app in the <strong>Services &amp; APIs</strong> panel.
 </p>
 </div>
 
