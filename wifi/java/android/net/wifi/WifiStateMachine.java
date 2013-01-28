@@ -103,7 +103,6 @@ import java.util.regex.Pattern;
  */
 public class WifiStateMachine extends StateMachine {
 
-    private static final String TAG = "WifiStateMachine";
     private static final String NETWORKTYPE = "WIFI";
     private static final boolean DBG = false;
 
@@ -565,7 +564,7 @@ public class WifiStateMachine extends StateMachine {
     private final IBatteryStats mBatteryStats;
 
     public WifiStateMachine(Context context, String wlanInterface) {
-        super(TAG);
+        super("WifiStateMachine");
 
         mContext = context;
         mInterfaceName = wlanInterface;
@@ -678,7 +677,7 @@ public class WifiStateMachine extends StateMachine {
         mScanResultCache = new LruCache<String, ScanResult>(SCAN_RESULT_CACHE_SIZE);
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getName());
 
         mSuspendWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WifiSuspend");
         mSuspendWakeLock.setReferenceCounted(false);
@@ -3132,14 +3131,14 @@ public class WifiStateMachine extends StateMachine {
                             break;
                         default:
                             result = new WpsResult(Status.FAILURE);
-                            Log.e(TAG, "Invalid setup for WPS");
+                            loge("Invalid setup for WPS");
                             break;
                     }
                     if (result.status == Status.SUCCESS) {
                         replyToMessage(message, WifiManager.START_WPS_SUCCEEDED, result);
                         transitionTo(mWpsRunningState);
                     } else {
-                        Log.e(TAG, "Failed to start WPS with config " + wpsInfo.toString());
+                        loge("Failed to start WPS with config " + wpsInfo.toString());
                         replyToMessage(message, WifiManager.WPS_FAILED, WifiManager.ERROR);
                     }
                     break;
@@ -3465,7 +3464,7 @@ public class WifiStateMachine extends StateMachine {
         public void exit() {
             /* Request a CS wakelock during transition to mobile */
             checkAndSetConnectivityInstance();
-            mCm.requestNetworkTransitionWakelock(TAG);
+            mCm.requestNetworkTransitionWakelock(getName());
         }
     }
 
@@ -4039,13 +4038,5 @@ public class WifiStateMachine extends StateMachine {
         Message msg = Message.obtain();
         msg.arg2 = srcMsg.arg2;
         return msg;
-    }
-
-    private void log(String s) {
-        Log.d(TAG, s);
-    }
-
-    private void loge(String s) {
-        Log.e(TAG, s);
     }
 }
