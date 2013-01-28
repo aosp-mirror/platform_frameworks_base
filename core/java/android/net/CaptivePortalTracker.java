@@ -370,13 +370,4 @@ public class CaptivePortalTracker extends StateMachine {
         }
         mNotificationShown = visible;
     }
-
-    private static void log(String s) {
-        Log.d(TAG, s);
-    }
-
-    private static void loge(String s) {
-        Log.e(TAG, s);
-    }
-
 }
