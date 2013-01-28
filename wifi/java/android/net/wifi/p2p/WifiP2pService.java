@@ -2460,11 +2460,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         return msg;
     }
 
-    private void logd(String s) {
+    @Override
+    protected void logd(String s) {
         Slog.d(TAG, s);
     }
 
-    private void loge(String s) {
+    @Override
+    protected void loge(String s) {
         Slog.e(TAG, s);
     }
 

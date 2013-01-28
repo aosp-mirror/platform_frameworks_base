@@ -77,7 +77,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
     /* STOPSHIP: Keep this configurable for debugging until ship */
     private static boolean DBG = false;
-    private static final String TAG = "WifiWatchdogStateMachine";
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
@@ -306,7 +305,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      *                       (all other states)
      */
     private WifiWatchdogStateMachine(Context context) {
-        super(TAG);
+        super("WifiWatchdogStateMachine");
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -966,14 +965,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
      */
     private static boolean putSettingsGlobalBoolean(ContentResolver cr, String name, boolean value) {
         return Settings.Global.putInt(cr, name, value ? 1 : 0);
-    }
-
-    private static void logd(String s) {
-        Log.d(TAG, s);
-    }
-
-    private static void loge(String s) {
-        Log.e(TAG, s);
     }
 
     /**
