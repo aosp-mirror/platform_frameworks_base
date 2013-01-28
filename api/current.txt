@@ -10701,6 +10701,7 @@ package android.location {
     method public boolean hasAltitude();
     method public boolean hasBearing();
     method public boolean hasSpeed();
+    method public boolean isFromMockProvider();
     method public void removeAccuracy();
     method public void removeAltitude();
     method public void removeBearing();
