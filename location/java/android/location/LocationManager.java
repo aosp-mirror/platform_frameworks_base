@@ -1549,9 +1549,9 @@ public class LocationManager {
     public GpsStatus getGpsStatus(GpsStatus status) {
         if (status == null) {
             status = new GpsStatus();
-       }
-       status.setStatus(mGpsStatus);
-       return status;
+        }
+        status.setStatus(mGpsStatus);
+        return status;
     }
 
     /**
