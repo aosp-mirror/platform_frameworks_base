@@ -45,6 +45,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
         android:src="?android:attr/searchViewSearchIcon"
+        android:focusable="true"
         android:contentDescription="@string/searchview_description_search"
     />
 
