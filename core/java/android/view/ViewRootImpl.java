@@ -1513,16 +1513,7 @@ public final class ViewRootImpl implements ViewParent,
                                 hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
                                         mHolder.getSurface());
                             } catch (Surface.OutOfResourcesException e) {
-                                Log.e(TAG, "OutOfResourcesException initializing HW surface", e);
-                                try {
-                                    if (!mWindowSession.outOfMemory(mWindow) &&
-                                            Process.myUid() != Process.SYSTEM_UID) {
-                                        Slog.w(TAG, "No processes killed for memory; killing self");
-                                        Process.killProcess(Process.myPid());
-                                    }
-                                } catch (RemoteException ex) {
-                                }
-                                mLayoutRequested = true;    // ask wm for a new surface next time.
+                                handleOutOfResourcesException(e);
                                 return;
                             }
                         }
@@ -1549,15 +1540,7 @@ public final class ViewRootImpl implements ViewParent,
                     try {
                         mAttachInfo.mHardwareRenderer.updateSurface(mHolder.getSurface());
                     } catch (Surface.OutOfResourcesException e) {
-                        Log.e(TAG, "OutOfResourcesException updating HW surface", e);
-                        try {
-                            if (!mWindowSession.outOfMemory(mWindow)) {
-                                Slog.w(TAG, "No processes killed for memory; killing self");
-                                Process.killProcess(Process.myPid());
-                            }
-                        } catch (RemoteException ex) {
-                        }
-                        mLayoutRequested = true;    // ask wm for a new surface next time.
+                        handleOutOfResourcesException(e);
                         return;
                     }
                 }
@@ -1877,6 +1860,19 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mIsInTraversal = false;
+    }
+
+    private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
+        Log.e(TAG, "OutOfResourcesException initializing HW surface", e);
+        try {
+            if (!mWindowSession.outOfMemory(mWindow) &&
+                    Process.myUid() != Process.SYSTEM_UID) {
+                Slog.w(TAG, "No processes killed for memory; killing self");
+                Process.killProcess(Process.myPid());
+            }
+        } catch (RemoteException ex) {
+        }
+        mLayoutRequested = true;    // ask wm for a new surface next time.
     }
 
     private void performMeasure(int childWidthMeasureSpec, int childHeightMeasureSpec) {
@@ -2296,8 +2292,35 @@ public final class ViewRootImpl implements ViewParent,
                         animating ? null : mCurrentDirty)) {
                     mPreviousDirty.set(0, 0, mWidth, mHeight);
                 }
-            } else if (!drawSoftware(surface, attachInfo, yoff, scalingRequired, dirty)) {
-                return;
+            } else {
+                // If we get here with a disabled & requested hardware renderer, something went
+                // wrong (an invalidate posted right before we destroyed the hardware surface
+                // for instance) so we should just bail out. Locking the surface with software
+                // rendering at this point would lock it forever and prevent hardware renderer
+                // from doing its job when it comes back.
+                // Before we request a new frame we must however attempt to reinitiliaze the
+                // hardware renderer if it's in requested state. This would happen after an
+                // eglTerminate() for instance.
+                if (attachInfo.mHardwareRenderer != null &&
+                        !attachInfo.mHardwareRenderer.isEnabled() &&
+                        attachInfo.mHardwareRenderer.isRequested()) {
+
+                    try {
+                        attachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
+                                mHolder.getSurface());
+                    } catch (Surface.OutOfResourcesException e) {
+                        handleOutOfResourcesException(e);
+                        return;
+                    }
+
+                    mFullRedrawNeeded = true;
+                    scheduleTraversals();
+                    return;
+                }
+
+                if (!drawSoftware(surface, attachInfo, yoff, scalingRequired, dirty)) {
+                    return;
+                }
             }
         }
 
@@ -2312,18 +2335,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int yoff,
             boolean scalingRequired, Rect dirty) {
-
-        // If we get here with a disabled & requested hardware renderer, something went
-        // wrong (an invalidate posted right before we destroyed the hardware surface
-        // for instance) so we should just bail out. Locking the surface with software
-        // rendering at this point would lock it forever and prevent hardware renderer
-        // from doing its job when it comes back.
-        if (attachInfo.mHardwareRenderer != null && !attachInfo.mHardwareRenderer.isEnabled() &&
-                attachInfo.mHardwareRenderer.isRequested()) {
-            mFullRedrawNeeded = true;
-            scheduleTraversals();
-            return false;
-        }
 
         // Draw with software renderer.
         Canvas canvas;
@@ -2343,15 +2354,7 @@ public final class ViewRootImpl implements ViewParent,
             // TODO: Do this in native
             canvas.setDensity(mDensity);
         } catch (Surface.OutOfResourcesException e) {
-            Log.e(TAG, "OutOfResourcesException locking surface", e);
-            try {
-                if (!mWindowSession.outOfMemory(mWindow)) {
-                    Slog.w(TAG, "No processes killed for memory; killing self");
-                    Process.killProcess(Process.myPid());
-                }
-            } catch (RemoteException ex) {
-            }
-            mLayoutRequested = true;    // ask wm for a new surface next time.
+            handleOutOfResourcesException(e);
             return false;
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Could not lock surface", e);
@@ -2996,10 +2999,8 @@ public final class ViewRootImpl implements ViewParent,
                                 mSurface != null && mSurface.isValid()) {
                             mFullRedrawNeeded = true;
                             try {
-                                if (mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mHolder.getSurface())) {
-                                    mFullRedrawNeeded = true;
-                                }
+                                mAttachInfo.mHardwareRenderer.initializeIfNeeded(
+                                        mWidth, mHeight, mHolder.getSurface());
                             } catch (Surface.OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {
