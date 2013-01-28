@@ -299,6 +299,10 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Ibeka imeneja yomsebenzi kwisimo sokuvala shaqa. Ayenzi ukuvala shaqa okuphelele."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"gwema ukushintsha kohlelo lokusebenza"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Igwema umsebenzisi ukuthi ashintshele kolunye uhlelo lokusebenza."</string>
+    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
+    <skip />
+    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"qapha futhi ulawule ukuqaliswa kwazo zonke izinsiza"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ivumela insiza ukuthi ihlole futhi ilawule ukuthi isistimu iziqalisa kanjani izehlakalo. Izinzisa ezinobungozi zingensa isistimu ibe sebungozini. Lemvume idingakalela intuthuku kuphela hhay ukusetshenziswa okwejwayelekile."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"thumela iphakheji yomsakazo okhishiwe"</string>

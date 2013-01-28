@@ -299,6 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Plaas die aktiwiteitbestuurder in \'n afsluitingstatus. Doen nie \'n volledige afsluiting nie."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Verhoed dat die gebruiker na \'n ander program oorskakel."</string>
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"kry huidige program-inligting"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Laat die houer toe om private inligting oor die huidige program op die voorgrond van die skerm te herwin."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitor en beheer alle programlaaiery"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Laat die program toe om te monitor en te beheer hoe die stelsel aktiwiteite laai. Kwaadwillige programme kan dalk die stelsel heeltemal in gevaar stel. Hierdie toestemming is net nodig vir ontwikkeling, en nooit vir normale gebruik nie."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"stuur uitsending met pakket verwyder"</string>
