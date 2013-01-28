@@ -1,0 +1,49 @@
+page.title=优化电池使用时间
+
+trainingnavtop=true
+startpage=true
+next.title=监控电池电量和充电状态
+next.link=battery-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>依存关系和前提条件</h2> 
+<ul>
+  <li>Android 2.0（API 级别 5）或更高版本</li>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>的使用经验</li>
+</ul>
+
+<h2>您还应参阅</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/services.html">服务</a>
+</ul>
+
+</div> 
+</div>
+
+<p>为了打造一个优秀的应用，您应设法降低应用对电池使用时间的影响。阅读完本教程后，您就可以让自己构建的应用根据其所在设备的状态来监控和调整自身的功能和行为。</p>
+
+<p>要确保在不影响用户体验的情况下最大程度地降低应用对电池使用时间的影响，您可以采取一些措施，例如在网络连接断开时停用后台服务更新，或在电池电量较低时降低此类更新的频率。</p>
+
+<h2>教程</h2> 
+ 
+<!-- Create a list of the lessons in this class along with a short description of each lesson.
+These should be short and to the point. It should be clear from reading the summary whether someone
+will want to jump to a lesson or not.--> 
+ 
+<dl>
+  <dt><b><a href="battery-monitoring.html">监控电池电量和充电状态</a></b></dt>
+  <dd>了解如何通过确定和监控当前的电池电量和充电状态的变化来相应地调整应用的更新频率。</dd>
+
+  <dt><b><a href="docking-monitoring.html">确定和监控基座对接状态和类型</a></b></dt>
+  <dd>最佳刷新频率可能各有不同，具体取决于安装了相关应用的设备的使用方式。了解如何确定和监控所用基座的对接状态和类型，以便相应地调整应用的行为。</dd>
+
+  <dt><b><a href="connectivity-monitoring.html">确定和监控网络连接状态</a></b></dt>
+  <dd>如果没有互联网连接，您就无法通过在线来源更新应用。了解如何查看连接状态，以便相应地调整后台更新频率。您还可以了解如何在执行高带宽操作前查看 Wi-Fi 或移动连接的状态。</dd>
+
+  <dt><b><a href="manifest-receivers.html">根据需要操作广播接收器</a></b></dt>
+  <dd>您可以在运行时切换自己在清单中声明的广播接收器，以便根据当前设备状态停用不需要的接收器。了解如何在设备未处于特定状态的情况下切换和层叠状态变化接收器和延迟操作，以便提高效率。</dd>
+</dl> 

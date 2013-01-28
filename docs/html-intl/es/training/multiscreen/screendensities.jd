@@ -1,0 +1,100 @@
+page.title=Cómo admitir varias densidades de pantalla
+parent.title=Cómo diseñar aplicaciones para varias pantallas
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Cómo admitir varios tamaños de pantalla
+previous.link=screensizes.html
+next.title=Cómo implementar interfaces de usuario adaptables
+next.link=adaptui.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>En esta sección puedes aprender:</h2>
+<ol>
+  <li><a href="#TaskUseDP">Cómo utilizar píxeles independientes de la densidad</a></li>
+  <li><a href="#TaskProvideAltBmp">Cómo proporcionar mapas de bits alternativos</a></li>
+</ol>
+
+<h2>También puedes consultar:</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Cómo admitir varias pantallas</a></li>
+  <li><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Directrices para diseñar iconos</a></li>
+</ul>
+
+<h2>¡Pruébalo!</h2>
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+ 
+</div> 
+</div> 
+
+<p>En esta sección se explica cómo proporcionar diferentes recursos y utilizar unidades de medida de resolución independiente para admitir diferentes densidades de pantalla.</p>
+
+<h2 id="TaskUseDP">Cómo utilizar píxeles independientes de la densidad</h2>
+
+<p>Un error común que debes evitar al crear tus diseños es utilizar píxeles absolutos para definir distancias o tamaños. Definir dimensiones de diseño mediante píxeles es problemático porque cada pantalla tiene densidades de píxeles diferentes, por lo que es posible que el mismo número de píxeles corresponda a varios tamaños físicos en distintos dispositivos. Por tanto, al especificar dimensiones, debes utilizar siempre unidades <code>dp</code> o <code>sp</code>. <code>dp</code> es un píxel independiente de la densidad que corresponde al tamaño físico de un píxel a 160 dpi. <code>sp</code> es la misma unidad de base, pero aumentada en función del tamaño de letra preferido por el usuario (se trata de un píxel independiente de la escala). Por tanto, debes utilizar esta unidad de medida para definir el tamaño de letra (pero no para tamaños de diseños).</p>
+
+<p>Por ejemplo, al especificar un espacio entre dos vistas, debes utilizar <code>dp</code> en lugar de <code>px</code>:</p>
+
+<pre>
+&lt;Button android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:text="&#64;string/clickme"
+    android:layout_marginTop="20dp" /&gt;
+</pre>
+
+<p>Al especificar el tamaño de letra, debes usar siempre <code>sp</code>:</p>
+
+<pre>
+&lt;TextView android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:textSize="20sp" /&gt;
+</pre>
+
+
+<h2 id="TaskProvideAltBmp">Cómo proporcionar mapas de bits alternativos</h2>
+
+<p>Dado que Android se ejecuta en dispositivos con diferentes densidades de pantalla, siempre debes proporcionar tus recursos de mapas de bits adaptados a los conjuntos de densidades generalizados: baja, media, alta y muy alta. De este modo, podrás conseguir un rendimiento y una calidad gráfica óptimos en todas las densidades de pantalla.</p>
+
+<p>Para generar estas imágenes, debes empezar con tu recurso genérico en formato vectorial y generar las imágenes para cada densidad con la siguiente escala de tamaños:</p>
+
+<p><ul>
+  <li><code>xhdpi</code>: 2,0
+  <li><code>hdpi</code>: 1,5
+  <li><code>mdpi</code>: 1.0 (base)
+  <li><code>ldpi</code>: 0,75
+</ul></p>
+
+<p>Esto significa que si generas una imagen de 200 x 200 para dispositivos <code>xhdpi</code>, debes generar el mismo recurso en 150 x 150 para <code>hdpi</code>, en 100 x 100 para <code>mdpi</code> y, por último, una imagen de 75 x 75 para dispositivos <code>ldpi</code>.</p>
+
+<p>A continuación, sitúa los archivos de imagen generados en el subdirectorio adecuado en <code>res/</code> y el sistema seleccionará el archivo correspondiente automáticamente en función de la densidad de la pantalla del dispositivo en el que se esté ejecutando la aplicación:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+  res/
+    drawable-xhdpi/
+        awesomeimage.png
+    drawable-hdpi/
+        awesomeimage.png
+    drawable-mdpi/
+        awesomeimage.png
+    drawable-ldpi/
+        awesomeimage.png
+</pre>
+
+<p>Por tanto, cada vez que hagas referencia a <code>&#64;drawable/awesomeimage</code>, el sistema seleccionará el mapa de bits adecuado en función de los puntos por pulgada de la pantalla.</p>
+
+<p>Para consultar más sugerencias y directrices sobre cómo crear recursos de iconos para tu aplicación, consulta la sección <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Directrices para diseñar iconos</a>.</p>
+

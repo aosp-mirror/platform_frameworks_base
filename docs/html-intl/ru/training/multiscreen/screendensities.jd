@@ -1,0 +1,100 @@
+page.title=Supporting Different Densities
+parent.title=Designing for Multiple Screens
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Supporting Different Screen Sizes
+previous.link=screensizes.html
+next.title=Implementing Adaptative UI Flows
+next.link=adaptui.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>Содержание урока</h2>
+<ol>
+  <li><a href="#TaskUseDP">Использование пикселей, не зависящих от разрешения</a></li>
+  <li><a href="#TaskProvideAltBmp">Предоставление альтернативных растровых изображений</a></li>
+</ol>
+
+<h2>Дополнительные материалы</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Поддержка нескольких экранов</a></li>
+  <li><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Рекомендации по созданию значков</a></li>
+</ul>
+
+<h2>Упражнение</h2>
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Загрузить учебное приложение</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+ 
+</div> 
+</div> 
+
+<p>В этом уроке рассказывается, как создать интерфейс, поддерживающий разные разрешения экрана, за счет использования разных ресурсов и не зависящих от разрешения единиц измерения.</p>
+
+<h2 id="TaskUseDP">Использование пикселей, не зависящих от разрешения</h2>
+
+<p>Разработчики часто допускают одну и ту же ошибку при создании макетов&nbsp;– указывают размеры и расстояния с помощью абсолютных значений в пикселях. Задавать размеры в пикселях не рекомендуется, поскольку из-за различной плотности пикселей на экранах разных устройств фактический размер макета будет неодинаков. Всегда задавайте размеры в единицах <code>dp</code> или <code>sp</code>. <code>dp</code>&nbsp;– это не зависящий от разрешения пиксель, равный физическому пикселю на экране с плотностью 160&nbsp;точек/дюйм. <code>sp</code> является аналогичной единицей измерения, но масштабируется на основе выбранного пользователем размера текста, поэтому ее следует применять для указания величины шрифта, но не размера макета.</p>
+
+<p>Например, если вы задаете расстояние между двумя представлениями, рекомендуется использовать <code>dp</code>, а не <code>px</code>:</p>
+
+<pre>
+&lt;Button android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:text="&#64;string/clickme"
+    android:layout_marginTop="20dp" /&gt;
+</pre>
+
+<p>Для определения размера шрифта всегда используйте <code>sp</code>:</p>
+
+<pre>
+&lt;TextView android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:textSize="20sp" /&gt;
+</pre>
+
+
+<h2 id="TaskProvideAltBmp">Предоставление альтернативных растровых изображений</h2>
+
+<p>Так как платформа Android предназначена для устройств с разными разрешениями экрана, необходимо позаботиться о наличии растровых изображений для каждого из четырех обобщенных типов разрешения: низкого, среднего, высокого и очень высокого. Это обеспечит оптимальное сочетание качества графики и производительности на всех устройствах.</p>
+
+<p>На основе исходного векторного рисунка создайте растровые изображения для каждого из указанных разрешений согласно следующей шкале размеров:</p>
+
+<p><ul>
+  <li><code>xhdpi</code>: 2,0
+  <li><code>hdpi</code>: 1,5
+  <li><code>mdpi</code>: 1,0 (стандартный размер)
+  <li><code>ldpi</code>: 0,75
+</ul></p>
+
+<p>Это означает, что изображение, которое на устройствах с разрешением экрана <code>xhdpi</code> имеет размер 200&nbsp;x&nbsp;200, на устройствах <code>hdpi</code> должно иметь размер 150&nbsp;x&nbsp;150, на устройствах <code>mdpi</code>&nbsp;– 100&nbsp;x&nbsp;100, а на устройствах <code>ldpi</code>&nbsp;– 75&nbsp;x&nbsp;75.</p>
+
+<p>Поместите файлы изображений в соответствующие подкаталоги в папке <code>res/</code>, и система автоматически выберет подходящий в зависимости от разрешения экрана устройства, на котором выполняется приложение:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+  res/
+    drawable-xhdpi/
+        awesomeimage.png
+    drawable-hdpi/
+        awesomeimage.png
+    drawable-mdpi/
+        awesomeimage.png
+    drawable-ldpi/
+        awesomeimage.png
+</pre>
+
+<p>При каждом обращении к файлу <code>&#64;drawable/awesomeimage</code> система будет выбирать изображение, отвечающее разрешению экрана.</p>
+
+<p>Дополнительную информацию и советы можно найти в разделе <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Рекомендации по созданию значков</a>.</p>
+
