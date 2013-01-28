@@ -2696,23 +2696,14 @@ public class Editor {
             TypedArray styledAttributes = mTextView.getContext().obtainStyledAttributes(
                     com.android.internal.R.styleable.SelectionModeDrawables);
 
-            boolean allowText = mTextView.getContext().getResources().getBoolean(
-                    com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
-
             mode.setTitle(mTextView.getContext().getString(
                     com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
 
-            int selectAllIconId = 0; // No icon by default
-            if (!allowText) {
-                // Provide an icon, text will not be displayed on smaller screens.
-                selectAllIconId = styledAttributes.getResourceId(
-                        R.styleable.SelectionModeDrawables_actionModeSelectAllDrawable, 0);
-            }
-
             menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                    setIcon(selectAllIconId).
+                    setIcon(styledAttributes.getResourceId(
+                            R.styleable.SelectionModeDrawables_actionModeSelectAllDrawable, 0)).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
