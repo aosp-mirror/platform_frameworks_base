@@ -564,7 +564,7 @@ public class ImageWallpaper extends WallpaperService {
     
             return program;
         }
-        
+
         private int buildShader(String source, int type) {
             int shader = glCreateShader(type);
     
@@ -585,27 +585,28 @@ public class ImageWallpaper extends WallpaperService {
             
             return shader;
         }
-    
+
         private void checkEglError() {
             int error = mEgl.eglGetError();
             if (error != EGL_SUCCESS) {
                 Log.w(GL_LOG_TAG, "EGL error = " + GLUtils.getEGLErrorString(error));
             }
         }
-    
+
         private void checkGlError() {
             int error = glGetError();
             if (error != GL_NO_ERROR) {
                 Log.w(GL_LOG_TAG, "GL error = 0x" + Integer.toHexString(error), new Throwable());
             }
         }
-    
+
         private void finishGL() {
             mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
             mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+            mEgl.eglTerminate(mEglDisplay);
         }
-        
+
         private boolean initGL(SurfaceHolder surfaceHolder) {
             mEgl = (EGL10) EGLContext.getEGL();
     
