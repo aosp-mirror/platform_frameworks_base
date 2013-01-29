@@ -210,6 +210,8 @@ interface IPackageManager {
     
     List<PackageInfo> getPreferredPackages(int flags);
 
+    void resetPreferredActivities(int userId);
+
     void addPreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity, int userId);
 

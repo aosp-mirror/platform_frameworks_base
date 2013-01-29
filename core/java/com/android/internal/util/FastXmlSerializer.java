@@ -50,6 +50,8 @@ public class FastXmlSerializer implements XmlSerializer {
 
     private static final int BUFFER_LEN = 8192;
 
+    private static String sSpace = "                                                              ";
+
     private final char[] mText = new char[BUFFER_LEN];
     private int mPos;
 
@@ -59,7 +61,11 @@ public class FastXmlSerializer implements XmlSerializer {
     private CharsetEncoder mCharset;
     private ByteBuffer mBytes = ByteBuffer.allocate(BUFFER_LEN);
 
+    private boolean mIndent = false;
     private boolean mInTag;
+
+    private int mNesting = 0;
+    private boolean mLineStart = true;
 
     private void append(char c) throws IOException {
         int pos = mPos;
@@ -113,6 +119,14 @@ public class FastXmlSerializer implements XmlSerializer {
         append(str, 0, str.length());
     }
 
+    private void appendIndent(int indent) throws IOException {
+        indent *= 4;
+        if (indent > sSpace.length()) {
+            indent = sSpace.length();
+        }
+        append(sSpace, 0, indent);
+    }
+
     private void escapeAndAppendString(final String string) throws IOException {
         final int N = string.length();
         final char NE = (char)ESCAPE_TABLE.length;
@@ -161,6 +175,7 @@ public class FastXmlSerializer implements XmlSerializer {
 
         escapeAndAppendString(value);
         append('"');
+        mLineStart = false;
         return this;
     }
 
@@ -185,9 +200,13 @@ public class FastXmlSerializer implements XmlSerializer {
 
     public XmlSerializer endTag(String namespace, String name) throws IOException,
             IllegalArgumentException, IllegalStateException {
+        mNesting--;
         if (mInTag) {
             append(" />\n");
         } else {
+            if (mIndent && mLineStart) {
+                appendIndent(mNesting);
+            }
             append("</");
             if (namespace != null) {
                 append(namespace);
@@ -196,6 +215,7 @@ public class FastXmlSerializer implements XmlSerializer {
             append(name);
             append(">\n");
         }
+        mLineStart = true;
         mInTag = false;
         return this;
     }
@@ -278,6 +298,7 @@ public class FastXmlSerializer implements XmlSerializer {
     public void setFeature(String name, boolean state) throws IllegalArgumentException,
             IllegalStateException {
         if (name.equals("http://xmlpull.org/v1/doc/features.html#indent-output")) {
+            mIndent = true;
             return;
         }
         throw new UnsupportedOperationException();
@@ -325,6 +346,7 @@ public class FastXmlSerializer implements XmlSerializer {
             IllegalArgumentException, IllegalStateException {
         append("<?xml version='1.0' encoding='utf-8' standalone='"
                 + (standalone ? "yes" : "no") + "' ?>\n");
+        mLineStart = true;
     }
 
     public XmlSerializer startTag(String namespace, String name) throws IOException,
@@ -332,6 +354,10 @@ public class FastXmlSerializer implements XmlSerializer {
         if (mInTag) {
             append(">\n");
         }
+        if (mIndent) {
+            appendIndent(mNesting);
+        }
+        mNesting++;
         append('<');
         if (namespace != null) {
             append(namespace);
@@ -339,6 +365,7 @@ public class FastXmlSerializer implements XmlSerializer {
         }
         append(name);
         mInTag = true;
+        mLineStart = false;
         return this;
     }
 
@@ -349,6 +376,9 @@ public class FastXmlSerializer implements XmlSerializer {
             mInTag = false;
         }
         escapeAndAppendString(buf, start, len);
+        if (mIndent) {
+            mLineStart = buf[start+len-1] == '\n';
+        }
         return this;
     }
 
@@ -359,6 +389,9 @@ public class FastXmlSerializer implements XmlSerializer {
             mInTag = false;
         }
         escapeAndAppendString(text);
+        if (mIndent) {
+            mLineStart = text.charAt(text.length()-1) == '\n';
+        }
         return this;
     }
 
