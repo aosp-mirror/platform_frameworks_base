@@ -164,17 +164,19 @@ public class PreferredComponent {
         return mParseError;
     }
 
-    public void writeToXml(XmlSerializer serializer) throws IOException {
+    public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
         final int NS = mSetClasses != null ? mSetClasses.length : 0;
         serializer.attribute(null, "name", mShortComponent);
-        if (mMatch != 0) {
-            serializer.attribute(null, "match", Integer.toHexString(mMatch));
-        }
-        serializer.attribute(null, "set", Integer.toString(NS));
-        for (int s=0; s<NS; s++) {
-            serializer.startTag(null, "set");
-            serializer.attribute(null, "name", mSetComponents[s]);
-            serializer.endTag(null, "set");
+        if (full) {
+            if (mMatch != 0) {
+                serializer.attribute(null, "match", Integer.toHexString(mMatch));
+            }
+            serializer.attribute(null, "set", Integer.toString(NS));
+            for (int s=0; s<NS; s++) {
+                serializer.startTag(null, "set");
+                serializer.attribute(null, "name", mSetComponents[s]);
+                serializer.endTag(null, "set");
+            }
         }
     }
 
