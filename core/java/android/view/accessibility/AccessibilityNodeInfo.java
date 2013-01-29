@@ -748,7 +748,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
      *   the client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
-     *   flag when configuring his {@link AccessibilityService}.
+     *   flag when configuring his {@link android.accessibilityservice.AccessibilityService}.
      * </p>
      *
      * @param viewId The fully qualified resource name of the view id to find.
@@ -1431,7 +1431,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the source view id of an {@link AccessibilityNodeInfo} the
      *   client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
-     *   flag when configuring his {@link AccessibilityService}.
+     *   flag when configuring his {@link android.accessibilityservice.AccessibilityService}.
      * </p>
 
      * @return The id resource name.
