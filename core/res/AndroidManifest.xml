@@ -532,6 +532,31 @@
         android:label="@string/permlab_addVoicemail"
         android:description="@string/permdesc_addVoicemail" />
 
+    <!-- =============================================== -->
+    <!-- Permissions for enabling accessibility features -->
+    <!-- =============================================== -->
+
+    <!-- Used for permissions that allow requesting certain accessibility features. -->
+    <permission-group android:name="android.permission-group.ACCESSIBILITY_FEATURES"
+        android:label="@string/permgrouplab_accessibilityFeatures"
+        android:icon="@drawable/perm_group_accessibility_features"
+        android:description="@string/permgroupdesc_accessibilityFeatures"
+        android:priority="380" />
+
+    <!-- Allows an accessibility service to request touch exploration mode. -->
+    <permission android:name="android.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE"
+        android:permissionGroup="android.permission-group.ACCESSIBILITY_FEATURES"
+        android:label="@string/permlab_canRequestTouchExplorationMode"
+        android:description="@string/permdesc_canRequestTouchExplorationMode"
+        android:protectionLevel="dangerous" />
+
+    <!-- Allows an accessibility service to request enhanced web accessibility. -->
+    <permission android:name="android.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY"
+        android:permissionGroup="android.permission-group.ACCESSIBILITY_FEATURES"
+        android:label="@string/permlab_canRequestEnahncedWebAccessibility"
+        android:description="@string/permdesc_canRequestEnahncedWebAccessibility"
+        android:protectionLevel="dangerous" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
@@ -1724,7 +1749,7 @@
         android:description="@string/permdesc_bindInputMethod"
         android:protectionLevel="signature" />
 
-        <!-- Must be required by an {@link android.accessibilityservice.AccessibilityService},
+    <!-- Must be required by an {@link android.accessibilityservice.AccessibilityService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
         android:label="@string/permlab_bindAccessibilityService"

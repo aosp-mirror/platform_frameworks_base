@@ -2510,6 +2510,8 @@
             <flag name="flagIncludeNotImportantViews" value="0x00000002" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} -->
             <flag name="flagRequestTouchExplorationMode" value="0x00000004" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY} -->
+            <flag name="flagRequestEnhancedWebAccessibility" value="0x00000008" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->

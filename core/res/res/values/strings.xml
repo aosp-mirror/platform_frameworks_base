@@ -535,6 +535,11 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage" product="default">Access the SD card.</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_accessibilityFeatures">Accessibility features</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_accessibilityFeatures">Features that assistive technology can request.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -933,6 +938,20 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindAccessibilityService">Allows the holder to bind to the top-level
         interface of an accessibility service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_canRequestTouchExplorationMode">request explore by touch</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_canRequestTouchExplorationMode">Allows the hoder to request an
+        interaction mode in which touched items are spoken aloud and the UI can be explored
+        via gestures.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_canRequestEnahncedWebAccessibility">request enhanced web accessibility</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_canRequestEnahncedWebAccessibility">Allows the hoder to request
+        enabling of web accessibility enhancements. For example, installing scripts from
+        Google to make app content more accessible.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
@@ -2694,25 +2713,6 @@
     <string name="searchview_description_submit">Submit query</string>
     <!-- SearchView accessibility description for voice button [CHAR LIMIT=NONE] -->
     <string name="searchview_description_voice">Voice search</string>
-
-    <!-- Title for a warning message about the interaction model changes after allowing an accessibility
-         service to put the device into explore by touch mode, displayed as a dialog message when
-         the user selects to enables the service. (default). [CHAR LIMIT=45] -->
-    <string name="enable_explore_by_touch_warning_title">Enable Explore by Touch?</string>
-    <!-- Summary for a warning message about the interaction model changes after allowing an accessibility
-         service to put the device into explore by touch mode, displayed as a dialog message when
-         the user selects to enables the service. (tablet). [CHAR LIMIT=NONE] -->
-    <string name="enable_explore_by_touch_warning_message" product="tablet">
-            <xliff:g id="accessibility_service_name">%1$s</xliff:g> wants to enable Explore by Touch.
-            When Explore by Touch is turned on, you can hear or see descriptions of what\'s under
-            your finger or perform gestures to interact with the tablet.</string>
-    <!-- Summary for a warning message about the interaction model changes after allowing an accessibility
-         service to put the device into explore by touch mode, displayed as a dialog message when
-         the user selects to enables the service. (default). [CHAR LIMIT=NONE] -->
-    <string name="enable_explore_by_touch_warning_message" product="default">
-            <xliff:g id="accessibility_service_name">%1$s</xliff:g> wants to enable Explore by Touch.
-            When Explore by Touch is turned on, you can hear or see descriptions of what\'s under
-            your finger or perform gestures to interact with the phone.</string>
 
     <!-- String used to display the date. This is the string to say something happened 1 month ago. -->
     <string name="oneMonthDurationPast">1 month ago</string>

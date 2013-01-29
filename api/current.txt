@@ -36,6 +36,8 @@ package android {
     field public static final java.lang.String CALL_PHONE = "android.permission.CALL_PHONE";
     field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA = "android.permission.CAMERA";
+    field public static final java.lang.String CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = "android.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
+    field public static final java.lang.String CAN_REQUEST_TOUCH_EXPLORATION_MODE = "android.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE";
     field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
     field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_NETWORK_STATE = "android.permission.CHANGE_NETWORK_STATE";
@@ -141,6 +143,7 @@ package android {
 
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
+    field public static final java.lang.String ACCESSIBILITY_FEATURES = "android.permission-group.ACCESSIBILITY_FEATURES";
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
     field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
@@ -2104,7 +2107,8 @@ package android.accessibilityservice {
     field public static final int FEEDBACK_SPOKEN = 1; // 0x1
     field public static final int FEEDBACK_VISUAL = 8; // 0x8
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
-    field public static final int FLAG_REPORT_VIEW_IDS = 8; // 0x8
+    field public static final int FLAG_REPORT_VIEW_IDS = 16; // 0x10
+    field public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 8; // 0x8
     field public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 4; // 0x4
     field public int eventTypes;
     field public int feedbackType;
