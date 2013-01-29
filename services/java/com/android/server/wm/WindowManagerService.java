@@ -3039,7 +3039,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplayMagnifier = new DisplayMagnifier(this, callbacks);
             } else {
                 if (callbacks == null) {
-                    mDisplayMagnifier = null;
+                    if (mDisplayMagnifier != null) {
+                        mDisplayMagnifier.destroyLocked();
+                        mDisplayMagnifier = null;
+                    }
                 } else {
                     throw new IllegalStateException("Magnification callbacks already set!");
                 }

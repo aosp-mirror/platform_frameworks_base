@@ -615,6 +615,7 @@ public abstract class AccessibilityService extends Service {
                         mCallback.onServiceConnected();
                     } else {
                         AccessibilityInteractionClient.getInstance().removeConnection(connectionId);
+                        AccessibilityInteractionClient.getInstance().clearCache();
                         mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
                     }
                     return;
