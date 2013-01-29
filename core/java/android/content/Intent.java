@@ -883,7 +883,7 @@ public class Intent implements Parcelable, Cloneable {
      * Activity Action: Allow the user to select a particular kind of data and
      * return it.  This is different than {@link #ACTION_PICK} in that here we
      * just say what kind of data is desired, not a URI of existing data from
-     * which the user can pick.  A ACTION_GET_CONTENT could allow the user to
+     * which the user can pick.  An ACTION_GET_CONTENT could allow the user to
      * create the data as it runs (for example taking a picture or recording a
      * sound), let them browse over the web and download the desired data,
      * etc.
@@ -917,12 +917,17 @@ public class Intent implements Parcelable, Cloneable {
      * from a remote server but not already on the local device (thus requiring
      * they be downloaded when opened).
      * <p>
+     * If the caller can handle multiple returned items (the user performing
+     * multiple selection), then it can specify {@link #EXTRA_ALLOW_MULTIPLE}
+     * to indicate this.
+     * <p>
      * Input: {@link #getType} is the desired MIME type to retrieve.  Note
      * that no URI is supplied in the intent, as there are no constraints on
      * where the returned data originally comes from.  You may also include the
      * {@link #CATEGORY_OPENABLE} if you can only accept data that can be
      * opened as a stream.  You may use {@link #EXTRA_LOCAL_ONLY} to limit content
-     * selection to local data.
+     * selection to local data.  You may use {@link #EXTRA_ALLOW_MULTIPLE} to
+     * allow the user to select multiple items.
      * <p>
      * Output: The URI of the item that was picked.  This must be a content:
      * URI so that any receiver can access it.
@@ -3043,6 +3048,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_LOCAL_ONLY =
         "android.intent.extra.LOCAL_ONLY";
+
+    /**
+     * Used to indicate that a {@link #ACTION_GET_CONTENT} intent can allow the
+     * user to select and return multiple items.  This is a boolean extra; the default
+     * is false.  If true, an implementation of ACTION_GET_CONTENT is allowed to
+     * present the user with a UI where they can pick multiple items that are all
+     * returned to the caller.  When this happens, they should be returned as
+     * the {@link #getClipData()} part of the result Intent.
+     */
+    public static final String EXTRA_ALLOW_MULTIPLE =
+        "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
      * The userHandle carried with broadcast intents related to addition, removal and switching of users
