@@ -975,6 +975,11 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
 static jint nativeInit(JNIEnv* env, jclass clazz,
         jobject serviceObj, jobject contextObj, jobject messageQueueObj) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
+    if (messageQueue == NULL) {
+        jniThrowRuntimeException(env, "MessageQueue is not initialized.");
+        return 0;
+    }
+
     NativeInputManager* im = new NativeInputManager(contextObj, serviceObj,
             messageQueue->getLooper());
     im->incStrong(serviceObj);
