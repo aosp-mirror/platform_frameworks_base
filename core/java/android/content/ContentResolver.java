@@ -208,7 +208,7 @@ public abstract class ContentResolver {
 
     public ContentResolver(Context context) {
         mContext = context != null ? context : ActivityThread.currentApplication();
-        mPackageName = context.getBasePackageName();
+        mPackageName = mContext.getBasePackageName();
     }
 
     /** @hide */
