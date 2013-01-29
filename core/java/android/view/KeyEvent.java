@@ -302,27 +302,27 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_SWITCH_CHARSET  = 95;   // switch char-sets (Kanji,Katakana)
     /** Key code constant: A Button key.
      * On a game controller, the A button should be either the button labeled A
-     * or the first button on the upper row of controller buttons. */
+     * or the first button on the bottom row of controller buttons. */
     public static final int KEYCODE_BUTTON_A        = 96;
     /** Key code constant: B Button key.
      * On a game controller, the B button should be either the button labeled B
-     * or the second button on the upper row of controller buttons. */
+     * or the second button on the bottom row of controller buttons. */
     public static final int KEYCODE_BUTTON_B        = 97;
     /** Key code constant: C Button key.
      * On a game controller, the C button should be either the button labeled C
-     * or the third button on the upper row of controller buttons. */
+     * or the third button on the bottom row of controller buttons. */
     public static final int KEYCODE_BUTTON_C        = 98;
     /** Key code constant: X Button key.
      * On a game controller, the X button should be either the button labeled X
-     * or the first button on the lower row of controller buttons. */
+     * or the first button on the upper row of controller buttons. */
     public static final int KEYCODE_BUTTON_X        = 99;
     /** Key code constant: Y Button key.
      * On a game controller, the Y button should be either the button labeled Y
-     * or the second button on the lower row of controller buttons. */
+     * or the second button on the upper row of controller buttons. */
     public static final int KEYCODE_BUTTON_Y        = 100;
     /** Key code constant: Z Button key.
      * On a game controller, the Z button should be either the button labeled Z
-     * or the third button on the lower row of controller buttons. */
+     * or the third button on the upper row of controller buttons. */
     public static final int KEYCODE_BUTTON_Z        = 101;
     /** Key code constant: L1 Button key.
      * On a game controller, the L1 button should be either the button labeled L1 (or L)
