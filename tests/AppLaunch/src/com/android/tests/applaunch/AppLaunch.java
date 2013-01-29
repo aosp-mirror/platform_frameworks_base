@@ -60,7 +60,7 @@ public class AppLaunch extends InstrumentationTestCase {
     public void testMeasureStartUpTime() throws RemoteException {
         InstrumentationTestRunner instrumentation =
                 (InstrumentationTestRunner)getInstrumentation();
-        Bundle args = instrumentation.getBundle();
+        Bundle args = instrumentation.getArguments();
         mAm = ActivityManagerNative.getDefault();
 
         createMappings();
