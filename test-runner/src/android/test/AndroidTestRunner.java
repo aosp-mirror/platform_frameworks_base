@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.PerformanceCollector.PerformanceResultsWriter;
 
 import com.google.android.collect.Lists;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestListener;

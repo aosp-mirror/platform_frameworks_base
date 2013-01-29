@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityThread;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -5007,6 +5008,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (label != null) {
                 info.setLabeledBy(label);
             }
+
+            if ((mAttachInfo.mAccessibilityFetchFlags
+                    & AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS) != 0) {
+                String viewId = null;
+                try {
+                    viewId = getResources().getResourceName(mID);
+                } catch (Resources.NotFoundException nfe) {
+                    /* ignore */
+                }
+                if (viewId == null) {
+                    try {
+                        viewId = ((Context) ActivityThread.currentActivityThread()
+                                .getSystemContext()).getResources().getResourceName(mID);
+                    } catch (Resources.NotFoundException nfe) {
+                        /* ignore */
+                    }
+                }
+                info.setViewId(viewId);
+            }
         }
 
         if (mLabelForId != View.NO_ID) {
@@ -6838,7 +6858,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean includeForAccessibility() {
         if (mAttachInfo != null) {
-            return mAttachInfo.mIncludeNotImportantViews || isImportantForAccessibility();
+            return (mAttachInfo.mAccessibilityFetchFlags
+                    & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
+                    || isImportantForAccessibility();
         }
         return false;
     }
@@ -18004,10 +18026,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mAccessibilityWindowId = View.NO_ID;
 
         /**
-         * Whether to ingore not exposed for accessibility Views when
-         * reporting the view tree to accessibility services.
+         * Flags related to accessibility processing.
+         *
+         * @see AccessibilityNodeInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+         * @see AccessibilityNodeInfo#FLAG_REPORT_VIEW_IDS
          */
-        boolean mIncludeNotImportantViews;
+        int mAccessibilityFetchFlags;
 
         /**
          * The drawable for highlighting accessibility focus.

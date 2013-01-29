@@ -24,6 +24,7 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
+import android.app.UiAutomationConnection;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -661,10 +662,13 @@ public class Am {
         if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
 
         InstrumentationWatcher watcher = null;
+        UiAutomationConnection connection = null;
         if (wait) {
             watcher = new InstrumentationWatcher();
             watcher.setRawOutput(rawMode);
+            connection = new UiAutomationConnection();
         }
+
         float[] oldAnims = null;
         if (no_window_animation) {
             oldAnims = wm.getAnimationScales();
@@ -672,7 +676,7 @@ public class Am {
             wm.setAnimationScale(1, 0.0f);
         }
 
-        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, userId)) {
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher, connection, userId)) {
             throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 

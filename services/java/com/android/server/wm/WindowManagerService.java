@@ -5598,6 +5598,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public boolean isRotationFrozen() {
+        return mPolicy.getUserRotationMode() == WindowManagerPolicy.USER_ROTATION_LOCKED;
+    }
+
+    @Override
     public int watchRotation(IRotationWatcher watcher) {
         final IBinder watcherBinder = watcher.asBinder();
         IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {

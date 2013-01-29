@@ -17,7 +17,6 @@
 package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
-import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -518,6 +517,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         ComponentName componentName = new ComponentName("foo.bar",
                 "AutomationAccessibilityService");
         synchronized (mLock) {
+            if (mUiAutomationService != null) {
+                throw new IllegalStateException("UiAutomationService " + serviceClient
+                        + "already registered!");
+            }
             // If an automation services is connected to the system all services are stopped
             // so the automation one is the only one running. Settings are not changed so when
             // the automation service goes away the state is restored from the settings.
@@ -556,7 +559,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         synchronized (mLock) {
             UserState userState = getCurrentUserStateLocked();
             // Stash the old state so we can restore it when the keyguard is gone.
-            mTempStateChangeForCurrentUserMemento.initialize(mCurrentUserId, getCurrentUserStateLocked());
+            mTempStateChangeForCurrentUserMemento.initialize(mCurrentUserId,
+                    getCurrentUserStateLocked());
             // Set the temporary state.
             userState.mIsAccessibilityEnabled = true;
             userState.mIsTouchExplorationEnabled= touchExplorationEnabled;
@@ -579,6 +583,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     && serviceClient != null && mUiAutomationService.mServiceInterface
                             .asBinder() == serviceClient.asBinder()) {
                 mUiAutomationService.binderDied();
+            } else {
+                throw new IllegalStateException("UiAutomationService " + serviceClient
+                        + " not registered!");
             }
         }
     }
@@ -935,7 +942,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         if (!event.isImportantForAccessibility()
-                && !service.mIncludeNotImportantViews) {
+                && (service.mFetchFlags
+                        & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
             return false;
         }
 
@@ -1486,7 +1494,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mRequestTouchExplorationMode;
 
-        boolean mIncludeNotImportantViews;
+        int mFetchFlags;
 
         long mNotificationTimeout;
 
@@ -1565,9 +1573,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             if (mIsAutomation || info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
                     >= Build.VERSION_CODES.JELLY_BEAN) {
-                mIncludeNotImportantViews =
-                    (info.flags & FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
+                mFetchFlags |= (info.flags
+                        & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0 ?
+                                AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             }
+
+            mFetchFlags |= (info.flags
+                    & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0 ?
+                            AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS : 0;
 
             mRequestTouchExplorationMode = (info.flags
                     & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
@@ -1664,8 +1677,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
-        public boolean findAccessibilityNodeInfoByViewId(int accessibilityWindowId,
-                long accessibilityNodeId, int viewId, int interactionId,
+        public boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
+                long accessibilityNodeId, String viewIdResName, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId;
@@ -1689,14 +1702,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
             try {
-                connection.findAccessibilityNodeInfoByViewId(accessibilityNodeId, viewId,
-                        interactionId, callback, flags, interrogatingPid, interrogatingTid, spec);
+                connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId,
+                        viewIdResName, interactionId, callback, mFetchFlags, interrogatingPid,
+                        interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1735,14 +1747,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                        interactionId, callback, flags, interrogatingPid, interrogatingTid, spec);
+                        interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
+                        spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1781,15 +1792,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int allFlags = flags | ((mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0);
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                        interactionId, callback, allFlags, interrogatingPid, interrogatingTid,
-                        spec);
+                        interactionId, callback, mFetchFlags | flags, interrogatingPid,
+                        interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1828,14 +1837,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
             try {
                 connection.findFocus(accessibilityNodeId, focusType, interactionId, callback,
-                        flags, interrogatingPid, interrogatingTid, spec);
+                        mFetchFlags, interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1874,14 +1881,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpec(resolvedWindowId);
             try {
                 connection.focusSearch(accessibilityNodeId, direction, interactionId, callback,
-                        flags, interrogatingPid, interrogatingTid, spec);
+                        mFetchFlags, interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -1920,13 +1925,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.performAccessibilityAction(accessibilityNodeId, action, arguments,
-                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
+                        interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling performAccessibilityAction()");

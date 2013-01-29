@@ -339,7 +339,10 @@ public abstract class AccessibilityService extends Service {
 
     private static final String LOG_TAG = "AccessibilityService";
 
-    interface Callbacks {
+    /**
+     * @hide
+     */
+    public interface Callbacks {
         public void onAccessibilityEvent(AccessibilityEvent event);
         public void onInterrupt();
         public void onServiceConnected();
@@ -538,8 +541,10 @@ public abstract class AccessibilityService extends Service {
     /**
      * Implements the internal {@link IAccessibilityServiceClient} interface to convert
      * incoming calls to it back to calls on an {@link AccessibilityService}.
+     *
+     * @hide
      */
-    static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
+    public static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
             implements HandlerCaller.Callback {
 
         static final int NO_ID = -1;

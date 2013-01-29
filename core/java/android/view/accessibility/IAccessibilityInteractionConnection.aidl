@@ -33,9 +33,9 @@ oneway interface IAccessibilityInteractionConnection {
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
         long interrogatingTid, in MagnificationSpec spec);
 
-    void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid, in MagnificationSpec spec);
+    void findAccessibilityNodeInfosByViewId(long accessibilityNodeId, String viewId,
+        int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+        int interrogatingPid, long interrogatingTid, in MagnificationSpec spec);
 
     void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,

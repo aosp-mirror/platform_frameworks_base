@@ -21,6 +21,7 @@ import com.android.internal.util.Predicates;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
@@ -390,12 +391,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     }
 
     /**
-     * Get the Bundle object that contains the arguments
+     * Get the arguments passed to this instrumentation.
      *
      * @return the Bundle object
-     * @hide
      */
-    public Bundle getBundle(){
+    protected Bundle getArguments() {
         return mArguments;
     }
 

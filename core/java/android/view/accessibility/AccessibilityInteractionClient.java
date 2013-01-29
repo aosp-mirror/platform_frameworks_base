@@ -230,23 +230,25 @@ public final class AccessibilityInteractionClient
      *     where to start the search. Use
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
-     * @param viewId The id of the view.
-     * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
+     * @param viewId The fully qualified resource name of the view id to find.
+     * @return An list of {@link AccessibilityNodeInfo} if found, empty list otherwise.
      */
-    public AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int connectionId,
-            int accessibilityWindowId, long accessibilityNodeId, int viewId) {
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(int connectionId,
+            int accessibilityWindowId, long accessibilityNodeId, String viewId) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final boolean success =connection.findAccessibilityNodeInfoByViewId(
+                final boolean success = connection.findAccessibilityNodeInfosByViewId(
                         accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
                         Thread.currentThread().getId());
                 if (success) {
-                    AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
+                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
-                    return info;
+                    if (infos != null) {
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        return infos;
+                    }
                 }
             } else {
                 if (DEBUG) {
@@ -259,7 +261,7 @@ public final class AccessibilityInteractionClient
                         + " findAccessibilityNodeInfoByViewIdInActiveWindow", re);
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -291,8 +293,10 @@ public final class AccessibilityInteractionClient
                 if (success) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
-                    return infos;
+                    if (infos != null) {
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        return infos;
+                    }
                 }
             } else {
                 if (DEBUG) {

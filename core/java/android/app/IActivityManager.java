@@ -158,8 +158,8 @@ public interface IActivityManager extends IInterface {
     public void killApplicationProcess(String processName, int uid) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
-            int flags, Bundle arguments, IInstrumentationWatcher watcher, int userId)
-            throws RemoteException;
+            int flags, Bundle arguments, IInstrumentationWatcher watcher,
+            IUiAutomationConnection connection, int userId) throws RemoteException;
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) throws RemoteException;
 

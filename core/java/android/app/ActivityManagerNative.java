@@ -39,7 +39,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Singleton;
@@ -836,8 +835,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Bundle arguments = data.readBundle();
             IBinder b = data.readStrongBinder();
             IInstrumentationWatcher w = IInstrumentationWatcher.Stub.asInterface(b);
+            b = data.readStrongBinder();
+            IUiAutomationConnection c = IUiAutomationConnection.Stub.asInterface(b);
             int userId = data.readInt();
-            boolean res = startInstrumentation(className, profileFile, fl, arguments, w, userId);
+            boolean res = startInstrumentation(className, profileFile, fl, arguments, w, c, userId);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -2874,8 +2875,8 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     public boolean startInstrumentation(ComponentName className, String profileFile,
-            int flags, Bundle arguments, IInstrumentationWatcher watcher, int userId)
-            throws RemoteException {
+            int flags, Bundle arguments, IInstrumentationWatcher watcher,
+            IUiAutomationConnection connection, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2884,6 +2885,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(flags);
         data.writeBundle(arguments);
         data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
+        data.writeStrongBinder(connection != null ? connection.asBinder() : null);
         data.writeInt(userId);
         mRemote.transact(START_INSTRUMENTATION_TRANSACTION, data, reply, 0);
         reply.readException();

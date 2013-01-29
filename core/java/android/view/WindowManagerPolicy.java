@@ -1035,6 +1035,16 @@ public interface WindowManagerPolicy {
     public void keepScreenOnStoppedLw();
 
     /**
+     * Gets the current user rotation mode. 
+     *
+     * @return The rotation mode.
+     *
+     * @see WindowManagerPolicy#USER_ROTATION_LOCKED
+     * @see WindowManagerPolicy#USER_ROTATION_FREE 
+     */
+    public int getUserRotationMode();
+
+    /**
      * Inform the policy that the user has chosen a preferred orientation ("rotation lock"). 
      *
      * @param mode One of {@link WindowManagerPolicy#USER_ROTATION_LOCKED} or

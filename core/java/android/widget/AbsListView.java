@@ -1374,9 +1374,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (isEnabled()) {
             if (getFirstVisiblePosition() > 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.setScrollable(true);
             }
             if (getLastVisiblePosition() < getCount() - 1) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.setScrollable(true);
             }
         }
     }
