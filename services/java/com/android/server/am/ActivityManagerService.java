@@ -51,6 +51,7 @@ import android.app.IProcessObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.IThumbnailReceiver;
+import android.app.IUiAutomationConnection;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
 import android.app.Notification;
@@ -162,7 +163,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class ActivityManagerService extends ActivityManagerNative
+public final class ActivityManagerService  extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
     private static final String USER_DATA_DIR = "/data/user/";
     static final String TAG = "ActivityManager";
@@ -4283,8 +4284,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             thread.bindApplication(processName, appInfo, providers,
                     app.instrumentationClass, profileFile, profileFd, profileAutoStop,
-                    app.instrumentationArguments, app.instrumentationWatcher, testMode,
-                    enableOpenGlTrace, isRestrictedBackupMode || !normalMode, app.persistent,
+                    app.instrumentationArguments, app.instrumentationWatcher,
+                    app.instrumentationUiAutomationConnection, testMode, enableOpenGlTrace,
+                    isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false);
@@ -12228,7 +12230,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
-            IInstrumentationWatcher watcher, int userId) {
+            IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
+            int userId) {
         enforceNotIsolatedCaller("startInstrumentation");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, true, "startInstrumentation", null);
@@ -12282,6 +12285,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.instrumentationProfileFile = profileFile;
             app.instrumentationArguments = arguments;
             app.instrumentationWatcher = watcher;
+            app.instrumentationUiAutomationConnection = uiAutomationConnection;
             app.instrumentationResultClass = className;
             Binder.restoreCallingIdentity(origId);
         }
@@ -12324,7 +12328,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException e) {
             }
         }
+        if (app.instrumentationUiAutomationConnection != null) {
+            try {
+                app.instrumentationUiAutomationConnection.shutdown();
+            } catch (RemoteException re) {
+                /* ignore */
+            }
+        }
         app.instrumentationWatcher = null;
+        app.instrumentationUiAutomationConnection = null;
         app.instrumentationClass = null;
         app.instrumentationInfo = null;
         app.instrumentationProfileFile = null;

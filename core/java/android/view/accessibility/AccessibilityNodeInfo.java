@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -78,7 +79,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000004;
 
     /** @hide */
-    public static final int INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000008;
+    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000008;
+
+    /** @hide */
+    public static final int FLAG_REPORT_VIEW_IDS = 0x00000010;
 
     // Actions.
 
@@ -375,6 +379,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mClassName;
     private CharSequence mText;
     private CharSequence mContentDescription;
+    private CharSequence mViewId;
 
     private final SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
@@ -726,6 +731,37 @@ public class AccessibilityNodeInfo implements Parcelable {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfosByText(mConnectionId, mWindowId, mSourceNodeId,
                 text);
+    }
+
+    /**
+     * Finds {@link AccessibilityNodeInfo}s by the fully qualified view id's resource
+     * name where a fully qualified id is of the from "package:id/id_resource_name".
+     * For example, if the target application's package is "foo.bar" and the id
+     * resource name is "baz", the fully qualified resource id is "foo.bar:id/baz".
+     *
+     * <p>
+     *   <strong>Note:</strong> It is a client responsibility to recycle the
+     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
+     *     to avoid creating of multiple instances.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> The primary usage of this API is for UI test automation
+     *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
+     *   the client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
+     *   flag when configuring his {@link AccessibilityService}.
+     * </p>
+     *
+     * @param viewId The fully qualified resource name of the view id to find.
+     * @return A list of node info.
+     */
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String viewId) {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+            return Collections.emptyList();
+        }
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfosByViewId(mConnectionId, mWindowId, mSourceNodeId,
+                viewId);
     }
 
     /**
@@ -1373,6 +1409,38 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the fully qualified resource name of the source view's id.
+     *
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param viewId The id resource name.
+     */
+    public void setViewId(CharSequence viewId) {
+        enforceNotSealed();
+        mViewId = viewId;
+    }
+
+    /**
+     * Gets the fully qualified resource name of the source view's id.
+     *
+     * <p>
+     *   <strong>Note:</strong> The primary usage of this API is for UI test automation
+     *   and in order to report the source view id of an {@link AccessibilityNodeInfo} the
+     *   client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
+     *   flag when configuring his {@link AccessibilityService}.
+     * </p>
+
+     * @return The id resource name.
+     */
+    public CharSequence getViewId() {
+        return mViewId;
+    }
+
+    /**
      * Gets the value of a boolean property.
      *
      * @param property The property.
@@ -1614,6 +1682,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
         parcel.writeCharSequence(mContentDescription);
+        parcel.writeCharSequence(mViewId);
 
         // Since instances of this class are fetched via synchronous i.e. blocking
         // calls in IPCs we always recycle as soon as the instance is marshaled.
@@ -1639,6 +1708,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = other.mClassName;
         mText = other.mText;
         mContentDescription = other.mContentDescription;
+        mViewId = other.mViewId;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
         mMovementGranularities = other.mMovementGranularities;
@@ -1689,6 +1759,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
+        mViewId = parcel.readCharSequence();
     }
 
     /**
@@ -1711,6 +1782,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mClassName = null;
         mText = null;
         mContentDescription = null;
+        mViewId = null;
         mActions = 0;
     }
 
@@ -1855,6 +1927,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; className: ").append(mClassName);
         builder.append("; text: ").append(mText);
         builder.append("; contentDescription: ").append(mContentDescription);
+        builder.append("; viewId: ").append(mViewId);
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());

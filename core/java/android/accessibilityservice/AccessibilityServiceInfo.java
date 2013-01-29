@@ -33,6 +33,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -150,6 +151,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      * mode since there may be another enabled service that requested it.
      */
     public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE= 0x0000004;
+
+    /**
+     * This flag requests that the {@link AccessibilityNodeInfo}s obtained
+     * by an {@link AccessibilityService} contain the id of the source view.
+     * The source view id will be a fully qualified resource name of the
+     * form "package:id/name", for example "foo.bar:id/my_list", and it is
+     * useful for UI test automation. This flag is not set by default.
+     */
+    public static final int FLAG_REPORT_VIEW_IDS = 0x00000008;
 
     /**
      * The event types an {@link AccessibilityService} is interested in.
