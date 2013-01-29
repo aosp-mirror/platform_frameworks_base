@@ -697,7 +697,8 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(web_docs_sample_code_flags) \
 		-devsite \
 		-toroot / \
-		-hdf android.whichdoc online
+		-hdf android.whichdoc online \
+		-hdf devsite true
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-ds
 
