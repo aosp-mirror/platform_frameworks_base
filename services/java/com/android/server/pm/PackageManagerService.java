@@ -173,7 +173,7 @@ adb shell am instrument -w -e class com.android.unit_tests.PackageManagerTests c
 public class PackageManagerService extends IPackageManager.Stub {
     static final String TAG = "PackageManager";
     static final boolean DEBUG_SETTINGS = false;
-    private static final boolean DEBUG_PREFERRED = false;
+    static final boolean DEBUG_PREFERRED = true;
     static final boolean DEBUG_UPGRADE = false;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_REMOVE = false;
@@ -1021,7 +1021,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             readPermissions();
 
-            mRestoredSettings = mSettings.readLPw(sUserManager.getUsers(false),
+            mRestoredSettings = mSettings.readLPw(this, sUserManager.getUsers(false),
                     mSdkVersion, mOnlyCore);
             long startTime = SystemClock.uptimeMillis();
 
@@ -4967,7 +4967,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         ps.haveGids = true;
     }
     
-    private final class ActivityIntentResolver
+    final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -8830,8 +8830,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (clearPackagePreferredActivitiesLPw(packageName, UserHandle.getCallingUserId())) {
-                scheduleWriteSettingsLocked();            
+            int user = UserHandle.getCallingUserId();
+            if (clearPackagePreferredActivitiesLPw(packageName, user)) {
+                mSettings.writePackageRestrictionsLPr(user);
+                scheduleWriteSettingsLocked();
             }
         }
     }
@@ -8849,7 +8851,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Iterator<PreferredActivity> it = pir.filterIterator();
             while (it.hasNext()) {
                 PreferredActivity pa = it.next();
-                if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
+                if (packageName == null ||
+                        pa.mPref.mComponent.getPackageName().equals(packageName)) {
                     if (removed == null) {
                         removed = new ArrayList<PreferredActivity>();
                     }
@@ -8862,10 +8865,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pir.removeFilter(pa);
                 }
                 changed = true;
-                mSettings.writePackageRestrictionsLPr(thisUserId);
             }
         }
         return changed;
+    }
+
+    public void resetPreferredActivities(int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        // writer
+        synchronized (mPackages) {
+            int user = UserHandle.getCallingUserId();
+            clearPackagePreferredActivitiesLPw(null, user);
+            mSettings.readDefaultPreferredAppsLPw(this, user);
+            mSettings.writePackageRestrictionsLPr(user);
+            scheduleWriteSettingsLocked();
+        }
     }
 
     public int getPreferredActivities(List<IntentFilter> outFilters,
@@ -9254,6 +9269,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         DumpState dumpState = new DumpState();
+        boolean fullPreferred = false;
         
         String packageName = null;
         
@@ -9277,7 +9293,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    r[esolvers]: dump intent resolvers");
                 pw.println("    perm[issions]: dump permissions");
                 pw.println("    pref[erred]: print preferred package settings");
-                pw.println("    preferred-xml: print preferred package settings as xml");
+                pw.println("    preferred-xml [--full]: print preferred package settings as xml");
                 pw.println("    prov[iders]: dump content providers");
                 pw.println("    p[ackages]: dump installed packages");
                 pw.println("    s[hared-users]: dump shared user IDs");
@@ -9311,6 +9327,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_PREFERRED);
             } else if ("preferred-xml".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PREFERRED_XML);
+                opti++;
+                if (opti < args.length && "--full".equals(args[opti])) {
+                    fullPreferred = true;
+                }
             } else if ("p".equals(cmd) || "packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
@@ -9405,7 +9425,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     serializer.startDocument(null, true);
                     serializer.setFeature(
                             "http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                    mSettings.writePreferredActivitiesLPr(serializer, 0);
+                    mSettings.writePreferredActivitiesLPr(serializer, 0, fullPreferred);
                     serializer.endDocument();
                     serializer.flush();
                 } catch (IllegalArgumentException e) {
@@ -10158,7 +10178,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Called by UserManagerService */
     void createNewUserLILPw(int userHandle, File path) {
         if (mInstaller != null) {
-            mSettings.createNewUserLILPw(mInstaller, userHandle, path);
+            mSettings.createNewUserLILPw(this, mInstaller, userHandle, path);
         }
     }
 

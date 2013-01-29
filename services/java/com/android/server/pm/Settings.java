@@ -23,6 +23,12 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.PatternMatcher;
+import android.util.LogPrinter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
@@ -972,14 +978,14 @@ final class Settings {
         return components;
     }
 
-    void writePreferredActivitiesLPr(XmlSerializer serializer, int userId)
+    void writePreferredActivitiesLPr(XmlSerializer serializer, int userId, boolean full)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, "preferred-activities");
         PreferredIntentResolver pir = mPreferredActivities.get(userId);
         if (pir != null) {
             for (final PreferredActivity pa : pir.filterSet()) {
                 serializer.startTag(null, TAG_ITEM);
-                pa.writeToXml(serializer);
+                pa.writeToXml(serializer, full);
                 serializer.endTag(null, TAG_ITEM);
             }
         }
@@ -1072,7 +1078,7 @@ final class Settings {
                 }
             }
 
-            writePreferredActivitiesLPr(serializer, userId);
+            writePreferredActivitiesLPr(serializer, userId, true);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
@@ -1557,7 +1563,8 @@ final class Settings {
         }
     }
 
-    boolean readLPw(List<UserInfo> users, int sdkVersion, boolean onlyCore) {
+    boolean readLPw(PackageManagerService service, List<UserInfo> users, int sdkVersion,
+            boolean onlyCore) {
         FileInputStream str = null;
         if (mBackupSettingsFilename.exists()) {
             try {
@@ -1588,7 +1595,7 @@ final class Settings {
                     PackageManagerService.reportSettingsProblem(Log.INFO,
                             "No settings file; creating initial state");
                     if (!onlyCore) {
-                        readDefaultPreferredAppsLPw(0);
+                        readDefaultPreferredAppsLPw(service, 0);
                     }
                     mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
                     return false;
@@ -1771,7 +1778,7 @@ final class Settings {
         return true;
     }
 
-    private void readDefaultPreferredAppsLPw(int userId) {
+    void readDefaultPreferredAppsLPw(PackageManagerService service, int userId) {
         // Read preferred apps from .../etc/preferred-apps directory.
         File preferredDir = new File(Environment.getRootDirectory(), "etc/preferred-apps");
         if (!preferredDir.exists() || !preferredDir.isDirectory()) {
@@ -1793,6 +1800,7 @@ final class Settings {
                 continue;
             }
 
+            if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Reading default preferred " + f);
             FileInputStream str = null;
             try {
                 str = new FileInputStream(f);
@@ -1814,7 +1822,7 @@ final class Settings {
                             + " does not start with 'preferred-activities'");
                     continue;
                 }
-                readPreferredActivitiesLPw(parser, userId);
+                readDefaultPreferredActivitiesLPw(service, parser, userId);
             } catch (XmlPullParserException e) {
                 Slog.w(TAG, "Error reading apps file " + f, e);
             } catch (IOException e) {
@@ -1826,6 +1834,112 @@ final class Settings {
                     } catch (IOException e) {
                     }
                 }
+            }
+        }
+    }
+
+    private void readDefaultPreferredActivitiesLPw(PackageManagerService service,
+            XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_ITEM)) {
+                PreferredActivity tmpPa = new PreferredActivity(parser);
+                if (tmpPa.mPref.getParseError() == null) {
+                    // The initial preferences only specify the target activity
+                    // component and intent-filter, not the set of matches.  So we
+                    // now need to query for the matches to build the correct
+                    // preferred activity entry.
+                    if (PackageManagerService.DEBUG_PREFERRED) {
+                        Log.d(TAG, "Processing preferred:");
+                        tmpPa.dump(new LogPrinter(Log.DEBUG, TAG), "  ");
+                    }
+                    final ComponentName cn = tmpPa.mPref.mComponent;
+                    Intent intent = new Intent();
+                    int flags = 0;
+                    intent.setAction(tmpPa.getAction(0));
+                    for (int i=0; i<tmpPa.countCategories(); i++) {
+                        String cat = tmpPa.getCategory(i);
+                        if (cat.equals(Intent.CATEGORY_DEFAULT)) {
+                            flags |= PackageManager.MATCH_DEFAULT_ONLY;
+                        } else {
+                            intent.addCategory(cat);
+                        }
+                    }
+                    if (tmpPa.countDataSchemes() > 0) {
+                        Uri.Builder builder = new Uri.Builder();
+                        builder.scheme(tmpPa.getDataScheme(0));
+                        if (tmpPa.countDataAuthorities() > 0) {
+                            IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(0);
+                            if (auth.getHost() != null) {
+                                builder.authority(auth.getHost());
+                            }
+                        }
+                        if (tmpPa.countDataPaths() > 0) {
+                            PatternMatcher path = tmpPa.getDataPath(0);
+                            builder.path(path.getPath());
+                        }
+                        intent.setData(builder.build());
+                    } else if (tmpPa.countDataTypes() > 0) {
+                        intent.setType(tmpPa.getDataType(0));
+                    }
+                    List<ResolveInfo> ri = service.mActivities.queryIntent(intent,
+                            intent.getType(), flags, 0);
+                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
+                            + " results: " + ri);
+                    int match = 0;
+                    if (ri != null && ri.size() > 1) {
+                        boolean haveAct = false;
+                        boolean haveNonSys = false;
+                        ComponentName[] set = new ComponentName[ri.size()];
+                        for (int i=0; i<ri.size(); i++) {
+                            ActivityInfo ai = ri.get(i).activityInfo;
+                            set[i] = new ComponentName(ai.packageName, ai.name);
+                            if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                                // If any of the matches are not system apps, then
+                                // there is a third party app that is now an option...
+                                // so don't set a default since we don't want to hide it.
+                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                                        + ai.packageName + "/" + ai.name + ": non-system!");
+                                haveNonSys = true;
+                                break;
+                            } else if (cn.getPackageName().equals(ai.packageName)
+                                    && cn.getClassName().equals(ai.name)) {
+                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                                        + ai.packageName + "/" + ai.name + ": default!");
+                                haveAct = true;
+                                match = ri.get(i).match;
+                            } else {
+                                if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
+                                        + ai.packageName + "/" + ai.name + ": skipped");
+                            }
+                        }
+                        if (haveAct && !haveNonSys) {
+                            PreferredActivity pa = new PreferredActivity(tmpPa, match, set,
+                                    tmpPa.mPref.mComponent);
+                            editPreferredActivitiesLPw(userId).addFilter(pa);
+                        } else if (!haveNonSys) {
+                            Slog.w(TAG, "No component found for default preferred activity "
+                                    + tmpPa.mPref.mComponent);
+                        }
+                    }
+                } else {
+                    PackageManagerService.reportSettingsProblem(Log.WARN,
+                            "Error in package manager settings: <preferred-activity> "
+                                    + tmpPa.mPref.getParseError() + " at "
+                                    + parser.getPositionDescription());
+                }
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <preferred-activities>: " + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
             }
         }
     }
@@ -2329,7 +2443,8 @@ final class Settings {
         }
     }
 
-    void createNewUserLILPw(Installer installer, int userHandle, File path) {
+    void createNewUserLILPw(PackageManagerService service, Installer installer,
+            int userHandle, File path) {
         path.mkdir();
         FileUtils.setPermissions(path.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
                 | FileUtils.S_IXOTH, -1, -1);
@@ -2340,7 +2455,7 @@ final class Settings {
             installer.createUserData(ps.name,
                     UserHandle.getUid(userHandle, ps.appId), userHandle);
         }
-        readDefaultPreferredAppsLPw(userHandle);
+        readDefaultPreferredAppsLPw(service, userHandle);
         writePackageRestrictionsLPr(userHandle);
     }
 

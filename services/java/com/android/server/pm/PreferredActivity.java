@@ -46,8 +46,8 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
         mPref = new PreferredComponent(this, parser);
     }
 
-    public void writeToXml(XmlSerializer serializer) throws IOException {
-        mPref.writeToXml(serializer);
+    public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
+        mPref.writeToXml(serializer, full);
         serializer.startTag(null, "filter");
             super.writeToXml(serializer);
         serializer.endTag(null, "filter");
