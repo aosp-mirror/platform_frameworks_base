@@ -700,7 +700,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-hdf android.whichdoc online \
 		-hdf devsite true
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-ds
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
