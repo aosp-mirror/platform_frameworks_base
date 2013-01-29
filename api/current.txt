@@ -21330,7 +21330,7 @@ package android.test {
     ctor public InstrumentationTestRunner();
     method public junit.framework.TestSuite getAllTests();
     method protected android.test.AndroidTestRunner getAndroidTestRunner();
-    method protected android.os.Bundle getArguments();
+    method public android.os.Bundle getArguments();
     method public java.lang.ClassLoader getLoader();
     method public junit.framework.TestSuite getTestSuite();
     field public static final java.lang.String REPORT_KEY_NAME_CLASS = "class";
