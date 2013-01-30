@@ -253,7 +253,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private void install(byte[] content, int version) throws IOException {
+    protected void install(byte[] content, int version) throws IOException {
         writeUpdate(updateDir, updateContent, content);
         writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
     }
