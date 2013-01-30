@@ -60,13 +60,14 @@ public class ConnectivityManagerTestActivity extends Activity {
 
     public static final String LOG_TAG = "ConnectivityManagerTestActivity";
     public static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
-    public static final int WIFI_SCAN_TIMEOUT = 50 * 1000;
-    public static final int SHORT_TIMEOUT = 5 * 1000;
-    public static final long LONG_TIMEOUT = 50 * 1000;
+    public static final int WIFI_SCAN_TIMEOUT = 50 * 1000; // 50 seconds
+    public static final int SHORT_TIMEOUT = 5 * 1000; // 5 seconds
+    public static final long LONG_TIMEOUT = 50 * 1000;  // 50 seconds
+    public static final long WIFI_CONNECTION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     // 2 minutes timer between wifi stop and start
-    public static final long  WIFI_STOP_START_INTERVAL = 2 * 60 * 1000;
+    public static final long  WIFI_STOP_START_INTERVAL = 2 * 60 * 1000; // 2 minutes
     // Set ping test timer to be 3 minutes
-    public static final long PING_TIMER = 3 * 60 *1000;
+    public static final long PING_TIMER = 3 * 60 *1000; // 3 minutes
     public static final int SUCCESS = 0;  // for Wifi tethering state change
     public static final int FAILURE = 1;
     public static final int INIT = -1;
@@ -573,7 +574,7 @@ public class ConnectivityManagerTestActivity extends Activity {
         String ssid = config.SSID;
         config.SSID = convertToQuotedString(ssid);
 
-        //If Wifi is not enabled, enable it
+        // If Wifi is not enabled, enable it
         if (!mWifiManager.isWifiEnabled()) {
             log("Wifi is not enabled, enable it");
             mWifiManager.setWifiEnabled(true);
@@ -584,59 +585,16 @@ public class ConnectivityManagerTestActivity extends Activity {
             }
         }
 
-        boolean foundApInScanResults = false;
-        for (int retry = 0; retry < 5; retry++) {
-            List<ScanResult> netList = mWifiManager.getScanResults();
-            if (netList != null) {
-                log("size of scan result list: " + netList.size());
-                for (int i = 0; i < netList.size(); i++) {
-                    ScanResult sr= netList.get(i);
-                    if (sr.SSID.equals(ssid)) {
-                        log("found " + ssid + " in the scan result list");
-                        log("retry: " + retry);
-                        foundApInScanResults = true;
-                        mWifiManager.connect(config,
-                                new WifiManager.ActionListener() {
-                                    public void onSuccess() {
-                                    }
-                                    public void onFailure(int reason) {
-                                        log("connect failure " + reason);
-                                    }
-                                });
-                        break;
-                   }
+        // Save network configuration and connect to network without scanning
+        mWifiManager.connect(config,
+            new WifiManager.ActionListener() {
+                public void onSuccess() {
                 }
-            }
-            if (foundApInScanResults) {
-                return true;
-            } else {
-                // Start an active scan
-                mWifiManager.startScanActive();
-                mScanResultIsAvailable = false;
-                long startTime = System.currentTimeMillis();
-                while (!mScanResultIsAvailable) {
-                    if ((System.currentTimeMillis() - startTime) > WIFI_SCAN_TIMEOUT) {
-                        log("wait for scan results timeout");
-                        return false;
-                    }
-                    // wait for the scan results to be available
-                    synchronized (this) {
-                        // wait for the scan result to be available
-                        try {
-                            this.wait(WAIT_FOR_SCAN_RESULT);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        if ((mWifiManager.getScanResults() == null) ||
-                                (mWifiManager.getScanResults().size() <= 0)) {
-                            continue;
-                        }
-                        mScanResultIsAvailable = true;
-                    }
+                public void onFailure(int reason) {
+                    log("connect failure " + reason);
                 }
-            }
-        }
-        return false;
+            });
+        return true;
     }
 
     /*
