@@ -714,6 +714,12 @@
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows access to the loop radio (Android@Home mesh network) device.
+	@hide -->
+    <permission android:name="android.permission.LOOP_RADIO"
+	android:permissionGroup="android.permission-group.NETWORK"
+	android:protectionLevel="signature|system" />
+    
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
