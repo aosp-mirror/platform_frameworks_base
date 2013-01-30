@@ -299,10 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Veiklos tvarkyklę perjungia į išsijungimo būseną. Neišjungia visiškai."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"neleisti perjungti programų"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Neleidžiama naudotojui perjungti į kitą programą."</string>
-    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
-    <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
-    <skip />
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"gauti esamos programos informaciją"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Savininkui leidžiama gauti privačią esamos pirmaeilės ekrano programos informaciją."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"stebėti ir valdyti visų programų paleidimą"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Leidžiama programai stebėti ir valdyti, kaip sistema paleidžia veiklą. Kenkėjiškos programos gali visiškai pažeisti sistemą. Šis leidimas reikalingas tik kuriant ir jo niekada nereikia naudojant įprastai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"siųsti pašalinto paketo perdavimą"</string>

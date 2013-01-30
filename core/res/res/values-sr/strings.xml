@@ -299,10 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Ставља менаџера активности у стање искључивања. Не искључује га у потпуности."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"спречавање пребацивања са једне апликације на другу"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Спречава да корисник пређе на другу апликацију."</string>
-    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
-    <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
-    <skip />
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"преузимање информација о актуелној апликацији"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Дозвољава власнику да преузима приватне информације о актуелној апликацији у првом плану екрана."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"надгледање и контрола покретања свих апликација"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дозвољава апликацији да прати начин на који систем покреће активности и да њиме управља. Злонамерне апликације могу у потпуности да угрозе систем. Ова дозвола је потребна само за програмирање, а никада за уобичајено коришћење."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"слање емитовања уклоњеног пакета"</string>
