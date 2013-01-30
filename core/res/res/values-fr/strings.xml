@@ -299,10 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Place le gestionnaire d\'activités en état d\'arrêt. N\'effectue pas un arrêt complet."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"empêcher les changements d\'applications"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Empêche l\'utilisateur de changer d\'application."</string>
-    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
-    <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
-    <skip />
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"Récupérer des informations sur l\'application actuelle"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permet à l\'application autorisée de récupérer des informations confidentielles à propos de l\'application exécutée au premier plan sur l\'écran."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"suivre et contrôler le lancement de toutes les applications"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permet à l\'application de surveiller et de contrôler la façon dont le système lance les activités. Des applications malveillantes peuvent exploiter cette fonctionnalité pour totalement compromettre le système. Cette autorisation est uniquement destinée aux développeurs. Elle ne doit jamais être activée dans le cadre d\'une utilisation standard."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Envoyer une diffusion sans paquet"</string>

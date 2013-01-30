@@ -299,10 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Liek darbību pārvaldniekam pāriet izslēgšanas stāvoklī. Neveic pilnīgu izslēgšanu."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"novērst lietojumprogrammu pārslēgšanu"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Novērš lietotāja pārslēgšanos uz citu lietotni."</string>
-    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
-    <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
-    <skip />
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pašreizējās lietotnes informācijas iegūšana"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Ļauj īpašniekam izgūt privātu informāciju par pašreizējo lietojumprogrammu ekrāna priekšplānā."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"pārraudzīt un kontrolēt visu lietotņu atvēršanu"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ļauj lietotnei pārraudzīt un kontrolēt, kā sistēmā tiek palaistas darbības. Ļaunprātīgas lietotnes var pilnībā uzlauzt sistēmu. Šī atļauja ir nepieciešama tikai izstrādei, taču ne parastai lietošanai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"sūtīt apraidi par pakotnes noņemšanu"</string>
