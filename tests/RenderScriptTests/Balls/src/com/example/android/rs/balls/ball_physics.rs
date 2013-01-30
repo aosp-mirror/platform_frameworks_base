@@ -10,6 +10,13 @@ float2 gMaxPos = {1280.f, 700.f};
 
 static float2 touchPos[10];
 static float touchPressure[10];
+static const float gDT = 1.f / 30.f;
+
+rs_allocation gGrid;
+rs_allocation gGridCache;
+rs_allocation gBalls;
+
+float gScale = 1.f;
 
 void touch(float x, float y, float pressure, int id) {
     if (id >= 10) {
@@ -21,126 +28,128 @@ void touch(float x, float y, float pressure, int id) {
     touchPressure[id] = pressure;
 }
 
-void root(const Ball_t *ballIn, Ball_t *ballOut, const BallControl_t *ctl, uint32_t x) {
-    float2 fv = {0, 0};
-    float2 pos = ballIn->position;
+void root(Ball_t *ball, uint32_t x) {
+    float2 fv = 0;
+    float pressure = 0;
+    float2 pos = ball->position;
+    int2 gridPos[9];
 
-    int arcID = -1;
-    float arcInvStr = 100000;
+    gridPos[0] = convert_int2((ball->position / 100.f) /*- 0.4999f*/);
+    gridPos[1] = (int2){gridPos[0].x - 1, gridPos[0].y - 1};
+    gridPos[2] = (int2){gridPos[0].x + 0, gridPos[0].y - 1};
+    gridPos[3] = (int2){gridPos[0].x + 1, gridPos[0].y - 1};
+    gridPos[4] = (int2){gridPos[0].x - 1, gridPos[0].y};
+    gridPos[5] = (int2){gridPos[0].x + 1, gridPos[0].y};
+    gridPos[6] = (int2){gridPos[0].x - 1, gridPos[0].y + 1};
+    gridPos[7] = (int2){gridPos[0].x + 0, gridPos[0].y + 1};
+    gridPos[8] = (int2){gridPos[0].x + 1, gridPos[0].y + 1};
 
-    const Ball_t * bPtr = rsGetElementAt(ctl->ain, 0);
-    for (uint32_t xin = 0; xin < ctl->dimX; xin++) {
-        float2 vec = bPtr[xin].position - pos;
-        float2 vec2 = vec * vec;
-        float len2 = vec2.x + vec2.y;
+    for (int gct=0; gct < 9; gct++) {
+        if ((gridPos[gct].x >= rsAllocationGetDimX(gGrid)) ||
+            (gridPos[gct].x < 0) ||
+            (gridPos[gct].y >= rsAllocationGetDimY(gGrid)) ||
+            (gridPos[gct].y < 0)) {
+            continue;
+        }
+        //rsDebug("grid ", gridPos[gct]);
+        const BallGrid_t *bg = (const BallGrid_t *)rsGetElementAt(gGrid, gridPos[gct].x, gridPos[gct].y);
 
-        if (len2 < 10000) {
-            //float minDist = ballIn->size + bPtr[xin].size;
-            float forceScale = ballIn->size * bPtr[xin].size;
-            forceScale *= forceScale;
+        for (int cidx = 0; cidx < bg->count; cidx++) {
+            float2 bcptr = rsGetElementAt_float2(gGridCache, bg->cacheIdx + cidx);
+            float2 vec = bcptr - pos;
+            float2 vec2 = vec * vec;
+            float len2 = vec2.x + vec2.y;
 
-            if (len2 > 16 /* (minDist*minDist)*/)  {
-                // Repulsion
-                float len = sqrt(len2);
-                fv -= (vec / (len * len * len)) * 20000.f * forceScale;
-            } else {
-                if (len2 < 1) {
-                    if (xin == x) {
-                        continue;
-                    }
-                    ballOut->delta = 0.f;
-                    ballOut->position = ballIn->position;
-                    if (xin > x) {
-                        ballOut->position.x += 1.f;
-                    } else {
-                        ballOut->position.x -= 1.f;
-                    }
-                    //ballOut->color.rgb = 1.f;
-                    //ballOut->arcID = -1;
-                    //ballOut->arcStr = 0;
-                    continue;
-                }
-                // Collision
-                float2 axis = normalize(vec);
-                float e1 = dot(axis, ballIn->delta);
-                float e2 = dot(axis, bPtr[xin].delta);
-                float e = (e1 - e2) * 0.45f;
-                if (e1 > 0) {
-                    fv -= axis * e;
-                } else {
-                    fv += axis * e;
-                }
+            if ((len2 < 10000.f) && (len2 > 0.f)) {
+                float t = native_powr(len2, 1.5f) + 16.0f;
+                float2 pfv = (vec / t) * 16000.f;
+                pressure += length(pfv);
+                fv -= pfv;
             }
         }
     }
 
-    fv /= ballIn->size * ballIn->size * ballIn->size;
-    fv -= gGravityVector * 4.f;
-    fv *= ctl->dt;
+    //fv /= ball->size * ball->size * ball->size;
+    fv -= gGravityVector * 4.f * gScale;
+    fv *= gDT;
 
     for (int i=0; i < 10; i++) {
         if (touchPressure[i] > 0.1f) {
-            float2 vec = touchPos[i] - ballIn->position;
+            float2 vec = touchPos[i] - ball->position;
             float2 vec2 = vec * vec;
             float len2 = max(2.f, vec2.x + vec2.y);
-            fv -= (vec / len2) * touchPressure[i] * 300.f;
+            float2 pfv = (vec / len2) * touchPressure[i] * 500.f * gScale;
+            pressure += length(pfv);
+            fv -= pfv;
         }
     }
 
-    ballOut->delta = (ballIn->delta * (1.f - 0.004f)) + fv;
-    ballOut->position = ballIn->position + (ballOut->delta * ctl->dt);
+    ball->delta = (ball->delta * (1.f - 0.008f)) + fv;
+    ball->position = ball->position + (ball->delta * gDT);
 
-    const float wallForce = 400.f;
-    if (ballOut->position.x > (gMaxPos.x - 20.f)) {
-        float d = gMaxPos.x - ballOut->position.x;
+    const float wallForce = 400.f * gScale;
+    if (ball->position.x > (gMaxPos.x - 20.f)) {
+        float d = gMaxPos.x - ball->position.x;
         if (d < 0.f) {
-            if (ballOut->delta.x > 0) {
-                ballOut->delta.x *= -0.7f;
+            if (ball->delta.x > 0) {
+                ball->delta.x *= -0.7f;
             }
-            ballOut->position.x = gMaxPos.x;
+            ball->position.x = gMaxPos.x - 1.f;
         } else {
-            ballOut->delta.x -= min(wallForce / (d * d), 10.f);
+            ball->delta.x -= min(wallForce / (d * d), 10.f);
         }
     }
 
-    if (ballOut->position.x < (gMinPos.x + 20.f)) {
-        float d = ballOut->position.x - gMinPos.x;
+    if (ball->position.x < (gMinPos.x + 20.f)) {
+        float d = ball->position.x - gMinPos.x;
         if (d < 0.f) {
-            if (ballOut->delta.x < 0) {
-                ballOut->delta.x *= -0.7f;
+            if (ball->delta.x < 0) {
+                ball->delta.x *= -0.7f;
             }
-            ballOut->position.x = gMinPos.x + 1.f;
+            ball->position.x = gMinPos.x + 1.f;
         } else {
-            ballOut->delta.x += min(wallForce / (d * d), 10.f);
+            ball->delta.x += min(wallForce / (d * d), 10.f);
         }
     }
 
-    if (ballOut->position.y > (gMaxPos.y - 20.f)) {
-        float d = gMaxPos.y - ballOut->position.y;
+    if (ball->position.y > (gMaxPos.y - 20.f)) {
+        float d = gMaxPos.y - ball->position.y;
         if (d < 0.f) {
-            if (ballOut->delta.y > 0) {
-                ballOut->delta.y *= -0.7f;
+            if (ball->delta.y > 0) {
+                ball->delta.y *= -0.7f;
             }
-            ballOut->position.y = gMaxPos.y;
+            ball->position.y = gMaxPos.y - 1.f;
         } else {
-            ballOut->delta.y -= min(wallForce / (d * d), 10.f);
+            ball->delta.y -= min(wallForce / (d * d), 10.f);
         }
     }
 
-    if (ballOut->position.y < (gMinPos.y + 20.f)) {
-        float d = ballOut->position.y - gMinPos.y;
+    if (ball->position.y < (gMinPos.y + 20.f)) {
+        float d = ball->position.y - gMinPos.y;
         if (d < 0.f) {
-            if (ballOut->delta.y < 0) {
-                ballOut->delta.y *= -0.7f;
+            if (ball->delta.y < 0) {
+                ball->delta.y *= -0.7f;
             }
-            ballOut->position.y = gMinPos.y + 1.f;
+            ball->position.y = gMinPos.y + 1.f;
         } else {
-            ballOut->delta.y += min(wallForce / (d * d * d), 10.f);
+            ball->delta.y += min(wallForce / (d * d * d), 10.f);
         }
     }
 
-    ballOut->size = ballIn->size;
+    // low pressure ~500, high ~2500
+    pressure = max(pressure - 400.f, 0.f);
+    ball->pressure = pressure;
 
-    //rsDebug("physics pos out", ballOut->position);
+    //rsDebug("p ", pressure);
+
+    float4 color = 1.f;
+    color.r = pow(pressure, 0.25f) / 12.f;
+    color.b = 1.f - color.r;
+    color.g = sin(pressure / 1500.f * 3.14f);
+    color.rgb = max(color.rgb, (float3)0);
+    color.rgb = normalize(color.rgb);
+    ball->color = rsPackColorTo8888(color);
+
+    //rsDebug("physics pos out", ball->position);
 }
 
