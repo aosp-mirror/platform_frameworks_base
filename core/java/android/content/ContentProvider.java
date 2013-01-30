@@ -191,11 +191,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String selection, String[] selectionArgs, String sortOrder,
                 ICancellationSignal cancellationSignal) {
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
-                // The read is not allowed...  to fake it out, we replace the given
-                // selection statement with a dummy one that will always be false.
-                // This way we will get a cursor back that has the correct structure
-                // but contains no rows.
-                selection = "'A' = 'B'";
+                return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
+                        CancellationSignal.fromTransport(cancellationSignal));
             }
             return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
                     CancellationSignal.fromTransport(cancellationSignal));
@@ -209,12 +206,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
-                // If not allowed, we need to return some reasonable URI.  Maybe the
-                // content provider should be responsible for this, but for now we
-                // will just return the base URI with a dummy '0' tagged on to it.
-                // You shouldn't be able to read if you can't write, anyway, so it
-                // shouldn't matter much what is returned.
-                return uri.buildUpon().appendPath("0").build();
+                return rejectInsert(uri, initialValues);
             }
             return ContentProvider.this.insert(uri, initialValues);
         }
@@ -592,6 +584,31 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /**
+     * @hide
+     * Implementation when a caller has performed a query on the content
+     * provider, but that call has been rejected for the operation given
+     * to {@link #setAppOps(int, int)}.  The default implementation
+     * rewrites the <var>selection</var> argument to include a condition
+     * that is never true (so will always result in an empty cursor)
+     * and calls through to {@link #query(android.net.Uri, String[], String, String[],
+     * String, android.os.CancellationSignal)} with that.
+     */
+    public Cursor rejectQuery(Uri uri, String[] projection,
+            String selection, String[] selectionArgs, String sortOrder,
+            CancellationSignal cancellationSignal) {
+        // The read is not allowed...  to fake it out, we replace the given
+        // selection statement with a dummy one that will always be false.
+        // This way we will get a cursor back that has the correct structure
+        // but contains no rows.
+        if (selection == null) {
+            selection = "'A' = 'B'";
+        } else {
+            selection = "'A' = 'B' AND (" + selection + ")";
+        }
+        return query(uri, projection, selection, selectionArgs, sortOrder, cancellationSignal);
+    }
+
+    /**
      * Implement this to handle query requests from clients.
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
@@ -737,6 +754,23 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return a MIME type string, or {@code null} if there is no type.
      */
     public abstract String getType(Uri uri);
+
+    /**
+     * @hide
+     * Implementation when a caller has performed an insert on the content
+     * provider, but that call has been rejected for the operation given
+     * to {@link #setAppOps(int, int)}.  The default implementation simply
+     * returns a dummy URI that is the base URI with a 0 path element
+     * appended.
+     */
+    public Uri rejectInsert(Uri uri, ContentValues values) {
+        // If not allowed, we need to return some reasonable URI.  Maybe the
+        // content provider should be responsible for this, but for now we
+        // will just return the base URI with a dummy '0' tagged on to it.
+        // You shouldn't be able to read if you can't write, anyway, so it
+        // shouldn't matter much what is returned.
+        return uri.buildUpon().appendPath("0").build();
+    }
 
     /**
      * Implement this to handle requests to insert a new row.
