@@ -734,17 +734,6 @@ public class ZygoteInit {
             throws IOException;
 
     /**
-     * Sets the permitted and effective capability sets of this process.
-     *
-     * @param permittedCapabilities permitted set
-     * @param effectiveCapabilities effective set
-     * @throws IOException on error
-     */
-    static native void setCapabilities(
-            long permittedCapabilities,
-            long effectiveCapabilities) throws IOException;
-
-    /**
      * Invokes select() on the provider array of file descriptors (selecting
      * for readability only). Array elements of null are ignored.
      *
