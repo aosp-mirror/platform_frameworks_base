@@ -140,7 +140,7 @@ public class Matrix3f {
         mMat[4] = y*y*nc +  c;
         mMat[7] =  yz*nc - xs;
         mMat[2] =  zx*nc - ys;
-        mMat[6] =  yz*nc + xs;
+        mMat[5] =  yz*nc + xs;
         mMat[8] = z*z*nc +  c;
     }
 
