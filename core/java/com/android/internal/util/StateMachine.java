@@ -27,6 +27,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -81,8 +82,8 @@ import java.util.Vector;
  * machine will cause <code>haltedProcessMessage</code> to be invoked.</p>
  *
  * <p>If it is desirable to completely stop the state machine call <code>quit</code> or
- * <code>abort</code>. These will call <code>exit</code> of the current state and its parents, call
- * <code>onQuiting</code> and then exit Thread/Loopers.</p>
+ * <code>quitNow</code>. These will call <code>exit</code> of the current state and its parents,
+ * call <code>onQuiting</code> and then exit Thread/Loopers.</p>
  *
  * <p>In addition to <code>processMessage</code> each <code>State</code> has
  * an <code>enter</code> method and <code>exit</exit> method which may be overridden.</p>
@@ -444,12 +445,13 @@ public class StateMachine {
      * {@hide}
      */
     public static class LogRec {
+        private StateMachine mSm;
         private long mTime;
         private int mWhat;
         private String mInfo;
-        private State mState;
-        private State mOrgState;
-        private State mTransitionToState;
+        private IState mState;
+        private IState mOrgState;
+        private IState mDstState;
 
         /**
          * Constructor
@@ -461,26 +463,26 @@ public class StateMachine {
          * @param transToState is the state that was transitioned to after the message was
          * processed.
          */
-        LogRec(Message msg, String info, State state, State orgState, State transToState) {
-            update(msg, info, state, orgState, transToState);
+        LogRec(StateMachine sm, Message msg, String info, IState state, IState orgState,
+                IState transToState) {
+            update(sm, msg, info, state, orgState, transToState);
         }
 
         /**
          * Update the information in the record.
          * @param state that handled the message
-         * @param orgState is the first state the received the message but
-         * did not processes the message.
-         * @param transToState is the state that was transitioned to after the message was
-         * processed.
+         * @param orgState is the first state the received the message
+         * @param dstState is the state that was the transition target when logging
          */
-        public void update(Message msg, String info, State state, State orgState,
-                State transToState) {
+        public void update(StateMachine sm, Message msg, String info, IState state, IState orgState,
+                IState dstState) {
+            mSm = sm;
             mTime = System.currentTimeMillis();
             mWhat = (msg != null) ? msg.what : 0;
             mInfo = info;
             mState = state;
             mOrgState = orgState;
-            mTransitionToState = transToState;
+            mDstState = dstState;
         }
 
         /**
@@ -507,21 +509,27 @@ public class StateMachine {
         /**
          * @return the state that handled this message
          */
-        public State getState() {
+        public IState getState() {
             return mState;
         }
 
         /**
+         * @return the state destination state if a transition is occurring or null if none.
+         */
+        public IState getDestState() {
+            return mDstState;
+        }
+
+
+        /**
          * @return the original state that received the message.
          */
-        public State getOriginalState() {
+        public IState getOriginalState() {
             return mOrgState;
         }
 
-        /**
-         * @return as string
-         */
-        public String toString(StateMachine sm) {
+        @Override
+        public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("time=");
             Calendar c = Calendar.getInstance();
@@ -532,9 +540,9 @@ public class StateMachine {
             sb.append(" org=");
             sb.append(mOrgState == null ? "<null>" : mOrgState.getName());
             sb.append(" dest=");
-            sb.append(mTransitionToState == null ? "<null>" : mTransitionToState.getName());
+            sb.append(mDstState == null ? "<null>" : mDstState.getName());
             sb.append(" what=");
-            String what = sm.getWhatToString(mWhat);
+            String what = mSm != null ? mSm.getWhatToString(mWhat) : "";
             if (TextUtils.isEmpty(what)) {
                 sb.append(mWhat);
                 sb.append("(0x");
@@ -647,18 +655,19 @@ public class StateMachine {
          * processed.
          *
          */
-        synchronized void add(Message msg, String messageInfo, State state, State orgState,
-                State transToState) {
+        synchronized void add(StateMachine sm, Message msg, String messageInfo, IState state,
+                IState orgState,
+                IState transToState) {
             mCount += 1;
             if (mLogRecVector.size() < mMaxSize) {
-                mLogRecVector.add(new LogRec(msg, messageInfo, state, orgState, transToState));
+                mLogRecVector.add(new LogRec(sm, msg, messageInfo, state, orgState, transToState));
             } else {
                 LogRec pmi = mLogRecVector.get(mOldestIndex);
                 mOldestIndex += 1;
                 if (mOldestIndex >= mMaxSize) {
                     mOldestIndex = 0;
                 }
-                pmi.update(msg, messageInfo, state, orgState, transToState);
+                pmi.update(sm, msg, messageInfo, state, orgState, transToState);
             }
         }
     }
@@ -788,55 +797,79 @@ public class StateMachine {
                 throw new RuntimeException("StateMachine.handleMessage: " +
                             "The start method not called, received msg: " + msg);
             }
-            performTransitions(msgProcessedState);
+            performTransitions(msgProcessedState, msg);
 
-            if (mDbg) mSm.log("handleMessage: X");
+            // We need to check if mSm == null here as we could be quitting.
+            if (mDbg && mSm != null) mSm.log("handleMessage: X");
         }
 
         /**
          * Do any transitions
          * @param msgProcessedState is the state that processed the message
          */
-        private void performTransitions(State msgProcessedState) {
+        private void performTransitions(State msgProcessedState, Message msg) {
             /**
              * If transitionTo has been called, exit and then enter
              * the appropriate states. We loop on this to allow
              * enter and exit methods to use transitionTo.
              */
-            State destState = null;
             State orgState = mStateStack[mStateStackTopIndex].state;
 
-            /** Record whether message needs to be logged before transitions */
-            boolean recordLogMsg = mSm.recordLogRec(mMsg);
+            /**
+             * Record whether message needs to be logged before we transition and
+             * and we won't log special messages SM_INIT_CMD or SM_QUIT_CMD which
+             * always set msg.obj to the handler.
+             */
+            boolean recordLogMsg = mSm.recordLogRec(mMsg) && (msg.obj == mSmHandlerObj);
 
-            while (mDestState != null) {
-                if (mDbg) mSm.log("handleMessage: new destination call exit");
+            if (mLogRecords.logOnlyTransitions()) {
+                /** Record only if there is a transition */
+                if (mDestState != null) {
+                    mLogRecords.add(mSm, mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
+                            orgState, mDestState);
+                }
+            } else if (recordLogMsg) {
+                /** Record message */
+               mLogRecords.add(mSm, mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
+                        orgState, mDestState);
+            }
 
+            State destState = mDestState;
+            if (destState != null) {
                 /**
-                 * Save mDestState locally and set to null
-                 * to know if enter/exit use transitionTo.
+                 * Process the transitions including transitions in the enter/exit methods
                  */
-                destState = mDestState;
+                while (true) {
+                    if (mDbg) mSm.log("handleMessage: new destination call exit/enter");
+
+                    /**
+                     * Determine the states to exit and enter and return the
+                     * common ancestor state of the enter/exit states. Then
+                     * invoke the exit methods then the enter methods.
+                     */
+                    StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(destState);
+                    invokeExitMethods(commonStateInfo);
+                    int stateStackEnteringIndex = moveTempStateStackToStateStack();
+                    invokeEnterMethods(stateStackEnteringIndex);
+
+
+                    /**
+                     * Since we have transitioned to a new state we need to have
+                     * any deferred messages moved to the front of the message queue
+                     * so they will be processed before any other messages in the
+                     * message queue.
+                     */
+                    moveDeferredMessageAtFrontOfQueue();
+
+                    if (destState != mDestState) {
+                        // A new mDestState so continue looping
+                        destState = mDestState;
+                    } else {
+                        // No change in mDestState so we're done
+                        break;
+                    }
+                }
                 mDestState = null;
-
-                /**
-                 * Determine the states to exit and enter and return the
-                 * common ancestor state of the enter/exit states. Then
-                 * invoke the exit methods then the enter methods.
-                 */
-                StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(destState);
-                invokeExitMethods(commonStateInfo);
-                int stateStackEnteringIndex = moveTempStateStackToStateStack();
-                invokeEnterMethods(stateStackEnteringIndex);
-
-
-                /**
-                 * Since we have transitioned to a new state we need to have
-                 * any deferred messages moved to the front of the message queue
-                 * so they will be processed before any other messages in the
-                 * message queue.
-                 */
-                moveDeferredMessageAtFrontOfQueue();
             }
 
             /**
@@ -857,21 +890,6 @@ public class StateMachine {
                      * in the halting state which invokes haltedProcessMessage(msg);
                      */
                     mSm.onHalting();
-                }
-            }
-
-            // Log only if state machine has not quit
-            if (mSm != null) {
-                if (mLogRecords.logOnlyTransitions()) {
-                    /** Record only if there is a transition */
-                    if (destState != null) {
-                        mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
-                                orgState, destState);
-                    }
-                } else if (recordLogMsg) {
-                    /** Record message */
-                    mLogRecords.add(mMsg, mSm.getLogRecString(mMsg), msgProcessedState,
-                            orgState, destState);
                 }
             }
         }
@@ -1255,20 +1273,6 @@ public class StateMachine {
     }
 
     /**
-     * @return current message
-     */
-    protected final Message getCurrentMessage() {
-        return mSmHandler.getCurrentMessage();
-    }
-
-    /**
-     * @return current state
-     */
-    protected final IState getCurrentState() {
-        return mSmHandler.getCurrentState();
-    }
-
-    /**
      * Add a new state to the state machine, parent will be null
      * @param state to add
      */
@@ -1284,6 +1288,26 @@ public class StateMachine {
      */
     protected final void setInitialState(State initialState) {
         mSmHandler.setInitialState(initialState);
+    }
+
+    /**
+     * @return current message
+     */
+    protected final Message getCurrentMessage() {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return null;
+        return smh.getCurrentMessage();
+    }
+
+    /**
+     * @return current state
+     */
+    protected final IState getCurrentState() {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return null;
+        return smh.getCurrentState();
     }
 
     /**
@@ -1390,21 +1414,44 @@ public class StateMachine {
      * @return number of log records
      */
     public final int getLogRecSize() {
-        return mSmHandler.mLogRecords.size();
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return 0;
+        return smh.mLogRecords.size();
     }
 
     /**
      * @return the total number of records processed
      */
     public final int getLogRecCount() {
-        return mSmHandler.mLogRecords.count();
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return 0;
+        return smh.mLogRecords.count();
     }
 
     /**
-     * @return a log record
+     * @return a log record, or null if index is out of range
      */
     public final LogRec getLogRec(int index) {
-        return mSmHandler.mLogRecords.get(index);
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return null;
+        return smh.mLogRecords.get(index);
+    }
+
+    /**
+     * @return a copy of LogRecs as a collection
+     */
+    public final Collection<LogRec> copyLogRecs() {
+        Vector<LogRec> vlr = new Vector<LogRec>();
+        SmHandler smh = mSmHandler;
+        if (smh != null) {
+            for (LogRec lr : smh.mLogRecords.mLogRecVector) {
+                vlr.add(lr);
+            }
+        }
+        return vlr;
     }
 
     /**
@@ -1413,17 +1460,11 @@ public class StateMachine {
      * @param string
      */
     protected void addLogRec(String string) {
-        mSmHandler.mLogRecords.add(null, string, null, null, null);
-    }
-
-    /**
-     * Add the string and state to LogRecords
-     *
-     * @param string
-     * @param state current state
-     */
-    protected void addLogRec(String string, State state) {
-        mSmHandler.mLogRecords.add(null, string, state, null, null);
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+        smh.mLogRecords.add(this, smh.getCurrentMessage(), string, smh.getCurrentState(),
+                smh.mStateStack[smh.mStateStackTopIndex].state, smh.mDestState);
     }
 
     /**
@@ -1452,168 +1493,217 @@ public class StateMachine {
     }
 
     /**
-     * @return Handler
+     * @return Handler, maybe null if state machine has quit.
      */
     public final Handler getHandler() {
         return mSmHandler;
     }
 
     /**
-     * Get a message and set Message.target = this.
+     * Get a message and set Message.target state machine handler.
      *
-     * @return message or null if SM has quit
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
+     *
+     * @return  A Message object from the global pool
      */
     public final Message obtainMessage()
     {
-        if (mSmHandler == null) return null;
-
         return Message.obtain(mSmHandler);
     }
 
     /**
-     * Get a message and set Message.target = this and what
+     * Get a message and set Message.target state machine handler, what.
+     *
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
      *
      * @param what is the assigned to Message.what.
-     * @return message or null if SM has quit
+     * @return  A Message object from the global pool
      */
     public final Message obtainMessage(int what) {
-        if (mSmHandler == null) return null;
-
         return Message.obtain(mSmHandler, what);
     }
 
     /**
-     * Get a message and set Message.target = this,
+     * Get a message and set Message.target state machine handler,
      * what and obj.
+     *
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
      *
      * @param what is the assigned to Message.what.
      * @param obj is assigned to Message.obj.
-     * @return message or null if SM has quit
+     * @return  A Message object from the global pool
      */
     public final Message obtainMessage(int what, Object obj)
     {
-        if (mSmHandler == null) return null;
-
         return Message.obtain(mSmHandler, what, obj);
     }
 
     /**
-     * Get a message and set Message.target = this,
+     * Get a message and set Message.target state machine handler,
      * what, arg1 and arg2
+     *
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
      *
      * @param what  is assigned to Message.what
      * @param arg1  is assigned to Message.arg1
      * @param arg2  is assigned to Message.arg2
-     * @return  A Message object from the global pool or null if
-     *          SM has quit
+     * @return  A Message object from the global pool
      */
     public final Message obtainMessage(int what, int arg1, int arg2)
     {
-        if (mSmHandler == null) return null;
-
         return Message.obtain(mSmHandler, what, arg1, arg2);
     }
 
     /**
-     * Get a message and set Message.target = this,
+     * Get a message and set Message.target state machine handler,
      * what, arg1, arg2 and obj
+     *
+     * Note: The handler can be null if the state machine has quit,
+     * which means target will be null and may cause a AndroidRuntimeException
+     * in MessageQueue#enqueMessage if sent directly or if sent using
+     * StateMachine#sendMessage the message will just be ignored.
      *
      * @param what  is assigned to Message.what
      * @param arg1  is assigned to Message.arg1
      * @param arg2  is assigned to Message.arg2
      * @param obj is assigned to Message.obj
-     * @return  A Message object from the global pool or null if
-     *          SM has quit
+     * @return  A Message object from the global pool
      */
     public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
     {
-        if (mSmHandler == null) return null;
-
         return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
 
     /**
      * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessage(int what) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessage(obtainMessage(what));
+        smh.sendMessage(obtainMessage(what));
     }
 
     /**
      * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessage(int what, Object obj) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessage(obtainMessage(what,obj));
+        smh.sendMessage(obtainMessage(what,obj));
     }
 
     /**
      * Enqueue a message to this state machine.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessage(Message msg) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessage(msg);
+        smh.sendMessage(msg);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessageDelayed(int what, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessageDelayed(obtainMessage(what), delayMillis);
+        smh.sendMessageDelayed(obtainMessage(what), delayMillis);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
+        smh.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
+     *
+     * Message is ignored if state machine has quit.
      */
     public final void sendMessageDelayed(Message msg, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.sendMessageDelayed(msg, delayMillis);
+        smh.sendMessageDelayed(msg, delayMillis);
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
      * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
      */
     protected final void sendMessageAtFrontOfQueue(int what, Object obj) {
-        mSmHandler.sendMessageAtFrontOfQueue(obtainMessage(what, obj));
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what, obj));
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
      * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
      */
     protected final void sendMessageAtFrontOfQueue(int what) {
-        mSmHandler.sendMessageAtFrontOfQueue(obtainMessage(what));
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(obtainMessage(what));
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
      * Protected, may only be called by instances of StateMachine.
+     *
+     * Message is ignored if state machine has quit.
      */
     protected final void sendMessageAtFrontOfQueue(Message msg) {
-        mSmHandler.sendMessageAtFrontOfQueue(msg);
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.sendMessageAtFrontOfQueue(msg);
     }
 
     /**
@@ -1621,7 +1711,23 @@ public class StateMachine {
      * Protected, may only be called by instances of StateMachine.
      */
     protected final void removeMessages(int what) {
-        mSmHandler.removeMessages(what);
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
+
+        smh.removeMessages(what);
+    }
+
+    /**
+     * Validate that the message was sent by
+     * {@link StateMachine#quit} or {@link StateMachine#quitNow}.
+     * */
+    protected final boolean isQuit(Message msg) {
+        // mSmHandler can be null if the state machine has quit.
+        SmHandler smh = mSmHandler;
+        if (smh == null) return msg.what == SM_QUIT_CMD;
+
+        return smh.isQuit(msg);
     }
 
     /**
@@ -1629,9 +1735,10 @@ public class StateMachine {
      */
     protected final void quit() {
         // mSmHandler can be null if the state machine is already stopped.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.quit();
+        smh.quit();
     }
 
     /**
@@ -1639,9 +1746,10 @@ public class StateMachine {
      */
     protected final void quitNow() {
         // mSmHandler can be null if the state machine is already stopped.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.quitNow();
+        smh.quitNow();
     }
 
     /**
@@ -1649,9 +1757,10 @@ public class StateMachine {
      */
     public boolean isDbg() {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return false;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return false;
 
-        return mSmHandler.isDbg();
+        return smh.isDbg();
     }
 
     /**
@@ -1661,9 +1770,10 @@ public class StateMachine {
      */
     public void setDbg(boolean dbg) {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
-        mSmHandler.setDbg(dbg);
+        smh.setDbg(dbg);
     }
 
     /**
@@ -1671,10 +1781,11 @@ public class StateMachine {
      */
     public void start() {
         // mSmHandler can be null if the state machine has quit.
-        if (mSmHandler == null) return;
+        SmHandler smh = mSmHandler;
+        if (smh == null) return;
 
         /** Send the complete construction message */
-        mSmHandler.completeConstruction();
+        smh.completeConstruction();
     }
 
     /**
@@ -1688,7 +1799,7 @@ public class StateMachine {
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
         for (int i=0; i < getLogRecSize(); i++) {
-            pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString(this));
+            pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString());
             pw.flush();
         }
         pw.println("curState=" + getCurrentState().getName());
