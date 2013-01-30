@@ -77,7 +77,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                     // get the certificate from Settings.Secure
                     X509Certificate cert = getCert(context.getContentResolver());
                     // get the content path from the extras
-                    String altContent = getAltContent(intent);
+                    byte[] altContent = getAltContent(intent);
                     // get the version from the extras
                     int altVersion = getVersionFromIntent(intent);
                     // get the previous value from the extras
@@ -172,28 +172,26 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private String getAltContent(Intent i) throws IOException {
-        String contents = IoUtils.readFileAsString(getContentFromIntent(i));
-        return contents.trim();
+    private byte[] getAltContent(Intent i) throws IOException {
+        return IoUtils.readFileAsByteArray(getContentFromIntent(i));
     }
 
-    private String getCurrentContent() {
+    private byte[] getCurrentContent() {
         try {
-            return IoUtils.readFileAsString(updateContent.getCanonicalPath()).trim();
+            return IoUtils.readFileAsByteArray(updateContent.getCanonicalPath());
         } catch (IOException e) {
             Slog.i(TAG, "Failed to read current content, assuming first update!");
             return null;
         }
     }
 
-    private static String getCurrentHash(String content) {
+    private static String getCurrentHash(byte[] content) {
         if (content == null) {
             return "0";
         }
         try {
             MessageDigest dgst = MessageDigest.getInstance("SHA512");
-            byte[] encoded = content.getBytes();
-            byte[] fingerprint = dgst.digest(encoded);
+            byte[] fingerprint = dgst.digest(content);
             return IntegralToString.bytesToHexString(fingerprint, false);
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
@@ -213,17 +211,17 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         return current.equals(required);
     }
 
-    private boolean verifySignature(String content, int version, String requiredPrevious,
+    private boolean verifySignature(byte[] content, int version, String requiredPrevious,
                                    String signature, X509Certificate cert) throws Exception {
         Signature signer = Signature.getInstance("SHA512withRSA");
         signer.initVerify(cert);
-        signer.update(content.getBytes());
+        signer.update(content);
         signer.update(Long.toString(version).getBytes());
         signer.update(requiredPrevious.getBytes());
         return signer.verify(Base64.decode(signature.getBytes(), Base64.DEFAULT));
     }
 
-    private void writeUpdate(File dir, File file, String content) throws IOException {
+    private void writeUpdate(File dir, File file, byte[] content) throws IOException {
         FileOutputStream out = null;
         File tmp = null;
         try {
@@ -240,7 +238,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             tmp.setReadable(true, false);
             // write to it
             out = new FileOutputStream(tmp);
-            out.write(content.getBytes());
+            out.write(content);
             // sync to disk
             out.getFD().sync();
             // atomic rename
@@ -255,8 +253,8 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private void install(String content, int version) throws IOException {
+    private void install(byte[] content, int version) throws IOException {
         writeUpdate(updateDir, updateContent, content);
-        writeUpdate(updateDir, updateVersion, Long.toString(version));
+        writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
     }
 }
