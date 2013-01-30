@@ -23,6 +23,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -35,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -62,21 +64,17 @@ import android.util.Slog;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarNotification;
-import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -156,6 +154,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     private ArrayList<NotificationRecord> mLights = new ArrayList<NotificationRecord>();
     private NotificationRecord mLedNotification;
 
+    private final AppOpsManager mAppOps;
+
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
@@ -218,79 +218,35 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
-    private void writeBlockDb() {
-        synchronized(mBlockedPackages) {
-            FileOutputStream outfile = null;
-            try {
-                outfile = mPolicyFile.startWrite();
-
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(outfile, "utf-8");
-
-                out.startDocument(null, true);
-
-                out.startTag(null, TAG_BODY); {
-                    out.attribute(null, ATTR_VERSION, String.valueOf(DB_VERSION));
-                    out.startTag(null, TAG_BLOCKED_PKGS); {
-                        // write all known network policies
-                        for (String pkg : mBlockedPackages) {
-                            out.startTag(null, TAG_PACKAGE); {
-                                out.attribute(null, ATTR_NAME, pkg);
-                            } out.endTag(null, TAG_PACKAGE);
-                        }
-                    } out.endTag(null, TAG_BLOCKED_PKGS);
-                } out.endTag(null, TAG_BODY);
-
-                out.endDocument();
-
-                mPolicyFile.finishWrite(outfile);
-            } catch (IOException e) {
-                if (outfile != null) {
-                    mPolicyFile.failWrite(outfile);
-                }
-            }
-        }
-    }
-
-    public boolean areNotificationsEnabledForPackage(String pkg) {
+    /**
+     * Use this when you just want to know if notifications are OK for this package.
+     */
+    public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
         checkCallerIsSystem();
-        return areNotificationsEnabledForPackageInt(pkg);
+        return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
+                == AppOpsManager.MODE_ALLOWED);
     }
 
-    // Unchecked. Not exposed via Binder, but can be called in the course of enqueue*().
-    private boolean areNotificationsEnabledForPackageInt(String pkg) {
-        final boolean enabled = !mBlockedPackages.contains(pkg);
-        if (DBG) {
-            Slog.v(TAG, "notifications are " + (enabled?"en":"dis") + "abled for " + pkg);
+    /** Use this when you actually want to post a notification or toast.
+     *
+     * Unchecked. Not exposed via Binder, but can be called in the course of enqueue*().
+     */
+    private boolean noteNotificationOp(String pkg, int uid) {
+        if (mAppOps.noteOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
+                != AppOpsManager.MODE_ALLOWED) {
+            Slog.v(TAG, "notifications are disabled by AppOps for " + pkg);
+            return false;
         }
-        return enabled;
+        return true;
     }
 
-    public void setNotificationsEnabledForPackage(String pkg, boolean enabled) {
+    public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
         checkCallerIsSystem();
-        if (DBG) {
+        if (true||DBG) {
             Slog.v(TAG, (enabled?"en":"dis") + "abling notifications for " + pkg);
         }
-        if (enabled) {
-            mBlockedPackages.remove(pkg);
-        } else {
-            mBlockedPackages.add(pkg);
-
-            // Now, cancel any outstanding notifications that are part of a just-disabled app
-            if (ENABLE_BLOCKED_NOTIFICATIONS) {
-                synchronized (mNotificationList) {
-                    final int N = mNotificationList.size();
-                    for (int i=0; i<N; i++) {
-                        final NotificationRecord r = mNotificationList.get(i);
-                        if (r.pkg.equals(pkg)) {
-                            cancelNotificationLocked(r, false);
-                        }
-                    }
-                }
-            }
-            // Don't bother canceling toasts, they'll go away soon enough.
-        }
-        writeBlockDb();
+        mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
+                enabled ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
     }
 
 
@@ -628,7 +584,9 @@ public class NotificationManagerService extends INotificationManager.Stub
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
-        loadBlockDb();
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+
+        importOldBlockDb();
 
         mStatusBar = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
@@ -685,6 +643,28 @@ public class NotificationManagerService extends INotificationManager.Stub
         observer.observe();
     }
 
+    /**
+     * Read the old XML-based app block database and import those blockages into the AppOps system.
+     */
+    private void importOldBlockDb() {
+        loadBlockDb();
+
+        PackageManager pm = mContext.getPackageManager();
+        for (String pkg : mBlockedPackages) {
+            PackageInfo info = null;
+            try {
+                info = pm.getPackageInfo(pkg, 0);
+                setNotificationsEnabledForPackage(pkg, info.applicationInfo.uid, false);
+            } catch (NameNotFoundException e) {
+                // forget you
+            }
+        }
+        mBlockedPackages.clear();
+        if (mPolicyFile != null) {
+            mPolicyFile.delete();
+        }
+    }
+
     void systemReady() {
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
@@ -706,9 +686,11 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         final boolean isSystemToast = ("android".equals(pkg));
 
-        if (ENABLE_BLOCKED_TOASTS && !isSystemToast && !areNotificationsEnabledForPackageInt(pkg)) {
-            Slog.e(TAG, "Suppressing toast from package " + pkg + " by user request.");
-            return;
+        if (ENABLE_BLOCKED_TOASTS && !noteNotificationOp(pkg, Binder.getCallingUid())) {
+            if (!isSystemToast) {
+                Slog.e(TAG, "Suppressing toast from package " + pkg + " by user request.");
+                return;
+            }
         }
 
         synchronized (mToastQueue) {
@@ -982,9 +964,11 @@ public class NotificationManagerService extends INotificationManager.Stub
         // 3. Apply local rules
 
         // blocked apps
-        if (ENABLE_BLOCKED_NOTIFICATIONS && !isSystemNotification && !areNotificationsEnabledForPackageInt(pkg)) {
-            score = JUNK_SCORE;
-            Slog.e(TAG, "Suppressing notification from package " + pkg + " by user request.");
+        if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
+            if (!isSystemNotification) {
+                score = JUNK_SCORE;
+                Slog.e(TAG, "Suppressing notification from package " + pkg + " by user request.");
+            }
         }
 
         if (DBG) {
