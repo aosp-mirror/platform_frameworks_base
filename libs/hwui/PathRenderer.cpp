@@ -596,7 +596,6 @@ bool PathRenderer::convexPathPerimeterVertices(const SkPath& path, bool forceClo
     SkPath::Iter iter(path, forceClose);
     SkPoint pts[4];
     SkPath::Verb v;
-    Vertex* newVertex = 0;
     while (SkPath::kDone_Verb != (v = iter.next(pts))) {
             switch (v) {
                 case SkPath::kMove_Verb:
