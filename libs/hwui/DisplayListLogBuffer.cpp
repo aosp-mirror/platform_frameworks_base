@@ -18,9 +18,8 @@
 
 // BUFFER_SIZE size must be one more than a multiple of COMMAND_SIZE to ensure
 // that mStart always points at the next command, not just the next item
-#define COMMAND_SIZE 2
 #define NUM_COMMANDS 50
-#define BUFFER_SIZE ((NUM_COMMANDS * COMMAND_SIZE) + 1)
+#define BUFFER_SIZE ((NUM_COMMANDS) + 1)
 
 /**
  * DisplayListLogBuffer is a utility class which logs the most recent display
@@ -57,7 +56,7 @@ namespace uirenderer {
 
 
 DisplayListLogBuffer::DisplayListLogBuffer() {
-    mBufferFirst = (int*) malloc(BUFFER_SIZE * sizeof(int));
+    mBufferFirst = (OpLog*) malloc(BUFFER_SIZE * sizeof(OpLog));
     mStart = mBufferFirst;
     mBufferLast = mBufferFirst + BUFFER_SIZE - 1;
     mEnd = mStart;
@@ -71,42 +70,30 @@ DisplayListLogBuffer::~DisplayListLogBuffer() {
  * Called from DisplayListRenderer to output the current buffer into the
  * specified FILE. This only happens in a dumpsys/bugreport operation.
  */
-void DisplayListLogBuffer::outputCommands(FILE *file, const char* opNames[])
+void DisplayListLogBuffer::outputCommands(FILE *file)
 {
-    int *tmpBufferPtr = mStart;
+    OpLog* tmpBufferPtr = mStart;
     while (true) {
         if (tmpBufferPtr == mEnd) {
             break;
         }
-        int level = *tmpBufferPtr++;
+        OpLog* nextOp = tmpBufferPtr++;
         if (tmpBufferPtr > mBufferLast) {
             tmpBufferPtr = mBufferFirst;
         }
-        int op = *tmpBufferPtr++;
-        if (tmpBufferPtr > mBufferLast) {
-            tmpBufferPtr = mBufferFirst;
-        }
-        uint32_t count = (level + 1) * 2;
-        char indent[count + 1];
-        for (uint32_t i = 0; i < count; i++) {
-            indent[i] = ' ';
-        }
-        indent[count] = '\0';
-        fprintf(file, "%s%s\n", indent, opNames[op]);
+
+        fprintf(file, "%*s%s\n", tmpBufferPtr->level*2, "", tmpBufferPtr->label);
     }
 }
 
-void DisplayListLogBuffer::writeCommand(int level, int op) {
-    writeInt(level);
-    writeInt(op);
-}
-
 /**
- * Store the given value in the buffer and increment/wrap the mEnd
- * and mStart values as appropriate.
+ * Store the given level and label in the buffer and increment/wrap the mEnd
+ * and mStart values as appropriate. Label should point to static memory.
  */
-void DisplayListLogBuffer::writeInt(int value) {
-    *((int*)mEnd) = value;
+void DisplayListLogBuffer::writeCommand(int level, const char* label) {
+    mEnd->level = level;
+    mEnd->label = label;
+
     if (mEnd == mBufferLast) {
         mEnd = mBufferFirst;
     } else {

@@ -31,6 +31,7 @@
 
 #include "DisplayListLogBuffer.h"
 #include "OpenGLRenderer.h"
+#include "utils/LinearAllocator.h"
 
 namespace android {
 namespace uirenderer {
@@ -60,6 +61,18 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DisplayListRenderer;
+class DisplayListOp;
+class DrawOp;
+class StateOp;
+
+/**
+ * Refcounted structure that holds data used in display list stream
+ */
+class DisplayListData: public LightRefBase<DisplayListData> {
+public:
+    LinearAllocator allocator;
+    Vector<DisplayListOp*> displayListOps;
+};
 
 /**
  * Replays recorded drawing commands.
@@ -69,66 +82,13 @@ public:
     DisplayList(const DisplayListRenderer& recorder);
     ANDROID_API ~DisplayList();
 
-    // IMPORTANT: Update the intialization of OP_NAMES in the .cpp file
-    //            when modifying this file
-    enum Op {
-        // Non-drawing operations
-        Save = 0,
-        Restore,
-        RestoreToCount,
-        SaveLayer,
-        SaveLayerAlpha,
-        Translate,
-        Rotate,
-        Scale,
-        Skew,
-        SetMatrix,
-        ConcatMatrix,
-        ClipRect,
-        ClipPath,
-        ClipRegion,
-        // Drawing operations
-        DrawDisplayList,
-        DrawLayer,
-        DrawBitmap,
-        DrawBitmapMatrix,
-        DrawBitmapRect,
-        DrawBitmapData,
-        DrawBitmapMesh,
-        DrawPatch,
-        DrawColor,
-        DrawRect,
-        DrawRoundRect,
-        DrawCircle,
-        DrawOval,
-        DrawArc,
-        DrawPath,
-        DrawLines,
-        DrawPoints,
-        DrawTextOnPath,
-        DrawPosText,
-        DrawText,
-        DrawRects,
-        ResetShader,
-        SetupShader,
-        ResetColorFilter,
-        SetupColorFilter,
-        ResetShadow,
-        SetupShadow,
-        ResetPaintFilter,
-        SetupPaintFilter,
-        DrawGLFunction,
-    };
-
     // See flags defined in DisplayList.java
     enum ReplayFlag {
         kReplayFlag_ClipChildren = 0x1
     };
 
-    static const char* OP_NAMES[];
-
     void setViewProperties(OpenGLRenderer& renderer, uint32_t level);
-    void outputViewProperties(OpenGLRenderer& renderer, char* indent);
+    void outputViewProperties(uint32_t level);
 
     ANDROID_API size_t getSize();
     ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
@@ -138,7 +98,7 @@ public:
 
     status_t replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
 
-    void output(OpenGLRenderer& renderer, uint32_t level = 0);
+    void output(uint32_t level = 0);
 
     ANDROID_API void reset();
 
@@ -423,78 +383,6 @@ private:
         const char* mText;
     };
 
-    SkBitmap* getBitmap() {
-        return (SkBitmap*) getInt();
-    }
-
-    SkBitmap* getBitmapData() {
-        return (SkBitmap*) getInt();
-    }
-
-    SkiaShader* getShader() {
-        return (SkiaShader*) getInt();
-    }
-
-    SkiaColorFilter* getColorFilter() {
-        return (SkiaColorFilter*) getInt();
-    }
-
-    inline int32_t getIndex() {
-        return mReader.readInt();
-    }
-
-    inline int32_t getInt() {
-        return mReader.readInt();
-    }
-
-    inline uint32_t getUInt() {
-        return mReader.readU32();
-    }
-
-    SkMatrix* getMatrix() {
-        return (SkMatrix*) getInt();
-    }
-
-    SkPath* getPath() {
-        return (SkPath*) getInt();
-    }
-
-    SkRegion* getRegion() {
-        return (SkRegion*) getInt();
-    }
-
-    SkPaint* getPaint(OpenGLRenderer& renderer) {
-        return renderer.filterPaint((SkPaint*) getInt());
-    }
-
-    DisplayList* getDisplayList() {
-        return (DisplayList*) getInt();
-    }
-
-    inline float getFloat() {
-        return mReader.readScalar();
-    }
-
-    int32_t* getInts(uint32_t& count) {
-        count = getInt();
-        return (int32_t*) mReader.skip(count * sizeof(int32_t));
-    }
-
-    uint32_t* getUInts(int8_t& count) {
-        count = getInt();
-        return (uint32_t*) mReader.skip(count * sizeof(uint32_t));
-    }
-
-    float* getFloats(int32_t& count) {
-        count = getInt();
-        return (float*) mReader.skip(count * sizeof(float));
-    }
-
-    void getText(TextContainer* text) {
-        size_t length = text->mByteLength = getInt();
-        text->mText = (const char*) mReader.skip(length);
-    }
-
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
@@ -507,7 +395,7 @@ private:
     Vector<SkiaShader*> mShaders;
     Vector<Layer*> mLayers;
 
-    mutable SkFlattenableReadBuffer mReader;
+    sp<DisplayListData> mDisplayListData;
 
     size_t mSize;
 
@@ -634,8 +522,8 @@ public:
 
     ANDROID_API void reset();
 
-    const SkWriter32& writeStream() const {
-        return mWriter;
+    sp<DisplayListData> getDisplayListData() const {
+        return mDisplayListData;
     }
 
     const Vector<SkBitmap*>& getBitmapResources() const {
@@ -683,102 +571,32 @@ public:
     }
 
 private:
-    void insertRestoreToCount() {
-        if (mRestoreSaveCount >= 0) {
-            mWriter.writeInt(DisplayList::RestoreToCount);
-            addInt(mRestoreSaveCount);
-            mRestoreSaveCount = -1;
-        }
-    }
+    void insertRestoreToCount();
+    void insertTranslate();
 
-    void insertTranlate() {
-        if (mHasTranslate) {
-            if (mTranslateX != 0.0f || mTranslateY != 0.0f) {
-                mWriter.writeInt(DisplayList::Translate);
-                addPoint(mTranslateX, mTranslateY);
-                mTranslateX = mTranslateY = 0.0f;
-            }
-            mHasTranslate = false;
-        }
-    }
-
-    inline void addOp(const DisplayList::Op drawOp) {
+    LinearAllocator& alloc() { return mDisplayListData->allocator; }
+    void addStateOp(StateOp* op);
+    bool addDrawOp(DrawOp* op); // returns true if op not rejected
+    void addOpInternal(DisplayListOp* op) {
         insertRestoreToCount();
-        insertTranlate();
-        mWriter.writeInt(drawOp);
-        mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
+        insertTranslate();
+        mDisplayListData->displayListOps.add(op);
     }
 
-    uint32_t* addOp(const DisplayList::Op drawOp, const bool reject) {
-        insertRestoreToCount();
-        insertTranlate();
-        mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
-        if (reject) {
-            mWriter.writeInt(OP_MAY_BE_SKIPPED_MASK | drawOp);
-            mWriter.writeInt(0xdeaddead);
-            mBufferSize = mWriter.size();
-            return mWriter.peek32(mBufferSize - sizeof(int32_t));
-        }
-        mWriter.writeInt(drawOp);
-        return NULL;
+    template<class T>
+    inline T* refBuffer(const T* srcBuffer, int32_t count) {
+        if (srcBuffer == NULL) return NULL;
+        T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
+        memcpy(dstBuffer, srcBuffer, count * sizeof(T));
+        return dstBuffer;
     }
 
-    inline void addSkip(uint32_t* location) {
-        if (location) {
-            *location = (int32_t) (mWriter.size() - mBufferSize);
-        }
+    inline char* refText(const char* text, size_t byteLength) {
+        return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
     }
 
-    inline void addInt(int32_t value) {
-        mWriter.writeInt(value);
-    }
-
-    inline void addSize(uint32_t w, uint32_t h) {
-        mWriter.writeInt(w);
-        mWriter.writeInt(h);
-    }
-
-    void addInts(const int32_t* values, uint32_t count) {
-        mWriter.writeInt(count);
-        mWriter.write(values, count * sizeof(int32_t));
-    }
-
-    void addUInts(const uint32_t* values, int8_t count) {
-        mWriter.writeInt(count);
-        mWriter.write(values, count * sizeof(uint32_t));
-    }
-
-    inline void addFloat(float value) {
-        mWriter.writeScalar(value);
-    }
-
-    void addFloats(const float* values, int32_t count) {
-        mWriter.writeInt(count);
-        mWriter.write(values, count * sizeof(float));
-    }
-
-    inline void addPoint(float x, float y) {
-        mWriter.writeScalar(x);
-        mWriter.writeScalar(y);
-    }
-
-    inline void addBounds(float left, float top, float right, float bottom) {
-        mWriter.writeScalar(left);
-        mWriter.writeScalar(top);
-        mWriter.writeScalar(right);
-        mWriter.writeScalar(bottom);
-    }
-
-    inline void addText(const void* text, size_t byteLength) {
-        mWriter.writeInt(byteLength);
-        mWriter.writePad(text, byteLength);
-    }
-
-    inline void addPath(SkPath* path) {
-        if (!path) {
-            addInt((int) NULL);
-            return;
-        }
+    inline SkPath* refPath(SkPath* path) {
+        if (!path) return NULL;
 
         SkPath* pathCopy = mPathMap.valueFor(path);
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
@@ -792,13 +610,11 @@ private:
             mCaches.resourceCache.incrementRefcount(path);
             mSourcePaths.add(path);
         }
-
-        addInt((int) pathCopy);
+        return pathCopy;
     }
 
-    inline SkPaint* addPaint(SkPaint* paint) {
+    inline SkPaint* refPaint(SkPaint* paint) {
         if (!paint) {
-            addInt((int) NULL);
             return paint;
         }
 
@@ -810,14 +626,11 @@ private:
             mPaints.add(paintCopy);
         }
 
-        addInt((int) paintCopy);
-
         return paintCopy;
     }
 
-    inline SkRegion* addRegion(SkRegion* region) {
+    inline SkRegion* refRegion(SkRegion* region) {
         if (!region) {
-            addInt((int) NULL);
             return region;
         }
 
@@ -830,53 +643,35 @@ private:
             mRegions.add(regionCopy);
         }
 
-        addInt((int) regionCopy);
-
         return regionCopy;
     }
 
-    inline void addDisplayList(DisplayList* displayList) {
-        // TODO: To be safe, the display list should be ref-counted in the
-        //       resources cache, but we rely on the caller (UI toolkit) to
-        //       do the right thing for now
-        addInt((int) displayList);
-    }
-
-    inline void addMatrix(SkMatrix* matrix) {
+    inline SkMatrix* refMatrix(SkMatrix* matrix) {
         // Copying the matrix is cheap and prevents against the user changing the original
         // matrix before the operation that uses it
         SkMatrix* copy = new SkMatrix(*matrix);
-        addInt((int) copy);
         mMatrices.add(copy);
+        return copy;
     }
 
-    inline void addLayer(Layer* layer) {
-        addInt((int) layer);
-        mLayers.add(layer);
-        mCaches.resourceCache.incrementRefcount(layer);
-    }
-
-    inline void addBitmap(SkBitmap* bitmap) {
+    inline SkBitmap* refBitmap(SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        addInt((int) bitmap);
         mBitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
+        return bitmap;
     }
 
-    void addBitmapData(SkBitmap* bitmap) {
-        addInt((int) bitmap);
+    inline SkBitmap* refBitmapData(SkBitmap* bitmap) {
         mOwnedBitmapResources.add(bitmap);
         mCaches.resourceCache.incrementRefcount(bitmap);
+        return bitmap;
     }
 
-    inline void addShader(SkiaShader* shader) {
-        if (!shader) {
-            addInt((int) NULL);
-            return;
-        }
+    inline SkiaShader* refShader(SkiaShader* shader) {
+        if (!shader) return NULL;
 
         SkiaShader* shaderCopy = mShaderMap.valueFor(shader);
         // TODO: We also need to handle generation ID changes in compose shaders
@@ -887,14 +682,13 @@ private:
             mShaders.add(shaderCopy);
             mCaches.resourceCache.incrementRefcount(shaderCopy);
         }
-
-        addInt((int) shaderCopy);
+        return shaderCopy;
     }
 
-    inline void addColorFilter(SkiaColorFilter* colorFilter) {
-        addInt((int) colorFilter);
+    inline SkiaColorFilter* refColorFilter(SkiaColorFilter* colorFilter) {
         mFilterResources.add(colorFilter);
         mCaches.resourceCache.incrementRefcount(colorFilter);
+        return colorFilter;
     }
 
     Vector<SkBitmap*> mBitmapResources;
@@ -919,12 +713,10 @@ private:
 
     Vector<Layer*> mLayers;
 
-    uint32_t mBufferSize;
-
     int mRestoreSaveCount;
 
     Caches& mCaches;
-    SkWriter32 mWriter;
+    sp<DisplayListData> mDisplayListData;
 
     float mTranslateX;
     float mTranslateY;

@@ -1868,7 +1868,7 @@ public abstract class HardwareRenderer {
                 mDebugDataProvider.setupGraphPaint(mProfilePaint, i);
                 switch (graphType) {
                     case GraphDataProvider.GRAPH_TYPE_BARS:
-                        mGlCanvas.drawRects(mProfileShapes[i], count, mProfilePaint);
+                        mGlCanvas.drawRects(mProfileShapes[i], count * 4, mProfilePaint);
                         break;
                     case GraphDataProvider.GRAPH_TYPE_LINES:
                         mGlCanvas.drawLines(mProfileShapes[i], 0, count * 4, mProfilePaint);
