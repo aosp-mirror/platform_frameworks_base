@@ -82,7 +82,7 @@ when your application starts.</p>
 
 <h2 id="Overview">Overview</h2>
 
-<p>Each time you upload an APK using the Google Play Android Developer Console, you have the option to
+<p>Each time you upload an APK using the Google Play Developer Console, you have the option to
 add one or two expansion files to the APK. Each file can be up to 2GB and it can be any format you
 choose, but we recommend you use a compressed file to conserve bandwidth during the download.
 Conceptually, each expansion file plays a different role:</p>
