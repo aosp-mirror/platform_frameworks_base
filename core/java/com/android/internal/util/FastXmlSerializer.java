@@ -390,7 +390,7 @@ public class FastXmlSerializer implements XmlSerializer {
         }
         escapeAndAppendString(text);
         if (mIndent) {
-            mLineStart = text.charAt(text.length()-1) == '\n';
+            mLineStart = text.length() > 0 && (text.charAt(text.length()-1) == '\n');
         }
         return this;
     }
