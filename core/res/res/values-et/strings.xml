@@ -299,10 +299,8 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lülitab tegevushalduri väljalülitusolekusse. Ei lülita lõplikult välja."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"väldi rakenduste ümberlülitamist"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Takistab kasutaja lülitumist teisele rakendusele."</string>
-    <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
-    <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
-    <skip />
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"aktiivse rakenduse teabe hankimine"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Lubab õiguste saajal hankida privaatset teavet ekraanil esiplaanil oleva aktiivse rakenduse kohta."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Kõigi rakenduste käivitumise jälgimine ja juhtimine"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Võimaldab rakendusel jälgida ja juhtida, kuidas süsteem tegevusi käivitab. Pahatahtlikud rakendused võivad süsteemi täielikult rikkuda. Seda õigust on vaja ainult arenduseks, mitte tavakasutuse korral."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"saada paketist eemaldatud saade"</string>
