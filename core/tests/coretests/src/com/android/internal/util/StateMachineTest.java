@@ -16,6 +16,9 @@
 
 package com.android.internal.util;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -58,11 +61,28 @@ public class StateMachineTest extends TestCase {
         }
     }
 
+    private void dumpLogRecs(StateMachine sm) {
+        int size = sm.getLogRecSize();
+        tlog("size=" + size + " count=" + sm.getLogRecCount());
+        for (int i = 0; i < size; i++) {
+            LogRec lr = sm.getLogRec(i);
+            tlog(lr.toString());
+        }
+    }
+
+    private void dumpLogRecs(Collection<LogRec> clr) {
+        int size = clr.size();
+        tlog("size=" + size);
+        for (LogRec lr : clr) {
+            tlog(lr.toString());
+        }
+    }
+
     /**
      * Tests {@link StateMachine#quit()}.
      */
     class StateMachineQuitTest extends StateMachine {
-        Object mWaitUntilTestDone = new Object();
+        Collection<LogRec> mLogRecs;
 
         StateMachineQuitTest(String name) {
             super(name);
@@ -78,39 +98,32 @@ public class StateMachineTest extends TestCase {
 
         @Override
         public void onQuitting() {
-            Log.d(TAG, "onQuitting");
+            log("onQuitting");
             addLogRec(ON_QUITTING);
+            mLogRecs = mThisSm.copyLogRecs();
             synchronized (mThisSm) {
                 mThisSm.notifyAll();
-            }
-
-            // Don't leave onQuitting before the test is done as everything is cleared
-            // including the log records.
-            synchronized (mWaitUntilTestDone) {
-                try {
-                    mWaitUntilTestDone.wait();
-                } catch(InterruptedException e) {
-                }
             }
         }
 
         class S1 extends State {
+            @Override
             public void exit() {
-                Log.d(TAG, "S1.exit");
-                addLogRec(EXIT, mS1);
+                log("S1.exit");
+                addLogRec(EXIT);
             }
             @Override
             public boolean processMessage(Message message) {
                 switch(message.what) {
                     // Sleep and assume the other messages will be queued up.
                     case TEST_CMD_1: {
-                        Log.d(TAG, "TEST_CMD_1");
+                        log("TEST_CMD_1");
                         sleep(500);
                         quit();
                         break;
                     }
                     default: {
-                        Log.d(TAG, "default what=" + message.what);
+                        log("default what=" + message.what);
                         break;
                     }
                 }
@@ -128,7 +141,7 @@ public class StateMachineTest extends TestCase {
 
         StateMachineQuitTest smQuitTest = new StateMachineQuitTest("smQuitTest");
         smQuitTest.start();
-        if (smQuitTest.isDbg()) Log.d(TAG, "testStateMachineQuit E");
+        if (smQuitTest.isDbg()) tlog("testStateMachineQuit E");
 
         synchronized (smQuitTest) {
 
@@ -141,38 +154,36 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 smQuitTest.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachineQuit: exception while waiting " + e.getMessage());
+                tloge("testStateMachineQuit: exception while waiting " + e.getMessage());
             }
         }
 
-        assertEquals(8, smQuitTest.getLogRecCount());
+        dumpLogRecs(smQuitTest.mLogRecs);
+        assertEquals(8, smQuitTest.mLogRecs.size());
 
         LogRec lr;
-
-        for (int i = 0; i < 6; i++) {
-            lr = smQuitTest.getLogRec(i);
-            assertEquals(i+1, lr.getWhat());
+        Iterator<LogRec> itr = smQuitTest.mLogRecs.iterator();
+        for (int i = 1; i <= 6; i++) {
+            lr = itr.next();
+            assertEquals(i, lr.getWhat());
             assertEquals(smQuitTest.mS1, lr.getState());
             assertEquals(smQuitTest.mS1, lr.getOriginalState());
         }
-        lr = smQuitTest.getLogRec(6);
+        lr = itr.next();
         assertEquals(EXIT, lr.getInfo());
         assertEquals(smQuitTest.mS1, lr.getState());
 
-        lr = smQuitTest.getLogRec(7);
+        lr = itr.next();
         assertEquals(ON_QUITTING, lr.getInfo());
 
-        synchronized (smQuitTest.mWaitUntilTestDone) {
-            smQuitTest.mWaitUntilTestDone.notifyAll();
-        }
-        if (smQuitTest.isDbg()) Log.d(TAG, "testStateMachineQuit X");
+        if (smQuitTest.isDbg()) tlog("testStateMachineQuit X");
     }
 
     /**
      * Tests {@link StateMachine#quitNow()}
      */
     class StateMachineQuitNowTest extends StateMachine {
-        Object mWaitUntilTestDone = new Object();
+        public Collection<LogRec> mLogRecs = null;
 
         StateMachineQuitNowTest(String name) {
             super(name);
@@ -188,39 +199,34 @@ public class StateMachineTest extends TestCase {
 
         @Override
         public void onQuitting() {
-            Log.d(TAG, "onQuitting");
+            log("onQuitting");
             addLogRec(ON_QUITTING);
+            // Get a copy of the log records since we're quitting and they will disappear
+            mLogRecs = mThisSm.copyLogRecs();
+
             synchronized (mThisSm) {
                 mThisSm.notifyAll();
-            }
-
-            // Don't leave onQuitting before the test is done as everything is cleared
-            // including the log records.
-            synchronized (mWaitUntilTestDone) {
-                try {
-                    mWaitUntilTestDone.wait();
-                } catch(InterruptedException e) {
-                }
             }
         }
 
         class S1 extends State {
+            @Override
             public void exit() {
-                Log.d(TAG, "S1.exit");
-                addLogRec(EXIT, mS1);
+                log("S1.exit");
+                addLogRec(EXIT);
             }
             @Override
             public boolean processMessage(Message message) {
                 switch(message.what) {
                     // Sleep and assume the other messages will be queued up.
                     case TEST_CMD_1: {
-                        Log.d(TAG, "TEST_CMD_1");
+                        log("TEST_CMD_1");
                         sleep(500);
                         quitNow();
                         break;
                     }
                     default: {
-                        Log.d(TAG, "default what=" + message.what);
+                        log("default what=" + message.what);
                         break;
                     }
                 }
@@ -238,11 +244,11 @@ public class StateMachineTest extends TestCase {
 
         StateMachineQuitNowTest smQuitNowTest = new StateMachineQuitNowTest("smQuitNowTest");
         smQuitNowTest.start();
-        if (smQuitNowTest.isDbg()) Log.d(TAG, "testStateMachineQuitNow E");
+        if (smQuitNowTest.isDbg()) tlog("testStateMachineQuitNow E");
 
         synchronized (smQuitNowTest) {
 
-            // Send 6 messages but we'll QuitNow on the first so even though
+            // Send 6 message we'll QuitNow on the first even though
             // we send 6 only one will be processed.
             for (int i = 1; i <= 6; i++) {
                 smQuitNowTest.sendMessage(smQuitNowTest.obtainMessage(i));
@@ -252,31 +258,27 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 smQuitNowTest.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachineQuitNow: exception while waiting " + e.getMessage());
+                tloge("testStateMachineQuitNow: exception while waiting " + e.getMessage());
             }
         }
 
-        // Only three records because we executed quitNow.
-        assertEquals(3, smQuitNowTest.getLogRecCount());
+        tlog("testStateMachineQuiteNow: logRecs=" + smQuitNowTest.mLogRecs);
+        assertEquals(3, smQuitNowTest.mLogRecs.size());
 
-        LogRec lr;
-
-        lr = smQuitNowTest.getLogRec(0);
+        Iterator<LogRec> itr = smQuitNowTest.mLogRecs.iterator();
+        LogRec lr = itr.next();
         assertEquals(1, lr.getWhat());
         assertEquals(smQuitNowTest.mS1, lr.getState());
         assertEquals(smQuitNowTest.mS1, lr.getOriginalState());
 
-        lr = smQuitNowTest.getLogRec(1);
+        lr = itr.next();
         assertEquals(EXIT, lr.getInfo());
         assertEquals(smQuitNowTest.mS1, lr.getState());
 
-        lr = smQuitNowTest.getLogRec(2);
+        lr = itr.next();
         assertEquals(ON_QUITTING, lr.getInfo());
 
-        synchronized (smQuitNowTest.mWaitUntilTestDone) {
-            smQuitNowTest.mWaitUntilTestDone.notifyAll();
-        }
-        if (smQuitNowTest.isDbg()) Log.d(TAG, "testStateMachineQuitNow X");
+        if (smQuitNowTest.isDbg()) tlog("testStateMachineQuitNow X");
     }
 
     /**
@@ -303,39 +305,39 @@ public class StateMachineTest extends TestCase {
             @Override
             public void enter() {
                 // Test transitions in enter on the initial state work
-                addLogRec(ENTER, mS1);
+                addLogRec(ENTER);
                 transitionTo(mS2);
-                Log.d(TAG, "S1.enter");
+                log("S1.enter");
             }
             @Override
             public void exit() {
-                // Test that message is HSM_INIT_CMD
-                addLogRec(EXIT, mS1);
-                Log.d(TAG, "S1.exit");
+                addLogRec(EXIT);
+                log("S1.exit");
             }
         }
 
         class S2 extends State {
             @Override
             public void enter() {
-                addLogRec(ENTER, mS2);
-                Log.d(TAG, "S2.enter");
+                addLogRec(ENTER);
+                log("S2.enter");
             }
             @Override
             public void exit() {
-                addLogRec(EXIT, mS2);
-                assertEquals(TEST_CMD_1, getCurrentMessage().what);
-
                 // Test transition in exit work
                 transitionTo(mS4);
-                Log.d(TAG, "S2.exit");
+
+                assertEquals(TEST_CMD_1, getCurrentMessage().what);
+                addLogRec(EXIT);
+
+                log("S2.exit");
             }
             @Override
             public boolean processMessage(Message message) {
                 // Start a transition to S3 but it will be
                 // changed to a transition to S4 in exit
                 transitionTo(mS3);
-                Log.d(TAG, "S2.processMessage");
+                log("S2.processMessage");
                 return HANDLED;
             }
         }
@@ -343,28 +345,28 @@ public class StateMachineTest extends TestCase {
         class S3 extends State {
             @Override
             public void enter() {
-                addLogRec(ENTER, mS3);
-                Log.d(TAG, "S3.enter");
+                addLogRec(ENTER);
+                log("S3.enter");
             }
             @Override
             public void exit() {
-                addLogRec(EXIT, mS3);
-                Log.d(TAG, "S3.exit");
+                addLogRec(EXIT);
+                log("S3.exit");
             }
         }
 
         class S4 extends State {
             @Override
             public void enter() {
-                addLogRec(ENTER, mS4);
+                addLogRec(ENTER);
                 // Test that we can do halting in an enter/exit
                 transitionToHaltingState();
-                Log.d(TAG, "S4.enter");
+                log("S4.enter");
             }
             @Override
             public void exit() {
-                addLogRec(EXIT, mS4);
-                Log.d(TAG, "S4.exit");
+                addLogRec(EXIT);
+                log("S4.exit");
             }
         }
 
@@ -390,7 +392,7 @@ public class StateMachineTest extends TestCase {
             new StateMachineEnterExitTransitionToTest("smEnterExitTranstionToTest");
         smEnterExitTranstionToTest.start();
         if (smEnterExitTranstionToTest.isDbg()) {
-            Log.d(TAG, "testStateMachineEnterExitTransitionToTest E");
+            tlog("testStateMachineEnterExitTransitionToTest E");
         }
 
         synchronized (smEnterExitTranstionToTest) {
@@ -400,13 +402,14 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 smEnterExitTranstionToTest.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachineEnterExitTransitionToTest: exception while waiting "
+                tloge("testStateMachineEnterExitTransitionToTest: exception while waiting "
                     + e.getMessage());
             }
         }
 
-        assertEquals(smEnterExitTranstionToTest.getLogRecCount(), 9);
+        dumpLogRecs(smEnterExitTranstionToTest);
 
+        assertEquals(9, smEnterExitTranstionToTest.getLogRecCount());
         LogRec lr;
 
         lr = smEnterExitTranstionToTest.getLogRec(0);
@@ -425,29 +428,44 @@ public class StateMachineTest extends TestCase {
         assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(smEnterExitTranstionToTest.mS2, lr.getState());
         assertEquals(smEnterExitTranstionToTest.mS2, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getDestState());
 
         lr = smEnterExitTranstionToTest.getLogRec(4);
-        assertEquals(EXIT, lr.getInfo());
+        assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(smEnterExitTranstionToTest.mS2, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS2, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
+        assertEquals(EXIT, lr.getInfo());
 
         lr = smEnterExitTranstionToTest.getLogRec(5);
+        assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(ENTER, lr.getInfo());
         assertEquals(smEnterExitTranstionToTest.mS3, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
 
         lr = smEnterExitTranstionToTest.getLogRec(6);
+        assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(EXIT, lr.getInfo());
         assertEquals(smEnterExitTranstionToTest.mS3, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS3, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
 
         lr = smEnterExitTranstionToTest.getLogRec(7);
+        assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(ENTER, lr.getInfo());
         assertEquals(smEnterExitTranstionToTest.mS4, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getOriginalState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getDestState());
 
         lr = smEnterExitTranstionToTest.getLogRec(8);
+        assertEquals(TEST_CMD_1, lr.getWhat());
         assertEquals(EXIT, lr.getInfo());
         assertEquals(smEnterExitTranstionToTest.mS4, lr.getState());
+        assertEquals(smEnterExitTranstionToTest.mS4, lr.getOriginalState());
 
         if (smEnterExitTranstionToTest.isDbg()) {
-            Log.d(TAG, "testStateMachineEnterExitTransitionToTest X");
+            tlog("testStateMachineEnterExitTransitionToTest X");
         }
     }
 
@@ -495,7 +513,7 @@ public class StateMachineTest extends TestCase {
 
         StateMachine0 sm0 = new StateMachine0("sm0");
         sm0.start();
-        if (sm0.isDbg()) Log.d(TAG, "testStateMachine0 E");
+        if (sm0.isDbg()) tlog("testStateMachine0 E");
 
         synchronized (sm0) {
             // Send 6 messages
@@ -507,12 +525,14 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm0.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine0: exception while waiting " + e.getMessage());
+                tloge("testStateMachine0: exception while waiting " + e.getMessage());
             }
         }
 
         assertEquals(6, sm0.getLogRecCount());
         assertEquals(3, sm0.getLogRecSize());
+
+        dumpLogRecs(sm0);
 
         LogRec lr;
         lr = sm0.getLogRec(0);
@@ -530,7 +550,7 @@ public class StateMachineTest extends TestCase {
         assertEquals(sm0.mS1, lr.getState());
         assertEquals(sm0.mS1, lr.getOriginalState());
 
-        if (sm0.isDbg()) Log.d(TAG, "testStateMachine0 X");
+        if (sm0.isDbg()) tlog("testStateMachine0 X");
     }
 
     /**
@@ -550,7 +570,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) Log.d(TAG, "StateMachine1: ctor X");
+            if (DBG) log("StateMachine1: ctor X");
         }
 
         class S1 extends State {
@@ -595,7 +615,7 @@ public class StateMachineTest extends TestCase {
     public void testStateMachine1() throws Exception {
         StateMachine1 sm1 = new StateMachine1("sm1");
         sm1.start();
-        if (sm1.isDbg()) Log.d(TAG, "testStateMachine1 E");
+        if (sm1.isDbg()) tlog("testStateMachine1 E");
 
         synchronized (sm1) {
             // Send two messages
@@ -606,7 +626,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm1.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine1: exception while waiting " + e.getMessage());
+                tloge("testStateMachine1: exception while waiting " + e.getMessage());
             }
         }
 
@@ -629,7 +649,7 @@ public class StateMachineTest extends TestCase {
         assertEquals(2, sm1.mEnterCount);
         assertEquals(2, sm1.mExitCount);
 
-        if (sm1.isDbg()) Log.d(TAG, "testStateMachine1 X");
+        if (sm1.isDbg()) tlog("testStateMachine1 X");
     }
 
     /**
@@ -651,7 +671,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) Log.d(TAG, "StateMachine2: ctor X");
+            if (DBG) log("StateMachine2: ctor X");
         }
 
         class S1 extends State {
@@ -702,7 +722,7 @@ public class StateMachineTest extends TestCase {
     public void testStateMachine2() throws Exception {
         StateMachine2 sm2 = new StateMachine2("sm2");
         sm2.start();
-        if (sm2.isDbg()) Log.d(TAG, "testStateMachine2 E");
+        if (sm2.isDbg()) tlog("testStateMachine2 E");
 
         synchronized (sm2) {
             // Send two messages
@@ -713,7 +733,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm2.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine2: exception while waiting " + e.getMessage());
+                tloge("testStateMachine2: exception while waiting " + e.getMessage());
             }
         }
 
@@ -739,7 +759,7 @@ public class StateMachineTest extends TestCase {
         assertTrue(sm2.mDidEnter);
         assertTrue(sm2.mDidExit);
 
-        if (sm2.isDbg()) Log.d(TAG, "testStateMachine2 X");
+        if (sm2.isDbg()) tlog("testStateMachine2 X");
     }
 
     /**
@@ -760,7 +780,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be the child
             setInitialState(mChildState);
-            if (DBG) Log.d(TAG, "StateMachine3: ctor X");
+            if (DBG) log("StateMachine3: ctor X");
         }
 
         class ParentState extends State {
@@ -796,7 +816,7 @@ public class StateMachineTest extends TestCase {
     public void testStateMachine3() throws Exception {
         StateMachine3 sm3 = new StateMachine3("sm3");
         sm3.start();
-        if (sm3.isDbg()) Log.d(TAG, "testStateMachine3 E");
+        if (sm3.isDbg()) tlog("testStateMachine3 E");
 
         synchronized (sm3) {
             // Send two messages
@@ -807,7 +827,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm3.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine3: exception while waiting " + e.getMessage());
+                tloge("testStateMachine3: exception while waiting " + e.getMessage());
             }
         }
 
@@ -824,7 +844,7 @@ public class StateMachineTest extends TestCase {
         assertEquals(sm3.mParentState, lr.getState());
         assertEquals(sm3.mChildState, lr.getOriginalState());
 
-        if (sm3.isDbg()) Log.d(TAG, "testStateMachine3 X");
+        if (sm3.isDbg()) tlog("testStateMachine3 X");
     }
 
     /**
@@ -847,7 +867,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be child 1
             setInitialState(mChildState1);
-            if (DBG) Log.d(TAG, "StateMachine4: ctor X");
+            if (DBG) log("StateMachine4: ctor X");
         }
 
         class ParentState extends State {
@@ -892,7 +912,7 @@ public class StateMachineTest extends TestCase {
     public void testStateMachine4() throws Exception {
         StateMachine4 sm4 = new StateMachine4("sm4");
         sm4.start();
-        if (sm4.isDbg()) Log.d(TAG, "testStateMachine4 E");
+        if (sm4.isDbg()) tlog("testStateMachine4 E");
 
         synchronized (sm4) {
             // Send two messages
@@ -903,7 +923,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm4.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine4: exception while waiting " + e.getMessage());
+                tloge("testStateMachine4: exception while waiting " + e.getMessage());
             }
         }
 
@@ -921,7 +941,7 @@ public class StateMachineTest extends TestCase {
         assertEquals(sm4.mParentState, lr.getState());
         assertEquals(sm4.mChildState2, lr.getOriginalState());
 
-        if (sm4.isDbg()) Log.d(TAG, "testStateMachine4 X");
+        if (sm4.isDbg()) tlog("testStateMachine4 X");
     }
 
     /**
@@ -947,7 +967,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be the child
             setInitialState(mChildState1);
-            if (DBG) Log.d(TAG, "StateMachine5: ctor X");
+            if (DBG) log("StateMachine5: ctor X");
         }
 
         class ParentState1 extends State {
@@ -1187,7 +1207,7 @@ public class StateMachineTest extends TestCase {
     public void testStateMachine5() throws Exception {
         StateMachine5 sm5 = new StateMachine5("sm5");
         sm5.start();
-        if (sm5.isDbg()) Log.d(TAG, "testStateMachine5 E");
+        if (sm5.isDbg()) tlog("testStateMachine5 E");
 
         synchronized (sm5) {
             // Send 6 messages
@@ -1202,7 +1222,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm5.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine5: exception while waiting " + e.getMessage());
+                tloge("testStateMachine5: exception while waiting " + e.getMessage());
             }
         }
 
@@ -1255,7 +1275,7 @@ public class StateMachineTest extends TestCase {
         assertEquals(sm5.mParentState2, lr.getState());
         assertEquals(sm5.mParentState2, lr.getOriginalState());
 
-        if (sm5.isDbg()) Log.d(TAG, "testStateMachine5 X");
+        if (sm5.isDbg()) tlog("testStateMachine5 X");
     }
 
     /**
@@ -1274,7 +1294,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) Log.d(TAG, "StateMachine6: ctor X");
+            if (DBG) log("StateMachine6: ctor X");
         }
 
         class S1 extends State {
@@ -1315,7 +1335,7 @@ public class StateMachineTest extends TestCase {
 
         StateMachine6 sm6 = new StateMachine6("sm6");
         sm6.start();
-        if (sm6.isDbg()) Log.d(TAG, "testStateMachine6 E");
+        if (sm6.isDbg()) tlog("testStateMachine6 E");
 
         synchronized (sm6) {
             // Send a message
@@ -1325,7 +1345,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm6.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine6: exception while waiting " + e.getMessage());
+                tloge("testStateMachine6: exception while waiting " + e.getMessage());
             }
         }
 
@@ -1336,11 +1356,11 @@ public class StateMachineTest extends TestCase {
          */
         long arrivalTimeDiff = sm6.mArrivalTimeMsg2 - sm6.mArrivalTimeMsg1;
         long expectedDelay = DELAY_TIME - DELAY_FUDGE;
-        if (sm6.isDbg()) Log.d(TAG, "testStateMachine6: expect " + arrivalTimeDiff
+        if (sm6.isDbg()) tlog("testStateMachine6: expect " + arrivalTimeDiff
                                     + " >= " + expectedDelay);
         assertTrue(arrivalTimeDiff >= expectedDelay);
 
-        if (sm6.isDbg()) Log.d(TAG, "testStateMachine6 X");
+        if (sm6.isDbg()) tlog("testStateMachine6 X");
     }
 
     /**
@@ -1361,7 +1381,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) Log.d(TAG, "StateMachine7: ctor X");
+            if (DBG) log("StateMachine7: ctor X");
         }
 
         class S1 extends State {
@@ -1421,7 +1441,7 @@ public class StateMachineTest extends TestCase {
 
         StateMachine7 sm7 = new StateMachine7("sm7");
         sm7.start();
-        if (sm7.isDbg()) Log.d(TAG, "testStateMachine7 E");
+        if (sm7.isDbg()) tlog("testStateMachine7 E");
 
         synchronized (sm7) {
             // Send a message
@@ -1431,7 +1451,7 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm7.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachine7: exception while waiting " + e.getMessage());
+                tloge("testStateMachine7: exception while waiting " + e.getMessage());
             }
         }
 
@@ -1442,11 +1462,11 @@ public class StateMachineTest extends TestCase {
          */
         long arrivalTimeDiff = sm7.mArrivalTimeMsg3 - sm7.mArrivalTimeMsg2;
         long expectedDelay = sm7.SM7_DELAY_TIME - SM7_DELAY_FUDGE;
-        if (sm7.isDbg()) Log.d(TAG, "testStateMachine7: expect " + arrivalTimeDiff
+        if (sm7.isDbg()) tlog("testStateMachine7: expect " + arrivalTimeDiff
                                     + " >= " + expectedDelay);
         assertTrue(arrivalTimeDiff >= expectedDelay);
 
-        if (sm7.isDbg()) Log.d(TAG, "testStateMachine7 X");
+        if (sm7.isDbg()) tlog("testStateMachine7 X");
     }
 
     /**
@@ -1494,9 +1514,9 @@ public class StateMachineTest extends TestCase {
     @SmallTest
     public void testStateMachineUnhandledMessage() throws Exception {
 
-        StateMachineUnhandledMessage sm = new StateMachineUnhandledMessage("sm");
+        StateMachineUnhandledMessage sm = new StateMachineUnhandledMessage("smUnhandledMessage");
         sm.start();
-        if (sm.isDbg()) Log.d(TAG, "testStateMachineUnhandledMessage E");
+        if (sm.isDbg()) tlog("testStateMachineUnhandledMessage E");
 
         synchronized (sm) {
             // Send 2 messages
@@ -1508,15 +1528,15 @@ public class StateMachineTest extends TestCase {
                 // wait for the messages to be handled
                 sm.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachineUnhandledMessage: exception while waiting "
+                tloge("testStateMachineUnhandledMessage: exception while waiting "
                         + e.getMessage());
             }
         }
 
-        assertEquals(sm.getLogRecCount(), 2);
+        assertEquals(2, sm.getLogRecSize());
         assertEquals(2, sm.mUnhandledMessageCount);
 
-        if (sm.isDbg()) Log.d(TAG, "testStateMachineUnhandledMessage X");
+        if (sm.isDbg()) tlog("testStateMachineUnhandledMessage X");
     }
 
     /**
@@ -1569,7 +1589,7 @@ public class StateMachineTest extends TestCase {
 
     @MediumTest
     public void testStateMachineSharedThread() throws Exception {
-        if (DBG) Log.d(TAG, "testStateMachineSharedThread E");
+        if (DBG) tlog("testStateMachineSharedThread E");
 
         // Create and start the handler thread
         HandlerThread smThread = new HandlerThread("testStateMachineSharedThread");
@@ -1578,7 +1598,8 @@ public class StateMachineTest extends TestCase {
         // Create the state machines
         StateMachineSharedThread sms[] = new StateMachineSharedThread[10];
         for (int i = 0; i < sms.length; i++) {
-            sms[i] = new StateMachineSharedThread("sm", smThread.getLooper(), sms.length);
+            sms[i] = new StateMachineSharedThread("smSharedThread",
+                        smThread.getLooper(), sms.length);
             sms[i].start();
         }
 
@@ -1594,14 +1615,14 @@ public class StateMachineTest extends TestCase {
             try {
                 waitObject.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testStateMachineSharedThread: exception while waiting "
+                tloge("testStateMachineSharedThread: exception while waiting "
                         + e.getMessage());
             }
         }
 
         for (StateMachineSharedThread sm : sms) {
-            assertEquals(sm.getLogRecCount(), 4);
-            for (int i = 0; i < sm.getLogRecCount(); i++) {
+            assertEquals(4, sm.getLogRecCount());
+            for (int i = 0; i < sm.getLogRecSize(); i++) {
                 LogRec lr = sm.getLogRec(i);
                 assertEquals(i+1, lr.getWhat());
                 assertEquals(sm.mS1, lr.getState());
@@ -1609,12 +1630,168 @@ public class StateMachineTest extends TestCase {
             }
         }
 
-        if (DBG) Log.d(TAG, "testStateMachineSharedThread X");
+        if (DBG) tlog("testStateMachineSharedThread X");
+    }
+
+    static class Hsm1 extends StateMachine {
+        private static final String HSM1_TAG = "hsm1";
+
+        public static final int CMD_1 = 1;
+        public static final int CMD_2 = 2;
+        public static final int CMD_3 = 3;
+        public static final int CMD_4 = 4;
+        public static final int CMD_5 = 5;
+
+        public static Hsm1 makeHsm1() {
+            Log.d(HSM1_TAG, "makeHsm1 E");
+            Hsm1 sm = new Hsm1(HSM1_TAG);
+            sm.start();
+            Log.d(HSM1_TAG, "makeHsm1 X");
+            return sm;
+        }
+
+        Hsm1(String name) {
+            super(name);
+            log("ctor E");
+
+            // Add states, use indentation to show hierarchy
+            addState(mP1);
+                addState(mS1, mP1);
+                addState(mS2, mP1);
+            addState(mP2);
+
+            // Set the initial state
+            setInitialState(mS1);
+            log("ctor X");
+        }
+
+        class P1 extends State {
+            @Override
+            public void enter() {
+                log("P1.enter");
+            }
+            @Override
+            public void exit() {
+                log("P1.exit");
+            }
+            @Override
+            public boolean processMessage(Message message) {
+                boolean retVal;
+                log("P1.processMessage what=" + message.what);
+                switch(message.what) {
+                case CMD_2:
+                    // CMD_2 will arrive in mS2 before CMD_3
+                    sendMessage(CMD_3);
+                    deferMessage(message);
+                    transitionTo(mS2);
+                    retVal = true;
+                    break;
+                default:
+                    // Any message we don't understand in this state invokes unhandledMessage
+                    retVal = false;
+                    break;
+                }
+                return retVal;
+            }
+        }
+
+        class S1 extends State {
+            @Override
+            public void enter() {
+                log("S1.enter");
+            }
+            @Override
+            public void exit() {
+                log("S1.exit");
+            }
+            @Override
+            public boolean processMessage(Message message) {
+                log("S1.processMessage what=" + message.what);
+                if (message.what == CMD_1) {
+                    // Transition to ourself to show that enter/exit is called
+                    transitionTo(mS1);
+                    return HANDLED;
+                } else {
+                    // Let parent process all other messages
+                    return NOT_HANDLED;
+                }
+            }
+        }
+
+        class S2 extends State {
+            @Override
+            public void enter() {
+                log("S2.enter");
+            }
+            @Override
+            public void exit() {
+                log("S2.exit");
+            }
+            @Override
+            public boolean processMessage(Message message) {
+                boolean retVal;
+                log("S2.processMessage what=" + message.what);
+                switch(message.what) {
+                case(CMD_2):
+                    sendMessage(CMD_4);
+                    retVal = true;
+                    break;
+                case(CMD_3):
+                    deferMessage(message);
+                    transitionTo(mP2);
+                    retVal = true;
+                    break;
+                default:
+                    retVal = false;
+                    break;
+                }
+                return retVal;
+            }
+        }
+
+        class P2 extends State {
+            @Override
+            public void enter() {
+                log("P2.enter");
+                sendMessage(CMD_5);
+            }
+            @Override
+            public void exit() {
+                log("P2.exit");
+            }
+            @Override
+            public boolean processMessage(Message message) {
+                log("P2.processMessage what=" + message.what);
+                switch(message.what) {
+                case(CMD_3):
+                    break;
+                case(CMD_4):
+                    break;
+                case(CMD_5):
+                    transitionToHaltingState();
+                    break;
+                }
+                return HANDLED;
+            }
+        }
+
+        @Override
+        protected void onHalting() {
+            log("halting");
+            synchronized (this) {
+                this.notifyAll();
+            }
+        }
+
+        P1 mP1 = new P1();
+        S1 mS1 = new S1();
+        S2 mS2 = new S2();
+        P2 mP2 = new P2();
     }
 
     @MediumTest
     public void testHsm1() throws Exception {
-        if (DBG) Log.d(TAG, "testHsm1 E");
+        if (DBG) tlog("testHsm1 E");
 
         Hsm1 sm = Hsm1.makeHsm1();
 
@@ -1627,11 +1804,14 @@ public class StateMachineTest extends TestCase {
             try {
                 sm.wait();
             } catch (InterruptedException e) {
-                Log.e(TAG, "testHsm1: exception while waiting " + e.getMessage());
+                tloge("testHsm1: exception while waiting " + e.getMessage());
             }
         }
 
+        dumpLogRecs(sm);
+
         assertEquals(7, sm.getLogRecCount());
+
         LogRec lr = sm.getLogRec(0);
         assertEquals(Hsm1.CMD_1, lr.getWhat());
         assertEquals(sm.mS1, lr.getState());
@@ -1667,162 +1847,14 @@ public class StateMachineTest extends TestCase {
         assertEquals(sm.mP2, lr.getState());
         assertEquals(sm.mP2, lr.getOriginalState());
 
-        if (DBG) Log.d(TAG, "testStateMachineSharedThread X");
-    }
-}
-
-class Hsm1 extends StateMachine {
-    private static final String TAG = "hsm1";
-
-    public static final int CMD_1 = 1;
-    public static final int CMD_2 = 2;
-    public static final int CMD_3 = 3;
-    public static final int CMD_4 = 4;
-    public static final int CMD_5 = 5;
-
-    public static Hsm1 makeHsm1() {
-        Log.d(TAG, "makeHsm1 E");
-        Hsm1 sm = new Hsm1("hsm1");
-        sm.start();
-        Log.d(TAG, "makeHsm1 X");
-        return sm;
+        if (DBG) tlog("testStateMachineSharedThread X");
     }
 
-    Hsm1(String name) {
-        super(name);
-        Log.d(TAG, "ctor E");
-
-        // Add states, use indentation to show hierarchy
-        addState(mP1);
-            addState(mS1, mP1);
-            addState(mS2, mP1);
-        addState(mP2);
-
-        // Set the initial state
-        setInitialState(mS1);
-        Log.d(TAG, "ctor X");
+    private void tlog(String s) {
+        Log.d(TAG, s);
     }
 
-    class P1 extends State {
-        @Override
-        public void enter() {
-            Log.d(TAG, "P1.enter");
-        }
-        @Override
-        public void exit() {
-            Log.d(TAG, "P1.exit");
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            boolean retVal;
-            Log.d(TAG, "P1.processMessage what=" + message.what);
-            switch(message.what) {
-            case CMD_2:
-                // CMD_2 will arrive in mS2 before CMD_3
-                sendMessage(CMD_3);
-                deferMessage(message);
-                transitionTo(mS2);
-                retVal = true;
-                break;
-            default:
-                // Any message we don't understand in this state invokes unhandledMessage
-                retVal = false;
-                break;
-            }
-            return retVal;
-        }
+    private void tloge(String s) {
+        Log.e(TAG, s);
     }
-
-    class S1 extends State {
-        @Override
-        public void enter() {
-            Log.d(TAG, "S1.enter");
-        }
-        @Override
-        public void exit() {
-            Log.d(TAG, "S1.exit");
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            Log.d(TAG, "S1.processMessage what=" + message.what);
-            if (message.what == CMD_1) {
-                // Transition to ourself to show that enter/exit is called
-                transitionTo(mS1);
-                return HANDLED;
-            } else {
-                // Let parent process all other messages
-                return NOT_HANDLED;
-            }
-        }
-    }
-
-    class S2 extends State {
-        @Override
-        public void enter() {
-            Log.d(TAG, "S2.enter");
-        }
-        @Override
-        public void exit() {
-            Log.d(TAG, "S2.exit");
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            boolean retVal;
-            Log.d(TAG, "S2.processMessage what=" + message.what);
-            switch(message.what) {
-            case(CMD_2):
-                sendMessage(CMD_4);
-                retVal = true;
-                break;
-            case(CMD_3):
-                deferMessage(message);
-                transitionTo(mP2);
-                retVal = true;
-                break;
-            default:
-                retVal = false;
-                break;
-            }
-            return retVal;
-        }
-    }
-
-    class P2 extends State {
-        @Override
-        public void enter() {
-            Log.d(TAG, "P2.enter");
-            sendMessage(CMD_5);
-        }
-        @Override
-        public void exit() {
-            Log.d(TAG, "P2.exit");
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            Log.d(TAG, "P2.processMessage what=" + message.what);
-            switch(message.what) {
-            case(CMD_3):
-                break;
-            case(CMD_4):
-                break;
-            case(CMD_5):
-                transitionToHaltingState();
-                break;
-            }
-            return HANDLED;
-        }
-    }
-
-    @Override
-    protected void onHalting() {
-        Log.d(TAG, "halting");
-        synchronized (this) {
-            this.notifyAll();
-        }
-    }
-
-    P1 mP1 = new P1();
-    S1 mS1 = new S1();
-    S2 mS2 = new S2();
-    P2 mP2 = new P2();
 }
