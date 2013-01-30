@@ -62,6 +62,7 @@ status_t LayerRenderer::prepareDirty(float left, float top, float right, float b
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }
+    mLayer->clipRect.set(dirty);
 
     return OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 }

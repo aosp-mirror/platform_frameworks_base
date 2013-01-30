@@ -61,6 +61,7 @@ public class ClipRegionActivity extends Activity {
 
         public RegionView(Context c) {
             super(c);
+            setAlpha(0.5f);
         }
 
         public float getClipPosition() {
