@@ -76,18 +76,6 @@ class ZygoteConnection {
     private final String peerSecurityContext;
 
     /**
-     * A long-lived reference to the original command socket used to launch
-     * this peer. If "peer wait" mode is specified, the process that requested
-     * the new VM instance intends to track the lifetime of the spawned instance
-     * via the command socket. In this case, the command socket is closed
-     * in the Zygote and placed here in the spawned instance so that it will
-     * not be collected and finalized. This field remains null at all times
-     * in the original Zygote process, and in all spawned processes where
-     * "peer-wait" mode was not requested.
-     */
-    private static LocalSocket sPeerWaitSocket = null;
-
-    /**
      * Constructs instance from connected socket.
      *
      * @param socket non-null; connected socket
@@ -298,11 +286,6 @@ class ZygoteConnection {
      *   <li> --rlimit=r,c,m<i>tuple of values for setrlimit() call.
      *    <code>r</code> is the resource, <code>c</code> and <code>m</code>
      *    are the settings for current and max value.</i>
-     *   <li> --peer-wait indicates that the command socket should
-     * be inherited by (and set to close-on-exec in) the spawned process
-     * and used to track the lifetime of that process. The spawning process
-     * then exits. Without this flag, it is retained by the spawning process
-     * (and closed in the child) in expectation of a new spawn request.
      *   <li> --classpath=<i>colon-separated classpath</i> indicates
      * that the specified class (which must b first non-flag argument) should
      * be loaded from jar files in the specified classpath. Incompatible with
@@ -329,9 +312,6 @@ class ZygoteConnection {
 
         /** from --setgroups */
         int[] gids;
-
-        /** from --peer-wait */
-        boolean peerWait;
 
         /**
          * From --enable-debugger, --enable-checkjni, --enable-assert,
@@ -437,8 +417,6 @@ class ZygoteConnection {
                     debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
                 } else if (arg.equals("--enable-assert")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
-                } else if (arg.equals("--peer-wait")) {
-                    peerWait = true;
                 } else if (arg.equals("--runtime-init")) {
                     runtimeInit = true;
                 } else if (arg.startsWith("--seinfo=")) {
@@ -897,23 +875,8 @@ class ZygoteConnection {
             FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
             throws ZygoteInit.MethodAndArgsCaller {
 
-        /*
-         * Close the socket, unless we're in "peer wait" mode, in which
-         * case it's used to track the liveness of this process.
-         */
-
-        if (parsedArgs.peerWait) {
-            try {
-                ZygoteInit.setCloseOnExec(mSocket.getFileDescriptor(), true);
-                sPeerWaitSocket = mSocket;
-            } catch (IOException ex) {
-                Log.e(TAG, "Zygote Child: error setting peer wait "
-                        + "socket to be close-on-exec", ex);
-            }
-        } else {
-            closeSocket();
-            ZygoteInit.closeServerSocket();
-        }
+        closeSocket();
+        ZygoteInit.closeServerSocket();
 
         if (descriptors != null) {
             try {
@@ -1044,18 +1007,6 @@ class ZygoteConnection {
             return true;
         }
 
-        /*
-         * If the peer wants to use the socket to wait on the
-         * newly spawned process, then we're all done.
-         */
-        if (parsedArgs.peerWait) {
-            try {
-                mSocket.close();
-            } catch (IOException ex) {
-                Log.e(TAG, "Zygote: error closing sockets", ex);
-            }
-            return true;
-        }
         return false;
     }
 
