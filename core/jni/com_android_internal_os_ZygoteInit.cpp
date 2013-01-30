@@ -163,32 +163,6 @@ static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
     }
 }
 
-static void com_android_internal_os_ZygoteInit_setCapabilities (JNIEnv *env,
-    jobject clazz, jlong permitted, jlong effective)
-{
-    struct __user_cap_header_struct capheader;
-    struct __user_cap_data_struct capdata;
-    int err;
-
-    memset (&capheader, 0, sizeof(capheader));
-    memset (&capdata, 0, sizeof(capdata));
-
-    capheader.version = _LINUX_CAPABILITY_VERSION;
-    capheader.pid = 0;
-
-    // As of this writing, capdata is __u32, but that's expected
-    // to change...
-    capdata.effective = effective;
-    capdata.permitted = permitted;
-
-    err = capset (&capheader, &capdata);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
-
 static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
     jobject clazz, jint pid)
 {
@@ -304,8 +278,6 @@ static JNINativeMethod gMethods[] = {
             (void *) com_android_internal_os_ZygoteInit_reopenStdio},
     { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V",
         (void *)  com_android_internal_os_ZygoteInit_setCloseOnExec},
-    { "setCapabilities", "(JJ)V",
-        (void *) com_android_internal_os_ZygoteInit_setCapabilities },
     { "capgetPermitted", "(I)J",
         (void *) com_android_internal_os_ZygoteInit_capgetPermitted },
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
