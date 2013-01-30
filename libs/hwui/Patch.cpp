@@ -122,8 +122,6 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     float rescaleX = 1.0f;
     float rescaleY = 1.0f;
 
-    const float meshWidth = right - left;
-
     if (xStretchCount > 0) {
         uint32_t stretchSize = 0;
         for (uint32_t i = 1; i < mXCount; i += 2) {

@@ -31,19 +31,23 @@ class DisplayListLogBuffer: public Singleton<DisplayListLogBuffer> {
     friend class Singleton<DisplayListLogBuffer>;
 
 public:
-    void writeCommand(int level, int op);
-    void writeInt(int value);
-    void outputCommands(FILE *file, const char* opNames[]);
+    void writeCommand(int level, const char* label);
+    void outputCommands(FILE *file);
 
     bool isEmpty() {
         return (mStart == mEnd);
     }
 
+    struct OpLog {
+        int level;
+        const char* label;
+    };
+
 private:
-    int *mBufferFirst; // where the memory starts
-    int* mStart;       // where the current command stream starts
-    int* mEnd;         // where the current commands end
-    int* mBufferLast;  // where the buffer memory ends
+    OpLog* mBufferFirst; // where the memory starts
+    OpLog* mStart;       // where the current command stream starts
+    OpLog* mEnd;         // where the current commands end
+    OpLog* mBufferLast;  // where the buffer memory ends
 
 };
 
