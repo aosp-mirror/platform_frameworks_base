@@ -400,10 +400,19 @@ private:
 
     /**
      * Tells the GPU what part of the screen is about to be redrawn.
+     * This method will use the clip rect that we started drawing the
+     * frame with.
      * This method needs to be invoked every time getTargetFbo() is
      * bound again.
      */
     void startTiling(const sp<Snapshot>& snapshot, bool opaque = false);
+
+    /**
+     * Tells the GPU what part of the screen is about to be redrawn.
+     * This method needs to be invoked every time getTargetFbo() is
+     * bound again.
+     */
+    void startTiling(const Rect& clip, int windowHeight, bool opaque = false);
 
     /**
      * Tells the GPU that we are done drawing the frame or that we

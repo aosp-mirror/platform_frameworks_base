@@ -169,8 +169,8 @@ status_t OpenGLRenderer::prepare(bool opaque) {
     return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
 }
 
-status_t OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom,
-        bool opaque) {
+status_t OpenGLRenderer::prepareDirty(float left, float top,
+        float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
@@ -207,7 +207,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
     if (mCaches.extensions.hasDiscardFramebuffer() &&
             left <= 0.0f && top <= 0.0f && right >= mWidth && bottom >= mHeight) {
         const GLenum attachments[] = { getTargetFbo() == 0 ? (const GLenum) GL_COLOR_EXT :
-                (const GLenum) GL_COLOR_ATTACHMENT0 };
+                (const GLenum) GL_COLOR_ATTACHMENT0, GL_STENCIL_EXT };
         glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
     }
 }
@@ -237,12 +237,18 @@ void OpenGLRenderer::syncState() {
 void OpenGLRenderer::startTiling(const sp<Snapshot>& s, bool opaque) {
     if (!mSuppressTiling) {
         Rect* clip = mTilingSnapshot->clipRect;
-        if (s->flags & Snapshot::kFlagIsFboLayer) {
-            clip = s->clipRect;
+        if (s->flags & Snapshot::kFlagFboTarget) {
+            clip = &s->layer->clipRect;
         }
 
-        mCaches.startTiling(clip->left, s->height - clip->bottom,
-                clip->right - clip->left, clip->bottom - clip->top, opaque);
+        startTiling(*clip, s->height, opaque);
+    }
+}
+
+void OpenGLRenderer::startTiling(const Rect& clip, int windowHeight, bool opaque) {
+    if (!mSuppressTiling) {
+        mCaches.startTiling(clip.left, windowHeight - clip.bottom,
+                    clip.right - clip.left, clip.bottom - clip.top, opaque);
     }
 }
 
@@ -782,18 +788,17 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
 }
 
 bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLuint previousFbo) {
+    layer->clipRect.set(clip);
     layer->setFbo(mCaches.fboCache.get());
 
     mSnapshot->region = &mSnapshot->layer->region;
-    mSnapshot->flags |= Snapshot::kFlagFboTarget;
-
-    mSnapshot->flags |= Snapshot::kFlagIsFboLayer;
+    mSnapshot->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer |
+            Snapshot::kFlagDirtyOrtho;
     mSnapshot->fbo = layer->getFbo();
     mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
     mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
     mSnapshot->height = bounds.getHeight();
-    mSnapshot->flags |= Snapshot::kFlagDirtyOrtho;
     mSnapshot->orthoMatrix.load(mOrthoMatrix);
 
     endTiling();
@@ -811,7 +816,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    startTiling(mSnapshot);
+    startTiling(mSnapshot, !layer->isBlend());
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mCaches.enableScissor();
@@ -1245,6 +1250,11 @@ void OpenGLRenderer::ensureStencilBuffer() {
 void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
     // The layer's FBO is already bound when we reach this stage
     if (!layer->getStencilRenderBuffer()) {
+        // GL_QCOM_tiled_rendering doesn't like it if a renderbuffer
+        // is attached after we initiated tiling. We must turn it off,
+        // attach the new render buffer then turn tiling back on
+        endTiling();
+
         // TODO: See Layer::removeFbo(). The stencil renderbuffer should be cached
         GLuint buffer;
         glGenRenderbuffers(1, &buffer);
@@ -1254,6 +1264,8 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
         layer->allocateStencilRenderBuffer();
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
+
+        startTiling(layer->clipRect, layer->layer.getHeight(), !layer->isBlend());
     }
 }
 

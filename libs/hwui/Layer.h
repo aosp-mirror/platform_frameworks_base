@@ -277,6 +277,10 @@ struct Layer {
      * Texture coordinates of the layer.
      */
     Rect texCoords;
+    /**
+     * Clipping rectangle.
+     */
+    Rect clipRect;
 
     /**
      * Dirty region indicating what parts of the layer
