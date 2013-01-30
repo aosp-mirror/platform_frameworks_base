@@ -9327,9 +9327,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_PREFERRED);
             } else if ("preferred-xml".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PREFERRED_XML);
-                opti++;
                 if (opti < args.length && "--full".equals(args[opti])) {
                     fullPreferred = true;
+                    opti++;
                 }
             } else if ("p".equals(cmd) || "packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
