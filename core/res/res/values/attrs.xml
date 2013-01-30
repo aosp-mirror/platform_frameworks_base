@@ -2107,8 +2107,8 @@
             <enum name="locale" value="3" />
         </attr>
 
-        <!-- Direction of the text. A heuristic is used to determine the resolved text direction
-             of paragraphs. -->
+        <!-- Defines the direction of the text. A heuristic is used to determine the resolved text
+              direction of paragraphs. -->
          <attr name="textDirection" format="integer">
             <!-- Default -->
             <enum name="inherit" value="0" />
@@ -2128,7 +2128,7 @@
             <enum name="locale" value="5" />
         </attr>
 
-        <!-- Alignment of the text. A heuristic is used to determine the resolved
+        <!-- Defines the alignment of the text. A heuristic is used to determine the resolved
             text alignment. -->
         <attr name="textAlignment" format="integer">
             <!-- Default -->
