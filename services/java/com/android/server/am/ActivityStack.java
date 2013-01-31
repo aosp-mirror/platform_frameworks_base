@@ -2483,7 +2483,7 @@ final class ActivityStack {
     final int startActivityLocked(IApplicationThread caller,
             Intent intent, String resolvedType, ActivityInfo aInfo, IBinder resultTo,
             String resultWho, int requestCode,
-            int callingPid, int callingUid, int startFlags, Bundle options,
+            int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
             boolean componentSpecified, ActivityRecord[] outActivity) {
 
         int err = ActivityManager.START_SUCCESS;
@@ -2620,7 +2620,7 @@ final class ActivityStack {
             }
         }
 
-        ActivityRecord r = new ActivityRecord(mService, this, callerApp, callingUid,
+        ActivityRecord r = new ActivityRecord(mService, this, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
         if (outActivity != null) {
@@ -3095,7 +3095,7 @@ final class ActivityStack {
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
-            Intent intent, String resolvedType, IBinder resultTo,
+            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
             Bundle options, int userId) {
@@ -3202,7 +3202,7 @@ final class ActivityStack {
             
             int res = startActivityLocked(caller, intent, resolvedType,
                     aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
-                    startFlags, options, componentSpecified, null);
+                    callingPackage, startFlags, options, componentSpecified, null);
             
             if (mConfigWillChange && mMainStack) {
                 // If the caller also wants to switch to a new configuration,
@@ -3253,7 +3253,7 @@ final class ActivityStack {
         }
     }
     
-    final int startActivities(IApplicationThread caller, int callingUid,
+    final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
             Bundle options, int userId) {
         if (intents == null) {
@@ -3316,7 +3316,7 @@ final class ActivityStack {
                         theseOptions = null;
                     }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
-                            aInfo, resultTo, null, -1, callingPid, callingUid,
+                            aInfo, resultTo, null, -1, callingPid, callingUid, callingPackage,
                             0, theseOptions, componentSpecified, outActivity);
                     if (res < 0) {
                         return res;

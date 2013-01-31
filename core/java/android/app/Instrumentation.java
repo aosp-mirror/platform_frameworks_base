@@ -1413,7 +1413,7 @@ public class Instrumentation {
             intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
             int result = ActivityManagerNative.getDefault()
-                .startActivity(whoThread, intent,
+                .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
                         requestCode, 0, null, null, options);
@@ -1471,15 +1471,16 @@ public class Instrumentation {
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
-                .startActivities(whoThread, intents, resolvedTypes, token, options,
-                        userId);
+                .startActivities(whoThread, who.getBasePackageName(), intents, resolvedTypes,
+                        token, options, userId);
             checkStartActivityResult(result, intents[0]);
         } catch (RemoteException e) {
         }
     }
 
     /**
-     * Like {@link #execStartActivity(Context, IBinder, IBinder, Activity, Intent, int)},
+     * Like {@link #execStartActivity(android.content.Context, android.os.IBinder,
+     * android.os.IBinder, Fragment, android.content.Intent, int, android.os.Bundle)},
      * but for calls from a {#link Fragment}.
      * 
      * @param who The Context from which the activity is being started.
@@ -1528,7 +1529,7 @@ public class Instrumentation {
             intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
             int result = ActivityManagerNative.getDefault()
-                .startActivity(whoThread, intent,
+                .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mWho : null,
                         requestCode, 0, null, null, options);
@@ -1588,7 +1589,7 @@ public class Instrumentation {
             intent.setAllowFds(false);
             intent.migrateExtraStreamToClipData();
             int result = ActivityManagerNative.getDefault()
-                .startActivityAsUser(whoThread, intent,
+                .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
                         requestCode, 0, null, null, options, user.getIdentifier());

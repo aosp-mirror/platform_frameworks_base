@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import com.android.internal.app.IAppOpsService;
 
 import java.util.ArrayList;
@@ -48,36 +49,81 @@ public class AppOpsManager {
     public static final int OP_WRITE_CALENDAR = 9;
     public static final int OP_WIFI_SCAN = 10;
     public static final int OP_POST_NOTIFICATION = 11;
+    public static final int OP_NEIGHBORING_CELLS = 12;
+    public static final int OP_CALL_PHONE = 13;
+    /** @hide */
+    public static final int _NUM_OP = 14;
 
+    /**
+     * This maps each operation to the operation that serves as the
+     * switch to determine whether it is allowed.  Generally this is
+     * a 1:1 mapping, but for some things (like location) that have
+     * multiple low-level operations being tracked that should be
+     * presented to hte user as one switch then this can be used to
+     * make them all controlled by the same single operation.
+     */
+    private static int[] sOpToSwitch = new int[] {
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_VIBRATE,
+            OP_READ_CONTACTS,
+            OP_WRITE_CONTACTS,
+            OP_READ_CALL_LOG,
+            OP_WRITE_CALL_LOG,
+            OP_READ_CALENDAR,
+            OP_WRITE_CALENDAR,
+            OP_COARSE_LOCATION,
+            OP_POST_NOTIFICATION,
+            OP_COARSE_LOCATION,
+            OP_CALL_PHONE,
+    };
+
+    /**
+     * This provides a simple name for each operation to be used
+     * in debug output.
+     */
     private static String[] sOpNames = new String[] {
-        "COARSE_LOCATION",
-        "FINE_LOCATION",
-        "GPS",
-        "VIBRATE",
-        "READ_CONTACTS",
-        "WRITE_CONTACTS",
-        "READ_CALL_LOG",
-        "WRITE_CALL_LOG",
-        "READ_CALENDAR",
-        "WRITE_CALENDAR",
-        "WIFI_SCAN",
-        "POST_NOTIFICATION",
+            "COARSE_LOCATION",
+            "FINE_LOCATION",
+            "GPS",
+            "VIBRATE",
+            "READ_CONTACTS",
+            "WRITE_CONTACTS",
+            "READ_CALL_LOG",
+            "WRITE_CALL_LOG",
+            "READ_CALENDAR",
+            "WRITE_CALENDAR",
+            "WIFI_SCAN",
+            "POST_NOTIFICATION",
+            "NEIGHBORING_CELLS",
+            "CALL_PHONE",
     };
 
+    /**
+     * This optionally maps a permission to an operation.  If there
+     * is no permission associated with an operation, it is null.
+     */
     private static String[] sOpPerms = new String[] {
-        android.Manifest.permission.ACCESS_COARSE_LOCATION,
-        android.Manifest.permission.ACCESS_FINE_LOCATION,
-        android.Manifest.permission.ACCESS_FINE_LOCATION,
-        android.Manifest.permission.VIBRATE,
-        android.Manifest.permission.READ_CONTACTS,
-        android.Manifest.permission.WRITE_CONTACTS,
-        android.Manifest.permission.READ_CALL_LOG,
-        android.Manifest.permission.WRITE_CALL_LOG,
-        android.Manifest.permission.READ_CALENDAR,
-        android.Manifest.permission.WRITE_CALENDAR,
-        android.Manifest.permission.ACCESS_WIFI_STATE,
-        null, // no permission required for notifications
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            null,
+            android.Manifest.permission.VIBRATE,
+            android.Manifest.permission.READ_CONTACTS,
+            android.Manifest.permission.WRITE_CONTACTS,
+            android.Manifest.permission.READ_CALL_LOG,
+            android.Manifest.permission.WRITE_CALL_LOG,
+            android.Manifest.permission.READ_CALENDAR,
+            android.Manifest.permission.WRITE_CALENDAR,
+            null, // no permission required for notifications
+            android.Manifest.permission.ACCESS_WIFI_STATE,
+            null, // neighboring cells shares the coarse location perm
+            android.Manifest.permission.CALL_PHONE,
     };
+
+    public static int opToSwitch(int op) {
+        return sOpToSwitch[op];
+    }
 
     public static String opToName(int op) {
         return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");

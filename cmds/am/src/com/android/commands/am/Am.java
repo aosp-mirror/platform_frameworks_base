@@ -488,11 +488,11 @@ public class Am {
             IActivityManager.WaitResult result = null;
             int res;
             if (mWaitOption) {
-                result = mAm.startActivityAndWait(null, intent, mimeType,
+                result = mAm.startActivityAndWait(null, null, intent, mimeType,
                             null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
                 res = result.result;
             } else {
-                res = mAm.startActivityAsUser(null, intent, mimeType,
+                res = mAm.startActivityAsUser(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
             }
             PrintStream out = mWaitOption ? System.out : System.err;

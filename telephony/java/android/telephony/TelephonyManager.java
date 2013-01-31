@@ -59,19 +59,19 @@ import java.util.regex.Pattern;
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
-    private static Context sContext;
     private static ITelephonyRegistry sRegistry;
+    private final Context mContext;
 
     /** @hide */
     public TelephonyManager(Context context) {
-        if (sContext == null) {
-            Context appContext = context.getApplicationContext();
-            if (appContext != null) {
-                sContext = appContext;
-            } else {
-                sContext = context;
-            }
+        Context appContext = context.getApplicationContext();
+        if (appContext != null) {
+            mContext = appContext;
+        } else {
+            mContext = context;
+        }
 
+        if (sRegistry == null) {
             sRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
         }
@@ -79,6 +79,7 @@ public class TelephonyManager {
 
     /** @hide */
     private TelephonyManager() {
+        mContext = null;
     }
 
     private static TelephonyManager sInstance = new TelephonyManager();
@@ -276,7 +277,7 @@ public class TelephonyManager {
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
         try {
-            return getITelephony().getNeighboringCellInfo();
+            return getITelephony().getNeighboringCellInfo(mContext.getBasePackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -361,7 +362,7 @@ public class TelephonyManager {
      * This function returns the type of the phone, depending
      * on the network mode.
      *
-     * @param network mode
+     * @param networkMode
      * @return Phone Type
      *
      * @hide
@@ -1199,7 +1200,7 @@ public class TelephonyManager {
      *               LISTEN_ flags.
      */
     public void listen(PhoneStateListener listener, int events) {
-        String pkgForDebug = sContext != null ? sContext.getPackageName() : "<unknown>";
+        String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         try {
             Boolean notifyNow = (getITelephony() != null);
             sRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
@@ -1277,8 +1278,8 @@ public class TelephonyManager {
      * @hide pending API review
      */
     public boolean isVoiceCapable() {
-        if (sContext == null) return true;
-        return sContext.getResources().getBoolean(
+        if (mContext == null) return true;
+        return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -1294,8 +1295,8 @@ public class TelephonyManager {
      * @hide pending API review
      */
     public boolean isSmsCapable() {
-        if (sContext == null) return true;
-        return sContext.getResources().getBoolean(
+        if (mContext == null) return true;
+        return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
     }
 

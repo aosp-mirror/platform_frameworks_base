@@ -828,7 +828,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
             mNotifManager.enqueueNotificationWithTag(
-                    packageName, tag, 0x0, builder.getNotification(), idReceived,
+                    packageName, packageName, tag, 0x0, builder.getNotification(), idReceived,
                     UserHandle.USER_OWNER);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
@@ -863,7 +863,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
-            mNotifManager.enqueueNotificationWithTag(packageName, tag,
+            mNotifManager.enqueueNotificationWithTag(packageName, packageName, tag,
                     0x0, builder.getNotification(), idReceived, UserHandle.USER_OWNER);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {

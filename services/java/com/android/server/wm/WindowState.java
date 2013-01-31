@@ -382,6 +382,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
+    public int getOwningUid() {
+        return mSession.mUid;
+    }
+
+    @Override
+    public String getOwningPackage() {
+        return mAttrs.packageName;
+    }
+
+    @Override
     public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
         mHaveFrame = true;
 

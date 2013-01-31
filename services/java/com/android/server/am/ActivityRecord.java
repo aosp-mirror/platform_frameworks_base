@@ -59,6 +59,7 @@ final class ActivityRecord {
     final IApplicationToken.Stub appToken; // window manager token
     final ActivityInfo info; // all about me
     final int launchedFromUid; // always the uid who started the activity.
+    final String launchedFromPackage; // always the package who started the activity.
     final int userId;          // Which user is this running for?
     final Intent intent;    // the original intent that generated us
     final ComponentName realActivity;  // the intent component, or target of an alias.
@@ -135,6 +136,7 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
+                pw.print(" launchedFromPackage="); pw.println(launchedFromPackage);
                 pw.print(" userId="); pw.println(userId);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.println(intent.toInsecureStringWithClip());
@@ -325,7 +327,7 @@ final class ActivityRecord {
     }
 
     ActivityRecord(ActivityManagerService _service, ActivityStack _stack, ProcessRecord _caller,
-            int _launchedFromUid, Intent _intent, String _resolvedType,
+            int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified) {
@@ -334,6 +336,7 @@ final class ActivityRecord {
         appToken = new Token(this);
         info = aInfo;
         launchedFromUid = _launchedFromUid;
+        launchedFromPackage = _launchedFromPackage;
         userId = UserHandle.getUserId(aInfo.applicationInfo.uid);
         intent = _intent;
         shortComponentName = _intent.getComponent().flattenToShortString();

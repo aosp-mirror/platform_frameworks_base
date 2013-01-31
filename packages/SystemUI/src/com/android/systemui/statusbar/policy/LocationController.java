@@ -120,7 +120,7 @@ public class LocationController extends BroadcastReceiver {
 
                 int[] idOut = new int[1];
                 mNotificationService.enqueueNotificationWithTag(
-                        mContext.getPackageName(),
+                        mContext.getPackageName(), mContext.getBasePackageName(),
                         null, 
                         GPS_NOTIFICATION_ID, 
                         n,

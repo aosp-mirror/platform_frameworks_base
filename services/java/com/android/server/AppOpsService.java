@@ -203,9 +203,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
-        uid = handleIncomingUid(uid);
+        verifyIncomingUid(uid);
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, true);
+            Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, true);
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
@@ -217,9 +217,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
-        uid = handleIncomingUid(uid);
+        verifyIncomingUid(uid);
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, false);
+            Op op = getOpLocked(AppOpsManager.opToSwitch(code), uid, packageName, false);
             if (op == null) {
                 return AppOpsManager.MODE_ALLOWED;
             }
@@ -229,24 +229,27 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int noteOperation(int code, int uid, String packageName) {
-        uid = handleIncomingUid(uid);
+        verifyIncomingUid(uid);
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, true);
-            if (op == null) {
+            Ops ops = getOpsLocked(uid, packageName, true);
+            if (ops == null) {
                 if (DEBUG) Log.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
                 return AppOpsManager.MODE_IGNORED;
             }
+            Op op = getOpLocked(ops, code, true);
             if (op.duration == -1) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName
                         + " code " + code + " time=" + op.time + " duration=" + op.duration);
             }
             op.duration = 0;
-            if (op.mode != AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code " + code
-                        + " uid " + uid + " package " + packageName);
+            final int switchCode = AppOpsManager.opToSwitch(code);
+            final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
+            if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code "
+                        + switchCode + " (" + code + ") uid " + uid + " package " + packageName);
                 op.rejectTime = System.currentTimeMillis();
-                return op.mode;
+                return switchOp.mode;
             }
             if (DEBUG) Log.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
@@ -257,19 +260,22 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int startOperation(int code, int uid, String packageName) {
-        uid = handleIncomingUid(uid);
+        verifyIncomingUid(uid);
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, true);
-            if (op == null) {
+            Ops ops = getOpsLocked(uid, packageName, true);
+            if (ops == null) {
                 if (DEBUG) Log.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
                 return AppOpsManager.MODE_IGNORED;
             }
-            if (op.mode != AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG) Log.d(TAG, "startOperation: reject #" + op.mode + " for code " + code
-                        + " uid " + uid + " package " + packageName);
+            Op op = getOpLocked(ops, code, true);
+            final int switchCode = AppOpsManager.opToSwitch(code);
+            final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
+            if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                if (DEBUG) Log.d(TAG, "startOperation: reject #" + op.mode + " for code "
+                        + switchCode + " (" + code + ") uid " + uid + " package " + packageName);
                 op.rejectTime = System.currentTimeMillis();
-                return op.mode;
+                return switchOp.mode;
             }
             if (DEBUG) Log.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
@@ -284,7 +290,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void finishOperation(int code, int uid, String packageName) {
-        uid = handleIncomingUid(uid);
+        verifyIncomingUid(uid);
         synchronized (this) {
             Op op = getOpLocked(code, uid, packageName, true);
             if (op == null) {
@@ -305,16 +311,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private int handleIncomingUid(int uid) {
+    private void verifyIncomingUid(int uid) {
         if (uid == Binder.getCallingUid()) {
-            return uid;
+            return;
         }
         if (Binder.getCallingPid() == Process.myPid()) {
-            return uid;
+            return;
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
-        return uid;
     }
 
     private Ops getOpsLocked(int uid, String packageName, boolean edit) {
@@ -377,6 +382,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (ops == null) {
             return null;
         }
+        return getOpLocked(ops, code, edit);
+    }
+
+    private Op getOpLocked(Ops ops, int code, boolean edit) {
         Op op = ops.get(code);
         if (op == null) {
             if (!edit) {

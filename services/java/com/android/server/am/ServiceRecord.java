@@ -369,8 +369,9 @@ class ServiceRecord extends Binder {
                     }
                     try {
                         int[] outId = new int[1];
-                        nm.enqueueNotificationInternal(localPackageName, appUid, appPid,
-                                null, localForegroundId, localForegroundNoti, outId, userId);
+                        nm.enqueueNotificationInternal(localPackageName, localPackageName,
+                                appUid, appPid, null, localForegroundId, localForegroundNoti,
+                                outId, userId);
                     } catch (RuntimeException e) {
                         Slog.w(ActivityManagerService.TAG,
                                 "Error showing notification for service", e);

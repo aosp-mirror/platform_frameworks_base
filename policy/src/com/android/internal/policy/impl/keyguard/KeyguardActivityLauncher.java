@@ -219,6 +219,7 @@ public abstract class KeyguardActivityLauncher {
                 try {
                     WaitResult result = ActivityManagerNative.getDefault().startActivityAndWait(
                             null /*caller*/,
+                            null /*caller pkg*/,
                             intent,
                             intent.resolveTypeIfNeeded(getContext().getContentResolver()),
                             null /*resultTo*/,

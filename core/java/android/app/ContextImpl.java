@@ -963,7 +963,7 @@ class ContextImpl extends Context {
     public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
         try {
             ActivityManagerNative.getDefault().startActivityAsUser(
-                mMainThread.getApplicationThread(), intent,
+                mMainThread.getApplicationThread(), getBasePackageName(), intent,
                 intent.resolveTypeIfNeeded(getContentResolver()),
                 null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, options,
                 user.getIdentifier());

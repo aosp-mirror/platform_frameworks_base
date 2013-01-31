@@ -135,6 +135,16 @@ public interface WindowManagerPolicy {
      */
     public interface WindowState {
         /**
+         * Return the uid of the app that owns this window.
+         */
+        int getOwningUid();
+
+        /**
+         * Return the package name of the app that owns this window.
+         */
+        String getOwningPackage();
+
+        /**
          * Perform standard frame computation.  The result can be obtained with
          * getFrame() if so desired.  Must be called with the window manager
          * lock held.

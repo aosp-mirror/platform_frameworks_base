@@ -278,6 +278,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final class NotificationRecord
     {
         final String pkg;
+        final String basePkg;
         final String tag;
         final int id;
         final int uid;
@@ -287,10 +288,11 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int score;
         IBinder statusBarKey;
 
-        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid,
+        NotificationRecord(String pkg, String basePkg, String tag, int id, int uid, int initialPid,
                 int userId, int score, Notification notification)
         {
             this.pkg = pkg;
+            this.basePkg = basePkg;
             this.tag = tag;
             this.id = id;
             this.uid = uid;
@@ -880,10 +882,10 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // Notifications
     // ============================================================================
-    public void enqueueNotificationWithTag(String pkg, String tag, int id, Notification notification,
-            int[] idOut, int userId)
+    public void enqueueNotificationWithTag(String pkg, String basePkg, String tag, int id,
+            Notification notification, int[] idOut, int userId)
     {
-        enqueueNotificationInternal(pkg, Binder.getCallingUid(), Binder.getCallingPid(),
+        enqueueNotificationInternal(pkg, basePkg, Binder.getCallingUid(), Binder.getCallingPid(),
                 tag, id, notification, idOut, userId);
     }
     
@@ -893,8 +895,8 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // Not exposed via Binder; for system use only (otherwise malicious apps could spoof the
     // uid/pid of another application)
-    public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
-            String tag, int id, Notification notification, int[] idOut, int userId)
+    public void enqueueNotificationInternal(String pkg, String basePkg, int callingUid,
+            int callingPid, String tag, int id, Notification notification, int[] idOut, int userId)
     {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id + " notification=" + notification);
@@ -984,7 +986,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD);
 
         synchronized (mNotificationList) {
-            NotificationRecord r = new NotificationRecord(pkg, tag, id, 
+            NotificationRecord r = new NotificationRecord(pkg, basePkg, tag, id,
                     callingUid, callingPid, userId,
                     score,
                     notification);
@@ -1141,15 +1143,16 @@ public class NotificationManagerService extends INotificationManager.Stub
                         // does not have the VIBRATE permission.
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            mVibrator.vibrate(useDefaultVibrate ? mDefaultVibrationPattern
-                                                                : mFallbackVibrationPattern,
+                            mVibrator.vibrate(r.uid, r.basePkg,
+                                useDefaultVibrate ? mDefaultVibrationPattern
+                                    : mFallbackVibrationPattern,
                                 ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
                     } else if (notification.vibrate.length > 1) {
                         // If you want your own vibration pattern, you need the VIBRATE permission
-                        mVibrator.vibrate(notification.vibrate,
+                        mVibrator.vibrate(r.uid, r.basePkg, notification.vibrate,
                             ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                     }
                 }

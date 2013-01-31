@@ -178,12 +178,23 @@ public class VibratorService extends IVibratorService.Stub
         return doVibratorExists();
     }
 
-    public void vibrate(String packageName, long milliseconds, IBinder token) {
+    private void verifyIncomingUid(int uid) {
+        if (uid == Binder.getCallingUid()) {
+            return;
+        }
+        if (Binder.getCallingPid() == Process.myPid()) {
+            return;
+        }
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+    }
+
+    public void vibrate(int uid, String packageName, long milliseconds, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
-        int uid = Binder.getCallingUid();
+        verifyIncomingUid(uid);
         // We're running in the system server so we cannot crash. Check for a
         // timeout of 0 or negative. This will ensure that a vibration has
         // either a timeout of > 0 or a non-null pattern.
@@ -219,12 +230,13 @@ public class VibratorService extends IVibratorService.Stub
         return true;
     }
 
-    public void vibratePattern(String packageName, long[] pattern, int repeat, IBinder token) {
+    public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
+            IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
-        int uid = Binder.getCallingUid();
+        verifyIncomingUid(uid);
         // so wakelock calls will succeed
         long identity = Binder.clearCallingIdentity();
         try {
@@ -454,7 +466,7 @@ public class VibratorService extends IVibratorService.Stub
         //synchronized (mInputDeviceVibrators) {
         //    return !mInputDeviceVibrators.isEmpty() || vibratorExists();
         //}
-        return vibratorExists();
+        return true || vibratorExists();
     }
 
     private void doVibratorOn(long millis, int uid) {

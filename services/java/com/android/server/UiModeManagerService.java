@@ -494,7 +494,7 @@ final class UiModeManagerService extends IUiModeManager.Stub {
             if (Sandman.shouldStartDockApp(mContext, homeIntent)) {
                 try {
                     int result = ActivityManagerNative.getDefault().startActivityWithConfig(
-                            null, homeIntent, null, null, null, 0, 0,
+                            null, null, homeIntent, null, null, null, 0, 0,
                             mConfiguration, null, UserHandle.USER_CURRENT);
                     if (result >= ActivityManager.START_SUCCESS) {
                         dockAppStarted = true;
