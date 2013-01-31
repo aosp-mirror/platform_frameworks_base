@@ -3351,6 +3351,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Deprecated
         public static final String TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES =
             "touch_exploration_granted_accessibility_services";
 
