@@ -290,6 +290,10 @@ public class AudioRecord
             mChannelCount = 2;
             mChannels = AudioFormat.CHANNEL_IN_STEREO;
             break;
+        case (AudioFormat.CHANNEL_IN_FRONT | AudioFormat.CHANNEL_IN_BACK):
+            mChannelCount = 2;
+            mChannels = channelConfig;
+            break;
         default:
             mChannelCount = 0;
             mChannels = AudioFormat.CHANNEL_INVALID;
@@ -464,6 +468,7 @@ public class AudioRecord
             break;
         case AudioFormat.CHANNEL_IN_STEREO:
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
+        case (AudioFormat.CHANNEL_IN_FRONT | AudioFormat.CHANNEL_IN_BACK):
             channelCount = 2;
             break;
         case AudioFormat.CHANNEL_INVALID:
