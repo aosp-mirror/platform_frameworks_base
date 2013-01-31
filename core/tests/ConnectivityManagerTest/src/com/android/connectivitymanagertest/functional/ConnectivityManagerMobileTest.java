@@ -126,7 +126,7 @@ public class ConnectivityManagerMobileTest extends
         cmActivity.disableWifi();
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                State.DISCONNECTED,  ConnectivityManagerTestActivity.LONG_TIMEOUT));
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
                 State.CONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
         // Wait for 10 seconds for broadcasts to be sent out
@@ -184,7 +184,7 @@ public class ConnectivityManagerMobileTest extends
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
         log("wifi state is enabled");
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
         if (!mWifiOnlyFlag) {
             assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
                     State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
@@ -217,7 +217,7 @@ public class ConnectivityManagerMobileTest extends
         assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
 
         sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         // Disable Wifi
@@ -257,7 +257,7 @@ public class ConnectivityManagerMobileTest extends
 
         // Wait for Wifi to be connected and mobile to be disconnected
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
         if (!mWifiOnlyFlag) {
             assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
                     State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
@@ -279,10 +279,10 @@ public class ConnectivityManagerMobileTest extends
 
         // connect to Wifi
         assertTrue("failed to connect to " + mTestAccessPoint,
-                   cmActivity.connectToWifi(mTestAccessPoint));
+                cmActivity.connectToWifi(mTestAccessPoint));
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-            ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
 
         // Wait for a few seconds to avoid the state that both Mobile and Wifi is connected
         sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
@@ -418,9 +418,9 @@ public class ConnectivityManagerMobileTest extends
 
         // Connect to Wifi
         assertTrue("failed to connect to " + mTestAccessPoint,
-                   cmActivity.connectToWifi(mTestAccessPoint));
+                cmActivity.connectToWifi(mTestAccessPoint));
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
 
         // validate state and broadcast
         if (!cmActivity.validateNetworkStates(ConnectivityManager.TYPE_WIFI)) {
@@ -454,7 +454,7 @@ public class ConnectivityManagerMobileTest extends
                 cmActivity.connectToWifi(mTestAccessPoint));
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
 
         try {
             Thread.sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT);
@@ -484,7 +484,7 @@ public class ConnectivityManagerMobileTest extends
         cmActivity.setAirplaneMode(getInstrumentation().getContext(), false);
 
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
         if (!mWifiOnlyFlag) {
             assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
                     State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
@@ -505,11 +505,11 @@ public class ConnectivityManagerMobileTest extends
         assertNotNull("SSID is null", mTestAccessPoint);
         //Connect to mTestAccessPoint
         assertTrue("failed to connect to " + mTestAccessPoint,
-                   cmActivity.connectToWifi(mTestAccessPoint));
+                cmActivity.connectToWifi(mTestAccessPoint));
         assertTrue(cmActivity.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
         assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                            ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
         assertNotNull("Not associated with any AP",
                       cmActivity.mWifiManager.getConnectionInfo().getBSSID());
 
