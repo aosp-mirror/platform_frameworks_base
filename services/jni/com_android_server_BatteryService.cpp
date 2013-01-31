@@ -215,7 +215,8 @@ static PowerSupplyType readPowerSupplyType(const String8& path) {
         buf[length - 1] = 0;
     if (strcmp(buf, "Battery") == 0)
         return ANDROID_POWER_SUPPLY_TYPE_BATTERY;
-    else if (strcmp(buf, "Mains") == 0)
+    else if (strcmp(buf, "Mains") == 0 || strcmp(buf, "USB_DCP") == 0 ||
+             strcmp(buf, "USB_CDP") == 0 || strcmp(buf, "USB_ACA") == 0)
         return ANDROID_POWER_SUPPLY_TYPE_AC;
     else if (strcmp(buf, "USB") == 0)
         return ANDROID_POWER_SUPPLY_TYPE_USB;
