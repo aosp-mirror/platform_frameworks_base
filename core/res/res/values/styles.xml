@@ -370,6 +370,7 @@ please see styles_device_defaults.xml.
         <item name="android:maxWidth">48dip</item>
         <item name="android:minHeight">48dip</item>
         <item name="android:maxHeight">48dip</item>
+        <item name="android:mirrorForRtl">false</item>
     </style>
 
     <style name="Widget.ProgressBar.Large">
@@ -410,6 +411,7 @@ please see styles_device_defaults.xml.
         <item name="android:indeterminateDrawable">@android:drawable/progress_indeterminate_horizontal</item>
         <item name="android:minHeight">20dip</item>
         <item name="android:maxHeight">20dip</item>
+        <item name="android:mirrorForRtl">true</item>
     </style>
 
     <style name="Widget.SeekBar">
@@ -421,6 +423,7 @@ please see styles_device_defaults.xml.
         <item name="android:thumb">@android:drawable/seek_thumb</item>
         <item name="android:thumbOffset">8dip</item>
         <item name="android:focusable">true</item>
+        <item name="android:mirrorForRtl">true</item>
     </style>
 
     <style name="Widget.RatingBar">
@@ -430,6 +433,7 @@ please see styles_device_defaults.xml.
         <item name="android:minHeight">57dip</item>
         <item name="android:maxHeight">57dip</item>
         <item name="android:thumb">@null</item>
+        <item name="android:mirrorForRtl">true</item>
     </style>
 
     <style name="Widget.RatingBar.Indicator">
@@ -1745,6 +1749,7 @@ please see styles_device_defaults.xml.
         <item name="android:focusable">true</item>
         <item name="android:paddingStart">16dip</item>
         <item name="android:paddingEnd">16dip</item>
+        <item name="android:mirrorForRtl">true</item>
     </style>
 
     <style name="Widget.Holo.RatingBar" parent="Widget.RatingBar">
