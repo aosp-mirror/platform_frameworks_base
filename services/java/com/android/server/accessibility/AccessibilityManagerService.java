@@ -2225,7 +2225,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             | AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT
             | AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT
             | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-            | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+            | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+            | AccessibilityNodeInfo.ACTION_COPY
+            | AccessibilityNodeInfo.ACTION_PASTE
+            | AccessibilityNodeInfo.ACTION_CUT
+            | AccessibilityNodeInfo.ACTION_SET_SELECTION;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
             AccessibilityEvent.TYPE_VIEW_CLICKED

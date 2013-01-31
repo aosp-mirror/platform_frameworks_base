@@ -131,15 +131,21 @@ public class AccessibilityNodeInfo implements Parcelable {
      * at a given movement granularity. For example, move to the next character,
      * word, etc.
      * <p>
-     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT}<br>
-     * <strong>Example:</strong>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT}<,
+     * {@link #ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN}<br>
+     * <strong>Example:</strong> Move to the previous character and do not extend selection.
      * <code><pre><p>
      *   Bundle arguments = new Bundle();
      *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
      *           AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER);
+     *   arguments.putBoolean(AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN,
+     *           false);
      *   info.performAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY, arguments);
      * </code></pre></p>
      * </p>
+     *
+     * @see #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+     * @see #ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
      *
      * @see #setMovementGranularities(int)
      * @see #getMovementGranularities()
@@ -157,16 +163,22 @@ public class AccessibilityNodeInfo implements Parcelable {
      * at a given movement granularity. For example, move to the next character,
      * word, etc.
      * <p>
-     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT}<br>
-     * <strong>Example:</strong>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT}<,
+     * {@link #ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN}<br>
+     * <strong>Example:</strong> Move to the next character and do not extend selection.
      * <code><pre><p>
      *   Bundle arguments = new Bundle();
      *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
      *           AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER);
+     *   arguments.putBoolean(AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN,
+     *           false);
      *   info.performAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
      *           arguments);
      * </code></pre></p>
      * </p>
+     *
+     * @see #ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT
+     * @see #ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN
      *
      * @see #setMovementGranularities(int)
      * @see #getMovementGranularities()
@@ -220,15 +232,53 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_SCROLL_BACKWARD = 0x00002000;
 
     /**
+     * Action to copy the current selection to the clipboard.
+     */
+    public static final int ACTION_COPY = 0x00004000;
+
+    /**
+     * Action to paste the current clipboard content.
+     */
+    public static final int ACTION_PASTE = 0x00008000;
+
+    /**
+     * Action to cut the current selection and place it to the clipboard.
+     */
+    public static final int ACTION_CUT = 0x00010000;
+
+    /**
+     * Action to set the selection. Performing this action with no arguments
+     * clears the selection.
+     * <p>
+     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_SELECTION_START_INT},
+     * {@link #ACTION_ARGUMENT_SELECTION_END_INT}<br>
+     * <strong>Example:</strong>
+     * <code><pre><p>
+     *   Bundle arguments = new Bundle();
+     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, 1);
+     *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, 2);
+     *   info.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+     * </code></pre></p>
+     * </p>
+     *
+     * @see #ACTION_ARGUMENT_SELECTION_START_INT
+     * @see #ACTION_ARGUMENT_SELECTION_END_INT
+     */
+    public static final int ACTION_SET_SELECTION = 0x00020000;
+
+    /**
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
      * <strong>Actions:</strong> {@link #ACTION_NEXT_AT_MOVEMENT_GRANULARITY},
      * {@link #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}
      * </p>
+     *
+     * @see #ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+     * @see #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
      */
     public static final String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT =
-        "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
+            "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
 
     /**
      * Argument for which HTML element to get moving to the next/previous HTML element.
@@ -237,9 +287,51 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <strong>Actions:</strong> {@link #ACTION_NEXT_HTML_ELEMENT},
      *         {@link #ACTION_PREVIOUS_HTML_ELEMENT}
      * </p>
+     *
+     * @see #ACTION_NEXT_HTML_ELEMENT
+     * @see #ACTION_PREVIOUS_HTML_ELEMENT
      */
     public static final String ACTION_ARGUMENT_HTML_ELEMENT_STRING =
-        "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
+            "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
+
+    /**
+     * Argument for whether when moving at granularity to extend the selection
+     * or to move it otherwise.
+     * <p>
+     * <strong>Type:</strong> boolean<br>
+     * <strong>Actions:</strong> {@link #ACTION_NEXT_AT_MOVEMENT_GRANULARITY},
+     * {@link #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}
+     * </p>
+     *
+     * @see #ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+     * @see #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
+     */
+    public static final String ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN =
+            "ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN";
+
+    /**
+     * Argument for specifying the selection start.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong> {@link #ACTION_SET_SELECTION}
+     * </p>
+     *
+     * @see #ACTION_SET_SELECTION
+     */
+    public static final String ACTION_ARGUMENT_SELECTION_START_INT =
+            "ACTION_ARGUMENT_SELECTION_START_INT";
+
+    /**
+     * Argument for specifying the selection end.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong> {@link #ACTION_SET_SELECTION}
+     * </p>
+     *
+     * @see #ACTION_SET_SELECTION
+     */
+    public static final String ACTION_ARGUMENT_SELECTION_END_INT =
+            "ACTION_ARGUMENT_SELECTION_END_INT";
 
     /**
      * The input focus.
