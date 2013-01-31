@@ -118,7 +118,7 @@ public class WifiConnectionTest
 
         // step 2: verify Wifi state and network state;
         assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, 6 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                State.CONNECTED, ConnectivityManagerTestActivity.WIFI_CONNECTION_TIMEOUT));
 
         // step 3: verify the current connected network is the given SSID
         assertNotNull("Wifi connection returns null", mAct.mWifiManager.getConnectionInfo());
