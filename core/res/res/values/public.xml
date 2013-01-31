@@ -2034,5 +2034,6 @@
   <eat-comment />
 
   <public type="attr" name="mipMap" id="0x010103cd" />
+  <public type="attr" name="mirrorForRtl" id="0x010103ce" />
 
 </resources>

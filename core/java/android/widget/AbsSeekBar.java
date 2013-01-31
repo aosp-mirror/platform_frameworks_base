@@ -305,7 +305,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         
         // Canvas will be translated, so 0,0 is where we start drawing
-        final int left = isLayoutRtl() ? available - thumbPos : thumbPos;
+        final int left = (isLayoutRtl() && mMirrorForRtl) ? available - thumbPos : thumbPos;
         thumb.setBounds(left, topBound, left + thumbWidth, bottomBound);
     }
 
@@ -426,7 +426,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         int x = (int)event.getX();
         float scale;
         float progress = 0;
-        if (isLayoutRtl()) {
+        if (isLayoutRtl() && mMirrorForRtl) {
             if (x > width - mPaddingRight) {
                 scale = 0.0f;
             } else if (x < mPaddingLeft) {
