@@ -7985,6 +7985,80 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
         }
+        if (isFocused()) {
+            if (canSelectText()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+            }
+            if (canCopy()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_COPY);
+            }
+            if (canPaste()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_PASTE);
+            }
+            if (canCut()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_CUT);
+            }
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_COPY: {
+                if (isFocused() && canCopy()) {
+                    if (onTextContextMenuItem(ID_COPY)) {
+                        notifyAccessibilityStateChanged();
+                        return true;
+                    }
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_PASTE: {
+                if (isFocused() && canPaste()) {
+                    if (onTextContextMenuItem(ID_PASTE)) {
+                        notifyAccessibilityStateChanged();
+                        return true;
+                    }
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_CUT: {
+                if (isFocused() && canCut()) {
+                    if (onTextContextMenuItem(ID_CUT)) {
+                        notifyAccessibilityStateChanged();
+                        return true;
+                    }
+                }
+            } return false;
+            case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
+                if (isFocused() && canSelectText()) {
+                    final int start = (arguments != null) ? arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
+                    final int end = (arguments != null) ? arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
+                    CharSequence text = getIterableTextForAccessibility();
+                    if (text == null) {
+                        return false;
+                    }
+                    // No arguments clears the selection.
+                    if (start == end && end == -1) {
+                        Selection.removeSelection((Spannable) text);
+                        notifyAccessibilityStateChanged();
+                        return true;
+                    }
+                    if (start >= 0 && start <= end && end <= text.length()) {
+                        Selection.setSelection((Spannable) text, start, end);
+                        // Make sure selection mode is engaged.
+                        if (mEditor != null) {
+                            mEditor.startSelectionActionMode();
+                        }
+                        notifyAccessibilityStateChanged();
+                        return true;
+                    }
+                }
+            } return false;
+            default: {
+                return super.performAccessibilityAction(action, arguments);
+            }
+        }
     }
 
     @Override
@@ -8554,32 +8628,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     @Override
-    public int getAccessibilityCursorPosition() {
+    public int getAccessibilitySelectionStart() {
         if (TextUtils.isEmpty(getContentDescription())) {
-            final int selectionEnd = getSelectionEnd();
-            if (selectionEnd >= 0) {
-                return selectionEnd;
+            final int selectionStart = getSelectionStart();
+            if (selectionStart >= 0) {
+                return selectionStart;
             }
         }
-        return super.getAccessibilityCursorPosition();
+        return ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isAccessibilitySelectionExtendable() {
+        return true;
     }
 
     /**
      * @hide
      */
     @Override
-    public void setAccessibilityCursorPosition(int index) {
-        if (getAccessibilityCursorPosition() == index) {
+    public int getAccessibilitySelectionEnd() {
+        if (TextUtils.isEmpty(getContentDescription())) {
+            final int selectionEnd = getSelectionEnd();
+            if (selectionEnd >= 0) {
+                return selectionEnd;
+            }
+        }
+        return ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setAccessibilitySelection(int start, int end) {
+        if (getAccessibilitySelectionStart() == start
+                && getAccessibilitySelectionEnd() == end) {
             return;
         }
-        if (TextUtils.isEmpty(getContentDescription())) {
-            if (index >= 0 && index <= mText.length()) {
-                Selection.setSelection((Spannable) mText, index);
-            } else {
-                Selection.removeSelection((Spannable) mText);
-            }
+        CharSequence text = getIterableTextForAccessibility();
+        if (start >= 0 && start <= end && end <= text.length()) {
+            Selection.setSelection((Spannable) text, start, end);
         } else {
-            super.setAccessibilityCursorPosition(index);
+            Selection.removeSelection((Spannable) text);
         }
     }
 

@@ -26345,21 +26345,28 @@ package android.view.accessibility {
     method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_ACCESSIBILITY_FOCUS = 64; // 0x40
+    field public static final java.lang.String ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN = "ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN";
     field public static final java.lang.String ACTION_ARGUMENT_HTML_ELEMENT_STRING = "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
     field public static final java.lang.String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT = "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
+    field public static final java.lang.String ACTION_ARGUMENT_SELECTION_END_INT = "ACTION_ARGUMENT_SELECTION_END_INT";
+    field public static final java.lang.String ACTION_ARGUMENT_SELECTION_START_INT = "ACTION_ARGUMENT_SELECTION_START_INT";
     field public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 128; // 0x80
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
     field public static final int ACTION_CLICK = 16; // 0x10
+    field public static final int ACTION_COPY = 16384; // 0x4000
+    field public static final int ACTION_CUT = 65536; // 0x10000
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_LONG_CLICK = 32; // 0x20
     field public static final int ACTION_NEXT_AT_MOVEMENT_GRANULARITY = 256; // 0x100
     field public static final int ACTION_NEXT_HTML_ELEMENT = 1024; // 0x400
+    field public static final int ACTION_PASTE = 32768; // 0x8000
     field public static final int ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY = 512; // 0x200
     field public static final int ACTION_PREVIOUS_HTML_ELEMENT = 2048; // 0x800
     field public static final int ACTION_SCROLL_BACKWARD = 8192; // 0x2000
     field public static final int ACTION_SCROLL_FORWARD = 4096; // 0x1000
     field public static final int ACTION_SELECT = 4; // 0x4
+    field public static final int ACTION_SET_SELECTION = 131072; // 0x20000
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
