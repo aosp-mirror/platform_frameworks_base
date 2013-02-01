@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
@@ -32,7 +31,6 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -88,7 +86,6 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -3336,7 +3333,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     @Override
     public boolean updateLockdownVpn() {
-        enforceSystemUid();
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            Slog.w(TAG, "Lockdown VPN only available to AID_SYSTEM");
+            return false;
+        }
 
         // Tear down existing lockdown if profile was removed
         mLockdownEnabled = LockdownVpnTracker.isEnabled();
@@ -3385,13 +3385,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void throwIfLockdownEnabled() {
         if (mLockdownEnabled) {
             throw new IllegalStateException("Unavailable in lockdown mode");
-        }
-    }
-
-    private static void enforceSystemUid() {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID) {
-            throw new SecurityException("Only available to AID_SYSTEM");
         }
     }
 }
