@@ -225,6 +225,10 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accéder à la  mémoire de stockage USB"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accéder à la carte SD"</string>
+    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barre d\'état"</string>
@@ -344,6 +348,14 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un mode de saisie. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"associer à un service d\'accessibilité"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'accessibilité. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
+    <skip />
+    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associer à un service de texte"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet à l\'application de s\'associer à l\'interface de haut niveau d\'un service de texte (par exemple, SpellCheckerService). Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associer à un service VPN"</string>
