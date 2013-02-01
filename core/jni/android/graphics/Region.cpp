@@ -255,7 +255,7 @@ static JNINativeMethod gRegionMethods[] = {
     // these are static methods
     { "nativeConstructor",      "()I",                              (void*)Region_constructor       },
     { "nativeDestructor",       "(I)V",                             (void*)Region_destructor        },
-    { "nativeSetRegion",        "(II)Z",                            (void*)Region_setRegion         },
+    { "nativeSetRegion",        "(II)V",                            (void*)Region_setRegion         },
     { "nativeSetRect",          "(IIIII)Z",                         (void*)Region_setRect           },
     { "nativeSetPath",          "(III)Z",                           (void*)Region_setPath           },
     { "nativeGetBounds",        "(ILandroid/graphics/Rect;)Z",      (void*)Region_getBounds         },
