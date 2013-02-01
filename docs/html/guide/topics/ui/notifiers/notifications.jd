@@ -569,7 +569,7 @@ numMessages = 0;
                     For this element, set
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
                     Set
-<code><a href="{@docRoot}/guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>
                     where <code>&lt;parent_activity_name&gt;</code> is the value of
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
                     for the parent

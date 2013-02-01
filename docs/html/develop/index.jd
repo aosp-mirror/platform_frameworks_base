@@ -70,7 +70,7 @@ src="//lh4.ggpht.com/-6K1kfNOdek8/T72bXvtTSQI/AAAAAAAABmw/kYzmJt0_328/s1600/goog
                    <h2>In-app Subscriptions with Trials</h2>
                    <p>You can now set up a <strong>free trial period</strong> for any Google Play in-app subscription, making it easy for users try your subscriber content before automatically converting to a full subscription. Free trials give you a new way to bring users into your products and engage them effectively. </p>
                    <p><a class="button"
-href="{@docRoot}google/play/billing/billing_subscriptions.html#trials">Read
+href="{@docRoot}google/play/billing/v2/billing_subscriptions.html#trials">Read
 more</a></p>
                    </div>                
                 </li>

@@ -67,7 +67,7 @@ included in that license.</li>
 style="margin:0;padding:0 2px;vertical-align:baseline" /> stylized typeface logo) are not included
 in the license.
 Please see <a
-href="http://www.android.com/developers/branding.html">Android Branding Guidelines</a> for
+href="{@docRoot}distribute/googleplay/promote/brand.html">Brand Guidelines</a> for
 information about this usage. </li>
 
 <li>In some cases, a page may include content, such as an image, that is not 
