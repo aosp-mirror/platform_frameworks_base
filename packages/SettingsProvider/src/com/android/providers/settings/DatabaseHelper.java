@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 96;
+    private static final int DATABASE_VERSION = 97;
 
     private Context mContext;
     private int mUserHandle;
@@ -1534,6 +1534,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 96;
+        }
+
+        if (upgradeVersion == 96) {
+            // Remove Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                try {
+                    db.execSQL("DELETE FROM system WHERE name='"
+                            + Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES
+                            + "'");
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+            upgradeVersion = 97;
         }
 
         // *** Remember to update DATABASE_VERSION above!

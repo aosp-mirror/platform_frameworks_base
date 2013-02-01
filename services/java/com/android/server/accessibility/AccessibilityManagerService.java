@@ -23,15 +23,12 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -70,7 +67,6 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
@@ -161,8 +157,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private Service mQueryBridge;
 
-    private AlertDialog mEnableTouchExplorationDialog;
-
     private AccessibilityInputFilter mInputFilter;
 
     private boolean mHasInputFilter;
@@ -249,12 +243,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                             // Update the enabled services setting.
                             persistComponentNamesToSettingLocked(
                                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                    state.mEnabledServices, userId);
-                            // Update the touch exploration granted services setting.
-                            state.mTouchExplorationGrantedServices.remove(comp);
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.
-                                    TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                                     state.mEnabledServices, userId);
                             return;
                         }
@@ -570,8 +558,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mIsDisplayMagnificationEnabled = false;
             userState.mEnabledServices.clear();
             userState.mEnabledServices.add(service);
-            userState.mTouchExplorationGrantedServices.clear();
-            userState.mTouchExplorationGrantedServices.add(service);
             // Update the internal state.
             performServiceManagementLocked(userState);
             scheduleUpdateInputFilter(userState);
@@ -843,12 +829,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 userState.mUserId,
                 userState.mEnabledServices);
-    }
-
-    private void populateTouchExplorationGrantedAccessibilityServicesLocked(UserState userState) {
-        populateComponentNamesFromSettingLocked(
-                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                userState.mUserId, userState.mTouchExplorationGrantedServices);
     }
 
     /**
@@ -1143,54 +1123,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void showEnableTouchExplorationDialog(final Service service) {
-        String label = service.mResolveInfo.loadLabel(
-
-        mContext.getPackageManager()).toString();
-        synchronized (mLock) {
-            final UserState state = getCurrentUserStateLocked();
-            if (state.mIsTouchExplorationEnabled) {
-                return;
-            }
-            if (mEnableTouchExplorationDialog != null
-                    && mEnableTouchExplorationDialog.isShowing()) {
-                return;
-            }
-            mEnableTouchExplorationDialog = new AlertDialog.Builder(mContext)
-                .setIconAttribute(android.R.attr.alertDialogIcon)
-                .setPositiveButton(android.R.string.ok, new OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         // The user allowed the service to toggle touch exploration.
-                         state.mTouchExplorationGrantedServices.add(service.mComponentName);
-                         persistComponentNamesToSettingLocked(
-                                 Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                                 state.mTouchExplorationGrantedServices, state.mUserId);
-                         // Enable touch exploration.
-                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1,
-                                 service.mUserId);
-                     }
-                 })
-                 .setNegativeButton(android.R.string.cancel, new OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         dialog.dismiss();
-                     }
-                 })
-                 .setTitle(R.string.enable_explore_by_touch_warning_title)
-                 .setMessage(mContext.getString(
-                         R.string.enable_explore_by_touch_warning_message, label))
-                 .create();
-             mEnableTouchExplorationDialog.getWindow().setType(
-                     WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-             mEnableTouchExplorationDialog.getWindow().getAttributes().privateFlags
-                     |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-             mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
-             mEnableTouchExplorationDialog.show();
-        }
-    }
-
     private int getClientState(UserState userState) {
         int clientState = 0;
         if (userState.mIsAccessibilityEnabled) {
@@ -1206,16 +1138,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void recreateInternalStateLocked(UserState userState) {
         populateInstalledAccessibilityServiceLocked(userState);
         populateEnabledAccessibilityServicesLocked(userState);
-        populateTouchExplorationGrantedAccessibilityServicesLocked(userState);
-        populatedEnhancedWebAccessibilityEnabledChangedLocked(userState);
 
         handleTouchExplorationEnabledSettingChangedLocked(userState);
         handleDisplayMagnificationEnabledSettingChangedLocked(userState);
         handleAccessibilityEnabledSettingChangedLocked(userState);
-        handleTouchExplorationGrantedAccessibilityServicesChangedLocked(userState);
 
         performServiceManagementLocked(userState);
-
         scheduleUpdateInputFilter(userState);
         scheduleSendStateToClientsLocked(userState);
     }
@@ -1247,61 +1175,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 0, userState.mUserId) == 1;
     }
 
-    private void handleTouchExplorationGrantedAccessibilityServicesChangedLocked(
-            UserState userState) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0, userState.mUserId);
-        final int serviceCount = userState.mServices.size();
-        for (int i = 0; i < serviceCount; i++) {
-            Service service = userState.mServices.get(i);
-            tryEnableTouchExplorationLocked(service);
-        }
-    }
-
-    private void populatedEnhancedWebAccessibilityEnabledChangedLocked(UserState userState) {
-        userState.mIsEnhancedWebAccessibilityEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
-                0, userState.mUserId) == 1;
-    }
-
     private void tryEnableTouchExplorationLocked(Service service) {
-        if (!service.canReceiveEventsLocked() || !service.mRequestTouchExplorationMode) {
+        if (!service.mRequestTouchExplorationMode || !service.canReceiveEventsLocked()) {
             return;
         }
         UserState userState = getUserStateLocked(service.mUserId);
-        if (userState.mIsTouchExplorationEnabled) {
-            return;
-        }
-        // UI test automation service can always enable it.
-        if (service.mIsAutomation) {
+        if (!userState.mIsTouchExplorationEnabled) {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
-            return;
-        }
-        if (service.mResolveInfo.serviceInfo.applicationInfo.targetSdkVersion
-                <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            // Up to JB-MR1 we had a white list with services that can enable touch
-            // exploration. When a service is first started we show a dialog to the
-            // use to get a permission to white list the service.
-            if (!userState.mTouchExplorationGrantedServices.contains(service.mComponentName)) {
-                if (mEnableTouchExplorationDialog == null
-                        || (mEnableTouchExplorationDialog != null
-                            && !mEnableTouchExplorationDialog.isShowing())) {
-                    showEnableTouchExplorationDialog(service);
-                }
-            } else {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
-            }
-        } else {
-            // Starting in JB-MR2 we request a permission to allow a service to enable
-            // touch exploration and do not care if the service is in the white list.
-            if (mContext.getPackageManager().checkPermission(
-                    android.Manifest.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE,
-                    service.mComponentName.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, service.mUserId);
-            }
+                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1, userState.mUserId);
         }
     }
 
@@ -1310,53 +1191,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return;
         }
         UserState userState = getUserStateLocked(service.mUserId);
-        if (!userState.mIsTouchExplorationEnabled) {
-            return;
-        }
-        final int serviceCount = userState.mServices.size();
-        for (int i = 0; i < serviceCount; i++) {
-            Service other = userState.mServices.get(i);
-            if (other != service) {
-                if (service.mResolveInfo.serviceInfo.applicationInfo.targetSdkVersion
-                        <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    // Up to JB-MR1 we had a white list with services that can enable touch
-                    // exploration. When a service is first started we show a dialog to the
-                    // use to get a permission to white list the service.
-                    if (other.mRequestTouchExplorationMode &&
-                            userState.mTouchExplorationGrantedServices.contains(
-                                    service.mComponentName)) {
-                        // A white-listed service wants touch exploration, do not disable.
-                        return;
-                    }
-                } else {
-                    // Starting in JB-MR2 we request a permission to allow a service to enable
-                    // touch exploration and do not care if the service is in the white list.
-                    if (other.mRequestTouchExplorationMode && (service.mIsAutomation
-                            || mContext.getPackageManager().checkPermission(
-                                    android.Manifest.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE,
-                                    service.mComponentName.getPackageName())
-                                    == PackageManager.PERMISSION_GRANTED)) {
-                        // A service with permission wants touch exploration, do not disable.
-                        return;
-                    }
+        if (userState.mIsTouchExplorationEnabled) {
+            final int serviceCount = userState.mServices.size();
+            for (int i = 0; i < serviceCount; i++) {
+                Service other = userState.mServices.get(i);
+                if (other != service && other.mRequestTouchExplorationMode) {
+                    return;
                 }
             }
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0, userState.mUserId);
         }
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0, userState.mUserId);
     }
 
     private void tryEnableEnhancedWebAccessibilityLocked(Service service) {
-        if (!service.canReceiveEventsLocked() || !service.mRequestEnhancedWebAccessibility ) {
+        if (!service.mRequestEnhancedWebAccessibility || !service.canReceiveEventsLocked()) {
             return;
         }
         UserState userState = getUserStateLocked(service.mUserId);
-        if (userState.mIsEnhancedWebAccessibilityEnabled) {
-            return;
-        }
-        // Requested and can enabled, do it.
-        if (service.mRequestEnhancedWebAccessibility
-                && canEnabledEnhancedWebAccessibility(service)) {
+        if (!userState.mIsEnhancedWebAccessibilityEnabled) {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 1, userState.mUserId);
         }
@@ -1367,26 +1220,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return;
         }
         UserState userState = getUserStateLocked(service.mUserId);
-        if (!userState.mIsEnhancedWebAccessibilityEnabled) {
-            return;
-        }
-        final int serviceCount = userState.mServices.size();
-        for (int i = 0; i < serviceCount; i++) {
-            Service other = userState.mServices.get(i);
-            if (other != service && other.mRequestEnhancedWebAccessibility
-                    && canEnabledEnhancedWebAccessibility(other)) {
-                // One service requests the feature, do not disable.
-                return;
+        if (userState.mIsEnhancedWebAccessibilityEnabled) {
+            final int serviceCount = userState.mServices.size();
+            for (int i = 0; i < serviceCount; i++) {
+                Service other = userState.mServices.get(i);
+                if (other != service && other.mRequestEnhancedWebAccessibility) {
+                    return;
+                }
             }
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 0, userState.mUserId);
         }
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 0, service.mUserId);
-    }
-
-    private boolean canEnabledEnhancedWebAccessibility(Service service) {
-        return (service.mIsAutomation || mContext.getPackageManager().checkPermission(
-                android.Manifest.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                service.mComponentName.getPackageName()) == PackageManager.PERMISSION_GRANTED);
     }
 
     @Override
@@ -1511,7 +1355,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 } break;
                 case MSG_UPDATE_INPUT_FILTER: {
                     UserState userState = (UserState) msg.obj;
-                    updateInputFilter(userState);
+                    updateInputFilter(userState);                        
                 } break;
             }
         }
@@ -1683,10 +1527,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                             AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS : 0;
 
             if (mResolveInfo != null) {
-                mRequestTouchExplorationMode = (info.flags
+                String packageName = mResolveInfo.serviceInfo.packageName;
+
+                if (mContext.getPackageManager().checkPermission(
+                        android.Manifest.permission.CAN_REQUEST_TOUCH_EXPLORATION_MODE,
+                        packageName) == PackageManager.PERMISSION_GRANTED) {
+                    mRequestTouchExplorationMode = (info.flags
                             & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
-                mRequestEnhancedWebAccessibility = (info.flags
+                }
+
+                if (mContext.getPackageManager().checkPermission(
+                        android.Manifest.permission.CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
+                        packageName) == PackageManager.PERMISSION_GRANTED) {
+                    mRequestEnhancedWebAccessibility = (info.flags
                            & AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY) != 0;
+                }
             }
 
             // If this service is up and running we may have to enable touch
@@ -2598,9 +2453,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
 
-        public final Set<ComponentName> mTouchExplorationGrantedServices =
-                new HashSet<ComponentName>();
-
         public final SparseArray<AccessibilityConnectionWrapper>
                 mInteractionConnections =
                 new SparseArray<AccessibilityConnectionWrapper>();
@@ -2638,7 +2490,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mEnabledServices.clear();
             mEnabledServices.addAll(userState.mEnabledServices);
             mTouchExplorationGrantedServices.clear();
-            mTouchExplorationGrantedServices.addAll(userState.mTouchExplorationGrantedServices);
         }
 
         public void applyTo(UserState userState) {
@@ -2648,8 +2499,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mIsDisplayMagnificationEnabled = mIsDisplayMagnificationEnabled;
             userState.mEnabledServices.clear();
             userState.mEnabledServices.addAll(mEnabledServices);
-            userState.mTouchExplorationGrantedServices.clear();
-            userState.mTouchExplorationGrantedServices.addAll(mTouchExplorationGrantedServices);
         }
 
         public void clear() {
@@ -2677,12 +2526,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mEnabledAccessibilityServicesUri = Settings.Secure.getUriFor(
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
 
-        private final Uri mTouchExplorationGrantedAccessibilityServicesUri = Settings.Secure
-                .getUriFor(Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
-
-        private final Uri mAccessibilityScriptInjectionUri = Settings.Secure
-                .getUriFor(Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION);
-
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -2695,11 +2538,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             contentResolver.registerContentObserver(mDisplayMagnificationEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mEnabledAccessibilityServicesUri,
-                    false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mTouchExplorationGrantedAccessibilityServicesUri,
-                    false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(mAccessibilityScriptInjectionUri,
                     false, this, UserHandle.USER_ALL);
         }
 
@@ -2743,23 +2581,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         UserState userState = getCurrentUserStateLocked();
                         populateEnabledAccessibilityServicesLocked(userState);
                         manageServicesLocked(userState);
-                    }
-                }
-            } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
-                synchronized (mLock) {
-                    // We will update when the automation service dies.
-                    if (mUiAutomationService == null) {
-                        UserState userState = getCurrentUserStateLocked();
-                        populateTouchExplorationGrantedAccessibilityServicesLocked(userState);
-                        handleTouchExplorationGrantedAccessibilityServicesChangedLocked(userState);
-                    }
-                }
-            } else if (mAccessibilityScriptInjectionUri.equals(uri)) {
-                synchronized (mLock) {
-                    // We will update when the automation service dies.
-                    if (mUiAutomationService == null) {
-                        UserState userState = getCurrentUserStateLocked();
-                        populatedEnhancedWebAccessibilityEnabledChangedLocked(userState);
                     }
                 }
             }
