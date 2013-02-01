@@ -225,6 +225,10 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storan"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Akses storan USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Akses kad SD."</string>
+    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"bar status"</string>
@@ -299,7 +303,7 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Meletakkan pengurus aktiviti dalam keadaan tutup. Tidak melaksanakan penutupan lengkap."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"halang pertukaran apl"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Menghalang pengguna daripada bertukar kepada apl lain."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"dapatkan maklumat apl. semasa"</string>
+    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"dapatkan maklumat apl semasa"</string>
     <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Membenarkan pemegang mendapatkan maklumat peribadi tentang permohonan semasa di latar hadapan skrin"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"pantau dan kawal semua pelancaran apl"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Membenarkan apl untuk memantau dan mengawal cara sistem melancarkan aktiviti. Apl hasad boleh menjejaskan sistem sepenuhnya. Kebenaran ini hanya diperlukan untuk pembangunan, tidak sekali-kali untuk penggunaan biasa."</string>
@@ -344,6 +348,14 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kaedah input itu. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"terikat kepada perkhidmatan yang boleh diakses"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan yang boleh diakses. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
+    <skip />
+    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Membenarkan pemegang mengikat kepada antara muka peringkat atasan perkhidmatan teks(mis. PerkhidmatanPenyemakEjaan). Tidak seharusnya diperlukan untuk apl biasa."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"terikat kepada perkhidmatan VPN"</string>

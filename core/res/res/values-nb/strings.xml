@@ -225,6 +225,10 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Tilgang til USB-lagring."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Tilgang til minnekortet."</string>
+    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
+    <skip />
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
@@ -300,7 +304,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre applikasjonsbytte"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindrer brukeren i å bytte til en annen app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"få informasjon om appen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Tillater brukeren å innhente privat informasjon om den aktuelle appen i forgrunnen på skjermen."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Tillater brukeren å få tilgang til privat informasjon om den aktuelle appen i forgrunnen på skjermen."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"avervåke og kontrollere all oppstart av apper"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lar appen overvåke og kontrollere hvordan systemet starter opp aktiviteter. Ondsinnede apper kan utsette hele systemet for sikkerhetsbrudd. Denne tillatelsen er bare nødvendig for utviklere, aldri for vanlig bruk."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kringkaste melding om fjernet pakke"</string>
@@ -344,6 +348,14 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lar innehaveren binde det øverste nivået av grensesnittet til en inndatametode. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"binde seg til en tilgjengelighetstjeneste"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Gir innehaveren tillatelse til å bindes til det øverste nivået av grensesnittet for en tilgjengelighetstjeneste. Skal aldri være nødvendig for vanlige apper."</string>
+    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
+    <skip />
+    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
+    <skip />
+    <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lar innehaveren binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"binde deg til en VPN-tjeneste"</string>
