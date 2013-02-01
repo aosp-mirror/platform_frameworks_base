@@ -150,17 +150,9 @@ public class AccessibilityServiceInfo implements Parcelable {
      * flag does not guarantee that the device will not be in touch exploration
      * mode since there may be another enabled service that requested it.
      * <p>
-     * For accessibility services targeting API version higher than
-     * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} that want to set
-     * this flag have to request the
+     * Clients that want to set this flag have to request the
      * {@link android.Manifest.permission#CAN_REQUEST_TOUCH_EXPLORATION_MODE}
      * permission or the flag will be ignored.
-     * </p>
-     * <p>
-     * Services targeting API version equal to or lower than
-     * {@link Build.VERSION_CODES#JELLY_BEAN_MR1} will work normally, i.e.
-     * the first time they are run, if this flag is specified, a dialog is
-     * shown to the user to confirm enabling explore by touch.
      * </p>
      */
     public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 0x0000004;
