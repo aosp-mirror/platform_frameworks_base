@@ -142,6 +142,7 @@ public class EntropyMixer extends Binder {
             out.println(SystemProperties.get("ro.bootloader"));
             out.println(SystemProperties.get("ro.hardware"));
             out.println(SystemProperties.get("ro.revision"));
+            out.println(SystemProperties.get("ro.build.fingerprint"));
             out.println(new Object().hashCode());
             out.println(System.currentTimeMillis());
             out.println(System.nanoTime());
