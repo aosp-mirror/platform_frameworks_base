@@ -215,7 +215,7 @@ public:
     bool disableScissor();
     void setScissorEnabled(bool enabled);
 
-    void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque);
+    void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool preserve);
     void endTiling();
 
     /**
