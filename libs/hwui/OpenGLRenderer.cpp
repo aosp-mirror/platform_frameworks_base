@@ -206,8 +206,10 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
     // the back buffer for this frame.
     if (mCaches.extensions.hasDiscardFramebuffer() &&
             left <= 0.0f && top <= 0.0f && right >= mWidth && bottom >= mHeight) {
-        const GLenum attachments[] = { getTargetFbo() == 0 ? (const GLenum) GL_COLOR_EXT :
-                (const GLenum) GL_COLOR_ATTACHMENT0, GL_STENCIL_EXT };
+        const bool isFbo = getTargetFbo() == 0;
+        const GLenum attachments[] = {
+                isFbo ? (const GLenum) GL_COLOR_EXT : (const GLenum) GL_COLOR_ATTACHMENT0,
+                isFbo ? (const GLenum) GL_STENCIL_EXT : (const GLenum) GL_STENCIL_ATTACHMENT };
         glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
     }
 }
