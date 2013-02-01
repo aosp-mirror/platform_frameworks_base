@@ -51,7 +51,7 @@ file</a>. The package name is also visible in the Developer Console. </p>
 
 <p>Here's an example:</p>
 
-<p style="margin-left:1em;"><code><a href="http://play.google.com/store/apps/details?id=com.google.android.apps">http://play.google.com/store/apps/details?id=com.google.android.apps</a></code></p>
+<p style="margin-left:1em;"><code><a href="http://play.google.com/store/apps/details?id=com.google.android.apps.maps">http://play.google.com/store/apps/details?id=com.google.android.apps.maps</a></code></p>
 
 <p>For details on how to send the link in an Android app, see <a href="#android-app">Linking from an Android App</a>.</p>
 
