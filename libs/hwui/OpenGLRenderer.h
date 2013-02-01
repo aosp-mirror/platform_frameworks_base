@@ -64,6 +64,19 @@ public:
     virtual ~OpenGLRenderer();
 
     /**
+     * Sets the name of this renderer. The name is optional and
+     * empty by default. If the pointer is null the name is set
+     * to the empty string.
+     */
+    ANDROID_API void setName(const char* name);
+
+    /**
+     * Returns the name of this renderer as UTF8 string.
+     * The returned pointer is never null.
+     */
+    ANDROID_API const char* getName() const;
+
+    /**
      * Read externally defined properties to control the behavior
      * of the renderer.
      */
@@ -903,6 +916,9 @@ private:
 
     // No-ops start/endTiling when set
     bool mSuppressTiling;
+
+    // Optional name of the renderer
+    String8 mName;
 
     friend class DisplayListRenderer;
 
