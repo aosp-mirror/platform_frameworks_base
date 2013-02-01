@@ -690,7 +690,8 @@ specify the intent with the following options:</p>
       <dd>Specify an intent category, such as "android.intent.category.APP_CONTACTS".
 
   <dt>{@code -n &lt;COMPONENT>}</dt>
-      <dd>Specify the component name with package name prefix to create an explicit intent.
+      <dd>Specify the component name with package name prefix to create an explicit intent, such
+      as "com.example.app/.ExampleActivity".
 
   <dt>{@code -f &lt;FLAGS>}</dt>
       <dd>Add flags to the intent, as supported by {@link
