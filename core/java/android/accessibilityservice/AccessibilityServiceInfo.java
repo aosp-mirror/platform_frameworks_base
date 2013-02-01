@@ -149,8 +149,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      * accessibility service that has this flag set. Hence, clearing this
      * flag does not guarantee that the device will not be in touch exploration
      * mode since there may be another enabled service that requested it.
+     * <p>
+     * Clients that want to set this flag have to request the
+     * {@link android.Manifest.permission#CAN_REQUEST_TOUCH_EXPLORATION_MODE}
+     * permission or the flag will be ignored.
+     * </p>
      */
-    public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE= 0x0000004;
+    public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 0x0000004;
 
     /**
      * This flag requests from the system to enable web accessibility enhancing
@@ -161,6 +166,11 @@ public class AccessibilityServiceInfo implements Parcelable {
      * that has this flag set. Hence, clearing this flag does not guarantee that the
      * device will not have enhanced web accessibility enabled since there may be
      * another enabled service that requested it.
+     * <p>
+     * Clients that want to set this flag have to request the
+     * {@link android.Manifest.permission#CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY}
+     * permission or the flag will be ignored.
+     * </p>
      */
     public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000008;
 
