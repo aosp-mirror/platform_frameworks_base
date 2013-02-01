@@ -212,8 +212,10 @@ public final class InputManager {
                 } catch (RemoteException ex) {
                     throw new RuntimeException("Could not get input device information.", ex);
                 }
+                if (inputDevice != null) {
+                    mInputDevices.setValueAt(index, inputDevice);
+                }
             }
-            mInputDevices.setValueAt(index, inputDevice);
             return inputDevice;
         }
     }
@@ -241,6 +243,8 @@ public final class InputManager {
                         inputDevice = mIm.getInputDevice(id);
                     } catch (RemoteException ex) {
                         // Ignore the problem for the purposes of this method.
+                    }
+                    if (inputDevice == null) {
                         continue;
                     }
                     mInputDevices.setValueAt(i, inputDevice);
