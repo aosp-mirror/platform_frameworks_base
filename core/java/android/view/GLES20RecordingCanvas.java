@@ -43,7 +43,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     private GLES20DisplayList mDisplayList;
 
     private GLES20RecordingCanvas() {
-        super(true /*record*/, true /*translucent*/);
+        super(true, true);
     }
 
     static GLES20RecordingCanvas obtain(GLES20DisplayList displayList) {

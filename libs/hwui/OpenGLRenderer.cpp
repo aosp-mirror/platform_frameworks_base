@@ -142,6 +142,18 @@ void OpenGLRenderer::initProperties() {
 // Setup
 ///////////////////////////////////////////////////////////////////////////////
 
+void OpenGLRenderer::setName(const char* name) {
+    if (name) {
+        mName.setTo(name);
+    } else {
+        mName.clear();
+    }
+}
+
+const char* OpenGLRenderer::getName() const {
+    return mName.string();
+}
+
 bool OpenGLRenderer::isDeferred() {
     return false;
 }
