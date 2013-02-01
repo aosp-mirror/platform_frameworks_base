@@ -813,6 +813,22 @@ public final class InputManager {
             }
         }
 
+        /**
+         * @hide
+         */
+        @Override
+        public void vibrate(int owningUid, String owningPackage, long milliseconds) {
+            vibrate(milliseconds);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat) {
+            vibrate(pattern, repeat);
+        }
+
         @Override
         public void cancel() {
             try {

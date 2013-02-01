@@ -796,6 +796,7 @@ public class NotificationTestList extends TestActivity
                     INotificationManager directLine = mNM.getService();
                     directLine.enqueueNotificationWithTag(
                             getPackageName(),
+                            getPackageName(),
                             null, 
                             100, 
                             n,
@@ -821,7 +822,8 @@ public class NotificationTestList extends TestActivity
                     INotificationManager directLine = mNM.getService();
                     directLine.enqueueNotificationWithTag(
                             getPackageName(),
-                            null, 
+                            getPackageName(),
+                            null,
                             200, 
                             n,
                             idOut,
@@ -846,7 +848,8 @@ public class NotificationTestList extends TestActivity
                     INotificationManager directLine = mNM.getService();
                     directLine.enqueueNotificationWithTag(
                             getPackageName(),
-                            null, 
+                            getPackageName(),
+                            null,
                             1, 
                             n,
                             idOut,

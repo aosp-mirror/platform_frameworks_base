@@ -864,7 +864,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private Future<String> expectEnqueueNotification() throws Exception {
         final FutureCapture<String> tag = new FutureCapture<String>();
-        mNotifManager.enqueueNotificationWithTag(isA(String.class), capture(tag.capture), anyInt(),
+        mNotifManager.enqueueNotificationWithTag(isA(String.class), isA(String.class),
+                capture(tag.capture), anyInt(),
                 isA(Notification.class), isA(int[].class), UserHandle.myUserId());
         return tag;
     }

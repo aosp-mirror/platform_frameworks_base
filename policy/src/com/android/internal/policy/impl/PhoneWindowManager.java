@@ -4408,7 +4408,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     sendCloseSystemWindows();
                 }
                 int result = ActivityManagerNative.getDefault()
-                        .startActivityAsUser(null, mHomeIntent,
+                        .startActivityAsUser(null, null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,
                                 ActivityManager.START_FLAG_ONLY_IF_NEEDED,
@@ -4480,12 +4480,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return false;
         }
+        int owningUid;
+        String owningPackage;
+        if (win != null) {
+            owningUid = win.getOwningUid();
+            owningPackage = win.getOwningPackage();
+        } else {
+            owningUid = android.os.Process.myUid();
+            owningPackage = mContext.getBasePackageName();
+        }
         if (pattern.length == 1) {
             // One-shot vibration
-            mVibrator.vibrate(pattern[0]);
+            mVibrator.vibrate(owningUid, owningPackage, pattern[0]);
         } else {
             // Pattern vibration
-            mVibrator.vibrate(pattern, -1);
+            mVibrator.vibrate(owningUid, owningPackage, pattern, -1);
         }
         return true;
     }

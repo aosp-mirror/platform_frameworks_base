@@ -624,7 +624,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     /**
      * Thread-local storage used to carry caller permissions over through
      * indirect content-provider access.
-     * @see #ActivityManagerService.openContentUri()
      */
     private class Identity {
         public int pid;
@@ -830,18 +829,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
     final ArrayList<ProcessChangeItem> mAvailProcessChanges
             = new ArrayList<ProcessChangeItem>();
 
-    /**
-     * Callback of last caller to {@link #requestPss}.
-     */
-    Runnable mRequestPssCallback;
-
-    /**
-     * Remaining processes for which we are waiting results from the last
-     * call to {@link #requestPss}.
-     */
-    final ArrayList<ProcessRecord> mRequestPssList
-            = new ArrayList<ProcessRecord>();
-    
     /**
      * Runtime statistics collection thread.  This object's lock is used to
      * protect all related state.
@@ -1231,7 +1218,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     
                     try {
                         int[] outId = new int[1];
-                        inm.enqueueNotificationWithTag("android", null,
+                        inm.enqueueNotificationWithTag("android", "android", null,
                                 R.string.heavy_weight_notification,
                                 notification, outId, root.userId);
                     } catch (RuntimeException e) {
@@ -2309,7 +2296,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mMainStack.startActivityLocked(null, intent, null, aInfo,
-                        null, null, 0, 0, 0, 0, null, false, null);
+                        null, null, 0, 0, 0, null, 0, null, false, null);
             }
         }
 
@@ -2387,7 +2374,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
                     mMainStack.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, 0, 0, 0, 0, null, false, null);
+                            null, null, 0, 0, 0, null, 0, null, false, null);
                 }
             }
         }
@@ -2522,27 +2509,28 @@ public final class ActivityManagerService  extends ActivityManagerNative
         mPendingActivityLaunches.clear();
     }
 
-    public final int startActivity(IApplicationThread caller,
+    public final int startActivity(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
-        return startActivityAsUser(caller, intent, resolvedType, resultTo, resultWho, requestCode,
+        return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
+                resultWho, requestCode,
                 startFlags, profileFile, profileFd, options, UserHandle.getCallingUserId());
     }
 
-    public final int startActivityAsUser(IApplicationThread caller,
+    public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags,
             String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
-        return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
+        return mMainStack.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 null, null, options, userId);
     }
 
-    public final WaitResult startActivityAndWait(IApplicationThread caller,
+    public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, Bundle options, int userId) {
@@ -2550,20 +2538,20 @@ public final class ActivityManagerService  extends ActivityManagerNative
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
-        mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
+        mMainStack.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
                 res, null, options, UserHandle.getCallingUserId());
         return res;
     }
 
-    public final int startActivityWithConfig(IApplicationThread caller,
+    public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, Configuration config,
             Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityWithConfig", null);
-        int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
+        int ret = mMainStack.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
                 null, null, null, config, options, userId);
         return ret;
@@ -2684,7 +2672,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             int res = mMainStack.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
-                    resultWho, requestCode, -1, r.launchedFromUid, 0,
+                    resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage, 0,
                     options, false, null);
             Binder.restoreCallingIdentity(origId);
 
@@ -2696,38 +2684,38 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
-    final int startActivityInPackage(int uid,
+    final int startActivityInPackage(int uid, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, Bundle options, int userId) {
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
 
-        int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
+        int ret = mMainStack.startActivityMayWait(null, uid, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags,
                 null, null, null, null, options, userId);
         return ret;
     }
 
-    public final int startActivities(IApplicationThread caller,
+    public final int startActivities(IApplicationThread caller, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options,
             int userId) {
         enforceNotIsolatedCaller("startActivities");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivity", null);
-        int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
-                options, userId);
+        int ret = mMainStack.startActivities(caller, -1, callingPackage, intents,
+                resolvedTypes, resultTo, options, userId);
         return ret;
     }
 
-    final int startActivitiesInPackage(int uid,
+    final int startActivitiesInPackage(int uid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
             Bundle options, int userId) {
 
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, true, "startActivityInPackage", null);
-        int ret = mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo,
-                options, userId);
+        int ret = mMainStack.startActivities(null, uid, callingPackage, intents, resolvedTypes,
+                resultTo, options, userId);
         return ret;
     }
 
@@ -6743,7 +6731,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     /**
      * Drop a content provider from a ProcessRecord's bookkeeping
-     * @param cpr
      */
     public void removeContentProvider(IBinder connection, boolean stable) {
         enforceNotIsolatedCaller("removeContentProvider");
@@ -12665,7 +12652,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                                 destIntent.getComponent(), 0, srec.userId);
                         int res = mMainStack.startActivityLocked(srec.app.thread, destIntent,
                                 null, aInfo, parent.appToken, null,
-                                0, -1, parent.launchedFromUid, 0, null, true, null);
+                                0, -1, parent.launchedFromUid, parent.launchedFromPackage,
+                                0, null, true, null);
                         foundParentInTask = res == ActivityManager.START_SUCCESS;
                     } catch (RemoteException e) {
                         foundParentInTask = false;
@@ -12685,6 +12673,14 @@ public final class ActivityManagerService  extends ActivityManagerNative
             return -1;
         }
         return srec.launchedFromUid;
+    }
+
+    public String getLaunchedFromPackage(IBinder activityToken) {
+        ActivityRecord srec = ActivityRecord.forToken(activityToken);
+        if (srec == null) {
+            return null;
+        }
+        return srec.launchedFromPackage;
     }
 
     // =========================================================

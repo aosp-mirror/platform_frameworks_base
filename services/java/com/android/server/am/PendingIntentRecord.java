@@ -246,11 +246,12 @@ class PendingIntentRecord extends IIntentSender.Stub {
                                 }
                                 allIntents[allIntents.length-1] = finalIntent;
                                 allResolvedTypes[allResolvedTypes.length-1] = resolvedType;
-                                owner.startActivitiesInPackage(uid, allIntents,
+                                owner.startActivitiesInPackage(uid, key.packageName, allIntents,
                                         allResolvedTypes, resultTo, options, userId);
                             } else {
-                                owner.startActivityInPackage(uid, finalIntent, resolvedType,
-                                        resultTo, resultWho, requestCode, 0, options, userId);
+                                owner.startActivityInPackage(uid, key.packageName, finalIntent,
+                                        resolvedType, resultTo, resultWho, requestCode, 0,
+                                        options, userId);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,

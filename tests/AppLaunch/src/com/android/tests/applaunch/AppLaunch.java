@@ -219,7 +219,7 @@ public class AppLaunch extends InstrumentationTestCase {
                             UserHandle.USER_CURRENT);
                 }
 
-                mResult = mAm.startActivityAndWait(null, mLaunchIntent, mimeType,
+                mResult = mAm.startActivityAndWait(null, null, mLaunchIntent, mimeType,
                         null, null, 0, mLaunchIntent.getFlags(), null, null, null,
                         UserHandle.USER_CURRENT);
             } catch (RemoteException e) {

@@ -73,6 +73,20 @@ public abstract class Vibrator {
     public abstract void vibrate(long[] pattern, int repeat);
 
     /**
+     * @hide
+     * Like {@link #vibrate(long)}, but allowing the caller to specify that
+     * the vibration is owned by someone else.
+     */
+    public abstract void vibrate(int owningUid, String owningPackage, long milliseconds);
+
+    /**
+     * @hide
+     * Like {@link #vibrate(long[], int)}, but allowing the caller to specify that
+     * the vibration is owned by someone else.
+     */
+    public abstract void vibrate(int owningUid, String owningPackage, long[] pattern, int repeat);
+
+    /**
      * Turn the vibrator off.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#VIBRATE}.
