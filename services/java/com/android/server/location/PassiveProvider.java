@@ -96,11 +96,6 @@ public class PassiveProvider implements LocationProviderInterface {
         mReportLocation = request.reportLocation;
     }
 
-    @Override
-    public void switchUser(int userId) {
-        // nothing to do here
-    }
-
     public void updateLocation(Location location) {
         if (mReportLocation) {
             try {

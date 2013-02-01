@@ -24,13 +24,17 @@ import com.android.location.provider.LocationProviderBase;
 import com.android.location.provider.ProviderPropertiesUnbundled;
 import com.android.location.provider.ProviderRequestUnbundled;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
 import android.os.WorkSource;
 
 public class FusedLocationProvider extends LocationProviderBase implements FusionEngine.Callback {
@@ -60,6 +64,19 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
         super(TAG, PROPERTIES);
         mContext = context;
         mEngine = new FusionEngine(context, Looper.myLooper());
+
+        // listen for user change
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    mEngine.switchUser();
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, mHandler);
     }
 
     /**

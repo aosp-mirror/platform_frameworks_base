@@ -300,4 +300,12 @@ public class FusionEngine implements LocationListener {
         s.append("    ").append(mStats.get(NETWORK)).append('\n');
         pw.append(s);
     }
+
+    /** Called on mLooper thread */
+    public void switchUser() {
+        // reset state to prevent location data leakage
+        mFusedLocation = null;
+        mGpsLocation = null;
+        mNetworkLocation = null;
+    }
 }
