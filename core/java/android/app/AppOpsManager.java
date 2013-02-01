@@ -47,6 +47,7 @@ public class AppOpsManager {
     public static final int OP_READ_CALENDAR = 8;
     public static final int OP_WRITE_CALENDAR = 9;
     public static final int OP_WIFI_SCAN = 10;
+    public static final int OP_POST_NOTIFICATION = 11;
 
     private static String[] sOpNames = new String[] {
         "COARSE_LOCATION",
@@ -60,6 +61,7 @@ public class AppOpsManager {
         "READ_CALENDAR",
         "WRITE_CALENDAR",
         "WIFI_SCAN",
+        "POST_NOTIFICATION",
     };
 
     private static String[] sOpPerms = new String[] {
@@ -74,6 +76,7 @@ public class AppOpsManager {
         android.Manifest.permission.READ_CALENDAR,
         android.Manifest.permission.WRITE_CALENDAR,
         android.Manifest.permission.ACCESS_WIFI_STATE,
+        null, // no permission required for notifications
     };
 
     public static String opToName(int op) {
