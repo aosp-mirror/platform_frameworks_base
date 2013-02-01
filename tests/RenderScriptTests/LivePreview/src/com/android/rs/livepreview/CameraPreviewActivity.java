@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class CameraPreviewActivity extends Activity
     private int mPreviewTexWidth;
     private int mPreviewTexHeight;
 
-    private ImageView mFormatView;
+    //private TextureView mFormatView;
 
     private Spinner mCameraSpinner;
     private Spinner mResolutionSpinner;
@@ -77,7 +77,8 @@ public class CameraPreviewActivity extends Activity
     private Camera.Size mNextPreviewSize;
     private Camera.Size mPreviewSize;
 
-    private Bitmap mCallbackBitmap;
+    private TextureView mOutputView;
+    //private Bitmap mCallbackBitmap;
 
     private static final int STATE_OFF = 0;
     private static final int STATE_PREVIEW = 1;
@@ -97,7 +98,7 @@ public class CameraPreviewActivity extends Activity
         setContentView(R.layout.cf_main);
 
         mPreviewView = (TextureView) findViewById(R.id.preview_view);
-        mFormatView = (ImageView) findViewById(R.id.format_view);
+        mOutputView = (TextureView) findViewById(R.id.format_view);
 
         mPreviewView.setSurfaceTextureListener(this);
 
@@ -115,8 +116,9 @@ public class CameraPreviewActivity extends Activity
         mResolutionSpinner = (Spinner) findViewById(R.id.resolution_selection);
         mResolutionSpinner.setOnItemSelectedListener(mResolutionSelectedListener);
 
-
         mRS = RenderScript.create(this);
+        mFilterYuv = new RsYuv(mRS);
+        mOutputView.setSurfaceTextureListener(mFilterYuv);
     }
 
     @Override
@@ -227,8 +229,8 @@ public class CameraPreviewActivity extends Activity
 
         // Set initial values
 
-        mNextPreviewSize = mPreviewSizes.get(0);
-        mResolutionSpinner.setSelection(0);
+        mNextPreviewSize = mPreviewSizes.get(15);
+        mResolutionSpinner.setSelection(15);
 
         if (mPreviewTexture != null) {
             startPreview();
@@ -271,6 +273,7 @@ public class CameraPreviewActivity extends Activity
                 mPreviewTexHeight * (1 - heightRatio/widthRatio)/2);
 
         mPreviewView.setTransform(transform);
+        mOutputView.setTransform(transform);
 
         mPreviewSize   = mNextPreviewSize;
 
@@ -305,7 +308,7 @@ public class CameraPreviewActivity extends Activity
 
             long t1 = java.lang.System.currentTimeMillis();
 
-            mFilterYuv.execute(data, mCallbackBitmap);
+            mFilterYuv.execute(data);
 
             long t2 = java.lang.System.currentTimeMillis();
             mTiming[mTimingSlot++] = t2 - t1;
@@ -325,7 +328,7 @@ public class CameraPreviewActivity extends Activity
         }
 
         protected void onPostExecute(Boolean result) {
-            mFormatView.invalidate();
+            mOutputView.invalidate();
         }
 
     }
@@ -355,21 +358,13 @@ public class CameraPreviewActivity extends Activity
 
         mProcessInProgress = true;
 
-        if (mCallbackBitmap == null ||
-                mPreviewSize.width != mCallbackBitmap.getWidth() ||
-                mPreviewSize.height != mCallbackBitmap.getHeight() ) {
-            mCallbackBitmap =
-                    Bitmap.createBitmap(
-                        mPreviewSize.width, mPreviewSize.height,
-                        Bitmap.Config.ARGB_8888);
-            mFilterYuv = new RsYuv(mRS, getResources(), mPreviewSize.width, mPreviewSize.height);
-            mFormatView.setImageBitmap(mCallbackBitmap);
+        if ((mFilterYuv == null) ||
+            (mPreviewSize.width != mFilterYuv.getWidth()) ||
+            (mPreviewSize.height != mFilterYuv.getHeight()) ) {
+
+            mFilterYuv.reset(mPreviewSize.width, mPreviewSize.height);
         }
 
-
-        mFormatView.invalidate();
-
-        mCamera.addCallbackBuffer(data);
         mProcessInProgress = true;
         new ProcessPreviewDataTask().execute(data);
     }

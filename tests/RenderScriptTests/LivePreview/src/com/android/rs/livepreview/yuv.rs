@@ -1,7 +1,7 @@
 
 #pragma version(1)
 #pragma rs java_package_name(com.android.rs.livepreview)
-#pragma rs_fp_relaxed
+//#pragma rs_fp_relaxed
 
 static int gWidth;
 static int gHeight;
