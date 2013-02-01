@@ -144,6 +144,14 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        nSetName(mRenderer, name);
+    }
+
+    private static native void nSetName(int renderer, String name);
+
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layers
     ///////////////////////////////////////////////////////////////////////////

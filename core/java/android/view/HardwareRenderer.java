@@ -543,6 +543,13 @@ public abstract class HardwareRenderer {
     }
 
     /**
+     * Optional, sets the name of the renderer. Useful for debugging purposes.
+     *
+     * @param name The name of this renderer, can be null
+     */
+    abstract void setName(String name);
+
+    /**
      * Creates a hardware renderer using OpenGL.
      * 
      * @param glVersion The version of OpenGL to use (1 for OpenGL 1, 11 for OpenGL 1.1, etc.)
@@ -756,6 +763,8 @@ public abstract class HardwareRenderer {
         GL mGl;
         HardwareCanvas mCanvas;
 
+        String mName;
+
         long mFrameCount;
         Paint mDebugPaint;
 
@@ -963,6 +972,7 @@ public abstract class HardwareRenderer {
                     } else {
                         if (mCanvas == null) {
                             mCanvas = createCanvas();
+                            mCanvas.setName(mName);
                         }
                         if (mCanvas != null) {
                             setEnabled(true);
@@ -1275,6 +1285,11 @@ public abstract class HardwareRenderer {
         @Override
         HardwareCanvas getCanvas() {
             return mCanvas;
+        }
+
+        @Override
+        void setName(String name) {
+            mName = name;
         }
 
         boolean canDraw() {
