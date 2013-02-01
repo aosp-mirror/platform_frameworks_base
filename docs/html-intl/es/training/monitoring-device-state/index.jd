@@ -1,0 +1,49 @@
+page.title=Cómo optimizar la duración de la batería
+
+trainingnavtop=true
+startpage=true
+next.title=Cómo controlar el nivel de batería y el estado de carga
+next.link=battery-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>Dependencias y requisitos previos</h2> 
+<ul>
+  <li>Android 2.0 (nivel 5 del API) o superior</li>
+  <li>Experiencia con <a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a></li>
+</ul>
+
+<h2>También puedes consultar:</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/services.html">Servicios</a>
+</ul>
+
+</div> 
+</div>
+
+<p>Uno de los objetivos de tu aplicación debe ser limitar su impacto en la duración de la batería del dispositivo en el que esté instalada. Después de leer estas secciones, podrás desarrollar aplicaciones que optimizarán el uso de la batería en función del estado del dispositivo en el que estén instaladas.</p>
+
+<p>Al tomar medidas como inhabilitar las actualizaciones de servicios en segundo plano o disminuir la frecuencia de dichas actualizaciones cuando el nivel de batería sea bajo, puedes garantizar que se minimice el impacto de tu aplicación en la duración de la batería sin afectar a la experiencia del usuario.</p>
+
+<h2>Secciones</h2> 
+ 
+<!-- Create a list of the lessons in this class along with a short description of each lesson.
+These should be short and to the point. It should be clear from reading the summary whether someone
+will want to jump to a lesson or not.--> 
+ 
+<dl>
+  <dt><b><a href="battery-monitoring.html">Cómo controlar el nivel de batería y el estado de carga</a></b></dt>
+  <dd>Obtén más información sobre cómo determinar y controlar el nivel de batería actual y los cambios en el estado de carga para modificar la frecuencia de actualizaciones en segundo plano de tu aplicación.</dd>
+
+  <dt><b><a href="docking-monitoring.html">Cómo determinar y controlar el tipo de conector y el estado de la conexión</a></b></dt>
+  <dd>La frecuencia de actualización óptima puede variar en función de cómo se utilice el dispositivo en el que está instalada la aplicación. Obtén más información sobre cómo determinar y controlar cuándo el dispositivo está conectado a algún sistema de acoplamiento u otra conexión.</dd>
+
+  <dt><b><a href="connectivity-monitoring.html">Cómo determinar y controlar el estado de la conectividad</a></b></dt>
+  <dd>Si no tienes conexión a Internet, no puedes actualizar tu aplicación a partir de una fuente online. Obtén más información sobre cómo comprobar el estado de la conectividad para modificar la frecuencia de actualización en segundo plano de tu aplicación. También puedes obtener más información sobre cómo comprobar la conectividad móvil o Wi-Fi antes de iniciar operaciones que requieran un nivel elevado de ancho de banda.</dd>
+
+  <dt><b><a href="manifest-receivers.html">Cómo manipular los receptores de emisión bajo demanda</a></b></dt>
+  <dd>Los receptores de emisión que declaras en el archivo de manifiesto se pueden alternar durante la ejecución para inhabilitar los que no son necesarios debido al estado actual del dispositivo. Obtén más información sobre cómo alternar y superponer receptores de cambio de estado para mejorar el rendimiento y cómo posponer acciones hasta que el dispositivo se encuentre en un estado concreto.</dd>
+</dl> 

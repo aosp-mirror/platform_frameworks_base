@@ -1,0 +1,212 @@
+page.title=Cómo implementar interfaces de usuario adaptables
+parent.title=Cómo diseñar aplicaciones para varias pantallas
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Cómo admitir varias densidades de pantalla
+previous.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>En esta sección puedes aprender:</h2>
+
+<ol>
+  <li><a href="#TaskDetermineCurLayout">Cómo determinar el diseño actual</a></li>
+  <li><a href="#TaskReactToLayout">Cómo reaccionar en función del diseño actual</a></li>
+  <li><a href="#TaskReuseFrag">Cómo volver a utilizar fragmentos en otras actividades</a></li>
+  <li><a href="#TaskHandleConfigChanges">Cómo gestionar los cambios en la configuración de la pantalla</a></li>
+</ol>
+
+<h2>También puedes consultar:</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Cómo admitir tablets y dispositivos móviles</a></li>
+</ul>
+ 
+<h2>¡Pruébalo!</h2>
+ 
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+ 
+</div> 
+</div> 
+
+<p>En función del diseño actual de tu aplicación, la interfaz puede variar. Por ejemplo, si tu aplicación está en modo de panel dual, haz clic en un elemento del panel izquierdo para que aparezca en el panel de la derecha. Asimismo, si está en modo de panel único, el contenido debería aparecer por sí mismo (en otra actividad).</p>
+
+
+<h2 id="TaskDetermineCurLayout">Cómo determinar el diseño actual</h2>
+
+<p>Dado que la implementación de cada diseño variará en cierta medida, probablemente una de las primeras cosas que tendrás que hacer será determinar el diseño que el usuario puede ver en ese momento. Por ejemplo, puedes determinar si el usuario utiliza el modo de "panel único" o de "panel dual". Para ello, puedes consultar si una vista determinada existe y es visible:</p>
+
+<pre class="prettyprint">
+public class NewsReaderActivity extends FragmentActivity {
+    boolean mIsDualPane;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_layout);
+
+        View articleView = findViewById(R.id.article);
+        mIsDualPane = articleView != null &amp;&amp; 
+                        articleView.getVisibility() == View.VISIBLE;
+    }
+}
+</pre>
+
+<p>Ten en cuenta que este código consulta la disponibilidad del panel del "artículo", lo que es mucho más flexible que incluir una consulta para un diseño determinado.</p>
+
+<p>Otro ejemplo de cómo puedes adaptar la existencia de diferentes componentes es comprobar su disponibilidad antes de realizar una operación relacionada con los mismos. Por ejemplo, en la aplicación de ejemplo News Reader, hay un botón que abre un menú, pero ese botón solo aparece en las versiones anteriores a Android 3.0 (porque  <PH>{@link android.app.ActionBar}</PH> en el nivel 11 del API y en niveles superiores). Por tanto, para añadir el detector de eventos para este botón, puedes hacer lo siguiente:</p>
+
+<pre class="prettyprint">
+Button catButton = (Button) findViewById(R.id.categorybutton);
+OnClickListener listener = /* create your listener here */;
+if (catButton != null) {
+    catButton.setOnClickListener(listener);
+}
+</pre>
+
+
+<h2 id="TaskReactToLayout">Cómo reaccionar en función del diseño actual</h2>
+
+<p>El resultado de algunas acciones puede variar en función del diseño actual. Por ejemplo, en el ejemplo de News Reader, al hacer clic en un encabezado de la lista se abrirá el artículo del panel situado a la derecha si la interfaz de usuario está en modo de panel dual, pero se iniciará una actividad independiente si esta está en modo de panel único:</p>
+
+<pre>
+&#64;Override
+public void onHeadlineSelected(int index) {
+    mArtIndex = index;
+    if (mIsDualPane) {
+        /* display article on the right pane */
+        mArticleFragment.displayArticle(mCurrentCat.getArticle(index));
+    } else {
+        /* start a separate activity */
+        Intent intent = new Intent(this, ArticleActivity.class);
+        intent.putExtra("catIndex", mCatIndex);
+        intent.putExtra("artIndex", index);
+        startActivity(intent);
+    }
+}
+</pre>
+
+<p>De igual modo, si la aplicación está en modo de panel dual, debe configurar la barra de acción con pestañas para la navegación, mientras que si la aplicación está en modo de panel único, debe configurar la navegación con un widget giratorio. Por tanto, el código debe comprobar también cuál es el caso adecuado:</p>
+
+<pre>
+final String CATEGORIES[] = { "Top Stories", "Politics", "Economy", "Technology" };
+
+public void onCreate(Bundle savedInstanceState) {
+    ....
+    if (mIsDualPane) {
+        /* use tabs for navigation */
+        actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_TABS);
+        int i;
+        for (i = 0; i &lt; CATEGORIES.length; i++) {
+            actionBar.addTab(actionBar.newTab().setText(
+                CATEGORIES[i]).setTabListener(handler));
+        }
+        actionBar.setSelectedNavigationItem(selTab);
+    }
+    else {
+        /* use list navigation (spinner) */
+        actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
+        SpinnerAdapter adap = new ArrayAdapter<String>(this, 
+                R.layout.headline_item, CATEGORIES);
+        actionBar.setListNavigationCallbacks(adap, handler);
+    }
+}
+</pre>
+
+
+<h2 id="TaskReuseFrag">Cómo volver a utilizar fragmentos en otras actividades</h2>
+
+<p>Un patrón recurrente a la hora de diseñar para distintas pantallas es utilizar una parte de la interfaz que se implementa como un panel en algunas configuraciones de pantalla y como actividad independiente en otras. Por ejemplo, en el ejemplo de News Reader, el texto del artículo de noticias se presenta en el panel de la derecha en las pantallas grandes, pero es una actividad independiente en las pantallas más pequeñas.</p>
+
+<p>En otros casos similares, puedes evitar la duplicación de código reutilizando la misma <PH>{@link android.app.Fragment}</PH> en distintas actividades. Por ejemplo, <code>ArticleFragment</code> se utiliza en el diseño de panel dual:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p>A continuación, se vuelve a utilizar (sin diseño) en el diseño de actividad para pantallas más pequeñas (<code>ArticleActivity</code>):</p>
+
+<pre>
+ArticleFragment frag = new ArticleFragment();
+getSupportFragmentManager().beginTransaction().add(android.R.id.content, frag).commit();
+</pre>
+
+<p>Evidentemente, esto tiene el mismo efecto que declarar el fragmento en un diseño XML. Sin embargo, en este caso, un diseño XML sería un trabajo innecesario porque el fragmento del artículo es el único componente de esta actividad.</p>
+
+<p>Un punto muy importante que debes tener en cuenta al diseñar tus fragmentos es no crear un acoplamiento fuerte para una actividad determinada. Para ello, normalmente puedes definir una interfaz que resuma todas las formas en las que tiene que interactuar el fragmento con su actividad principal y, a continuación, la actividad principal implementa esa interfaz:</p>
+
+<p>Por ejemplo, ese es precisamente el objetivo del <code>HeadlinesFragment</code> de la aplicación News Reader:</p>
+
+<pre>
+public class HeadlinesFragment extends ListFragment {
+    ...
+    OnHeadlineSelectedListener mHeadlineSelectedListener = null;
+
+    /* Must be implemented by host activity */
+    public interface OnHeadlineSelectedListener {
+        public void onHeadlineSelected(int index);
+    }
+    ...
+
+    public void setOnHeadlineSelectedListener(OnHeadlineSelectedListener listener) {
+        mHeadlineSelectedListener = listener;
+    }
+}
+</pre>
+
+<p>A continuación, cuando el usuario selecciona un encabezado, el fragmento notifica el detector especificado por la actividad principal (en lugar de notificar una actividad predefinida específica):</p>
+
+<pre>
+public class HeadlinesFragment extends ListFragment {
+    ...
+    &#64;Override
+    public void onItemClick(AdapterView&lt;?&gt; parent, 
+                            View view, int position, long id) {
+        if (null != mHeadlineSelectedListener) {
+            mHeadlineSelectedListener.onHeadlineSelected(position);
+        }
+    }
+    ...
+}
+</pre>
+
+<p>Si quieres obtener más información sobre esta técnica, puedes consultar la guía sobre <a
+href="{@docRoot}guide/practices/tablets-and-handsets.html">Cómo admitir tablets y dispositivos móviles</a>.</p>
+
+
+<h2 id="TaskHandleConfigChanges">Cómo gestionar los cambios en la configuración de la pantalla</h2>
+
+<p>Si utilizas actividades independientes para implementar partes individuales de tu interfaz, debes tener en cuenta que es posible que tengas que reaccionar ante determinados cambios en la configuración (como un cambio de rotación) para mantener la homogeneidad de tu interfaz.</p>
+
+<p>Por ejemplo, en un tablet de 7" que utilice Android 3.0 o una versión superior, el ejemplo de News Reader utiliza una actividad independiente para mostrar el artículo de noticias en el modo vertical, pero utiliza el diseño de panel dual en el modo horizontal.</p>
+
+<p>Esto significa que cuando el usuario utiliza el modo vertical y está consultando un artículo, tienes que detectar que la orientación ha cambiado al modo horizontal y reaccionar de forma adecuada finalizando la actividad. A continuación, debes volver a la actividad principal para que el contenido pueda mostrarse en el diseño de panel dual:</p>
+
+<pre>
+public class ArticleActivity extends FragmentActivity {
+    int mCatIndex, mArtIndex;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mCatIndex = getIntent().getExtras().getInt("catIndex", 0);
+        mArtIndex = getIntent().getExtras().getInt("artIndex", 0);
+
+        // If should be in two-pane mode, finish to return to main activity
+        if (getResources().getBoolean(R.bool.has_two_panes)) {
+            finish();
+            return;
+        }
+        ...
+}
+</pre>
+
+
