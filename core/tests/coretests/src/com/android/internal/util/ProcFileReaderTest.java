@@ -134,7 +134,7 @@ public class ProcFileReaderTest extends AndroidTestCase {
             fail("somehow read a string value?");
         } catch (IOException e) {
             // expected
-            assertTrue(e.getMessage().contains("end of stream"));
+            assertTrue(e.getMessage().contains("End of stream"));
         }
     }
 
@@ -150,6 +150,20 @@ public class ProcFileReaderTest extends AndroidTestCase {
             // expected
             assertTrue(e.getMessage().contains("already-full buffer"));
         }
+    }
+
+    public void testOptionalLongs() throws Exception {
+        final ProcFileReader reader = buildReader("123 456\n789\n");
+
+        assertEquals(123L, reader.nextLong());
+        assertEquals(456L, reader.nextOptionalLong(-1L));
+        assertEquals(-1L, reader.nextOptionalLong(-1L));
+        assertEquals(-1L, reader.nextOptionalLong(-1L));
+        assertEquals(-1L, reader.nextOptionalLong(-1L));
+        reader.finishLine();
+
+        assertEquals(789L, reader.nextOptionalLong(-1L));
+        assertEquals(-1L, reader.nextOptionalLong(-1L));
     }
 
     private static ProcFileReader buildReader(String string) throws IOException {
