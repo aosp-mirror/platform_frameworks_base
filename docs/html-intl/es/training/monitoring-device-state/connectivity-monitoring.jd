@@ -1,0 +1,70 @@
+page.title=Cómo determinar y controlar el estado de la conectividad
+parent.title=Cómo optimizar la duración de la batería
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Cómo determinar y controlar el tipo de conector y el estado de la conexión
+previous.link=docking-monitoring.html
+next.title=Cómo manipular los receptores de emisión bajo demanda
+next.link=manifest-receivers.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>En esta sección puedes aprender:</h2>
+<ol>
+  <li><a href="#DetermineConnection">Cómo determinar si tienes conexión a Internet</a></li>
+  <li><a href="#DetermineType">Cómo determinar el tipo de conexión a Internet</a></li>
+  <li><a href="#MonitorChanges">Cómo supervisar los cambios en la conectividad</a></li>
+</ol>
+
+
+<h2>También puedes consultar:</h2>
+<ul>
+  <li><a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a>
+</ul>
+
+</div> 
+</div>
+
+<p>Algunos de los usos más comunes para las alarmas con repetición y los servicios en segundo plano es programar actualizaciones regulares de los datos de aplicaciones a partir de recursos de Internet, almacenar datos en la memoria caché o ejecutar descargas a largo plazo. Sin embargo, si no estás conectado a Internet o la conexión es demasiado débil para completar la descarga, ¿para qué activar el dispositivo y programar la actualización?</p>
+
+<p>Puedes utilizar {@link android.net.ConnectivityManager} para comprobar si estás conectado a Internet y, en ese caso, el tipo de conexión que estás utilizando.</p>
+
+
+<h2 id="DetermineConnection">Cómo determinar si tienes conexión a Internet</h2> 
+ 
+<p>No es necesario programar una actualización basada en un recurso de Internet si no estás conectado. En el fragmento que aparece a continuación, se muestra cómo utilizar {@link android.net.ConnectivityManager} para consultar la red activa y determinar si hay conexión a Internet.</p>
+
+<pre>ConnectivityManager cm =
+        (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+ 
+NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
+
+
+<h2 id="DetermineType">Cómo determinar el tipo de conexión a Internet</h2> 
+
+<p>También puedes determinar el tipo de conexión a Internet que hay disponible.</p>
+
+<p>El dispositivo se puede conectar a Internet a través de conexiones Ethernet, Wi-Fi, WiMAX y de datos móviles. Al consultar el tipo de red activa, como se muestra a continuación, puedes modificar la frecuencia de actualización en función del ancho de banda disponible.</p>
+
+<pre>boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;</pre>
+
+<p>El coste de las conexiones de datos móviles suele ser superior al de las conexiones Wi-Fi, por lo que en la mayoría de los casos, la frecuencia de actualización de tu aplicación debería ser menor si utilizas conexiones móviles. Del mismo modo, las descargas grandes deberían cancelarse hasta que estés conectado a una red Wi-Fi.</p>
+
+<p>Cuando hayas inhabilitado las actualizaciones, es importante que detectes si se hay cambios en la conectividad para poder reanudarlas cuando se haya establecido una conexión a Internet.</p>
+
+
+<h2 id="MonitorChanges">Cómo supervisar los cambios en la conectividad</h2> 
+
+<p>{@link android.net.ConnectivityManager} emite la acción {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION} ({@code "android.net.conn.CONNECTIVITY_CHANGE"}) cuando se han modificado los detalles de la conectividad. Puedes registrar un receptor de emisión en el archivo de manifiesto para detectar estos cambios y reanudar (o cancelar) las actualizaciones en segundo plano según corresponda.</p>
+
+<pre>&lt;action android:name="android.net.conn.CONNECTIVITY_CHANGE"/></pre>
+
+<p>Los cambios en la conectividad de un dispositivo pueden ser muy frecuentes (esta emisión se activa siempre que cambias de una conexión de datos móviles a una conexión Wi-Fi). Como resultado, te recomendamos que supervises esta emisión únicamente cuando hayas cancelado anteriormente las actualizaciones o las descargas para reanudarlas. Normalmente, basta con comprobar la conexión a Internet antes de iniciar una actualización y, si no hay ninguna, cancelar el resto de actualizaciones hasta que se restablezca la conexión.</p>
+
+<p>Esta técnica requiere que alternes receptores de emisión que hayas declarado en el archivo de manifiesto, que se describe en la próxima sección.</p>
