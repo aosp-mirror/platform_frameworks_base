@@ -19,6 +19,7 @@ package com.android.internal.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ProtocolException;
 import java.nio.charset.Charsets;
 
 /**
@@ -82,12 +83,15 @@ public class ProcFileReader implements Closeable {
     }
 
     /**
-     * Find buffer index of next token delimiter, usually space or newline. Will
-     * fill buffer as needed.
+     * Find buffer index of next token delimiter, usually space or newline.
+     * Fills buffer as needed.
+     *
+     * @return Index of next delimeter, otherwise -1 if no tokens remain on
+     *         current line.
      */
     private int nextTokenIndex() throws IOException {
         if (mLineFinished) {
-            throw new IOException("no tokens remaining on current line");
+            return -1;
         }
 
         int i = 0;
@@ -105,7 +109,7 @@ public class ProcFileReader implements Closeable {
             }
         } while (fillBuf() > 0);
 
-        throw new IOException("end of stream while looking for token boundary");
+        throw new ProtocolException("End of stream while looking for token boundary");
     }
 
     /**
@@ -136,7 +140,7 @@ public class ProcFileReader implements Closeable {
             }
         } while (fillBuf() > 0);
 
-        throw new IOException("end of stream while looking for line boundary");
+        throw new ProtocolException("End of stream while looking for line boundary");
     }
 
     /**
@@ -144,9 +148,11 @@ public class ProcFileReader implements Closeable {
      */
     public String nextString() throws IOException {
         final int tokenIndex = nextTokenIndex();
-        final String s = new String(mBuffer, 0, tokenIndex, Charsets.US_ASCII);
-        consumeBuf(tokenIndex + 1);
-        return s;
+        if (tokenIndex == -1) {
+            throw new ProtocolException("Missing required string");
+        } else {
+            return parseAndConsumeString(tokenIndex);
+        }
     }
 
     /**
@@ -154,6 +160,33 @@ public class ProcFileReader implements Closeable {
      */
     public long nextLong() throws IOException {
         final int tokenIndex = nextTokenIndex();
+        if (tokenIndex == -1) {
+            throw new ProtocolException("Missing required long");
+        } else {
+            return parseAndConsumeLong(tokenIndex);
+        }
+    }
+
+    /**
+     * Parse and return next token as base-10 encoded {@code long}, or return
+     * the given default value if no remaining tokens on current line.
+     */
+    public long nextOptionalLong(long def) throws IOException {
+        final int tokenIndex = nextTokenIndex();
+        if (tokenIndex == -1) {
+            return def;
+        } else {
+            return parseAndConsumeLong(tokenIndex);
+        }
+    }
+
+    private String parseAndConsumeString(int tokenIndex) throws IOException {
+        final String s = new String(mBuffer, 0, tokenIndex, Charsets.US_ASCII);
+        consumeBuf(tokenIndex + 1);
+        return s;
+    }
+
+    private long parseAndConsumeLong(int tokenIndex) throws IOException {
         final boolean negative = mBuffer[0] == '-';
 
         // TODO: refactor into something like IntegralToString
@@ -193,6 +226,7 @@ public class ProcFileReader implements Closeable {
         return (int) value;
     }
 
+    @Override
     public void close() throws IOException {
         mStream.close();
     }
