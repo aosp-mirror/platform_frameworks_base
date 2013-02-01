@@ -1537,18 +1537,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 96) {
-            // Remove Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES
-            if (mUserHandle == UserHandle.USER_OWNER) {
-                db.beginTransaction();
-                try {
-                    db.execSQL("DELETE FROM system WHERE name='"
-                            + Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES
-                            + "'");
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                }
-            }
+            // NOP bump due to a reverted change that some people got on upgrade.
             upgradeVersion = 97;
         }
 
