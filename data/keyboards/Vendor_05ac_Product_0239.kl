@@ -112,8 +112,8 @@ key 163   MEDIA_NEXT
 key 164   MEDIA_PLAY_PAUSE
 key 165   MEDIA_PREVIOUS
 # key 204  show gadgets
-# key 224  reduce brightness
-# key 225  increase brightness
+key 224   BRIGHTNESS_DOWN
+key 225   BRIGHTNESS_UP
 # key 229  blank special function on F5
 # key 230  blank special function on F6
 key 464   FUNCTION

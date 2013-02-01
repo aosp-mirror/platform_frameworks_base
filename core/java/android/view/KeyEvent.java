@@ -623,8 +623,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Assist key.
      * Launches the global assist activity.  Not delivered to applications. */
     public static final int KEYCODE_ASSIST          = 219;
+    /** Key code constant: Brightness Down key.
+     * Adjusts the screen brightness down. */
+    public static final int KEYCODE_BRIGHTNESS_DOWN = 220;
+    /** Key code constant: Brightness Up key.
+     * Adjusts the screen brightness up. */
+    public static final int KEYCODE_BRIGHTNESS_UP   = 221;
 
-    private static final int LAST_KEYCODE           = KEYCODE_ASSIST;
+    private static final int LAST_KEYCODE           = KEYCODE_BRIGHTNESS_UP;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -866,6 +872,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_RO, "KEYCODE_RO");
         names.append(KEYCODE_KANA, "KEYCODE_KANA");
         names.append(KEYCODE_ASSIST, "KEYCODE_ASSIST");
+        names.append(KEYCODE_BRIGHTNESS_DOWN, "KEYCODE_BRIGHTNESS_DOWN");
+        names.append(KEYCODE_BRIGHTNESS_UP, "KEYCODE_BRIGHTNESS_UP");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
