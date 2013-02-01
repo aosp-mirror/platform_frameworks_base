@@ -20,8 +20,9 @@ import android.content.res.Resources;
 import android.renderscript.*;
 import android.util.Log;
 
+
 public class BallsRS {
-    public static final int PART_COUNT = 900;
+    public static final int PART_COUNT = 4000;
 
     public BallsRS() {
     }
@@ -30,11 +31,12 @@ public class BallsRS {
     private RenderScriptGL mRS;
     private ScriptC_balls mScript;
     private ScriptC_ball_physics mPhysicsScript;
-    private ProgramFragment mPFLines;
     private ProgramFragment mPFPoints;
-    private ProgramVertex mPV;
     private ScriptField_Point mPoints;
     private ScriptField_VpConsts mVpConsts;
+    private ScriptField_BallGrid mGrid;
+    private ScriptField_Ball mBalls;
+    private Allocation mGridCache;
 
     void updateProjectionMatrices() {
         mVpConsts = new ScriptField_VpConsts(mRS, 1,
@@ -56,8 +58,8 @@ public class BallsRS {
                     "  vec4 pos = vec4(0.0, 0.0, 0.0, 1.0);\n" +
                     "  pos.xy = ATTRIB_position;\n" +
                     "  gl_Position = UNI_MVP * pos;\n" +
-                    "  varColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
-                    "  gl_PointSize = ATTRIB_size;\n" +
+                    "  varColor = ATTRIB_color;\n" +
+                    "  gl_PointSize = 12.0;\n" +
                     "}\n";
         sb.setShader(t);
         sb.addConstant(mVpConsts.getType());
@@ -84,22 +86,21 @@ public class BallsRS {
         return builder.create();
     }
 
-    public void init(RenderScriptGL rs, Resources res, int width, int height) {
-        mRS = rs;
-        mRes = res;
-
-        ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(rs);
+    private void createPF(int width, int height) {
+        ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(mRS);
         pfb.setPointSpriteTexCoordinateReplacement(true);
         pfb.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
                            ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         pfb.setVaryingColor(true);
         mPFPoints = pfb.create();
+    }
 
-        pfb = new ProgramFragmentFixedFunction.Builder(rs);
-        pfb.setVaryingColor(true);
-        mPFLines = pfb.create();
+    public void init(RenderScriptGL rs, Resources res, int width, int height) {
+        mRS = rs;
+        mRes = res;
 
-        android.util.Log.e("rs", "Load texture");
+        createPF(width, height);
+
         mPFPoints.bindTexture(loadTexture(R.drawable.flares), 0);
 
         mPoints = new ScriptField_Point(mRS, PART_COUNT, Allocation.USAGE_SCRIPT);
@@ -109,16 +110,22 @@ public class BallsRS {
         smb.addIndexSetType(Mesh.Primitive.POINT);
         Mesh smP = smb.create();
 
-        mPhysicsScript = new ScriptC_ball_physics(mRS, mRes, R.raw.ball_physics);
+        mGrid = ScriptField_BallGrid.create2D(mRS, (width + 99) / 100, (height + 99) / 100);
+        mGridCache = Allocation.createSized(mRS, Element.F32_2(mRS), PART_COUNT);
+        mBalls = new ScriptField_Ball(mRS, PART_COUNT, Allocation.USAGE_SCRIPT);
 
-        mScript = new ScriptC_balls(mRS, mRes, R.raw.balls);
+        mPhysicsScript = new ScriptC_ball_physics(mRS);
+        mPhysicsScript.set_gGridCache(mGridCache);
+        mPhysicsScript.set_gBalls(mBalls.getAllocation());
+
+        mScript = new ScriptC_balls(mRS);
         mScript.set_partMesh(smP);
         mScript.set_physics_script(mPhysicsScript);
         mScript.bind_point(mPoints);
-        mScript.bind_balls1(new ScriptField_Ball(mRS, PART_COUNT, Allocation.USAGE_SCRIPT));
-        mScript.bind_balls2(new ScriptField_Ball(mRS, PART_COUNT, Allocation.USAGE_SCRIPT));
+        mScript.bind_balls(mBalls);
+        mScript.set_gGrid(mGrid.getAllocation());
+        mScript.bind_gGridCache(mGridCache);
 
-        mScript.set_gPFLines(mPFLines);
         mScript.set_gPFPoints(mPFPoints);
         createProgramVertex();
 
@@ -126,6 +133,7 @@ public class BallsRS {
 
         mPhysicsScript.set_gMinPos(new Float2(5, 5));
         mPhysicsScript.set_gMaxPos(new Float2(width - 5, height - 5));
+        mPhysicsScript.set_gGrid(mGrid.getAllocation());
 
         mScript.invoke_initParts(width, height);
 
@@ -133,7 +141,7 @@ public class BallsRS {
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
-        mPhysicsScript.invoke_touch(x, y, pressure, id);
+        mPhysicsScript.invoke_touch(x, y, pressure * mRS.getWidth() / 1280, id);
     }
 
     public void setAccel(float x, float y) {
