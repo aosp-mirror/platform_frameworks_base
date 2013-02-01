@@ -1914,8 +1914,16 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SCROLL_FORWARD";
             case ACTION_SCROLL_BACKWARD:
                 return "ACTION_SCROLL_BACKWARD";
+            case ACTION_CUT:
+                return "ACTION_CUT";
+            case ACTION_COPY:
+                return "ACTION_COPY";
+            case ACTION_PASTE:
+                return "ACTION_PASTE";
+            case ACTION_SET_SELECTION:
+                return "ACTION_SET_SELECTION";
             default:
-                throw new IllegalArgumentException("Unknown action: " + action);
+                return"ACTION_UNKNOWN";
         }
     }
 
