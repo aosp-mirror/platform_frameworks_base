@@ -27,7 +27,7 @@ livecasts on YouTube and videos of past sessions or follow us on
           developers joining on air via the moderator queue. </p>
           
           <div id="objectWrapper">
-            <iframe width="560" height="315" src="http://www.youtube.com/embed/-wkXan-xNqA" frameborder="0" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="//www.youtube.com/embed/-wkXan-xNqA" frameborder="0" allowfullscreen></iframe>
           </div>
 
     </div><!-- end mainBodyLeft -->
@@ -35,7 +35,7 @@ livecasts on YouTube and videos of past sessions or follow us on
     <div id="mainBodyRight" class="videoPlayer">
 
       <div style="padding-left:1.5em;font-size:12px;">
-        <div style="padding-bottom:1em;"><img itemprop="image" src="http://pocketgems.com/images/pocket-gems-logo-blue.png"></div>
+        <div style="padding-bottom:1em;"><img itemprop="image" src="//pocketgems.com/images/pocket-gems-logo-blue.png"></div>
 
         <h3 style="color:#000;font-size:12px;">About Pocket Gems</h3>
           <p>
