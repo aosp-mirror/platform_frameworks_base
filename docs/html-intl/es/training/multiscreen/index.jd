@@ -1,0 +1,63 @@
+page.title=Cómo diseñar aplicaciones para varias pantallas
+trainingnavtop=true
+startpage=true
+next.title=Cómo admitir varios tamaños de pantalla
+next.link=screensizes.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>Dependencias y requisitos previos</h2> 
+
+<ul>
+  <li>Android 1.6 o superior (Android 2.1 o superior para la aplicación de ejemplo)</li>
+  <li>Conocimiento básico de <a
+href="http://developer.android.com/guide/components/activities.html">Actividades</a> y <a href="http://developer.android.com/guide/components/fragments.html">Fragmentos</a></li>
+  <li>Experiencia en el desarrollo de una <a
+href="http://developer.android.com/guide/topics/ui/index.html">Interfaz de usuario</a> de Android</li>
+  <li>Algunas funciones requieren el uso de la <a
+href="{@docRoot}tools/extras/support-library.html">biblioteca de compatibilidad</a></li>
+</ul>
+
+<h2>También puedes consultar:</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Cómo admitir varias pantallas</a></li>
+</ul>
+ 
+<h2>¡Pruébalo!</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+ 
+<p>Android se utiliza en cientos de dispositivos con diferentes tamaños de pantalla, desde pequeños teléfonos hasta enormes televisores. Por ello, es importante que diseñes tu aplicación para que sea compatible con todos los tamaños de pantalla y esté disponible para el mayor número de usuarios posible.</p>
+
+<p>Sin embargo, no es suficiente con que tu aplicación sea compatible con diferentes dispositivos. Cada tamaño de pantalla ofrece diferentes posibilidades y retos para la interacción del usuario. Por ello, para satisfacer completamente a tus usuarios e impresionarlos, tu aplicación debe ir más allá de simplemente <em>admitir</em> varias pantallas: debe <em>optimizar</em> la experiencia de usuario para cada configuración de pantalla.</p>
+
+<p>En esta sección se explica cómo implementar una interfaz de usuario que esté optimizada para diferentes configuraciones de pantalla.</p>
+
+<p>El código que aparece en cada sección se ha extraído de una aplicación de ejemplo para explicar las prácticas recomendadas a la hora de optimizar tu aplicación para varias pantallas. Puedes descargar el ejemplo (situado a la derecha) y utilizarlo como fuente de código reutilizable para tu propia aplicación.</p>
+
+<p class="note"><strong>Nota:</strong> en esta sección y en el ejemplo correspondiente, se utiliza la <a
+href="{@docRoot}tools/extras/support-library.html">biblioteca de compatibilidad</a> para poder usar las API de <PH>{@link android.app.Fragment}</PH> en versiones anteriores a Android 3.0. Debes descargar y la biblioteca y añadirla a tu aplicación para poder utilizar todas las API que se indican en esta sección.</p>
+ 
+
+<h2>Secciones</h2> 
+ 
+<dl> 
+  <dt><b><a href="screensizes.html">Cómo admitir varios tamaños de pantalla</a></b></dt> 
+    <dd>En esta sección se explica cómo crear diseños que se adapten a diferentes tamaños de pantalla (mediante dimensiones flexibles para vistas, <PH>{@link android.widget.RelativeLayout}</PH>, calificadores de orientación y tamaño de pantalla, filtros de alias y mapas de bits de la clase NinePatch).</dd> 
+ 
+  <dt><b><a href="screendensities.html">Cómo admitir varias densidades de pantalla</a></b></dt> 
+    <dd>En esta sección se explica cómo admitir pantallas con diferentes densidades de píxeles (mediante píxeles independientes de la densidad y mapas de bits adecuados a cada densidad).</dd> 
+ 
+  <dt><b><a href="adaptui.html">Cómo implementar interfaces de usuario adaptables</a></b></dt> 
+    <dd>En esta sección se explica cómo implementar tu interfaz de usuario para que se adapte a varias combinaciones de densidad o de tamaño de pantalla (detección de tiempo de ejecución del diseño activo, cómo reaccionar en función del diseño actual y cómo administrar los cambios en la configuración de la pantalla).</dd> 
+</dl> 

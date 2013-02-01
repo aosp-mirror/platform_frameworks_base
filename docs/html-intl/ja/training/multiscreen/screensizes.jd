@@ -1,0 +1,279 @@
+page.title=さまざまな画面サイズのサポート
+parent.title=複数画面のデザイン
+parent.link=index.html
+
+trainingnavtop=true
+next.title=さまざまな画面密度のサポート
+next.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#TaskUseWrapMatchPar">「wrap_content」と「match_parent」を使用する</a></li>
+  <li><a href="#TaskUseRelativeLayout">RelativeLayout を使用する</a></li>
+  <li><a href="#TaskUseSizeQuali">サイズ修飾子を使用する</a></li>
+  <li><a href="#TaskUseSWQuali">最小幅修飾子を使用する</a></li>
+  <li><a href="#TaskUseAliasFilters">レイアウト エイリアスを使用する</a></li>
+  <li><a href="#TaskUseOriQuali">画面の向きの修飾子を使用する</a></li>
+  <li><a href="#TaskUse9Patch">ナインパッチ ビットマップを使用する</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">複数画面のサポート</a></li>
+</ul>
+
+<h2>試してみる</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">サンプル アプリのダウンロード</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+
+<p>このレッスンでは、異なる画面サイズを以下のような方法でサポートする方法について学習します:</p>
+<ul> 
+  <li>画面に収まるようにレイアウト サイズを適切に変更する</li> 
+  <li>画面設定に基づいて適切な UI レイアウトを表示する</li> 
+  <li>適切な画面に適切なレイアウトを適用する</li>
+  <li>適切にサイズ調整したビットマップを表示する</li> 
+</ul> 
+
+
+<h2 id="TaskUseWrapMatchPar">「wrap_content」と「match_parent」を使用する</h2> 
+
+<p>レイアウトをさまざまな画面サイズに柔軟に対応させるには、一部のビュー コンポーネントの幅と高さに <code>"wrap_content"</code> と <code>"match_parent"</code> を使用する必要があります。<code>"wrap_content"</code> を使用すると、ビューの幅や高さがそのビュー内にコンテンツが収まるのに必要な最小サイズに設定されます。一方、<code>"match_parent"</code>（API レベル 8 より前の名称は <code>"fill_parent"</code>）を使用すると、コンポーネントがその親ビューのサイズに一致するまで拡大されます。</p>
+
+<p>ハードコーディングされたサイズの代わりに <code>"wrap_content"</code> と <code>"match_parent"</code> を使用することで、ビューはそれぞれ、そのビューに必要なスペースだけを使用したり、空きスペースを埋めるまで拡大したりします。次に例を示します:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p>このサンプルでは、特定のサイズではない <code>"wrap_content"</code> と <code>"match_parent"</code> をコンポーネント サイズにどのように使用しているかに注目してください。こうすることで、異なる画面のサイズと向きにレイアウトを正しく対応させることができます。</p>
+
+<p>たとえば、このレイアウトを縦表示と横表示で表示したときの見え方を以下に示します。コンポーネントのサイズが幅と高さに自動的に適合している点に注目してください:</p>
+
+<img src="{@docRoot}images/training/layout-hvga.png" />
+<p class="img-caption"><strong>図 1.</strong> News Reader サンプル アプリの縦表示（左）と横表示（右）</p>
+
+
+<h2 id="TaskUseRelativeLayout">RelativeLayout を使用する</h2> 
+
+<p>ネストされた <PH>{@link android.widget.LinearLayout} インスタンスや、</PH> <code>"wrap_content"</code> と <code>"match_parent"</code> のサイズの組み合わせを使用すると、かなり複雑なレイアウトを作成できます。しかし、 <PH>{@link android.widget.LinearLayout}</PH> では、子ビューの空間的な位置関係を正確に制御することはできません。 <PH>{@link android.widget.LinearLayout} のビューは、</PH> 単に一列に並ぶだけです。子ビューに対して直線以外のさまざまな配置を実現する必要がある場合は、 <PH>{@link android.widget.RelativeLayout}</PH>を使用することでうまくいくことがよくあります。たとえば、1 つの子ビューを画面の左側に配置し、もう 1 つの子ビューを右側に配置できます。</p>
+
+<p>次に例を示します:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;TextView
+        android:id="&#64;+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/&gt;
+    &lt;EditText
+        android:id="&#64;+id/entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/label"/&gt;
+    &lt;Button
+        android:id="&#64;+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:text="OK" /&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="&#64;id/ok"
+        android:layout_alignTop="&#64;id/ok"
+        android:text="Cancel" /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>図 2 は、このレイアウトの QVGA 画面での見え方を示しています。</p>
+
+<img src="{@docRoot}images/training/relativelayout1.png" />
+<p class="img-caption"><strong>図 2.</strong> QVGA 画面（スモール画面）のスクリーンショット</p>
+
+<p>図 3 は、このレイアウトのラージ画面での見え方を示しています。</p>
+
+<img src="{@docRoot}images/training/relativelayout2.png" />
+<p class="img-caption"><strong>図 3.</strong> WSVGA 画面（ラージ画面）のスクリーンショット</p>
+
+<p>コンポーネントのサイズが変更されても、 <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>で指定されたとおりに空間的な位置関係が維持されていることがわかります。</p>
+
+ 
+<h2 id="TaskUseSizeQuali">サイズ修飾子を使用する</h2> 
+
+<p>柔軟なレイアウトや相対的なレイアウトから得られる恩恵は、前のセクションで説明したことくらいです。これらのレイアウトはコンポーネントの内部や周囲のスペースを引き延ばすことでさまざまな画面に対応しますが、それぞれの画面サイズに合った最高のユーザー エクスペリエンスを実現していない可能性があります。したがって、アプリでは、柔軟なレイアウトの実装だけではなく、さまざまな画面設定に合わせた複数の代替レイアウトも必要になります。これは、<a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">設定修飾子</a>を使用することで実現可能です。設定修飾子により、ランタイムが現在のデバイスの設定に基づいて適切なリソース（画面サイズ別のレイアウト デザインなど）を自動的に選択できます。</p>
+
+<p>たとえば、多くのアプリでは、ラージ画面用に「2 ペイン」パターンを実装しています（一方のペインに項目リスト、もう一方のペインにそのコンテンツを表示することが可能です）。タブレットやテレビは両方のペインを同時に表示できるほど十分に大きい画面ですが、携帯端末の画面では 2 つのペインを別々に表示する必要があります。そのようなレイアウトを実装するには、次のようなファイルが必要になります:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>、シングルペイン（デフォルト）レイアウト:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-large/main.xml</code>、2 ペイン レイアウト:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>2 番目のレイアウトのディレクトリ名の <code>large</code> 修飾子に注目してください。このレイアウトは、ラージ（7 インチ以上のタブレットなど）と分類された画面のデバイスで選択されます。それよりも小さいデバイスでは、その他のレイアウト（修飾子なし）が選択されます。</p>
+
+
+<h2 id="TaskUseSWQuali">最小幅修飾子を使用する</h2>
+
+<p>Android 3.2 未満のデバイスでデベロッパーが抱えていた問題の 1 つに、Dell Streak、初代 Galaxy Tab、7 インチ タブレット全般を含む、「ラージ」画面サイズの分類があります。しかし、多くのアプリでは、すべて「ラージ」画面と見なされたとしても、このカテゴリ内のデバイスのサイズに合わせて異なるレイアウト（5 インチと 7 インチのデバイス用など）を表示したい場合があります。そこで、Android 3.2 では「最小幅」修飾子などが導入されました。</p>
+
+<p>最小幅修飾子を使用すると、dp で指定した特定の最小幅の画面を対象とすることができます。たとえば、一般的な 7 インチ タブレットは最小幅が 600 dp なので、これらの画面の UI で 2 つのペイン（ただし、それよりも小さい画面ではシングル リスト）を表示したい場合は、前のセクションで説明した 2 つのレイアウトをシングルペイン レイアウト用と 2 ペイン レイアウト用としてそのまま利用できます。ただし、<code>large</code> サイズ修飾子の代わりに、<code>sw600dp</code> を使用して、最小幅が 600 dp の画面では 2 ペイン レイアウトになるよう指定します:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>、シングルペイン（デフォルト）レイアウト:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-sw600dp/main.xml</code>、2 ペイン レイアウト:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>つまり、最小幅が 600dp 以上のデバイスでは <code>layout-sw600dp/main.xml</code>（2 ペイン）レイアウトが選択され、それよりも小さい画面では <code>layout/main.xml</code>（シングルペイン）レイアウトが選択されるということです。</p>
+
+<p>ただし、Android 3.2 未満のデバイスではこの修飾子は機能しません。これは <code>sw600dp</code> をサイズ修飾子として認識できないためです。したがって、引き続き <code>large</code> 修飾子も使用する必要があります。そこで、<code>res/layout-sw600dp/main.xml</code> と同じ内容の <code>res/layout-large/main.xml</code> という名前のファイルも必要になります。次のセクションでは、このようにレイアウト ファイルの重複を避けるためのテクニックについて学習します。</p>
+
+
+<h2 id="TaskUseAliasFilters">レイアウト エイリアスを使用する</h2> 
+
+<p>最小幅修飾子は、Android 3.2 以上でしか利用できません。したがって、旧バージョンとの互換性を維持するために、あいまいなサイズ分類（small、normal、large、xlarge）も併用することが必要です。たとえば、携帯端末ではシングルペイン UI、7 インチ タブレットやテレビなどの大きなデバイスではマルチペイン UI を表示するよう UI を設計する場合、以下のようなファイルが必要になります:</p>
+
+<p><ul>
+<li><code>res/layout/main.xml:</code> シングルペイン レイアウト</li>
+<li><code>res/layout-large:</code> マルチペイン レイアウト</li>
+<li><code>res/layout-sw600dp:</code> マルチペイン レイアウト</li>
+</ul></p>
+
+<p>最後の 2 つのファイルは同じものです。一方は Android 3.2 デバイス用で、もう一方は旧バージョンの Android を搭載したタブレットとテレビ用です。</p>
+
+<p>このようにタブレット/テレビ用として同じファイルを使用することで起こる重複（さらに、その結果メンテナンスが困難になる状況）を避けるために、エイリアス ファイルを使用できます。たとえば、次のようなレイアウトを定義できます:</p>
+
+<ul>
+<li><code>res/layout/main.xml</code>、シングルペイン レイアウト</li>
+<li><code>res/layout/main_twopanes.xml</code>、2 ペイン レイアウト</li>
+</ul>
+
+<p>さらに、次の 2 つのファイルを追加します:</p>
+
+<p><ul>
+<li><code>res/values-large/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+</li>
+
+<li><code>res/values-sw600dp/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+
+</li>
+</ul></p>
+
+<p>最後の 2 つのファイルの内容は同じですが、実際のレイアウトは定義していません。これらのファイルは、単に <PH>{@code main}</PH> を <PH>{@code main_twopanes}</PH>へのエイリアスになるように設定しただけです。これらのファイルには <code>large</code> と <code>sw600dp</code> セレクタが含まれているので、Android のバージョンに関係なく（
+<PH>Android 3.2 未満のタブレット/テレビは {@code large} に一致し、</PH>Android 3.2 以上のタブレット/テレビは <code>sw600dp</code> に一致します）タブレット/テレビに適用されます。</p>
+
+
+<h2 id="TaskUseOriQuali">画面の向きの修飾子を使用する</h2> 
+
+<p>横表示と縦表示が両方とも正しく表示されるレイアウトもありますが、ほとんどのレイアウトは調整が必要になります。以下に、News Reader サンプル アプリの各画面のサイズと向きでレイアウトがどのように表示されるかを示します:</p>
+
+<p><ul>
+<li><b>スモール画面、縦表示:</b> シングル ペイン、ロゴ付き</li>
+<li><b>スモール画面、横表示:</b> シングル ペイン、ロゴ付き</li>
+<li><b>7 インチ タブレット、縦表示:</b> シングル ペイン、アクション バー付き</li>
+<li><b>7 インチ タブレット、横表示:</b> デュアル ペイン、ワイド、アクション バー付き</li>
+<li><b>10 インチ タブレット、縦表示:</b> デュアル ペイン、ナロー、アクション バー付き</li>
+<li><b>10 インチ タブレット、横表示:</b> デュアル ペイン、ワイド、アクション バー付き</li>
+<li><b>テレビ、横表示:</b> デュアル ペイン、ワイド、アクション バー付き</li>
+</ul></p>
+
+<p>これらの各レイアウトは、<code>res/layout/</code> ディレクトリ内の XML ファイルに定義されています。各レイアウトをさまざまな画面設定に割り当てるには、アプリでレイアウト エイリアスを使用して、各設定に対応付けます:</p>
+
+<p><code>res/layout/onepane.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+
+<p><code>res/layout/onepane_with_bar.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p><code>res/layout/twopanes.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p><code>res/layout/twopanes_narrow.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes_narrow.xml all}
+
+<p>これで、考えられるすべてのレイアウトが定義されました。あとは、設定修飾子を使用して、適切なレイアウトを各設定にマッピングするだけです。そのためには、以下のようなレイアウト エイリアス テクニックを使用することができます:</p>
+
+<p><code>res/values/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values/layouts.xml all}
+
+<p><code>res/values-sw600dp-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-land/layouts.xml
+all}
+
+<p><code>res/values-sw600dp-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
+all}
+
+<p><code>res/values-large-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-land/layouts.xml all}
+
+<p><code>res/values-large-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-port/layouts.xml all}
+
+
+
+<h2 id="TaskUse9Patch">ナインパッチ ビットマップを使用する</h2>
+
+<p>異なる画面サイズをサポートするには、画像リソースも異なるサイズに対応できないといけません。たとえば、ボタンの背景は、適用されるボタンの形状が異なってもサイズが合わなければいけません。</p>
+
+<p>サイズ変更可能なコンポーネントでシンプルな画像を使用すると、ランタイムによって画像が一様に拡大縮小されるので、いくぶん期待はずれの結果になることがすぐにわかります。これは、ナインパッチ ビットマップを使用することで解決します。ナインパッチ ビットマップとは、拡大可能な領域と拡大不可能な領域が指定された特殊なフォーマットの PNG ファイルです。</p>
+
+<p>そのため、サイズが変化するコンポーネントで使用するビットマップをデザインする場合は、常にナインパッチを使用してください。ビットマップをナインパッチに変換するには、まず、通常の画像を用意します（図 4: わかりやすく 4 倍に拡大しています）。</p>
+
+<img src="{@docRoot}images/training/button.png" />
+<p class="img-caption"><strong>図 4.</strong> <code>button.png</code></p>
+
+<p>次に、 <ode
+href="{@docRoot}tools/help/draw9patch.html">SDK の <code>draw9patch</code></a> ユーティリティ（<code>tools/</code> ディレクトリにあります）からナインパッチを実行して、左境界線と上境界線上にピクセル（ドット）を描くことで拡大する領域にマークを付けます。また、右境界線と下境界線上にピクセルを描くことで、コンテンツを入れる領域をマークできます（図 5）。</p>
+
+<img src="{@docRoot}images/training/button_with_marks.png" />
+<p class="img-caption"><strong>図 5.</strong> <code>button.9.png</code></p>
+
+<p>境界線上に黒いピクセルがあることに注目してください。左境界線と上境界線上のものは画像を拡大できる領域で、右境界線と下境界線上のものはコンテンツを配置する領域を示しています。</p>
+
+<p>さらに、<code>.9.png</code> という拡張子にも注目してください。この拡張子は必ず使用してください。そうすることで、通常の PNG 画像ではなく、ナインパッチ画像であることがフレームワークによって検出されます。</p>
+
+<p>この背景を（<code>android:background="&#64;drawable/button"</code> を設定して）コンポーネントに適用すると、ボタンのサイズに合わせて適切に画像が拡大します（図 6 のさまざまなサイズを参照）。</p>
+
+<img src="{@docRoot}images/training/buttons_stretched.png" />
+<p class="img-caption"><strong>図 6</strong><code>button.9.png</code> ナインパッチを使用したさまざまなサイズのボタン</p>
+
