@@ -466,9 +466,9 @@ void Caches::resetScissor() {
 // Tiling
 ///////////////////////////////////////////////////////////////////////////////
 
-void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool opaque) {
+void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard) {
     if (extensions.hasTiledRendering() && !debugOverdraw) {
-        glStartTilingQCOM(x, y, width, height, (opaque ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
+        glStartTilingQCOM(x, y, width, height, (discard ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
     }
 }
 

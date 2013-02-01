@@ -818,7 +818,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip, GLui
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->getTexture(), 0);
 
-    startTiling(mSnapshot, !layer->isBlend());
+    startTiling(mSnapshot, true);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     mCaches.enableScissor();
@@ -1267,7 +1267,7 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, buffer);
 
-        startTiling(layer->clipRect, layer->layer.getHeight(), !layer->isBlend());
+        startTiling(layer->clipRect, layer->layer.getHeight());
     }
 }
 
