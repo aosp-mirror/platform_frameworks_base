@@ -2962,6 +2962,9 @@
         <!-- Timeout between frames of animation in milliseconds
              {@deprecated Not used by the framework.} -->
         <attr name="animationResolution" format="integer" />
+        <!-- Defines if the associated drawables need to be mirrored when in RTL mode.
+             Default is false -->
+        <attr name="mirrorForRtl" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="SeekBar">

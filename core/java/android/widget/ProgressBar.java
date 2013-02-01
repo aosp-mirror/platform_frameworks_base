@@ -223,6 +223,8 @@ public class ProgressBar extends View {
     private boolean mAttached;
     private boolean mRefreshIsPosted;
 
+    boolean mMirrorForRtl = false;
+
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
     private AccessibilityEventSender mAccessibilityEventSender;
@@ -301,6 +303,8 @@ public class ProgressBar extends View {
 
         setIndeterminate(mOnlyIndeterminate || a.getBoolean(
                 R.styleable.ProgressBar_indeterminate, mIndeterminate));
+
+        mMirrorForRtl = a.getBoolean(R.styleable.ProgressBar_mirrorForRtl, mMirrorForRtl);
 
         a.recycle();
     }
@@ -1004,7 +1008,7 @@ public class ProgressBar extends View {
                     }
                 }
             }
-            if (isLayoutRtl()) {
+            if (isLayoutRtl() && mMirrorForRtl) {
                 int tempLeft = left;
                 left = w - right;
                 right = w - tempLeft;
@@ -1026,7 +1030,7 @@ public class ProgressBar extends View {
             // Translate canvas so a indeterminate circular progress bar with padding
             // rotates properly in its animation
             canvas.save();
-            if(isLayoutRtl()) {
+            if(isLayoutRtl() && mMirrorForRtl) {
                 canvas.translate(getWidth() - mPaddingRight, mPaddingTop);
                 canvas.scale(-1.0f, 1.0f);
             } else {
