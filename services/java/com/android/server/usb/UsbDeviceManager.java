@@ -864,6 +864,15 @@ public class UsbDeviceManager {
         }
     }
 
+    public void clearUsbDebuggingKeys() {
+        if (mDebuggingManager != null) {
+            mDebuggingManager.clearUsbDebuggingKeys();
+        } else {
+            throw new RuntimeException("Cannot clear Usb Debugging keys, "
+                        + "UsbDebuggingManager not enabled");
+        }
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw) {
         if (mHandler != null) {
             mHandler.dump(fd, pw);
