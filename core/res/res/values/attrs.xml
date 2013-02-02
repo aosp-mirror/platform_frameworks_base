@@ -1542,6 +1542,8 @@
         <enum name="KEYCODE_RO" value="217" />
         <enum name="KEYCODE_KANA" value="218" />
         <enum name="KEYCODE_ASSIST" value="219" />
+        <enum name="KEYCODE_BRIGHTNESS_DOWN" value="220" />
+        <enum name="KEYCODE_BRIGHTNESS_UP" value="221" />
     </attr>
 
     <!-- ***************************************************************** -->

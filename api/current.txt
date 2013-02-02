@@ -24186,6 +24186,8 @@ package android.view {
     field public static final int KEYCODE_BACKSLASH = 73; // 0x49
     field public static final int KEYCODE_BOOKMARK = 174; // 0xae
     field public static final int KEYCODE_BREAK = 121; // 0x79
+    field public static final int KEYCODE_BRIGHTNESS_DOWN = 220; // 0xdc
+    field public static final int KEYCODE_BRIGHTNESS_UP = 221; // 0xdd
     field public static final int KEYCODE_BUTTON_1 = 188; // 0xbc
     field public static final int KEYCODE_BUTTON_10 = 197; // 0xc5
     field public static final int KEYCODE_BUTTON_11 = 198; // 0xc6
