@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import android.os.Binder;
 import android.os.IVibratorService;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -46,7 +47,7 @@ public class VibratorServicePermissionTest extends TestCase {
      */
     public void testVibrate() throws RemoteException {
         try {
-            mVibratorService.vibrate(null, 2000, new Binder());
+            mVibratorService.vibrate(Process.myUid(), null, 2000, new Binder());
             fail("vibrate did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected
@@ -62,7 +63,7 @@ public class VibratorServicePermissionTest extends TestCase {
      */
     public void testVibratePattern() throws RemoteException {
         try {
-            mVibratorService.vibratePattern(null, new long[] {0}, 0, new Binder());
+            mVibratorService.vibratePattern(Process.myUid(), null, new long[] {0}, 0, new Binder());
             fail("vibratePattern did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected
