@@ -318,12 +318,15 @@ class AccessibilityInjector {
     /**
      * Attempts to handle selection change events when accessibility is using a
      * non-JavaScript method.
+     * <p>
+     * This must not be called from the main thread.
      *
-     * @param selectionString The selection string.
+     * @param selection The selection string.
+     * @param token The selection request token.
      */
-    public void handleSelectionChangedIfNecessary(String selectionString) {
+    public void onSelectionStringChangedWebCoreThread(String selection, int token) {
         if (mAccessibilityInjectorFallback != null) {
-            mAccessibilityInjectorFallback.onSelectionStringChange(selectionString);
+            mAccessibilityInjectorFallback.onSelectionStringChangedWebCoreThread(selection, token);
         }
     }
 
