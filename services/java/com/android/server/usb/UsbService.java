@@ -255,6 +255,12 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void clearUsbDebuggingKeys() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.clearUsbDebuggingKeys();
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
