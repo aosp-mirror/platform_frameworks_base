@@ -72,6 +72,8 @@ bool KeyEvent::hasDefaultAction(int32_t keyCode) {
         case AKEYCODE_MEDIA_RECORD:
         case AKEYCODE_MEDIA_FAST_FORWARD:
         case AKEYCODE_MUTE:
+        case AKEYCODE_BRIGHTNESS_DOWN:
+        case AKEYCODE_BRIGHTNESS_UP:
             return true;
     }
     
@@ -108,6 +110,8 @@ bool KeyEvent::isSystemKey(int32_t keyCode) {
         case AKEYCODE_CAMERA:
         case AKEYCODE_FOCUS:
         case AKEYCODE_SEARCH:
+        case AKEYCODE_BRIGHTNESS_DOWN:
+        case AKEYCODE_BRIGHTNESS_UP:
             return true;
     }
     
