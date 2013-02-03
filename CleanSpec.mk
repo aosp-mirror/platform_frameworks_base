@@ -154,7 +154,7 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/librtp_jni_int
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/librtp_jni.so)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/lib/librtp_jni.so)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/symbols/system/lib/librtp_jni.so)
-
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/telephony/java/com/android/internal/telephony/SmsRawData.*)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
