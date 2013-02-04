@@ -57,6 +57,63 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 21.1.0</a> <em>(February 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 21.1.0.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.1.0.</li>
+      <li>ADT 21.1.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r21.1.0</a>. If you haven't already installed SDK Tools r21.1.0 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Added new <a href="{@docRoot}tools/projects/templates.html">code templates</a> for
+        notifications, blank fragments and list fragments.</li>
+      <li>Added support for resource rename refactoring. Renaming a resource XML file, drawable
+        icon, an {@code R.} field name or ID in the layout editor invokes a refactoring routine
+        to update all resource references.</li>
+      <li>Added more than 15 new Lint checks, including checks for overriding older APIs, XML
+        resource problems, graphic asset issues and manifest tags.
+      <li>Updated XML Editor to respond to refactoring shortcut keys such as <strong>Refactor
+        &gt; Rename</strong>.</li>
+      <li>Updated XML Editor to improve double click handling.</li>
+      <li>Added code completion improvements for custom views, theme references and class
+        references. For example, code completion in a {@code &lt;fragment android:name=””&gt;} tag
+        now suggests completion with a list of fragment classes. Similarly, code completion in the
+        manifest now offers implementations suitable for the given tag.</li>
+      <li>Updated the <strong>Project Import</strong> dialog so that it shows a table for all
+        imported projects where you can edit the name of the imported project.</li>
+      <li>Added support for layout aliases in the Layout Editor.</li>
+    </ul>
+  </dd>
+
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed issued with refactoring support for renaming and moving classes and packages.
+      </li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 21.0.1</a> <em>(December 2012)</em>
   </p>
 
