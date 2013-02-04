@@ -442,7 +442,8 @@ sample_dir := development/samples
 
 # the list here should match the list of samples included in the sdk samples package
 # (see development/build/sdk.atree)
-web_docs_sample_code_flags := \
+# remove htmlified samples for now -- samples are still available through the SDK
+# web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
