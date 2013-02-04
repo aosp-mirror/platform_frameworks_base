@@ -1378,6 +1378,8 @@ public final class CalendarContract {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ALL_DAY);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, AVAILABILITY);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EVENT_COLOR);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EVENT_COLOR_KEY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, HAS_ALARM);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         HAS_EXTENDED_PROPERTIES);
