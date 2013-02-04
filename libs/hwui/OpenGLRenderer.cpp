@@ -3241,7 +3241,9 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         }
     }
 
-    if (count == 0) return DrawGlInfo::kStatusDone;
+    if (count == 0 || quickReject(left, top, right, bottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
 
     setupDraw();
     setupDrawNoTexture();
