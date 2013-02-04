@@ -49,12 +49,14 @@ public class BitmapFactory {
          * If set, decode methods that take the Options object will attempt to
          * reuse this bitmap when loading content. If the decode operation cannot
          * use this bitmap, the decode method will return <code>null</code> and
-         * will throw an IllegalArgumentException. The
-         * current implementation necessitates that the reused bitmap be of the
-         * same size as the source content and in jpeg or png format (whether as a
-         * resource or as a stream). The {@link android.graphics.Bitmap.Config
+         * will throw an IllegalArgumentException. The current implementation
+         * necessitates that the reused bitmap be mutable and of the same size as the
+         * source content. The source content must be in jpeg or png format (whether as
+         * a resource or as a stream). The {@link android.graphics.Bitmap.Config
          * configuration} of the reused bitmap will override the setting of
-         * {@link #inPreferredConfig}, if set.
+         * {@link #inPreferredConfig}, if set. The reused bitmap will continue to
+         * remain mutable even when decoding a resource which would normally result
+         * in an immutable bitmap.
          *
          * <p>You should still always use the returned Bitmap of the decode
          * method and not assume that reusing the bitmap worked, due to the

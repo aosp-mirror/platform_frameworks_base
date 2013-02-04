@@ -384,7 +384,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         return nullObjectReturn("Got null SkPixelRef");
     }
 
-    if (!isMutable) {
+    if (!isMutable && !useExistingBitmap) {
         // promise we will never change our pixels (great for sharing and pictures)
         pr->setImmutable();
     }
