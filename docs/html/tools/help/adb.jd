@@ -5,32 +5,27 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>ADB quickview</h2>
-  <ul>
-<li>Manage the state of an emulator or device</li>
-<li>Run shell commands on a device</li>
-<li>Manage port forwarding on an emulator or device</li>
-<li>Copy files to/from an emulator or device</li>
-  </ul>
-
   <h2>In this document</h2>
-  <ol>
-<li><a href="#issuingcommands">Issuing ADB Commands</a></li>
-<li><a href="#devicestatus">Querying for Emulator/Device Instances</a></li>
-<li><a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a></li>
-<li><a href="#move">Installing an Application</a></li>
-<li><a href="#forwardports">Forwarding Ports</a></li>
-<li><a href="#copyfiles">Copying Files to or from an Emulator/Device Instance</a></li>
-<li><a href="#commandsummary">Listing of adb Commands </a></li>
-<li><a href="#shellcommands">Issuing Shell Commands</a></li>
-<li><a href="#logcat">Enabling Logcat Logging</a></li>
-<li><a href="#stopping">Stopping the adb Server</a></li>
-  </ol>
-
-  <h2>See also</h2>
-  <ol>
-    <li><a href="emulator.html">Emulator</a></li>
-  </ol>
+<ol>
+  <li><a href="#issuingcommands">Syntax</a></li>
+  <li><a href="#commandsummary">Commands</a></li>
+  <li><a href="#devicestatus">Querying for Emulator/Device Instances</a></li>
+  <li><a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a></li>
+  <li><a href="#move">Installing an Application</a></li>
+  <li><a href="#forwardports">Forwarding Ports</a></li>
+  <li><a href="#copyfiles">Copying Files to or from an Emulator/Device Instance</a></li>
+  <li><a href="#shellcommands">Issuing Shell Commands</a>
+    <ol>
+      <li><a href="#am">Using activity manager (am)</a></li>
+      <li><a href="#pm">Using package manager (pm)</a></li>
+      <li><a href="#sqlite">Examining sqlite3 databases from a remote shell</a></li>
+      <li><a href="#monkey">UI/Application Exerciser Monkey</a></li>
+      <li><a href="#othershellcommands">Other shell commands</a></li>
+    </ol>
+  </li>
+  <li><a href="#logcat">Enabling logcat logging</a></li>
+  <li><a href="#stopping">Stopping the adb server</a></li>
+</ol>
 
 </div>
 </div>
@@ -40,14 +35,20 @@ emulator instance or connected Android-powered device. It is a client-server pro
 three components: </p>
 
 <ul>
-  <li>A client, which runs on your development machine. You can invoke a client from a shell by issuing an adb command. Other Android tools such as the ADT plugin and DDMS also create adb clients. </li>
-  <li>A server, which runs as a background process on your development machine. The server manages communication between the client and the adb daemon running on an emulator or device. </li>
+  <li>A client, which runs on your development machine. You can invoke a client from a shell
+by issuing an adb command. Other Android tools such as the ADT plugin and DDMS also create
+adb clients. </li>
+  <li>A server, which runs as a background process on your development machine. The server
+manages communication between the client and the adb daemon running on an emulator or device. </li>
   <li>A daemon, which runs as a background process on each emulator or device instance. </li>
 </ul>
 
 <p>You can find the {@code adb} tool in {@code &lt;sdk&gt;/platform-tools/}.</p>
 
-<p>When you start an adb client, the client first checks whether there is an adb server process already running. If there isn't, it starts the server process. When the server starts, it binds to local TCP port 5037 and listens for commands sent from adb clients&mdash;all adb clients use port 5037 to communicate with the adb server. </p>
+<p>When you start an adb client, the client first checks whether there is an adb server
+process already running. If there isn't, it starts the server process. When the server starts,
+it binds to local TCP port 5037 and listens for commands sent from adb clients&mdash;all adb
+clients use port 5037 to communicate with the adb server. </p>
 
 <p>The server then sets up connections to all running emulator/device instances. It locates emulator/device instances by scanning odd-numbered ports in the range 5555 to 5585, the range used by emulators/devices. Where the server finds an adb daemon, it sets up a connection to that port. Note that each emulator/device instance acquires a pair of sequential ports &mdash; an even-numbered port for console connections and an odd-numbered port for adb connections. For example: </p>
 
@@ -55,127 +56,42 @@ three components: </p>
 Emulator 1, console: 5554<br/>
 Emulator 1, adb: 5555<br>
 Emulator 2, console: 5556<br>
-Emulator 2, adb: 5557 ...
+Emulator 2, adb: 5557<br>
+and so on...
 </p>
 
-<p>As shown, the emulator instance connected to adb on port 5555 is the same as the instance whose console listens on port 5554. </p>
+<p>As shown, the emulator instance connected to adb on port 5555 is the same as the instance
+whose console listens on port 5554. </p>
 
-<p>Once the server has set up connections to all emulator instances, you can use adb commands to control and access those instances. Because the server manages connections to emulator/device instances and handles commands from multiple adb clients, you can control any emulator/device instance from any client (or from a script).</p>
-
-<p>The sections below describe the commands that you can use to access adb capabilities and manage the state of an emulator/device. Note that if you are developing Android applications in Eclipse and have installed the ADT plugin, you do not need to access adb from the command line. The ADT plugin provides a transparent integration of adb into the Eclipse IDE. However, you can still use adb directly as necessary, such as for debugging.</p>
-
-<a name="issuingcommands"></a>
-
-<h2>Issuing adb Commands</h2>
-
-<p>You can issue adb commands from a command line on your development machine or from a script. The usage is: </p>
-
-    <pre>adb [-d|-e|-s &lt;serialNumber&gt;] &lt;command&gt; </pre>
-
-<p>When you issue a command, the program invokes an adb client. The client is not specifically associated with any emulator instance, so if multiple emulators/devices are running, you need to use the <code>-d</code> option to specify the target instance to which the command should be directed. For more information about using this option, see <a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a>. </p>
-
-<a name="devicestatus"></a>
-
-<h2>Querying for Emulator/Device Instances</h2>
-
-<p>Before issuing adb commands, it is helpful to know what emulator/device instances are connected to the adb server. You can generate a list of attached emulators/devices using the <code>devices</code> command: </p>
-
-	<pre>adb devices</pre>
-
-<p>In response, adb prints this status information for each instance:</p>
-
-<ul>
-	<li>Serial number &mdash; A string created by adb to uniquely identify an emulator/device instance by its 
-        console port number. The format of the serial number is <code>&lt;type&gt;-&lt;consolePort&gt;</code>. 
-        Here's an example serial number: <code>emulator-5554</code></li>
-	<li>State &mdash; The connection state of the instance may be one of the following:
-		<ul>
-		<li><code>offline</code> &mdash; the instance is not connected to adb or is not responding.</li>
-		<li><code>device</code> &mdash; the instance is now connected to the adb server. Note that this state does not 
-                    imply that the Android system is fully booted and operational, since the instance connects to adb 
-                    while the system is still booting. However, after boot-up, this is the normal operational state of 
-                    an emulator/device instance.</li>
-                <li><code>no device</code> &mdash; there is no emulator/device connected.
-		</ul>
-	</li>
-</ul>
-
-<p>The output for each instance is formatted like this: </p>
-
-	<pre>[serialNumber] [state]</pre>
-
-<p>Here's an example showing the <code>devices</code> command and its output:</p>
-
-	<pre>$ adb devices
-List of devices attached 
-emulator-5554&nbsp;&nbsp;device
-emulator-5556&nbsp;&nbsp;device
-emulator-5558&nbsp;&nbsp;device</pre>
+<p>Once the server has set up connections to all emulator instances, you can use adb commands to
+access those instances. Because the server manages connections to emulator/device
+instances and handles commands from multiple adb clients, you can control any emulator/device
+instance from any client (or from a script).</p>
 
 
 
-<a name="directingcommands"></a>
 
-<h2>Directing Commands to a Specific Emulator/Device Instance</h2>
+<h2 id="issuingcommands">Syntax</h2>
 
-<p>If multiple emulator/device instances are running, you need to specify a target instance when issuing adb commands. To so so, use the <code>-s</code> option in the commands. The usage for the <code>-s</code> option is:</p>
+<p>You can issue adb commands from a command line on your development machine or from a script.
+The usage is: </p>
 
-    <pre>adb -s &lt;serialNumber&gt; &lt;command&gt; </pre>
-	
-<p>As shown, you specify the target instance for a command using its adb-assigned serial number. You can use the <code>devices</code> command to obtain the serial numbers of running emulator/device instances. </p>
+<pre class="no-pretty-print">
+adb [-d|-e|-s &lt;serialNumber&gt;] &lt;command&gt;
+</pre>
 
-<p>Here is an example: </p>
-
-	<pre>adb -s emulator-5556 install helloWorld.apk</pre>
-
-<p>Note that, if you issue a command without specifying a target emulator/device instance using <code>-s</code>, adb generates an error. 
-
-<a name="move"></a>
-
-<h2>Installing an Application</h2>
-<p>You can use adb to copy an application from your development computer and install it on an emulator/device instance. To do so, use the <code>install</code> command. With the command, you must specify the path to the .apk file that you want to install:</p>
-
-<pre>adb install &lt;path_to_apk&gt;</pre>
-
-<p>For more information about how to create an .apk file that you can install on an emulator/device
-instance, see <a href="{@docRoot}tools/building/index.html">Building and Running</a></p>
-
-<p>Note that, if you are using the Eclipse IDE and have the ADT plugin installed, you do not need to use adb (or aapt) directly to install your application on the emulator/device. Instead, the ADT plugin handles the packaging and installation of the application for you. </p>
+<p>If there's only one emulator running or only one device connected, the adb command is
+sent to that device by default. If multiple emulators are running and/or multiple devices are
+attached, you need to use the <code>-d</code>, <code>-e</code>, or <code>-s</code>
+option to specify the target device to which the command should be directed. </p>
 
 
-<a name="forwardports"></a>
 
-<h2>Forwarding Ports</h2>
-
-    <p>You can use the <code>forward</code> command to set up arbitrary port forwarding &mdash; forwarding of requests on a specific host port to a different port on an emulator/device instance. Here's how you would set up forwarding of host port 6100 to emulator/device port 7100:</p>
-<pre>adb forward tcp:6100 tcp:7100</pre>
-    <p>You can also use adb to set up forwarding to named abstract UNIX domain sockets, as illustrated here:</p>
-<pre>adb forward tcp:6100 local:logd </pre>
-
-<a name="copyfiles"></a>
-
-<h2>Copying Files to or from an Emulator/Device Instance</h2>
-
-<p>You can use the adb commands <code>pull</code> and <code>push</code> to copy files to and from an emulator/device instance's data file. Unlike the <code>install</code> command, which only copies an .apk file to a specific location, the <code>pull</code> and <code>push</code> commands let you copy arbitrary directories and files to any location in an emulator/device instance. </p>
-
-<p>To copy a file or directory (recursively) <em>from</em> the emulator or device, use</p>
-<pre>adb pull &lt;remote&gt; &lt;local&gt;</pre> 
-
-<p>To copy a file or directory (recursively) <em>to</em> the emulator or device, use</p>
-    <pre>adb push &lt;local&gt; &lt;remote&gt;</pre> 
-
-<p>In the commands, <code>&lt;local&gt;</code> and <code>&lt;remote&gt;</code> refer to the paths to the target files/directory on your development machine (local) and on the emulator/device instance (remote).</p>
-
-<p>Here's an example: </p>
-<pre>adb push foo.txt /sdcard/foo.txt</pre>
-
-<a name="commandsummary"></a>
-
-<h2>Listing of adb Commands</h2>
+<h2 id="commandsummary">Commands</h2>
 
 <p>The table below lists all of the supported adb commands and explains their meaning and usage. </p>
 
-
+<p class="table-caption"><strong>Table 1.</strong> Available adb commands</p>
 <table>
 <tr>
 	<th>Category</th>
@@ -185,7 +101,7 @@ instance, see <a href="{@docRoot}tools/building/index.html">Building and Running
 </tr>
 
 <tr>
-<td rowspan="3">Options</td>
+<td rowspan="3">Target Device</td>
 <td><code>-d</code></td>
 <td>Direct an adb command to the only attached USB device.</td>
 <td>Returns an error if more than one USB device is attached.</td>
@@ -200,7 +116,8 @@ instance, see <a href="{@docRoot}tools/building/index.html">Building and Running
 <tr>
 <td><code>-s&nbsp;&lt;serialNumber&gt;</code></td>
 <td>Direct an adb command a specific emulator/device instance, referred to by its adb-assigned serial number (such as "emulator-5556").</td>
-<td>If not specified, adb generates an error.</td>
+<td>See <a href="#directingcommands">Directing
+Commands to a Specific Emulator/Device Instance</a>.</td>
 </tr>
 
 <tr>
@@ -224,7 +141,7 @@ instance, see <a href="{@docRoot}tools/building/index.html">Building and Running
 
 <tr>
 <td rowspan="3">Debug</td>
-<td ><code>logcat&nbsp;[&lt;option&gt;] [&lt;filter-specs&gt;]</code></td>
+<td ><code>logcat&nbsp;[option] [filter-specs]</code></td>
 <td>Prints log data to the screen. </td>
 <td>&nbsp;</td>
 </tr>
@@ -247,7 +164,7 @@ instance, see <a href="{@docRoot}tools/building/index.html">Building and Running
 <tr>
 <td rowspan=3">Data</td>
 <td><code>install&nbsp;&lt;path-to-apk&gt;</code></td>
-<td>Pushes an Android application (specified as a full path to an .apk file) to the data file of an emulator/device. </td>
+<td>Pushes an Android application (specified as a full path to an .apk file) to an emulator/device. </td>
 <td>&nbsp;</td>
 </tr>
 
@@ -303,11 +220,11 @@ instance, see <a href="{@docRoot}tools/building/index.html">Building and Running
 <td><code>wait-for-device</code></td>
 <td>Blocks execution until the device is online &mdash; that is, until the instance state is <code>device</code>.</td>
 <td>You can prepend this command to other adb commands, in which case adb will wait until the emulator/device instance is connected before issuing the other commands. Here's an example: 
-<pre>adb wait-for-device shell getprop</pre>
+<pre class="no-pretty-print">adb wait-for-device shell getprop</pre>
 
 Note that this command does <em>not</em> cause adb to wait until the entire system is fully booted. For that reason, you should not prepend it to other commands that require a fully booted system. As an example, the <code>install</code> requires the Android package manager, which is available only after the system is fully booted. A command such as 
 
-<pre>adb wait-for-device install &lt;app&gt;.apk</pre>
+<pre class="no-pretty-print">adb wait-for-device install &lt;app&gt;.apk</pre>
 
 would issue the <code>install</code> command as soon as the emulator or device instance connected to the adb server, but before the Android system was fully booted, so it would result in an error. </td>
 </tr>
@@ -337,40 +254,825 @@ would issue the <code>install</code> command as soon as the emulator or device i
 </tr>
 
 <tr>
-<td><code>shell&nbsp;[&lt;shellCommand&gt;]</code></td>
+<td><code>shell&nbsp;[shellCommand]</code></td>
 <td>Issues a shell command in the target emulator/device instance and then exits the remote shell.</td>
 </tr>
 
 </table>
 
 
-<a name="shellcommands"></a>
 
-<h2>Issuing Shell Commands</h2>
 
-<p>Adb provides an ash shell that you can use to run a variety of commands on an emulator 
-or device. The command binaries are stored in the file system of the emulator or device, 
-in this location: </p>
 
-<pre>/system/bin/...</pre>
 
-<p>You can use the <code>shell</code> command to issue commands, with or without entering the adb remote shell on the emulator/device. </p>
 
-<p>To issue a single command without entering a remote shell, use the <code>shell</code> command like this: </p>
 
-	<pre>adb [-d|-e|-s {&lt;serialNumber&gt;}] shell &lt;shellCommand&gt;</pre>
+
+
+<h2 id="devicestatus">Querying for Emulator/Device Instances</h2>
+
+<p>Before issuing adb commands, it is helpful to know what emulator/device instances are connected to the adb server. You can generate a list of attached emulators/devices using the <code>devices</code> command: </p>
+
+	<pre class="no-pretty-print">adb devices</pre>
+
+<p>In response, adb prints this status information for each instance:</p>
+
+<ul>
+	<li>Serial number &mdash; A string created by adb to uniquely identify an emulator/device instance by its 
+        console port number. The format of the serial number is <code>&lt;type&gt;-&lt;consolePort&gt;</code>. 
+        Here's an example serial number: <code>emulator-5554</code></li>
+	<li>State &mdash; The connection state of the instance may be one of the following:
+		<ul>
+		<li><code>offline</code> &mdash; the instance is not connected to adb or is not responding.</li>
+		<li><code>device</code> &mdash; the instance is now connected to the adb server. Note that this state does not 
+                    imply that the Android system is fully booted and operational, since the instance connects to adb 
+                    while the system is still booting. However, after boot-up, this is the normal operational state of 
+                    an emulator/device instance.</li>
+                <li><code>no device</code> &mdash; there is no emulator/device connected.
+		</ul>
+	</li>
+</ul>
+
+<p>The output for each instance is formatted like this: </p>
+
+	<pre class="no-pretty-print">[serialNumber] [state]</pre>
+
+<p>Here's an example showing the <code>devices</code> command and its output:</p>
+
+	<pre class="no-pretty-print">adb devices
+List of devices attached 
+emulator-5554&nbsp;&nbsp;device
+emulator-5556&nbsp;&nbsp;device
+emulator-5558&nbsp;&nbsp;device</pre>
+
+
+
+
+
+
+<h2 id="directingcommands">Directing Commands to a Specific Emulator/Device Instance</h2>
+
+<p>If multiple emulator/device instances are running, you must specify a target instance
+when issuing adb commands. To do so, use the <code>-s</code> option in the commands. The usage
+for the <code>-s</code> option is:</p>
+
+    <pre class="no-pretty-print">adb -s &lt;serialNumber&gt; &lt;command&gt; </pre>
 	
-<p>To drop into a remote shell on a emulator/device instance, use the <code>shell</code> command like this:</p>
+<p>As shown, you specify the target instance for a command using its adb-assigned serial number.
+You can use the <code>devices</code> command to obtain the serial numbers of running
+emulator/device instances. For example: </p>
 
-	<pre>adb [-d|-e|-s {&lt;serialNumber&gt;}] shell</pre>
+	<pre class="no-pretty-print">adb -s emulator-5556 install helloWorld.apk</pre>
 
-<p>When you are ready to exit the remote shell, use <code>CTRL+D</code> or <code>exit</code> to end the shell session. </p>
+<p>Note that, if you issue a command without specifying a target emulator/device instance
+while multiple devices are available, adb generates an error.
 
-<p>The sections below provide more information about shell commands that you can use.</p>
-      
-<a name="sqlite" id="sqlite"></a>
+<p>If you have multiple devices available (hardware or emulated), but only one is an emulator,
+simply use the {@code -e} option to send commands to the emulator. Likewise if there's multiple
+devices but only one hardware device attached, use the {@code -d} option to send commands to
+the hardware device.
 
-<h3>Examining sqlite3 Databases from a Remote Shell</h3>
+
+
+
+<h2 id="move">Installing an Application</h2>
+<p>You can use adb to copy an application from your development computer and install it on an emulator/device instance. To do so, use the <code>install</code> command. With the command, you must specify the path to the .apk file that you want to install:</p>
+
+<pre class="no-pretty-print">adb install &lt;path_to_apk&gt;</pre>
+
+<p>For more information about how to create an .apk file that you can install on an emulator/device
+instance, see <a href="{@docRoot}tools/building/index.html">Building and Running</a></p>
+
+<p>Note that, if you are using the Eclipse IDE and have the ADT plugin installed, you do not need to use adb (or aapt) directly to install your application on the emulator/device. Instead, the ADT plugin handles the packaging and installation of the application for you. </p>
+
+
+
+
+
+
+<h2 id="forwardports">Forwarding Ports</h2>
+
+    <p>You can use the <code>forward</code> command to set up arbitrary port forwarding &mdash; forwarding of requests on a specific host port to a different port on an emulator/device instance. Here's how you would set up forwarding of host port 6100 to emulator/device port 7100:</p>
+<pre class="no-pretty-print">adb forward tcp:6100 tcp:7100</pre>
+    <p>You can also use adb to set up forwarding to named abstract UNIX domain sockets, as illustrated here:</p>
+<pre class="no-pretty-print">adb forward tcp:6100 local:logd </pre>
+
+
+
+
+
+<h2 id="copyfiles">Copying Files to or from an Emulator/Device Instance</h2>
+
+<p>You can use the adb commands <code>pull</code> and <code>push</code> to copy files to
+and from an emulator/device instance. Unlike the <code>install</code> command,
+which only copies an APK file to a specific location, the <code>pull</code> and <code>push</code>
+commands let you copy arbitrary directories and files to any location in an
+emulator/device instance. </p>
+
+<p>To copy a file or directory (and its sub-directories) <em>from</em> the emulator or device, use</p>
+<pre class="no-pretty-print">adb pull &lt;remote&gt; &lt;local&gt;</pre> 
+
+<p>To copy a file or directory (and its sub-directories) <em>to</em> the emulator or device, use</p>
+    <pre class="no-pretty-print">adb push &lt;local&gt; &lt;remote&gt;</pre> 
+
+<p>In the commands, <code>&lt;local&gt;</code> and <code>&lt;remote&gt;</code> refer to the
+paths to the target files/directory on your development machine (local) and on the
+emulator/device instance (remote). For example: </p>
+<pre class="no-pretty-print">adb push foo.txt /sdcard/foo.txt</pre>
+
+
+
+
+
+
+
+
+
+<h2 id="shellcommands">Issuing Shell Commands</h2>
+
+<p>Adb provides a Unix shell that you can use to run a variety of commands on an emulator 
+or connected device. The command binaries are stored in the file system of the emulator or device, 
+at <code>/system/bin/...</code>
+
+<p>Two of the most common command tools are <a href="#am">activity manager</a> ({@code am}) and
+<a href="#pm">package manager</a> ({@code pm}).</p>
+
+<p>You can use the <code>shell</code> command to issue commands, with or without entering
+the adb remote shell on the emulator/device. To issue a single command without entering a
+remote shell, use the <code>shell</code> command like this: </p>
+
+	<pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell &lt;shell_command&gt;</pre>
+	
+<p>Or enter a remote shell on an emulator/device like this:</p>
+
+	<pre class="no-pretty-print">adb [-d|-e|-s &lt;serialNumber&gt;] shell</pre>
+
+<p>When you are ready to exit the remote shell, press CTRL+D or type
+<code>exit</code>. </p>
+
+
+
+
+
+<h3 id="am">Using activity manager (am)</h3>
+
+<p>Within an adb shell, you can issue commands with the activity manager ({@code am}) tool to
+perform various system actions, such as start an activity, force-stop a process,
+broadcast an intent, modify the device screen properties, and more. While in a shell,
+the syntax is:</p>
+<pre class="no-pretty-print">
+am &lt;command>
+</pre>
+
+<p>You can also issue an activity manager command directly from adb
+without entering a remote shell. For example:</p>
+<pre class="no-pretty-print">
+adb shell am start -a android.intent.action.VIEW
+</pre>
+
+
+<p class="table-caption"><strong>Table 2.</strong> Available activity manager commands</p>
+<table>
+<tr>
+	<th>Command</th>
+	<th>Description</th>
+</tr>
+
+<tr>
+<td><code>
+start [options] &lt;INTENT>
+</code></td>
+<td>Start an {@link android.app.Activity} specified by {@code &lt;INTENT>}. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code -D}: Enable debugging.
+    <li>{@code -W}: Wait for launch to complete.
+    <li>{@code --start-profiler &lt;FILE>}: Start profiler and send results to {@code &lt;FILE>}.
+    <li>{@code -P &lt;FILE>}: Like <code>--start-profiler</code>,
+        but profiling stops when the app goes idle.
+    <li>{@code -R}: Repeat the activity launch {@code &lt;COUNT>} times.  Prior to each repeat,
+        the top activity will be finished.
+    <li>{@code -S}: Force stop the target app before starting the activity.
+    <li>{@code --opengl-trace}: Enable tracing of OpenGL functions.
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+        specified, then run as the current user.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+startservice [options] &lt;INTENT>
+</code></td>
+<td>Start the {@link android.app.Service} specified by {@code &lt;INTENT>}. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+        specified, then run as the current user.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+force-stop &lt;PACKAGE>
+</code></td>
+<td>Force stop everything associated with {@code &lt;PACKAGE>} (the app's package name).
+</td>
+</tr>
+
+<tr>
+<td><code>
+kill  [options] &lt;PACKAGE>
+</code></td>
+<td> Kill all processes associated with {@code &lt;PACKAGE>}
+  (the app's package name).  This command kills only
+  processes that are safe to kill and that will not impact the user
+  experience.
+  <p>Options are:
+  <ul>
+      <li>{@code --user &lt;USER_ID> | all | current}: Specify user whose processes to kill;
+        all users if not specified.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+kill-all
+</code></td>
+<td>Kill all background processes.
+</td>
+</tr>
+
+<tr>
+<td><code>
+broadcast [options] &lt;INTENT>
+</code></td>
+<td>Issue a broadcast intent. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+<p>Options are:
+<ul>
+    <li>{@code [--user &lt;USER_ID> | all | current]}: Specify which user to send to; if not
+        specified then send to all users.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+instrument [options] &lt;COMPONENT>
+</code></td>
+<td>Start monitoring with an {@link android.app.Instrumentation} instance.
+  Typically the target {@code &lt;COMPONENT>}
+  is the form {@code &lt;TEST_PACKAGE>/&lt;RUNNER_CLASS>}.  <p>Options are:
+<ul>
+    <li>{@code -r}: Print raw results (otherwise decode
+        {@code &lt;REPORT_KEY_STREAMRESULT>}).  Use with
+        {@code [-e perf true]} to generate raw output for performance measurements.
+
+    <li>{@code -e &lt;NAME> &lt;VALUE>}: Set argument {@code &lt;NAME>} to {@code &lt;VALUE>}.
+        For test runners a common form is {@code
+        -e &lt;testrunner_flag> &lt;value>[,&lt;value>...]}.
+
+    <li>{@code -p &lt;FILE>}: Write profiling data to {@code &lt;FILE>}.
+
+    <li>{@code -w}: Wait for instrumentation to finish before returning.  Required for
+        test runners.
+
+    <li>{@code --no-window-animation}: Turn off window animations while running.
+    <li>{@code --user &lt;USER_ID> | current}: Specify which user instrumentation runs in;
+        current user if not specified.
+</ul>
+
+</td>
+</tr>
+
+<tr>
+<td><code>
+profile start &lt;PROCESS> &lt;FILE>
+</code></td>
+<td>Start profiler on {@code &lt;PROCESS>}, write results to {@code &lt;FILE>}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+profile stop &lt;PROCESS>
+</code></td>
+<td>Stop profiler on {@code &lt;PROCESS>}.
+</td>
+</tr>
+
+<tr>
+<td style="white-space:nowrap"><code>
+dumpheap [options] &lt;PROCESS> &lt;FILE>
+</code></td>
+<td>Dump the heap of {@code &lt;PROCESS>}, write to {@code &lt;FILE>}. <p>Options are:
+<ul>
+    <li>{@code --user [&lt;USER_ID>|current]}: When supplying a process name,
+        specify user of process to dump; uses current user if not specified.
+    <li>{@code -n}: Dump native heap instead of managed heap.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-debug-app [options] &lt;PACKAGE>
+</code></td>
+<td>Set application {@code &lt;PACKAGE>} to debug.  <p>Options are:
+<ul>
+    <li>{@code -w}: Wait for debugger when application starts.
+    <li>{@code --persistent}: Retain this value.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+clear-debug-app
+</code></td>
+<td>Clear the package previous set for debugging with {@code set-debug-app}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+monitor [options]
+</code></td>
+<td>Start monitoring for crashes or ANRs.  <p>Options are:
+<ul>
+    <li>{@code --gdb}: Start gdbserv on the given port at crash/ANR.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+screen-compat [on|off] &lt;PACKAGE>
+</code></td>
+<td>Control <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
+compatibility</a> mode of {@code &lt;PACKAGE>}.</p>
+</td>
+</tr>
+
+<tr>
+<td><code>
+display-size [reset|&lt;WxH>]
+</code></td>
+<td>Override emulator/device display size.
+This command is helpful for testing your app across different screen sizes by mimicking a small
+screen resolution using a device with a large screen, and vice versa.
+<p>Example:<br><code>am display-size 1280x800</code>
+</td>
+</tr>
+
+<tr>
+<td><code>
+display-density &lt;dpi>
+</code></td>
+<td>Override emulator/device display density. 
+This command is helpful for testing your app across different screen densities on high-density
+screen environment using a low density screen, and vice versa.
+<p>Example:<br><code>am display-density 480</code>
+</td>
+</tr>
+
+<tr>
+<td><code>
+to-uri &lt;INTENT>
+</code></td>
+<td>Print the given intent specification as a URI. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
+</td>
+</tr>
+
+<tr>
+<td><code>
+to-intent-uri &lt;INTENT>
+</code></td>
+<td>Print the given intent specification as an {@code intent:} URI. <p>See the
+<a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>. 
+</td>
+</tr>
+</table>
+
+
+
+
+
+<h4 id="IntentSpec">
+  <a href="" class="expandable" onclick="toggleExpandable(this,'.intents');
+return false">Specification for &lt;INTENT> arguments</a></h4>
+
+<div class="intents" style="display:none">
+
+<p>For activity manager commands that take a {@code &lt;INTENT>} argument, you can
+specify the intent with the following options:</p>
+
+<dl>
+  <dt>{@code -a &lt;ACTION>}</dt>
+      <dd>Specify the intent action, such as "android.intent.action.VIEW".
+      You can declare this only once.
+
+  <dt>{@code -d &lt;DATA_URI>}</dt>
+      <dd>Specify the intent data URI, such as "content://contacts/people/1".
+      You can declare this only once.
+  
+  <dt>{@code -t &lt;MIME_TYPE>}</dt>
+      <dd>Specify the intent MIME type, such as "image/png".
+      You can declare this only once.
+
+  <dt>{@code -c &lt;CATEGORY>}</dt>
+      <dd>Specify an intent category, such as "android.intent.category.APP_CONTACTS".
+
+  <dt>{@code -n &lt;COMPONENT>}</dt>
+      <dd>Specify the component name with package name prefix to create an explicit intent.
+
+  <dt>{@code -f &lt;FLAGS>}</dt>
+      <dd>Add flags to the intent, as supported by {@link
+        android.content.Intent#setFlags setFlags()}.
+
+  <dt>{@code --esn &lt;EXTRA_KEY>}</dt>
+      <dd>Add a null extra. This option is not supported for URI intents.
+
+  <dt>{@code -e|--es &lt;EXTRA_KEY> &lt;EXTRA_STRING_VALUE>}</dt>
+      <dd>Add string data as a key-value pair.
+
+  <dt>{@code --ez &lt;EXTRA_KEY> &lt;EXTRA_BOOLEAN_VALUE>}</dt>
+      <dd>Add boolean data as a key-value pair.
+
+  <dt>{@code --ei &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>}</dt>
+      <dd>Add integer data as a key-value pair.
+
+  <dt>{@code --el &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>}</dt>
+      <dd>Add long data as a key-value pair.
+
+  <dt>{@code --ef &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>}</dt>
+      <dd>Add float data as a key-value pair.
+
+  <dt>{@code --eu &lt;EXTRA_KEY> &lt;EXTRA_URI_VALUE>}</dt>
+      <dd>Add URI data as a key-value pair.
+
+  <dt>{@code --ecn &lt;EXTRA_KEY> &lt;EXTRA_COMPONENT_NAME_VALUE>}</dt>
+      <dd>Add a component name, which is converted and passed as
+      a {@link android.content.ComponentName} object.
+
+  <dt>{@code --eia &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>[,&lt;EXTRA_INT_VALUE...]}</dt>
+      <dd>Add an array of integers.
+
+  <dt>{@code --ela &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>[,&lt;EXTRA_LONG_VALUE...]}</dt>
+      <dd>Add an array of longs.
+
+  <dt>{@code --efa &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>[,&lt;EXTRA_FLOAT_VALUE...]}</dt>
+      <dd>Add an array of floats.
+
+  <dt>{@code --grant-read-uri-permission}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}.
+
+  <dt>{@code --grant-write-uri-permission}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+
+  <dt>{@code --debug-log-resolution}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_DEBUG_LOG_RESOLUTION}.
+
+  <dt>{@code --exclude-stopped-packages}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_EXCLUDE_STOPPED_PACKAGES}.
+
+  <dt>{@code --include-stopped-packages}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
+
+  <dt>{@code --activity-brought-to-front}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_BROUGHT_TO_FRONT}.
+
+  <dt>{@code --activity-clear-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}.
+
+  <dt>{@code --activity-clear-when-task-reset}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET}.
+
+  <dt>{@code --activity-exclude-from-recents}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS}.
+
+  <dt>{@code --activity-launched-from-history}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY}.
+
+  <dt>{@code --activity-multiple-task}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.
+
+  <dt>{@code --activity-no-animation}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_ANIMATION}.
+
+  <dt>{@code --activity-no-history}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_HISTORY}.
+
+  <dt>{@code --activity-no-user-action}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_NO_USER_ACTION}.
+
+  <dt>{@code --activity-previous-is-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_PREVIOUS_IS_TOP}.
+
+  <dt>{@code --activity-reorder-to-front}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_REORDER_TO_FRONT}.
+
+  <dt>{@code --activity-reset-task-if-needed}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_RESET_TASK_IF_NEEDED}.
+
+  <dt>{@code --activity-single-top}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}.
+
+  <dt>{@code --activity-clear-task}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK}.
+
+  <dt>{@code --activity-task-on-home}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_ACTIVITY_TASK_ON_HOME}.
+
+  <dt>{@code --receiver-registered-only}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
+
+  <dt>{@code --receiver-replace-pending}</dt>
+      <dd>Include the flag {@link android.content.Intent#FLAG_RECEIVER_REPLACE_PENDING}.
+
+  <dt>{@code --selector}</dt>
+      <dd>Requires the use of {@code -d} and {@code -t} options to set the intent data and type.
+
+  <dt>{@code &lt;URI> &lt;COMPONENT> &lt;PACKAGE>}</dt>
+      <dd>You can directly specify a URI, package name, and component name when not qualified
+      by one of the above options. When an argument is unqualified, the tool assumes the argument
+      is a URI if it contains a ":" (colon); it assumes the argument is a component name if it
+      contains a "/" (forward-slash); otherwise it assumes the argument is a package name.
+
+</dl>
+</div><!-- end 'intents' -->
+<script>
+  $(window).hashchange( function(){
+    if ((location.hash == "#IntentSpec") && !($("#IntentSpec a").hasClass("expanded"))) {
+      $("#IntentSpec a").click();
+    }
+  });
+</script>
+
+
+
+<h3 id="pm">Using package manager (pm)</h3>
+
+<p>Within an adb shell, you can issue commands with the package manager ({@code pm}) tool to
+perform actions and queries on application packages installed on the device. While in a shell,
+the syntax is:</p>
+<pre class="no-pretty-print">
+pm &lt;command>
+</pre>
+
+<p>You can also issue a package manager command directly from adb
+without entering a remote shell. For example:</p>
+<pre class="no-pretty-print">
+adb shell pm uninstall com.example.MyApp
+</pre>
+
+<p class="table-caption"><strong>Table 3.</strong> Available package manager commands.</p>
+<table>
+<tr>
+	<th>Command</th>
+	<th>Description</th>
+</tr>
+
+<tr>
+<td><code>
+list packages [options] &lt;FILTER>
+</code></td>
+<td>Prints all packages, optionally only
+  those whose package name contains the text in {@code &lt;FILTER>}.  <p>Options:
+<ul>
+    <li>{@code -f}: See their associated file.
+    <li>{@code -d}: Filter to only show disabled packages.
+    <li>{@code -e}: Filter to only show enabled packages.
+    <li>{@code -s}: Filter to only show system packages.
+    <li>{@code -3}: Filter to only show third party packages.
+    <li>{@code -i}: See the installer for the packages.
+    <li>{@code -u}: Also include uninstalled packages.
+    <li>{@code --user &lt;USER_ID>}: The user space to query.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list permission-groups
+</code></td>
+<td>Prints all known permission groups.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list permissions [options] &lt;GROUP>
+</code></td>
+<td>Prints all known permissions, optionally only  those in {@code &lt;GROUP>}.  <p>Options:
+<ul>    <li>{@code -g}: Organize by group.    <li>{@code -f}: Print all information.    <li>{@code -s}: Short summary.    <li>{@code -d}: Only list dangerous permissions.    <li>{@code -u}: List only the permissions users will see.
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list instrumentation
+</code></td>
+<td>List all test packages.  <p>Options:
+  <ul>    <li>{@code -f}: List the APK file for the test package.
+    <li>{@code &lt;TARGET_PACKAGE>}: List test packages for only this app.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+list features
+</code></td>
+<td>Prints all features of the system.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list libraries
+</code></td>
+<td>Prints all the libraries supported by the current device.
+</td>
+</tr>
+
+<tr>
+<td><code>
+list users
+</code></td>
+<td>Prints all users on the system.
+</td>
+</tr>
+
+<tr>
+<td><code>
+path &lt;PACKAGE>
+</code></td>
+<td>Print the path to the APK of the given {@code &lt;PACKAGE>}.
+</td>
+</tr>
+
+<tr>
+<td><code>
+install [options]  &lt;PATH>
+</code></td>
+<td>Installs a package (specified by {@code &lt;PATH>}) to the system.  <p>Options:
+  <ul>    <li>{@code -l}: Install the package with forward lock.    <li>{@code -r}: Reinstall an exisiting app, keeping its data.    <li>{@code -t}: Allow test APKs to be installed.    <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.    <li>{@code -s}: Install package on the shared mass storage (such as sdcard).    <li>{@code -f}: Install package on the internal system memory.    <li>{@code -d}: Allow version code downgrade.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+uninstall [options] &lt;PACKAGE>
+</code></td>
+<td>Removes a package from the system. <p>Options:
+  <ul>    <li>{@code -k}: Keep the data and cache directories around after package removal.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+clear &lt;PACKAGE>
+</code></td>
+<td>Deletes all data associated with a package.
+</td>
+</tr>
+
+<tr>
+<td><code>
+enable &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td>Enable the given package or component (written as "package/class").
+</td>
+</tr>
+
+<tr>
+<td><code>
+disable &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td>Disable the given package or component (written as "package/class").
+</td>
+</tr>
+
+<tr>
+<td style="white-space:nowrap"><code>
+disable-user [options] &lt;PACKAGE_OR_COMPONENT>
+</code></td>
+<td><p>Options:
+  <ul>
+    <li>{@code --user &lt;USER_ID>}: The user to disable.
+  </ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+grant &lt;PACKAGE_PERMISSION>
+</code></td>
+<td>Grant permissions
+  to applications.  Only optional permissions the application has
+  declared can be granted.
+</td>
+</tr>
+
+<tr>
+<td><code>
+revoke &lt;PACKAGE_PERMISSION>
+</code></td>
+<td>Revoke permissions
+  to applications.  Only optional permissions the application has
+  declared can be revoked.
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-install-location &lt;LOCATION>
+</code></td>
+<td>Changes the default install location. Location values:
+<ul>
+    <li>{@code 0}: Auto&mdash;Let system decide the best location.
+    <li>{@code 1}: Internal&mdash;install on internal device storage.
+    <li>{@code 2}: External&mdash;install on external media.
+</ul>
+<p class="note"><strong>Note:</strong> This is only intended for debugging; using this can cause
+  applications to break and other undesireable behavior.</p>
+</td>
+</tr>
+
+<tr>
+<td><code>
+get-install-location
+</code></td>
+<td>Returns the current install location. Return values:
+<ul>
+  <li>{@code 0 [auto]}: Lets system decide the best location
+  <li>{@code 1 [internal]}: Installs on internal device storage
+  <li>{@code 2 [external]}: Installs on external media
+</ul>
+</td>
+</tr>
+
+<tr>
+<td><code>
+set-permission-enforced &lt;PERMISSION> [true|false]
+</code></td>
+<td>Specifies whether the given permission should be enforced.
+</td>
+</tr>
+
+<tr>
+<td><code>
+trim-caches &lt;DESIRED_FREE_SPACE>
+</code></td>
+<td>Trim cache files to reach the given free space.
+</td>
+</tr>
+
+<tr>
+<td><code>
+create-user &lt;USER_NAME>
+</code></td>
+<td>Create a new user with the given {@code &lt;USER_NAME>},
+  printing the new user identifier of the user.
+</td>
+</tr>
+
+<tr>
+<td><code>
+remove-user &lt;USER_ID>
+</code></td>
+<td>Remove the user with the given {@code &lt;USER_IDENTIFIER>},
+  deleting all data associated with that user
+</td>
+</tr>
+
+<tr>
+<td><code>
+get-max-users
+</code></td>
+<td>Prints the maximum number of users supported by the device.
+</td>
+</tr>
+
+</table>
+
+
+
+
+
+
+
+<h3 id="sqlite">Examining sqlite3 databases from a remote shell</h3>
 
 <p>From an adb remote shell, you can use the 
 <a href="http://www.sqlite.org/sqlite.html">sqlite3</a> command-line program to 
@@ -384,7 +1086,7 @@ The tool also gives you the ability to execute SQLite commands on the fly.</p>
 
 <p>Here's an example: </p>
 
-<pre>$ adb -s emulator-5554 shell
+<pre class="no-pretty-print">adb -s emulator-5554 shell
 # sqlite3 /data/data/com.example.google.rss.rssexample/databases/rssitems.db
 SQLite version 3.3.12
 Enter &quot;.help&quot; for instructions
@@ -394,34 +1096,40 @@ sqlite&gt; .exit </pre>
 <p>Once you've invoked <code>sqlite3</code>, you can issue <code>sqlite3</code> commands in the shell. To exit and return to the adb remote shell, use <code>exit</code> or <code>CTRL+D</code>.
 
 
-<a name="monkey"></a>
 
-<h3>UI/Application Exerciser Monkey</h3>
+
+
+
+<h3 id="monkey">UI/Application Exerciser Monkey</h3>
 
 <p>The Monkey is a program that runs on your emulator or device and generates pseudo-random
 streams of user events such as clicks, touches, or gestures, as well as a number of system-level 
 events.  You can use the Monkey to stress-test applications that you are developing,
 in a random yet repeatable manner.</p>
 
-<p>The simplest way to use the monkey is with the following command, which will launch your
-application and send 500 pseudo-random events to it.</p>
+<p>The simplest way to use the monkey is with the following command, which launches your
+application and sends 500 pseudo-random events to it.</p>
 
-<pre>$ adb shell monkey -v -p your.package.name 500</pre>
+<pre class="no-pretty-print">adb shell monkey -v -p your.package.name 500</pre>
 
 <p>For more information about command options for Monkey, see the complete 
 <a href="{@docRoot}tools/help/monkey.html" title="monkey">UI/Application Exerciser Monkey</a> documentation page.</p>
 
 
-<a name="othershellcommands"></a>
 
-<h3>Other Shell Commands</h3>
 
-<p>The table below lists several of the adb shell commands available. For a complete list of commands and programs, start an emulator instance and use the <code>adb -help</code> command. </p>
 
-<pre>adb shell ls /system/bin</pre>
+<h3 id="othershellcommands">Other shell commands</h3>
+
+<p>For a list of all the available shell programs, use the following command:</p>
+
+<pre class="no-pretty-print">adb shell ls /system/bin</pre>
 
 <p>Help is available for most of the commands. </p>
 
+<p>Table 4 lists some of the more common adb shell commands.</p>
+
+<p class="table-caption"><strong>Table 4.</strong> Some other adb shell commands</p>
 <table>
 <tr>
 	<th>Shell Command</th>
@@ -442,8 +1150,8 @@ application and send 500 pseudo-random events to it.</p>
 </tr>
 
 <tr>
-<td><code>logcat&nbsp;[&lt;option&gt;]...&nbsp;[&lt;filter-spec&gt;]...</code></td>
-<td>Enables radio logging and prints output to the screen. </td>
+<td><code>logcat&nbsp;[option]...&nbsp;[filter-spec]...</code></td>
+<td>Enables system and app logging and prints output to the screen. </td>
 </tr>
 
 <tr>
@@ -464,39 +1172,47 @@ application and send 500 pseudo-random events to it.</p>
 </tr>
 
 </table>
+
+
+
+
+
+
+
 <a name="stdout"></a>
 <a name="usinglogcat"></a>
 <a name="outputformat"></a>
 <a name="filteringoutput"></a>
 <a name="stdout"></a>
 <a name="logcatoptions"></a>
-<a name="logcat"></a>
 
-<h2>Enabling logcat Logging</h2>
+<h2 id="logcat">Enabling logcat logging</h2>
 
 <p>The Android logging system provides a mechanism for collecting and viewing system debug output. Logs from various applications and portions of the system are collected in a series of circular buffers, which then can be viewed and filtered by the <code>logcat</code> command.</p>
 
 <p>You can use the <code>logcat</code> command to view and follow the contents of the system's log buffers. The general usage is:</p>
 
-<pre>[adb] logcat [&lt;option&gt;] ... [&lt;filter-spec&gt;] ...</pre>
+<pre class="no-pretty-print">[adb] logcat [option] ... [filter-spec] ...</pre>
 
 <p>You can use the <code>logcat</code> command from your development computer  or from a remote adb shell in an emulator/device instance. To view log output in your development computer, you use</p>
 
-<pre>$ adb logcat</pre>
+<pre class="no-pretty-print">adb logcat</pre>
 
 <p>and from a remote adb shell you use</p>
 
-<pre># logcat</pre>
+<pre class="no-pretty-print">logcat</pre>
 
 <p>See <a href="{@docRoot}tools/debugging/debugging-log.html">Reading and Writing Logs</a> for complete information about logcat commend options and filter specifications.</p>
 
 
-<a name="stopping"></a>
 
-<h2>Stopping the adb Server</h2>
+
+
+<h2 id="stopping">Stopping the adb server</h2>
 
 <p>In some cases, you might need to terminate the adb server process and then restart it. For example, if adb does not respond to a command, you can terminate the server and restart it and that may resolve the problem. </p>
 
-<p>To stop the adb server, use the <code>kill-server</code>. You can then restart the server by issuing any adb command. </p>
+<p>To stop the adb server, use the <code>kill-server</code> command.
+You can then restart the server by issuing any other adb command. </p>
 
 
