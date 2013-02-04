@@ -87,7 +87,8 @@ public class Region implements Parcelable {
     /** Set the region to the specified region.
     */
     public boolean set(Region region) {
-        return nativeSetRegion(mNativeRegion, region.mNativeRegion);
+        nativeSetRegion(mNativeRegion, region.mNativeRegion);
+        return true;
     }
 
     /** Set the region to the specified rectangle
@@ -406,8 +407,7 @@ public class Region implements Parcelable {
     private static native int nativeConstructor();
     private static native void nativeDestructor(int native_region);
 
-    private static native boolean nativeSetRegion(int native_dst,
-                                                  int native_src);
+    private static native void nativeSetRegion(int native_dst, int native_src);
     private static native boolean nativeSetRect(int native_dst, int left,
                                                 int top, int right, int bottom);
     private static native boolean nativeSetPath(int native_dst, int native_path,
