@@ -297,7 +297,9 @@ public final class ShutdownThread extends Thread {
         
         // First send the high-level shut down broadcast.
         mActionDone = false;
-        mContext.sendOrderedBroadcastAsUser(new Intent(Intent.ACTION_SHUTDOWN),
+        Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendOrderedBroadcastAsUser(intent,
                 UserHandle.ALL, null, br, mHandler, 0, null, null);
         
         final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
