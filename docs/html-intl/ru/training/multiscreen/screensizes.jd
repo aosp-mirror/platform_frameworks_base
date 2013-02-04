@@ -1,0 +1,279 @@
+page.title=Supporting Different Screen Sizes
+parent.title=Designing for Multiple Screens
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Supporting Different Screen Densities
+next.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>Содержание урока</h2>
+<ol>
+  <li><a href="#TaskUseWrapMatchPar">Использование параметров wrap_content и match_parent</a></li>
+  <li><a href="#TaskUseRelativeLayout">Использование объекта RelativeLayout</a></li>
+  <li><a href="#TaskUseSizeQuali">Использование квалификаторов размера</a></li>
+  <li><a href="#TaskUseSWQuali">Использование квалификатора Smallest-width</a></li>
+  <li><a href="#TaskUseAliasFilters">Использование псевдонимов макетов</a></li>
+  <li><a href="#TaskUseOriQuali">Использование квалификаторов ориентации</a></li>
+  <li><a href="#TaskUse9Patch">Использование растровых изображений nine-patch</a></li>
+</ol>
+
+<h2>Дополнительные материалы</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Поддержка нескольких экранов</a></li>
+</ul>
+
+<h2>Упражнение</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Загрузить учебное приложение</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+
+<p>В этом уроке описаны следующие аспекты обеспечения совместимости интерфейса с разными экранами:</p>
+<ul> 
+  <li>обеспечение способности макета адаптироваться к размеру экрана;</li> 
+  <li>выбор макета интерфейса, отвечающего конфигурации экрана;</li> 
+  <li>контроль правильности применяемого макета;</li>
+  <li>использование масштабируемых растровых изображений.</li> 
+</ul> 
+
+
+<h2 id="TaskUseWrapMatchPar">Использование параметров wrap_content и match_parent</h2> 
+
+<p>Чтобы создать масштабируемый макет, способный адаптироваться к разным экранам, используйте в качестве значений ширины и высоты отдельных компонентов представления параметры <code>"wrap_content"</code> и <code>"match_parent"</code>. Если используется <code>"wrap_content"</code>, для ширины или высоты представления устанавливается минимальное значение, позволяющее уместить содержание на экран, а параметр <code>"match_parent"</code> (известный как <code>"fill_parent"</code> в API до 8&nbsp;уровня) служит для растягивания компонента по размеру родительского представления.</p>
+
+<p>Если указать параметры <code>"wrap_content"</code> и <code>"match_parent"</code> вместо строго заданных размеров, в представлениях будет использоваться минимально необходимое место или они будут растягиваться на всю доступную длину и ширину соответственно. Например:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p>Обратите внимание на то, что в коде учебного приложения размеры компонентов заданы с помощью параметров <code>"wrap_content"</code> и <code>"match_parent"</code>. В результате макет правильно отображается на экранах разных размеров при разных ориентациях.</p>
+
+<p>Например, вот так он выглядит в вертикальной и горизонтальной ориентациях. Обратите внимание на то, как размеры компонентов автоматически адаптируются к длине и ширине:</p>
+
+<img src="{@docRoot}images/training/layout-hvga.png" />
+<p class="img-caption"><strong>Рисунок 1</strong>. Приложение News Reader при вертикальной (слева) и горизонтальной (справа) ориентации.</p>
+
+
+<h2 id="TaskUseRelativeLayout">Использование объекта RelativeLayout</h2> 
+
+<p>С помощью вложенных экземпляров объекта <PH>{@link android.widget.LinearLayout}</PH> и параметров <code>"wrap_content"</code> и <code>"match_parent"</code> можно создавать достаточно сложные макеты. Однако <PH>{@link android.widget.LinearLayout}</PH> не дает возможности точно управлять взаимным расположением дочерних представлений: в <PH>{@link android.widget.LinearLayout}</PH> они просто помещаются в ряд друг за другом. Если необходимо расположить дочерние представления иным образом, используйте объект <PH>{@link android.widget.RelativeLayout}</PH>, позволяющий задать относительные позиции компонентов. Например, одно дочернее представление можно выровнять по левому краю экрана, а другое&nbsp;– по правому.</p>
+
+<p>Например:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;TextView
+        android:id="&#64;+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/&gt;
+    &lt;EditText
+        android:id="&#64;+id/entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/label"/&gt;
+    &lt;Button
+        android:id="&#64;+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:text="OK" /&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="&#64;id/ok"
+        android:layout_alignTop="&#64;id/ok"
+        android:text="Cancel" /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>На рис.&nbsp;2 показано, как этот макет выглядит на экране QVGA.</p>
+
+<img src="{@docRoot}images/training/relativelayout1.png" />
+<p class="img-caption"><strong>Рисунок&nbsp;2</strong>. Скриншот экрана QVGA (маленького размера).</p>
+
+<p>На рис.&nbsp;3 показано, как он выглядит на экране с большей диагональю.</p>
+
+<img src="{@docRoot}images/training/relativelayout2.png" />
+<p class="img-caption"><strong>Рисунок&nbsp;3</strong>. Скриншот экрана WSVGA (большего размера).</p>
+
+<p>Обратите внимание: несмотря на изменение размера компонентов их взаимное расположение остается прежним, так как оно задано объектом <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>.</p>
+
+ 
+<h2 id="TaskUseSizeQuali">Использование квалификаторов размера</h2> 
+
+<p>Масштабируемые или относительные макеты, один из которых продемонстрирован выше, имеют свои ограничения. Хотя они позволяют создать интерфейс, способный адаптироваться к разным экранам за счет растягивания пространства внутри и вокруг компонентов, пользователю может оказаться не слишком удобно работать с таким интерфейсом. Поэтому в приложении должен использоваться не один масштабируемый макет, а несколько альтернативных вариантов для разных конфигураций экрана. Их можно создать с помощью <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">квалификаторов конфигураций</a>, которые позволяют оперативно выбирать ресурсы, отвечающие текущим параметрам экрана (например, разные варианты макетов для экранов разных размеров).</p>
+
+<p>Многие приложения отображаются на больших экранах в двухпанельном режиме, при котором список элементов расположен в одной панели, а их содержание открывается в другой. Такой режим просмотра удобен на достаточно больших экранах планшетных ПК и телевизоров, однако на экране телефона эти панели следует отображать по отдельности. Для каждого режима просмотра нужно создать отдельный файл.</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, однопанельный макет (по умолчанию):
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-large/main.xml</code>, двухпанельный макет:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>Обратите внимание, что во втором случае в названии каталога использован квалификатор <code>large</code>. Этот макет будет выбран на устройствах, экраны которых считаются большими (например, 7&nbsp;дюймов и более). Первый макет (без квалификаторов) будет выбран для устройств с маленьким экраном.</p>
+
+
+<h2 id="TaskUseSWQuali">Использование квалификатора Smallest-width</h2>
+
+<p>Одной из проблем, с которой сталкивались разработчики приложений для устройств Android версий до 3.2, было слишком общее определение "большого" экрана. Это касалось устройств Dell Streak, первой модели Galaxy Tab и планшетных ПК с экраном размером 7&nbsp;дюймов. Многие приложения требовалось по-разному отображать на разных устройствах (например, с 5- и 7-дюймовыми экранами), хотя они и относились к одной категории "больших" экранов. В Android версии 3.2 и более поздних доступен квалификатор Smallest-width.</p>
+
+<p>Он позволяет определять экраны с заданной минимальной шириной в dp. Например, типичный планшетный ПК с экраном 7&nbsp;дюймов имеет минимальную ширину 600&nbsp;dp, и если вы хотите, чтобы приложение работало на нем в двухпанельном режиме (а на меньших экранах в однопанельном), используйте два макета из предыдущего раздела, но вместо квалификатора размера <code>large</code> укажите <code>sw600dp</code>. В таком случае на экранах, минимальная ширина которых составляет 600&nbsp;dp, будет использоваться двухпанельный макет.</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, однопанельный макет (по умолчанию):
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-sw600dp/main.xml</code>, двухпанельный макет:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>Это означает, что на устройствах, минимальная ширина экрана которых не меньше 600&nbsp;dp, будет выбран <code>layout-sw600dp/main.xml</code> (двухпанельный макет), а на экранах меньшего размера&nbsp;– <code>layout/main.xml</code> (однопанельный макет).</p>
+
+<p>Следует учесть, что на Android-устройствах до версии 3.2 квалификатор <code>sw600dp</code> не будет работать, поэтому для них по-прежнему нужно использовать <code>large</code>. Таким образом, вам потребуется еще один файл с названием <code>res/layout-large/main.xml</code>, идентичный файлу <code>res/layout-sw600dp/main.xml</code>. В следующем разделе вы познакомитесь с методом, который позволяет избежать дублирования таких файлов макета.</p>
+
+
+<h2 id="TaskUseAliasFilters">Использование псевдонимов макетов</h2> 
+
+<p>Квалификатор Smallest-width работает только на устройствах Android 3.2 или более поздних версий. Для совместимости с более ранними устройствами по-прежнему следует использовать абстрактные размеры (small, normal, large и xlarge). Например, чтобы интерфейс открывался в однопанельном режиме на телефонах и в многопанельном на планшетных ПК с 7-дюймовым экраном, телевизорах и других крупных устройствах, подготовьте следующие файлы:</p>
+
+<p><ul>
+<li><code>res/layout/main.xml:</code> однопанельный макет;</li>
+<li><code>res/layout-large:</code> многопанельный макет;</li>
+<li><code>res/layout-sw600dp:</code> многопанельный макет.</li>
+</ul></p>
+
+<p>Последние два файла идентичны: один из них предназначен для устройств Android 3.2 и новее, а второй для более старых планшетных ПК и телевизоров на платформе Android.</p>
+
+<p>Чтобы не создавать дубликаты файлов и упростить процесс поддержки приложения, используйте псевдонимы. Например, можно определить следующие макеты:</p>
+
+<ul>
+<li><code>res/layout/main.xml</code> (однопанельный макет);</li>
+<li><code>res/layout/main_twopanes.xml</code> (двухпанельный макет).</li>
+</ul>
+
+<p>Затем добавьте следующие два файла:</p>
+
+<p><ul>
+<li><code>res/values-large/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+</li>
+
+<li><code>res/values-sw600dp/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+
+</li>
+</ul></p>
+
+<p>Содержание последних двух файлов одинаково, но сами по себе они не определяют макет. Они служат для того, чтобы назначить файл <PH>{@code main}</PH> в качестве псевдонима <PH>{@code main_twopanes}</PH>. Так как в них используются селекторы <code>large</code> и <code>sw600dp</code>, они применяются к планшетным ПК и телевизорам на платформе Android независимо от версии (для версий до 3.2 используется
+<PH>{@code large}</PH>, а для более новых&nbsp;– <code>sw600dp</code>).</p>
+
+
+<h2 id="TaskUseOriQuali">Использование квалификаторов ориентации</h2> 
+
+<p>Хотя некоторые макеты одинаково хорошо смотрятся в вертикальной и горизонтальной ориентациях, в большинстве случаев интерфейс все же приходится адаптировать. Ниже показано, как изменяется макет в приложении News Reader в зависимости от размера и ориентации экрана.</p>
+
+<p><ul>
+<li><b>Маленький экран, вертикальная ориентация</b>: однопанельный вид с логотипом.</li>
+<li><b>Маленький экран, горизонтальная ориентация</b>: однопанельный вид с логотипом.</li>
+<li><b>Планшетный ПК с 7-дюймовым экраном, вертикальная ориентация</b>: однопанельный вид с панелью действий.</li>
+<li><b>Планшетный ПК с 7-дюймовым экраном, горизонтальная ориентация</b>: двухпанельный вид с панелью действий.</li>
+<li><b>Планшетный ПК с 10-дюймовым экраном, вертикальная ориентация</b>: двухпанельный вид (узкий вариант) с панелью действий.</li>
+<li><b>Планшетный ПК с 10-дюймовым экраном, горизонтальная ориентация</b>: двухпанельный вид (широкий вариант) с панелью действий.</li>
+<li><b>Телевизор, горизонтальная ориентация</b>: двухпанельный вид с панелью действий.</li>
+</ul></p>
+
+<p>Каждый из этих макетов определен в XML-файле в каталоге <code>res/layout/</code>. Чтобы сопоставить их с определенными конфигурациями экрана, в приложении используются псевдонимы:</p>
+
+<p><code>res/layout/onepane.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+
+<p><code>res/layout/onepane_with_bar.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p><code>res/layout/twopanes.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p><code>res/layout/twopanes_narrow.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes_narrow.xml all}
+
+<p>После того как все возможные макеты определены, остается сопоставить каждый из них с подходящей конфигурацией, используя квалификаторы конфигураций. Воспользуемся псевдонимами макетов:</p>
+
+<p><code>res/values/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values/layouts.xml all}
+
+<p><code>res/values-sw600dp-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-land/layouts.xml
+all}
+
+<p><code>res/values-sw600dp-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
+all}
+
+<p><code>res/values-large-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-land/layouts.xml all}
+
+<p><code>res/values-large-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-port/layouts.xml all}
+
+
+
+<h2 id="TaskUse9Patch">Использование растровых изображений nine-patch</h2>
+
+<p>Чтобы интерфейс был совместим с экранами разных размеров, используемые в нем графические элементы также должны быть адаптированы соответствующим образом. Например, фон кнопки должен одинаково хорошо выглядеть независимо от ее формы.</p>
+
+<p>Если использовать для компонентов, размеры которых меняются, обычные изображения, то они будут равномерно сжиматься и растягиваться, и результат будет далек от идеального. Решением являются растровые изображения формата nine-patch&nbsp;– специальные PNG-файлы, содержащие информацию о том, какие области можно растягивать, а какие нет.</p>
+
+<p>Создавая растровые изображения для масштабируемых компонентов, обязательно используйте формат nine-patch. На рис.&nbsp;4 показано обычное растровое изображение (увеличенное в 4&nbsp;раза для наглядности), которое мы переведем в формат nine-patch.</p>
+
+<img src="{@docRoot}images/training/button.png" />
+<p class="img-caption"><strong>Рисунок&nbsp;4</strong>. <code>button.png</code></p>
+
+<p>Откройте его с помощью утилиты <ode
+href="{@docRoot}tools/help/draw9patch.html"><code>draw9patch</code></a>, входящей в комплект разработчика (в каталоге <code>tools/</code>). Установите метки на левом и верхнем краях, чтобы ограничить области, которые можно растягивать. Можно также провести линию вдоль правого и нижнего краев, как показано на рис.&nbsp;5, чтобы отметить области, в которых содержание должно быть зафиксировано.</p>
+
+<img src="{@docRoot}images/training/button_with_marks.png" />
+<p class="img-caption"><strong>Рисунок&nbsp;5</strong>. <code>button.9.png</code></p>
+
+<p>Обратите внимание на черные пиксели по краям. Метки у верхней и левой границ обозначают те области, которые можно растягивать, а метки у правой и нижней границ&nbsp;– те, куда должно быть помещено содержание.</p>
+
+<p>Также обратите внимание на расширение <code>.9.png</code>. Оно должно быть задано именно в таком виде, чтобы система могла определить, что это формат nine-patch, а не обычный PNG-файл.</p>
+
+<p>При применении этого фона к компоненту (с помощью <code>android:background="&#64;drawable/button"</code>) изображение будет растянуто по размеру кнопки, как показано на рис.&nbsp;6.</p>
+
+<img src="{@docRoot}images/training/buttons_stretched.png" />
+<p class="img-caption"><strong>Рисунок&nbsp;6</strong>. Кнопки разных размеров с файлом фона <code>button.9.png</code> в формате nine-patch.</p>
+
