@@ -39,7 +39,7 @@
 
 // Use OP_LOG for logging with arglist, OP_LOGS if just printing char*
 #define OP_LOGS(s) OP_LOG("%s", s)
-#define OP_LOG(s, ...) ALOGD( "%*s--%p " s, level * 2, "", this, __VA_ARGS__ )
+#define OP_LOG(s, ...) ALOGD( "%*s" s, level * 2, "", __VA_ARGS__ )
 
 
 namespace android {
