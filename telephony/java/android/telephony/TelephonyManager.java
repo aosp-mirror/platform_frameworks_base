@@ -126,6 +126,28 @@ public class TelephonyManager {
             "android.intent.action.PHONE_STATE";
 
     /**
+     * The Phone app sends this intent when a user opts to respond-via-message during an incoming
+     * call. By default, the MMS app consumes this message and sends a text message to the caller. A
+     * third party app can provide this functionality in lieu of MMS app by consuming this Intent
+     * and sending the message using their own messaging system.  The intent contains a URI
+     * describing the recipient, and an EXTRA containg the message itself.
+     * <p>
+     * The intent-filter which consumes this Intent needs to be in a service which requires the
+     * permission SEND_RESPOND_VIA_MESSAGE.
+     *
+     * <p>
+     * {@link #getData} is a URI describing the recipient of the message.
+     * <p>
+     * The {@link android.intent.Intent#EXTRA_TEXT} extra contains the message
+     * to send.
+     * <p>
+     * Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_RESPOND_VIA_MESSAGE =
+            "android.intent.action.RESPOND_VIA_MESSAGE";
+
+    /**
      * The lookup key used with the {@link #ACTION_PHONE_STATE_CHANGED} broadcast
      * for a String containing the new call state.
      *

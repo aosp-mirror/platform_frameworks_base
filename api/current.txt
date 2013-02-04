@@ -101,6 +101,7 @@ package android {
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
+    field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final java.lang.String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
@@ -21075,6 +21076,7 @@ package android.telephony {
     method public boolean isNetworkRoaming();
     method public void listen(android.telephony.PhoneStateListener, int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
+    field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1

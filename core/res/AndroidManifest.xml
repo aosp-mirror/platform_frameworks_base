@@ -196,7 +196,7 @@
         android:permissionGroupFlags="personalInfo"
         android:priority="360"/>
 
-  <!-- Allows an application to send SMS messages. -->
+    <!-- Allows an application to send SMS messages. -->
     <permission android:name="android.permission.SEND_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:protectionLevel="dangerous"
@@ -204,14 +204,13 @@
         android:label="@string/permlab_sendSms"
         android:description="@string/permdesc_sendSms" />
 
-    <!-- Allows an application to send SMS messages via the Messaging app with no user
-         input or confirmation.
-         @hide -->
-    <permission android:name="android.permission.SEND_SMS_NO_CONFIRMATION"
+    <!-- Allows an application (Phone) to send a request to other applications
+         to handle the respond-via-message action during incoming calls. -->
+    <permission android:name="android.permission.SEND_RESPOND_VIA_MESSAGE"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:protectionLevel="signature|system"
-        android:label="@string/permlab_sendSmsNoConfirmation"
-        android:description="@string/permdesc_sendSmsNoConfirmation" />
+        android:label="@string/permlab_sendRespondViaMessageRequest"
+        android:description="@string/permdesc_sendRespondViaMessageRequest" />
 
     <!-- Allows an application to monitor incoming SMS messages, to record
          or perform processing on them. -->
