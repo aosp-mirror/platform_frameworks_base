@@ -632,21 +632,21 @@ $(document).ready(function() {
 
 <div class="button-row">
   <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
-    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small.png"
+    <label for="ns"><img src="//www.android.com/images/brand/get_it_on_play_logo_small.png"
 alt="Get it on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
   <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large" id="nm" />
-    <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
+    <label for="nm"><img src="//www.android.com/images/brand/get_it_on_play_logo_large.png"
 alt="Get it on Google Play (large)" /></label>
 </div>
 
 <div class="button-row">
   <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small" id="ws" />
-    <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
+    <label for="ws"><img src="//www.android.com/images/brand/android_app_on_play_logo_small.png"
 alt="Android app on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
   <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large" id="wm" />
-    <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
+    <label for="wm"><img src="//www.android.com/images/brand/android_app_on_play_logo_large.png"
 alt="Android app on Google Play (large)" /></label>
 </div>
 
