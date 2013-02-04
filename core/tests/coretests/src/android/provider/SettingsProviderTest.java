@@ -132,6 +132,42 @@ public class SettingsProviderTest extends AndroidTestCase {
     }
 
     @MediumTest
+    public void testSettingsChangeForOtherUser() {
+        UserManager um = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        ContentResolver r = getContext().getContentResolver();
+
+        // Make sure there's an owner
+        assertTrue(findUser(um, UserHandle.USER_OWNER));
+
+        // create a new user to use for testing
+        UserInfo otherUser = um.createUser("TestUser1", UserInfo.FLAG_GUEST);
+        assertTrue(otherUser != null);
+        try {
+            assertNotSame("Current calling user id should not be the new guest user",
+                    otherUser.id, UserHandle.getCallingUserId());
+
+            Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "gps");
+            Settings.Secure.putStringForUser(r,
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "network", otherUser.id);
+
+            assertEquals("gps",
+                    Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+            assertEquals("network", Settings.Secure.getStringForUser(
+                    r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, otherUser.id));
+
+            assertNotSame("Current calling user id should not be the new guest user",
+                    otherUser.id, UserHandle.getCallingUserId());
+            Settings.Secure.setLocationProviderEnabledForUser(r, "network", false, otherUser.id);
+            assertEquals("", Settings.Secure.getStringForUser(
+                    r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, otherUser.id));
+
+        } finally {
+            // Tidy up
+            um.removeUser(otherUser.id);
+        }
+    }
+
+    @MediumTest
     public void testRowNumberContentUri() {
         ContentResolver r = getContext().getContentResolver();
 

@@ -757,7 +757,7 @@ public class SettingsProvider extends ContentProvider {
      * @returns whether the database needs to be updated or not, also modifying
      *     'initialValues' if needed.
      */
-    private boolean parseProviderList(Uri url, ContentValues initialValues) {
+    private boolean parseProviderList(Uri url, ContentValues initialValues, int desiredUser) {
         String value = initialValues.getAsString(Settings.Secure.VALUE);
         String newProviders = null;
         if (value != null && value.length() > 1) {
@@ -770,7 +770,7 @@ public class SettingsProvider extends ContentProvider {
                 String providers = "";
                 String[] columns = {Settings.Secure.VALUE};
                 String where = Settings.Secure.NAME + "=\'" + Settings.Secure.LOCATION_PROVIDERS_ALLOWED + "\'";
-                Cursor cursor = query(url, columns, where, null, null);
+                Cursor cursor = queryForUser(url, columns, where, null, null, desiredUser);
                 if (cursor != null && cursor.getCount() == 1) {
                     try {
                         cursor.moveToFirst();
@@ -847,7 +847,7 @@ public class SettingsProvider extends ContentProvider {
         // Support enabling/disabling a single provider (using "+" or "-" prefix)
         String name = initialValues.getAsString(Settings.Secure.NAME);
         if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            if (!parseProviderList(url, initialValues)) return null;
+            if (!parseProviderList(url, initialValues, desiredUserHandle)) return null;
         }
 
         // If this is an insert() of a key that has been migrated to the global store,
