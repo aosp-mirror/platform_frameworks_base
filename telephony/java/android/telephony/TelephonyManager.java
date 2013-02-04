@@ -136,9 +136,9 @@ public class TelephonyManager {
      * permission SEND_RESPOND_VIA_MESSAGE.
      *
      * <p>
-     * {@link #getData} is a URI describing the recipient of the message.
+     * {@link android.content.Intent#getData} is a URI describing the recipient of the message.
      * <p>
-     * The {@link android.intent.Intent#EXTRA_TEXT} extra contains the message
+     * The {@link android.content.Intent#EXTRA_TEXT} extra contains the message
      * to send.
      * <p>
      * Output: nothing.
