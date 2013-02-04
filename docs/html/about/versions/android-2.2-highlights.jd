@@ -44,7 +44,7 @@ page.title=Android 2.2 Platform Highlights
 <param name="movie" value="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&"></param>
 <param name="allowFullScreen" value="true"></param><param name="allowscriptaccess"
 value="always"></param>
-<embed src="http://www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&" type="application/x-shockwave-flash"
+<embed src="//www.youtube.com/v/yAZYSVr2Bhc&hl=en&fs=1&" type="application/x-shockwave-flash"
 allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
 </object>
 </div>
