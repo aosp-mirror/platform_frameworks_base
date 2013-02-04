@@ -243,7 +243,12 @@ public class KeyStore {
      */
     public long getmtime(String key) {
         try {
-            return mBinder.getmtime(key) * 1000L;
+            final long millis = mBinder.getmtime(key);
+            if (millis == -1L) {
+                return -1L;
+            }
+
+            return millis * 1000L;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return -1L;
