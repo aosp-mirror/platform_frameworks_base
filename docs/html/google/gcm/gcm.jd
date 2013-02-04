@@ -1026,7 +1026,7 @@ registration_id=32
 
 <p>To view  statistics and any error messages for your GCM applications:</p>
 <ol>
-  <li> Go to the <code><a href="http://play.google.com/apps/publish">Android Developer Console</a></code>.</li>
+  <li> Go to the <code><a href="http://play.google.com/apps/publish">Developer Console</a></code>.</li>
   <li>Login with your developer account. 
   <p>You will see a page that has a list of all of your apps.</p></li>
   <li> Click on the &quot;statistics&quot; link next to the app for which you want to view GCM stats. 
@@ -1034,7 +1034,7 @@ registration_id=32
   <li>Go to the drop-down menu and select the GCM metric you want to view. 
   </li>
 </ol>
-<p class="note"><strong>Note:</strong> Stats on the Google API Console are not enabled for GCM. You must use the <a href="http://play.google.com/apps/publish">Android Developer Console</a>.</p>
+<p class="note"><strong>Note:</strong> Stats on the Google API Console are not enabled for GCM. You must use the <a href="http://play.google.com/apps/publish">Developer Console</a>.</p>
 
 <h2 id="example">Examples</h2>
 <p>See the <a href="demo.html">GCM Demo Application</a> document.</p>

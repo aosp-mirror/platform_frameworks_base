@@ -43,7 +43,7 @@ page.title=Migration
 <ul>
   <li> Ease of use. No sign-up forms.</li>
   <li>No quotas.</li>
-  <li>GCM and C2DM stats are available through the <a href="http://play.google.com/apps/publish">Android Developer Console</a>.</li>
+  <li>GCM and C2DM stats are available through the <a href="http://play.google.com/apps/publish">Developer Console</a>.</li>
   <li>Battery efficiency.</li>
   <li>Rich set of new APIs.</li>
 </ul>
