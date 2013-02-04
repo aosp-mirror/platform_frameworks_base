@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Dung lượng"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Truy cập bộ nhớ USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Truy cập thẻ SD."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tính năng hỗ trợ truy cập"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Tính năng mà công nghệ hỗ trợ có thể yêu cầu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"thanh trạng thái"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của phương thức nhập. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"liên kết với dịch vụ truy cập"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ truy cập. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"yêu cầu khám phá bằng cách chạm"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Cho phép chủ sở hữu yêu cầu chế độ tương tác mà các mục đã chạm được đọc to và có thể khám phá giao diện  người dùng qua các thao tác."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"yêu cầu cải thiện hỗ trợ truy cập web"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"liên kết với dịch vụ văn bản"</string>
