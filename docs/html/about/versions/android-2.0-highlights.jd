@@ -32,7 +32,7 @@ sdk.date=October 2009
 <object width="278 height="180">
 <param name="movie" value="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&"></param>
 <param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param>
-<embed src="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash" 
+<embed src="//www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash" 
 allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
 </object>
 </div>

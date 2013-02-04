@@ -12,7 +12,7 @@ page.title=Videos
     <p>You have a great idea for an Android app. You want it to stand out among hundreds of thousands. You want your users to love it and tell everyone they know. The Android User Experience team is here to help. We talk about the Android Design guide and other tricks of the trade for creating apps that delight users and help them accomplish their goals. No design background is required.</p>
   </div>
   <div class="layout-content-col span-6">
-    <iframe width="355" height="200" src="http://www.youtube.com/embed/2NL_83EG0no" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="355" height="200" src="//www.youtube.com/embed/2NL_83EG0no" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
@@ -24,7 +24,7 @@ page.title=Videos
     <p>Design isn't black magic, it's a field that people can learn. In this talk two elite designers from Google give you an advanced crash course in interactive and visual design. Topics include mental models, natural mappings, metaphors, mode errors, visual hierarchies, typography and gestalt principles. Correctly applied, this knowledge can drastically improve the quality of your work.</p>
   </div>
   <div class="layout-content-col span-6">
-    <iframe width="355" height="200" src="http://www.youtube.com/embed/iJDoxOTyMdk" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="355" height="200" src="//www.youtube.com/embed/iJDoxOTyMdk" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
@@ -36,7 +36,7 @@ page.title=Videos
     <p>An app is useless if people can't find their way around it. Android introduced big navigation-support changes in 3.0 and 4.0. The Action Bar offers a convenient control for Up navigation, the Back key's behavior became more consistent within tasks, and the Recent Tasks UI got an overhaul. In this talk, we discuss how and why we got where we are today, how to think about navigation when designing your app's user experience, and how to write apps that offer effortless navigation in multiple Android versions.</p>
   </div>
   <div class="layout-content-col span-6">
-    <iframe width="355" height="200" src="http://www.youtube.com/embed/XwGHJJYBs0Q" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="355" height="200" src="//www.youtube.com/embed/XwGHJJYBs0Q" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
@@ -48,7 +48,7 @@ page.title=Videos
     <p>The Android Design Guide describes how to design beautiful Android apps, but not how to build them. In this talk we give practical tips for how to apply fit &amp; finish as you implement your design, we show you how to avoid some common pitfalls, we describe some useful patterns, and show how tools can help.</p>
   </div>
   <div class="layout-content-col span-6">
-    <iframe width="355" height="200" src="http://www.youtube.com/embed/2jCVmfCse1E" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="355" height="200" src="//www.youtube.com/embed/2jCVmfCse1E" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
@@ -60,7 +60,7 @@ page.title=Videos
     <p>Best-in-class application designers and developers talk about their experience in developing for Android, showing screenshots from their app, exploring the challenges they faced, and offering creative solutions congruent with the Android Design guide. Guests are invited to show examples of visual and interaction patterns in their application that manage to keep it simultaneously consistent and personal.</p>
   </div>
   <div class="layout-content-col span-6">
-    <iframe width="355" height="200" src="http://www.youtube.com/embed/8iUbr8RZKtg" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="355" height="200" src="//www.youtube.com/embed/8iUbr8RZKtg" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
