@@ -13,7 +13,7 @@ page.title=Get Started with Publishing
 
 <h2>Get Started</h2>
 <ol>
-  <li><a href="https://play.google.com/apps/publish/">Google Play Android Developer Console</a></li>
+  <li><a href="https://play.google.com/apps/publish/">Google Play Developer Console</a></li>
 </ol>
 
 </div>
@@ -24,13 +24,13 @@ page.title=Get Started with Publishing
 <ul>
 <li>Register for a Google Play publisher account</li>
 <li>If you will sell apps, set up a Google Checkout Merchant Account</li>
-<li>Explore the Google Play Android Developer Console and learn about the tools for publishing</li>
+<li>Explore the Google Play Developer Console and learn about the tools for publishing</li>
 </ul>
 
 
 <h3>Register for a publisher account</h3>
 
-<p>The first step is to visit the Google Play Android Developer Console and register for a publisher account.</p>
+<p>The first step is to visit the Google Play Developer Console and register for a publisher account.</p>
 
 <p>Here's what you will do during registration: </p>
 
@@ -46,7 +46,7 @@ page.title=Get Started with Publishing
 
 
 <ol>
-<li>Visit the Google Play Android Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>.
+<li>Visit the Google Play Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>.
 <li>Enter basic information about your <strong>developer identity</strong> &mdash; developer name, email address, and so on. You can modify this information later.</li>
 <li>Read and accept the <strong>Developer Distribution Agreement</strong> that applies to your country or region. Note that apps and store listings that you publish on Google Play must comply with the Developer Program Policies and US export law,</li>
 <li>Pay a <strong>$25 USD registration fee</strong> using Google Checkout. If you don't have a Google Checkout account, you can quickly set one up during the process.</li>
@@ -61,7 +61,7 @@ page.title=Get Started with Publishing
 <p>To set up a Merchant account from the Developer Console:</p>
 
 <ol>
-<li><strong>Sign in</strong> to your Google Play Android Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>
+<li><strong>Sign in</strong> to your Google Play Developer Console at <a href="https://play.google.com/apps/publish/">https://play.google.com/apps/publish/</a>
 <li>Click on the "<strong>Edit profile</strong>" link.
 <li>Select "<strong>Setup a Merchant Account at Google Checkout</strong>".</li>
 </ol>
@@ -69,4 +69,4 @@ page.title=Get Started with Publishing
 <p>This will take you to the Google Checkout site to sign up as a Merchant; you'll need to have information about your business handy to complete this step.</p>
 
 <h3>Explore the Developer Console</h3>
-<p>When your registration is verified, you can sign in to your Android Developer Console, which will be the home for your app publishing operations and tools on Google Play. </p>
+<p>When your registration is verified, you can sign in to your Developer Console, which will be the home for your app publishing operations and tools on Google Play. </p>
