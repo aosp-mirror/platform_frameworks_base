@@ -8030,28 +8030,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } return false;
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
                 if (isFocused() && canSelectText()) {
-                    final int start = (arguments != null) ? arguments.getInt(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
-                    final int end = (arguments != null) ? arguments.getInt(
-                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
                     CharSequence text = getIterableTextForAccessibility();
                     if (text == null) {
                         return false;
                     }
-                    // No arguments clears the selection.
-                    if (start == end && end == -1) {
-                        Selection.removeSelection((Spannable) text);
-                        notifyAccessibilityStateChanged();
-                        return true;
-                    }
-                    if (start >= 0 && start <= end && end <= text.length()) {
-                        Selection.setSelection((Spannable) text, start, end);
-                        // Make sure selection mode is engaged.
-                        if (mEditor != null) {
-                            mEditor.startSelectionActionMode();
+                    final int start = (arguments != null) ? arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
+                    final int end = (arguments != null) ? arguments.getInt(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
+                    if ((getSelectionStart() != start || getSelectionEnd() != end)) {
+                        // No arguments clears the selection.
+                        if (start == end && end == -1) {
+                            Selection.removeSelection((Spannable) text);
+                            notifyAccessibilityStateChanged();
+                            return true;
                         }
-                        notifyAccessibilityStateChanged();
-                        return true;
+                        if (start >= 0 && start <= end && end <= text.length()) {
+                            Selection.setSelection((Spannable) text, start, end);
+                            // Make sure selection mode is engaged.
+                            if (mEditor != null) {
+                                mEditor.startSelectionActionMode();
+                            }
+                            notifyAccessibilityStateChanged();
+                            return true;
+                        }
                     }
                 }
             } return false;
