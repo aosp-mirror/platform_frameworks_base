@@ -1509,7 +1509,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
-     * @param viewId The id resource name.
+     * @param viewIdResName The id resource name.
      */
     public void setViewIdResourceName(CharSequence viewIdResName) {
         enforceNotSealed();
