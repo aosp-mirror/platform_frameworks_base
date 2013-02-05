@@ -122,6 +122,7 @@ public class ActionBarView extends AbsActionBarView {
     private boolean mIncludeTabs;
     private boolean mIsCollapsable;
     private boolean mIsCollapsed;
+    private boolean mWasHomeEnabled; // Was it enabled before action view expansion?
 
     private MenuBuilder mOptionsMenu;
     
@@ -227,6 +228,15 @@ public class ActionBarView extends AbsActionBarView {
         mExpandedHomeLayout.setContentDescription(getResources().getText(
                 R.string.action_bar_up_description));
         
+        // This needs to highlight/be focusable on its own.
+        // TODO: Clean up the handoff between expanded/normal.
+        final Drawable upBackground = mUpGoerFive.getBackground();
+        if (upBackground != null) {
+            mExpandedHomeLayout.setBackground(upBackground.getConstantState().newDrawable());
+        }
+        mExpandedHomeLayout.setEnabled(true);
+        mExpandedHomeLayout.setFocusable(true);
+
         mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
         mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
         mProgressStyle = a.getResourceId(R.styleable.ActionBar_progressBarStyle, 0);
@@ -1530,6 +1540,8 @@ public class ActionBarView extends AbsActionBarView {
             if (mTabScrollView != null) mTabScrollView.setVisibility(GONE);
             if (mSpinner != null) mSpinner.setVisibility(GONE);
             if (mCustomNavView != null) mCustomNavView.setVisibility(GONE);
+            mWasHomeEnabled = mUpGoerFive.isEnabled();
+            setHomeButtonEnabled(false);
             requestLayout();
             item.setActionViewExpanded(true);
 
@@ -1572,6 +1584,7 @@ public class ActionBarView extends AbsActionBarView {
             }
             mExpandedHomeLayout.setIcon(null);
             mCurrentExpandedItem = null;
+            setHomeButtonEnabled(mWasHomeEnabled); // Set by expandItemActionView above
             requestLayout();
             item.setActionViewExpanded(false);
 
