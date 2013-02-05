@@ -5082,6 +5082,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mContentDescription != null && mContentDescription.length() > 0) {
+            info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
             info.setMovementGranularities(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
@@ -7020,6 +7021,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     final boolean extendSelection = arguments.getBoolean(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
                     return previousAtGranularity(granularity, extendSelection);
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
+                CharSequence text = getIterableTextForAccessibility();
+                if (text == null) {
+                    return false;
+                }
+                final int start = (arguments != null) ? arguments.getInt(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, -1) : -1;
+                final int end = (arguments != null) ? arguments.getInt(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, -1) : -1;
+                // Only cursor position can be specified (selection length == 0)
+                if ((getAccessibilitySelectionStart() != start
+                        || getAccessibilitySelectionEnd() != end)
+                        && (start == end)) {
+                    setAccessibilitySelection(start, end);
+                    notifyAccessibilityStateChanged();
+                    return true;
                 }
             } break;
         }
