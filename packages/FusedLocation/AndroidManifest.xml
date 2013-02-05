@@ -18,14 +18,17 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.location.fused"
-        coreApp="true">
+        coreApp="true"
+        android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <application
-            android:label="@string/app_label">
+            android:label="@string/app_label"
+            android:process="system">
 
         <uses-library android:name="com.android.location.provider" />
 
@@ -39,6 +42,7 @@
                <action android:name="com.android.location.service.FusedLocationProvider" />
            </intent-filter>
            <meta-data android:name="serviceVersion" android:value="0" />
+           <meta-data android:name="serviceIsMultiuser" android:value="true" />
         </service>
     </application>
 </manifest>

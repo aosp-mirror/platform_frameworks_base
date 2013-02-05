@@ -16,9 +16,11 @@
 
 package com.android.server;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -44,6 +46,7 @@ import java.util.List;
 public class ServiceWatcher implements ServiceConnection {
     private static final boolean D = false;
     public static final String EXTRA_SERVICE_VERSION = "serviceVersion";
+    public static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
 
     private final String mTag;
     private final Context mContext;
@@ -59,7 +62,11 @@ public class ServiceWatcher implements ServiceConnection {
     private IBinder mBinder;   // connected service
     private String mPackageName;  // current best package
     private int mVersion = Integer.MIN_VALUE;  // current best version
-    private int mCurrentUserId;
+    /**
+     * Whether the currently-connected service is multiuser-aware. This can change at run-time
+     * when switching from one version of a service to another.
+     */
+    private boolean mIsMultiuser = false;
 
     public static ArrayList<HashSet<Signature>> getSignatureSets(Context context,
             List<String> initialPackageNames) {
@@ -80,15 +87,13 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     public ServiceWatcher(Context context, String logTag, String action,
-            List<String> initialPackageNames, Runnable newServiceWork, Handler handler, int userId) {
+            List<String> initialPackageNames, Runnable newServiceWork, Handler handler) {
         mContext = context;
         mTag = logTag;
         mAction = action;
         mPm = mContext.getPackageManager();
         mNewServiceWork = newServiceWork;
         mHandler = handler;
-        mCurrentUserId = userId;
-
         mSignatureSets = getSignatureSets(context, initialPackageNames);
     }
 
@@ -97,7 +102,22 @@ public class ServiceWatcher implements ServiceConnection {
             if (!bindBestPackageLocked(null)) return false;
         }
 
+        // listen for user change
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    switchUser();
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, mHandler);
+
+        // listen for relevant package changes
         mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+
         return true;
     }
 
@@ -114,9 +134,10 @@ public class ServiceWatcher implements ServiceConnection {
             intent.setPackage(justCheckThisPackage);
         }
         List<ResolveInfo> rInfos = mPm.queryIntentServicesAsUser(new Intent(mAction),
-                PackageManager.GET_META_DATA, mCurrentUserId);
+                PackageManager.GET_META_DATA, UserHandle.USER_OWNER);
         int bestVersion = Integer.MIN_VALUE;
         String bestPackage = null;
+        boolean bestIsMultiuser = false;
         for (ResolveInfo rInfo : rInfos) {
             String packageName = rInfo.serviceInfo.packageName;
 
@@ -134,25 +155,30 @@ public class ServiceWatcher implements ServiceConnection {
                 continue;
             }
 
-            // check version
-            int version = 0;
+            // check metadata
+            int version = Integer.MIN_VALUE;
+            boolean isMultiuser = false;
             if (rInfo.serviceInfo.metaData != null) {
-                version = rInfo.serviceInfo.metaData.getInt(EXTRA_SERVICE_VERSION, 0);
+                version = rInfo.serviceInfo.metaData.getInt(EXTRA_SERVICE_VERSION,
+                        Integer.MIN_VALUE);
+                isMultiuser = rInfo.serviceInfo.metaData.getBoolean(EXTRA_SERVICE_IS_MULTIUSER);
             }
 
             if (version > mVersion) {
                 bestVersion = version;
                 bestPackage = packageName;
+                bestIsMultiuser = isMultiuser;
             }
         }
 
         if (D) Log.d(mTag, String.format("bindBestPackage for %s : %s found %d, %s", mAction,
                 (justCheckThisPackage == null ? "" : "(" + justCheckThisPackage + ") "),
                 rInfos.size(),
-                (bestPackage == null ? "no new best package" : "new best packge: " + bestPackage)));
+                (bestPackage == null ? "no new best package" : "new best package: "
+                + bestPackage)));
 
         if (bestPackage != null) {
-            bindToPackageLocked(bestPackage, bestVersion);
+            bindToPackageLocked(bestPackage, bestVersion, bestIsMultiuser);
             return true;
         }
         return false;
@@ -163,21 +189,24 @@ public class ServiceWatcher implements ServiceConnection {
         pkg = mPackageName;
         mPackageName = null;
         mVersion = Integer.MIN_VALUE;
+        mIsMultiuser = false;
         if (pkg != null) {
             if (D) Log.d(mTag, "unbinding " + pkg);
             mContext.unbindService(this);
         }
     }
 
-    private void bindToPackageLocked(String packageName, int version) {
+    private void bindToPackageLocked(String packageName, int version, boolean isMultiuser) {
         unbindLocked();
         Intent intent = new Intent(mAction);
         intent.setPackage(packageName);
         mPackageName = packageName;
         mVersion = version;
-        if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ")");
+        mIsMultiuser = isMultiuser;
+        if (D) Log.d(mTag, "binding " + packageName + " (version " + version + ") ("
+                + (isMultiuser ? "multi" : "single") + "-user)");
         mContext.bindServiceAsUser(intent, this, Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                | Context.BIND_NOT_VISIBLE, new UserHandle(mCurrentUserId));
+                | Context.BIND_NOT_VISIBLE, mIsMultiuser ? UserHandle.OWNER : UserHandle.CURRENT);
     }
 
     public static boolean isSignatureMatch(Signature[] signatures,
@@ -290,11 +319,12 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    public void switchUser(int userId) {
+    public void switchUser() {
         synchronized (mLock) {
-            unbindLocked();
-            mCurrentUserId = userId;
-            bindBestPackageLocked(null);
+            if (!mIsMultiuser) {
+                unbindLocked();
+                bindBestPackageLocked(null);
+            }
         }
     }
 }

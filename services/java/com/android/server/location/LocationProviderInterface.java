@@ -38,8 +38,6 @@ public interface LocationProviderInterface {
     public boolean isEnabled();
     public void setRequest(ProviderRequest request, WorkSource source);
 
-    public void switchUser(int userId);
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
     // --- deprecated (but still supported) ---
