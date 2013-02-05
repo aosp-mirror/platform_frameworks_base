@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Zugriff auf USB-Speicher"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Zugriff auf SD-Karte"</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funktionen der Bedienungshilfen"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funktionen, die für Bedienungshilfentechnologie beantragt werden können"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"Statusleiste"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"An eine Bedienungshilfe binden"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ermöglicht dem Halter, sich an die Oberfläche einer Bedienungshilfe auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"Tippen &amp; Entdecken beantragen"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Nutzer darf Interaktionsmodus beantragen, in dem berührte Elemente laut vorgelesen werden und die Benutzeroberfläche über Gesten erkundet werden kann."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"Erweiterte Webbedienungshilfen beantragen"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>

@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问 USB 存储设备。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"辅助功能"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求的功能。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"状态栏"</string>
@@ -326,7 +324,7 @@
     <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"修改应用操作统计信息"</string>
     <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"允许该应用修改收集到的应用操作统计信息。普通应用不应使用此权限。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系统备份和还原"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"允许应用控制系统的备份和还原机制。普通应用不能使用此权限。"</string>
+    <string name="permdesc_backup" msgid="6912230525140589891">"允许应用控制系统的备份和还原机制。普通应用不应使用此权限。"</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"确认完整备份或恢复操作"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"允许应用启动完整备份确认用户界面。不用于任何应用。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"显示未授权的窗口"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允许用户绑定至输入法的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"绑定至辅助服务"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至辅助服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"请求触摸浏览"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"允许应用请求启用互动模式，在该模式下，设备可大声读出用户触摸的内容项，而且用户可以通过手势浏览用户界面。"</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"请求增强网页辅助功能"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
@@ -409,9 +404,9 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"修改系统设置"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"允许应用修改系统的设置数据。恶意应用可能会破坏您的系统配置。"</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"修改安全系统设置"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"允许应用修改系统的安全设置数据。普通应用不能使用此权限。"</string>
+    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"允许应用修改系统的安全设置数据。普通应用不应使用此权限。"</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"修改 Google 服务地图"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"允许应用修改 Google 服务地图。普通应用不能使用此权限。"</string>
+    <string name="permdesc_writeGservices" msgid="1287309437638380229">"允许应用修改 Google 服务地图。普通应用不应使用此权限。"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"开机启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用始终运行，从而导致平板电脑总体运行速度减慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"允许应用在系统完成引导后立即自动启动。这样可能会延长手机的启动时间，并允许应用始终运行，从而导致手机总体运行速度减慢。"</string>
@@ -510,9 +505,9 @@
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"直接启动 CDMA 电话设置"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"允许应用启动 CDMA 配置。恶意应用可能会无端启动 CDMA 配置。"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"允许应用启用/停用来自无线装置的位置更新通知。普通应用不能使用此权限。"</string>
+    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"允许应用启用/停用来自无线装置的位置更新通知。普通应用不应使用此权限。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不能使用此权限。"</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不应使用此权限。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"选择小部件"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人资料的访问权限。普通应用不应使用此权限。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
@@ -1238,9 +1233,9 @@
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除。请插入新的 SD 卡。"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"未找到匹配的活动。"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新组件使用情况统计"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允许应用修改收集到的组件使用情况统计信息。普通应用不能使用此权限。"</string>
+    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允许应用修改收集到的组件使用情况统计信息。普通应用不应使用此权限。"</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"复制内容"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不能使用此权限。"</string>
+    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不应使用此权限。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>

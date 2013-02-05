@@ -225,10 +225,8 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Tilgang til USB-lagring."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Tilgang til minnekortet."</string>
-    <!-- no translation found for permgrouplab_accessibilityFeatures (7919025602283593907) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accessibilityFeatures (4205196881678144335) -->
-    <skip />
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tilgjengelighetsfunksjoner"</string>
+    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funksjoner hjelpeteknologi kan be om."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
@@ -348,12 +346,9 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lar innehaveren binde det øverste nivået av grensesnittet til en inndatametode. Skal aldri være nødvendig for normale apper."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"binde seg til en tilgjengelighetstjeneste"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Gir innehaveren tillatelse til å bindes til det øverste nivået av grensesnittet for en tilgjengelighetstjeneste. Skal aldri være nødvendig for vanlige apper."</string>
-    <!-- no translation found for permlab_canRequestTouchExplorationMode (6094034289937541846) -->
-    <skip />
-    <!-- no translation found for permdesc_canRequestTouchExplorationMode (940314268922270663) -->
-    <skip />
-    <!-- no translation found for permlab_canRequestEnahncedWebAccessibility (1905232971331801453) -->
-    <skip />
+    <string name="permlab_canRequestTouchExplorationMode" msgid="6094034289937541846">"be om utforsking ved berøring"</string>
+    <string name="permdesc_canRequestTouchExplorationMode" msgid="940314268922270663">"Tillater brukeren å be om en interaksjonsmodus der berørte elementer sies høyt, og brukergrensesnittet kan utforskes med bevegelser."</string>
+    <string name="permlab_canRequestEnahncedWebAccessibility" msgid="1905232971331801453">"be om forbedret nettilgjengelighet"</string>
     <!-- no translation found for permdesc_canRequestEnahncedWebAccessibility (4500520989321729676) -->
     <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
