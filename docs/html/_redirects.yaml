@@ -1,0 +1,328 @@
+# Redirects file.
+# This file contains the list of rewrite rules that are applied when serving
+# pages. Add "pattern: True" to use python regex in to or from.
+#
+#   WATCH OUT -- FROM LINE HAS TO START WITH A HYPHEN
+
+redirects:
+- from: ^/sdk/android-(.*$)
+  to: /about/versions/android-\1
+  pattern: True
+
+- from: /sdk/adding-components.html
+  to: /sdk/exploring.html
+
+- from: /sdk/compatibility-library.html
+  to: /tools/extras/support-library.html
+
+- from: /sdk/eclipse-adt.html
+  to: /tools/sdk/eclipse-adt.html
+
+- from: /sdk/installing.html
+  to: /sdk/installing/index.html
+
+- from: /sdk/installing/next.html
+  to: /training/basics/firstapp/index.html
+
+- from: /sdk/ndk/...
+  to: /tools/sdk/ndk/...
+
+- from: /sdk/oem-usb.html
+  to: /tools/extras/oem-usb.html
+
+- from: /sdk/tools-notes.html
+  to: /tools/sdk/tools-notes.html
+
+- from: /sdk/requirements.html
+  to: /sdk/index.html
+
+# ------------------- GUIDE -------------------
+
+- from: /guide/market/...
+  to: /google/play/...
+
+- from: /guide/google/gcm/client-javadoc/...
+  to: /reference/com/google/android/gcm/package-summary.html
+
+- from: /guide/google/gcm/server-javadoc/...
+  to: /reference/com/google/android/gcm/server/package-summary.html
+
+- from: /guide/google/play/services.html
+  to: /google/play-services/index.html
+
+- from: /guide/google/...
+  to: /google/...
+
+- from: /guide/publishing/licensing.html
+  to: /google/play/licensing/index.html
+
+- from: /google/play/billing/billing_about.html
+  to: /google/play/billing/index.html
+
+- from: /guide/developing/tools/...
+  to: /tools/help/...
+
+- from: /guide/developing/...
+  to: /tools/...
+
+- from: /tools/aidl.html
+  to: /guide/components/aidl.html
+
+- from: /guide/publishing/publishing.html
+  to: /distribute/googleplay/publish/preparing.html
+
+- from: /guide/publishing/...
+  to: /tools/publishing/...
+
+- from: /guide/topics/fundamentals.html
+  to: /guide/components/fundamentals.html
+
+- from: /guide/topics/intents/intents-filters.html
+  to: /guide/components/intents-filters.html
+
+- from: /guide/topics/fundamentals/...
+  to: /guide/components/...
+
+- from: /guide/topics/clipboard/copy-paste.html
+  to: /guide/topics/text/copy-paste.html
+
+- from: /guide/topics/ui/notifiers/index.html
+  to: /guide/topics/ui/notifiers/notifications.html
+
+- from: /guide/topics/wireless/...
+  to: /guide/topics/connectivity/...
+
+- from: /guide/topics/drawing/...
+  to: /guide/topics/graphics/opengl.html
+
+- from: /guide/topics/connectivity/usb/adk.html
+  to: /tools/adk/index.html
+
+- from: /tools/adk/aoa.html
+  to: http://source.android.com/tech/accessories/aoap/aoa.html
+
+- from: /tools/adk/aoa2.html
+  to: http://source.android.com/tech/accessories/aoap/aoa2.html
+
+- from: /guide/topics/usb/...
+  to: /guide/topics/connectivity/usb/...
+
+- from: /guide/appendix/api-levels.html
+  to: /guide/topics/manifest/uses-sdk-element.html#ApiLevels
+
+- from: /guide/appendix/install-location.html
+  to: /guide/topics/data/install-location.html
+
+- from: /guide/basics/what-is-android.html
+  to: /about/index.html
+
+- from: /guide/topics/security/security.html
+  to: /training/articles/security-tips.html
+#  type: permanent
+#  comment: Move content and then adjust this
+
+- from: /guide/appendix/market-filters.html
+  to: /google/play/filters.html
+
+- from: /guide/topics/testing/...
+  to: /tools/testing/...
+
+- from: /guide/topics/graphics/animation.html
+  to: /guide/topics/graphics/overview.html
+
+- from: /guide/topics/graphics/renderscript.html
+  to: /guide/topics/renderscript/index.html
+
+- from: /guide/topics/graphics/renderscript/
+  to: /guide/topics/renderscript/index.html
+
+- from: /guide/topics/location/obtaining-user-location.html
+  to: /guide/topics/location/strategies.html
+
+- from: /guide/topics/nfc/...
+  to: /guide/topics/connectivity/nfc/...
+
+- from: /guide/topics/wireless/...
+  to: /guide/topics/connectivity/...
+
+- from: /guide/topics/network/...
+  to: /guide/topics/connectivity/...
+
+- from: /resources/articles/creating-input-method.html
+  to: /guide/topics/text/creating-input-method.html
+
+- from: /resources/articles/spell-checker-framework.html
+  to: /guide/topics/text/spell-checker-framework.html
+
+- from: /resources/tutorials/notepad/...
+  to: /training/notepad/...
+
+- from: /resources/faq/...
+  to: /guide/faq/...
+
+- from: /resources/tutorials/hello-world.html
+  to: /training/basics/firstapp/index.html
+
+# add the rest of the tutorials here
+
+- from: /guide/practices/design/...
+  to: /guide/practices/...
+
+- from: /guide/practices/accessibility.html
+  to: /guide/topics/ui/accessibility/index.html
+
+# move best practices to training
+
+- from: /guide/practices/app-design/performance.html
+  to: /training/articles/perf-tips.html
+
+- from: /guide/practices/performance.html
+  to: /training/articles/perf-tips.html
+
+- from: /guide/practices/app-design/responsiveness.html
+  to: /training/articles/perf-anr.html
+
+- from: /guide/practices/responsiveness.html
+  to: /training/articles/perf-anr.html
+
+- from: /guide/practices/security.html
+  to: /training/articles/security-tips.html
+
+- from: /guide/practices/jni.html
+  to: /training/articles/perf-jni.html
+
+- from: /guide/tutorials/...
+  to: /resources/tutorials/...
+
+# ------------------- RESOURCES -------------------
+
+- from: /resources/dashboard/...
+  to: /about/dashboards/index.html
+
+- from: /resources/community-groups.html
+  to: /support.html
+
+- from: /resources/tutorials/views/hello-linearlayout.html
+  to: /guide/topics/ui/layout/linear.html
+
+- from: /resources/tutorials/views/hello-relativelayout.html
+  to: /guide/topics/ui/layout/relative.html
+
+- from: /resources/tutorials/views/hello-listview.html
+  to: /guide/topics/ui/layout/listview.html
+
+- from: /resources/tutorials/views/hello-gridview.html
+  to: /guide/topics/ui/layout/gridview.html
+
+- from: /resources/tutorials/views/hello-webview.html
+  to: /guide/webapps/webview.html
+
+- from: /resources/tutorials/views/hello-formstuff.html
+  to: /guide/topics/ui/controls.html
+
+- from: /resources/tutorials/views/hello-datepicker.html
+  to: /guide/topics/ui/controls/pickers.html
+
+- from: /resources/tutorials/views/hello-timepicker.html
+  to: /guide/topics/ui/controls/pickers.html
+
+- from: /resources/tutorials/views/hello-autocomplete.html
+  to: /guide/topics/ui/controls/text.html
+
+- from: /resources/tutorials/views/hello-spinner.html
+  to: /guide/topics/ui/controls/spinner.html
+
+- from: /resources/tutorials/opengl/opengl-es10.html
+  to: /training/graphics/opengl/index.html
+
+- from: /resources/tutorials/opengl/opengl-es20.html
+  to: /training/graphics/opengl/index.html
+
+- from: /resources/tutorials/views/hello-mapview.html
+  to: https://developers.google.com/maps/documentation/android/hello-mapview
+
+- from: /resources/tutorials/views/...
+  to: /guide/topics/ui/declaring-layout.html#CommonLayouts
+
+- from: /guide/topics/ui/layout-objects.html
+  to: /guide/topics/ui/declaring-layout.html#CommonLayouts
+
+- from: /resources/tutorials/localization/...
+  to: /training/basics/supporting-devices/languages.html
+
+- from: /resources/samples/...
+  to: /tools/samples/index.html
+
+- from: /guide/
+  to: /guide/components/index.html
+  # comment: this redirects guide/ and guide/index.html only
+
+# ------------------- TRAINING -------------------
+
+- from: /training/cloudsync/aesync.html
+  to: /google/gcm/index.html
+
+# -------------------- MISC ----------------------
+
+- from: /shareables/...
+  to: http://commondatastorage.googleapis.com/androiddevelopers/shareables/...
+
+- from: /downloads/...
+  to: http://commondatastorage.googleapis.com/androiddevelopers/...
+
+- from: /search.html
+  to: /index.html
+
+- from: /videos/index.html
+  to: /develop/index.html
+
+- from: /live/index.html
+  to: https://developers.google.com/live/
+
+# ---------- PLATFORM VERSIONS ----------------
+
+- from: /4.2
+  to: /about/versions/android-4.2.html
+
+- from: /4.1
+  to: /about/versions/android-4.1.html
+
+- from: /4.0
+  to: /about/versions/android-4.0.html
+
+- from: /(j|jb|jellybean)/?$
+  to: /about/versions/jelly-bean.html
+  pattern: True
+
+- from: /(i|ics|icecreamsandwich)/?$
+  to: /about/versions/android-4.0-highlights.html
+  pattern: True
+
+- from: /(h|hc|honeycomb)/?$
+  to: /about/versions/android-3.0-highlights.html
+  pattern: True
+
+- from: /(g|gb|gingerbread)/?$
+  to: /about/versions/android-2.3-highlights.html
+  pattern: True
+
+# ---------- MISC -----------------
+
+- from: /\+/?$
+  to: https://plus.google.com/108967384991768947849/posts
+  pattern: True
+
+- from: /blog
+  to: http://android-developers.blogspot.com
+
+- from: /stats
+  to: /about/dashboards/index.html
+
+- from: /youtube
+  to: http://www.youtube.com/user/androiddevelopers
+
+- from: /playbadge
+  to: http://developer.android.com/distribute/googleplay/promote/badges.html
+
+- from: /deviceart
+  to: http://developer.android.com/distribute/promote/device-art.html
