@@ -2611,7 +2611,7 @@ http://developer.android.com/reference/android/inputmethodservice/Keyboard.html
 http://developer.android.com/reference/android/support/v4/view/PagerTabStrip.html
 http://developer.android.com/reference/android/support/v4/view/PagerTitleStrip.html
 http://developer.android.com/reference/android/renderscript/RSSurfaceView.html
-http://developer.android.com/guide/topics/graphics/renderscript.html
+http://developer.android.com/guide/topics/renderscript/index.html
 http://developer.android.com/reference/android/renderscript/RSTextureView.html
 http://developer.android.com/reference/android/appwidget/AppWidgetHost.html
 http://developer.android.com/reference/javax/xml/XMLConstants.html
