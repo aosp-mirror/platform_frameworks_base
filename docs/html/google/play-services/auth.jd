@@ -57,7 +57,12 @@ private String[] getAccountNames() {
 </pre>
 <h2 id="obtain">Obtaining an Access Token</h2>
 <p>
-  With an email address, you can now obtain an access token. There are two general
+  With an email address and the service scope you can now obtain an access token.
+</p>
+<p class="note"><strong>Note:</strong> Specify <code>"oauth2:<em>scope</em>"</code> for a single scope or
+  <code>"oauth2:<em>scope1</em> <em>scope2</em> <em>scope3</em>"</code> for multiple scopes.</p>
+
+There are two general
   ways to get a token:</p>
 
     <ul>
@@ -73,6 +78,7 @@ private String[] getAccountNames() {
 
     <h3>Using getToken()</h3>
     The following code snippet obtains an access token with an email address, the scope that you want to use for the service, and a {@link android.content.Context}:
+
 <pre>
 HelloActivity mActivity;
 String mEmail;
