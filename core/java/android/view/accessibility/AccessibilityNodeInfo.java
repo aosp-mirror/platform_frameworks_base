@@ -1511,7 +1511,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param viewId The id resource name.
      */
-    public void setViewId(CharSequence viewId) {
+    public void setViewIdResourceName(CharSequence viewId) {
         enforceNotSealed();
         mViewId = viewId;
     }
@@ -1528,7 +1528,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
      * @return The id resource name.
      */
-    public CharSequence getViewId() {
+    public CharSequence getViewIdResourceName() {
         return mViewId;
     }
 
