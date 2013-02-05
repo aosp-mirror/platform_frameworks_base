@@ -33,6 +33,7 @@ public:
      //! Return the allocation size for the pixels
     size_t getSize() const { return mSize; }
 
+    SK_DECLARE_UNFLATTENABLE_OBJECT()
 protected:
     // overrides from SkPixelRef
     virtual void* onLockPixels(SkColorTable**);

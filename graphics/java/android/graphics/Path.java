@@ -375,9 +375,9 @@ public class Path {
      */
     public enum Direction {
         /** clockwise */
-        CW  (0),    // must match enum in SkPath.h
+        CW  (1),    // must match enum in SkPath.h
         /** counter-clockwise */
-        CCW (1);    // must match enum in SkPath.h
+        CCW (2);    // must match enum in SkPath.h
         
         Direction(int ni) {
             nativeInt = ni;
