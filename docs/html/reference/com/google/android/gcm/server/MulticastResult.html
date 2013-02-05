@@ -73,6 +73,35 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -82,28 +111,44 @@
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
-href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+href="//fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic,bold" title="roboto">
 <link href="/assets/css/default.css" rel="stylesheet" type="text/css">
 
 
 
 <!-- JAVASCRIPT -->
 <script src="//www.google.com/jsapi" type="text/javascript"></script>
-<script src="/assets/js/global-libraries-combined.js" type="text/javascript"></script>
+<script src="/assets/js/android_3p-bundle.js" type="text/javascript"></script>
 <script type="text/javascript">
   var toRoot = "/";
+  
+  var devsite = false;
+  
 </script>
 <script src="/assets/js/docs.js" type="text/javascript"></script>
 
 <script src="/gms_navtree_data.js" type="text/javascript"></script>
 <script src="/gcm_navtree_data.js" type="text/javascript"></script>
 
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-5831155-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 </head>
 <body class="gc-documentation google
   develop" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
+  
     <!-- Header -->
     <div id="header">
         <div class="wrap" id="header-wrap">
@@ -164,27 +209,31 @@ href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,m
         <li class="active"><a>Android Developers</a></li>
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
-      <!-- <div class="header">Support</div>
-      <ul>
-        <li><a href="/support.html">Developer Support</a></li>
-      </ul> -->
-      <div class="header">Languages</div>
-        <div id="language" class="locales">
-          <select name="language" onChange="changeLangPref(this.value, true)">
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="ja">日本語</option>
-              <option value="ko">한국어</option>
-              <option value="ru">Русский</option>
-              <option value="zh-CN">中文 (中国)</option>
-              <option value="zh-TW">中文 (台灣)</option>
-          </select>
-        </div>
-      <script type="text/javascript">
-        <!--  
-        loadLangPref();  
-          //-->
-      </script>
+      
+
+      
+      
+        <div class="header">Language</div>
+          <div id="language" class="locales">
+            <select name="language" onChange="changeLangPref(this.value, true)">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="ru">Русский</option>
+                <option value="zh-CN">中文 (中国)</option>
+                <option value="zh-TW">中文 (台灣)</option>
+            </select>
+          </div>
+        <script type="text/javascript">
+          <!--
+          loadLangPref();
+            //-->
+        </script>
+      
+      
+
+
       <br class="clearfix" />
     </div>
     <div class="bottom"></div>
@@ -341,7 +390,7 @@ onkeyup="return search_changed(event, false, '/')" />
     <!-- /Sendondary x-nav -->
 
   
-
+  
 
   
   <div class="wrap clearfix" id="body-content">
@@ -530,6 +579,7 @@ onkeyup="return search_changed(event, false, '/')" />
        showGoogleRefTree();
     
       </script>
+
     </div> <!-- end side-nav -->
     <script>
       $(document).ready(function() {
@@ -539,11 +589,6 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
      
-    <script>
-      $(document).ready(function() {
-        changeDocLang(getLangPref());
-        });
-    </script>
 
 
 
@@ -1374,6 +1419,7 @@ From class
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
 
+
 <div id="footer" class="wrap" >
         
 
@@ -1384,7 +1430,12 @@ From class
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
-  
+  <div id="build_info">
+    
+<script src="/timestamp.js" type="text/javascript"></script>
+<script>document.write(BUILD_TIMESTAMP)</script>
+
+  </div>
 
 
   <div id="footerlinks">
@@ -1397,6 +1448,7 @@ From class
   </div>
 
 </div> <!-- end footer -->
+
 </div> <!-- jd-content -->
 
 </div><!-- end doc-content -->
@@ -1405,41 +1457,6 @@ From class
 
 
 
-
-<!-- Grid - for dev 
-<script type="text/javascript">
-
-window.gOverride = {
-		gColor: '#FF0000',
-		pColor: '#EEEEEE',
-		gOpacity: 0.10,
-		pOpacity: 0.40,
-		pHeight: 16,
-		pOffset: 2,
-		gColumns:16,
-		gEnabled:false,
-		pEnabled:false
-	}
-</script>
-	
-<link href="/assets/js/grid/960.gridder.css" rel="stylesheet" type="text/css">
-<script src="/assets/js/grid/960.gridder.js" type="text/javascript"></script>
--->
-
-
-
-
-
-<script type="text/javascript">
-init(); /* initialize android-developer-docs.js */
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-
-<script type="text/javascript">
-  var pageTracker = _gat._getTracker("UA-5831155-1");
-  pageTracker._trackPageview();
-</script>
 
 
 
