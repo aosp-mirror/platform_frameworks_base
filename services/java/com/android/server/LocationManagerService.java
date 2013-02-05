@@ -92,7 +92,7 @@ import java.util.Set;
  */
 public class LocationManagerService extends ILocationManager.Stub {
     private static final String TAG = "LocationManagerService";
-    public static final boolean D = false;
+    public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String WAKELOCK_KEY = TAG;
     private static final String THREAD_NAME = TAG;
