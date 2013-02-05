@@ -301,6 +301,11 @@ public abstract class BatteryStats implements Parcelable {
         public abstract int getUserActivityCount(int type, int which);
         
         public static abstract class Sensor {
+            /*
+             * FIXME: it's not correct to use this magic value because it
+             * could clash with a sensor handle (which are defined by
+             * the sensor HAL, and therefore out of our control
+             */
             // Magic sensor number for the GPS.
             public static final int GPS = -10000;
             
