@@ -76,11 +76,6 @@ You can list multiple classes or methods by using a space as a separator.</p></t
 </tr>
 
 <tr>
-<td><nobr><code>-e runner [CLASS]</code></nobr></td>
-<td>Use the specified test runner class instead. If unspecified, the {@code uiautomator} framework’s  default runner will be used.</td>
-</tr>
-
-<tr>
 <td><code>dump</code></td>
 <td><code>[file]</code></td>
 <td>Generate an XML file with a dump of the current UI hierarchy. If a filepath is not specified, by default, the generated dump file is stored on the device in this location {@code /storage/sdcard0/window_dump.xml}.</td>
