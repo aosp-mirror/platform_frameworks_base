@@ -42,6 +42,15 @@
         </activity>
 
         <activity
+                android:name="NoAATextActivity"
+                android:label="_NoAAText">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="ScaledPathsActivity"
                 android:label="_ScaledPaths">
             <intent-filter>

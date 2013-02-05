@@ -51,6 +51,7 @@ Font::FontDescription::FontDescription(const SkPaint* paint, const mat4& matrix)
     mScaleX = paint->getTextScaleX();
     mStyle = paint->getStyle();
     mStrokeWidth = paint->getStrokeWidth();
+    mAntiAliasing = paint->isAntiAlias();
 }
 
 Font::~Font() {
@@ -69,6 +70,7 @@ hash_t Font::FontDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(mScaleX));
     hash = JenkinsHashMix(hash, android::hash_type(mStyle));
     hash = JenkinsHashMix(hash, android::hash_type(mStrokeWidth));
+    hash = JenkinsHashMix(hash, int(mAntiAliasing));
     return JenkinsHashWhiten(hash);
 }
 
@@ -94,6 +96,9 @@ int Font::FontDescription::compare(const Font::FontDescription& lhs,
 
     if (lhs.mStrokeWidth < rhs.mStrokeWidth) return -1;
     if (lhs.mStrokeWidth > rhs.mStrokeWidth) return +1;
+
+    deltaInt = int(lhs.mAntiAliasing) - int(rhs.mAntiAliasing);
+    if (deltaInt != 0) return deltaInt;
 
     return 0;
 }
@@ -385,7 +390,9 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     uint32_t startY = 0;
 
     // Get the bitmap for the glyph
-    paint->findImage(skiaGlyph, NULL);
+    if (!skiaGlyph.fImage) {
+        paint->findImage(skiaGlyph, NULL);
+    }
     mState->cacheBitmap(skiaGlyph, glyph, &startX, &startY, precaching);
 
     if (!glyph->mIsValid) {

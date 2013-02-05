@@ -814,7 +814,6 @@ status_t DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, i
         SkPath* path, float hOffset, float vOffset, SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
-    paint->setAntiAlias(true);
     text = refText(text, bytesCount);
     path = refPath(path);
     paint = refPaint(paint);
@@ -833,7 +832,6 @@ status_t DisplayListRenderer::drawPosText(const char* text, int bytesCount, int 
         const float* positions, SkPaint* paint) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
-    paint->setAntiAlias(true);
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
     paint = refPaint(paint);
@@ -851,14 +849,6 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
         float x, float y, const float* positions, SkPaint* paint, float length) {
     if (!text || count <= 0) return DrawGlInfo::kStatusDone;
 
-    // TODO: We should probably make a copy of the paint instead of modifying
-    //       it; modifying the paint will change its generationID the first
-    //       time, which might impact caches. More investigation needed to
-    //       see if it matters.
-    //       If we make a copy, then drawTextDecorations() should *not* make
-    //       its own copy as it does right now.
-    // Beware: this needs Glyph encoding (already done on the Paint constructor)
-    paint->setAntiAlias(true);
     if (length < 0.0f) length = paint->measureText(text, bytesCount);
 
     text = refText(text, bytesCount);
