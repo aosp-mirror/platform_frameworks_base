@@ -76,6 +76,15 @@ android_media_AudioSystem_isStreamActive(JNIEnv *env, jobject thiz, jint stream,
 }
 
 static jboolean
+android_media_AudioSystem_isStreamActiveRemotely(JNIEnv *env, jobject thiz, jint stream,
+        jint inPastMs)
+{
+    bool state = false;
+    AudioSystem::isStreamActiveRemotely((audio_stream_type_t) stream, &state, inPastMs);
+    return state;
+}
+
+static jboolean
 android_media_AudioSystem_isSourceActive(JNIEnv *env, jobject thiz, jint source)
 {
     bool state = false;
@@ -270,6 +279,7 @@ static JNINativeMethod gMethods[] = {
     {"muteMicrophone",      "(Z)I",     (void *)android_media_AudioSystem_muteMicrophone},
     {"isMicrophoneMuted",   "()Z",      (void *)android_media_AudioSystem_isMicrophoneMuted},
     {"isStreamActive",      "(II)Z",    (void *)android_media_AudioSystem_isStreamActive},
+    {"isStreamActiveRemotely","(II)Z",  (void *)android_media_AudioSystem_isStreamActiveRemotely},
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
     {"setDeviceConnectionState", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
